@@ -26,25 +26,14 @@ Tailwind CSS · shadcn/ui · Vercel. Full list in
 
 ## Run it locally
 
-Requirements: [uv](https://docs.astral.sh/uv/) (installs Python 3.14),
-[Bun](https://bun.sh), and Docker for a local PostgreSQL. On Windows, use
-**Git Bash or WSL** for the `bash` commands.
+Requirements: [uv](https://docs.astral.sh/uv/) (Python environment and dependencies),
+[Bun](https://bun.sh), and Docker for a local PostgreSQL database.
 
-```bash
-cp .env.example .env              # then set real values for the secrets
-docker compose up -d db           # local PostgreSQL
+For the tested Windows PowerShell setup, including database migrations, initial
+administrator creation, and separate backend/frontend terminals, follow
+[`docs/How-To-Start.md`](docs/How-To-Start.md).
 
-cd backend
-uv sync
-uv run bash scripts/prestart.sh   # migrations + first admin account
-uv run fastapi dev                # API: http://localhost:8000  (docs: /docs)
-
-# second terminal, from the repo root
-bun install
-bun run dev                       # frontend: http://localhost:5173
-```
-
-Log in with `FIRST_SUPERUSER` / `FIRST_SUPERUSER_PASSWORD` from your `.env`.
+Log in with `FIRST_SUPERUSER` / `FIRST_SUPERUSER_PASSWORD` from the root `.env`.
 There is no public sign-up: an admin creates accounts from the **Admin** page.
 
 ### Tests and checks
@@ -88,7 +77,7 @@ post-interview plan.
 backend/    FastAPI app, database models, migrations, tests
 frontend/   React app (branding in src/config/site.ts)
 packages/   React Email templates for system emails
-docs/       Source of truth, tech stack, developer guide, documentation index
+docs/       Source of truth, tech stack, developer and local startup guides, documentation index
 scripts/    Client generation and test helpers
 ```
 
