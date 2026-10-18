@@ -20,6 +20,18 @@ This is a checklist, not proof that the system is secure. Record evidence for co
 
 Until the client interview and Creative Brief confirm the system's modules, roles, and hosting arrangement, do not assume that optional features such as file uploads, public registration, or database row-level security are needed.
 
+## Verified Foundation controls
+
+The following controls are implemented in the Foundation branch and have automated coverage. This list records implementation, not production approval.
+
+- Password recovery attempts are counted in PostgreSQL by normalized email and client IP, using keyed HMAC bucket identifiers rather than storing raw email addresses or IP addresses in the rate-limit table.
+- Password recovery limits are configurable by time window, per-email attempt count, and per-IP attempt count. The endpoint keeps a generic response for unknown, throttled, and eligible accounts to reduce account enumeration.
+- Password reset tokens are bound to the user's current stored password hash. After a successful password change, a previously issued reset token no longer validates.
+- Expired rate-limit buckets are opportunistically removed during password recovery requests. A database index supports cleanup by window timestamp.
+- Automated CI has passed for backend tests, Playwright end-to-end tests, Docker Compose checks, lint/build, secret scanning, and workflow security checks on commit `0879935980d231b4efa79fdd155b903f5354e18c`. Later changes to cleanup and documentation require their own CI verification.
+
+Deployment-specific checks remain open until the actual hosting and network design is known. In particular, confirm trusted reverse-proxy configuration before relying on client IP addresses behind a proxy, validate rate-limit behavior in the deployed environment, and review backup/restore, HTTPS, access permissions, and client-approved data-handling procedures before using real resident data.
+
 ## 1. Application security
 
 ### Secrets and configuration
