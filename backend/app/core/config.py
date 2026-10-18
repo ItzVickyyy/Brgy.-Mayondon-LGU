@@ -63,7 +63,7 @@ class Settings(BaseSettings):
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
-    SMTP_PORT: int = 587
+    SMTP_PORT: int = Field(default=587, gt=0, le=65535)
     SMTP_HOST: str | None = None
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
@@ -76,7 +76,7 @@ class Settings(BaseSettings):
             self.EMAILS_FROM_NAME = self.PROJECT_NAME
         return self
 
-    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
+    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = Field(default=48, gt=0)
 
     @computed_field  # type: ignore[prop-decorator]
     @property
