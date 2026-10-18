@@ -133,6 +133,11 @@ function Login() {
             </LoadingButton>
           </div>
         </form>
+        <div className="text-center text-sm">
+          <RouterLink to="/welcome" className="underline underline-offset-4">
+            Back to public information
+          </RouterLink>
+        </div>
       </Form>
     </AuthLayout>
   )
