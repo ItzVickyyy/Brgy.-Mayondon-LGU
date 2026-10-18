@@ -31,7 +31,9 @@ target_metadata = SQLModel.metadata
 
 
 def get_url():
-    return str(settings.DATABASE_URL)
+    # Use the session pooler or direct URL for migrations when supplied.
+    # Runtime Vercel connections may use the transaction pooler instead.
+    return str(settings.MIGRATION_DATABASE_URL or settings.DATABASE_URL)
 
 
 def run_migrations_offline():
