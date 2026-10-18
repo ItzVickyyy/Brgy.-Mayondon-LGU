@@ -35,3 +35,33 @@ def test_accepts_non_default_migration_database_password() -> None:
     )
 
     assert settings.MIGRATION_DATABASE_URL is not None
+
+
+@pytest.mark.parametrize(
+    ("setting", "invalid_value"),
+    [
+        ("ACCESS_TOKEN_EXPIRE_MINUTES", 0),
+        ("ACCESS_TOKEN_EXPIRE_MINUTES", -1),
+        ("LOGIN_MAX_FAILED_ATTEMPTS", 0),
+        ("LOGIN_MAX_FAILED_ATTEMPTS", -1),
+        ("LOGIN_LOCKOUT_MINUTES", 0),
+        ("LOGIN_LOCKOUT_MINUTES", -1),
+    ],
+)
+def test_rejects_non_positive_authentication_settings(
+    setting: str, invalid_value: int
+) -> None:
+    with pytest.raises(ValidationError):
+        make_settings(**{setting: invalid_value})
+
+
+def test_accepts_positive_authentication_settings() -> None:
+    settings = make_settings(
+        ACCESS_TOKEN_EXPIRE_MINUTES=1,
+        LOGIN_MAX_FAILED_ATTEMPTS=1,
+        LOGIN_LOCKOUT_MINUTES=1,
+    )
+
+    assert settings.ACCESS_TOKEN_EXPIRE_MINUTES == 1
+    assert settings.LOGIN_MAX_FAILED_ATTEMPTS == 1
+    assert settings.LOGIN_LOCKOUT_MINUTES == 1
