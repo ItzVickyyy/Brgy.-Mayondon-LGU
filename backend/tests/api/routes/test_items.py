@@ -202,3 +202,19 @@ def test_protected_item_routes_reject_unauthenticated_requests(
 
     assert list_response.status_code == 401
     assert create_response.status_code == 401
+
+
+def test_read_items_rejects_invalid_pagination(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    negative_skip = client.get(
+        f"{settings.API_V1_STR}/items/?skip=-1",
+        headers=superuser_token_headers,
+    )
+    excessive_limit = client.get(
+        f"{settings.API_V1_STR}/items/?limit=101",
+        headers=superuser_token_headers,
+    )
+
+    assert negative_skip.status_code == 422
+    assert excessive_limit.status_code == 422
