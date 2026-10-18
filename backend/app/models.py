@@ -2,6 +2,7 @@ import uuid
 from datetime import UTC, datetime
 
 from pydantic import EmailStr
+from sqlalchemy import DateTime
 from sqlmodel import Field, Relationship, SQLModel
 
 
@@ -55,6 +56,12 @@ class User(UserBase, table=True):
     failed_login_attempts: int = Field(default=0, nullable=False)
     locked_until: datetime | None = Field(default=None, nullable=True)
     items: list[Item] = Relationship(back_populates="owner", cascade_delete=True)
+
+
+class PasswordRecoveryRateLimit(SQLModel, table=True):
+    bucket_key: str = Field(primary_key=True, max_length=64)
+    window_started_at: datetime = Field(sa_type=DateTime(timezone=True))
+    attempts: int = Field(default=1, nullable=False)
 
 
 # Properties to return via API, id is always required
