@@ -60,7 +60,7 @@ class User(UserBase, table=True):
 
 class PasswordRecoveryRateLimit(SQLModel, table=True):
     bucket_key: str = Field(primary_key=True, max_length=64)
-    window_started_at: datetime = Field(sa_type=DateTime(timezone=True))
+    window_started_at: datetime = Field(sa_type=DateTime(timezone=True), index=True)
     attempts: int = Field(default=1, nullable=False)
 
 
