@@ -30,7 +30,7 @@ def client() -> Generator[TestClient]:
         yield c
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def superuser_token_headers(client: TestClient) -> dict[str, str]:
     return get_superuser_token_headers(client)
 
