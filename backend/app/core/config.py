@@ -100,8 +100,14 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
-        for host in self.DATABASE_URL.hosts():
-            self._check_default_secret("DATABASE_URL password", host["password"])
+        for database_url_name in ("DATABASE_URL", "MIGRATION_DATABASE_URL"):
+            database_url = getattr(self, database_url_name)
+            if database_url is None:
+                continue
+            for host in database_url.hosts():
+                self._check_default_secret(
+                    f"{database_url_name} password", host["password"]
+                )
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
