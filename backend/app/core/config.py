@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60 * 24 * 8, gt=0)
     LOGIN_MAX_FAILED_ATTEMPTS: int = Field(default=5, gt=0)
     LOGIN_LOCKOUT_MINUTES: int = Field(default=15, gt=0)
+    PASSWORD_RECOVERY_WINDOW_MINUTES: int = Field(default=15, gt=0)
+    PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_EMAIL: int = Field(default=5, gt=0)
+    PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_IP: int = Field(default=30, gt=0)
     FRONTEND_HOST: str = "http://localhost:5173"
     # Comma-separated trusted origins, useful for production and selected previews.
     # FRONTEND_HOST remains as a backwards-compatible local/default origin.
