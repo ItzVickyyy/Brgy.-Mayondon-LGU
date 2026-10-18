@@ -253,7 +253,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 | Backend | FastAPI + SQLModel + PostgreSQL, Python 3.14 |
 | Frontend | React + TypeScript + Vite + Tailwind CSS + shadcn/ui |
 | Deployment | **Vercel** (frontend and API in two projects) + **Supabase** (database); deployment remains untested |
-| Accounts | Admin-only account creation; open sign-up is disabled. `is_superuser` = Admin, other users = Staff |
+| Accounts | Admin-only account creation; open sign-up is disabled. `is_superuser` = Admin, other users = Staff. New passwords require 12–128 characters; five failed logins trigger a 15-minute account lockout |
 | Branding | Centralized in `frontend/src/config/site.ts`; official logo pending |
 | AI tools | Free-tier AI assistants only; this folder is the shared context |
 
@@ -279,6 +279,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 - [x] Request letter drafted (to be signed Oct 19)
 - [x] Repository tailored from the template (branding, closed registration)
 - [x] Foundation deployment configuration prepared (Vercel entrypoint, SPA fallback, configurable Vite output, explicit CORS origins, Supabase transaction-pooler support); hosting not yet verified
+- [x] Added reusable admin authorization, structured admin-write logs, and database-backed login lockout fields; audit events currently go to application logs rather than a dedicated audit table
 - [x] Closed the three template-generated Dependabot pull requests that targeted `master`; dependency updates will be handled deliberately
 - [ ] Interview
 - [ ] Creative Brief
