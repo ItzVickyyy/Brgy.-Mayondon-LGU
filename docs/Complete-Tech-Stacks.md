@@ -107,39 +107,36 @@ Branding (name, location, logo) lives in `frontend/src/config/site.ts`.
 
 ## 6. Deployment checklist (code prepared; hosting untested)
 
-Recommended starting setup: **two Vercel projects connected to this same GitHub
-repository**, plus one Supabase PostgreSQL project. This keeps the static frontend
-and serverless API independently configured and is supported by Vercel's monorepo
-workflow.
+Recommended starting setup: **one Vercel project using Vercel Services**, plus
+one Supabase PostgreSQL project. Services lets the frontend and FastAPI backend
+build separately while sharing one domain and deployment. The feature is currently
+Beta and documented as available on all Vercel plans. If Services cannot be enabled
+for this account, fall back to two Vercel projects and use the explicit CORS allowlist.
 
-### Vercel project A: frontend
+### Vercel project: frontend + backend Services
 
-- [ ] Import the repository and set **Root Directory** to `frontend`.
-- [ ] Ensure **Include source files outside of the Root Directory** is enabled.
-  The workspace's `package.json` and `bun.lock` live at the repository root.
-- [ ] Framework preset: Vite. Build command: `bun run build`. Output directory: `dist`.
-- [ ] Set `VITE_BUILD_OUT_DIR=dist` so Vite writes to the static output directory
-  instead of the local FastAPI frontend folder.
-- [ ] Set `VITE_API_URL` to the deployed backend origin, with no trailing slash.
-- [ ] The checked-in `frontend/vercel.json` rewrites SPA paths to `/index.html`;
-  test direct visits and refreshes on `/login` and other app routes.
-
-### Vercel project B: backend
-
-- [ ] Import the same repository and set **Root Directory** to `backend`.
-- [ ] Ensure **Include source files outside of the Root Directory** is enabled if
-  the build needs repository-root files. The backend project has its own
-  `pyproject.toml`; the workspace lockfile is at the repository root.
-- [ ] The backend `pyproject.toml` declares the Vercel entrypoint
-  `app.main:app`. Verify that Vercel detects and imports this entrypoint.
+- [ ] Import the repository and set the project framework to **Services** in
+  Vercel's Build and Deployment settings. A `services` block alone is not enough.
+- [ ] The root `vercel.json` defines `frontend` at `frontend/` and `backend` at
+  `backend/`, using Vite and FastAPI. The backend entrypoint is `app.main:app`.
+- [ ] Keep the repository-root `package.json` and `bun.lock` available to the
+  frontend service. Check the Vercel monorepo/root-file behavior on the first build.
+- [ ] Set `VITE_BUILD_OUT_DIR=dist` so the frontend service builds to its static
+  output directory rather than `../backend/app/frontend`.
+- [ ] The root rewrite sends `/api` and `/api/*` to the backend, then other paths
+  to the frontend. The frontend's own `vercel.json` rewrites SPA routes to
+  `/index.html`. Test direct visits and refreshes on `/login` and `/items`.
+- [ ] The frontend uses a relative API URL in production, so browser requests
+  stay on the shared origin. Same-origin production requests do not need CORS.
 - [ ] Set `DATABASE_URL` to the Supabase transaction pooler URL on port `6543`
   and set `DATABASE_POOL_MODE=transaction`.
-- [ ] Set `FRONTEND_HOSTS` to a comma-separated list of exact trusted frontend
-  origins. Include the production origin and only preview origins you intend to
-  trust. Avoid a broad wildcard CORS policy.
 - [ ] Set `SECRET_KEY`, `FIRST_SUPERUSER`, `FIRST_SUPERUSER_PASSWORD`,
   `PROJECT_NAME`, and any required email/Sentry settings in Vercel environment
-  variables. Never commit actual values.
+  variables. Never commit actual values. Do not expose database secrets with a
+  `VITE_` prefix.
+- [ ] If using two separate Vercel projects instead, set `VITE_API_URL` to the
+  backend origin and set `FRONTEND_HOSTS` to a comma-separated allowlist of exact
+  production/preview frontend origins. Avoid broad wildcard CORS rules.
 
 ### Supabase database and migrations
 
@@ -149,7 +146,7 @@ workflow.
   `uv run alembic upgrade head` from `backend`.
 - [ ] Create the first admin using the existing initial-data script only after
   confirming its behavior and the production environment variables.
-- [ ] Verify login, CRUD, logout, CORS, direct SPA route visits, and a migration
+- [ ] Verify login, lockout, CRUD, logout, direct SPA route visits, and a migration
   against a non-production test database before client data is entered.
 - [ ] Check current Vercel and Supabase free-tier limits, project pausing behavior,
   database backup options, and restore steps before Week 16 turnover.
@@ -158,15 +155,16 @@ workflow.
 
 **Official references checked October 18, 2026:**
 
-- [Vercel FastAPI deployment](https://vercel.com/docs/frameworks/backend/fastapi)
+- [Vercel Services guide and availability](https://vercel.com/kb/guide/vercel-services)
+- [Vercel FastAPI entrypoint configuration](https://vercel.com/docs/frameworks/backend/fastapi)
+- [Vercel Python runtime and supported versions](https://vercel.com/docs/functions/runtimes/python)
 - [Vercel Vite SPA routing](https://vercel.com/docs/frameworks/frontend/vite)
-- [Vercel monorepo Root Directory behavior](https://vercel.com/docs/monorepos/monorepo-faq)
 - [Supabase PostgreSQL connection methods](https://supabase.com/docs/guides/database/connecting-to-postgres)
 - [Supabase SQLAlchemy transaction-pooler guidance](https://supabase.com/docs/guides/troubleshooting/using-sqlalchemy-with-supabase-FUqebT)
 
-**Status:** The repository configuration has been prepared for this approach, but
-neither Vercel project nor the Supabase connection has been tested. Treat the first
-preview deployment as a verification step, not as proof of production readiness.
+**Status:** Configuration is prepared, but Vercel Services and Supabase have not
+been deployed or tested. Treat the first preview deployment as a verification step,
+not as proof of production readiness.
 ## 7. Security features in place
 
 - Argon2 password hashing and timing-attack-safe login
