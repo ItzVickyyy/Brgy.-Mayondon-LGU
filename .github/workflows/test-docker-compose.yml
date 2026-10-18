@@ -21,6 +21,12 @@ jobs:
           persist-credentials: false
       # .env is intentionally not tracked; use placeholders for local CI.
       - run: cp .env.example .env
+      - name: Keep Adminer out of the base Compose stack
+        run: |
+          if docker compose -f compose.yml config --services | grep -qx adminer; then
+            echo "Adminer must only be available through the development override."
+            exit 1
+          fi
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
       - run: docker compose run --rm backend bash scripts/prestart.sh
