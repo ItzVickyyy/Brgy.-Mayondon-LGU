@@ -3,7 +3,7 @@ from pathlib import Path
 import sentry_sdk
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 
@@ -52,9 +52,21 @@ def favicon():
         if icon_path.is_file():
             return FileResponse(icon_path, media_type="image/svg+xml")
     # Keep API docs branded even if the frontend's static assets are absent.
-    return {
-        "detail": "Barangay favicon was not found in the frontend assets."
-    }
+    return Response(
+        content=(
+            '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" '
+            'fill="none" stroke="#15803d" stroke-width="2" '
+            'stroke-linecap="round" stroke-linejoin="round">'
+            '<line x1="3" x2="21" y1="22" y2="22"/>'
+            '<line x1="6" x2="6" y1="18" y2="11"/>'
+            '<line x1="10" x2="10" y1="18" y2="11"/>'
+            '<line x1="14" x2="14" y1="18" y2="11"/>'
+            '<line x1="18" x2="18" y1="18" y2="11"/>'
+            '<polygon points="12 2 20 7 4 7"/>'
+            '</svg>'
+        ),
+        media_type="image/svg+xml",
+    )
 
 
 app.add_middleware(
