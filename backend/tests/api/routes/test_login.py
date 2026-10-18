@@ -9,7 +9,7 @@ from app.core.config import settings
 from app.api.routes.login import recover_password_html_content
 from app.core.security import get_password_hash, verify_password
 from app.crud import create_user
-from app.models import User, UserCreate
+from app.models import PasswordRecoveryRateLimit, User, UserCreate
 from app.utils import generate_password_reset_token
 from tests.utils.user import user_authentication_headers
 from tests.utils.utils import random_email, random_lower_string
@@ -361,3 +361,24 @@ def test_password_recovery_throttles_email_delivery(
     )
     assert send_email_mock.call_count == 2
 
+
+
+def test_password_recovery_cleans_up_old_rate_limit_buckets(
+    client: TestClient, db: Session
+) -> None:
+    stale_key = "a" * 64
+    db.add(
+        PasswordRecoveryRateLimit(
+            bucket_key=stale_key,
+            window_started_at=datetime.now(UTC) - timedelta(hours=1),
+            attempts=1,
+        )
+    )
+    db.commit()
+
+    response = client.post(
+        f"{settings.API_V1_STR}/password-recovery/{random_email()}"
+    )
+
+    assert response.status_code == 200
+    assert db.get(PasswordRecoveryRateLimit, stale_key) is None
