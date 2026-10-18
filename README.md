@@ -9,9 +9,9 @@ Laguna State Polytechnic University – Los Baños Campus
 
 | Member | Role |
 |---|---|
-| Vic John O. Salen Jr. | Project Leader, Lead Developer |
-| Justin Adrian P. Reboton | Backend Developer, Technical Writer |
-| Jean Mervin G. Fajardo | Frontend Developer |
+| [Vic John O. Salen Jr.](https://github.com/ItzVickyyy) | Project Leader, Lead Developer |
+| [Justin Adrian P. Reboton](https://github.com/jOstin-7) | Backend Developer, Technical Writer |
+| [Jean Mervin G. Fajardo](https://github.com/JeanMervin) | Frontend Developer |
 
 > **Status:** foundation only. The system's modules are decided after the
 > client interview (Week 13). Everything about the project lives in
