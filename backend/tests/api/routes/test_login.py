@@ -1,3 +1,4 @@
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 from fastapi.testclient import TestClient
@@ -113,7 +114,7 @@ def test_reset_password(client: TestClient, db: Session) -> None:
 def test_reset_password_invalid_token(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
-    data = {"new_password": "changethis", "token": "invalid"}
+    data = {"new_password": "not-a-valid-reset-password-123", "token": "invalid"}
     r = client.post(
         f"{settings.API_V1_STR}/reset-password/",
         headers=superuser_token_headers,
@@ -189,3 +190,57 @@ def test_login_with_argon2_password_keeps_hash(client: TestClient, db: Session) 
 
     assert user.hashed_password == original_hash
     assert user.hashed_password.startswith("$argon2")
+
+
+
+def test_login_locks_account_after_failed_attempts(
+    client: TestClient, db: Session
+) -> None:
+    email = random_email()
+    password = random_lower_string()
+    user = create_user(
+        session=db,
+        user_create=UserCreate(email=email, password=password),
+    )
+    login_data = {"username": email, "password": "wrong-password"}
+
+    for _ in range(settings.LOGIN_MAX_FAILED_ATTEMPTS):
+        response = client.post(
+            f"{settings.API_V1_STR}/login/access-token", data=login_data
+        )
+        assert response.status_code == 400
+
+    db.refresh(user)
+    assert user.failed_login_attempts == settings.LOGIN_MAX_FAILED_ATTEMPTS
+    assert user.locked_until is not None
+
+    response = client.post(
+        f"{settings.API_V1_STR}/login/access-token",
+        data={"username": email, "password": password},
+    )
+    assert response.status_code == 400
+
+
+def test_successful_login_clears_expired_lockout(
+    client: TestClient, db: Session
+) -> None:
+    email = random_email()
+    password = random_lower_string()
+    user = create_user(
+        session=db,
+        user_create=UserCreate(email=email, password=password),
+    )
+    user.failed_login_attempts = 4
+    user.locked_until = datetime.now(UTC) - timedelta(minutes=1)
+    db.add(user)
+    db.commit()
+
+    response = client.post(
+        f"{settings.API_V1_STR}/login/access-token",
+        data={"username": email, "password": password},
+    )
+    assert response.status_code == 200
+
+    db.refresh(user)
+    assert user.failed_login_attempts == 0
+    assert user.locked_until is None
