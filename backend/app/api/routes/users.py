@@ -142,7 +142,6 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
         )
     session.delete(current_user)
     session.commit()
-    record_admin_action(actor_id=current_user.id, action="user.delete", target_type="user", target_id=user_id)
     return Message(message="User deleted successfully")
 
 
@@ -239,4 +238,5 @@ def delete_user(
     session.exec(statement)
     session.delete(user)
     session.commit()
+    record_admin_action(actor_id=current_user.id, action="user.delete", target_type="user", target_id=user_id)
     return Message(message="User deleted successfully")
