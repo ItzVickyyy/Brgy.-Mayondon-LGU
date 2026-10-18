@@ -45,7 +45,7 @@ def test_create_user_new_email(
 ) -> None:
     caplog.set_level(logging.INFO, logger="app.audit")
     with (
-        patch("app.utils.send_email", return_value=None),
+        patch("app.utils.send_email", return_value=None) as send_email_mock,
         patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
         patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
     ):
@@ -62,6 +62,11 @@ def test_create_user_new_email(
         user = crud.get_user_by_email(session=db, email=username)
         assert user
         assert user.email == created_user["email"]
+        send_email_mock.assert_called_once()
+        sent_html = send_email_mock.call_args.kwargs["html_content"]
+        assert "reset-password?token=" in sent_html
+        assert password not in sent_html
+        assert "Set Password" in sent_html
         assert '"action":"user.create"' in caplog.text
         assert '"target_type":"user"' in caplog.text
 
