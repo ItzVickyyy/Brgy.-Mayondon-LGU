@@ -8,7 +8,11 @@ Everything the team needs to know about the project lives in this folder.
 | [Developers.md](Developers.md) | Team roles, branch plan, workflows, reviews, testing, migrations, and security guidance | Before starting development or opening a pull request |
 | [How-To-Start.md](How-To-Start.md) | Tested Windows PowerShell steps to start PostgreSQL, migrate and initialize the database, and run the backend and frontend | When setting up or running the project locally |
 | [Complete-Tech-Stacks.md](Complete-Tech-Stacks.md) | Technologies, architecture, and Vercel + Supabase deployment notes | Before coding or planning deployment |
-| [Security-Measures.md](Security-Measures.md) | Recurring security checklist for development, testing, and deployment | During development, before releases, and before handling real data |
+| [Security-Measures.md](Security-Measures.md) | Recurring security checklist; production hosting verification is explicitly pending | During development, before releases, and before handling real data |
+| [Developers-Journal/README.md](Developers-Journal/README.md) | Rules and individual journals for recording work, achievements, AI tools, and workflow with date/time | Every time you work on the project |
+| [Bug-and-Issue-Log.md](Bug-and-Issue-Log.md) | Central record of bugs, defects, incidents, and issues found during development, testing, or launch | Whenever an issue is found or its status changes |
+| [System-Specification.md](System-Specification.md) | Structured template for client-confirmed requirements, scope, roles, and acceptance criteria | After the client interview and whenever requirements are approved |
+| [System-Architecture.md](System-Architecture.md) | Technical architecture and sitemap working reference, to be updated after client decisions | Before architecture or implementation changes and after confirmed decisions |
 
 Use [How-To-Start.md](How-To-Start.md) as the detailed, tested guide for running the system in Windows PowerShell. The root [README](../README.md#run-it-locally) links to it for quick access.
 
