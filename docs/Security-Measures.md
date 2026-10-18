@@ -146,4 +146,5 @@ Complete this record for a release or a scheduled security review.
 - The client interview and signed Creative Brief must define the actual modules, user roles, personal data, and operational needs before feature-specific controls can be finalized.
 - The final hosting choice matters. HTTPS, network exposure, rate limiting, backups, monitoring, and database connectivity must be verified against the actual hosting and Networking 2 setup.
 - Keep uncertain starter-template modules until the client requirements confirm whether they are needed. Removing a module is not itself a security measure.
+- **Open authentication risk:** Access tokens are not currently bound to the user's current password hash. A password change or reset invalidates prior password-reset links, but already-issued access tokens may remain usable until their expiry. Add and test access-token revocation on password changes before production use.
 - Passing automated tests means the tested checks passed. It does not guarantee the application is secure or ready for production.
