@@ -56,14 +56,31 @@ cd frontend && bun run lint && bun run build     # lint + type-check + build
 
 ## Team workflow
 
-- `main` always works. Create a branch per task (`feat/<module>-<name>`), open
-  a Pull Request, and have a teammate review before merging.
-- Changed a model in `backend/app/models.py`? Create and commit a migration:
-  `cd backend && uv run alembic revision --autogenerate -m "what changed"`, then
-  `uv run alembic upgrade head`.
-- Changed an API route or schema? Regenerate the typed client:
-  `bash scripts/generate-client.sh`.
-- Never commit `.env`, passwords or real resident data.
+Read [`docs/Developers.md`](docs/Developers.md) for the full team workflow,
+branching strategy, review checklist, testing guidance, and developer roles.
+
+**Current branch policy:** the team is staying on `Foundation` until the client
+interview clarifies the system requirements. Do not rename or merge this branch
+or create the planned `production` branch before the team reviews the
+post-interview plan.
+
+**Planned branch policy after the interview:**
+- `master` will be the integration branch for reviewed changes that pass the
+  required checks.
+- `production` will contain only approved, tested releases intended for
+  deployment. Deployment remains unverified until the real hosting process is
+  tested.
+- Use short-lived `feature/`, `fix/`, `hotfix/`, `docs/`, and `chore/`
+  branches for individual tasks, with pull requests and teammate review.
+
+### Database and API changes
+
+- Changed a model in `backend/app/models.py`? Create and inspect a migration:
+  `cd backend && uv run alembic revision --autogenerate -m "what changed"`,
+  then test it with `uv run alembic upgrade head`.
+- Changed an API route or schema? Regenerate the typed client with
+  `bash scripts/generate-client.sh` from the repository root.
+- Never commit `.env`, passwords, secrets, or real resident data.
 
 ## Project layout
 
@@ -71,7 +88,7 @@ cd frontend && bun run lint && bun run build     # lint + type-check + build
 backend/    FastAPI app, database models, migrations, tests
 frontend/   React app (branding in src/config/site.ts)
 packages/   React Email templates for system emails
-docs/       Source of truth, tech stack, documentation index
+docs/       Source of truth, tech stack, developer guide, documentation index
 scripts/    Client generation and test helpers
 ```
 
