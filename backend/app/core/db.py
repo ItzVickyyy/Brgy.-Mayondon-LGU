@@ -1,10 +1,21 @@
+from sqlalchemy.pool import NullPool
 from sqlmodel import Session, create_engine, select
 
 from app import crud
 from app.core.config import settings
 from app.models import User, UserCreate
 
-engine = create_engine(str(settings.DATABASE_URL), pool_pre_ping=True)
+# Vercel functions should not retain a client-side pool when using Supabase's
+# transaction pooler. Psycopg prepared statements must also be disabled there.
+if settings.DATABASE_POOL_MODE == "transaction":
+    engine = create_engine(
+        str(settings.DATABASE_URL),
+        poolclass=NullPool,
+        pool_pre_ping=True,
+        connect_args={"prepare_threshold": None},
+    )
+else:
+    engine = create_engine(str(settings.DATABASE_URL), pool_pre_ping=True)
 
 
 # make sure all SQLModel models are imported (app.models) before initializing DB
