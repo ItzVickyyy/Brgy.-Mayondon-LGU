@@ -75,16 +75,18 @@ Branding (name, location, logo) lives in `frontend/src/config/site.ts`.
 | Service | Role | Notes |
 |---|---|---|
 | **Supabase** | Managed PostgreSQL | Used as a plain Postgres database; the app has its own users table and JWT login, so Supabase Auth is not used |
-| **Vercel** | Hosts the frontend and the FastAPI backend | Vercel supports Python 3.12, 3.13 and 3.14 (default 3.12), detects FastAPI automatically, and runs the whole app as a single Vercel Function; pin the version with `.python-version` |
+| **Vercel** | Hosts the frontend and FastAPI backend in two projects | Use Root Directory `frontend` for the Vite static site and `backend` for FastAPI. The backend declares `tool.vercel.entrypoint = "app.main:app"`. Verify both projects on first deployment. |
 | Docker Compose | Local PostgreSQL and test mailbox only | `docker compose up -d db` (add `mailpit` to test emails). Not used for deployment |
 | GitHub | Source control, pull requests, CI | |
 
 **Supabase connection rules** (from Supabase's docs):
-- For serverless apps (our API on Vercel) use the **transaction pooler** string,
-  port **6543**. Transaction mode does not support prepared statements, and
-  Supabase recommends SQLAlchemy's `NullPool` there.
+- For the serverless API on Vercel use the **transaction pooler** string,
+  port **6543**. Set `DATABASE_POOL_MODE=transaction`; the engine uses SQLAlchemy's
+  `NullPool` and disables psycopg prepared statements (`prepare_threshold=None`).
 - The **direct** connection string is IPv6-only. The **session pooler** (port
-  5432) supports IPv4 and is the safer choice for running Alembic migrations.
+  5432) supports IPv4 and is the recommended choice for running Alembic migrations.
+  Set `MIGRATION_DATABASE_URL` to that session-pooler URL (or the direct URL when
+  available) for migration commands. Do not run Alembic through port 6543.
 - Always copy the exact string from the Supabase Dashboard → Connect.
 
 ## 5. Development tools
@@ -103,44 +105,74 @@ Branding (name, location, logo) lives in `frontend/src/config/site.ts`.
 | React Email | Source of the email templates (`packages/react-email`, exported to `backend/app/email-templates`) |
 | Mailpit | Local fake mailbox for testing emails |
 
-## 6. Deployment checklist (verify at the first deploy)
+## 6. Deployment checklist (code prepared; hosting untested)
 
-Known gaps between the template and a Vercel + Supabase deployment:
+Recommended starting setup: **two Vercel projects connected to this same GitHub
+repository**, plus one Supabase PostgreSQL project. This keeps the static frontend
+and serverless API independently configured and is supported by Vercel's monorepo
+workflow.
 
-- [ ] **Two Vercel projects** (recommended): one for `frontend` (Vite static build)
-      and one for `backend` (FastAPI). Set the Root Directory of each.
-- [ ] **Frontend build output.** `frontend/vite.config.ts` writes the build to
-      `../backend/app/frontend`. For the frontend project, make the output
-      directory configurable (for example `dist`) and set it in Vercel.
-- [ ] **Single-page routing.** Add a Vercel rewrite so direct visits to routes like
-      `/login` return `index.html`.
-- [ ] **API URL.** Set `VITE_API_URL` in the frontend project to the backend's
-      Vercel URL.
-- [ ] **CORS.** Set `FRONTEND_HOST` in the backend project to the frontend's URL
-      (the template allows one origin).
-- [ ] **Database engine.** Point `DATABASE_URL` at the Supabase transaction pooler
-      and adapt `backend/app/core/db.py` (`NullPool`, and disable psycopg's
-      automatic prepared statements) as Supabase's docs advise.
-- [ ] **Migrations.** Run `alembic upgrade head` and create the first admin with
-      `python app/initial_data.py` against Supabase, from a laptop, using the
-      session pooler or direct connection.
-- [ ] **Secrets.** Set `SECRET_KEY`, `FIRST_SUPERUSER`, `FIRST_SUPERUSER_PASSWORD`,
-      `DATABASE_URL` and `PROJECT_NAME` in Vercel (never in git). In production the
-      app refuses the default `changethis` secrets on purpose.
-- [ ] **Email.** Password recovery needs an SMTP provider. If the barangay has none,
-      leave `SMTP_HOST` empty (recovery stays disabled) and let the admin reset passwords.
-- [ ] **Free-tier limits.** Check the current Vercel and Supabase free-plan limits
-      (and whether inactive projects pause) before the Week 16 turnover.
-- [ ] **Backups.** Decide how the database is backed up before turnover.
-- [ ] **Networking 2.** Confirm what Sir Ramos expects for a cloud-hosted system
-      (see `Source-of-Truth.md`, open items).
+### Vercel project A: frontend
 
+- [ ] Import the repository and set **Root Directory** to `frontend`.
+- [ ] Ensure **Include source files outside of the Root Directory** is enabled.
+  The workspace's `package.json` and `bun.lock` live at the repository root.
+- [ ] Framework preset: Vite. Build command: `bun run build`. Output directory: `dist`.
+- [ ] Set `VITE_BUILD_OUT_DIR=dist` so Vite writes to the static output directory
+  instead of the local FastAPI frontend folder.
+- [ ] Set `VITE_API_URL` to the deployed backend origin, with no trailing slash.
+- [ ] The checked-in `frontend/vercel.json` rewrites SPA paths to `/index.html`;
+  test direct visits and refreshes on `/login` and other app routes.
+
+### Vercel project B: backend
+
+- [ ] Import the same repository and set **Root Directory** to `backend`.
+- [ ] Ensure **Include source files outside of the Root Directory** is enabled if
+  the build needs repository-root files. The backend project has its own
+  `pyproject.toml`; the workspace lockfile is at the repository root.
+- [ ] The backend `pyproject.toml` declares the Vercel entrypoint
+  `app.main:app`. Verify that Vercel detects and imports this entrypoint.
+- [ ] Set `DATABASE_URL` to the Supabase transaction pooler URL on port `6543`
+  and set `DATABASE_POOL_MODE=transaction`.
+- [ ] Set `FRONTEND_HOSTS` to a comma-separated list of exact trusted frontend
+  origins. Include the production origin and only preview origins you intend to
+  trust. Avoid a broad wildcard CORS policy.
+- [ ] Set `SECRET_KEY`, `FIRST_SUPERUSER`, `FIRST_SUPERUSER_PASSWORD`,
+  `PROJECT_NAME`, and any required email/Sentry settings in Vercel environment
+  variables. Never commit actual values.
+
+### Supabase database and migrations
+
+- [ ] Copy the exact transaction-pooler connection string from Dashboard → Connect.
+- [ ] From a trusted development machine, set `MIGRATION_DATABASE_URL` to the
+  session-pooler URL on port `5432` (or a reachable direct URL), then run
+  `uv run alembic upgrade head` from `backend`.
+- [ ] Create the first admin using the existing initial-data script only after
+  confirming its behavior and the production environment variables.
+- [ ] Verify login, CRUD, logout, CORS, direct SPA route visits, and a migration
+  against a non-production test database before client data is entered.
+- [ ] Check current Vercel and Supabase free-tier limits, project pausing behavior,
+  database backup options, and restore steps before Week 16 turnover.
+- [ ] Confirm with Sir Ramos what Networking 2 expects for a cloud-hosted system
+  and with Sir Matute what Client-Server Technologies requires.
+
+**Official references checked October 18, 2026:**
+
+- [Vercel FastAPI deployment](https://vercel.com/docs/frameworks/backend/fastapi)
+- [Vercel Vite SPA routing](https://vercel.com/docs/frameworks/frontend/vite)
+- [Vercel monorepo Root Directory behavior](https://vercel.com/docs/monorepos/monorepo-faq)
+- [Supabase PostgreSQL connection methods](https://supabase.com/docs/guides/database/connecting-to-postgres)
+- [Supabase SQLAlchemy transaction-pooler guidance](https://supabase.com/docs/guides/troubleshooting/using-sqlalchemy-with-supabase-FUqebT)
+
+**Status:** The repository configuration has been prepared for this approach, but
+neither Vercel project nor the Supabase connection has been tested. Treat the first
+preview deployment as a verification step, not as proof of production readiness.
 ## 7. Security features in place
 
 - Argon2 password hashing and timing-attack-safe login
 - JWT bearer authentication; admin-only endpoints for user management
 - Open registration disabled (`USERS_OPEN_REGISTRATION=False`)
-- CORS restricted to the configured frontend origin
+- CORS restricted to the explicit `FRONTEND_HOSTS` allowlist, or the `FRONTEND_HOST` fallback
 - Refuses default secrets outside development mode
 - Secrets read from environment variables; `.env` is not committed
 
