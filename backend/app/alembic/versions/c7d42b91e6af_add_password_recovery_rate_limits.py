@@ -16,7 +16,17 @@ def upgrade() -> None:
         sa.Column("window_started_at", sa.DateTime(timezone=True), nullable=False),
         sa.Column("attempts", sa.Integer(), nullable=False, server_default="1"),
     )
+    op.create_index(
+        "ix_passwordrecoveryratelimit_window_started_at",
+        "passwordrecoveryratelimit",
+        ["window_started_at"],
+        unique=False,
+    )
 
 
 def downgrade() -> None:
+    op.drop_index(
+        "ix_passwordrecoveryratelimit_window_started_at",
+        table_name="passwordrecoveryratelimit",
+    )
     op.drop_table("passwordrecoveryratelimit")
