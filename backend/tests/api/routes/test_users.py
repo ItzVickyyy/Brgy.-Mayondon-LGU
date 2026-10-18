@@ -544,3 +544,18 @@ def test_delete_user_without_privileges(
     )
     assert r.status_code == 403
     assert r.json()["detail"] == "The user doesn't have enough privileges"
+
+
+def test_normal_user_cannot_escalate_privileges_through_profile_update(
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+) -> None:
+    response = client.patch(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+        json={"full_name": "Updated Name", "is_superuser": True, "is_active": True},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["is_superuser"] is False
+    assert response.json()["is_active"] is True
