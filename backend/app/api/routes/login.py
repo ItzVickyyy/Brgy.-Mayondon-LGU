@@ -18,6 +18,7 @@ from app.utils import (
 )
 
 router = APIRouter(tags=["login"])
+dev_router = APIRouter(tags=["login"])
 
 
 @router.post("/login/access-token")
@@ -97,7 +98,7 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
     return Message(message="Password updated successfully")
 
 
-@router.post(
+@dev_router.post(
     "/password-recovery-html-content/{email}",
     dependencies=[Depends(require_admin)],
     response_class=HTMLResponse,
