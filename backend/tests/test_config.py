@@ -46,6 +46,11 @@ def test_accepts_non_default_migration_database_password() -> None:
         ("LOGIN_MAX_FAILED_ATTEMPTS", -1),
         ("LOGIN_LOCKOUT_MINUTES", 0),
         ("LOGIN_LOCKOUT_MINUTES", -1),
+        ("EMAIL_RESET_TOKEN_EXPIRE_HOURS", 0),
+        ("EMAIL_RESET_TOKEN_EXPIRE_HOURS", -1),
+        ("SMTP_PORT", 0),
+        ("SMTP_PORT", -1),
+        ("SMTP_PORT", 65536),
     ],
 )
 def test_rejects_non_positive_authentication_settings(
@@ -60,8 +65,12 @@ def test_accepts_positive_authentication_settings() -> None:
         ACCESS_TOKEN_EXPIRE_MINUTES=1,
         LOGIN_MAX_FAILED_ATTEMPTS=1,
         LOGIN_LOCKOUT_MINUTES=1,
+        EMAIL_RESET_TOKEN_EXPIRE_HOURS=1,
+        SMTP_PORT=65535,
     )
 
     assert settings.ACCESS_TOKEN_EXPIRE_MINUTES == 1
     assert settings.LOGIN_MAX_FAILED_ATTEMPTS == 1
     assert settings.LOGIN_LOCKOUT_MINUTES == 1
+    assert settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS == 1
+    assert settings.SMTP_PORT == 65535
