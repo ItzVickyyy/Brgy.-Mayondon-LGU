@@ -1,88 +1,82 @@
-# Full Stack FastAPI Template
+# Barangay Mayondon LGU – Web System
 
-[![Test Docker Compose](../../actions/workflows/test-docker-compose.yml/badge.svg)](../../actions/workflows/test-docker-compose.yml)
-[![Test Backend](../../actions/workflows/test-backend.yml/badge.svg)](../../actions/workflows/test-backend.yml)
+Final Project for **ITST301 Principles of Web Design**, **Integrative
+Programming**, **Client-Server Technologies** and **Networking 2**. One system,
+built for a real client: **Barangay Mayondon LGU, Los Baños, Laguna**.
 
-## Technology Stack and Features
+BSIT major in Web and Mobile Application Development (WMAD) ·
+Laguna State Polytechnic University – Los Baños Campus
 
-- ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
-  - 🧰 [SQLModel](https://sqlmodel.tiangolo.com) for the Python SQL database interactions (ORM).
-  - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
-  - 💾 [PostgreSQL](https://www.postgresql.org) as the SQL database.
-- 🚀 [React](https://react.dev) for the frontend.
-  - 🧩 Built into the backend application and served by FastAPI on the same domain as the API.
-  - 💃 Using TypeScript, hooks, [Vite](https://vitejs.dev), and other parts of a modern frontend stack.
-  - 🎨 [Tailwind CSS](https://tailwindcss.com) and [shadcn/ui](https://ui.shadcn.com) for the frontend components.
-  - 🤖 An automatically generated frontend client.
-  - 🧪 [Playwright](https://playwright.dev) for end-to-end testing.
-  - 🦇 Dark mode support.
-- ☁️ [FastAPI Cloud](https://fastapicloud.com) for deployment.
-- 🐋 [Docker Compose](https://www.docker.com) for local services and self-hosted deployment.
-  - 📞 [Traefik](https://traefik.io) as a reverse proxy with automatic HTTPS.
-- 🔒 Secure password hashing by default.
-- 🔑 JWT (JSON Web Token) authentication.
-- 📫 Email-based password recovery.
-- ✉️ [React Email](https://react.email) for email templates.
-- 📬 [Mailpit](https://mailpit.axllent.org) for local email testing during development.
-- ✅ Tests with [Pytest](https://pytest.org).
-- 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+| Member | Role |
+|---|---|
+| Vic John O. Salen Jr. | Project Leader, Lead Developer |
+| Justin Adrian P. Reboton | Backend Developer, Technical Writer |
+| Jean Mervin G. Fajardo | Frontend Developer |
 
-### Dashboard Login
+> **Status:** foundation only. The system's modules are decided after the
+> client interview (Week 13). Everything about the project lives in
+> [`docs/`](docs/README.md); start with
+> [`docs/Source-of-Truth.md`](docs/Source-of-Truth.md).
 
-![Dashboard login screenshot](img/login.png)
+## Stack at a glance
 
-### Dashboard - Admin
+FastAPI · SQLModel · PostgreSQL (Supabase) · React · TypeScript · Vite ·
+Tailwind CSS · shadcn/ui · Vercel. Full list in
+[`docs/Complete-Tech-Stacks.md`](docs/Complete-Tech-Stacks.md).
 
-![Admin dashboard screenshot](img/dashboard.png)
+## Run it locally
 
-### Dashboard - Items
+Requirements: [uv](https://docs.astral.sh/uv/) (installs Python 3.14),
+[Bun](https://bun.sh), and Docker for a local PostgreSQL. On Windows, use
+**Git Bash or WSL** for the `bash` commands.
 
-![Items dashboard screenshot](img/dashboard-items.png)
+```bash
+cp .env.example .env              # then set real values for the secrets
+docker compose up -d db           # local PostgreSQL
 
-### Dashboard - Dark Mode
+cd backend
+uv sync
+uv run bash scripts/prestart.sh   # migrations + first admin account
+uv run fastapi dev                # API: http://localhost:8000  (docs: /docs)
 
-![Dark mode dashboard screenshot](img/dashboard-dark.png)
+# second terminal, from the repo root
+bun install
+bun run dev                       # frontend: http://localhost:5173
+```
 
-### React Email Templates
+Log in with `FIRST_SUPERUSER` / `FIRST_SUPERUSER_PASSWORD` from your `.env`.
+There is no public sign-up: an admin creates accounts from the **Admin** page.
 
-![Email templates screenshot](img/react-email.png)
+### Tests and checks
 
-### Mailpit - Local Email Testing
+```bash
+cd backend && uv run pytest                      # backend tests
+cd frontend && bun run lint && bun run build     # lint + type-check + build
+```
 
-![Mailpit screenshot](img/mailpit.png)
+## Team workflow
 
-### Interactive API Documentation
+- `main` always works. Create a branch per task (`feat/<module>-<name>`), open
+  a Pull Request, and have a teammate review before merging.
+- Changed a model in `backend/app/models.py`? Create and commit a migration:
+  `cd backend && uv run alembic revision --autogenerate -m "what changed"`, then
+  `uv run alembic upgrade head`.
+- Changed an API route or schema? Regenerate the typed client:
+  `bash scripts/generate-client.sh`.
+- Never commit `.env`, passwords or real resident data.
 
-![API docs](img/docs.png)
+## Project layout
 
-## How to Use It
-
-Click the **Use this template** button at the top of this page to create a new repository.
-
-## Backend Development
-
-Backend docs: [backend/README.md](./backend/README.md).
-
-## Frontend Development
-
-Frontend docs: [frontend/README.md](./frontend/README.md).
-
-## Deployment
-
-FastAPI Cloud deployment: [deployment.md](./deployment.md).
-
-Self-hosted deployment with Docker Compose: [deployment-docker-compose.md](./deployment-docker-compose.md).
-
-## Development
-
-General development docs: [development.md](./development.md).
-
-This includes the local FastAPI and Vite workflow, Docker Compose services, `.env` configuration, and more.
-
-## Release Notes
-
-Check the file [release-notes.md](./release-notes.md).
+```
+backend/    FastAPI app, database models, migrations, tests
+frontend/   React app (branding in src/config/site.ts)
+packages/   React Email templates for system emails
+docs/       Source of truth, tech stack, documentation index
+scripts/    Client generation and test helpers
+```
 
 ## License
 
-The Full Stack FastAPI Template is licensed under the terms of the MIT license.
+MIT, inherited from the
+[Full Stack FastAPI Template](https://github.com/fastapi/full-stack-fastapi-template)
+this project started from. See [LICENSE](LICENSE).

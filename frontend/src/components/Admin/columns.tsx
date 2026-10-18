@@ -44,7 +44,7 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
     header: "Role",
     cell: ({ row }) => (
       <Badge variant={row.original.is_superuser ? "default" : "secondary"}>
-        {row.original.is_superuser ? "Superuser" : "User"}
+        {row.original.is_superuser ? "Admin" : "Staff"}
       </Badge>
     ),
   },

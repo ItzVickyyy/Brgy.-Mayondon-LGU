@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-
+import { pageTitle, SITE } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/")({
@@ -7,7 +7,7 @@ export const Route = createFileRoute("/_layout/")({
   head: () => ({
     meta: [
       {
-        title: "Dashboard - FastAPI Template",
+        title: pageTitle("Dashboard"),
       },
     ],
   }),
@@ -23,8 +23,9 @@ function Dashboard() {
           Hi, {currentUser?.full_name || currentUser?.email} 👋
         </h1>
         <p className="text-muted-foreground">
-          Welcome back, nice to see you again!!!
+          Welcome back, nice to see you again!
         </p>
+        <p className="text-muted-foreground text-sm mt-1">{SITE.systemName}</p>
       </div>
     </div>
   )

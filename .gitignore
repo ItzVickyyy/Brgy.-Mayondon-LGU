@@ -6,3 +6,11 @@ backend/app/frontend/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Local secrets (copy .env.example to .env)
+.env
+
+# Local build output & tooling
+openapi.json
+__pycache__/
+.venv/
