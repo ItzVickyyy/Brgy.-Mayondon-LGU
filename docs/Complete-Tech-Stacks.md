@@ -75,7 +75,7 @@ Branding (name, location, logo) lives in `frontend/src/config/site.ts`. The prot
 | Service | Role | Notes |
 |---|---|---|
 | **Supabase** | Managed PostgreSQL | Used as a plain Postgres database; the app has its own users table and JWT login, so Supabase Auth is not used |
-| **Vercel** | Hosts the frontend and FastAPI backend in two projects | Use Root Directory `frontend` for the Vite static site and `backend` for FastAPI. The backend declares `tool.vercel.entrypoint = "app.main:app"`. Verify both projects on first deployment. |
+| **Vercel** | Hosts the frontend and FastAPI backend in one Vercel Services project (planned) | Services is the preferred single-project setup. If Services cannot be enabled, use two projects with Root Directory `frontend` for Vite and `backend` for FastAPI. The backend declares `tool.vercel.entrypoint = "app.main:app"`. Verify the chosen setup on first deployment. |
 | Docker Compose | Local PostgreSQL and test mailbox only | `docker compose up -d db` (add `mailpit` to test emails). Not used for deployment |
 | GitHub | Source control, pull requests, CI | |
 
