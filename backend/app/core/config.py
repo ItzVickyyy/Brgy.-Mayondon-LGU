@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     FRONTEND_HOST: str = "http://localhost:5173"
+    # Comma-separated trusted origins, useful for production and selected previews.
+    # FRONTEND_HOST remains as a backwards-compatible local/default origin.
+    FRONTEND_HOSTS: str | None = None
     # Barangay system: only an admin creates accounts. Keep False unless the
     # client explicitly wants public self-registration.
     USERS_OPEN_REGISTRATION: bool = False
@@ -32,15 +35,28 @@ class Settings(BaseSettings):
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
     DATABASE_URL: PostgresDsn
+    # Set this to the session-pooler/direct URL when running Alembic migrations.
+    MIGRATION_DATABASE_URL: PostgresDsn | None = None
+    # Use "transaction" for Supabase transaction-pooler connections on port 6543.
+    DATABASE_POOL_MODE: Literal["default", "transaction"] = "default"
 
-    @field_validator("DATABASE_URL", mode="before")
+    @field_validator("DATABASE_URL", "MIGRATION_DATABASE_URL", mode="before")
     @classmethod
-    def _use_psycopg_driver(cls, value: str | PostgresDsn) -> str:
+    def _use_psycopg_driver(cls, value: str | PostgresDsn | None) -> str | None:
+        if value is None:
+            return None
         database_url = str(value)
         for scheme in ("postgres://", "postgresql://"):
             if database_url.startswith(scheme):
                 return database_url.replace(scheme, "postgresql+psycopg://", 1)
         return database_url
+
+    @property
+    def frontend_origins(self) -> list[str]:
+        """Return explicitly trusted browser origins for CORS."""
+        if self.FRONTEND_HOSTS:
+            return list(dict.fromkeys(origin.strip() for origin in self.FRONTEND_HOSTS.split(",") if origin.strip()))
+        return [self.FRONTEND_HOST]
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
