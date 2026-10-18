@@ -107,6 +107,9 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
         != user.email
     ):
         raise HTTPException(status_code=400, detail="Invalid token")
+    # A verified password reset restores access after a failed-login lockout.
+    user.failed_login_attempts = 0
+    user.locked_until = None
     user_in_update = UserUpdate(password=body.new_password)
     crud.update_user(
         session=session,
