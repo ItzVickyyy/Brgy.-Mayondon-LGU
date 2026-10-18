@@ -131,6 +131,10 @@ class TokenPayload(SQLModel):
     pwdv: str | None = None
 
 
+class PasswordRecoveryRequest(SQLModel):
+    email: EmailStr
+
+
 class NewPassword(SQLModel):
     token: str
     new_password: str = Field(min_length=12, max_length=128)
