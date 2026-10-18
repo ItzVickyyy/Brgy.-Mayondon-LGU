@@ -1,12 +1,25 @@
 # How to Start the System Locally (Windows PowerShell)
 
-This guide records the working local startup process tested on Windows with PowerShell. It starts the PostgreSQL database, applies database migrations, creates the initial administrator account, and runs the backend and frontend in separate terminals.
+This guide explains how to run the Barangay Mayondon LGU system on a Windows development computer. It starts PostgreSQL, applies database migrations, creates the initial administrator account, and runs the backend and frontend in separate PowerShell terminals.
 
-Use this for local development only. The project is still on the `Foundation` branch while the team prepares for the Barangay Mayondon LGU client interview. Do not enter real resident information.
+Use this for local development only. The project remains on the `Foundation` branch while the team prepares for the client interview. Do not enter real resident information.
 
-## 1. Requirements
+## 1. Required software
 
-Install these tools and confirm they are available in PowerShell:
+Install the following software before starting. Use the official download pages linked below.
+
+| Software | What it is used for | Required setup |
+|---|---|---|
+| Windows 10 or Windows 11, 64-bit | Operating system for these instructions | Use Windows PowerShell. |
+| [Docker Desktop for Windows](https://www.docker.com/products/docker-desktop/) | Runs PostgreSQL in a container, so you do not need to install PostgreSQL separately | Start Docker Desktop before running Docker commands. Enable the WSL 2 backend when prompted or when required by your Windows setup. |
+| [Git for Windows](https://git-scm.com/download/win) | Clones the repository and checks branches and changes | PowerShell can run the Git commands in this guide. Git Bash is not required for these PowerShell steps. |
+| [uv](https://docs.astral.sh/uv/getting-started/installation/) | Installs Python dependencies and runs the backend tools | The project requires Python 3.14. `uv` can provision the project Python version when needed. |
+| [Bun](https://bun.sh/docs/installation) | Installs frontend packages and runs the Vite development server | Install Bun for Windows and reopen PowerShell after installation if the command is not recognized. |
+| A modern web browser, such as [Microsoft Edge](https://www.microsoft.com/edge) or [Google Chrome](https://www.google.com/chrome/) | Opens the web system and API documentation | Use a current browser version. |
+
+**Optional:** [Visual Studio Code](https://code.visualstudio.com/) or another code editor is useful for editing `.env` and source files. You do not need to install Node.js or PostgreSQL separately for the steps in this guide.
+
+Verify the command-line tools in PowerShell:
 
 ```powershell
 docker --version
@@ -15,31 +28,39 @@ bun --version
 git --version
 ```
 
-The tested setup used Docker, uv, Bun, and Git on Windows. Docker Desktop must be running.
+If a command is not recognized, finish installing that software and reopen PowerShell. Docker Desktop must be running.
 
-## 2. Open the project and check the branch
+## 2. Open the project folder
 
-Open PowerShell and go to the repository root. Adjust the path if you cloned the project elsewhere.
+Clone the repository if you have not already done so:
 
 ```powershell
-cd C:\Users\vocjo\Projects\Brgy.-Mayondon-LGU
+git clone https://github.com/ItzVickyyy/Brgy.-Mayondon-LGU.git
+```
+
+Open the cloned `Brgy.-Mayondon-LGU` folder in File Explorer. To open PowerShell in that folder, right-click an empty area and choose **Open in Terminal**. Alternatively, open the folder in your code editor and use its integrated terminal.
+
+Confirm the terminal is at the repository root, then check the branch and working tree:
+
+```powershell
+Get-Location
 git branch --show-current
 git status
 ```
 
-The active branch should be `Foundation`. If you have local changes, inspect them before switching branches or pulling changes. Do not switch branches as part of this startup guide.
+The active branch should be `Foundation`. If you have local changes, inspect them before switching branches or pulling updates. Do not switch branches as part of this startup guide.
 
 ## 3. Create the local environment file
 
-At the repository root, copy the example file if you have not already created `.env`:
+Run this command from the repository root. It creates `.env` only if the file does not already exist:
 
 ```powershell
 if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
-Open `.env` in your editor and review the settings. The local database URL uses `POSTGRES_PASSWORD` in its password field. Keep these values consistent.
+Open the root `.env` file in your editor and review its settings. The database URL and `POSTGRES_PASSWORD` must use matching credentials.
 
-The example contains development placeholders. The application warns if `SECRET_KEY` or the database password is `changethis`. These placeholders are for local setup only. Never deploy with them, commit `.env`, or share its contents. Use unique secrets before deployment and do not use real resident data during development.
+The example file contains development placeholders. The application warns if `SECRET_KEY` or the database password is `changethis`. These placeholders are for local setup only. Never deploy with them, commit `.env`, or share its contents. Use unique secrets before deployment and do not use real resident data during development.
 
 ## 4. Start PostgreSQL
 
@@ -56,14 +77,14 @@ Wait until the `db` service shows as healthy. To inspect its logs:
 docker compose logs db
 ```
 
-On the first startup, PostgreSQL may log that database `app` does not exist before it creates the database. If the logs then show `CREATE DATABASE` and the service becomes healthy, that initial message by itself does not mean startup failed.
+On first startup, PostgreSQL may log that database `app` does not exist before creating it. If the logs then show `CREATE DATABASE` and the service becomes healthy, that initial message by itself does not mean startup failed.
 
 ## 5. Install backend dependencies
 
-Open a second PowerShell window and go to the backend directory:
+Open a second PowerShell terminal in the repository root using File Explorer's **Open in Terminal** option. Change to the backend directory with a relative path:
 
 ```powershell
-cd C:\Users\vocjo\Projects\Brgy.-Mayondon-LGU\backend
+Set-Location .\backend
 uv sync
 ```
 
@@ -111,10 +132,9 @@ A successful startup includes a message similar to `Application startup complete
 
 ## 8. Install and start the frontend
 
-Open a third PowerShell window and return to the repository root:
+Open a third PowerShell terminal in the repository root using File Explorer's **Open in Terminal** option. Keep this terminal at the root and run:
 
 ```powershell
-cd C:\Users\vocjo\Projects\Brgy.-Mayondon-LGU
 bun install
 bun run dev
 ```
@@ -139,6 +159,7 @@ The repository does not provide public self-registration by default. An administ
 
 | Problem | What to do |
 |---|---|
+| A command is not recognized | Check that the relevant software is installed, then reopen PowerShell. |
 | `alembic: command not found` from `prestart.sh` | From `backend`, run `uv run alembic upgrade head`, then `uv run python app/initial_data.py`. |
 | Database connection error | Check `docker compose ps`, database logs, and the root `.env` database settings. Confirm the database service is healthy. |
 | `SECRET_KEY` or database password warning | Check the root `.env`. Development placeholders may produce warnings. Replace them before deployment; never use them with real client data. |
