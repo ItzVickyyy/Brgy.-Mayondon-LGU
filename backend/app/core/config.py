@@ -58,7 +58,15 @@ class Settings(BaseSettings):
     def frontend_origins(self) -> list[str]:
         """Return explicitly trusted browser origins for CORS."""
         if self.FRONTEND_HOSTS:
-            return list(dict.fromkeys(origin.strip() for origin in self.FRONTEND_HOSTS.split(",") if origin.strip()))
+            origins = list(
+                dict.fromkeys(
+                    origin.strip()
+                    for origin in self.FRONTEND_HOSTS.split(",")
+                    if origin.strip()
+                )
+            )
+            if origins:
+                return origins
         return [self.FRONTEND_HOST]
 
     SMTP_TLS: bool = True
