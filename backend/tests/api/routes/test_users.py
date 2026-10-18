@@ -1,3 +1,4 @@
+import logging
 import uuid
 from unittest.mock import patch
 
@@ -36,8 +37,12 @@ def test_get_users_normal_user_me(
 
 
 def test_create_user_new_email(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    db: Session,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
+    caplog.set_level(logging.INFO, logger="app.audit")
     with (
         patch("app.utils.send_email", return_value=None),
         patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
@@ -56,6 +61,8 @@ def test_create_user_new_email(
         user = crud.get_user_by_email(session=db, email=username)
         assert user
         assert user.email == created_user["email"]
+        assert '"action":"user.create"' in caplog.text
+        assert '"target_type":"user"' in caplog.text
 
 
 def test_get_existing_user_as_superuser(
