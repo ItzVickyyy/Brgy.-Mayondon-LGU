@@ -86,19 +86,18 @@ def generate_reset_password_email(email_to: str, email: str, token: str) -> Emai
     return EmailData(html_content=html_content, subject=subject)
 
 
-def generate_new_account_email(
-    email_to: str, username: str, password: str
-) -> EmailData:
+def generate_new_account_email(email_to: str, username: str, token: str) -> EmailData:
     project_name = settings.PROJECT_NAME
-    subject = f"{project_name} - New account for user {username}"
+    subject = f"{project_name} - Set up your account"
+    link = f"{settings.FRONTEND_HOST}/reset-password?token={token}"
     html_content = render_email_template(
         template_name="new_account.html",
         context={
-            "project_name": settings.PROJECT_NAME,
+            "project_name": project_name,
             "username": username,
-            "password": password,
             "email": email_to,
-            "link": settings.FRONTEND_HOST,
+            "valid_hours": settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS,
+            "link": link,
         },
     )
     return EmailData(html_content=html_content, subject=subject)
