@@ -3,6 +3,7 @@ from typing import Literal, Self
 
 from pydantic import (
     EmailStr,
+    Field,
     HttpUrl,
     PostgresDsn,
     computed_field,
@@ -22,9 +23,9 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str
     # 60 minutes * 24 hours * 8 days = 8 days
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
-    LOGIN_MAX_FAILED_ATTEMPTS: int = 5
-    LOGIN_LOCKOUT_MINUTES: int = 15
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60 * 24 * 8, gt=0)
+    LOGIN_MAX_FAILED_ATTEMPTS: int = Field(default=5, gt=0)
+    LOGIN_LOCKOUT_MINUTES: int = Field(default=15, gt=0)
     FRONTEND_HOST: str = "http://localhost:5173"
     # Comma-separated trusted origins, useful for production and selected previews.
     # FRONTEND_HOST remains as a backwards-compatible local/default origin.
