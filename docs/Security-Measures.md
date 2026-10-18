@@ -176,4 +176,14 @@ The repository documents Vercel for the frontend/API and Supabase PostgreSQL as 
 - Verify password recovery email delivery, rate limiting behind the actual proxy, account setup links, login, logout, and token invalidation against the deployed environment.
 - Confirm approved data-handling, access, retention, and incident procedures with the client before entering real resident data.
 
-**Current decision:** Suitable for continued development and controlled testing only. Do not treat production security as verified and do not enter real resident data until the deployment checks above are completed and the client/instructor approve the arrangement.
+**Current status: PENDING — production hosting verification has not been performed.**
+
+The team has agreed to keep the current `Foundation` branch, preserve its passing CI, pause additional security code changes, and resume this verification only when the actual hosting setup is available to inspect and test.
+
+- [x] Record the code-level controls above and their test evidence.
+- [x] Confirm all 13 CI checks passed for the latest documentation commit `b159e78c9c4504a50d64a4092ff0e75db08d85ce`.
+- [ ] Obtain access to, or reliable configuration evidence for, the actual hosting environment.
+- [ ] Verify each deployment-specific item above against that environment and record evidence, date, reviewer, and findings in this checklist.
+- [ ] Confirm hosting terms, network requirements, and operational/data-handling procedures with the client and instructors before real resident data is used.
+
+**Current decision:** Suitable for continued development and controlled testing only. No further Foundation security code changes are planned at this time. Production verification remains open; passing CI does not prove that the deployed environment is secure. Do not treat production security as verified or enter real resident data until the deployment checks are completed and the required client/instructor approvals are obtained.
