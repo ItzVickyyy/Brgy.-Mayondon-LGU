@@ -38,7 +38,7 @@ const formSchema = z
     password: z
       .string()
       .min(1, { message: "Password is required" })
-      .min(12, { message: "Password must be at least 12 characters" },
+      .min(12, { message: "Password must be at least 12 characters" }),
     confirm_password: z
       .string()
       .min(1, { message: "Please confirm your password" }),
