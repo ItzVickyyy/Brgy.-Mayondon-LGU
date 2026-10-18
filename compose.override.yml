@@ -14,7 +14,6 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    # command: sleep infinity  # Infinite loop to keep container alive doing nothing
     command:
       - fastapi
       - dev
@@ -36,7 +35,7 @@ services:
             - ./frontend/dist
             - ./frontend/blob-report
             - ./frontend/test-results
-    # TODO: remove once coverage is done locally
+    # Persist the HTML coverage report for local review.
     volumes:
       - ./backend/htmlcov:/app/backend/htmlcov
     environment:
