@@ -8,6 +8,7 @@ Everything the team needs to know about the project lives in this folder.
 | [Developers.md](Developers.md) | Team roles, branch plan, workflows, reviews, testing, migrations, and security guidance | Before starting development or opening a pull request |
 | [How-To-Start.md](How-To-Start.md) | Tested Windows PowerShell steps to start PostgreSQL, migrate and initialize the database, and run the backend and frontend | When setting up or running the project locally |
 | [Complete-Tech-Stacks.md](Complete-Tech-Stacks.md) | Technologies, architecture, and Vercel + Supabase deployment notes | Before coding or planning deployment |
+| [Security-Measures.md](Security-Measures.md) | Recurring security checklist for development, testing, and deployment | During development, before releases, and before handling real data |
 
 Use [How-To-Start.md](How-To-Start.md) as the detailed, tested guide for running the system in Windows PowerShell. The root [README](../README.md#run-it-locally) links to it for quick access.
 
