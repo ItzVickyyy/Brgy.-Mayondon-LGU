@@ -180,7 +180,9 @@ preview deployment as a verification step, not as proof of production readiness.
 - Refuses default secrets outside development mode
 - Secrets read from environment variables; `.env` is not committed
 
-\n**Audit-log limitation:** these events are emitted to application logs, not stored in a dedicated database audit table. Confirm log access and retention before relying on them for formal records. If the client requires durable audit history, agree on retention and access rules before adding it.\n\n## 8. How the stack maps to the four subjects
+**Audit-log limitation:** these events are emitted to application logs, not stored in a dedicated database audit table. Confirm log access and retention before relying on them for formal records. If the client requires durable audit history, agree on retention and access rules before adding it.
+
+## 8. How the stack maps to the four subjects
 
 | Subject | Where it shows up |
 |---|---|
