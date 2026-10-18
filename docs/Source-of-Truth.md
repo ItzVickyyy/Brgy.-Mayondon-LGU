@@ -280,6 +280,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 - [x] Repository tailored from the template (branding, closed registration)
 - [x] Foundation deployment configuration prepared (single-project Vercel Services routing, SPA fallback, configurable Vite output, explicit CORS fallback, Supabase transaction-pooler support); hosting not yet verified
 - [x] Added reusable admin authorization, structured admin-write logs, and database-backed login lockout fields; audit events currently go to application logs rather than a dedicated audit table
+- [x] Added responsive app-header breadcrumbs and a public `/welcome` landing page with placeholder announcements/contact details; public content still needs client approval
 - [x] Closed the three template-generated Dependabot pull requests that targeted `master`; dependency updates will be handled deliberately
 - [ ] Interview
 - [ ] Creative Brief
