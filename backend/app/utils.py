@@ -105,7 +105,7 @@ def generate_new_account_email(
 
 
 def _password_reset_fingerprint(hashed_password: str) -> str:
-    """Return a keyed fingerprint so reset tokens are invalidated after a password change."""
+    """Return a keyed fingerprint that changes when the password hash changes."""
     return hmac.new(
         settings.SECRET_KEY.encode("utf-8"),
         hashed_password.encode("utf-8"),
