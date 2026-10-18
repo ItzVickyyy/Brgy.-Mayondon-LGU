@@ -68,7 +68,7 @@ Key files: `backend/app/models.py` (tables and schemas), `backend/app/api/routes
 | Theme provider | built in | Light and dark mode (`src/components/theme-provider.tsx`) |
 
 The TanStack devtools (floating debug buttons) were removed from this project.
-Branding (name, location, logo) lives in `frontend/src/config/site.ts`.
+Branding (name, location, logo) lives in `frontend/src/config/site.ts`. The protected app shell has a responsive sidebar/header with breadcrumbs, and `/welcome` is a public landing page with placeholder announcements and contact details. Confirm all public-facing content with the client before publishing.
 
 ## 4. Database and hosting
 
