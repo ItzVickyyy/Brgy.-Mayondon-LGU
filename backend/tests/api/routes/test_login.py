@@ -109,6 +109,10 @@ def test_reset_password(client: TestClient, db: Session) -> None:
         is_superuser=False,
     )
     user = create_user(session=db, user_create=user_create)
+    user.failed_login_attempts = settings.LOGIN_MAX_FAILED_ATTEMPTS
+    user.locked_until = datetime.now(UTC) + timedelta(minutes=settings.LOGIN_LOCKOUT_MINUTES)
+    db.add(user)
+    db.commit()
     token = generate_password_reset_token(email=email, hashed_password=user.hashed_password)
     headers = user_authentication_headers(client=client, email=email, password=password)
     data = {"new_password": new_password, "token": token}
@@ -125,6 +129,8 @@ def test_reset_password(client: TestClient, db: Session) -> None:
     db.refresh(user)
     verified, _ = verify_password(new_password, user.hashed_password)
     assert verified
+    assert user.failed_login_attempts == 0
+    assert user.locked_until is None
 
 
 def test_reset_password_invalid_token(
