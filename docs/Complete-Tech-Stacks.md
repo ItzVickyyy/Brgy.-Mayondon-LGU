@@ -150,12 +150,14 @@ for this account, fall back to two Vercel projects and use the explicit CORS all
   against a non-production test database before client data is entered.
 - [ ] Check current Vercel and Supabase free-tier limits, project pausing behavior,
   database backup options, and restore steps before Week 16 turnover.
+- [ ] Confirm that Vercel Hobby terms permit the intended organizational use by the LGU. The free plan is described as for personal, non-commercial use; do not put real office/resident records into this deployment until the instructor and client approve a compliant hosting arrangement.
 - [ ] Confirm with Sir Ramos what Networking 2 expects for a cloud-hosted system
   and with Sir Matute what Client-Server Technologies requires.
 
 **Official references checked October 18, 2026:**
 
 - [Vercel Services guide and availability](https://vercel.com/kb/guide/vercel-services)
+- [Vercel Hobby plan terms and restrictions](https://vercel.com/legal/terms)
 - [Vercel FastAPI entrypoint configuration](https://vercel.com/docs/frameworks/backend/fastapi)
 - [Vercel Python runtime and supported versions](https://vercel.com/docs/functions/runtimes/python)
 - [Vercel Vite SPA routing](https://vercel.com/docs/frameworks/frontend/vite)
