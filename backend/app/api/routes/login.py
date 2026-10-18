@@ -10,7 +10,14 @@ from app.api.deps import CurrentUser, SessionDep, require_admin
 from app.core import security
 from app.core.config import settings
 from app.core.password_recovery import is_password_recovery_rate_limited
-from app.models import Message, NewPassword, Token, UserPublic, UserUpdate
+from app.models import (
+    Message,
+    NewPassword,
+    PasswordRecoveryRequest,
+    Token,
+    UserPublic,
+    UserUpdate,
+)
 from app.utils import (
     generate_password_reset_token,
     get_password_reset_token_email,
@@ -55,10 +62,11 @@ def test_token(current_user: CurrentUser) -> Any:
     return current_user
 
 
-@router.post("/password-recovery/{email}")
+@router.post("/password-recovery")
 def recover_password(
-    email: str, request: Request, session: SessionDep
+    body: PasswordRecoveryRequest, request: Request, session: SessionDep
 ) -> Message:
+    email = str(body.email)
     """
     Password Recovery
     """
