@@ -2,6 +2,8 @@ from pathlib import Path
 
 import sentry_sdk
 from fastapi import FastAPI
+from fastapi.openapi.docs import get_swagger_ui_html
+from fastapi.responses import FileResponse
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 
@@ -9,6 +11,15 @@ from app.api.main import api_router
 from app.core.config import settings
 
 FRONTEND_DIR = Path(__file__).parent / "frontend"
+BRGY_ICON_PATHS = (
+    FRONTEND_DIR / "assets" / "images" / "brgy-icon.svg",
+    Path(__file__).resolve().parents[2]
+    / "frontend"
+    / "public"
+    / "assets"
+    / "images"
+    / "brgy-icon.svg",
+)
 
 
 def custom_generate_unique_id(route: APIRoute) -> str:
@@ -20,9 +31,31 @@ if settings.SENTRY_DSN and settings.FASTAPI_ENV != "development":
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
+    docs_url=None,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     generate_unique_id_function=custom_generate_unique_id,
 )
+
+
+@app.get("/docs", include_in_schema=False)
+def custom_swagger_ui_html():
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url or f"{settings.API_V1_STR}/openapi.json",
+        title=f"{settings.PROJECT_NAME} - API documentation",
+        swagger_favicon_url="/favicon.svg",
+    )
+
+
+@app.get("/favicon.svg", include_in_schema=False)
+def favicon():
+    for icon_path in BRGY_ICON_PATHS:
+        if icon_path.is_file():
+            return FileResponse(icon_path, media_type="image/svg+xml")
+    # Keep API docs branded even if the frontend's static assets are absent.
+    return {
+        "detail": "Barangay favicon was not found in the frontend assets."
+    }
+
 
 app.add_middleware(
     CORSMiddleware,
