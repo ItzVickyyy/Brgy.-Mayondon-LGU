@@ -14,6 +14,7 @@ def create_api_router(fastapi_env: str | None) -> APIRouter:
 
     if fastapi_env == "development":
         router.include_router(private.router)
+        router.include_router(login.dev_router)
 
     return router
 
