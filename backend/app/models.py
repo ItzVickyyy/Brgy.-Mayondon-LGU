@@ -128,6 +128,7 @@ class Token(SQLModel):
 # Contents of JWT token
 class TokenPayload(SQLModel):
     sub: str | None = None
+    pwdv: str | None = None
 
 
 class NewPassword(SQLModel):
