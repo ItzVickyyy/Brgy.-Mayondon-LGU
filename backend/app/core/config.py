@@ -109,6 +109,15 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
+        if len(self.SECRET_KEY.encode("utf-8")) < 32:
+            message = (
+                "SECRET_KEY must be at least 32 bytes long for secure HS256 signing."
+            )
+            if self.FASTAPI_ENV == "development":
+                warnings.warn(message, stacklevel=1)
+            else:
+                raise ValueError(message)
+
         for database_url_name in ("DATABASE_URL", "MIGRATION_DATABASE_URL"):
             database_url = getattr(self, database_url_name)
             if database_url is None:
