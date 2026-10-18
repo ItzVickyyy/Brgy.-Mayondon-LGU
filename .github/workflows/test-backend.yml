@@ -26,6 +26,10 @@ jobs:
         uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           version: "latest-known"
+      - name: Audit locked Python dependencies
+        run: |
+          uv export --locked --format requirements.txt --no-hashes --no-dev --no-emit-project --package app --output-file /tmp/requirements.txt
+          uvx --from pip-audit pip-audit -r /tmp/requirements.txt
       # .env is intentionally not tracked; use placeholders for local CI.
       - run: cp .env.example .env
       - run: docker compose down -v --remove-orphans
