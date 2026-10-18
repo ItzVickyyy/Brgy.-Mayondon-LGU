@@ -4,7 +4,7 @@ import hashlib
 import hmac
 from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import case
+from sqlalchemy import case, delete
 from sqlalchemy.dialects.postgresql import insert
 from sqlmodel import Session
 
@@ -66,6 +66,16 @@ def is_password_recovery_rate_limited(
         key=_bucket_key("ip", ip_value),
         now=now,
         cutoff=cutoff,
+    )
+    # Opportunistically remove inactive buckets so the table does not grow forever.
+    # Keep one extra full window as a buffer for recently expired buckets.
+    cleanup_cutoff = now - timedelta(
+        minutes=settings.PASSWORD_RECOVERY_WINDOW_MINUTES * 2
+    )
+    session.execute(
+        delete(PasswordRecoveryRateLimit).where(
+            PasswordRecoveryRateLimit.window_started_at <= cleanup_cutoff
+        )
     )
     session.commit()
 
