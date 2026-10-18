@@ -6,6 +6,7 @@ from pwdlib.hashers.bcrypt import BcryptHasher
 from sqlmodel import Session
 
 from app.core.config import settings
+from app.api.routes.login import recover_password_html_content
 from app.core.security import get_password_hash, verify_password
 from app.crud import create_user
 from app.models import User, UserCreate
@@ -316,4 +317,18 @@ def test_reset_password_token_cannot_be_reused(
     assert first_response.status_code == 200
     assert second_response.status_code == 400
     assert second_response.json() == {"detail": "Invalid token"}
+
+def test_development_password_recovery_preview_generates_bound_token(
+    db: Session,
+) -> None:
+    email = random_email()
+    create_user(
+        session=db,
+        user_create=UserCreate(email=email, password=random_lower_string()),
+    )
+
+    response = recover_password_html_content(email=email, session=db)
+
+    assert response.status_code == 200
+    assert "reset-password" in response.body.decode()
 
