@@ -26,9 +26,11 @@ The following controls are implemented in the Foundation branch and have automat
 
 - Password recovery attempts are counted in PostgreSQL by normalized email and client IP, using keyed HMAC bucket identifiers rather than storing raw email addresses or IP addresses in the rate-limit table.
 - Password recovery limits are configurable by time window, per-email attempt count, and per-IP attempt count. The endpoint keeps a generic response for unknown, throttled, and eligible accounts to reduce account enumeration.
-- Password reset tokens are bound to the user's current stored password hash. After a successful password change, a previously issued reset token no longer validates.
+- Password reset tokens and access tokens are bound to the user's current stored password hash. A password change or reset invalidates previously issued reset links and access tokens. Regression tests cover reset-token reuse and access-token invalidation after a reset.
+- Password recovery accepts the email in a JSON request body rather than placing it in the URL path. The frontend request client and recovery form use the new body-based contract.
+- Administrator-created account emails contain a time-limited password setup link rather than the supplied plaintext password. The link uses the existing password-hash-bound reset token and becomes invalid after the password is changed.
 - Expired rate-limit buckets are opportunistically removed during password recovery requests. A database index supports cleanup by window timestamp.
-- Automated CI has passed for backend tests, Playwright end-to-end tests, Docker Compose checks, lint/build, secret scanning, and workflow security checks on commit `0879935980d231b4efa79fdd155b903f5354e18c`. Later changes to cleanup and documentation require their own CI verification.
+- Check the latest GitHub Actions run for the exact commit before treating CI as passed. This checklist does not certify CI status or production readiness.
 
 Deployment-specific checks remain open until the actual hosting and network design is known. In particular, confirm trusted reverse-proxy configuration before relying on client IP addresses behind a proxy, validate rate-limit behavior in the deployed environment, and review backup/restore, HTTPS, access permissions, and client-approved data-handling procedures before using real resident data.
 
@@ -146,6 +148,28 @@ Complete this record for a release or a scheduled security review.
 - The client interview and signed Creative Brief must define the actual modules, user roles, personal data, and operational needs before feature-specific controls can be finalized.
 - The final hosting choice matters. HTTPS, network exposure, rate limiting, backups, monitoring, and database connectivity must be verified against the actual hosting and Networking 2 setup.
 - Keep uncertain starter-template modules until the client requirements confirm whether they are needed. Removing a module is not itself a security measure.
-- **Open account-onboarding risk:** Admin-created account emails currently include the password supplied at account creation, and the email template only advises users to change it after signing in. That exposes credentials through email and does not enforce a first-login password change. Before real accounts are created, replace emailed passwords with a short-lived, single-use setup link or implement and test an enforced first-login password-change flow.
-- **Open authentication risk:** Access tokens are not currently bound to the user's current password hash. A password change or reset invalidates prior password-reset links, but already-issued access tokens may remain usable until their expiry. Add and test access-token revocation on password changes before production use.
+- **Implemented onboarding control:** When email is configured, admin-created account emails use a time-limited setup link and do not include the supplied password. The setup link is based on a password-hash-bound token and is invalidated after a password change. Confirm email delivery and the setup flow in the deployed environment before creating real accounts.
+- **Implemented access-token invalidation:** Access tokens include a keyed fingerprint of the current password hash. The API rejects missing or stale fingerprints, so password changes and resets invalidate previously issued tokens. Regression tests cover invalidation after a password reset.
+- **Implemented recovery URL privacy control:** The recovery email is accepted in a POST JSON body instead of a URL path. Verify the deployed frontend and backend use the same API version after deployment.
 - Passing automated tests means the tested checks passed. It does not guarantee the application is secure or ready for production.
+
+
+## 8. Final Foundation security review (October 18, 2026)
+
+### Implemented in code, pending CI confirmation for the latest commit
+- Access-token invalidation after password changes and resets.
+- Time-limited password setup links instead of emailing supplied passwords.
+- Password recovery email moved from the URL path into a JSON request body.
+- Regression tests updated for these behaviors.
+
+### Production verification remains open
+The repository documents Vercel for the frontend/API and Supabase PostgreSQL as the planned hosting setup. The deployment documentation explicitly states that this setup has not yet been tested. The following cannot be marked verified until the actual projects are configured and inspected:
+
+- Confirm the Vercel plan and terms permit the intended LGU use.
+- Verify production environment variables, secret strength, and that development-only routes are disabled.
+- Verify same-origin routing or exact CORS origins, HTTPS/TLS, security headers, and externally exposed ports.
+- Verify Supabase connection-pool settings, database permissions, migration access, backup plan, and a successful restore test.
+- Verify password recovery email delivery, rate limiting behind the actual proxy, account setup links, login, logout, and token invalidation against the deployed environment.
+- Confirm approved data-handling, access, retention, and incident procedures with the client before entering real resident data.
+
+**Current decision:** Suitable for continued development and controlled testing only. Do not treat production security as verified and do not enter real resident data until the deployment checks above are completed and the client/instructor approve the arrangement.
