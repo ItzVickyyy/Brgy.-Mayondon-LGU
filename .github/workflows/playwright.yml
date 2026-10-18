@@ -75,6 +75,8 @@ jobs:
     - run: bun ci
       working-directory: frontend
     - run: bash scripts/generate-client.sh
+    # .env is intentionally not tracked; use placeholders for local CI.
+    - run: cp .env.example .env
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - run: docker compose run --rm backend bash scripts/prestart.sh
