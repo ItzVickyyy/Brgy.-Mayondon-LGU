@@ -35,6 +35,20 @@ def test_get_access_token_incorrect_password(client: TestClient) -> None:
     assert r.status_code == 400
 
 
+def test_get_access_token_unknown_email(client: TestClient) -> None:
+    login_data = {
+        "username": "unknown-account@example.com",
+        "password": "some-incorrect-password",
+    }
+
+    response = client.post(
+        f"{settings.API_V1_STR}/login/access-token", data=login_data
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Incorrect email or password"}
+
+
 def test_use_access_token(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
