@@ -107,7 +107,7 @@ def test_reset_password(client: TestClient, db: Session) -> None:
         is_superuser=False,
     )
     user = create_user(session=db, user_create=user_create)
-    token = generate_password_reset_token(email=email)
+    token = generate_password_reset_token(email=email, hashed_password=user.hashed_password)
     headers = user_authentication_headers(client=client, email=email, password=password)
     data = {"new_password": new_password, "token": token}
 
@@ -290,4 +290,28 @@ def test_password_recovery_does_not_send_email_for_unknown_user(
         "message": "If that email is registered, we sent a password recovery link"
     }
     send_email_mock.assert_not_called()
+
+
+def test_reset_password_token_cannot_be_reused(client: TestClient, db: Session) -> None:
+    email = random_email()
+    user = create_user(
+        session=db,
+        user_create=UserCreate(email=email, password=random_lower_string()),
+    )
+    token = generate_password_reset_token(
+        email=email, hashed_password=user.hashed_password
+    )
+    url = f"{settings.API_V1_STR}/reset-password/"
+    first_response = client.post(
+        url,
+        json={"new_password": random_lower_string(), "token": token},
+    )
+    second_response = client.post(
+        url,
+        json={"new_password": random_lower_string(), "token": token},
+    )
+
+    assert first_response.status_code == 200
+    assert second_response.status_code == 400
+    assert second_response.json() == {"detail": "Invalid token"}
 
