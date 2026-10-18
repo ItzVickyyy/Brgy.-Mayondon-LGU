@@ -60,7 +60,7 @@ function RecoverPassword() {
 
   const recoverPassword = async (data: FormData) => {
     await LoginService.recoverPassword({
-      path: { email: data.email },
+      body: { email: data.email },
     })
   }
 
