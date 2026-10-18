@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -9,6 +9,7 @@ from app import crud
 from app.api.deps import CurrentUser, SessionDep, require_admin
 from app.core import security
 from app.core.config import settings
+from app.core.password_recovery import is_password_recovery_rate_limited
 from app.models import Message, NewPassword, Token, UserPublic, UserUpdate
 from app.utils import (
     generate_password_reset_token,
@@ -53,14 +54,21 @@ def test_token(current_user: CurrentUser) -> Any:
 
 
 @router.post("/password-recovery/{email}")
-def recover_password(email: str, session: SessionDep) -> Message:
+def recover_password(
+    email: str, request: Request, session: SessionDep
+) -> Message:
     """
     Password Recovery
     """
-    user = crud.get_user_by_email(session=session, email=email)
+    rate_limited = is_password_recovery_rate_limited(
+        session=session,
+        email=email,
+        client_ip=request.client.host if request.client else None,
+    )
+    user = None if rate_limited else crud.get_user_by_email(session=session, email=email)
 
-    # Always return the same response to prevent email enumeration attacks
-    # Only send email if user actually exists
+    # Always return the same response to prevent email enumeration attacks.
+    # Do not send email or reveal account existence after a rate limit is reached.
     if user:
         password_reset_token = generate_password_reset_token(
             email=email, hashed_password=user.hashed_password
