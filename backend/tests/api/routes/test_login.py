@@ -6,6 +6,7 @@ from pwdlib.hashers.bcrypt import BcryptHasher
 from sqlmodel import Session
 
 from app.core.config import settings
+from app.core.password_recovery import is_password_recovery_rate_limited
 from app.api.routes.login import recover_password_html_content
 from app.core.security import get_password_hash, verify_password
 from app.crud import create_user
@@ -382,3 +383,23 @@ def test_password_recovery_cleans_up_old_rate_limit_buckets(
 
     assert response.status_code == 200
     assert db.get(PasswordRecoveryRateLimit, stale_key) is None
+
+
+def test_password_recovery_throttles_shared_client_ip(
+    db: Session,
+) -> None:
+    client_ip = f"test-ip-{random_lower_string()}"
+    emails = [random_email() for _ in range(3)]
+
+    with (
+        patch("app.core.config.settings.PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_EMAIL", 100),
+        patch("app.core.config.settings.PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_IP", 2),
+    ):
+        results = [
+            is_password_recovery_rate_limited(
+                session=db, email=email, client_ip=client_ip
+            )
+            for email in emails
+        ]
+
+    assert results == [False, False, True]
