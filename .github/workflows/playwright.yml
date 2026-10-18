@@ -74,9 +74,10 @@ jobs:
       working-directory: backend
     - run: bun ci
       working-directory: frontend
-    - run: bash scripts/generate-client.sh
+    # The API schema generator imports app settings, so provide safe CI defaults first.
     # .env is intentionally not tracked; use placeholders for local CI.
     - run: cp .env.example .env
+    - run: bash scripts/generate-client.sh
     - run: docker compose build
     - run: docker compose down -v --remove-orphans
     - run: docker compose run --rm backend bash scripts/prestart.sh
