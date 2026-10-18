@@ -292,7 +292,9 @@ def test_password_recovery_does_not_send_email_for_unknown_user(
     send_email_mock.assert_not_called()
 
 
-def test_reset_password_token_cannot_be_reused(client: TestClient, db: Session) -> None:
+def test_reset_password_token_cannot_be_reused(
+    client: TestClient, db: Session
+) -> None:
     email = random_email()
     user = create_user(
         session=db,
