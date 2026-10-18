@@ -1,3 +1,4 @@
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
@@ -27,13 +28,23 @@ def test_create_user(client: TestClient, db: Session) -> None:
     assert user.full_name == "Pollo Listo"
 
 
-def test_private_routes_are_excluded_outside_development() -> None:
-    router = create_api_router(fastapi_env=None)
+def _client_for_environment(fastapi_env: str | None) -> TestClient:
+    app = FastAPI()
+    app.include_router(create_api_router(fastapi_env=fastapi_env))
+    return TestClient(app)
 
-    assert all(not route.path.startswith("/private") for route in router.routes)
+
+def test_private_routes_are_excluded_outside_development() -> None:
+    client = _client_for_environment(fastapi_env=None)
+
+    response = client.get("/private/users/")
+
+    assert response.status_code == 404
 
 
 def test_private_routes_are_registered_in_development() -> None:
-    router = create_api_router(fastapi_env="development")
+    client = _client_for_environment(fastapi_env="development")
 
-    assert any(route.path == "/private/users/" for route in router.routes)
+    response = client.get("/private/users/")
+
+    assert response.status_code == 405
