@@ -162,3 +162,43 @@ def test_delete_item_not_enough_permissions(
     assert response.status_code == 403
     content = response.json()
     assert content["detail"] == "Not enough permissions"
+
+
+def test_normal_user_only_sees_own_items(
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+    db: Session,
+) -> None:
+    other_users_item = create_random_item(db)
+    own_item_response = client.post(
+        f"{settings.API_V1_STR}/items/",
+        headers=normal_user_token_headers,
+        json={"title": "My private item", "description": "Owned by current user"},
+    )
+    assert own_item_response.status_code == 200
+    own_item_id = own_item_response.json()["id"]
+
+    response = client.get(
+        f"{settings.API_V1_STR}/items/",
+        headers=normal_user_token_headers,
+    )
+
+    assert response.status_code == 200
+    content = response.json()
+    returned_ids = {item["id"] for item in content["data"]}
+    assert own_item_id in returned_ids
+    assert str(other_users_item.id) not in returned_ids
+    assert content["count"] == 1
+
+
+def test_protected_item_routes_reject_unauthenticated_requests(
+    client: TestClient,
+) -> None:
+    list_response = client.get(f"{settings.API_V1_STR}/items/")
+    create_response = client.post(
+        f"{settings.API_V1_STR}/items/",
+        json={"title": "Unauthorized item", "description": "Must not be created"},
+    )
+
+    assert list_response.status_code == 401
+    assert create_response.status_code == 401
