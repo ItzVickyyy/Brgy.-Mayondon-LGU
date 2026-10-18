@@ -559,3 +559,11 @@ def test_normal_user_cannot_escalate_privileges_through_profile_update(
     assert response.status_code == 200
     assert response.json()["is_superuser"] is False
     assert response.json()["is_active"] is True
+
+
+def test_admin_user_list_rejects_unauthenticated_requests(
+    client: TestClient,
+) -> None:
+    response = client.get(f"{settings.API_V1_STR}/users/")
+
+    assert response.status_code == 401
