@@ -23,6 +23,8 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    LOGIN_MAX_FAILED_ATTEMPTS: int = 5
+    LOGIN_LOCKOUT_MINUTES: int = 15
     FRONTEND_HOST: str = "http://localhost:5173"
     # Comma-separated trusted origins, useful for production and selected previews.
     # FRONTEND_HOST remains as a backwards-compatible local/default origin.
