@@ -122,6 +122,9 @@ def update_password_me(
         )
     hashed_password = get_password_hash(body.new_password)
     current_user.hashed_password = hashed_password
+    # A password change releases any failed-login lockout for this account.
+    current_user.failed_login_attempts = 0
+    current_user.locked_until = None
     session.add(current_user)
     session.commit()
     return Message(message="Password updated successfully")
