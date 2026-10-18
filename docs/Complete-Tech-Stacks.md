@@ -194,7 +194,8 @@ preview deployment as a verification step, not as proof of production readiness.
 ## 9. Removed from the template
 
 TanStack devtools · FastAPI Cloud deployment files · release and changelog
-tooling · template documentation, images and logos · open sign-up. The Docker
-Compose and Traefik deployment files (`compose.yml`, `compose.deploy.yml`,
-related workflows) are still in the repo but unused for deployment; delete them
-if the team agrees.
+tooling · template documentation, images and logos · open sign-up · obsolete
+`compose.deploy.yml` and its Traefik production proxy. `compose.yml` and
+`compose.override.yml` remain for local PostgreSQL, Mailpit, backend integration,
+and Playwright testing. The local stack uses direct service ports and no longer
+requires Traefik.
