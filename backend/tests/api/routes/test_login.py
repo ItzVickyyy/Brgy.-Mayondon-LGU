@@ -258,3 +258,36 @@ def test_successful_login_clears_expired_lockout(
     db.refresh(user)
     assert user.failed_login_attempts == 0
     assert user.locked_until is None
+
+def test_password_recovery_sends_email_for_registered_user(
+    client: TestClient, db: Session
+) -> None:
+    email = random_email()
+    user = create_user(
+        session=db,
+        user_create=UserCreate(email=email, password=random_lower_string()),
+    )
+    with patch("app.api.routes.login.send_email") as send_email_mock:
+        response = client.post(f"{settings.API_V1_STR}/password-recovery/{email}")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "message": "If that email is registered, we sent a password recovery link"
+    }
+    send_email_mock.assert_called_once()
+    assert send_email_mock.call_args.kwargs["email_to"] == user.email
+
+
+def test_password_recovery_does_not_send_email_for_unknown_user(
+    client: TestClient,
+) -> None:
+    email = "unknown-recovery-target@example.com"
+    with patch("app.api.routes.login.send_email") as send_email_mock:
+        response = client.post(f"{settings.API_V1_STR}/password-recovery/{email}")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "message": "If that email is registered, we sent a password recovery link"
+    }
+    send_email_mock.assert_not_called()
+
