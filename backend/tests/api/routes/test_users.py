@@ -45,7 +45,7 @@ def test_create_user_new_email(
 ) -> None:
     caplog.set_level(logging.INFO, logger="app.audit")
     with (
-        patch("app.utils.send_email", return_value=None) as send_email_mock,
+        patch("app.api.routes.users.send_email", return_value=None) as send_email_mock,
         patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
         patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
         patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
