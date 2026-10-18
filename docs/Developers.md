@@ -156,7 +156,26 @@ Run this script from the repository root in an environment that supports Bash. R
 - If the team falls behind the project schedule, tell Vic early and arrange an instructor consultation rather than silently dropping required work.
 - Every member should be able to explain the parts they implement and help test the integrated system.
 
-## 10. Milestone alignment
+## 10. Developer journals
+
+Every developer must maintain their own journal in [Developers-Journal](Developers-Journal/README.md). Record work **every time you work on this project**, including small tasks, investigations, bugs found, fixes, reviews, decisions, tests, documentation, and achievements. Keep entries factual and add them as soon as practical so details are not lost.
+
+Each entry must include:
+- The date, time, and timezone. Use the actual local time when writing the entry. If recording historical work and the time is unknown, write `Time not recorded` instead of guessing.
+- What you worked on and why.
+- What you personally did and what was achieved, including relevant file paths or commit/PR links when available.
+- Tests/checks performed and their actual results. Clearly label checks not run or still pending.
+- AI tools used, how they were used, and the important parts of your prompting/review workflow. If no AI tool was used, say so.
+- Blockers, decisions, follow-up work, and links to relevant bug/issue records when applicable.
+
+Use the shared [Journal Template](Developers-Journal/Journal-Template.md). Keep each member's notes in their own journal:
+- [Vic's Journal](Developers-Journal/Vic%27s-Journal.md)
+- [Justin's Journal](Developers-Journal/Justin%27s-Journal.md)
+- [JM's Journal](Developers-Journal/JM%27s-Journal.md)
+
+The journal is a working record, not a place for secrets. Never record passwords, tokens, API keys, private environment values, or real resident personal data. Do not claim another member's work as your own. Distinguish personal contributions from team achievements and AI-generated suggestions. Record the AI tool by name and describe how you used it, but do not paste confidential prompts or sensitive context.
+
+## 11. Milestone alignment
 
 This guide supports the team's ongoing development workflow. After the client interview, use the [Source of Truth](Source-of-Truth.md) and the Final Project Guide to connect each task to its milestone and the relevant subject:
 
