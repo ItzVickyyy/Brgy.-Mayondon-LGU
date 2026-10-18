@@ -252,7 +252,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 | Starting point | Full Stack FastAPI Template, cloned and tailored for this project |
 | Backend | FastAPI + SQLModel + PostgreSQL, Python 3.14 |
 | Frontend | React + TypeScript + Vite + Tailwind CSS + shadcn/ui |
-| Deployment | **Vercel** (frontend and API) + **Supabase** (database) |
+| Deployment | **Vercel** (frontend and API in two projects) + **Supabase** (database); deployment remains untested |
 | Accounts | Admin-only account creation; open sign-up is disabled. `is_superuser` = Admin, other users = Staff |
 | Branding | Centralized in `frontend/src/config/site.ts`; official logo pending |
 | AI tools | Free-tier AI assistants only; this folder is the shared context |
@@ -268,6 +268,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 - [ ] Confirm with Sir Ramos what **Networking 2** expects when the system is cloud-hosted (e.g. network setup, connectivity and security checks at the barangay hall) and what Sir Matute expects for **Client-Server Technologies**
 - [ ] Confirm the barangay has reliable internet and devices for an online system; if not, discuss an offline option
 - [ ] Set up the Vercel and Supabase accounts and agree who owns them
+- [ ] Deploy preview projects and verify routing, CORS, database connections, migrations, and login before production use
 
 ---
 
@@ -277,6 +278,8 @@ Ratings are confidential and members may receive different grades. Rating guide:
 - [x] Questionnaire drafted and fixed (7 questions)
 - [x] Request letter drafted (to be signed Oct 19)
 - [x] Repository tailored from the template (branding, closed registration)
+- [x] Foundation deployment configuration prepared (Vercel entrypoint, SPA fallback, configurable Vite output, explicit CORS origins, Supabase transaction-pooler support); hosting not yet verified
+- [x] Closed the three template-generated Dependabot pull requests that targeted `master`; dependency updates will be handled deliberately
 - [ ] Interview
 - [ ] Creative Brief
 - [ ] Design
