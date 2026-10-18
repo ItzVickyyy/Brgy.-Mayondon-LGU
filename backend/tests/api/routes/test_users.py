@@ -234,6 +234,17 @@ def test_update_password_me(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     new_password = random_lower_string()
+    user_db = db.exec(
+        select(User).where(User.email == settings.FIRST_SUPERUSER)
+    ).first()
+    assert user_db
+    user_db.failed_login_attempts = settings.LOGIN_MAX_FAILED_ATTEMPTS
+    user_db.locked_until = datetime.now(UTC) + timedelta(
+        minutes=settings.LOGIN_LOCKOUT_MINUTES
+    )
+    db.add(user_db)
+    db.commit()
+
     data = {
         "current_password": settings.FIRST_SUPERUSER_PASSWORD,
         "new_password": new_password,
