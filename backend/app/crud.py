@@ -26,6 +26,9 @@ def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
         password = user_data["password"]
         hashed_password = get_password_hash(password)
         extra_data["hashed_password"] = hashed_password
+        # A password change should also release any failed-login lockout.
+        db_user.failed_login_attempts = 0
+        db_user.locked_until = None
     db_user.sqlmodel_update(user_data, update=extra_data)
     session.add(db_user)
     session.commit()

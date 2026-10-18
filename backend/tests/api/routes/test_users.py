@@ -1,5 +1,6 @@
 import logging
 import uuid
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
 import pytest
@@ -404,6 +405,32 @@ def test_update_user(
     db.refresh(user_db)
     assert user_db
     assert user_db.full_name == "Updated_full_name"
+
+
+def test_admin_password_change_clears_login_lockout(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    user = crud.create_user(
+        session=db,
+        user_create=UserCreate(email=random_email(), password=random_lower_string()),
+    )
+    user.failed_login_attempts = settings.LOGIN_MAX_FAILED_ATTEMPTS
+    user.locked_until = datetime.now(UTC) + timedelta(
+        minutes=settings.LOGIN_LOCKOUT_MINUTES
+    )
+    db.add(user)
+    db.commit()
+
+    response = client.patch(
+        f"{settings.API_V1_STR}/users/{user.id}",
+        headers=superuser_token_headers,
+        json={"password": random_lower_string()},
+    )
+
+    assert response.status_code == 200
+    db.refresh(user)
+    assert user.failed_login_attempts == 0
+    assert user.locked_until is None
 
 
 def test_update_user_not_exists(
