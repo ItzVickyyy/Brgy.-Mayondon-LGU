@@ -89,6 +89,7 @@ def test_recovery_password_user_not_exits(
     r = client.post(
         f"{settings.API_V1_STR}/password-recovery",
         headers=normal_user_token_headers,
+        json={"email": email},
     )
     # Should return 200 with generic message to prevent email enumeration attacks
     assert r.status_code == 200
@@ -383,7 +384,8 @@ def test_password_recovery_cleans_up_old_rate_limit_buckets(
     db.commit()
 
     response = client.post(
-        f"{settings.API_V1_STR}/password-recovery/{random_email()}"
+        f"{settings.API_V1_STR}/password-recovery",
+        json={"email": random_email()},
     )
 
     assert response.status_code == 200
