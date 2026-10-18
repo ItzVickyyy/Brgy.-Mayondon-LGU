@@ -72,8 +72,9 @@ def test_recovery_password(
     ):
         email = "test@example.com"
         r = client.post(
-            f"{settings.API_V1_STR}/password-recovery/{email}",
+            f"{settings.API_V1_STR}/password-recovery",
             headers=normal_user_token_headers,
+            json={"email": email},
         )
         assert r.status_code == 200
         assert r.json() == {
@@ -86,7 +87,7 @@ def test_recovery_password_user_not_exits(
 ) -> None:
     email = "jVgQr@example.com"
     r = client.post(
-        f"{settings.API_V1_STR}/password-recovery/{email}",
+        f"{settings.API_V1_STR}/password-recovery",
         headers=normal_user_token_headers,
     )
     # Should return 200 with generic message to prevent email enumeration attacks
@@ -274,7 +275,7 @@ def test_password_recovery_sends_email_for_registered_user(
         user_create=UserCreate(email=email, password=random_lower_string()),
     )
     with patch("app.api.routes.login.send_email") as send_email_mock:
-        response = client.post(f"{settings.API_V1_STR}/password-recovery/{email}")
+        response = client.post(f"{settings.API_V1_STR}/password-recovery", json={"email": email})
 
     assert response.status_code == 200
     assert response.json() == {
@@ -289,7 +290,7 @@ def test_password_recovery_does_not_send_email_for_unknown_user(
 ) -> None:
     email = "unknown-recovery-target@example.com"
     with patch("app.api.routes.login.send_email") as send_email_mock:
-        response = client.post(f"{settings.API_V1_STR}/password-recovery/{email}")
+        response = client.post(f"{settings.API_V1_STR}/password-recovery", json={"email": email})
 
     assert response.status_code == 200
     assert response.json() == {
@@ -352,7 +353,7 @@ def test_password_recovery_throttles_email_delivery(
         patch("app.core.config.settings.PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_IP", 1000),
     ):
         responses = [
-            client.post(f"{settings.API_V1_STR}/password-recovery/{email}")
+            client.post(f"{settings.API_V1_STR}/password-recovery", json={"email": email})
             for _ in range(3)
         ]
 
