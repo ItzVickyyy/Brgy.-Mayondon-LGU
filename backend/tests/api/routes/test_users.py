@@ -567,3 +567,19 @@ def test_admin_user_list_rejects_unauthenticated_requests(
     response = client.get(f"{settings.API_V1_STR}/users/")
 
     assert response.status_code == 401
+
+
+def test_retrieve_users_rejects_invalid_pagination(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    negative_skip = client.get(
+        f"{settings.API_V1_STR}/users/?skip=-1",
+        headers=superuser_token_headers,
+    )
+    excessive_limit = client.get(
+        f"{settings.API_V1_STR}/users/?limit=101",
+        headers=superuser_token_headers,
+    )
+
+    assert negative_skip.status_code == 422
+    assert excessive_limit.status_code == 422
