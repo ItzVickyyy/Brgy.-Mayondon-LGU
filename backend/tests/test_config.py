@@ -74,3 +74,27 @@ def test_accepts_positive_authentication_settings() -> None:
     assert settings.LOGIN_LOCKOUT_MINUTES == 1
     assert settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS == 1
     assert settings.SMTP_PORT == 65535
+
+def test_frontend_origins_trims_and_deduplicates_configured_hosts() -> None:
+    settings = make_settings(
+        FRONTEND_HOST="http://localhost:5173",
+        FRONTEND_HOSTS=(
+            " https://example.com,https://preview.example.com, "
+            "https://example.com "
+        ),
+    )
+
+    assert settings.frontend_origins == [
+        "https://example.com",
+        "https://preview.example.com",
+    ]
+
+
+def test_frontend_origins_fall_back_when_configured_hosts_are_empty() -> None:
+    settings = make_settings(
+        FRONTEND_HOST="http://localhost:5173",
+        FRONTEND_HOSTS=" ,  , ",
+    )
+
+    assert settings.frontend_origins == ["http://localhost:5173"]
+
