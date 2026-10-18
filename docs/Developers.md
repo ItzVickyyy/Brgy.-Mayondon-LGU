@@ -8,7 +8,7 @@ This guide explains how our three-person team works on the Barangay Mayondon LGU
 2. [Complete Tech Stacks](Complete-Tech-Stacks.md) for the architecture, technology choices, and deployment notes.
 3. [Root README](../README.md) for the local setup, test commands, and project structure.
 
-**How to run the project:** use the existing [Run it locally section in the root README](../README.md#run-it-locally). Do not maintain a second set of setup steps here. If the setup changes, update the root README and check this link.
+**How to run the project:** follow [How-To-Start.md](How-To-Start.md) for the tested Windows PowerShell startup steps. The root [README](../README.md) links to this guide. Update the guide whenever the verified startup process changes.
 
 ## 2. Team responsibilities
 
