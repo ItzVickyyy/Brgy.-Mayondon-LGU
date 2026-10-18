@@ -332,3 +332,32 @@ def test_development_password_recovery_preview_generates_bound_token(
     assert response.status_code == 200
     assert "reset-password" in response.body.decode()
 
+def test_password_recovery_throttles_email_delivery(
+    client: TestClient, db: Session
+) -> None:
+    email = random_email()
+    create_user(
+        session=db,
+        user_create=UserCreate(email=email, password=random_lower_string()),
+    )
+
+    with (
+        patch("app.api.routes.login.send_email") as send_email_mock,
+        patch("app.core.config.settings.PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_EMAIL", 2),
+        patch("app.core.config.settings.PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_IP", 1000),
+    ):
+        responses = [
+            client.post(f"{settings.API_V1_STR}/password-recovery/{email}")
+            for _ in range(3)
+        ]
+
+    assert all(response.status_code == 200 for response in responses)
+    assert all(
+        response.json()
+        == {
+            "message": "If that email is registered, we sent a password recovery link"
+        }
+        for response in responses
+    )
+    assert send_email_mock.call_count == 2
+
