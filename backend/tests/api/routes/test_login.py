@@ -407,3 +407,39 @@ def test_password_recovery_throttles_shared_client_ip(
         ]
 
     assert results == [False, False, True]
+
+
+
+def test_access_token_is_invalidated_after_password_reset(
+    client: TestClient, db: Session
+) -> None:
+    email = random_email()
+    old_password = random_lower_string()
+    user = create_user(
+        session=db,
+        user_create=UserCreate(email=email, password=old_password),
+    )
+    login_response = client.post(
+        f"{settings.API_V1_STR}/login/access-token",
+        data={"username": email, "password": old_password},
+    )
+    assert login_response.status_code == 200
+    old_access_token = login_response.json()["access_token"]
+
+    reset_token = generate_password_reset_token(
+        email=email, hashed_password=user.hashed_password
+    )
+    reset_response = client.post(
+        f"{settings.API_V1_STR}/reset-password/",
+        json={"new_password": random_lower_string(), "token": reset_token},
+    )
+    assert reset_response.status_code == 200
+
+    protected_response = client.post(
+        f"{settings.API_V1_STR}/login/test-token",
+        headers={"Authorization": f"Bearer {old_access_token}"},
+    )
+    assert protected_response.status_code == 403
+    assert protected_response.json() == {
+        "detail": "Could not validate credentials"
+    }
