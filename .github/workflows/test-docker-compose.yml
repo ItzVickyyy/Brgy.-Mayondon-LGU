@@ -3,6 +3,7 @@ name: Test Docker Compose
 on:
   push:
     branches:
+      - Foundation
       - master
   pull_request:
 permissions:
