@@ -170,13 +170,17 @@ preview deployment as a verification step, not as proof of production readiness.
 ## 7. Security features in place
 
 - Argon2 password hashing and timing-attack-safe login
+- New passwords must be 12–128 characters; current-password verification remains compatible with existing passwords
+- Account lockout after 5 consecutive failed login attempts for 15 minutes (configurable with `LOGIN_MAX_FAILED_ATTEMPTS` and `LOGIN_LOCKOUT_MINUTES`)
+- Reusable `require_admin` dependency for admin-only routes
+- Structured audit events for admin user creation, updates, and deletion, written to application logs without recording personal field values
 - JWT bearer authentication; admin-only endpoints for user management
 - Open registration disabled (`USERS_OPEN_REGISTRATION=False`)
 - CORS restricted to the explicit `FRONTEND_HOSTS` allowlist, or the `FRONTEND_HOST` fallback
 - Refuses default secrets outside development mode
 - Secrets read from environment variables; `.env` is not committed
 
-## 8. How the stack maps to the four subjects
+\n**Audit-log limitation:** these events are emitted to application logs, not stored in a dedicated database audit table. Confirm log access and retention before relying on them for formal records. If the client requires durable audit history, agree on retention and access rules before adding it.\n\n## 8. How the stack maps to the four subjects
 
 | Subject | Where it shows up |
 |---|---|
