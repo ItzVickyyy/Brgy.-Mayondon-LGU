@@ -253,6 +253,8 @@ def test_update_password_me(
     assert user_db.email == settings.FIRST_SUPERUSER
     verified, _ = verify_password(new_password, user_db.hashed_password)
     assert verified
+    assert user_db.failed_login_attempts == 0
+    assert user_db.locked_until is None
 
     # Revert to the old password to keep consistency in test
     old_data = {
