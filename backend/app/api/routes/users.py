@@ -25,7 +25,11 @@ from app.models import (
     UserUpdate,
     UserUpdateMe,
 )
-from app.utils import generate_new_account_email, send_email
+from app.utils import (
+    generate_new_account_email,
+    generate_password_reset_token,
+    send_email,
+)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -73,8 +77,11 @@ def create_user(*, session: SessionDep, user_in: UserCreate, current_user: Curre
     user = crud.create_user(session=session, user_create=user_in)
     record_admin_action(actor_id=current_user.id, action="user.create", target_type="user", target_id=user.id)
     if settings.emails_enabled and user_in.email:
+        setup_token = generate_password_reset_token(
+            email=user.email, hashed_password=user.hashed_password
+        )
         email_data = generate_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
+            email_to=user.email, username=user.email, token=setup_token
         )
         send_email(
             email_to=user_in.email,
