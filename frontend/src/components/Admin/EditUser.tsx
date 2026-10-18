@@ -197,7 +197,7 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel className="font-normal">Is superuser?</FormLabel>
+                    <FormLabel className="font-normal">Is admin?</FormLabel>
                   </FormItem>
                 )}
               />

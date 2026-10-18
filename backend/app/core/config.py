@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     FRONTEND_HOST: str = "http://localhost:5173"
+    # Barangay system: only an admin creates accounts. Keep False unless the
+    # client explicitly wants public self-registration.
+    USERS_OPEN_REGISTRATION: bool = False
     FASTAPI_ENV: Literal["development"] | None = None
 
     PROJECT_NAME: str

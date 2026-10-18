@@ -33,4 +33,8 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
-app.frontend("/", directory=FRONTEND_DIR)
+# Serve the built frontend only when it exists (local/self-hosted builds).
+# On Vercel the frontend is deployed separately, so a backend-only deploy and
+# plain `pytest` runs must not crash when this folder is missing.
+if FRONTEND_DIR.is_dir():
+    app.frontend("/", directory=FRONTEND_DIR)
