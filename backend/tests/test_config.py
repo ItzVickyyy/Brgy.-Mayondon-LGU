@@ -6,7 +6,7 @@ from app.core.config import Settings
 
 def make_settings(**overrides: object) -> Settings:
     values: dict[str, object] = {
-        "SECRET_KEY": "a-local-test-secret",
+        "SECRET_KEY": "a-local-test-secret-that-is-long-enough",
         "PROJECT_NAME": "Configuration Tests",
         "DATABASE_URL": "postgresql://postgres:secure-db-password@localhost:5432/app",
         "FIRST_SUPERUSER": "admin@example.com",
@@ -35,6 +35,24 @@ def test_accepts_non_default_migration_database_password() -> None:
     )
 
     assert settings.MIGRATION_DATABASE_URL is not None
+
+
+def test_rejects_short_secret_key_outside_development() -> None:
+    with pytest.raises(ValidationError, match="SECRET_KEY must be at least 32 bytes"):
+        make_settings(SECRET_KEY="short-secret")
+
+
+def test_warns_about_short_secret_key_in_development() -> None:
+    with pytest.warns(UserWarning, match="SECRET_KEY must be at least 32 bytes"):
+        settings = make_settings(SECRET_KEY="short-secret", FASTAPI_ENV="development")
+
+    assert settings.SECRET_KEY == "short-secret"
+
+
+def test_accepts_secret_key_of_at_least_32_bytes() -> None:
+    settings = make_settings(SECRET_KEY="x" * 32)
+
+    assert len(settings.SECRET_KEY.encode("utf-8")) == 32
 
 
 @pytest.mark.parametrize(
@@ -75,6 +93,7 @@ def test_accepts_positive_authentication_settings() -> None:
     assert settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS == 1
     assert settings.SMTP_PORT == 65535
 
+
 def test_frontend_origins_trims_and_deduplicates_configured_hosts() -> None:
     settings = make_settings(
         FRONTEND_HOST="http://localhost:5173",
@@ -97,4 +116,3 @@ def test_frontend_origins_fall_back_when_configured_hosts_are_empty() -> None:
     )
 
     assert settings.frontend_origins == ["http://localhost:5173"]
-
