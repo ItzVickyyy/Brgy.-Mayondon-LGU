@@ -156,11 +156,15 @@ Complete this record for a release or a scheduled security review.
 
 ## 8. Final Foundation security review (October 18, 2026)
 
-### Implemented in code, pending CI confirmation for the latest commit
+### Implemented in code and verified by CI
+The implementation passed backend tests, Docker Compose checks, frontend lint/build, secret scanning, workflow security checks, and all four Playwright shards on commit `12c171b81c670683e28e3d4428bd02e84c4d93c4`.
+
 - Access-token invalidation after password changes and resets.
 - Time-limited password setup links instead of emailing supplied passwords.
 - Password recovery email moved from the URL path into a JSON request body.
-- Regression tests updated for these behaviors.
+- Regression tests cover token invalidation, recovery behavior, and account setup email content.
+
+For later commits, check GitHub Actions for the exact commit before treating its checks as passed.
 
 ### Production verification remains open
 The repository documents Vercel for the frontend/API and Supabase PostgreSQL as the planned hosting setup. The deployment documentation explicitly states that this setup has not yet been tested. The following cannot be marked verified until the actual projects are configured and inspected:
