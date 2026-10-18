@@ -268,7 +268,8 @@ Ratings are confidential and members may receive different grades. Rating guide:
 - [ ] Confirm with Sir Ramos what **Networking 2** expects when the system is cloud-hosted (e.g. network setup, connectivity and security checks at the barangay hall) and what Sir Matute expects for **Client-Server Technologies**
 - [ ] Confirm the barangay has reliable internet and devices for an online system; if not, discuss an offline option
 - [ ] Set up the Vercel and Supabase accounts and agree who owns them
-- [ ] Deploy preview projects and verify routing, CORS, database connections, migrations, and login before production use
+- [ ] Deploy preview project and verify routing, database connections, migrations, and login before production use
+- [ ] Confirm Vercel Hobby terms allow the LGU's intended organizational use before entering any real resident or office data; otherwise choose a compliant hosting/offline option
 
 ---
 
