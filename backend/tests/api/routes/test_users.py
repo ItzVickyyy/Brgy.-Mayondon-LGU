@@ -273,6 +273,12 @@ def test_update_password_me(
     assert user_db.failed_login_attempts == 0
     assert user_db.locked_until is None
 
+    stale_token_response = client.post(
+        f"{settings.API_V1_STR}/login/test-token",
+        headers=superuser_token_headers,
+    )
+    assert stale_token_response.status_code == 403
+
     # Revert to the old password to keep consistency in test
     fresh_login = client.post(
         f"{settings.API_V1_STR}/login/access-token",
