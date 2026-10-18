@@ -53,7 +53,7 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Email").fill(email)
     await page.getByPlaceholder("Password").first().fill(password)
     await page.getByPlaceholder("Password").last().fill(password)
-    await page.getByLabel("Is superuser?").check()
+    await page.getByLabel("Is admin?").check()
     await page.getByLabel("Is active?").check()
 
     await page.getByRole("button", { name: "Save" }).click()
@@ -150,7 +150,7 @@ test.describe("Admin user management", () => {
     await expect(page.getByText("Invalid email address")).toBeVisible()
   })
 
-  test("Password must be at least 8 characters", async ({ page }) => {
+  test("Password must be at least 12 characters", async ({ page }) => {
     await page.goto("/admin")
 
     await page.getByRole("button", { name: "Add User" }).click()
@@ -161,7 +161,7 @@ test.describe("Admin user management", () => {
     await page.getByRole("button", { name: "Save" }).click()
 
     await expect(
-      page.getByText("Password must be at least 8 characters"),
+      page.getByText("Password must be at least 12 characters"),
     ).toBeVisible()
   })
 
