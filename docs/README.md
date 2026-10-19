@@ -11,8 +11,7 @@ Everything the team needs to know about the project lives in this folder.
 | [Security-Measures.md](Security-Measures.md) | Recurring security checklist; production hosting verification is explicitly pending | During development, before releases, and before handling real data |
 | [Developers-Journal/README.md](Developers-Journal/README.md) | Rules and individual journals for recording work, achievements, AI tools, and workflow with date/time | Every time you work on the project |
 | [Bug-and-Issue-Log.md](Bug-and-Issue-Log.md) | Central record of bugs, defects, incidents, and issues found during development, testing, or launch | Whenever an issue is found or its status changes |
-| [System-Specification.md](System-Specification.md) | Structured template for client-confirmed requirements, scope, roles, and acceptance criteria | After the client interview and whenever requirements are approved |
-| [System-Architecture.md](System-Architecture.md) | Technical architecture and sitemap working reference, to be updated after client decisions | Before architecture or implementation changes and after confirmed decisions |
+| [System-Specification-and-Architecture.md](System-Specification-and-Architecture.md) | Single reference combining client-confirmed requirements, scope, roles, technical architecture, sitemap, database, security, hosting, and open decisions | Before design or implementation changes, and after client discussions or technical decisions |
 
 Use [How-To-Start.md](How-To-Start.md) as the detailed, tested guide for running the system in Windows PowerShell. The root [README](../README.md#run-it-locally) links to it for quick access.
 
