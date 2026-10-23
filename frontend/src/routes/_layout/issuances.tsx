@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { FileCheck2, Info, Search } from "lucide-react"
+import { FileCheck2, Info, Printer, Search } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
@@ -9,100 +9,299 @@ export const Route = createFileRoute("/_layout/issuances")({
   head: () => ({ meta: [{ title: pageTitle("Issuances Management") }] }),
 })
 
+type FieldType = "text" | "date" | "textarea" | "checkboxes"
+type DocumentField = {
+  name: string
+  label: string
+  type?: FieldType
+  options?: string[]
+  fullWidth?: boolean
+}
+type IssuanceRecord = {
+  id: string
+  resident: string
+  type: string
+  date: string
+  status: "Sample" | "Draft"
+  fields: Record<string, string>
+}
+
 const documentTypes = [
-  "Barangay ID",
   "Barangay Clearance",
-  "Barangay Clearance (Electrical and Water Connection)",
   "Barangay Franchise Clearance",
+  "Barangay Clearance (Electrical and Water Connection)",
   "Certificate of Indigency",
-  "Certificate of Residency",
-  "Other Certificate",
 ]
 
-const sampleIssuances = [
-  { id: "ISS-2026-001", resident: "Sample Resident One", type: "Barangay Clearance", date: "Oct 23, 2026", status: "Issued" },
-  { id: "ISS-2026-002", resident: "Sample Resident Two", type: "Certificate of Residency", date: "Oct 23, 2026", status: "Issued" },
-  { id: "ISS-2026-003", resident: "Sample Resident Three", type: "Certificate of Indigency", date: "Oct 22, 2026", status: "Issued" },
-  { id: "ISS-2026-004", resident: "Sample Resident Four", type: "Barangay ID", date: "Oct 22, 2026", status: "Issued" },
-  { id: "ISS-2026-005", resident: "Sample Resident Five", type: "Barangay Franchise Clearance", date: "Oct 21, 2026", status: "Issued" },
+const documentFields: Record<string, DocumentField[]> = {
+  "Barangay Clearance": [
+    { name: "date", label: "Date", type: "date" },
+    { name: "name", label: "Name" },
+    { name: "address", label: "Address", fullWidth: true },
+    { name: "age", label: "Age" },
+    { name: "birthdate", label: "Birthdate", type: "date" },
+    { name: "birthplace", label: "Birthplace" },
+    { name: "civilStatus", label: "Civil Status" },
+    { name: "purpose", label: "Purpose", type: "textarea", fullWidth: true },
+    { name: "remarks", label: "Remarks", type: "textarea", fullWidth: true },
+    { name: "validIdPresented", label: "Valid ID Presented" },
+    { name: "idNumber", label: "Number" },
+    { name: "idPlaceOfIssue", label: "Place of Issue" },
+    { name: "idDateOfIssue", label: "Date of Issue", type: "date" },
+    { name: "officialReceiptNumber", label: "Paid under Official Receipt Number" },
+  ],
+  "Barangay Franchise Clearance": [
+    { name: "date", label: "Date", type: "date" },
+    { name: "name", label: "Name" },
+    { name: "address", label: "Address", fullWidth: true },
+    { name: "tricycleAssociation", label: "Tricycle Association", fullWidth: true },
+    { name: "make", label: "Make" },
+    { name: "typeOfBody", label: "Type of Body" },
+    { name: "motorNumber", label: "Motor Number" },
+    { name: "color", label: "Color" },
+    { name: "plateNumber", label: "Plate Number" },
+    { name: "ctcNumber", label: "CTC Number" },
+    { name: "ctcPlaceOfIssue", label: "Place of Issue" },
+    { name: "ctcDateOfIssue", label: "Date of Issue", type: "date" },
+    { name: "officialReceiptNumber", label: "Paid under Official Receipt Number" },
+  ],
+  "Barangay Clearance (Electrical and Water Connection)": [
+    { name: "date", label: "Date", type: "date" },
+    { name: "serviceType", label: "Connection Service", type: "checkboxes", options: ["Electric", "Water"], fullWidth: true },
+    { name: "name", label: "Name" },
+    { name: "address", label: "Address", fullWidth: true },
+    { name: "connectionType", label: "Type of Connection", type: "checkboxes", options: ["New", "Reconnection"], fullWidth: true },
+    { name: "classification", label: "Classification", type: "checkboxes", options: ["Residential", "Commercial"], fullWidth: true },
+    { name: "location", label: "Location", fullWidth: true },
+    { name: "ctcNumber", label: "CTC Number" },
+    { name: "ctcPlaceOfIssue", label: "Place of Issue" },
+    { name: "ctcDateOfIssue", label: "Date of Issue", type: "date" },
+    { name: "officialReceiptNumber", label: "Paid under Official Receipt Number" },
+  ],
+  "Certificate of Indigency": [
+    { name: "date", label: "Date", type: "date" },
+    { name: "name", label: "Name" },
+    { name: "address", label: "Address", fullWidth: true },
+    { name: "age", label: "Age" },
+    { name: "sector", label: "Sector" },
+    { name: "purpose", label: "Purpose", type: "textarea", fullWidth: true },
+  ],
+}
+
+const sampleIssuances: IssuanceRecord[] = [
+  { id: "SAMPLE-001", resident: "Sample Resident One", type: "Barangay Clearance", date: "2026-10-23", status: "Sample", fields: {} },
+  { id: "SAMPLE-002", resident: "Sample Resident Two", type: "Barangay Franchise Clearance", date: "2026-10-22", status: "Sample", fields: {} },
+  { id: "SAMPLE-003", resident: "Sample Resident Three", type: "Barangay Clearance (Electrical and Water Connection)", date: "2026-10-22", status: "Sample", fields: {} },
+  { id: "SAMPLE-004", resident: "Sample Resident Four", type: "Certificate of Indigency", date: "2026-10-21", status: "Sample", fields: {} },
 ]
+
+const inputClassName = "h-10 w-full rounded-md border bg-background px-3 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring"
+const labelClassName = "flex min-w-0 flex-col gap-2 text-sm font-medium"
+
+function formatDate(value: string) {
+  if (!value) return "Not entered"
+  const parsed = new Date(value + "T00:00:00")
+  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleDateString()
+}
 
 function IssuancesManagement() {
   const [activeTab, setActiveTab] = useState<"issue" | "history">("issue")
-  const [selectedType, setSelectedType] = useState(documentTypes[1])
+  const [selectedType, setSelectedType] = useState(documentTypes[0])
   const [search, setSearch] = useState("")
-  const [residentName, setResidentName] = useState("")
-  const [purpose, setPurpose] = useState("")
-  const filteredIssuances = useMemo(() => sampleIssuances.filter((item) =>
-    [item.id, item.resident, item.type, item.date, item.status].some((value) =>
+  const [historyType, setHistoryType] = useState("All document types")
+  const [formValues, setFormValues] = useState<Record<string, string>>({})
+  const [drafts, setDrafts] = useState<IssuanceRecord[]>([])
+  const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
+  const [notice, setNotice] = useState("")
+
+  const fields = documentFields[selectedType] ?? []
+  const currentName = formValues.name?.trim() || "Name not entered"
+  const currentDate = formValues.date || ""
+  const allRecords = useMemo(() => [...drafts, ...sampleIssuances], [drafts])
+  const filteredIssuances = useMemo(() => allRecords.filter((item) => {
+    const matchesSearch = [item.id, item.resident, item.type, item.date, item.status].some((value) =>
       value.toLowerCase().includes(search.toLowerCase()),
-    ),
-  ), [search])
+    )
+    const matchesType = historyType === "All document types" || item.type === historyType
+    return matchesSearch && matchesType
+  }), [allRecords, historyType, search])
+
+  function updateField(name: string, value: string) {
+    setFormValues((previous) => ({ ...previous, [name]: value }))
+    setNotice("")
+  }
+
+  function changeDocumentType(value: string) {
+    setSelectedType(value)
+    setFormValues({})
+    setNotice("")
+    setPrintRecord(null)
+  }
+
+  function clearForm() {
+    setFormValues({})
+    setNotice("")
+    setPrintRecord(null)
+  }
+
+  function saveDraft() {
+    const record: IssuanceRecord = {
+      id: "DRAFT-" + String(drafts.length + 1).padStart(3, "0"),
+      resident: currentName,
+      type: selectedType,
+      date: currentDate,
+      status: "Draft",
+      fields: { ...formValues },
+    }
+    setDrafts((previous) => [record, ...previous])
+    setNotice(record.id + " was added to this session's draft history. It has not been saved to the database or officially issued.")
+    setActiveTab("history")
+  }
+
+  function preparePrint(record?: IssuanceRecord) {
+    setPrintRecord(record ?? {
+      id: "PRINT-PREVIEW",
+      resident: currentName,
+      type: selectedType,
+      date: currentDate,
+      status: "Draft",
+      fields: { ...formValues },
+    })
+    window.setTimeout(() => window.print(), 100)
+  }
+
+  const printFields = printRecord ? documentFields[printRecord.type] ?? [] : fields
+  const printValues = printRecord?.fields ?? formValues
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
+      <div className="print:hidden">
         <p className="text-sm font-medium text-primary">Admin Portal</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Issuances Management</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Proposed workflow for issuing barangay documents and reviewing issuance history.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Draft forms based on the four hardcopy document types provided for review.</p>
       </div>
 
-      <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
+      <div className="print:hidden flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
         <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        <p>Draft preview only. Form entries are not saved, documents are not generated, and the sample history is fictional.</p>
+        <p>Draft only. Saved drafts stay in this page session and are lost when the page is refreshed. Sample history is fictional. Printing creates a review copy, not an official barangay document. No data is sent to the backend.</p>
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b">
-        <button type="button" onClick={() => setActiveTab("issue")} className={`border-b-2 px-4 py-3 text-sm font-medium ${activeTab === "issue" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>Issue Document</button>
-        <button type="button" onClick={() => setActiveTab("history")} className={`border-b-2 px-4 py-3 text-sm font-medium ${activeTab === "history" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"}`}>Issuance History</button>
+      {notice && <div role="status" className="print:hidden rounded-lg border bg-muted/40 px-4 py-3 text-sm">{notice}</div>}
+
+      <div className="print:hidden flex flex-wrap gap-2 border-b">
+        <button type="button" onClick={() => setActiveTab("issue")} className={"border-b-2 px-4 py-3 text-sm font-medium " + (activeTab === "issue" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>Issue Document</button>
+        <button type="button" onClick={() => setActiveTab("history")} className={"border-b-2 px-4 py-3 text-sm font-medium " + (activeTab === "history" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>Issuance History</button>
       </div>
 
       {activeTab === "issue" ? (
-        <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-6">
+        <section className="print:hidden rounded-xl border bg-card p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><FileCheck2 className="size-5" aria-hidden="true" /></div>
-            <div><h2 className="font-semibold">Document Details</h2><p className="mt-1 text-sm text-muted-foreground">Select a document type and enter the resident details for the proposed workflow.</p></div>
+            <div><h2 className="font-semibold">Document Details</h2><p className="mt-1 text-sm text-muted-foreground">Choose a document to show its corresponding hardcopy fields.</p></div>
           </div>
           <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 md:grid-cols-2">
-            <label className="flex flex-col gap-2 text-sm font-medium">Document Type
-              <select value={selectedType} onChange={(event) => setSelectedType(event.target.value)} className="h-10 rounded-md border bg-background px-3 font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            <label className={labelClassName + " md:col-span-2"}>Document Type
+              <select value={selectedType} onChange={(event) => changeDocumentType(event.target.value)} className={inputClassName}>
                 {documentTypes.map((type) => <option key={type} value={type}>{type}</option>)}
               </select>
             </label>
-            <label className="flex flex-col gap-2 text-sm font-medium">Resident Name
-              <input value={residentName} onChange={(event) => setResidentName(event.target.value)} placeholder="Enter resident name (sample only)" className="h-10 rounded-md border bg-background px-3 font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring" />
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium md:col-span-2">Purpose / Notes
-              <textarea value={purpose} onChange={(event) => setPurpose(event.target.value)} rows={3} placeholder="Enter purpose or details required for this document" className="rounded-md border bg-background px-3 py-2 font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring" />
-            </label>
-            <div className="rounded-lg bg-muted/40 p-4 text-sm text-muted-foreground md:col-span-2">
-              <p className="font-medium text-foreground">Draft selection summary</p>
-              <p className="mt-1">Document: {selectedType}</p>
-              <p>Resident: {residentName.trim() || "Not entered"}</p>
-              <p>Notes: {purpose.trim() || "None entered"}</p>
-              <p className="mt-2 text-xs">The final form fields, requirements, fees, approval steps, and print template must be confirmed with the barangay.</p>
+
+            {fields.map((field) => (
+              <div key={field.name} className={labelClassName + " " + (field.fullWidth || field.type === "textarea" || field.type === "checkboxes" ? "md:col-span-2" : "")}>
+                <span>{field.label}</span>
+                {field.type === "textarea" ? (
+                  <textarea value={formValues[field.name] ?? ""} onChange={(event) => updateField(field.name, event.target.value)} rows={3} className="w-full rounded-md border bg-background px-3 py-2 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring" placeholder={"Enter " + field.label.toLowerCase()} />
+                ) : field.type === "checkboxes" ? (
+                  <div className="flex flex-wrap gap-4 rounded-md border bg-background px-3 py-3">
+                    {(field.options ?? []).map((option) => {
+                      const checkedValues = (formValues[field.name] ?? "").split("||").filter(Boolean)
+                      return (
+                        <label key={option} className="inline-flex items-center gap-2 font-normal">
+                          <input type="checkbox" checked={checkedValues.includes(option)} onChange={(event) => {
+                            const nextValues = event.target.checked ? [...checkedValues, option] : checkedValues.filter((value) => value !== option)
+                            updateField(field.name, nextValues.join("||"))
+                          }} className="size-4 rounded border-input accent-primary" />
+                          {option}
+                        </label>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <input type={field.type ?? "text"} value={formValues[field.name] ?? ""} onChange={(event) => updateField(field.name, event.target.value)} className={inputClassName} placeholder={field.type === "date" ? undefined : "Enter " + field.label.toLowerCase()} />
+                )}
+              </div>
+            ))}
+
+            <div className="md:col-span-2 rounded-lg bg-muted/40 p-4 text-sm">
+              <p className="font-medium">Draft summary</p>
+              <p className="mt-1 text-muted-foreground">Document: {selectedType}</p>
+              <p className="text-muted-foreground">Name: {currentName}</p>
+              <p className="text-muted-foreground">Date: {formatDate(currentDate)}</p>
+              <p className="mt-2 text-xs text-muted-foreground">Fields follow the hardcopy list you provided. Required fields, fees, approval steps, official wording, and final print layout still need barangay confirmation.</p>
             </div>
-            <div className="flex flex-wrap gap-2 md:col-span-2">
-              <button type="button" onClick={() => { setResidentName(""); setPurpose("") }} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Clear Form</button>
-              <button type="button" onClick={() => setActiveTab("history")} className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90">View Issuance History</button>
+            <div className="md:col-span-2 flex flex-wrap gap-2">
+              <button type="button" onClick={clearForm} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Clear Form</button>
+              <button type="button" onClick={saveDraft} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Save Draft to Session</button>
+              <button type="button" onClick={() => preparePrint()} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"><Printer className="size-4" aria-hidden="true" />Print Review Copy</button>
+              <button type="button" onClick={() => setActiveTab("history")} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">View History</button>
             </div>
           </form>
         </section>
       ) : (
-        <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-          <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
-            <div><h2 className="font-semibold">Issuance History</h2><p className="mt-1 text-sm text-muted-foreground">Search the sample list of issued documents.</p></div>
-            <label className="relative block w-full sm:max-w-xs"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search issuance history..." className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
+        <section className="print:hidden overflow-hidden rounded-xl border bg-card shadow-sm">
+          <div className="flex flex-col gap-3 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
+            <div><h2 className="font-semibold">Issuance History</h2><p className="mt-1 text-sm text-muted-foreground">Review fictional sample rows and drafts saved during this page session.</p></div>
+            <div className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-xl">
+              <label className="relative block min-w-0 flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by ID, name, type, or date..." className={inputClassName + " pl-9"} /></label>
+              <select value={historyType} onChange={(event) => setHistoryType(event.target.value)} className={inputClassName + " sm:max-w-[260px]"}>
+                <option>All document types</option>
+                {documentTypes.map((type) => <option key={type} value={type}>{type}</option>)}
+              </select>
+            </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[680px] text-left text-sm">
-              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Issuance ID</th><th className="px-4 py-3 font-medium">Resident</th><th className="px-4 py-3 font-medium">Document Type</th><th className="px-4 py-3 font-medium">Date Issued</th><th className="px-4 py-3 font-medium">Status</th></tr></thead>
-              <tbody className="divide-y">{filteredIssuances.map((item) => <tr key={item.id} className="hover:bg-muted/20"><td className="px-4 py-3 font-medium">{item.id}</td><td className="px-4 py-3">{item.resident}</td><td className="px-4 py-3">{item.type}</td><td className="px-4 py-3">{item.date}</td><td className="px-4 py-3"><span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">{item.status}</span></td></tr>)}</tbody>
+            <table className="w-full min-w-[760px] text-left text-sm">
+              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Record ID</th><th className="px-4 py-3 font-medium">Name</th><th className="px-4 py-3 font-medium">Document Type</th><th className="px-4 py-3 font-medium">Date</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Action</th></tr></thead>
+              <tbody className="divide-y">
+                {filteredIssuances.map((item) => (
+                  <tr key={item.id} className="hover:bg-muted/20">
+                    <td className="px-4 py-3 font-medium">{item.id}</td>
+                    <td className="px-4 py-3">{item.resident}</td>
+                    <td className="px-4 py-3">{item.type}</td>
+                    <td className="px-4 py-3">{formatDate(item.date)}</td>
+                    <td className="px-4 py-3"><span className={"rounded-full px-2.5 py-1 text-xs font-medium " + (item.status === "Draft" ? "bg-amber-500/10 text-amber-700 dark:text-amber-300" : "bg-muted text-muted-foreground")}>{item.status}</span></td>
+                    <td className="px-4 py-3">{item.status === "Draft" ? <button type="button" onClick={() => preparePrint(item)} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"><Printer className="size-3.5" aria-hidden="true" />Print draft</button> : <span className="text-xs text-muted-foreground">Sample only</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
-            {filteredIssuances.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No sample issuances match your search.</p>}
+            {filteredIssuances.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No records match your search and filter.</p>}
           </div>
         </section>
       )}
+
+      <section id="issuance-print" className="hidden print:block p-6 text-black">
+        <header className="mb-6 border-b border-gray-400 pb-4 text-center">
+          <p className="text-sm">Barangay Mayondon LGU</p>
+          <h1 className="mt-2 text-xl font-bold">{printRecord?.type ?? selectedType}</h1>
+          <p className="mt-2 text-xs">DRAFT REVIEW COPY · NOT AN OFFICIAL DOCUMENT</p>
+        </header>
+        <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+          {printFields.map((field) => {
+            const value = printValues[field.name] ?? ""
+            const displayValue = value.split("||").filter(Boolean).join(", ")
+            return (
+              <div key={field.name} className={field.fullWidth || field.type === "textarea" || field.type === "checkboxes" ? "col-span-2" : ""}>
+                <p className="text-xs font-semibold">{field.label}</p>
+                <p className="mt-1 min-h-6 whitespace-pre-wrap border-b border-gray-300 pb-1 text-sm">{displayValue || " "}</p>
+              </div>
+            )
+          })}
+        </div>
+        <footer className="mt-10 border-t border-gray-300 pt-3 text-xs">
+          Record: {printRecord?.id ?? "Print preview"} · Status: Draft only · This layout is for design review and must be validated by the barangay.
+        </footer>
+      </section>
     </div>
   )
 }
