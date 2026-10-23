@@ -2,9 +2,9 @@
 
 Status: **Draft only. Not approved for production or client handover.**
 
-Base branch: `Foundation`
+Base branch: Foundation
 
-Working branch: `draft/admin-portal`
+Working branch: draft/admin-portal
 
 ## Purpose
 
@@ -34,26 +34,64 @@ The modules and fields are proposals. They must be validated with the barangay b
 - Population Growth, pending historical data validation
 - Recent Activities, pending logging and data validation
 
-The initial document types shown in the draft are Barangay ID, Barangay Clearance, Barangay Clearance for Electrical and Water Connection, Barangay Franchise Clearance, Certificate of Indigency, Certificate of Residency, and Other Certificate. Confirm the official names and workflows with the client.
+## Issuance Management draft
+
+The current form prototype is limited to the four document types described from the supplied hardcopy list:
+
+1. **Barangay Clearance**
+   - Date, Name, Address, Age, Birthdate, Birthplace, Civil Status
+   - Purpose, Remarks
+   - Valid ID Presented, Number, Place of Issue, Date of Issue
+   - Paid under Official Receipt Number
+2. **Barangay Franchise Clearance**
+   - Date, Name, Address, Tricycle Association
+   - Make, Type of Body, Motor Number, Color, Plate Number
+   - CTC Number, Place of Issue, Date of Issue
+   - Paid under Official Receipt Number
+3. **Barangay Clearance (Electrical and Water Connection)**
+   - Date
+   - Connection Service checkboxes: Electric and Water
+   - Name, Address
+   - Type of Connection checkboxes: New and Reconnection
+   - Classification checkboxes: Residential and Commercial
+   - Location
+   - CTC Number, Place of Issue, Date of Issue
+   - Paid under Official Receipt Number
+4. **Certificate of Indigency**
+   - Date, Name, Address, Age, Sector, Purpose
+
+Current prototype behavior:
+- The selected document type controls which fields appear.
+- Checkbox groups are used for Electric/Water, New/Reconnection, and Residential/Commercial.
+- The form can be cleared.
+- A draft can be added to an in-memory history for the current page session.
+- The history can be searched and filtered by document type.
+- The print action opens a print dialog with a review-only layout, clearly marked as a draft and not an official document.
 
 ## Important limitations
 
 - Dashboard figures, issuance history, names, and activity items are fictional sample data.
 - Dashboard charts are illustrative, not connected to live statistics.
 - Records and Officials pages display sample rows only. They do not create, update, or delete database records.
-- Issuance form inputs are local draft inputs only. They do not issue or generate official documents.
+- Issuance drafts exist only in frontend memory for the current page session. Refreshing the page clears them.
+- Issuance forms are not connected to a database or backend API. They do not issue official documents or persist records.
+- Print layout is a review prototype, not an approved reproduction of the official hardcopy. Confirm wording, spacing, signatures, seals, fees, and approval steps with the barangay before using it.
+- Required fields and validation rules have not been confirmed. The prototype does not assume official eligibility rules.
+- The sample history is fictional and must not be mistaken for actual barangay records.
 - Barangay Information, Document Templates, and Audit Logs in System Settings are visual placeholders.
 - Account profile, password change, and account management continue to use the existing foundation functionality.
-- The interface presents a single Admin role. New accounts created through the draft interface are submitted as Admin. The backend still uses its existing `is_superuser` authorization field, so confirm that account authorization is consistent before any deployment.
+- The interface presents a single Admin role. New accounts created through the draft interface are submitted as Admin. The backend still uses its existing is_superuser authorization field, so confirm that account authorization is consistent before any deployment.
 - Terms of Use and Privacy Policy in the footer are placeholders, not approved legal documents.
-- No real resident or barangay data should be entered into this draft.
+- Do not enter real resident or barangay data into this draft.
 
 ## Review before any merge
 
 1. Confirm the system scope and document workflows with the client.
 2. Confirm dashboard metrics, reporting periods, demographics categories, and historical data availability.
-3. Review mobile and desktop layouts with the client.
-4. Test the frontend build and regression tests locally.
-5. Confirm role and authorization behavior in the backend.
-6. Replace fictional sample data only after an approved data plan exists.
-7. Keep this branch separate from `Foundation` until the team and client review the draft.
+3. Confirm whether issuance drafts need database persistence, official numbering, editing, cancellation, or deletion.
+4. Review the form fields and print layouts with the barangay.
+5. Review mobile and desktop layouts with the client.
+6. Test the frontend build and regression tests locally.
+7. Confirm role and authorization behavior in the backend.
+8. Replace fictional sample data only after an approved data plan exists.
+9. Keep this branch separate from Foundation until the team and client review the draft.
