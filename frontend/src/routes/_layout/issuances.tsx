@@ -9,12 +9,13 @@ export const Route = createFileRoute("/_layout/issuances")({
   head: () => ({ meta: [{ title: pageTitle("Issuances Management") }] }),
 })
 
-type FieldType = "text" | "date" | "textarea" | "checkboxes"
+type FieldType = "text" | "date" | "textarea" | "checkboxes" | "select"
 type DocumentField = {
   name: string
   label: string
   type?: FieldType
   options?: string[]
+  defaultToday?: boolean
   fullWidth?: boolean
 }
 type IssuanceRecord = {
@@ -26,6 +27,34 @@ type IssuanceRecord = {
   fields: Record<string, string>
 }
 
+const civilStatusOptions = ["Single", "Married", "Legally Seperated", "Widow/Widower"]
+const idTypeOptions = ["CTC", "VIN", "PASSPORT", "UMID", "TIN", "DRIVER LICENSE", "SENIOR CITIZEN", "SOLO PARENT", "POSTAL ID", "PhilHealth", "PRC ID", "Nat'l ID", "SSS ID", "SCHOOL ID"]
+const clearancePurposeOptions = [
+  "Employment Requirement", "Student Permit Requirement", "Proof of Residency only",
+  "SIDECAR Loan Application Requirement", "Loan Application Requirement",
+  "House Loan Application Requirement", "Franchise Requirement",
+  "Internet Connection Application Requirement", "Bank Requirement (Openning Bank Account)",
+  "Driver's License Requirement", "Overseas Employment Requirement",
+  "E-BIKE Loan Application Requirement", "Permit to Carry Firearms License",
+  "E-BIKE Franchise Requirement", "Employment Requirement/First Time Jobseeker",
+  "School/OJT Requirement", "Motor Loan Application Requirement",
+  "Electric Installation Requirements", "Senior Citizen Requirement",
+  "Application for Service/Special Permit",
+]
+const postalClearancePurposeOptions = [
+  "POSTAL ID", "Employment Requirement", "Proof of Residency", "Loan Application Requirement",
+  "Housing Loan Application Requirement", "Motor Loan Applicatio Requirement", "Franchise Requirement",
+  "OJT Requirement", "PESO Requirement", "Driver's License Requirement", "Overseas Employment Requirement",
+  "Firearms License", "Permit to Carry Firearms License", "Franchise Requirement (Special Permit)",
+  "Employment Requirement/First Time Jobseeker", "Bank Requirement (Open Account)",
+  "Car Loan Application Requirement", "Marriage Application Requirement", "E-Bike Application",
+  "LTOPF Registration", "PAARU",
+]
+const indigencySectorOptions = [
+  "Urban Poor", "Small Farmers and Rural Workers", "Fisherfolk", "Workers in the Informal Economy",
+  "Person with Disabilities (PWD)", "Solo Parents", "Senior Citizens", "Barangay-based Volunteer Workers",
+  "Government Employee", "STUDENT", "other marginalized sector",
+]
 const documentTypes = [
   "Barangay Clearance",
   "Barangay Franchise Clearance",
@@ -35,19 +64,19 @@ const documentTypes = [
 
 const documentFields: Record<string, DocumentField[]> = {
   "Barangay Clearance": [
-    { name: "date", label: "Date", type: "date" },
+    { name: "date", label: "Date", type: "date", defaultToday: true },
     { name: "name", label: "Name" },
     { name: "address", label: "Address", fullWidth: true },
     { name: "age", label: "Age" },
     { name: "birthdate", label: "Birthdate", type: "date" },
     { name: "birthplace", label: "Birthplace" },
-    { name: "civilStatus", label: "Civil Status" },
-    { name: "purpose", label: "Purpose", type: "textarea", fullWidth: true },
+    { name: "civilStatus", label: "Civil Status", type: "select", options: civilStatusOptions },
+    { name: "purpose", label: "Purpose", type: "select", options: postalClearancePurposeOptions, fullWidth: true },
     { name: "remarks", label: "Remarks", type: "textarea", fullWidth: true },
-    { name: "validIdPresented", label: "Valid ID Presented" },
+    { name: "validIdPresented", label: "Valid ID Presented", type: "select", options: idTypeOptions },
     { name: "idNumber", label: "Number" },
     { name: "idPlaceOfIssue", label: "Place of Issue" },
-    { name: "idDateOfIssue", label: "Date of Issue", type: "date" },
+    { name: "idDateOfIssue", label: "Date of Issue", type: "date", defaultToday: true },
     { name: "officialReceiptNumber", label: "Paid under Official Receipt Number" },
   ],
   "Barangay Franchise Clearance": [
@@ -62,7 +91,7 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "plateNumber", label: "Plate Number" },
     { name: "ctcNumber", label: "CTC Number" },
     { name: "ctcPlaceOfIssue", label: "Place of Issue" },
-    { name: "ctcDateOfIssue", label: "Date of Issue", type: "date" },
+    { name: "ctcDateOfIssue", label: "Date of Issue", type: "date", defaultToday: true },
     { name: "officialReceiptNumber", label: "Paid under Official Receipt Number" },
   ],
   "Barangay Clearance (Electrical and Water Connection)": [
@@ -83,8 +112,8 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "name", label: "Name" },
     { name: "address", label: "Address", fullWidth: true },
     { name: "age", label: "Age" },
-    { name: "sector", label: "Sector" },
-    { name: "purpose", label: "Purpose", type: "textarea", fullWidth: true },
+    { name: "sector", label: "Sector", type: "select", options: indigencySectorOptions },
+    { name: "purpose", label: "Purpose", type: "select", options: clearancePurposeOptions, fullWidth: true },
   ],
 }
 
@@ -98,6 +127,19 @@ const sampleIssuances: IssuanceRecord[] = [
 const inputClassName = "h-10 w-full rounded-md border bg-background px-3 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring"
 const labelClassName = "flex min-w-0 flex-col gap-2 text-sm font-medium"
 
+function localDateValue() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, "0")
+  const day = String(now.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+function createDefaultFormValues(type: string) {
+  const today = localDateValue()
+  return Object.fromEntries((documentFields[type] ?? []).filter((field) => field.defaultToday).map((field) => [field.name, today])) as Record<string, string>
+}
+
 function formatDate(value: string) {
   if (!value) return "Not entered"
   const parsed = new Date(value + "T00:00:00")
@@ -109,7 +151,7 @@ function IssuancesManagement() {
   const [selectedType, setSelectedType] = useState(documentTypes[0])
   const [search, setSearch] = useState("")
   const [historyType, setHistoryType] = useState("All document types")
-  const [formValues, setFormValues] = useState<Record<string, string>>({})
+  const [formValues, setFormValues] = useState<Record<string, string>>(() => createDefaultFormValues(documentTypes[0]))
   const [drafts, setDrafts] = useState<IssuanceRecord[]>([])
   const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
   const [notice, setNotice] = useState("")
@@ -133,13 +175,13 @@ function IssuancesManagement() {
 
   function changeDocumentType(value: string) {
     setSelectedType(value)
-    setFormValues({})
+    setFormValues(createDefaultFormValues(value))
     setNotice("")
     setPrintRecord(null)
   }
 
   function clearForm() {
-    setFormValues({})
+    setFormValues(createDefaultFormValues(selectedType))
     setNotice("")
     setPrintRecord(null)
   }
@@ -210,7 +252,12 @@ function IssuancesManagement() {
             {fields.map((field) => (
               <div key={field.name} className={labelClassName + " " + (field.fullWidth || field.type === "textarea" || field.type === "checkboxes" ? "md:col-span-2" : "")}>
                 <span>{field.label}</span>
-                {field.type === "textarea" ? (
+                {field.type === "select" ? (
+                  <select value={formValues[field.name] ?? ""} onChange={(event) => updateField(field.name, event.target.value)} className={inputClassName}>
+                    <option value="">Select {field.label.toLowerCase()}</option>
+                    {(field.options ?? []).map((option) => <option key={option} value={option}>{option}</option>)}
+                  </select>
+                ) : field.type === "textarea" ? (
                   <textarea value={formValues[field.name] ?? ""} onChange={(event) => updateField(field.name, event.target.value)} rows={3} className="w-full rounded-md border bg-background px-3 py-2 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring" placeholder={"Enter " + field.label.toLowerCase()} />
                 ) : field.type === "checkboxes" ? (
                   <div className="flex flex-wrap gap-4 rounded-md border bg-background px-3 py-3">
