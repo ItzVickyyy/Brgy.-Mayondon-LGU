@@ -41,15 +41,6 @@ const clearancePurposeOptions = [
   "Electric Installation Requirements", "Senior Citizen Requirement",
   "Application for Service/Special Permit",
 ]
-const postalClearancePurposeOptions = [
-  "POSTAL ID", "Employment Requirement", "Proof of Residency", "Loan Application Requirement",
-  "Housing Loan Application Requirement", "Motor Loan Applicatio Requirement", "Franchise Requirement",
-  "OJT Requirement", "PESO Requirement", "Driver's License Requirement", "Overseas Employment Requirement",
-  "Firearms License", "Permit to Carry Firearms License", "Franchise Requirement (Special Permit)",
-  "Employment Requirement/First Time Jobseeker", "Bank Requirement (Open Account)",
-  "Car Loan Application Requirement", "Marriage Application Requirement", "E-Bike Application",
-  "LTOPF Registration", "PAARU",
-]
 const indigencySectorOptions = [
   "Urban Poor", "Small Farmers and Rural Workers", "Fisherfolk", "Workers in the Informal Economy",
   "Person with Disabilities (PWD)", "Solo Parents", "Senior Citizens", "Barangay-based Volunteer Workers",
