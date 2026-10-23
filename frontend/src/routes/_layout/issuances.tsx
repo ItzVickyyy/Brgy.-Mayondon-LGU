@@ -80,7 +80,7 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "officialReceiptNumber", label: "Paid under Official Receipt Number" },
   ],
   "Barangay Franchise Clearance": [
-    { name: "date", label: "Date", type: "date" },
+    { name: "date", label: "Date", type: "date", defaultToday: true },
     { name: "name", label: "Name" },
     { name: "address", label: "Address", fullWidth: true },
     { name: "tricycleAssociation", label: "Tricycle Association", fullWidth: true },
@@ -95,7 +95,7 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "officialReceiptNumber", label: "Paid under Official Receipt Number" },
   ],
   "Barangay Clearance (Electrical and Water Connection)": [
-    { name: "date", label: "Date", type: "date" },
+    { name: "date", label: "Date", type: "date", defaultToday: true },
     { name: "serviceType", label: "Connection Service", type: "checkboxes", options: ["Electric", "Water"], fullWidth: true },
     { name: "name", label: "Name" },
     { name: "address", label: "Address", fullWidth: true },
@@ -108,7 +108,7 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "officialReceiptNumber", label: "Paid under Official Receipt Number" },
   ],
   "Certificate of Indigency": [
-    { name: "date", label: "Date", type: "date" },
+    { name: "date", label: "Date", type: "date", defaultToday: true },
     { name: "name", label: "Name" },
     { name: "address", label: "Address", fullWidth: true },
     { name: "age", label: "Age" },
