@@ -175,6 +175,7 @@ function IssuancesManagement() {
 
   return (
     <div className="flex flex-col gap-6">
+      <style>{"@media print { body * { visibility: hidden !important; } #issuance-print, #issuance-print * { visibility: visible !important; } #issuance-print { display: block !important; position: fixed; inset: 0; width: 100%; padding: 24px; color: #111 !important; background: white !important; } }"}</style>
       <div className="print:hidden">
         <p className="text-sm font-medium text-primary">Admin Portal</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Issuances Management</h1>
