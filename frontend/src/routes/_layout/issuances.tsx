@@ -95,7 +95,7 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "location", label: "Location", fullWidth: true },
     { name: "ctcNumber", label: "CTC Number" },
     { name: "ctcPlaceOfIssue", label: "Place of Issue" },
-    { name: "ctcDateOfIssue", label: "Date of Issue", type: "date" },
+    { name: "ctcDateOfIssue", label: "Date of Issue", type: "date", defaultToday: true },
     { name: "officialReceiptNumber", label: "Paid under Official Receipt Number" },
   ],
   "Certificate of Indigency": [
