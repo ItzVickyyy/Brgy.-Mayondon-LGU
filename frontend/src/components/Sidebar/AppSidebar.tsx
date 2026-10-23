@@ -1,4 +1,4 @@
-import { BookUser, FileCheck2, House, LayoutDashboard, Settings, Users, Vote, ShieldCheck } from "lucide-react"
+import { BookUser, FileCheck2, House, LayoutDashboard, Settings, Users, ShieldCheck } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
