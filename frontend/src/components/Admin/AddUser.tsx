@@ -7,7 +7,6 @@ import { z } from "zod"
 
 import { type UserCreate, UsersService } from "@/client"
 import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogClose,
@@ -66,7 +65,7 @@ const AddUser = () => {
       full_name: "",
       password: "",
       confirm_password: "",
-      is_superuser: false,
+      is_superuser: true,
       is_active: false,
     },
   })
@@ -85,7 +84,7 @@ const AddUser = () => {
   })
 
   const onSubmit = (data: FormData) => {
-    mutation.mutate(data)
+    mutation.mutate({ ...data, is_superuser: true })
   }
 
   return (
@@ -180,22 +179,6 @@ const AddUser = () => {
                       />
                     </FormControl>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="is_superuser"
-                render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">Is admin?</FormLabel>
                   </FormItem>
                 )}
               />
