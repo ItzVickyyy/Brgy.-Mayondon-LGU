@@ -62,6 +62,8 @@ The current form prototype is limited to the four document types described from 
 
 Current prototype behavior:
 - The selected document type controls which fields appear.
+- The Date and Date of Issue fields default to the current local date when a form is opened, when the document type changes, and when Clear Form is used. Birthdate remains blank by default.
+- Dropdown selectors are used for Civil Status, Valid ID Presented, and Sector. Clearance Purpose options are based on the supplied BRGY CLEARANCE sheet list. The option lists should be checked against the original workbook and confirmed by the barangay.
 - Checkbox groups are used for Electric/Water, New/Reconnection, and Residential/Commercial.
 - The form can be cleared.
 - A draft can be added to an in-memory history for the current page session.
@@ -76,6 +78,8 @@ Current prototype behavior:
 - Issuance drafts exist only in frontend memory for the current page session. Refreshing the page clears them.
 - Issuance forms are not connected to a database or backend API. They do not issue official documents or persist records.
 - Print layout is a review prototype, not an approved reproduction of the official hardcopy. Confirm wording, spacing, signatures, seals, fees, and approval steps with the barangay before using it.
+- The supplied workbook contains different purpose lists across sheets. The current four-form draft uses the BRGY CLEARANCE purpose list for Barangay Clearance. The separate CLEARANCE POSTAL purpose list has been retained in code for later mapping if that sheet is confirmed as a separate form.
+- Explicit Excel dropdown validation was only confirmed in the converted workbook for CLEARANCE POSTAL and BRGY CLEARANCE. Other workbook option lists were not confirmed as active dropdowns.
 - Required fields and validation rules have not been confirmed. The prototype does not assume official eligibility rules.
 - The sample history is fictional and must not be mistaken for actual barangay records.
 - Barangay Information, Document Templates, and Audit Logs in System Settings are visual placeholders.
