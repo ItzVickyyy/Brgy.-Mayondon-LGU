@@ -134,7 +134,9 @@ function createDefaultFormValues(type: string) {
 function formatDate(value: string) {
   if (!value) return "Not entered"
   const parsed = new Date(value + "T00:00:00")
-  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleDateString()
+  return Number.isNaN(parsed.getTime())
+    ? value
+    : parsed.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
 }
 
 function IssuancesManagement() {
