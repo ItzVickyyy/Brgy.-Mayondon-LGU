@@ -71,7 +71,7 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "birthdate", label: "Birthdate", type: "date" },
     { name: "birthplace", label: "Birthplace" },
     { name: "civilStatus", label: "Civil Status", type: "select", options: civilStatusOptions },
-    { name: "purpose", label: "Purpose", type: "select", options: postalClearancePurposeOptions, fullWidth: true },
+    { name: "purpose", label: "Purpose", type: "select", options: clearancePurposeOptions, fullWidth: true },
     { name: "remarks", label: "Remarks", type: "textarea", fullWidth: true },
     { name: "validIdPresented", label: "Valid ID Presented", type: "select", options: idTypeOptions },
     { name: "idNumber", label: "Number" },
@@ -113,7 +113,7 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "address", label: "Address", fullWidth: true },
     { name: "age", label: "Age" },
     { name: "sector", label: "Sector", type: "select", options: indigencySectorOptions },
-    { name: "purpose", label: "Purpose", type: "select", options: clearancePurposeOptions, fullWidth: true },
+    { name: "purpose", label: "Purpose", type: "textarea", fullWidth: true },
   ],
 }
 
