@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { FileCheck2, Info, Printer, Search } from "lucide-react"
+import { FileCheck2, Info, Search } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
@@ -96,12 +96,11 @@ function IssuancesManagement() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[680px] text-left text-sm">
-              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Issuance ID</th><th className="px-4 py-3 font-medium">Resident</th><th className="px-4 py-3 font-medium">Document Type</th><th className="px-4 py-3 font-medium">Date Issued</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Action</th></tr></thead>
-              <tbody className="divide-y">{filteredIssuances.map((item) => <tr key={item.id} className="hover:bg-muted/20"><td className="px-4 py-3 font-medium">{item.id}</td><td className="px-4 py-3">{item.resident}</td><td className="px-4 py-3">{item.type}</td><td className="px-4 py-3">{item.date}</td><td className="px-4 py-3"><span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">{item.status}</span></td><td className="px-4 py-3"><button type="button" onClick={() => window.print()} className="inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs hover:bg-muted"><Printer className="size-3.5" aria-hidden="true" />Print list</button></td></tr>)}</tbody>
+              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Issuance ID</th><th className="px-4 py-3 font-medium">Resident</th><th className="px-4 py-3 font-medium">Document Type</th><th className="px-4 py-3 font-medium">Date Issued</th><th className="px-4 py-3 font-medium">Status</th></tr></thead>
+              <tbody className="divide-y">{filteredIssuances.map((item) => <tr key={item.id} className="hover:bg-muted/20"><td className="px-4 py-3 font-medium">{item.id}</td><td className="px-4 py-3">{item.resident}</td><td className="px-4 py-3">{item.type}</td><td className="px-4 py-3">{item.date}</td><td className="px-4 py-3"><span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">{item.status}</span></td></tr>)}</tbody>
             </table>
             {filteredIssuances.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No sample issuances match your search.</p>}
           </div>
-          <div className="border-t px-4 py-3 text-xs text-muted-foreground">Print is a browser print action for the current page, not an official document printout.</div>
         </section>
       )}
     </div>
