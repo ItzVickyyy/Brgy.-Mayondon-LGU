@@ -48,10 +48,13 @@ cd frontend && bun run lint && bun run build     # lint + type-check + build
 Read [`docs/Developers.md`](docs/Developers.md) for the full team workflow,
 branching strategy, review checklist, testing guidance, and developer roles.
 
-**Current branch policy:** the team is staying on `Foundation` until the client
-interview clarifies the system requirements. Do not rename or merge this branch
-or create the planned `production` branch before the team reviews the
-post-interview plan.
+**Canonical foundation:** `Foundation` remains the baseline while the client
+requirements are being confirmed. The `draft/admin-portal` branch is a temporary
+UI and sitemap exploration only. Its modules, sample figures, and workflows are
+unapproved proposals. Do not merge this draft or treat it as a production-ready
+system before the team reviews it and validates the scope with the client.
+Do not rename `Foundation` or create the planned `production` branch before
+the team reviews the post-interview plan.
 
 **Planned branch policy after the interview:**
 - `master` will be the integration branch for reviewed changes that pass the
