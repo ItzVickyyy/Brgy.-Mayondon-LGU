@@ -1,7 +1,6 @@
 /**
  * Single source of truth for the client's branding.
- * After the client interview, update the values here (and drop the official
- * logo into /public/assets/images, then point `logo` at it).
+ * The official logo asset is stored under /public/assets/images.
  */
 export const SITE = {
   /** Short name shown in the sidebar and browser tab */
@@ -12,9 +11,8 @@ export const SITE = {
   location: "Los Baños, Laguna",
   /** TODO: rename once the system is decided (see docs/ROADMAP.md) */
   systemName: "Barangay Mayondon LGU System",
-  /** TODO: replace with the official logo/seal after the interview, e.g.
-   *  "/assets/images/brgy-logo.png". While null, a placeholder icon is shown. */
-  logo: null as string | null,
+  /** Official logo from the repository's public assets folder. */
+  logo: "/assets/images/Barangay%20Mayondon%20Logo.png" as string | null,
   developedBy: "BSIT-WMAD, Laguna State Polytechnic University – Los Baños",
 } as const
 
