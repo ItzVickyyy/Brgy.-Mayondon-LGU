@@ -323,8 +323,14 @@ function IssuancesManagement() {
 
       <section id="issuance-print" className="hidden print:block p-6 text-black">
         <header className="mb-6 border-b border-gray-400 pb-4 text-center">
-          <p className="text-sm">Barangay Mayondon LGU</p>
-          <h1 className="mt-2 text-xl font-bold">{printRecord?.type ?? selectedType}</h1>
+          <img
+            src="/assets/images/Barangay%20Mayondon%20Logo.png"
+            alt="Barangay Mayondon LGU logo"
+            className="mx-auto mb-3 h-16 w-16 object-contain"
+          />
+          <p className="text-sm font-medium">Barangay Mayondon LGU</p>
+          <p className="text-xs">Los Baños, Laguna</p>
+          <h1 className="mt-3 text-xl font-bold">{printRecord?.type ?? selectedType}</h1>
           <p className="mt-2 text-xs">DRAFT REVIEW COPY · NOT AN OFFICIAL DOCUMENT</p>
         </header>
         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
