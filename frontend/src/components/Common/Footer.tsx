@@ -10,11 +10,11 @@ export function Footer() {
           © {currentYear} {SITE.fullName}, {SITE.location}
         </p>
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:justify-end">
-          <span>Draft build · v0.1.0</span>
+          <span>v0.1.0</span>
           <span aria-hidden="true">·</span>
-          <span>Terms of Use (draft)</span>
+          <span>Terms of Use</span>
           <span aria-hidden="true">·</span>
-          <span>Privacy Policy (draft)</span>
+          <span>Privacy Policy</span>
         </div>
       </div>
     </footer>
