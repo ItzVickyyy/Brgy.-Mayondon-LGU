@@ -23,7 +23,7 @@ type IssuanceRecord = {
   resident: string
   type: string
   date: string
-  status: "Sample" | "Draft"
+  status: "Sample" | "Session"
   fields: Record<string, string>
 }
 
@@ -145,14 +145,14 @@ function IssuancesManagement() {
   const [search, setSearch] = useState("")
   const [historyType, setHistoryType] = useState("All document types")
   const [formValues, setFormValues] = useState<Record<string, string>>(() => createDefaultFormValues(documentTypes[0]))
-  const [drafts, setDrafts] = useState<IssuanceRecord[]>([])
+  const [sessionRecords, setSessionRecords] = useState<IssuanceRecord[]>([])
   const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
   const [notice, setNotice] = useState("")
 
   const fields = documentFields[selectedType] ?? []
   const currentName = formValues.name?.trim() || "Name not entered"
   const currentDate = formValues.date || ""
-  const allRecords = useMemo(() => [...drafts, ...sampleIssuances], [drafts])
+  const allRecords = useMemo(() => [...sessionRecords, ...sampleIssuances], [sessionRecords])
   const filteredIssuances = useMemo(() => allRecords.filter((item) => {
     const matchesSearch = [item.id, item.resident, item.type, item.date, item.status].some((value) =>
       value.toLowerCase().includes(search.toLowerCase()),
@@ -179,17 +179,17 @@ function IssuancesManagement() {
     setPrintRecord(null)
   }
 
-  function saveDraft() {
+  function saveToSession() {
     const record: IssuanceRecord = {
-      id: "DRAFT-" + String(drafts.length + 1).padStart(3, "0"),
+      id: "SESSION-" + String(sessionRecords.length + 1).padStart(3, "0"),
       resident: currentName,
       type: selectedType,
       date: currentDate,
-      status: "Draft",
+      status: "Session",
       fields: { ...formValues },
     }
-    setDrafts((previous) => [record, ...previous])
-    setNotice(record.id + " was added to this session's draft history. It has not been saved to the database or officially issued.")
+    setSessionRecords((previous) => [record, ...previous])
+    setNotice(record.id + " was saved for this page session. It will be cleared when the page is refreshed.")
     setActiveTab("history")
   }
 
@@ -199,7 +199,7 @@ function IssuancesManagement() {
       resident: currentName,
       type: selectedType,
       date: currentDate,
-      status: "Draft",
+      status: "Session",
       fields: { ...formValues },
     })
     window.setTimeout(() => window.print(), 100)
@@ -214,33 +214,40 @@ function IssuancesManagement() {
       <div className="print:hidden">
         <p className="text-sm font-medium text-primary">Admin Portal</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Issuances Management</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Draft forms based on the four hardcopy document types provided for review.</p>
-      </div>
-
-      <div className="print:hidden flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        <p>Draft only. Saved drafts stay in this page session and are lost when the page is refreshed. Sample history is fictional. Printing creates a review copy, not an official barangay document. No data is sent to the backend.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Prepare and print barangay documents.</p>
       </div>
 
       {notice && <div role="status" className="print:hidden rounded-lg border bg-muted/40 px-4 py-3 text-sm">{notice}</div>}
 
-      <div className="print:hidden flex flex-wrap gap-2 border-b">
-        <button type="button" onClick={() => setActiveTab("issue")} className={"border-b-2 px-4 py-3 text-sm font-medium " + (activeTab === "issue" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>Issue Document</button>
-        <button type="button" onClick={() => setActiveTab("history")} className={"border-b-2 px-4 py-3 text-sm font-medium " + (activeTab === "history" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>Issuance History</button>
+      <div className="print:hidden flex flex-wrap gap-2">
+        {documentTypes.map((type) => (
+          <button
+            key={type}
+            type="button"
+            onClick={() => { changeDocumentType(type); setActiveTab("issue") }}
+            aria-pressed={activeTab === "issue" && selectedType === type}
+            className={"rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors " + (activeTab === "issue" && selectedType === type ? "border-primary bg-primary/5 text-primary ring-1 ring-primary/20" : "bg-card hover:bg-muted/40")}
+          >
+            {type}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() => setActiveTab("history")}
+          aria-pressed={activeTab === "history"}
+          className={"rounded-lg border px-4 py-3 text-sm font-medium transition-colors " + (activeTab === "history" ? "border-primary bg-primary/5 text-primary ring-1 ring-primary/20" : "bg-card hover:bg-muted/40")}
+        >
+          Issuance History
+        </button>
       </div>
 
       {activeTab === "issue" ? (
         <section className="print:hidden rounded-xl border bg-card p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><FileCheck2 className="size-5" aria-hidden="true" /></div>
-            <div><h2 className="font-semibold">Document Details</h2><p className="mt-1 text-sm text-muted-foreground">Choose a document to show its corresponding hardcopy fields.</p></div>
+            <div><h2 className="font-semibold">{selectedType}</h2><p className="mt-1 text-sm text-muted-foreground">Enter the details for this document.</p></div>
           </div>
           <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 md:grid-cols-2">
-            <label className={labelClassName + " md:col-span-2"}>Document Type
-              <select value={selectedType} onChange={(event) => changeDocumentType(event.target.value)} className={inputClassName}>
-                {documentTypes.map((type) => <option key={type} value={type}>{type}</option>)}
-              </select>
-            </label>
 
             {fields.map((field) => (
               <div key={field.name} className={labelClassName + " " + (field.fullWidth || field.type === "textarea" || field.type === "checkboxes" ? "md:col-span-2" : "")}>
@@ -274,16 +281,15 @@ function IssuancesManagement() {
             ))}
 
             <div className="md:col-span-2 rounded-lg bg-muted/40 p-4 text-sm">
-              <p className="font-medium">Draft summary</p>
+              <p className="font-medium">Form Summary</p>
               <p className="mt-1 text-muted-foreground">Document: {selectedType}</p>
               <p className="text-muted-foreground">Name: {currentName}</p>
               <p className="text-muted-foreground">Date: {formatDate(currentDate)}</p>
-              <p className="mt-2 text-xs text-muted-foreground">Fields follow the hardcopy list you provided. Required fields, fees, approval steps, official wording, and final print layout still need barangay confirmation.</p>
             </div>
             <div className="md:col-span-2 flex flex-wrap gap-2">
               <button type="button" onClick={clearForm} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Clear Form</button>
-              <button type="button" onClick={saveDraft} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Save Draft to Session</button>
-              <button type="button" onClick={() => preparePrint()} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"><Printer className="size-4" aria-hidden="true" />Print Review Copy</button>
+              <button type="button" onClick={saveToSession} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Save to Session</button>
+              <button type="button" onClick={() => preparePrint()} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"><Printer className="size-4" aria-hidden="true" />Print Copy</button>
               <button type="button" onClick={() => setActiveTab("history")} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">View History</button>
             </div>
           </form>
@@ -291,7 +297,7 @@ function IssuancesManagement() {
       ) : (
         <section className="print:hidden overflow-hidden rounded-xl border bg-card shadow-sm">
           <div className="flex flex-col gap-3 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
-            <div><h2 className="font-semibold">Issuance History</h2><p className="mt-1 text-sm text-muted-foreground">Review fictional sample rows and drafts saved during this page session.</p></div>
+            <div><h2 className="font-semibold">Issuance History</h2><p className="mt-1 text-sm text-muted-foreground">View document records and items saved during this page session.</p></div>
             <div className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-xl">
               <label className="relative block min-w-0 flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by ID, name, type, or date..." className={inputClassName + " pl-9"} /></label>
               <select value={historyType} onChange={(event) => setHistoryType(event.target.value)} className={inputClassName + " sm:max-w-[260px]"}>
@@ -310,8 +316,8 @@ function IssuancesManagement() {
                     <td className="px-4 py-3">{item.resident}</td>
                     <td className="px-4 py-3">{item.type}</td>
                     <td className="px-4 py-3">{formatDate(item.date)}</td>
-                    <td className="px-4 py-3"><span className={"rounded-full px-2.5 py-1 text-xs font-medium " + (item.status === "Draft" ? "bg-amber-500/10 text-amber-700 dark:text-amber-300" : "bg-muted text-muted-foreground")}>{item.status}</span></td>
-                    <td className="px-4 py-3">{item.status === "Draft" ? <button type="button" onClick={() => preparePrint(item)} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"><Printer className="size-3.5" aria-hidden="true" />Print draft</button> : <span className="text-xs text-muted-foreground">Sample only</span>}</td>
+                    <td className="px-4 py-3"><span className={"rounded-full px-2.5 py-1 text-xs font-medium " + (item.status === "Session" ? "bg-primary/10 text-primary" : "bg-muted text-muted-foreground")}>{item.status}</span></td>
+                    <td className="px-4 py-3">{item.status === "Session" ? <button type="button" onClick={() => preparePrint(item)} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"><Printer className="size-3.5" aria-hidden="true" />Print copy</button> : <span className="text-xs text-muted-foreground">Sample only</span>}</td>
                   </tr>
                 ))}
               </tbody>
@@ -331,7 +337,7 @@ function IssuancesManagement() {
           <p className="text-sm font-medium">Barangay Mayondon LGU</p>
           <p className="text-xs">Los Baños, Laguna</p>
           <h1 className="mt-3 text-xl font-bold">{printRecord?.type ?? selectedType}</h1>
-          <p className="mt-2 text-xs">DRAFT REVIEW COPY · NOT AN OFFICIAL DOCUMENT</p>
+          
         </header>
         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
           {printFields.map((field) => {
@@ -346,7 +352,7 @@ function IssuancesManagement() {
           })}
         </div>
         <footer className="mt-10 border-t border-gray-300 pt-3 text-xs">
-          Record: {printRecord?.id ?? "Print preview"} · Status: Draft only · This layout is for design review and must be validated by the barangay.
+          Record: {printRecord?.id ?? "New record"}
         </footer>
       </section>
     </div>
