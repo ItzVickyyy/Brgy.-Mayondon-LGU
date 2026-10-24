@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Search, Users, House, Vote, Info } from "lucide-react"
+import { Search, Users, House, Vote } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
@@ -52,11 +52,6 @@ function RecordsManagement() {
         <p className="text-sm font-medium text-primary">Admin Portal</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Records Management</h1>
         <p className="mt-2 text-sm text-muted-foreground">Organize resident, household, and voter records in one place.</p>
-      </div>
-
-      <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        <p>Draft preview using fictional sample records only. This page is not connected to the database and does not save changes.</p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
