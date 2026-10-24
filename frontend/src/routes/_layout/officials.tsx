@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Info, Search, UserRound } from "lucide-react"
+import { Search, UserRound } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
@@ -30,11 +30,6 @@ function OfficialsManagement() {
         <p className="text-sm font-medium text-primary">Admin Portal</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Officials</h1>
         <p className="mt-2 text-sm text-muted-foreground">A proposed page for maintaining barangay officials and their terms.</p>
-      </div>
-
-      <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        <p>Draft preview using fictional names and positions. The official list, fields, and whether this module is needed must be confirmed with the barangay.</p>
       </div>
 
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
