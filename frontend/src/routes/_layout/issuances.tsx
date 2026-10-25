@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { FileCheck2, Info, Printer, Search } from "lucide-react"
+import { FileCheck2, Printer, Search } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
@@ -214,12 +214,6 @@ function IssuancesManagement() {
       <div className="print:hidden">
         <p className="text-sm font-medium text-primary">Admin Portal</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Issuances Management</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Draft forms based on the four hardcopy document types provided for review.</p>
-      </div>
-
-      <div className="print:hidden flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        <p>Draft only. Saved drafts stay in this page session and are lost when the page is refreshed. Sample history is fictional. Printing creates a review copy, not an official barangay document. No data is sent to the backend.</p>
       </div>
 
       {notice && <div role="status" className="print:hidden rounded-lg border bg-muted/40 px-4 py-3 text-sm">{notice}</div>}
@@ -278,7 +272,6 @@ function IssuancesManagement() {
               <p className="mt-1 text-muted-foreground">Document: {selectedType}</p>
               <p className="text-muted-foreground">Name: {currentName}</p>
               <p className="text-muted-foreground">Date: {formatDate(currentDate)}</p>
-              <p className="mt-2 text-xs text-muted-foreground">Fields follow the hardcopy list you provided. Required fields, fees, approval steps, official wording, and final print layout still need barangay confirmation.</p>
             </div>
             <div className="md:col-span-2 flex flex-wrap gap-2">
               <button type="button" onClick={clearForm} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Clear Form</button>
@@ -331,7 +324,6 @@ function IssuancesManagement() {
           <p className="text-sm font-medium">Barangay Mayondon LGU</p>
           <p className="text-xs">Los Baños, Laguna</p>
           <h1 className="mt-3 text-xl font-bold">{printRecord?.type ?? selectedType}</h1>
-          <p className="mt-2 text-xs">DRAFT REVIEW COPY · NOT AN OFFICIAL DOCUMENT</p>
         </header>
         <div className="grid grid-cols-2 gap-x-8 gap-y-4">
           {printFields.map((field) => {
@@ -346,7 +338,7 @@ function IssuancesManagement() {
           })}
         </div>
         <footer className="mt-10 border-t border-gray-300 pt-3 text-xs">
-          Record: {printRecord?.id ?? "Print preview"} · Status: Draft only · This layout is for design review and must be validated by the barangay.
+          Record: {printRecord?.id ?? "Print preview"}
         </footer>
       </section>
     </div>
