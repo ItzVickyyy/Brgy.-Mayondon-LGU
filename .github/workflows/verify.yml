@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROJECT_NAME: Barangay Mayondon Records and Document Issuance System
-      SECRET_KEY: ci-only-placeholder-secret-key
+      SECRET_KEY: ci-only-placeholder-secret-key-0123456789
       FIRST_SUPERUSER: ci-admin@example.com
       FIRST_SUPERUSER_PASSWORD: ci-only-placeholder-password
       POSTGRES_PASSWORD: ci-only-placeholder-database-password
@@ -32,7 +32,7 @@ jobs:
         run: docker compose config --quiet
 
   docker-build:
-    name: Build application image
+    name: Build and run without internet egress
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -42,3 +42,123 @@ jobs:
 
       - name: Build application image
         run: docker build --file backend/Dockerfile --tag mayondon-records:ci .
+
+      - name: Verify runtime on an isolated Docker network
+        shell: bash
+        env:
+          PROJECT_NAME: Barangay Mayondon Records and Document Issuance System
+          SECRET_KEY: ci-only-placeholder-secret-key-0123456789
+          FIRST_SUPERUSER: ci-admin@example.com
+          FIRST_SUPERUSER_PASSWORD: ci-only-placeholder-password
+          POSTGRES_PASSWORD: ci-only-placeholder-database-password
+        run: |
+          set -euo pipefail
+          network="mayondon-offline-test"
+          db="mayondon-offline-db"
+          app="mayondon-offline-app"
+          cleanup() {
+            docker rm -f "$app" "$db" >/dev/null 2>&1 || true
+            docker network rm "$network" >/dev/null 2>&1 || true
+          }
+          trap cleanup EXIT
+
+          # The internal network prevents containers from reaching the internet.
+          # Images are built/pulled before runtime isolation is tested.
+          docker network create --internal "$network"
+          docker run -d --name "$db" --network "$network" --network-alias db \
+            -e POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
+            -e POSTGRES_DB=app postgres:18
+
+          ready=0
+          for attempt in $(seq 1 30); do
+            if docker exec "$db" pg_isready -U postgres -d app >/dev/null 2>&1; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            docker logs "$db"
+            echo "PostgreSQL did not become ready on the isolated network."
+            exit 1
+          fi
+
+          app_env=(
+            -e "PROJECT_NAME=$PROJECT_NAME"
+            -e "SECRET_KEY=$SECRET_KEY"
+            -e "FIRST_SUPERUSER=$FIRST_SUPERUSER"
+            -e "FIRST_SUPERUSER_PASSWORD=$FIRST_SUPERUSER_PASSWORD"
+            -e "POSTGRES_PASSWORD=$POSTGRES_PASSWORD"
+            -e "DATABASE_URL=postgresql://postgres:$POSTGRES_PASSWORD@db:5432/app"
+            -e "SMTP_HOST="
+            -e "EMAILS_FROM_EMAIL="
+            -e "SENTRY_DSN="
+            -e "USERS_OPEN_REGISTRATION=false"
+          )
+
+          docker run --rm --network "$network" "${app_env[@]}" \
+            --entrypoint alembic mayondon-records:ci upgrade head
+          docker run --rm --network "$network" "${app_env[@]}" \
+            --entrypoint python mayondon-records:ci app/initial_data.py
+
+          docker run -d --name "$app" --network "$network" \
+            -p 127.0.0.1:18000:8000 "${app_env[@]}" mayondon-records:ci
+
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error \
+              http://127.0.0.1:18000/api/v1/utils/health-check/ >/dev/null 2>&1; then
+              ready=1
+              break
+            fi
+            sleep 2
+          done
+          if [ "$ready" -ne 1 ]; then
+            docker logs "$app"
+            echo "Application did not become healthy without internet egress."
+            exit 1
+          fi
+
+          # Verify the app serves the SPA and its built assets locally.
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from urllib.request import urlopen
+
+          base = "http://127.0.0.1:18000"
+
+          class Assets(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.urls = []
+
+              def handle_starttag(self, tag, attrs):
+                  attrs = dict(attrs)
+                  for key in ("src", "href"):
+                      value = attrs.get(key, "")
+                      if value and (value.startswith("/") or value.startswith("http")):
+                          if tag in ("script", "link"):
+                              self.urls.append(value)
+
+          with urlopen(base + "/", timeout=10) as response:
+              html = response.read().decode("utf-8")
+              assert response.status == 200
+          parser = Assets()
+          parser.feed(html)
+          assert parser.urls, "No frontend script or stylesheet assets were found."
+          for asset in parser.urls:
+              assert asset.startswith("/"), f"Unexpected external frontend asset: {asset}"
+              with urlopen(base + asset, timeout=10) as response:
+                  assert response.status == 200, f"Frontend asset failed: {asset}"
+          with urlopen(base + "/login", timeout=10) as response:
+              assert response.status == 200, "SPA login route did not load."
+          print("Offline runtime check passed: health endpoint, SPA routes, and local assets loaded.")
+          PY
+
+          # Prove the application container cannot reach a public website.
+          if docker exec "$app" python -c \
+            "import urllib.request; urllib.request.urlopen('https://example.com', timeout=3)" \
+            >/dev/null 2>&1; then
+            echo "Unexpected internet access from the isolated application container."
+            exit 1
+          fi
+          echo "Confirmed: the application container has no internet egress."
