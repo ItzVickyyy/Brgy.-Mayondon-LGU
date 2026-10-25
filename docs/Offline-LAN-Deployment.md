@@ -27,7 +27,7 @@ This is **LAN operation without internet**, not a standalone copy of the databas
 - The Docker image builds the frontend and serves it through the FastAPI application on the same origin.
 - PostgreSQL data is stored in a named Docker volume so it persists across container restarts.
 - SMTP and Sentry are disabled by default in the offline environment example.
-- Vercel and Supabase configuration files are retained as part of the original Foundation setup, but they are not part of the local LAN startup path.
+- Vercel-specific configuration and Supabase transaction-pooler handling have been removed from the active deployment code. The local LAN startup path uses the configured local PostgreSQL service.
 
 These changes prepare a deployment path. They do not prove that the complete application is ready for the barangay. The current app still contains starter-template features that must be reviewed against the signed Creative Brief.
 
