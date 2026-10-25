@@ -32,13 +32,32 @@ if ($LASTEXITCODE -ne 0) {
     throw "Copying the backup into the database container failed."
 }
 
+# Prevent requests from changing data while the restore is in progress.
+docker compose stop backend
+if ($LASTEXITCODE -ne 0) {
+    docker compose exec -T db rm -f $containerPath
+    throw "Could not stop the backend. Restore cancelled."
+}
+
+$restoreSucceeded = $false
 try {
     docker compose exec -T db pg_restore -U postgres -d app --clean --if-exists --no-owner --no-privileges $containerPath
     if ($LASTEXITCODE -ne 0) {
-        throw "pg_restore reported an error. Review the output and verify the database before using the system."
+        throw "pg_restore reported an error. The backend will remain stopped until the database is checked."
     }
-    Write-Host "Restore command completed. Verify login, key records, and application workflows before returning the system to use."
+    $restoreSucceeded = $true
 }
 finally {
     docker compose exec -T db rm -f $containerPath
+}
+
+if ($restoreSucceeded) {
+    docker compose start backend
+    if ($LASTEXITCODE -ne 0) {
+        throw "Restore completed, but the backend did not restart. Verify the database and start the backend manually."
+    }
+    Write-Host "Restore command completed and backend restarted. Verify login, key records, and application workflows before returning the system to use."
+}
+else {
+    throw "Restore did not complete. Keep the backend stopped and verify the database before restarting the application."
 }
