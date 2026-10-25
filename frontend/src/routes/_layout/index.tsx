@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Activity, FileCheck2, House, Users, Vote, TrendingUp, ChartNoAxesColumn, ChartPie, CalendarDays } from "lucide-react"
+import { Activity, FileCheck2, House, Users, Vote, TrendingUp, ChartPie, CalendarDays } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
@@ -97,12 +97,7 @@ function Dashboard() {
         <div className="flex items-center gap-2 self-start rounded-lg border bg-card px-3 py-2 text-sm text-muted-foreground sm:self-auto">
           <CalendarDays className="size-4" aria-hidden="true" />
           <span>Dashboard overview</span>
-          <span className="rounded-md bg-amber-500/10 px-2 py-1 text-xs font-medium text-amber-700 dark:text-amber-300">Draft</span>
         </div>
-      </div>
-
-      <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
-        <strong className="font-semibold text-foreground">Draft preview:</strong> All numbers and activity entries on this page are sample data for layout planning. They are not actual Barangay Mayondon records and are not connected to the backend.
       </div>
 
       <section aria-label="Summary statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -207,10 +202,6 @@ function Dashboard() {
         <p className="mt-2 text-xs text-muted-foreground">Real activity history would require an approved logging design and backend support.</p>
       </section>
 
-      <div className="flex items-start gap-2 text-xs text-muted-foreground">
-        <ChartNoAxesColumn className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        <p>Dashboard contents, document categories, sector groupings, and reporting periods remain subject to client approval. Avoid entering real resident data into this draft.</p>
-      </div>
     </div>
   )
 }
