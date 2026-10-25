@@ -199,3 +199,33 @@ Audit the `Foundation` branch for Vercel/Supabase runtime dependencies and stren
 - [ ] Decide whether the API documentation page must work offline. If required, replace its CDN dependency with locally packaged assets.
 - [ ] Before client deployment, build and cache all images while online, then test the system with internet disconnected while preserving the office LAN. Verify login, records, local assets, document printing, multi-computer access, restart behavior, and backup/restore using synthetic data.
 - [ ] Continue Week 14 design deliverables and obtain client approval of the Creative Brief and architecture before adding client-specific modules.
+
+
+---
+
+## Offline deployment command safety correction
+
+- **Date:** 2026-10-25
+- **Time:** Time not recorded
+- **Phase / milestone:** Week 14 preparation, offline/LAN deployment
+- **Work type:** Deployment configuration review, documentation and script correction
+- **Status:** Updated on `Foundation`; full CI verification for the latest journal commit is pending.
+
+### Finding
+A review of the deployment instructions found that plain `docker compose` automatically includes `compose.override.yml`. That override is intended for local development and adds Adminer, Mailpit, and Playwright services, publishes PostgreSQL on all host interfaces, and configures the backend for development. Using the default command for an office LAN deployment could expose development-only services and the database.
+
+### Changes made
+- Updated `docs/Offline-LAN-Deployment.md` to use `docker compose -f compose.yml` for configuration validation, build, startup, status, logs, migrations, and initialization.
+- Updated `scripts/backup-db.ps1` and `scripts/restore-db.ps1` to target the base deployment file explicitly, including database lookup, backup/restore operations, and backend stop/start commands.
+- Kept `compose.override.yml` available for the existing local development and test workflow. The offline deployment guide now bypasses it explicitly rather than relying on default Compose file discovery.
+
+### Verification and limitations
+- **Offline deployment verification:** Passed on the same application code before these documentation/script-only changes, and passed again on commit `a778931888dc9f0bdb4bed0a0d87a3df22bdff85`.
+- **Other CI workflows:** Still running at the time of this entry. Check the latest branch head before reporting all workflows green.
+- **PowerShell scripts:** Reviewed and updated through GitHub, but not executed on a Windows host in this session.
+- **Client site:** Actual LAN, firewall, printer, offline operation, and backup/restore remain unverified at Barangay Mayondon.
+
+### Next actions
+- [ ] Verify all workflows on the latest `Foundation` commit.
+- [ ] On the deployment computer, use only `docker compose -f compose.yml` for the offline deployment. Do not use plain `docker compose up -d` for the client setup.
+- [ ] Test backup and restore with synthetic data before any real resident data is loaded.
