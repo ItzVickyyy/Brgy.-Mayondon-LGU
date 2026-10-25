@@ -80,7 +80,7 @@ Branding (name, location, logo) lives in `frontend/src/config/site.ts`. The prot
 | PostgreSQL 18 | Local database container | Data is persisted in the `app-db-data` volume; create separate backups and test restore |
 | FastAPI | Serves API and built frontend on port `8000` | The backend container binds to `0.0.0.0:8000`; Compose publishes the configured host port |
 | React + Vite | Frontend built into the backend image | Staff access the same origin, normally `http://<host-LAN-IP>:8000` |
-| Vercel + Supabase | Original online Foundation setup | Retained in repository configuration, but not used by the proposed offline Compose deployment |
+| Docker Compose + local PostgreSQL | Proposed offline/LAN deployment | Active deployment path; still requires client-site verification |
 | SMTP | Optional email service | Disabled by default for offline use; account recovery/setup by email will not work without a reachable approved SMTP server |
 | Sentry | Optional external monitoring | Leave unset for offline client operation unless separately reviewed and approved |
 | GitHub | Source control and CI | Development workflow only; not required for normal operation at the client site |
@@ -105,7 +105,7 @@ The offline deployment guide contains the current setup procedure, LAN access in
 
 ## 6. Offline/LAN deployment checklist
 
-The current target is a designated office computer hosting the frontend, API, and local PostgreSQL database. Do not use the old Vercel deployment checklist for the client installation.
+The current target is a designated office computer hosting the frontend, API, and local PostgreSQL database. Use the offline LAN deployment guide for the client installation.
 
 - [ ] Review and approve the operating model in the signed Creative Brief.
 - [ ] Build the Docker image while required dependencies and images are available.
