@@ -257,3 +257,33 @@ A review of the deployment instructions found that plain `docker compose` automa
 - [ ] Verify all relevant GitHub Actions on the latest `Foundation` commit.
 - [ ] Continue the dependency audit for any remaining Vercel/Supabase-specific code or environment variables and remove only code confirmed to be unnecessary for the approved offline design.
 - [ ] Run the real offline/LAN, printing, and backup/restore checks with synthetic data before client-site use.
+
+
+---
+
+## Remove unused hosted-deployment configuration and database pooler support
+
+- **Date:** 2026-10-25
+- **Time:** Time not recorded
+- **Phase / milestone:** Week 14 preparation, offline/LAN deployment
+- **Work type:** Repository cleanup, configuration simplification, documentation maintenance
+- **Status:** Changes committed directly to `Foundation`; final CI verification is pending.
+
+### Changes made
+- Deleted the repository-root `vercel.json` and `frontend/vercel.json`.
+- Removed the Vercel-specific `[tool.vercel]` section from `backend/pyproject.toml`.
+- Simplified `backend/app/core/db.py` to use a standard SQLAlchemy connection pool with the configured database URL. Removed Supabase transaction-pooler handling, `NullPool` selection, and the special psycopg prepared-statement option.
+- Removed the `DATABASE_POOL_MODE` and `MIGRATION_DATABASE_URL` settings from `backend/app/core/config.py`, removed the pool-mode environment value from `.env.example`, and simplified Alembic to use `DATABASE_URL`.
+- Updated the tech-stack, offline deployment, system specification, and source-of-truth documents to describe the current local PostgreSQL/Docker deployment path and no longer claim the old Vercel/Supabase configuration remains active.
+- Kept the existing offline Docker deployment path and local PostgreSQL configuration. No database schema or migration was changed.
+
+### Verification and limitations
+- Changes were committed directly to `Foundation`. No branch rename, pull request, or merge was performed.
+- No local backend tests, frontend tests, Docker build, or Windows deployment test was run in this session.
+- The cleanup removes Vercel-specific configuration and Supabase transaction-pooler compatibility from the active code, but the full CI suite must pass before the latest branch head is treated as verified.
+- This does not prove the system works at Barangay Mayondon without internet. Client-site LAN, printing, backup/restore, security, and Creative Brief approval remain pending.
+
+### Next actions
+- [ ] Verify backend, frontend, Docker Compose, Playwright, secret scan, Zizmor, conflict detector, and offline deployment workflows for the latest `Foundation` head.
+- [ ] Inspect any remaining Vercel/Supabase mentions and distinguish historical journal entries from active configuration or runtime dependencies.
+- [ ] Run the offline deployment and backup/restore checks with synthetic data on the actual test computer before client-site use.
