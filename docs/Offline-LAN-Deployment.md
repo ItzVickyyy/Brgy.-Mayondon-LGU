@@ -56,7 +56,7 @@ Copy-Item .env.example .env
 Edit `.env` and set unique values for:
 
 - `SECRET_KEY`: a random secret of at least 32 bytes.
-- `POSTGRES_PASSWORD`: a strong database password.
+- `POSTGRES_PASSWORD`: a strong database password. Until URL-encoding is handled explicitly in the Compose configuration, use a long random alphanumeric password without URL-reserved characters such as `@`, `:`, `/`, or `#`.
 - `FIRST_SUPERUSER`: the initial administrator username/email.
 - `FIRST_SUPERUSER_PASSWORD`: a strong initial administrator password.
 - `APP_PORT`: normally `8000`.
