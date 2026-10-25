@@ -261,33 +261,37 @@ Ratings are confidential and members may receive different grades. Rating guide:
 
 ## 13. Open items
 
-- [ ] Request letter signed by all three instructors (Oct 19), then delivered to the barangay; fill in the client's name, position, office and address
-- [ ] Interview done; sample forms, logbooks, logo and seal collected
-- [ ] **Which modules** the system will have (decide from the client's answers)
-- [ ] Confirm bracketed values in the Guide with Prof. Camba: number of mockup pages, mobile pages, presentation length, survey respondents, photos per narrative, paper size, submission platform
-- [ ] Confirm with Sir Ramos what **Networking 2** expects when the system is cloud-hosted (e.g. network setup, connectivity and security checks at the barangay hall) and what Sir Matute expects for **Client-Server Technologies**
-- [ ] Confirm the barangay has reliable internet and devices for an online system; if not, discuss an offline option
-- [ ] Set up the Vercel and Supabase accounts and agree who owns them
-- [ ] Deploy preview project and verify routing, database connections, migrations, and login before production use
-- [ ] Confirm Vercel Hobby terms allow the LGU's intended organizational use before entering any real resident or office data; otherwise choose a compliant hosting/offline option
+- [ ] Confirm the request letter has the instructor signatures and client receiving copy required by the Final Project Guide.
+- [ ] Review [Creative-Brief.md](Creative-Brief.md) with the client and obtain client and group leader signatures before design begins.
+- [ ] Confirm final document types, approved print layouts, required resident fields, import rules, ID numbering and validity rules, and account permissions.
+- [ ] Confirm the offline/LAN architecture, designated host computer, other client computers, printer access, and who will maintain the setup.
+- [ ] Decide how ID photo background removal will work without internet. The client described using an online service today.
+- [ ] Agree on backup frequency, external-drive custody, restore testing, and recovery responsibilities.
+- [ ] Confirm bracketed values in the Guide with Prof. Camba: number of mockup pages, mobile pages, presentation length, survey respondents, photos per narrative, paper size, and submission platform.
+- [ ] Confirm with Sir Ramos what Networking 2 expects for local network setup, connectivity, and security at the barangay site, and what Sir Matute expects for Client-Server Technologies.
+- [ ] Review the Foundation implementation against the signed scope before adapting, removing, or adding modules.
+- [ ] Verify the chosen architecture and installation with a test setup before using real resident data.
 
 ---
 
 ## 14. Status
 
+**Current status (October 25, 2026):** Interviews were conducted on October 19–20 and an interview-based Creative Brief draft is available in `docs/Creative-Brief.md`. It is not yet signed by the client. The client prefers fully offline operation over the local network, which conflicts with the current online-oriented Vercel + Supabase Foundation plan. Keep the repository on `Foundation`; do not rename or merge this branch or create `production` until the team reviews the requirements and architecture.
+
 - [x] Group formed; client assigned
 - [x] Questionnaire drafted and fixed (7 questions)
-- [x] Request letter drafted (to be signed Oct 19)
-- [x] Repository tailored from the template (branding, closed registration)
-- [x] Foundation deployment configuration prepared (single-project Vercel Services routing, SPA fallback, configurable Vite output, explicit CORS fallback, Supabase transaction-pooler support); hosting not yet verified
-- [x] Added reusable admin authorization, structured admin-write logs, and database-backed login lockout fields; audit events currently go to application logs rather than a dedicated audit table
-- [x] Added responsive app-header breadcrumbs and a public `/welcome` landing page with placeholder announcements/contact details; public content still needs client approval
+- [x] Client interviews conducted on October 19–20, 2026
+- [x] Interview-based Creative Brief draft documented
+- [x] Sample document formats, current issuing file, logo, ID layout, and resident/ID data sheets reported as received during the interviews
+- [x] Repository foundation prepared; current online hosting configuration remains unverified and is not client-approved
+- [x] Existing authentication, authorization, login lockout, and security controls documented
+- [x] Added responsive app-header breadcrumbs and a public `/welcome` landing page with placeholder announcements/contact details; public content is not in the current draft scope and needs review before use
 - [x] Closed the three template-generated Dependabot pull requests that targeted `master`; dependency updates will be handled deliberately
-- [ ] Interview
-- [ ] Creative Brief
-- [ ] Design
+- [ ] Creative Brief reviewed and signed
+- [ ] Offline/LAN architecture and operational responsibilities confirmed
+- [ ] Initial design reviewed with client
 - [ ] Version 1
-- [ ] Testing and turnover
+- [ ] Testing and technology transfer
 - [ ] Presentation
 - [ ] Final report
 
