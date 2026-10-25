@@ -102,7 +102,7 @@ jobs:
             --entrypoint python mayondon-records:ci app/initial_data.py
 
           docker run -d --name "$app" --network "$network" \
-            "\${app_env[@]}" mayondon-records:ci
+            "${app_env[@]}" mayondon-records:ci
 
           # Test from inside the isolated application container. The Docker
           # internal network intentionally does not expose published ports to
