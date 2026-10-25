@@ -2,7 +2,7 @@
 
 **Status: Interview-derived requirements draft — Creative Brief signature, final approval, local-network architecture, and deployment verification are pending.**
 
-This document combines client requirements and technical architecture in one place so the team can maintain a single system reference. The snapshot below records the October 19–20, 2026 interviews. The requirements are not formally approved until the client reviews and signs `Creative-Brief.md`. The repository retains its original Vercel + Supabase configuration and now has an initial Docker-based local-host path for offline LAN operation. The local path is preparation only and has not yet been tested on the barangay's network or approved by the client.
+This document combines client requirements and technical architecture in one place so the team can maintain a single system reference. The snapshot below records the October 19–20, 2026 interviews. The requirements are not formally approved until the client reviews and signs `Creative-Brief.md`. The repository now uses an initial Docker-based local-host path for offline LAN operation, with legacy Vercel configuration and Supabase transaction-pooler handling removed. The local path is preparation only and has not yet been tested on the barangay's network or approved by the client.
 
 The academic schedule, grading, team workflow, and overall project status remain in [Source-of-Truth.md](Source-of-Truth.md). Use [Security-Measures.md](Security-Measures.md) for the active security checklist.
 
@@ -62,7 +62,7 @@ The client's stated preference is a **fully offline system** because the office 
 
 ### Important unresolved design and technical decisions
 
-1. The original Vercel + Supabase configuration remains in the repository, but the current proposed client path is Docker Compose with local PostgreSQL and the frontend served by FastAPI. This setup has not yet been tested without internet or approved by the client. Do not represent it as production-ready.
+1. The proposed client path is Docker Compose with local PostgreSQL and the frontend served by FastAPI. Legacy Vercel configuration and Supabase transaction-pooler handling have been removed. This setup has not yet been tested on the client's network or approved by the client. Do not represent it as production-ready.
 2. The client currently uses an online background-removal service for ID photos. A fully offline workflow needs a client-approved local alternative or a clearly documented manual workaround. Do not upload real resident photos to an external service.
 3. Confirm exact document types, approved layouts, required data fields, import rules, ID numbering and validity rules, account permissions, and the backup/restore procedure.
 4. Treat resident and ID information as confidential. Use synthetic data in development and demonstrations, restrict access, and agree on data handling, retention, backups, and recovery with the client in line with the Data Privacy Act of 2012.
@@ -299,7 +299,7 @@ Never rely only on frontend visibility to enforce permissions. Test protected AP
 
 - **Client preference (online/offline/hybrid):** Client stated a preference for fully offline operation during the October 19–20, 2026 interviews. The signed Creative Brief and deployment arrangement are still pending.
 - **Client internet and devices:** Pending verification.
-- **Prepared option:** Docker Compose local-host deployment for offline LAN use. The original Vercel/Supabase configuration remains in the repository but is not the intended offline startup path.
+- **Prepared option:** Docker Compose local-host deployment for offline LAN use. Vercel-specific configuration and Supabase transaction-pooler handling have been removed from the active deployment code.
 - **Alternative:** Assess if connectivity, provider terms, privacy requirements, or instructor expectations make the planned option unsuitable.
 - **TLS / HTTPS:** Production verification pending.
 - **CORS / trusted proxy:** Production verification pending.
