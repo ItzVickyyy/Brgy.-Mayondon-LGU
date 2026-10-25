@@ -156,3 +156,46 @@ The implementation commit passed all observed GitHub Actions workflows:
 - [ ] Prioritize the Week 14 design deliverables for October 26 and 29: sitemap, wireframes, at least the suggested number of full-color and mobile mockups, style guide, and client feedback list. Confirm bracketed quantities with Prof. Camba.
 - [ ] Review the Creative Brief with the client and obtain the required signatures before treating the scope as approved.
 - [ ] Schedule a separate synthetic-data test of the offline/LAN setup before any use of real resident records.
+
+
+---
+
+## Offline dependency audit and isolated-runtime verification
+
+- **Date:** 2026-10-25
+- **Time:** Time not recorded
+- **Phase / milestone:** Week 14 preparation, offline/LAN deployment verification
+- **Work type:** Architecture audit, deployment test, bug fix, CI verification
+- **Status:** Offline deployment CI check passed on the implementation commit; remaining workflows and actual client-site testing must still be verified.
+
+### Goal
+Audit the `Foundation` branch for Vercel/Supabase runtime dependencies and strengthen automated verification that the packaged system can run without internet egress.
+
+### Work performed
+- Reviewed the local Docker Compose configuration, frontend build configuration, frontend package dependencies, application startup, database settings, offline deployment guide, and relevant environment files.
+- Confirmed the intended Docker path uses local PostgreSQL and packages the built frontend with FastAPI. The frontend package does not list a Supabase SDK, and the offline environment example leaves SMTP and Sentry settings empty.
+- Identified remaining configuration/code references that are not required by the offline startup path: root and frontend `vercel.json` files, optional Supabase transaction-pooler handling in the database settings, and an interactive Swagger UI endpoint that uses CDN-hosted assets. These remain audit items; they should not be confused with active dependencies of the staff-facing UI.
+- Extended `.github/workflows/verify.yml` to build the app, start PostgreSQL and the app on an internal Docker network with no internet egress, apply migrations, initialize a test administrator, check local frontend assets and the SPA login route, exercise login/token authentication, and confirm that the application container cannot reach a public IP.
+- The first CI test attempt exposed that direct navigation to `/login` returned 404 in the packaged self-hosted app. Replaced the previous frontend mount with a guarded SPA fallback that serves existing local assets, returns `index.html` for client-side routes, prevents unknown API paths from returning the frontend, and rejects paths that escape the frontend directory.
+- Corrected the isolated-network test to perform its checks from inside the app container. The internal Docker network is intentionally not reachable through a published host port in this test arrangement.
+- Committed changes directly to `Foundation`. No branch rename, pull request, or merge was performed.
+
+### Tests and verification
+- **Frontend route fix commit:** `8ca885ee9547f2c52f6e2652fb9ddf47b2c111c6`
+- **Offline deployment verification:** Passed on that commit. The test applied database migrations, initialized a test administrator, started the app without internet egress, and passed the runtime checks.
+- **Other GitHub Actions workflows:** Still running at the time of this journal entry. Verify the latest branch head before reporting the full CI suite as green.
+- **Local testing:** No local Docker build or local test suite was run.
+- **Client-site testing:** No test was performed on the barangay's computers, printer, or actual LAN. This CI simulation does not replace the required physical offline/LAN test.
+
+### Remaining findings and risks
+- The Vercel configuration files and optional Supabase-related connection-pool code remain in the repository, but they are not needed for the local Docker path with default settings.
+- The custom `/docs` endpoint uses Swagger UI assets hosted externally, so that developer documentation page may not render fully without internet. The staff-facing frontend uses packaged local assets.
+- The client's online background-removal process for resident ID photos remains unresolved. Do not upload resident photos to an external service for testing or production use without explicit client approval and privacy review.
+- The signed Creative Brief, client approval of the LAN architecture, real offline operation, printer behavior, backup/restore, and deployment security remain unverified. Do not use real resident data until the required approvals and safeguards are in place.
+
+### Next actions
+- [ ] Verify all GitHub Actions for the latest `Foundation` commit, including backend, frontend, Docker Compose, Playwright, secret scanning, Zizmor, conflict detection, and offline deployment verification.
+- [ ] Decide whether to remove the unused Vercel configuration files and Supabase-specific optional connection-pool support, or retain them as inactive historical/template configuration.
+- [ ] Decide whether the API documentation page must work offline. If required, replace its CDN dependency with locally packaged assets.
+- [ ] Before client deployment, build and cache all images while online, then test the system with internet disconnected while preserving the office LAN. Verify login, records, local assets, document printing, multi-computer access, restart behavior, and backup/restore using synthetic data.
+- [ ] Continue Week 14 design deliverables and obtain client approval of the Creative Brief and architecture before adding client-specific modules.
