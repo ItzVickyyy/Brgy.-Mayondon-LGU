@@ -41,12 +41,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
     DATABASE_URL: PostgresDsn
-    # Set this to the session-pooler/direct URL when running Alembic migrations.
-    MIGRATION_DATABASE_URL: PostgresDsn | None = None
-    # Use "transaction" for Supabase transaction-pooler connections on port 6543.
-    DATABASE_POOL_MODE: Literal["default", "transaction"] = "default"
 
-    @field_validator("DATABASE_URL", "MIGRATION_DATABASE_URL", mode="before")
+    @field_validator("DATABASE_URL", mode="before")
     @classmethod
     def _use_psycopg_driver(cls, value: str | PostgresDsn | None) -> str | None:
         if value is None:
@@ -121,14 +117,8 @@ class Settings(BaseSettings):
             else:
                 raise ValueError(message)
 
-        for database_url_name in ("DATABASE_URL", "MIGRATION_DATABASE_URL"):
-            database_url = getattr(self, database_url_name)
-            if database_url is None:
-                continue
-            for host in database_url.hosts():
-                self._check_default_secret(
-                    f"{database_url_name} password", host["password"]
-                )
+        for host in self.DATABASE_URL.hosts():
+            self._check_default_secret("DATABASE_URL password", host["password"])
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
