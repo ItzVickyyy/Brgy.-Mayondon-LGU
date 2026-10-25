@@ -70,6 +70,7 @@ def test_recovery_password(
         patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
         patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
         patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
+        patch("app.api.routes.login.send_email", return_value=None),
     ):
         email = "test@example.com"
         r = client.post(
