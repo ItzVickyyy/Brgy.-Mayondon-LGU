@@ -9,7 +9,7 @@ Project Guide*, the Guide wins; fix this file.
 a new chat, then ask your question. Update the file whenever a decision changes
 (see [Maintenance](#maintenance)).
 
-Last updated: October 18, 2026
+Last updated: October 25, 2026
 
 ---
 
@@ -19,8 +19,8 @@ Last updated: October 18, 2026
 |---|---|
 | Project | A working web system for a real client, designed, built, tested and turned over by one group |
 | Client | Barangay Mayondon LGU, Los Baños, Laguna (assigned by Prof. Camba) |
-| System to build | **Not decided yet.** Decided after the client interview (Week 13) |
-| Hosting | Online: **Vercel** (frontend and API) + **Supabase** (PostgreSQL). See `Complete-Tech-Stacks.md` |
+| System to build | **Barangay Mayondon Records and Document Issuance System** (draft scope from interviews on October 19–20, 2026; client signature still pending) |
+| Operating model | Client prefers a fully offline system on the barangay office's local network. The current Vercel + Supabase foundation does not yet match this preference. Architecture decision and feasibility review are required before implementation or deployment. |
 | School | Laguna State Polytechnic University – Los Baños Campus |
 | Program | BSIT, Major in Web and Mobile Application Development (WMAD), Section 3A |
 | Merged courses | One project replaces the separate final projects of four subjects |
@@ -143,7 +143,7 @@ Hard copy and soft copy (section 10), together with the Peer Evaluation Sheet.
 
 ---
 
-## 6. Creative Brief (2–3 pages, signed by the client)
+## 6. Creative Brief (2–3 pages, signed by the client)\n\nThe current interview-based draft is maintained in [Creative-Brief.md](Creative-Brief.md). It records the October 19–20 interviews and is **pending client review and signatures**. Use that document as the working version, but do not call it approved until the client signs it. The Final Project Guide requires client approval before design starts.
 
 | # | Part | What to write |
 |---|---|---|
@@ -252,9 +252,9 @@ Ratings are confidential and members may receive different grades. Rating guide:
 | Starting point | Full Stack FastAPI Template, cloned and tailored for this project |
 | Backend | FastAPI + SQLModel + PostgreSQL, Python 3.14 |
 | Frontend | React + TypeScript + Vite + Tailwind CSS + shadcn/ui |
-| Deployment | **One Vercel Services project** (frontend + FastAPI backend, Beta on all plans) + **Supabase** (database); deployment remains untested. Two Vercel projects are the fallback if Services cannot be enabled |
+| Existing foundation architecture | React + FastAPI + PostgreSQL, currently prepared for Vercel + Supabase. This is repository groundwork only, not the approved client deployment model. Client prefers fully offline LAN operation; evaluate a local host/database setup and update the architecture before committing to deployment. |
 | Accounts | Admin-only account creation; open sign-up is disabled. `is_superuser` = Admin, other users = Staff. New passwords require 12–128 characters; five failed logins trigger a 15-minute account lockout |
-| Branding | Centralized in `frontend/src/config/site.ts`; official logo pending |
+| Branding | Centralized in `frontend/src/config/site.ts`; client supplied the Barangay Mayondon logo on October 20, 2026. Final UI palette and use of logo remain subject to client design feedback. |
 | AI tools | Free-tier AI assistants only; this folder is the shared context |
 
 ---
