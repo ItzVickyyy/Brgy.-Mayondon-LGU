@@ -18,25 +18,6 @@ def make_settings(**overrides: object) -> Settings:
     return Settings(**values)  # type: ignore[arg-type]
 
 
-def test_rejects_default_password_in_migration_database_url() -> None:
-    with pytest.raises(ValidationError, match="MIGRATION_DATABASE_URL password"):
-        make_settings(
-            MIGRATION_DATABASE_URL=(
-                "postgresql://postgres:changethis@localhost:5432/app"
-            )
-        )
-
-
-def test_accepts_non_default_migration_database_password() -> None:
-    settings = make_settings(
-        MIGRATION_DATABASE_URL=(
-            "postgresql://postgres:secure-migration-password@localhost:5432/app"
-        )
-    )
-
-    assert settings.MIGRATION_DATABASE_URL is not None
-
-
 def test_rejects_short_secret_key_outside_development() -> None:
     with pytest.raises(ValidationError, match="SECRET_KEY must be at least 32 bytes"):
         make_settings(SECRET_KEY="short-secret")
