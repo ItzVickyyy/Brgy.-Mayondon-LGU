@@ -13,9 +13,9 @@ if (-not (Test-Path -LiteralPath $resolvedBackup -PathType Leaf)) {
     throw "Backup file not found: $BackupFile"
 }
 
-$containerId = (docker compose ps -q db).Trim()
+$containerId = (docker compose -f compose.yml ps -q db).Trim()
 if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($containerId)) {
-    throw "The database container is not running. Start it with 'docker compose up -d db' first."
+    throw "The database container is not running. Start it with 'docker compose -f compose.yml up -d db' first."
 }
 
 Write-Warning "RESTORE WARNING: this operation can replace current application database objects and data."
@@ -33,33 +33,33 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # Validate that PostgreSQL can read the archive before stopping the application.
-docker compose exec -T db pg_restore --list $containerPath
+docker compose -f compose.yml exec -T db pg_restore --list $containerPath
 if ($LASTEXITCODE -ne 0) {
-    docker compose exec -T db rm -f $containerPath
+    docker compose -f compose.yml exec -T db rm -f $containerPath
     throw "The selected file is not a readable PostgreSQL custom-format backup. The backend was not stopped."
 }
 
 # Prevent requests from changing data while the restore is in progress.
-docker compose stop backend
+docker compose -f compose.yml stop backend
 if ($LASTEXITCODE -ne 0) {
-    docker compose exec -T db rm -f $containerPath
+    docker compose -f compose.yml exec -T db rm -f $containerPath
     throw "Could not stop the backend. Restore cancelled."
 }
 
 $restoreSucceeded = $false
 try {
-    docker compose exec -T db pg_restore --exit-on-error -U postgres -d app --clean --if-exists --no-owner --no-privileges $containerPath
+    docker compose -f compose.yml exec -T db pg_restore --exit-on-error -U postgres -d app --clean --if-exists --no-owner --no-privileges $containerPath
     if ($LASTEXITCODE -ne 0) {
         throw "pg_restore reported an error. The backend will remain stopped until the database is checked."
     }
     $restoreSucceeded = $true
 }
 finally {
-    docker compose exec -T db rm -f $containerPath
+    docker compose -f compose.yml exec -T db rm -f $containerPath
 }
 
 if ($restoreSucceeded) {
-    docker compose start backend
+    docker compose -f compose.yml start backend
     if ($LASTEXITCODE -ne 0) {
         throw "Restore completed, but the backend did not restart. Verify the database and start the backend manually."
     }
