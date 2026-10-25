@@ -229,3 +229,31 @@ A review of the deployment instructions found that plain `docker compose` automa
 - [ ] Verify all workflows on the latest `Foundation` commit.
 - [ ] On the deployment computer, use only `docker compose -f compose.yml` for the offline deployment. Do not use plain `docker compose up -d` for the client setup.
 - [ ] Test backup and restore with synthetic data before any real resident data is loaded.
+
+
+---
+
+## Remove unused Vercel deployment configuration
+
+- **Date:** 2026-10-25
+- **Time:** Time not recorded
+- **Phase / milestone:** Week 14 preparation, offline/LAN deployment
+- **Work type:** Repository cleanup
+- **Status:** Removed directly from `Foundation`; CI verification is pending.
+
+### Work performed
+- Deleted the repository-root `vercel.json`, which defined a split Vercel frontend/backend deployment and rewrites.
+- Deleted `frontend/vercel.json`, which defined Vercel SPA rewrites.
+- The intended self-hosted deployment uses `compose.yml`, the backend image, packaged frontend assets, and local PostgreSQL. These two Vercel configuration files are not required for that path.
+- No branch rename, pull request, or merge was performed.
+
+### Verification and limitations
+- The two file deletions were committed directly to `Foundation`.
+- No local build or test suite was run for this cleanup.
+- Verify GitHub Actions for the latest branch head before treating the repository as green.
+- This removes the two Vercel configuration files only. It does not claim that every historical reference to Vercel or Supabase has been removed, nor does it prove that the application works on the client's LAN without internet.
+
+### Next actions
+- [ ] Verify all relevant GitHub Actions on the latest `Foundation` commit.
+- [ ] Continue the dependency audit for any remaining Vercel/Supabase-specific code or environment variables and remove only code confirmed to be unnecessary for the approved offline design.
+- [ ] Run the real offline/LAN, printing, and backup/restore checks with synthetic data before client-site use.
