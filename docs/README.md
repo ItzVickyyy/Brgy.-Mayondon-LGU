@@ -5,6 +5,7 @@ Everything the team needs to know about the project lives in this folder.
 | File | What it is | When to read it |
 |---|---|---|
 | [Source-of-Truth.md](Source-of-Truth.md) | Project requirements, schedule, grading, decisions, open items, and status | Before any task; check this after client discussions |
+| [Creative-Brief.md](Creative-Brief.md) | Interview-based scope, objectives, features, exclusions, platform preference, content, timeline, and approval fields | Use as the current draft; client review and signatures are still required |
 | [Developers.md](Developers.md) | Team roles, branch plan, workflows, reviews, testing, migrations, and security guidance | Before starting development or opening a pull request |
 | [How-To-Start.md](How-To-Start.md) | Tested Windows PowerShell steps to start PostgreSQL, migrate and initialize the database, and run the backend and frontend | When setting up or running the project locally |
 | [Complete-Tech-Stacks.md](Complete-Tech-Stacks.md) | Technologies, architecture, and Vercel + Supabase deployment notes | Before coding or planning deployment |
@@ -29,7 +30,7 @@ Use [How-To-Start.md](How-To-Start.md) as the detailed, tested guide for running
 
 ## Keeping the docs current
 
-- Update documentation in the same pull request that changes a decision or workflow.
+- Update documentation in the same pull request that changes a decision or workflow. The interviews on October 19–20, 2026 established a draft clerical records and document-issuance scope. The client prefers fully offline LAN operation, which conflicts with the current online-oriented Foundation hosting plan. Keep this conflict visible until resolved.
 - Move items from "Open items" to "Decisions made" in `Source-of-Truth.md`
   only after they are confirmed. Update the status checklist and date as needed.
 - Keep files focused. Interview notes, test results, mockups, and narrative
