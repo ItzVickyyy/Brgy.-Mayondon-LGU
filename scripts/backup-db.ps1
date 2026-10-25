@@ -23,10 +23,26 @@ if ($LASTEXITCODE -ne 0) {
     throw "pg_dump failed. No backup was confirmed."
 }
 
+docker compose exec -T db pg_restore --list $containerPath
+if ($LASTEXITCODE -ne 0) {
+    docker compose exec -T db rm -f $containerPath
+    throw "The generated backup could not be validated as a PostgreSQL archive."
+}
+
 docker cp "$($containerId):$containerPath" "$backupPath"
 if ($LASTEXITCODE -ne 0) {
     docker compose exec -T db rm -f $containerPath
     throw "Copying the backup from the container failed."
+}
+
+if (-not (Test-Path -LiteralPath $backupPath -PathType Leaf)) {
+    docker compose exec -T db rm -f $containerPath
+    throw "The backup file is missing after copying."
+}
+if ((Get-Item -LiteralPath $backupPath).Length -le 0) {
+    Remove-Item -LiteralPath $backupPath -Force
+    docker compose exec -T db rm -f $containerPath
+    throw "The copied backup file is empty."
 }
 
 docker compose exec -T db rm -f $containerPath
