@@ -61,6 +61,8 @@ Edit `.env` and set unique values for:
 - `FIRST_SUPERUSER_PASSWORD`: a strong initial administrator password.
 - `APP_PORT`: normally `8000`.
 
+For a deployment test, remove `FASTAPI_ENV=development` from `.env` or leave `FASTAPI_ENV=` blank. The current settings accept `development` or an unset value, not a `production` value. In development mode, weak-secret checks only warn; with the setting unset, invalid default secrets or a signing key shorter than 32 bytes prevent startup. This setting alone does not make the application production-secure, so still review authentication, permissions, network exposure, and other deployment controls.
+
 Keep SMTP, Sentry, and external hosted database settings empty for the offline deployment. Never commit the real `.env` file. The example values are placeholders and must be replaced.
 
 ## 5. Build and start the system
