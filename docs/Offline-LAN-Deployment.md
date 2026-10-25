@@ -113,9 +113,26 @@ This setup uses HTTP on a private LAN. It is not encrypted in transit. Before re
 
 ## 8. Backup and restore preparation
 
-At minimum, the team should create a database backup using PostgreSQL's `pg_dump`, save it outside the database container and outside the only copy of the host computer's storage, and verify that it can be restored to a test database. The final commands and schedule must be documented and tested with the actual Compose project before turnover.
+The repository includes PowerShell scripts for a basic local PostgreSQL backup and restore. Run them from the repository root with Docker Compose running.
 
-Do not assume that copying only the Docker volume or leaving backups on the same physical disk protects against disk failure, theft, ransomware, or accidental deletion. Keep backup access restricted because the database may contain residents' personal information.
+Create a backup:
+
+```powershell
+.\scripts\backup-db.ps1
+```
+
+The script creates a timestamped PostgreSQL custom-format dump under `backups\`, copies it out of the database container, and removes its temporary container copy. The `backups\` directory is ignored by Git because backup files may contain resident personal information.
+
+Before restoring, create a fresh backup of the current database. Then choose the dump file and run:
+
+```powershell
+.\scripts\backup-db.ps1
+.\scripts\restore-db.ps1 -BackupFile ".\backups\mayondon-db-YYYYMMDD-HHMMSS.dump"
+```
+
+The restore script asks for the exact confirmation word `RESTORE`. Restoring can replace existing database objects and data. Use only a backup from a compatible application/database version. After restore, verify login, representative records, document generation, and the main workflows before returning the system to use. Do not assume the restore succeeded solely because the command completed.
+
+These scripts are initial utilities and still require execution and recovery testing on the actual deployment environment. Store a protected backup copy on a separate physical device or approved storage location, restrict access, and agree on a backup frequency with the client. A backup stored only on the host computer does not protect against disk failure, theft, ransomware, or accidental deletion.
 
 ## 9. Required verification before client deployment
 
