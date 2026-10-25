@@ -20,7 +20,7 @@ Last updated: October 25, 2026
 | Project | A working web system for a real client, designed, built, tested and turned over by one group |
 | Client | Barangay Mayondon LGU, Los Baños, Laguna (assigned by Prof. Camba) |
 | System to build | **Barangay Mayondon Records and Document Issuance System** (draft scope from interviews on October 19–20, 2026; client signature still pending) |
-| Operating model | Client prefers a fully offline system on the barangay office's local network. The current Vercel + Supabase foundation does not yet match this preference. Architecture decision and feasibility review are required before implementation or deployment. |
+| Operating model | Client prefers a fully offline system on the barangay office's local network. An initial Docker-based local-host deployment path is now prepared on Foundation, but the actual LAN setup, offline workflows, backup/restore, and client approval remain unverified. |
 | School | Laguna State Polytechnic University – Los Baños Campus |
 | Program | BSIT, Major in Web and Mobile Application Development (WMAD), Section 3A |
 | Merged courses | One project replaces the separate final projects of four subjects |
@@ -252,7 +252,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 | Starting point | Full Stack FastAPI Template, cloned and tailored for this project |
 | Backend | FastAPI + SQLModel + PostgreSQL, Python 3.14 |
 | Frontend | React + TypeScript + Vite + Tailwind CSS + shadcn/ui |
-| Existing foundation architecture | React + FastAPI + PostgreSQL, currently prepared for Vercel + Supabase. This is repository groundwork only, not the approved client deployment model. Client prefers fully offline LAN operation; evaluate a local host/database setup and update the architecture before committing to deployment. |
+| Existing foundation architecture | React + FastAPI + PostgreSQL. The original Vercel + Supabase setup remains in the repository, and an initial Docker Compose self-hosted path now builds the frontend into the FastAPI image and uses local PostgreSQL. The LAN path is preparation only and remains untested at the client site. |
 | Accounts | Admin-only account creation; open sign-up is disabled. `is_superuser` = Admin, other users = Staff. New passwords require 12–128 characters; five failed logins trigger a 15-minute account lockout |
 | Branding | Centralized in `frontend/src/config/site.ts`; client supplied the Barangay Mayondon logo on October 20, 2026. Final UI palette and use of logo remain subject to client design feedback. |
 | AI tools | Free-tier AI assistants only; this folder is the shared context |
@@ -264,7 +264,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 - [ ] Confirm the request letter has the instructor signatures and client receiving copy required by the Final Project Guide.
 - [ ] Review [Creative-Brief.md](Creative-Brief.md) with the client and obtain client and group leader signatures before design begins.
 - [ ] Confirm final document types, approved print layouts, required resident fields, import rules, ID numbering and validity rules, and account permissions.
-- [ ] Confirm the offline/LAN architecture, designated host computer, other client computers, printer access, and who will maintain the setup.
+- [ ] Validate the prepared offline/LAN setup with the client, identify the designated host computer and staff computers, confirm printer access, and assign maintenance responsibilities.
 - [ ] Decide how ID photo background removal will work without internet. The client described using an online service today.
 - [ ] Agree on backup frequency, external-drive custody, restore testing, and recovery responsibilities.
 - [ ] Confirm bracketed values in the Guide with Prof. Camba: number of mockup pages, mobile pages, presentation length, survey respondents, photos per narrative, paper size, and submission platform.
@@ -276,19 +276,19 @@ Ratings are confidential and members may receive different grades. Rating guide:
 
 ## 14. Status
 
-**Current status (October 25, 2026):** Interviews were conducted on October 19–20 and an interview-based Creative Brief draft is available in `docs/Creative-Brief.md`. It is not yet signed by the client. The client prefers fully offline operation over the local network, which conflicts with the current online-oriented Vercel + Supabase Foundation plan. Keep the repository on `Foundation`; do not rename or merge this branch or create `production` until the team reviews the requirements and architecture.
+**Current status (October 25, 2026):** Interviews were conducted on October 19–20 and an interview-based Creative Brief draft is available in `docs/Creative-Brief.md`. It is not yet signed by the client. The client prefers fully offline operation over the local network. The Foundation branch now includes an initial Docker Compose path for a local host and database, plus [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). This path has not yet been built, tested without internet, or verified at the client site. Keep the repository on `Foundation`; do not rename or merge this branch or create `production` unless the team explicitly reviews the branch plan.
 
 - [x] Group formed; client assigned
 - [x] Questionnaire drafted and fixed (7 questions)
 - [x] Client interviews conducted on October 19–20, 2026
 - [x] Interview-based Creative Brief draft documented
 - [x] Sample document formats, current issuing file, logo, ID layout, and resident/ID data sheets reported as received during the interviews
-- [x] Repository foundation prepared; current online hosting configuration remains unverified and is not client-approved
+- [x] Initial Docker-based self-hosting configuration and offline LAN deployment guide prepared on Foundation; actual deployment and offline behavior remain unverified
 - [x] Existing authentication, authorization, login lockout, and security controls documented
 - [x] Added responsive app-header breadcrumbs and a public `/welcome` landing page with placeholder announcements/contact details; public content is not in the current draft scope and needs review before use
 - [x] Closed the three template-generated Dependabot pull requests that targeted `master`; dependency updates will be handled deliberately
 - [ ] Creative Brief reviewed and signed
-- [ ] Offline/LAN architecture and operational responsibilities confirmed
+- [ ] Offline/LAN setup tested without internet and approved by client; host, backup, photo workflow, and recovery responsibilities confirmed
 - [ ] Initial design reviewed with client
 - [ ] Version 1
 - [ ] Testing and technology transfer
