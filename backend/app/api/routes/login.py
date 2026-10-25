@@ -70,6 +70,13 @@ def recover_password(
     """
     Password Recovery
     """
+    rate_limited = is_password_recovery_rate_limited(
+        session=session,
+        email=email,
+        client_ip=request.client.host if request.client else None,
+    )
+    user = None if rate_limited else crud.get_user_by_email(session=session, email=email)
+
     if not settings.emails_enabled:
         return Message(
             message=(
@@ -77,13 +84,6 @@ def recover_password(
                 "installation. Contact the system administrator."
             )
         )
-
-    rate_limited = is_password_recovery_rate_limited(
-        session=session,
-        email=email,
-        client_ip=request.client.host if request.client else None,
-    )
-    user = None if rate_limited else crud.get_user_by_email(session=session, email=email)
 
     # Always return the same response to prevent email enumeration attacks.
     # Do not send email or reveal account existence after a rate limit is reached.
