@@ -14,7 +14,7 @@ The academic schedule, grading, team workflow, and overall project status remain
 - **Prepared by:**
 - **Date prepared:**
 - **Interview date:**
-- **Client contact person and position:** Pending confirmation
+- **Client contacts interviewed:** Ma’am Margarita R. Rivera, Admin Assistant; Sir Kelly Renz G. Villegas, Barangay Clerk
 - **Last updated:**
 - **Client approval / signature:** Pending
 - **Architecture status:** Foundation baseline; final design pending interview
@@ -73,83 +73,102 @@ See [Creative-Brief.md](Creative-Brief.md) for the full working brief and approv
 
 ## 3. Client background and current process
 
-Complete from the client interview. Do not infer the current process.
-
-- **Office / department:**
-- **Client contact and role:**
-- **Current process being considered:**
-- **Current tools, forms, logbooks, or software:**
-- **People involved in the current process:**
-- **Pain points described by the client:**
-- **Frequency / volume of work, if provided:**
-- **Evidence or interview-note reference:**
+- **Office:** Barangay Mayondon Local Government Unit, Los Baños, Laguna.
+- **Interview contacts:** Ma’am Margarita R. Rivera, Admin Assistant, and Sir Kelly Renz G. Villegas, Barangay Clerk.
+- **Current tools:** Google Sheets, Excel, document templates, and Excel/Publisher for Barangay ID preparation.
+- **Pain points reported:** Spreadsheet errors, saving issues, missing files, repeated data entry, overwritten records, difficulty reviewing prior issuances, and manual print-size adjustments.
+- **Users:** Six clerical personnel were identified as likely users, including a night-duty staff member.
+- **Network and internet:** The office reported connected computers, no dedicated server, slow internet, and a preference for offline use.
+- **Evidence:** Interview notes dated October 19 and 20, 2026, and [Creative-Brief.md](Creative-Brief.md).
 
 ## 4. Client-confirmed problem, goals, and success criteria
 
 ### Problem statement
 
-- **Client-confirmed problem:**
-- **Who is affected:**
-- **Impact of the problem:**
-- **Current workaround:**
-- **Evidence / source:**
+The current spreadsheet and template workflow makes it difficult to maintain consistent resident records and preserve separate document-issuance history. Staff want to search for existing information, reduce repeated typing, and populate approved document formats for printing.
 
-### Goals and success criteria
+### Draft goals and success criteria
 
-| ID | Goal / success criterion | How it will be measured | Source / date | Status |
+| ID | Goal / success criterion | Proposed verification | Source / date | Status |
 |---|---|---|---|---|
-| GOAL-01 | To be confirmed with the client | To be agreed | Pending interview | Proposed |
+| GOAL-01 | Centralize resident records and related information | Create, edit, search, and retrieve sample resident records | Interviews, Oct 19–20, 2026 | Draft, pending signed brief |
+| GOAL-02 | Preserve document request and issuance history | Issue multiple sample documents for one resident without overwriting prior transactions | Interviews, Oct 19–20, 2026 | Draft, pending signed brief |
+| GOAL-03 | Reduce repeated data entry for approved documents and Barangay IDs | Populate approved sample layouts from stored records and verify print preview | Interviews, Oct 19–20, 2026 | Draft, pending signed brief |
+| GOAL-04 | Work without internet for normal office tasks | Test the approved workflow with internet disconnected on the agreed LAN setup | Client preference, Oct 19–20, 2026 | Architecture not yet validated |
+| GOAL-05 | Provide local backup and recovery | Complete a backup and restore test using synthetic data | Draft objective in Creative Brief | Procedure to be agreed |
+
+These are proposed ways to verify the interview goals. Confirm them with the client before treating them as final acceptance criteria.
 
 ## 5. Users, roles, and permissions
 
-| Role / user group | Confirmed responsibilities | Data/actions allowed | Data/actions restricted | Confirmed by / date | Status |
-|---|---|---|---|---|---|
-| To be determined | Pending interview | Pending | Pending | Pending | Proposed |
+| Role / user group | Responsibilities described in interview | Proposed access | Status |
+|---|---|---|---|
+| Clerical staff (six likely users) | Resident records, document preparation, and issuance | Access needed for the approved clerical workflow; exact permissions pending | Draft |
+| Admin Assistant / other office staff | Interview contacts; duties include office administration and may overlap with clerical work | Confirm whether they need the same or different permissions | Pending |
+| Residents / public | Subjects of stored records and requesters of documents | No public account or direct system access requested in the interviews | Draft scope exclusion |
 
-Do not assume residents, staff, administrators, or any other group will have an account. Confirm whether the system is public-facing, staff-only, or mixed. The permission matrix must be reflected in backend authorization and tested through API requests, not only through frontend visibility.
+Do not assume that all six accounts should have identical privileges merely because the Creative Brief draft currently describes full access. Confirm who may view, edit, import, print, back up, restore, and manage accounts. Enforce the final permission matrix in the backend and test direct API requests.
 
 ## 6. Functional requirements
 
-| ID | Requirement | Priority | Acceptance criteria | Source / date | Status |
-|---|---|---|---|---|---|
-| FR-001 | Pending client interview | TBD | TBD | Pending | Proposed |
+The requirements below are an interview-derived draft, not formally approved requirements until the Creative Brief is signed.
 
-Add one row per specific, testable requirement. Link requirements to interview notes or an approved client document. Keep rejected and deferred requests visible in the change history rather than silently deleting the decision.
+| ID | Requirement | Draft acceptance criteria | Source / status |
+|---|---|---|---|
+| FR-001 | Staff login | Only approved office accounts can sign in; no public sign-up | Interview-derived draft |
+| FR-002 | Dashboard | Show document issuance counts and clearances/IDs nearing expiry | Creative Brief draft |
+| FR-003 | Resident records | Add, edit, search, retrieve, and import client-approved resident masterlist fields | Interview-derived draft; field mapping pending |
+| FR-004 | Family and sector details | Store family, beneficiary, and marginalized-sector details only where required by the approved workflow | Interview-derived draft |
+| FR-005 | ID records | Store existing ID numbers and agreed validity/registration details without inventing numbering rules | Interview-derived draft; exceptions to confirm |
+| FR-006 | Document requests and history | Record each request/issuance as a separate transaction, including purpose, issue date, and expiry date where applicable | Interview-derived draft |
+| FR-007 | Document printing | Populate client-approved document formats using stored data and preserve the approved layout | Sample formats received; final list/layout approval pending |
+| FR-008 | Barangay ID preparation | Populate the approved ID layout and support photo input where agreed | Client described current Excel/Publisher workflow |
+| FR-009 | Local backup and restore | Back up approved application data locally and restore it successfully in a test | Frequency and custody pending |
 
 ## 7. Non-functional requirements
 
-| ID | Topic | Requirement / target | How to verify | Source / date | Status |
-|---|---|---|---|---|---|
-| NFR-001 | Usability and accessibility | Pending | Pending | Pending | Proposed |
-| NFR-002 | Performance and expected workload | Pending | Pending | Pending | Proposed |
-| NFR-003 | Security and access control | Pending | Pending | Pending | Proposed |
-| NFR-004 | Privacy, retention, and handling of personal data | Pending | Pending | Pending | Proposed |
-| NFR-005 | Availability and recovery | Pending | Pending | Pending | Proposed |
-| NFR-006 | Supported devices and browsers | Pending | Pending | Pending | Proposed |
-| NFR-007 | Network / internet availability | Pending | Pending | Pending | Proposed |
-| NFR-008 | Maintainability and handover | Pending | Pending | Pending | Proposed |
+| ID | Topic | Draft requirement / target | How to verify | Status |
+|---|---|---|---|---|
+| NFR-001 | Usability | Simple navigation, readable text, clear labels, efficient office workflow | Client walkthrough and user evaluation | Draft |
+| NFR-002 | Performance | Common record search and document preparation should be practical for daily office use | Test with representative synthetic data; agree acceptable response times | Target pending |
+| NFR-003 | Security | Require authentication for staff-only features and restrict unauthorized access | Test login and permissions at UI and API levels | Exact roles pending |
+| NFR-004 | Privacy | Minimize resident data, restrict access, and agree on retention and handling | Client review of fields, permissions, backup, and retention | Pending |
+| NFR-005 | Recovery | Local backups must be restorable | Perform and document a restore test | Procedure pending |
+| NFR-006 | Devices and browsers | Existing barangay office computers and printers | Verify actual device/browser/printer setup with client | Details pending |
+| NFR-007 | Connectivity | Normal system use should not require internet if offline operation is approved | Disconnect internet and test across the intended LAN | Architecture pending |
+| NFR-008 | Maintainability | Provide operating instructions, user manual, and documented backup/restore procedure | Review during technology transfer | Draft |
+
+Follow the Philippine Data Privacy Act of 2012 and the client's procedures for resident personal information. Use synthetic data in development and demonstrations unless real-data use is explicitly authorized and appropriately protected.
 
 ## 8. Scope, exclusions, and data
 
-### Scope
+### Draft in-scope features
 
-- **In-scope features confirmed by the client:**
-- **Out-of-scope features:**
-- **Tasks that will remain manual:**
-- **Known limitations:**
-- **Reason and approval for exclusions:**
+- Staff login and a dashboard.
+- Resident records, search, and import of approved masterlist data.
+- Family, beneficiary, and marginalized-sector details where needed.
+- Resident and Barangay ID records.
+- Document request entry, purpose selection, and separate issuance history.
+- Auto-filled printing of client-approved documents and Barangay IDs.
+- Local backup and restore.
 
-Pending interview and signed Creative Brief.
+### Draft exclusions
 
-### Data and records
+- Public-facing resident accounts, announcements, and online payments.
+- Blotter, incident, and tanod records, discussed separately from the clerical workflow prioritized in the interviews.
+- Business and building clearances described as municipal processes.
+- Documents issued by other agencies, such as BIR and PhilHealth. The barangay's own Certificate of Indigency remains in the draft scope.
+- Creating or applying official signatures or dry seals; these remain manual.
+- Cloud hosting, online synchronization, and internet-dependent services.
+- Purchase of hardware, network equipment, or internet service.
 
-For each type of data the client says the system needs, document its purpose, source, authorized users, retention, and handling rules. Do not include actual personal records in this document.
+### Data and document types to confirm
 
-| Data / record type | Purpose | Source / provider | Authorized roles | Retention / deletion rule | Sensitivity / safeguards | Status |
-|---|---|---|---|---|---|---|
-| Pending interview | Pending | Pending | Pending | Pending | Pending | Proposed |
+The interviews mentioned resident masterlists, family/beneficiary details, ID-number records, marginalized-sector sheets, Barangay Clearance, Franchise Clearance, Certificate of Indigency, clearance for electrical and water connection, residency-related documents, First-Time Jobseeker documents, and Barangay ID. Confirm the exact document list, required fields, formats, and which samples are still in use before implementation.
 
-Confirm requirements under the Philippine Data Privacy Act of 2012 and the client's approved procedures before collecting or entering real personal data. Keep real resident data, confidential records, and secrets out of this repository.
+Do not commit real resident records to source control. Agree on import validation, duplicate handling, data correction, access permissions, retention, backup custody, and recovery responsibilities before using production data.
+
+---
 
 ## 9. Platform, connectivity, and operating environment
 
