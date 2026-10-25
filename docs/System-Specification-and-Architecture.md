@@ -17,7 +17,7 @@ The academic schedule, grading, team workflow, and overall project status remain
 - **Client contacts interviewed:** Ma’am Margarita R. Rivera, Admin Assistant; Sir Kelly Renz G. Villegas, Barangay Clerk
 - **Last updated:**
 - **Client approval / signature:** Pending
-- **Architecture status:** Foundation baseline; final design pending interview
+- **Architecture status:** Docker-based offline LAN preparation added; client approval and site verification pending
 - **Deployment verification:** Pending
 
 ## 2. Status and decision rules
