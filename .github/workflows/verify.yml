@@ -102,12 +102,16 @@ jobs:
             --entrypoint python mayondon-records:ci app/initial_data.py
 
           docker run -d --name "$app" --network "$network" \
-            -p 127.0.0.1:18000:8000 "${app_env[@]}" mayondon-records:ci
+            "\${app_env[@]}" mayondon-records:ci
 
+          # Test from inside the isolated application container. The Docker
+          # internal network intentionally does not expose published ports to
+          # the runner host, so this validates the app through its loopback.
           ready=0
           for attempt in $(seq 1 30); do
-            if curl --fail --silent --show-error \
-              http://127.0.0.1:18000/api/v1/utils/health-check/ >/dev/null 2>&1; then
+            if docker exec "$app" python -c \
+              "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/utils/health-check/', timeout=3)" \
+              >/dev/null 2>&1; then
               ready=1
               break
             fi
@@ -119,12 +123,14 @@ jobs:
             exit 1
           fi
 
-          # Verify the app serves the SPA and its built assets locally.
-          python3 - <<'PY'
+          # Verify the SPA, local assets, login API, and token authentication.
+          docker exec -i "$app" python - <<'PY'
+          import json
           from html.parser import HTMLParser
-          from urllib.request import urlopen
+          from urllib.parse import urlencode
+          from urllib.request import Request, urlopen
 
-          base = "http://127.0.0.1:18000"
+          base = "http://127.0.0.1:8000"
 
           class Assets(HTMLParser):
               def __init__(self):
@@ -151,12 +157,34 @@ jobs:
                   assert response.status == 200, f"Frontend asset failed: {asset}"
           with urlopen(base + "/login", timeout=10) as response:
               assert response.status == 200, "SPA login route did not load."
-          print("Offline runtime check passed: health endpoint, SPA routes, and local assets loaded.")
+
+          login_data = urlencode({
+              "username": "ci-admin@example.com",
+              "password": "ci-only-placeholder-password",
+          }).encode()
+          request = Request(
+              base + "/api/v1/login/access-token",
+              data=login_data,
+              headers={"Content-Type": "application/x-www-form-urlencoded"},
+          )
+          with urlopen(request, timeout=10) as response:
+              token = json.loads(response.read().decode())["access_token"]
+          request = Request(
+              base + "/api/v1/login/test-token",
+              data=b"",
+              headers={"Authorization": f"Bearer {token}"},
+              method="POST",
+          )
+          with urlopen(request, timeout=10) as response:
+              user = json.loads(response.read().decode())
+              assert user.get("email") == "ci-admin@example.com"
+
+          print("Offline runtime check passed: health, SPA, local assets, login, and token authentication.")
           PY
 
-          # Prove the application container cannot reach a public website.
-          if docker exec "$app" python -c \
-            "import urllib.request; urllib.request.urlopen('https://example.com', timeout=3)" \
+          # Prove the application container cannot reach a public IP address.
+          if timeout 5 docker exec "$app" python -c \
+            "import socket; socket.create_connection(('1.1.1.1', 443), timeout=2)" \
             >/dev/null 2>&1; then
             echo "Unexpected internet access from the isolated application container."
             exit 1
