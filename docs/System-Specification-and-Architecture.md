@@ -2,7 +2,7 @@
 
 **Status: Interview-derived requirements draft — Creative Brief signature, final approval, local-network architecture, and deployment verification are pending.**
 
-This document combines client requirements and technical architecture in one place so the team can maintain a single system reference. The snapshot below records the October 19–20, 2026 interviews. The requirements are not formally approved until the client reviews and signs `Creative-Brief.md`. The existing repository architecture was prepared for online hosting and must not be treated as the selected deployment design because the client expressed a preference for fully offline LAN operation.
+This document combines client requirements and technical architecture in one place so the team can maintain a single system reference. The snapshot below records the October 19–20, 2026 interviews. The requirements are not formally approved until the client reviews and signs `Creative-Brief.md`. The repository retains its original Vercel + Supabase configuration and now has an initial Docker-based local-host path for offline LAN operation. The local path is preparation only and has not yet been tested on the barangay's network or approved by the client.
 
 The academic schedule, grading, team workflow, and overall project status remain in [Source-of-Truth.md](Source-of-Truth.md). Use [Security-Measures.md](Security-Measures.md) for the active security checklist.
 
@@ -37,7 +37,7 @@ Do not treat an existing starter-template page, mockup, AI suggestion, developer
 
 The current draft system name is **Barangay Mayondon Records and Document Issuance System**. Staff described using Google Sheets, Excel, and document templates, with problems involving spreadsheet errors, saving issues, missing files, repeated data entry, and lack of issuance history when existing records or templates are overwritten.
 
-The client's stated preference is a **fully offline system** because the office internet is slow. The office reported having connected computers but no dedicated server. The proposed arrangement in the Creative Brief is one designated office computer running the application, with other office computers connecting over the local network. This arrangement remains a proposal and must be validated for feasibility, availability, security, and backup responsibilities.
+The client's stated preference is a **fully offline system** because the office internet is slow. The office reported having connected computers but no dedicated server. The proposed arrangement in the Creative Brief is one designated office computer running the application and local PostgreSQL database, with other office computers connecting over the local network. The repository has an initial Docker Compose path for this model, documented in `Offline-LAN-Deployment.md`. The arrangement remains unverified and must be validated for feasibility, availability, security, backup/restore, and maintenance responsibilities.
 
 ### Current draft scope
 
@@ -62,8 +62,8 @@ The client's stated preference is a **fully offline system** because the office 
 
 ### Important unresolved design and technical decisions
 
-1. The current repository has an online-oriented Vercel + Supabase plan. It does not yet match the client's offline preference. Do not represent it as client-approved. Compare feasible local-host/LAN options before implementation.
-2. The client currently uses an online background-removal service for ID photos. A fully offline workflow needs a client-approved alternative or a clearly documented manual workaround.
+1. The original Vercel + Supabase configuration remains in the repository, but the current proposed client path is Docker Compose with local PostgreSQL and the frontend served by FastAPI. This setup has not yet been tested without internet or approved by the client. Do not represent it as production-ready.
+2. The client currently uses an online background-removal service for ID photos. A fully offline workflow needs a client-approved local alternative or a clearly documented manual workaround. Do not upload real resident photos to an external service.
 3. Confirm exact document types, approved layouts, required data fields, import rules, ID numbering and validity rules, account permissions, and the backup/restore procedure.
 4. Treat resident and ID information as confidential. Use synthetic data in development and demonstrations, restrict access, and agree on data handling, retention, backups, and recovery with the client in line with the Data Privacy Act of 2012.
 
