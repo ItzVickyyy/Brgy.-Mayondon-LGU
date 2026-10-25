@@ -2,7 +2,7 @@ from collections.abc import Awaitable, Callable
 from pathlib import Path
 
 import sentry_sdk
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import FileResponse, Response
 from fastapi.routing import APIRoute
@@ -91,8 +91,27 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
-# Serve the built frontend only when it exists (local/self-hosted builds).
-# On Vercel the frontend is deployed separately, so a backend-only deploy and
-# plain `pytest` runs must not crash when this folder is missing.
+# Serve the packaged frontend for self-hosted LAN deployments. The fallback
+# returns index.html for client-side routes such as /login, while keeping API
+# paths as API 404s and serving existing frontend assets directly.
 if FRONTEND_DIR.is_dir():
-    app.frontend("/", directory=FRONTEND_DIR)
+    FRONTEND_ROOT = FRONTEND_DIR.resolve()
+
+    @app.get("/", include_in_schema=False)
+    def frontend_index():
+        return FileResponse(FRONTEND_ROOT / "index.html")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def frontend_routes(full_path: str):
+        if full_path == "api" or full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="Not Found")
+
+        requested_path = (FRONTEND_ROOT / full_path).resolve()
+        try:
+            requested_path.relative_to(FRONTEND_ROOT)
+        except ValueError:
+            raise HTTPException(status_code=404, detail="Not Found") from None
+
+        if requested_path.is_file():
+            return FileResponse(requested_path)
+        return FileResponse(FRONTEND_ROOT / "index.html")
