@@ -8,7 +8,7 @@ This guide explains how our three-person team works on the Barangay Mayondon LGU
 2. [Complete Tech Stacks](Complete-Tech-Stacks.md) for the architecture, technology choices, and deployment notes.
 3. [Root README](../README.md) for the local setup, test commands, and project structure.
 
-**How to run the project:** follow [How-To-Start.md](How-To-Start.md) for the tested Windows PowerShell startup steps. The root [README](../README.md) links to this guide. Update the guide whenever the verified startup process changes.
+**How to run the project:** follow [How-To-Start.md](How-To-Start.md) for local development. For the proposed self-hosted LAN package, follow [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). That guide is preparation only until the packaged app is built and tested without internet on the target network.
 
 ## 2. Team responsibilities
 
@@ -22,24 +22,24 @@ Responsibilities are areas of ownership, not permission to ignore code outside y
 
 ## 3. Current project stage
 
-The team is working on the `Foundation` branch after client interviews on October 19–20, 2026. A draft clerical records and document-issuance scope is recorded in [Creative-Brief.md](Creative-Brief.md), but client review and signatures are still pending. The client prefers fully offline LAN operation, while the existing foundation was prepared for online hosting. This architecture mismatch must be resolved before final implementation or client deployment.
+The team is working on the `Foundation` branch after client interviews on October 19–20, 2026. A draft clerical records and document-issuance scope is recorded in [Creative-Brief.md](Creative-Brief.md), but client review and signatures are still pending. The client prefers fully offline LAN operation. The repository now has an initial Docker Compose deployment path using local PostgreSQL and FastAPI-served frontend assets, documented in [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). It still needs a full build, no-internet testing, LAN/firewall testing, backup/restore verification, and client approval.
 
 Until the Creative Brief and architecture are reviewed:
 - Keep the repository on `Foundation`; do not rename or merge it or create the future `production` branch.
 - Update [Source-of-Truth.md](Source-of-Truth.md) and the system specification when a decision is confirmed.
 - Record remaining questions rather than guessing, especially around the local host, LAN access, photo background removal, account permissions, and backups.
-- Do not describe the current Vercel + Supabase plan as client-approved or production-ready.
+- Do not describe either the retained Vercel + Supabase setup or the new local LAN preparation as client-approved or production-ready.
 
 ## 4. Agreed branching strategy
 
-The team plans to use two long-lived branches after the client interview and when the team is ready to adopt the release workflow:
+The team plans to use two long-lived branches when the team is ready to adopt the reviewed release workflow:
 
 | Branch | Purpose | Rules |
 |---|---|---|
 | `master` | Integration branch for reviewed work | Contains features that have passed review and required checks. It is not automatically considered production-ready. |
 | `production` | Release and deployment branch | Contains only a tested, approved release intended for deployment. Deploy from this branch only after the hosting and deployment process is verified. |
 
-The names and roles above are the agreed plan. **At present, continue using `Foundation` until the client interview.** Do not rename it, merge it into `master`, or create `production` as part of ordinary feature work before the team reviews the post-interview plan.
+The names and roles above are the planned workflow. **At present, continue using `Foundation`** as requested. Do not rename it, merge it into `master`, or create `production` unless the team explicitly reviews and changes the branch plan.
 
 Use short-lived branches for individual tasks:
 
