@@ -48,6 +48,9 @@ services:
       SMTP_HOST: "mailpit"
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
+      # Enable email only in the local development override so Playwright can
+      # exercise password recovery through the Mailpit test inbox.
+      EMAILS_FROM_EMAIL: "noreply@example.com"
 
   mailpit:
     image: axllent/mailpit
