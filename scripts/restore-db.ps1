@@ -32,6 +32,13 @@ if ($LASTEXITCODE -ne 0) {
     throw "Copying the backup into the database container failed."
 }
 
+# Validate that PostgreSQL can read the archive before stopping the application.
+docker compose exec -T db pg_restore --list $containerPath
+if ($LASTEXITCODE -ne 0) {
+    docker compose exec -T db rm -f $containerPath
+    throw "The selected file is not a readable PostgreSQL custom-format backup. The backend was not stopped."
+}
+
 # Prevent requests from changing data while the restore is in progress.
 docker compose stop backend
 if ($LASTEXITCODE -ne 0) {
@@ -41,7 +48,7 @@ if ($LASTEXITCODE -ne 0) {
 
 $restoreSucceeded = $false
 try {
-    docker compose exec -T db pg_restore -U postgres -d app --clean --if-exists --no-owner --no-privileges $containerPath
+    docker compose exec -T db pg_restore --exit-on-error -U postgres -d app --clean --if-exists --no-owner --no-privileges $containerPath
     if ($LASTEXITCODE -ne 0) {
         throw "pg_restore reported an error. The backend will remain stopped until the database is checked."
     }
