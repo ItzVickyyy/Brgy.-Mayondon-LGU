@@ -22,13 +22,13 @@ Responsibilities are areas of ownership, not permission to ignore code outside y
 
 ## 3. Current project stage
 
-The team is working on the `Foundation` branch while preparing for the client interview. The system's actual modules and requirements must be decided with Barangay Mayondon LGU. Do not treat proposed features, placeholder pages, or assumptions as approved client requirements.
+The team is working on the `Foundation` branch after client interviews on October 19–20, 2026. A draft clerical records and document-issuance scope is recorded in [Creative-Brief.md](Creative-Brief.md), but client review and signatures are still pending. The client prefers fully offline LAN operation, while the existing foundation was prepared for online hosting. This architecture mismatch must be resolved before final implementation or client deployment.
 
-Until the interview clarifies the problem and requirements:
-- Keep work focused on the project foundation, developer documentation, and verified existing behavior.
-- Record open questions instead of guessing.
-- Update [Source-of-Truth.md](Source-of-Truth.md) when a client decision is confirmed.
-- Do not create the future `production` branch or deploy a client-facing system yet.
+Until the Creative Brief and architecture are reviewed:
+- Keep the repository on `Foundation`; do not rename or merge it or create the future `production` branch.
+- Update [Source-of-Truth.md](Source-of-Truth.md) and the system specification when a decision is confirmed.
+- Record remaining questions rather than guessing, especially around the local host, LAN access, photo background removal, account permissions, and backups.
+- Do not describe the current Vercel + Supabase plan as client-approved or production-ready.
 
 ## 4. Agreed branching strategy
 
