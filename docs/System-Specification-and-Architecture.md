@@ -216,7 +216,7 @@ The following is the current Foundation repository baseline, not a commitment th
 | Database | PostgreSQL | Current development database; production setup unverified |
 | API | HTTP API between frontend and backend | Confirm production routing after deployment is configured |
 | Development / tests | Docker Compose, backend tests, frontend lint/build, Playwright, GitHub Actions | Check CI for the exact commit |
-| Planned hosting | Vercel for frontend/API and Supabase PostgreSQL | Planned only; compatibility, terms, configuration, cost, and production security require verification |
+| Prepared hosting option | Docker Compose local host with FastAPI-served frontend and local PostgreSQL | Matches the interview preference for offline use, but client approval, LAN/site verification, and security checks remain pending |
 
 ### Architectural principles
 
@@ -315,7 +315,7 @@ Do not describe the application as deployed until it has actually been configure
 | ID | Question / constraint | Why it matters | Owner | Target date, if known | Status / answer |
 |---|---|---|---|---|---|
 | OPEN-001 | What problem and process should the system address? | Defines scope and system design | Project team | Client interview | Open |
-| OPEN-002 | Should the system work online, offline, or both? | Affects architecture, hosting, and Networking 2 | Project team / client | Client interview | Open |
+| OPEN-002 | Confirm the client's fully offline preference in the signed Creative Brief and validate the proposed local-host/LAN arrangement | Affects architecture, hosting, availability, and Networking 2 | Project team / client | Before design approval and deployment planning | Preference stated in Oct 19–20 interviews; approval and site validation pending |
 | OPEN-003 | Who will use the system, and what permissions are needed? | Affects UX and authorization | Project team / client | Client interview | Open |
 | OPEN-004 | What data is necessary, and what must remain outside the system? | Affects schema, privacy, and scope | Project team / client | Client interview | Open |
 | OPEN-005 | What devices, connectivity, maintenance, and support are available at the barangay? | Affects deployment and handover | Project team / client | Client interview | Open |
