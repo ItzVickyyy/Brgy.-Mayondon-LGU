@@ -10,6 +10,10 @@ services:
       timeout: 10s
     volumes:
       - app-db-data:/var/lib/postgresql
+    ports:
+      # Host-side development tools may connect locally. Do not expose the DB
+      # on the office LAN; the backend container connects over Compose's network.
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Variable not set}
       POSTGRES_DB: app
