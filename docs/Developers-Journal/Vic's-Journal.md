@@ -97,3 +97,62 @@ Keep Foundation and its passing CI. Pause further security code changes. Leave p
 - [ ] When hosting is configured, verify the deployment checklist against the real environment and record evidence in docs/Security-Measures.md.
 - [ ] Continue client requirements gathering. Do not build client-specific modules before the interview and signed Creative Brief.
 - [ ] Record every future project work session using the journal template.
+
+
+---
+
+## CI repair: Mailpit email configuration and full verification
+
+- **Date:** 2026-10-25
+- **Time:** Time not recorded
+- **Phase / milestone:** Foundation stabilization before Week 14 initial design
+- **Work type:** Bug fix, CI verification, documentation
+- **Status:** CI passed for the implementation commit; journal update verification pending
+
+### Goal
+Resolve the Playwright password-recovery failures while preserving the default offline deployment behavior, then verify the complete GitHub Actions run.
+
+### Work performed
+- Investigated the failing Playwright workflow and reviewed the local Docker Compose override, Mailpit test helper, password-recovery route, and environment configuration.
+- Found that the development override configured the Mailpit SMTP host and port but did not set `EMAILS_FROM_EMAIL`. Since email enablement requires both a configured SMTP host and sender email, password-recovery messages were not sent to Mailpit.
+- Updated `compose.override.yml` to set a development-only sender address for Mailpit tests. The main `compose.yml` and `.env.example` retain the offline default with email disabled.
+- Committed the change directly to `Foundation` as `eff82f498268dfd07c12ffef2af6536f3fac1967`. No pull request, branch rename, or merge was performed.
+
+### Achievements / outcome
+The implementation commit passed all observed GitHub Actions workflows:
+- Backend tests and dependency audit
+- Frontend tests
+- Docker Compose integration
+- Playwright tests across all four shards
+- Offline deployment verification
+- Secret Scan
+- Zizmor workflow security scan
+- Conflict detector
+
+### AI tools and workflow
+- **Tool:** ChatGPT with the GitHub repository connector.
+- **How used:** Inspect CI run results, review relevant repository files, identify the missing test-only configuration, update the file on the requested branch, and verify the new commit's workflow results.
+- **Human review:** The CI run was checked against the exact implementation commit. The project team should still review the configuration change and understand why the sender email is required for Mailpit.
+- **Limitations:** No local Docker build, local test suite, real no-internet test, or barangay LAN deployment was performed in this session.
+
+### Tests and verification
+- **Implementation commit:** `eff82f498268dfd07c12ffef2af6536f3fac1967`
+- **Playwright:** Passed, including all four shards and report merge.
+- **Backend:** Passed.
+- **Frontend:** Passed.
+- **Docker Compose integration:** Passed.
+- **Offline deployment verification:** Passed.
+- **Security and workflow checks:** Passed.
+- **Evidence:** https://github.com/ItzVickyyy/Brgy.-Mayondon-LGU/actions/runs/40200654707
+- **Known gaps:** CI success does not prove the packaged application works without internet on the target computer, across the barangay LAN, or with actual printers and approved records.
+
+### Blockers, risks, and decisions
+- The Creative Brief remains unsigned according to the project status documentation. Do not treat draft requirements or the local LAN architecture as client-approved.
+- Resident data must remain out of source control and automated test fixtures.
+- The client’s current use of online background removal remains an unresolved offline-workflow issue.
+
+### Next actions
+- [ ] Confirm the CI run triggered by this journal update passes.
+- [ ] Prioritize the Week 14 design deliverables for October 26 and 29: sitemap, wireframes, at least the suggested number of full-color and mobile mockups, style guide, and client feedback list. Confirm bracketed quantities with Prof. Camba.
+- [ ] Review the Creative Brief with the client and obtain the required signatures before treating the scope as approved.
+- [ ] Schedule a separate synthetic-data test of the offline/LAN setup before any use of real resident records.
