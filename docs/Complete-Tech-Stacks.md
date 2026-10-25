@@ -21,8 +21,7 @@ flowchart LR
 - Locally, the same code runs with PostgreSQL in Docker. The backend can also
   serve the built frontend itself when `backend/app/frontend` exists.
 
-> **Deployment status:** the Vercel + Supabase setup is the agreed plan and has
-> **not been tested yet**. Section 6 lists what to verify at the first deploy.
+> **Architecture decision warning (October 25, 2026):** Vercel + Supabase describes the existing Foundation implementation plan only. The client interviews on October 19–20 recorded a preference for a fully offline system on the barangay office LAN because the internet is slow. The online architecture is **not client-approved** and does not meet the stated preference as written. Before building client-specific modules or deploying, compare a local application host and local database setup, verify how the other office computers and printers will connect, and document the chosen approach in the signed Creative Brief and this file. Do not describe either hosting model as production-ready until it has been tested.
 
 ## 2. Backend
 
@@ -74,8 +73,8 @@ Branding (name, location, logo) lives in `frontend/src/config/site.ts`. The prot
 
 | Service | Role | Notes |
 |---|---|---|
-| **Supabase** | Managed PostgreSQL | Used as a plain Postgres database; the app has its own users table and JWT login, so Supabase Auth is not used |
-| **Vercel** | Hosts the frontend and FastAPI backend in one Vercel Services project (planned) | Services is the preferred single-project setup. If Services cannot be enabled, use two projects with Root Directory `frontend` for Vite and `backend` for FastAPI. The backend declares `tool.vercel.entrypoint = "app.main:app"`. Verify the chosen setup on first deployment. |
+| **Supabase** | Managed PostgreSQL in the current Foundation plan | Not approved for the final client deployment because the client prefers offline LAN operation. A local database and backup strategy must be evaluated. |
+| **Vercel** | Existing online-hosting configuration only | Not approved as the client deployment model. Client preference is offline LAN operation. Keep these notes for the current Foundation setup, not as a final architecture decision. |
 | Docker Compose | Local PostgreSQL and test mailbox only | `docker compose up -d db` (add `mailpit` to test emails). Not used for deployment |
 | GitHub | Source control, pull requests, CI | |
 
@@ -188,8 +187,8 @@ not as proof of production readiness.
 |---|---|
 | Principles of Web Design | React + Tailwind + shadcn/ui, theme and branding config, responsive layouts, mockups and style guide |
 | Integrative Programming | SQLModel models, Alembic migrations, FastAPI routes, modules working together, report/print features |
-| Client-Server Technologies | REST API with JWT, generated typed client, Vercel + Supabase deployment, environment configuration |
-| Networking 2 | Cloud connectivity, HTTPS, CORS, access control, and whatever site-level checks the instructor requires |
+| Client-Server Technologies | REST API with JWT and generated typed client; final deployment and data exchange must match the client-approved offline/LAN architecture |
+| Networking 2 | Local network topology, client-to-host connectivity, exposed ports, access control, and site-level security checks for the approved setup; confirm specific requirements with the instructor |
 
 ## 9. Removed from the template
 
@@ -197,5 +196,5 @@ TanStack devtools · FastAPI Cloud deployment files · release and changelog
 tooling · template documentation, images and logos · open sign-up · obsolete
 `compose.deploy.yml` and its Traefik production proxy. `compose.yml` and
 `compose.override.yml` remain for local PostgreSQL, Mailpit, backend integration,
-and Playwright testing. The local stack uses direct service ports and no longer
-requires Traefik.
+and Playwright testing. The local development stack uses direct service ports and no longer
+requires Traefik. This development setup is not yet evidence of a complete offline installation at the barangay.
