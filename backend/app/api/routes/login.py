@@ -70,6 +70,14 @@ def recover_password(
     """
     Password Recovery
     """
+    if not settings.emails_enabled:
+        return Message(
+            message=(
+                "Email-based password recovery is unavailable in this offline "
+                "installation. Contact the system administrator."
+            )
+        )
+
     rate_limited = is_password_recovery_rate_limited(
         session=session,
         email=email,
