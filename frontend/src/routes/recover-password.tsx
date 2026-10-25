@@ -67,6 +67,10 @@ function RecoverPassword() {
   const mutation = useMutation({
     mutationFn: recoverPassword,
     onSuccess: (response) => {
+      if (response.data.message.includes("unavailable")) {
+        showErrorToast(response.data.message)
+        return
+      }
       showSuccessToast(response.data.message)
       form.reset()
     },
