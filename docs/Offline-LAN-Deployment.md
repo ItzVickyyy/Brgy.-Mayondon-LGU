@@ -70,7 +70,7 @@ Keep SMTP, Sentry, and external hosted database settings empty for the offline d
 Before building, ask Docker Compose to parse the configuration and resolve required environment variables:
 
 ```powershell
-docker compose config --quiet
+docker compose -f compose.yml config --quiet
 ```
 
 If this command reports a missing variable or invalid configuration, fix `.env` before continuing. Do not paste the contents of `.env` into issue reports or chat messages because it contains secrets.
@@ -78,23 +78,23 @@ If this command reports a missing variable or invalid configuration, fix `.env` 
 Build and start the services from the repository root:
 
 ```powershell
-docker compose build
-docker compose up -d
-docker compose ps
+docker compose -f compose.yml build
+docker compose -f compose.yml up -d
+docker compose -f compose.yml ps
 ```
 
 Wait until the database and backend report healthy. If a service is not healthy, inspect its logs before proceeding:
 
 ```powershell
-docker compose logs --tail 100 db
-docker compose logs --tail 100 backend
+docker compose -f compose.yml logs --tail 100 db
+docker compose -f compose.yml logs --tail 100 backend
 ```
 
 On a first installation, apply migrations and create the initial administrator:
 
 ```powershell
-docker compose exec backend alembic upgrade head
-docker compose exec backend python app/initial_data.py
+docker compose -f compose.yml exec backend alembic upgrade head
+docker compose -f compose.yml exec backend python app/initial_data.py
 ```
 
 If the administrator already exists, the initialization script should not be treated as a way to reset its password. Follow the application's approved account-recovery procedure instead.
