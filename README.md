@@ -13,10 +13,7 @@ Laguna State Polytechnic University – Los Baños Campus
 | [Justin Adrian P. Reboton](https://github.com/jOstin-7) | Backend Developer, Technical Writer |
 | [Jean Mervin G. Fajardo](https://github.com/JeanMervin) | Frontend Developer |
 
-> **Status:** foundation only. The system's modules are decided after the
-> client interview (Week 13). Everything about the project lives in
-> [`docs/`](docs/README.md); start with
-> [`docs/Source-of-Truth.md`](docs/Source-of-Truth.md).
+> **Status (October 25, 2026):** client interviews were conducted on October 19–20. The current draft scope is a staff-only records and document-issuance system. The Creative Brief is awaiting client review and signatures. The client prefers fully offline LAN operation, while the current Foundation architecture is online-oriented. See [Creative-Brief.md](docs/Creative-Brief.md), [Source-of-Truth.md](docs/Source-of-Truth.md), and [System-Specification-and-Architecture.md](docs/System-Specification-and-Architecture.md).
 
 ## Stack at a glance
 
