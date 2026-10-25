@@ -305,7 +305,11 @@ def test_password_recovery_sends_email_for_registered_user(
         session=db,
         user_create=UserCreate(email=email, password=random_lower_string()),
     )
-    with patch("app.api.routes.login.send_email") as send_email_mock:
+    with (
+        patch("app.api.routes.login.send_email") as send_email_mock,
+        patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
+        patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
+    ):
         response = client.post(f"{settings.API_V1_STR}/password-recovery", json={"email": email})
 
     assert response.status_code == 200
@@ -320,7 +324,11 @@ def test_password_recovery_does_not_send_email_for_unknown_user(
     client: TestClient,
 ) -> None:
     email = "unknown-recovery-target@example.com"
-    with patch("app.api.routes.login.send_email") as send_email_mock:
+    with (
+        patch("app.api.routes.login.send_email") as send_email_mock,
+        patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
+        patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
+    ):
         response = client.post(f"{settings.API_V1_STR}/password-recovery", json={"email": email})
 
     assert response.status_code == 200
@@ -380,6 +388,8 @@ def test_password_recovery_throttles_email_delivery(
 
     with (
         patch("app.api.routes.login.send_email") as send_email_mock,
+        patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
+        patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
         patch("app.core.config.settings.PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_EMAIL", 2),
         patch("app.core.config.settings.PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_IP", 1000),
     ):
