@@ -59,15 +59,15 @@ function RecoverPassword() {
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   const recoverPassword = async (data: FormData) => {
-    await LoginService.recoverPassword({
+    return LoginService.recoverPassword({
       body: { email: data.email },
     })
   }
 
   const mutation = useMutation({
     mutationFn: recoverPassword,
-    onSuccess: () => {
-      showSuccessToast("Password recovery email sent successfully")
+    onSuccess: (response) => {
+      showSuccessToast(response.data.message)
       form.reset()
     },
     onError: handleError.bind(showErrorToast),
