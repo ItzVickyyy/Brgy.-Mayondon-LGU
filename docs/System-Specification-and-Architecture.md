@@ -1,8 +1,8 @@
 # System Specification and Architecture
 
-**Status: WORKING TEMPLATE — client requirements, final design, and production deployment are not yet verified.**
+**Status: Interview-derived requirements draft — Creative Brief signature, final approval, local-network architecture, and deployment verification are pending.**
 
-This document combines client requirements and technical architecture in one place so the team can maintain a single system reference. It is not evidence that Barangay Mayondon LGU has requested or approved any feature. Complete the requirements sections from the client interview, get the Creative Brief and requirements reviewed and signed as required, then update the architecture to match those confirmed needs.
+This document combines client requirements and technical architecture in one place so the team can maintain a single system reference. The snapshot below records the October 19–20, 2026 interviews. The requirements are not formally approved until the client reviews and signs `Creative-Brief.md`. The existing repository architecture was prepared for online hosting and must not be treated as the selected deployment design because the client expressed a preference for fully offline LAN operation.
 
 The academic schedule, grading, team workflow, and overall project status remain in [Source-of-Truth.md](Source-of-Truth.md). Use [Security-Measures.md](Security-Measures.md) for the active security checklist.
 
@@ -32,6 +32,44 @@ Use these labels consistently:
 - **Pending verification:** The implementation or deployment has not yet been tested in the intended environment.
 
 Do not treat an existing starter-template page, mockup, AI suggestion, developer assumption, or planned hosting option as a client-approved requirement or verified implementation.
+
+## Interview-derived requirements snapshot (October 19–20, 2026)
+
+The current draft system name is **Barangay Mayondon Records and Document Issuance System**. Staff described using Google Sheets, Excel, and document templates, with problems involving spreadsheet errors, saving issues, missing files, repeated data entry, and lack of issuance history when existing records or templates are overwritten.
+
+The client's stated preference is a **fully offline system** because the office internet is slow. The office reported having connected computers but no dedicated server. The proposed arrangement in the Creative Brief is one designated office computer running the application, with other office computers connecting over the local network. This arrangement remains a proposal and must be validated for feasibility, availability, security, and backup responsibilities.
+
+### Current draft scope
+
+- Staff-only login for six office users. Confirm account permissions with the client.
+- Dashboard for documents issued and clearances/IDs nearing expiry.
+- Resident record management, search, and import of existing masterlist data.
+- Family, beneficiary, and marginalized-sector details where required.
+- Resident and Barangay ID number records, including the client's stated validity rules and new-resident tracking.
+- Document request entry, editable purpose list, and separate issuance history with expiry dates.
+- Auto-filled printing for client-approved documents and Barangay IDs, including ID photo upload where required.
+- Local backup and restore.
+
+### Current draft exclusions
+
+- Public-facing access, online announcements, and online payments.
+- Blotter, incident, and tanod records, which were discussed separately and are outside the currently prioritized clerical-document scope.
+- Business and building clearances described as municipal processes.
+- Documents issued by other agencies, such as BIR and PhilHealth. The barangay's own Certificate of Indigency is included.
+- Creating or applying official signatures or dry seals. These remain manual.
+- Cloud hosting, online synchronization, and other internet-dependent services.
+- Purchasing hardware, network equipment, or internet service.
+
+### Important unresolved design and technical decisions
+
+1. The current repository has an online-oriented Vercel + Supabase plan. It does not yet match the client's offline preference. Do not represent it as client-approved. Compare feasible local-host/LAN options before implementation.
+2. The client currently uses an online background-removal service for ID photos. A fully offline workflow needs a client-approved alternative or a clearly documented manual workaround.
+3. Confirm exact document types, approved layouts, required data fields, import rules, ID numbering and validity rules, account permissions, and the backup/restore procedure.
+4. Treat resident and ID information as confidential. Use synthetic data in development and demonstrations, restrict access, and agree on data handling, retention, backups, and recovery with the client in line with the Data Privacy Act of 2012.
+
+See [Creative-Brief.md](Creative-Brief.md) for the full working brief and approval fields. The interview notes are in the group's interview document; the source file should remain in the project records.
+
+---
 
 ## 3. Client background and current process
 
