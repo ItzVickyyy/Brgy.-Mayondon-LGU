@@ -65,9 +65,17 @@ For a deployment test, remove `FASTAPI_ENV=development` from `.env` or leave `FA
 
 Keep SMTP, Sentry, and external hosted database settings empty for the offline deployment. Never commit the real `.env` file. The example values are placeholders and must be replaced.
 
-## 5. Build and start the system
+## 5. Validate configuration, build, and start the system
 
-From the repository root:
+Before building, ask Docker Compose to parse the configuration and resolve required environment variables:
+
+```powershell
+docker compose config --quiet
+```
+
+If this command reports a missing variable or invalid configuration, fix `.env` before continuing. Do not paste the contents of `.env` into issue reports or chat messages because it contains secrets.
+
+Build and start the services from the repository root:
 
 ```powershell
 docker compose build
@@ -75,7 +83,14 @@ docker compose up -d
 docker compose ps
 ```
 
-Wait until the database and backend report healthy. On a first installation, apply migrations and create the initial administrator:
+Wait until the database and backend report healthy. If a service is not healthy, inspect its logs before proceeding:
+
+```powershell
+docker compose logs --tail 100 db
+docker compose logs --tail 100 backend
+```
+
+On a first installation, apply migrations and create the initial administrator:
 
 ```powershell
 docker compose exec backend alembic upgrade head
