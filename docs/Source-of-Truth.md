@@ -252,7 +252,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 | Starting point | Full Stack FastAPI Template, cloned and tailored for this project |
 | Backend | FastAPI + SQLModel + PostgreSQL, Python 3.14 |
 | Frontend | React + TypeScript + Vite + Tailwind CSS + shadcn/ui |
-| Existing foundation architecture | React + FastAPI + PostgreSQL. The original Vercel + Supabase setup remains in the repository, and an initial Docker Compose self-hosted path now builds the frontend into the FastAPI image and uses local PostgreSQL. The LAN path is preparation only and remains untested at the client site. |
+| Existing foundation architecture | React + FastAPI + PostgreSQL. The Docker Compose self-hosted path builds the frontend into the FastAPI image and uses local PostgreSQL. Legacy Vercel-specific configuration and Supabase transaction-pooler handling have been removed. The LAN path is preparation only and remains untested at the client site. |
 | Accounts | Admin-only account creation; open sign-up is disabled. `is_superuser` = Admin, other users = Staff. New passwords require 12–128 characters; five failed logins trigger a 15-minute account lockout |
 | Branding | Centralized in `frontend/src/config/site.ts`; client supplied the Barangay Mayondon logo on October 20, 2026. Final UI palette and use of logo remain subject to client design feedback. |
 | AI tools | Free-tier AI assistants only; this folder is the shared context |
