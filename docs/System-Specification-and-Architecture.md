@@ -172,12 +172,12 @@ Do not commit real resident records to source control. Agree on import validatio
 
 ## 9. Platform, connectivity, and operating environment
 
-- **Online, offline, or hybrid:** Pending client discussion
+- **Online, offline, or hybrid:** Client stated a preference for fully offline operation during the October 19–20, 2026 interviews. Final approval is pending the signed Creative Brief.
 - **Internet availability / reliability:** Pending
 - **Devices available at the office:** Pending
 - **Expected users and concurrent use:** Pending
 - **Network restrictions / Wi-Fi / LAN requirements:** Pending
-- **Hosting preference and constraints:** Pending
+- **Hosting preference and constraints:** Client prefers a local office system because internet is slow. The proposed Docker-based LAN host is not yet approved or site-verified.
 - **Maintenance owner after turnover:** Pending
 - **Client-side technical support:** Pending
 - **Networking 2 requirements confirmed with instructor:** Pending
@@ -297,9 +297,9 @@ Never rely only on frontend visibility to enforce permissions. Test protected AP
 
 **Status: Not production-verified.**
 
-- **Client preference (online/offline/hybrid):** Pending interview.
+- **Client preference (online/offline/hybrid):** Client stated a preference for fully offline operation during the October 19–20, 2026 interviews. The signed Creative Brief and deployment arrangement are still pending.
 - **Client internet and devices:** Pending verification.
-- **Planned option:** Vercel frontend/API plus Supabase PostgreSQL, subject to client requirements, provider terms, configuration support, cost, and security verification.
+- **Prepared option:** Docker Compose local-host deployment for offline LAN use. The original Vercel/Supabase configuration remains in the repository but is not the intended offline startup path.
 - **Alternative:** Assess if connectivity, provider terms, privacy requirements, or instructor expectations make the planned option unsuitable.
 - **TLS / HTTPS:** Production verification pending.
 - **CORS / trusted proxy:** Production verification pending.
