@@ -9,9 +9,9 @@ Laguna State Polytechnic University – Los Baños Campus
 
 | Member | Role |
 |---|---|
-| [Vic John O. Salen Jr.](https://github.com/ItzVickyyy) | Project Leader, Lead Developer |
+| [Vic John O. Salen Jr.](https://github.com/ItzVickyyy) | Project Leader, Full Stack Developer |
 | [Justin Adrian P. Reboton](https://github.com/jOstin-7) | Backend Developer, Technical Writer |
-| [Jean Mervin G. Fajardo](https://github.com/JeanMervin) | Frontend Developer |
+| [Jean Mervin G. Fajardo](https://github.com/JeanMervin) | Full Stack Developer |
 
 > **Status (October 25, 2026):** client interviews were conducted on October 19–20. The staff-only records and document-issuance scope and Creative Brief still await client review and signatures. The Foundation branch has an initial Docker-based self-hosted LAN path, but actual office deployment, offline workflows, backup/restore, security, automatic startup, and client approval remain unverified. See [Offline-LAN-Deployment.md](docs/Offline-LAN-Deployment.md), [Creative-Brief.md](docs/Creative-Brief.md), and [Source-of-Truth.md](docs/Source-of-Truth.md).
 
