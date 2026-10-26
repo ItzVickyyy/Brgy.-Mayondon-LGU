@@ -77,6 +77,14 @@ def recover_password(
     )
     user = None if rate_limited else crud.get_user_by_email(session=session, email=email)
 
+    if not settings.emails_enabled:
+        return Message(
+            message=(
+                "Email-based password recovery is unavailable in this offline "
+                "installation. Contact the system administrator."
+            )
+        )
+
     # Always return the same response to prevent email enumeration attacks.
     # Do not send email or reveal account existence after a rate limit is reached.
     if user:

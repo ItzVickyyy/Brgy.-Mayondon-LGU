@@ -9,7 +9,7 @@ Project Guide*, the Guide wins; fix this file.
 a new chat, then ask your question. Update the file whenever a decision changes
 (see [Maintenance](#maintenance)).
 
-Last updated: October 18, 2026
+Last updated: October 25, 2026
 
 ---
 
@@ -19,8 +19,8 @@ Last updated: October 18, 2026
 |---|---|
 | Project | A working web system for a real client, designed, built, tested and turned over by one group |
 | Client | Barangay Mayondon LGU, Los Baños, Laguna (assigned by Prof. Camba) |
-| System to build | **Not decided yet.** Decided after the client interview (Week 13) |
-| Hosting | Online: **Vercel** (frontend and API) + **Supabase** (PostgreSQL). See `Complete-Tech-Stacks.md` |
+| System to build | **Barangay Mayondon Records and Document Issuance System** (draft scope from interviews on October 19–20, 2026; client signature still pending) |
+| Operating model | Client prefers a fully offline system on the barangay office's local network. An initial Docker-based local-host deployment path is now prepared on Foundation, but the actual LAN setup, offline workflows, backup/restore, and client approval remain unverified. |
 | School | Laguna State Polytechnic University – Los Baños Campus |
 | Program | BSIT, Major in Web and Mobile Application Development (WMAD), Section 3A |
 | Merged courses | One project replaces the separate final projects of four subjects |
@@ -37,14 +37,11 @@ Last updated: October 18, 2026
 
 | Member | Role |
 |---|---|
-| Vic John O. Salen Jr. | Project Leader, Lead Developer (also fills out the Peer Evaluation Sheet) |
+| Vic John O. Salen Jr. | Project Leader, Full Stack Developer (also fills out the Peer Evaluation Sheet) |
 | Justin Adrian P. Reboton | Backend Developer, Technical Writer |
-| Jean Mervin G. Fajardo | Frontend Developer |
+| Jean Mervin G. Fajardo | Full Stack Developer |
 
-Suggested ownership: **Vic** architecture, auth/roles, deployment, integration,
-final demo · **Justin** models, migrations, API, tests, Creative Brief, user
-manual, final report · **Jean** sitemap, wireframes, mockups, pages and
-components, responsiveness, mobile view.
+Suggested areas of focus, not exclusive boundaries: **Vic** project coordination, architecture, authentication/roles, deployment, integration, and final demo · **Justin** backend logic, models, migrations, APIs, tests, and technical writing for the Creative Brief, user manual, and final report · **Jean** UI/UX design, sitemap, wireframes, mockups, responsive interface, and full-stack implementation. Vic and Jean are both full-stack developers and should coordinate on frontend/backend tasks based on workload and experience.
 
 ---
 
@@ -143,7 +140,7 @@ Hard copy and soft copy (section 10), together with the Peer Evaluation Sheet.
 
 ---
 
-## 6. Creative Brief (2–3 pages, signed by the client)
+## 6. Creative Brief (2–3 pages, signed by the client)\n\nThe current interview-based draft is maintained in [Creative-Brief.md](Creative-Brief.md). It records the October 19–20 interviews and is **pending client review and signatures**. Use that document as the working version, but do not call it approved until the client signs it. The Final Project Guide requires client approval before design starts.
 
 | # | Part | What to write |
 |---|---|---|
@@ -252,42 +249,46 @@ Ratings are confidential and members may receive different grades. Rating guide:
 | Starting point | Full Stack FastAPI Template, cloned and tailored for this project |
 | Backend | FastAPI + SQLModel + PostgreSQL, Python 3.14 |
 | Frontend | React + TypeScript + Vite + Tailwind CSS + shadcn/ui |
-| Deployment | **One Vercel Services project** (frontend + FastAPI backend, Beta on all plans) + **Supabase** (database); deployment remains untested. Two Vercel projects are the fallback if Services cannot be enabled |
+| Existing foundation architecture | React + FastAPI + PostgreSQL. The Docker Compose self-hosted path builds the frontend into the FastAPI image and uses local PostgreSQL. Legacy Vercel-specific configuration and Supabase transaction-pooler handling have been removed. The LAN path is preparation only and remains untested at the client site. |
 | Accounts | Admin-only account creation; open sign-up is disabled. `is_superuser` = Admin, other users = Staff. New passwords require 12–128 characters; five failed logins trigger a 15-minute account lockout |
-| Branding | Centralized in `frontend/src/config/site.ts`; official logo pending |
+| Branding | Centralized in `frontend/src/config/site.ts`; client supplied the Barangay Mayondon logo on October 20, 2026. Final UI palette and use of logo remain subject to client design feedback. |
 | AI tools | Free-tier AI assistants only; this folder is the shared context |
 
 ---
 
 ## 13. Open items
 
-- [ ] Request letter signed by all three instructors (Oct 19), then delivered to the barangay; fill in the client's name, position, office and address
-- [ ] Interview done; sample forms, logbooks, logo and seal collected
-- [ ] **Which modules** the system will have (decide from the client's answers)
-- [ ] Confirm bracketed values in the Guide with Prof. Camba: number of mockup pages, mobile pages, presentation length, survey respondents, photos per narrative, paper size, submission platform
-- [ ] Confirm with Sir Ramos what **Networking 2** expects when the system is cloud-hosted (e.g. network setup, connectivity and security checks at the barangay hall) and what Sir Matute expects for **Client-Server Technologies**
-- [ ] Confirm the barangay has reliable internet and devices for an online system; if not, discuss an offline option
-- [ ] Set up the Vercel and Supabase accounts and agree who owns them
-- [ ] Deploy preview project and verify routing, database connections, migrations, and login before production use
-- [ ] Confirm Vercel Hobby terms allow the LGU's intended organizational use before entering any real resident or office data; otherwise choose a compliant hosting/offline option
+- [ ] Confirm the request letter has the instructor signatures and client receiving copy required by the Final Project Guide.
+- [ ] Review [Creative-Brief.md](Creative-Brief.md) with the client and obtain client and group leader signatures before design begins.
+- [ ] Confirm final document types, approved print layouts, required resident fields, import rules, ID numbering and validity rules, and account permissions.
+- [ ] Validate the prepared offline/LAN setup with the client, identify the designated host computer and staff computers, confirm printer access, and assign maintenance responsibilities.
+- [ ] Decide how ID photo background removal will work without internet. The client described using an online service today.
+- [ ] Agree on backup frequency, external-drive custody, restore testing, and recovery responsibilities.
+- [ ] Confirm bracketed values in the Guide with Prof. Camba: number of mockup pages, mobile pages, presentation length, survey respondents, photos per narrative, paper size, and submission platform.
+- [ ] Confirm with Sir Ramos what Networking 2 expects for local network setup, connectivity, and security at the barangay site, and what Sir Matute expects for Client-Server Technologies.
+- [ ] Review the Foundation implementation against the signed scope before adapting, removing, or adding modules.
+- [ ] Verify the chosen architecture and installation with a test setup before using real resident data.
 
 ---
 
 ## 14. Status
 
+**Current status (October 25, 2026):** Interviews were conducted on October 19–20 and an interview-based Creative Brief draft is available in `docs/Creative-Brief.md`. It is not yet signed by the client. The client prefers fully offline operation over the local network. The Foundation branch now includes an initial Docker Compose path for a local host and database, plus [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). This path has not yet been built, tested without internet, or verified at the client site. Keep the repository on `Foundation`; do not rename or merge this branch or create `production` unless the team explicitly reviews the branch plan.
+
 - [x] Group formed; client assigned
 - [x] Questionnaire drafted and fixed (7 questions)
-- [x] Request letter drafted (to be signed Oct 19)
-- [x] Repository tailored from the template (branding, closed registration)
-- [x] Foundation deployment configuration prepared (single-project Vercel Services routing, SPA fallback, configurable Vite output, explicit CORS fallback, Supabase transaction-pooler support); hosting not yet verified
-- [x] Added reusable admin authorization, structured admin-write logs, and database-backed login lockout fields; audit events currently go to application logs rather than a dedicated audit table
-- [x] Added responsive app-header breadcrumbs and a public `/welcome` landing page with placeholder announcements/contact details; public content still needs client approval
+- [x] Client interviews conducted on October 19–20, 2026
+- [x] Interview-based Creative Brief draft documented
+- [x] Sample document formats, current issuing file, logo, ID layout, and resident/ID data sheets reported as received during the interviews
+- [x] Initial Docker-based self-hosting configuration and offline LAN deployment guide prepared on Foundation; actual deployment and offline behavior remain unverified
+- [x] Existing authentication, authorization, login lockout, and security controls documented
+- [x] Added responsive app-header breadcrumbs and a public `/welcome` landing page with placeholder announcements/contact details; public content is not in the current draft scope and needs review before use
 - [x] Closed the three template-generated Dependabot pull requests that targeted `master`; dependency updates will be handled deliberately
-- [ ] Interview
-- [ ] Creative Brief
-- [ ] Design
+- [ ] Creative Brief reviewed and signed
+- [ ] Offline/LAN setup tested without internet and approved by client; host, backup, photo workflow, and recovery responsibilities confirmed
+- [ ] Initial design reviewed with client
 - [ ] Version 1
-- [ ] Testing and turnover
+- [ ] Testing and technology transfer
 - [ ] Presentation
 - [ ] Final report
 

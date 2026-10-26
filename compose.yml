@@ -1,7 +1,7 @@
 services:
-
   db:
     image: postgres:18
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
       interval: 10s
@@ -10,27 +10,40 @@ services:
       timeout: 10s
     volumes:
       - app-db-data:/var/lib/postgresql
+    ports:
+      # Host-side development tools may connect locally. Do not expose the DB
+      # on the office LAN; the backend container connects over Compose's network.
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     environment:
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Variable not set}
-      - POSTGRES_DB=app
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Variable not set}
+      POSTGRES_DB: app
 
   backend:
     image: backend:latest
+    restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
         restart: true
+    ports:
+      # The application and API share this port. Office computers open
+      # http://<server-computer-LAN-IP>:8000 from their browsers.
+      - "${APP_PORT:-8000}:8000"
     environment:
       PROJECT_NAME: ${PROJECT_NAME:?Variable not set}
       SECRET_KEY: ${SECRET_KEY:?Variable not set}
       FIRST_SUPERUSER: ${FIRST_SUPERUSER:?Variable not set}
       FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD:?Variable not set}
-      SMTP_HOST: ${SMTP_HOST}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_TLS: ${SMTP_TLS:-true}
+      SMTP_SSL: ${SMTP_SSL:-false}
       SMTP_USER: ${SMTP_USER:-}
       SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      EMAILS_FROM_EMAIL: ${EMAILS_FROM_EMAIL}
+      EMAILS_FROM_EMAIL: ${EMAILS_FROM_EMAIL:-}
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Variable not set}@db:5432/app
       SENTRY_DSN: ${SENTRY_DSN:-}
+      USERS_OPEN_REGISTRATION: ${USERS_OPEN_REGISTRATION:-false}
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]

@@ -8,21 +8,23 @@ range pinned in `frontend/package.json`).
 
 ```mermaid
 flowchart LR
-    U[Staff / Admin<br/>browser or phone] -->|HTTPS| F[Frontend<br/>React + Vite<br/>Vercel]
-    F -->|REST + JWT| B[Backend API<br/>FastAPI<br/>Vercel Function]
-    B -->|SQL via pooler| D[(PostgreSQL<br/>Supabase)]
-    B -->|SMTP, optional| M[Email service]
+    U1[Office computer 1] -->|LAN browser| H[Designated host computer]
+    U2[Office computer 2] -->|LAN browser| H
+    U3[Office computer 3] -->|LAN browser| H
+    H --> F[React frontend served by FastAPI]
+    F -->|Same-origin REST + JWT| B[FastAPI API]
+    B --> D[(Local PostgreSQL in Docker)]
+    D --> BK[Protected separate backups]
 ```
 
 - The frontend talks to the backend only through the REST API (`/api/v1/...`).
   The API client in `frontend/src/client` is generated from the backend's OpenAPI
   schema, so types stay in sync.
 - Login uses JWT bearer tokens. Passwords are hashed (Argon2, with bcrypt supported).
-- Locally, the same code runs with PostgreSQL in Docker. The backend can also
-  serve the built frontend itself when `backend/app/frontend` exists.
+- The current Docker image builds the frontend and the backend serves it from the same origin. This avoids a separate frontend server and avoids a separate API origin in the proposed LAN setup.
+- The Compose database volume preserves PostgreSQL data across container restarts. It is not a backup.
 
-> **Deployment status:** the Vercel + Supabase setup is the agreed plan and has
-> **not been tested yet**. Section 6 lists what to verify at the first deploy.
+> **Architecture status (October 25, 2026):** the client expressed a preference for a fully offline system on the barangay office LAN because the internet is slow. The repository now has an initial Docker-based self-hosting path, documented in [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). This is preparation only. The host computer, office LAN, firewall, no-internet behavior, backup/restore, photo workflow, and client approval remain unverified. Do not use real resident data until the actual deployment is tested and approved.
 
 ## 2. Backend
 
@@ -72,22 +74,18 @@ Branding (name, location, logo) lives in `frontend/src/config/site.ts`. The prot
 
 ## 4. Database and hosting
 
-| Service | Role | Notes |
+| Component | Offline/LAN role | Notes |
 |---|---|---|
-| **Supabase** | Managed PostgreSQL | Used as a plain Postgres database; the app has its own users table and JWT login, so Supabase Auth is not used |
-| **Vercel** | Hosts the frontend and FastAPI backend in one Vercel Services project (planned) | Services is the preferred single-project setup. If Services cannot be enabled, use two projects with Root Directory `frontend` for Vite and `backend` for FastAPI. The backend declares `tool.vercel.entrypoint = "app.main:app"`. Verify the chosen setup on first deployment. |
-| Docker Compose | Local PostgreSQL and test mailbox only | `docker compose up -d db` (add `mailpit` to test emails). Not used for deployment |
-| GitHub | Source control, pull requests, CI | |
+| Docker Compose | Starts the backend and local database | Requires Docker Desktop or a compatible Docker Engine on the host computer |
+| PostgreSQL 18 | Local database container | Data is persisted in the `app-db-data` volume; create separate backups and test restore |
+| FastAPI | Serves API and built frontend on port `8000` | The backend container binds to `0.0.0.0:8000`; Compose publishes the configured host port |
+| React + Vite | Frontend built into the backend image | Staff access the same origin, normally `http://<host-LAN-IP>:8000` |
+| Docker Compose + local PostgreSQL | Proposed offline/LAN deployment | Active deployment path; still requires client-site verification |
+| SMTP | Optional email service | Disabled by default for offline use; account recovery/setup by email will not work without a reachable approved SMTP server |
+| Sentry | Optional external monitoring | Leave unset for offline client operation unless separately reviewed and approved |
+| GitHub | Source control and CI | Development workflow only; not required for normal operation at the client site |
 
-**Supabase connection rules** (from Supabase's docs):
-- For the serverless API on Vercel use the **transaction pooler** string,
-  port **6543**. Set `DATABASE_POOL_MODE=transaction`; the engine uses SQLAlchemy's
-  `NullPool` and disables psycopg prepared statements (`prepare_threshold=None`).
-- The **direct** connection string is IPv6-only. The **session pooler** (port
-  5432) supports IPv4 and is the recommended choice for running Alembic migrations.
-  Set `MIGRATION_DATABASE_URL` to that session-pooler URL (or the direct URL when
-  available) for migration commands. Do not run Alembic through port 6543.
-- Always copy the exact string from the Supabase Dashboard → Connect.
+The offline deployment guide contains the current setup procedure, LAN access instructions, and unresolved limitations: [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md).
 
 ## 5. Development tools
 
@@ -105,97 +103,22 @@ Branding (name, location, logo) lives in `frontend/src/config/site.ts`. The prot
 | React Email | Source of the email templates (`packages/react-email`, exported to `backend/app/email-templates`) |
 | Mailpit | Local fake mailbox for testing emails |
 
-## 6. Deployment checklist (code prepared; hosting untested)
+## 6. Offline/LAN deployment checklist
 
-Recommended starting setup: **one Vercel project using Vercel Services**, plus
-one Supabase PostgreSQL project. Services lets the frontend and FastAPI backend
-build separately while sharing one domain and deployment. The feature is currently
-Beta and documented as available on all Vercel plans. If Services cannot be enabled
-for this account, fall back to two Vercel projects and use the explicit CORS allowlist.
+The current target is a designated office computer hosting the frontend, API, and local PostgreSQL database. Use the offline LAN deployment guide for the client installation.
 
-### Vercel project: frontend + backend Services
+- [ ] Review and approve the operating model in the signed Creative Brief.
+- [ ] Build the Docker image while required dependencies and images are available.
+- [ ] Configure unique `.env` secrets and strong initial administrator credentials.
+- [ ] Start Compose, apply migrations, and initialize the first administrator.
+- [ ] Confirm the packaged frontend and API load from the host computer.
+- [ ] Confirm a second office computer can log in and perform core tasks using the host's LAN address.
+- [ ] Disconnect internet access and repeat the core workflow tests.
+- [ ] Verify all frontend assets and required application features work without external services.
+- [ ] Agree on an offline alternative for email-based recovery and ID photo background removal.
+- [ ] Configure and test database backup and restore to a separate protected location.
+- [ ] Review firewall rules, account permissions, host availability, updates, and physical security.
+- [ ] Complete Instrument A testing and retesting before client-site use.
+- [ ] Complete Instrument B, training, user manual handover, and Certificate of Utilization only after the actual installation is tested and approved.
 
-- [ ] Import the repository and set the project framework to **Services** in
-  Vercel's Build and Deployment settings. A `services` block alone is not enough.
-- [ ] The root `vercel.json` defines `frontend` at `frontend/` and `backend` at
-  `backend/`, using Vite and FastAPI. The backend entrypoint is `app.main:app`.
-- [ ] Keep the repository-root `package.json` and `bun.lock` available to the
-  frontend service. Check the Vercel monorepo/root-file behavior on the first build.
-- [ ] Set `VITE_BUILD_OUT_DIR=dist` so the frontend service builds to its static
-  output directory rather than `../backend/app/frontend`.
-- [ ] The root rewrite sends `/api` and `/api/*` to the backend, then other paths
-  to the frontend. The frontend's own `vercel.json` rewrites SPA routes to
-  `/index.html`. Test direct visits and refreshes on `/login` and `/items`.
-- [ ] The frontend uses a relative API URL in production, so browser requests
-  stay on the shared origin. Same-origin production requests do not need CORS.
-- [ ] Set `DATABASE_URL` to the Supabase transaction pooler URL on port `6543`
-  and set `DATABASE_POOL_MODE=transaction`.
-- [ ] Set `SECRET_KEY`, `FIRST_SUPERUSER`, `FIRST_SUPERUSER_PASSWORD`,
-  `PROJECT_NAME`, and any required email/Sentry settings in Vercel environment
-  variables. Never commit actual values. Do not expose database secrets with a
-  `VITE_` prefix.
-- [ ] If using two separate Vercel projects instead, set `VITE_API_URL` to the
-  backend origin and set `FRONTEND_HOSTS` to a comma-separated allowlist of exact
-  production/preview frontend origins. Avoid broad wildcard CORS rules.
-
-### Supabase database and migrations
-
-- [ ] Copy the exact transaction-pooler connection string from Dashboard → Connect.
-- [ ] From a trusted development machine, set `MIGRATION_DATABASE_URL` to the
-  session-pooler URL on port `5432` (or a reachable direct URL), then run
-  `uv run alembic upgrade head` from `backend`.
-- [ ] Create the first admin using the existing initial-data script only after
-  confirming its behavior and the production environment variables.
-- [ ] Verify login, lockout, CRUD, logout, direct SPA route visits, and a migration
-  against a non-production test database before client data is entered.
-- [ ] Check current Vercel and Supabase free-tier limits, project pausing behavior,
-  database backup options, and restore steps before Week 16 turnover.
-- [ ] Confirm that Vercel Hobby terms permit the intended organizational use by the LGU. The free plan is described as for personal, non-commercial use; do not put real office/resident records into this deployment until the instructor and client approve a compliant hosting arrangement.
-- [ ] Confirm with Sir Ramos what Networking 2 expects for a cloud-hosted system
-  and with Sir Matute what Client-Server Technologies requires.
-
-**Official references checked October 18, 2026:**
-
-- [Vercel Services guide and availability](https://vercel.com/kb/guide/vercel-services)
-- [Vercel Hobby plan terms and restrictions](https://vercel.com/legal/terms)
-- [Vercel FastAPI entrypoint configuration](https://vercel.com/docs/frameworks/backend/fastapi)
-- [Vercel Python runtime and supported versions](https://vercel.com/docs/functions/runtimes/python)
-- [Vercel Vite SPA routing](https://vercel.com/docs/frameworks/frontend/vite)
-- [Supabase PostgreSQL connection methods](https://supabase.com/docs/guides/database/connecting-to-postgres)
-- [Supabase SQLAlchemy transaction-pooler guidance](https://supabase.com/docs/guides/troubleshooting/using-sqlalchemy-with-supabase-FUqebT)
-
-**Status:** Configuration is prepared, but Vercel Services and Supabase have not
-been deployed or tested. Treat the first preview deployment as a verification step,
-not as proof of production readiness.
-## 7. Security features in place
-
-- Argon2 password hashing and timing-attack-safe login
-- New passwords must be 12–128 characters; current-password verification remains compatible with existing passwords
-- Account lockout after 5 consecutive failed login attempts for 15 minutes (configurable with `LOGIN_MAX_FAILED_ATTEMPTS` and `LOGIN_LOCKOUT_MINUTES`)
-- Reusable `require_admin` dependency for admin-only routes
-- Structured audit events for admin user creation, updates, and deletion, written to application logs without recording personal field values
-- JWT bearer authentication; admin-only endpoints for user management
-- Open registration disabled (`USERS_OPEN_REGISTRATION=False`)
-- CORS restricted to the explicit `FRONTEND_HOSTS` allowlist, or the `FRONTEND_HOST` fallback
-- Refuses default secrets outside development mode
-- Secrets read from environment variables; `.env` is not committed
-
-**Audit-log limitation:** these events are emitted to application logs, not stored in a dedicated database audit table. Confirm log access and retention before relying on them for formal records. If the client requires durable audit history, agree on retention and access rules before adding it.
-
-## 8. How the stack maps to the four subjects
-
-| Subject | Where it shows up |
-|---|---|
-| Principles of Web Design | React + Tailwind + shadcn/ui, theme and branding config, responsive layouts, mockups and style guide |
-| Integrative Programming | SQLModel models, Alembic migrations, FastAPI routes, modules working together, report/print features |
-| Client-Server Technologies | REST API with JWT, generated typed client, Vercel + Supabase deployment, environment configuration |
-| Networking 2 | Cloud connectivity, HTTPS, CORS, access control, and whatever site-level checks the instructor requires |
-
-## 9. Removed from the template
-
-TanStack devtools · FastAPI Cloud deployment files · release and changelog
-tooling · template documentation, images and logos · open sign-up · obsolete
-`compose.deploy.yml` and its Traefik production proxy. `compose.yml` and
-`compose.override.yml` remain for local PostgreSQL, Mailpit, backend integration,
-and Playwright testing. The local stack uses direct service ports and no longer
-requires Traefik.
+See [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md) for detailed steps. This list is not evidence of a completed installation.
