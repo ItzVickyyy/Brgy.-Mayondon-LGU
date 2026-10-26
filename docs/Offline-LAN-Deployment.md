@@ -166,3 +166,100 @@ These scripts are initial utilities and still require execution and recovery tes
 - [ ] Client and instructor approval is recorded before real data is loaded.
 
 This deployment guide supports the Client-Server Technologies and Networking 2 milestones, and informs the Integrative Programming work. It does not replace the testing instruments, technology-transfer records, signed Certificate of Utilization, or final report required by the project guide.
+
+## 10. Source-code protection and deployment packaging
+
+### Keep development separate from client deployment
+
+The GitHub repository is the team's development workspace. The barangay's main computer does not need a clone of the repository for normal operation. Keeping the repository private protects access to the hosted copy, but it does not protect source files after they have been downloaded to another computer.
+
+Recommended approach:
+
+1. Keep the private repository and development credentials on the team's development computers. Grant repository access only to the people who need it.
+2. Build and test the application on a trusted development computer.
+3. Prepare a deployment package containing the production Docker images, a production Compose file, required configuration templates, and installation instructions. Prefer prebuilt images so the client host does not need the source tree to build the app.
+4. Transfer the approved package to the designated host using an agreed method. Verify that the package runs without cloning the repository or accessing GitHub.
+5. Keep the real production `.env` file on the host, restrict access to it, and use secrets that are different from development credentials.
+6. Never place GitHub passwords, personal access tokens, SSH private keys, development credentials, or real resident records in the deployment package or documentation.
+
+An illustrative deployment package could contain:
+
+```text
+Mayondon-Deployment/
+├── compose.production.yml
+├── mayondon-backend.tar
+├── mayondon-frontend.tar
+├── deployment-instructions.pdf
+└── scripts/
+```
+
+This is an example structure only. The actual package must match the repository's Docker configuration and be tested before handover. If the backend image contains application code, it may still be possible for a sufficiently privileged local administrator to inspect or extract parts of it. Frontend code delivered to a browser can also be inspected. Docker images reduce the need to distribute the repository, but they do not make the software impossible to copy.
+
+### Host and client computer access
+
+- The designated host computer runs the application and local PostgreSQL database.
+- Other office computers use a browser and the trusted local network. They should not need Git, the source repository, Docker, or their own PostgreSQL installation.
+- Do not publish the PostgreSQL port to the LAN. Office computers should communicate with the application, and the application should communicate with the database.
+- Keep Windows Defender Firewall enabled. Allow only the required application traffic on the trusted private LAN.
+- Do not save GitHub credentials or administrator passwords in shortcuts, scripts, or browser launch commands.
+- Use separate production secrets and staff accounts. Limit Windows administrator access and access to deployment files and database storage.
+
+### Ownership and client handover
+
+Before final turnover, clarify with the instructor and client what source code, deployment files, documentation, maintenance support, and usage rights are expected to be handed over. Record the agreed arrangement rather than assuming that a private repository or a Docker image determines ownership.
+
+Do not build hidden access mechanisms or make the system dependent on the students' personal accounts. The client must retain legitimate access to its records and operate the system according to the agreed handover arrangement.
+
+## 11. One-time setup and daily startup
+
+The goal is to configure the host once so staff do not need to run terminal commands or start PostgreSQL manually every workday. This is a target behavior, not a verified capability until it has been tested on the intended host computer.
+
+### One-time setup by the project team
+
+- Install and configure Docker Desktop on the designated host computer.
+- Copy the approved deployment package, configure the production `.env` file with unique secrets, and load the required images.
+- Initialize PostgreSQL, apply migrations, and create the approved administrator account.
+- Configure Docker Desktop to start at the appropriate Windows startup or sign-in point.
+- Confirm the Compose services have suitable restart policies and that the database and backend become healthy.
+- Configure the firewall and trusted LAN access.
+- Create a desktop shortcut or browser bookmark for the system address.
+- Document the approved shutdown, restart, update, backup, restore, and troubleshooting procedures.
+
+### Intended daily workflow
+
+1. Turn on the designated main computer and sign in to Windows as required by the agreed setup.
+2. Docker Desktop and its engine start according to the configured startup behavior.
+3. The application and database containers start according to their restart policies.
+4. Wait until the application is ready.
+5. Open the system using a desktop shortcut or browser bookmark. On the host, use `http://localhost:8000`. On other office computers, use `http://<host-computer-LAN-IP>:8000`.
+6. Staff sign in and use the system through the browser.
+
+The main computer may also be used as a clerk workstation. Other office computers need a supported browser and access to the trusted local network only.
+
+### Startup limitations and verification
+
+- A Compose restart policy can restart containers when the Docker engine starts. It does not, by itself, make Docker Desktop launch when Windows starts.
+- Docker Desktop startup may depend on Windows sign-in and the configured user account. Test the actual startup sequence on the intended host.
+- A browser shortcut does not start the server. Opening it before the application is healthy may show a connection error.
+- Do not store administrator credentials in a shortcut or startup script.
+- If the client expects the application to be available before anyone signs in to Windows, assess that requirement separately. Do not promise unattended pre-login startup until a supported setup has been selected and tested.
+- Do not disable Windows Defender Firewall to make the system accessible.
+
+### Daily operation acceptance checklist
+
+- [ ] Docker Desktop / the engine starts as expected after a normal host startup and sign-in.
+- [ ] Database and application containers start without manual terminal commands.
+- [ ] The backend health check becomes healthy after startup.
+- [ ] The system opens from the prepared shortcut or bookmark.
+- [ ] The host can also be used as a clerk workstation.
+- [ ] At least one other authorized computer can access the same application through the LAN.
+- [ ] Approved workflows work without internet using locally available resources.
+- [ ] A host restart does not lose database data.
+- [ ] Staff have simple instructions for checking readiness, opening the system, and reporting problems.
+- [ ] The team documents any requirement for a Windows user to sign in before Docker starts.
+
+### Client-facing instructions for the user manual
+
+After the actual deployment is verified, the user manual should explain how to turn on and sign in to the host, tell whether the system is ready, open the system on the host and other office computers, respond when the page does not load, identify who may restart the application or host, contact the designated support person, and shut down the host safely. Keep Docker commands in an administrator troubleshooting section rather than the normal daily staff workflow.
+
+These are target procedures only. Automatic startup, shortcuts, LAN access from another computer, and client-site operation remain unverified until tested. Backup and restore testing remains a separate required deployment check before real resident data is used.
