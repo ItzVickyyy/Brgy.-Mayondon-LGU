@@ -5,7 +5,8 @@ on:
     branches:
       - Foundation
       - master
-  pull_request:
+
+      - draft/admin-portal  pull_request:
 permissions:
   contents: read
 
