@@ -2,7 +2,7 @@
 
 This guide explains how to run the Barangay Mayondon LGU system on a Windows development computer. It starts PostgreSQL, applies database migrations, creates the initial administrator account, and runs the backend and frontend in separate PowerShell terminals.
 
-Use this for local development only. The project remains on the `Foundation` branch while the team prepares for the client interview. Do not enter real resident information.
+Use this guide for local development with separate backend and frontend processes. For the proposed packaged office-LAN deployment, use [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). Do not enter real resident information in development.
 
 ## 1. Required software
 

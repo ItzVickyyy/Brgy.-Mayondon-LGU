@@ -1,0 +1,265 @@
+# Offline LAN Deployment Guide
+
+**Status:** Initial self-hosting preparation. The setup has not yet been installed or tested on the barangay's actual computers and network. Do not use real resident records until the client approves the design and the team verifies security, backups, and recovery.
+
+## 1. Target operating model
+
+Use one designated office computer as the local application host. It runs the React frontend, FastAPI backend, and PostgreSQL database. Other authorized office computers open the system in a browser over the barangay's local network.
+
+```mermaid
+flowchart TD
+    A[Office PC 1] -->|Local network / HTTP| H[Designated host computer]
+    B[Office PC 2] -->|Local network / HTTP| H
+    C[Office PC 3] -->|Local network / HTTP| H
+    H --> F[React frontend served by FastAPI]
+    F --> API[FastAPI API]
+    API --> DB[(Local PostgreSQL)]
+    DB --> BK[Scheduled backup to a separate protected location]
+```
+
+The application does not need Vercel, Supabase, or an internet connection during normal use. Internet access may still be needed once to download the repository, package dependencies, and Docker images before the deployment computer is taken offline. The office LAN, host computer, and local database must remain powered on for other computers to use the system.
+
+This is **LAN operation without internet**, not a standalone copy of the database on every computer. If the host computer or local network is down, other staff cannot access the application until it is restored.
+
+## 2. What has been prepared in the repository
+
+- The Docker Compose backend publishes the application port, defaulting to `8000`.
+- The Docker image builds the frontend and serves it through the FastAPI application on the same origin.
+- PostgreSQL data is stored in a named Docker volume so it persists across container restarts.
+- SMTP and Sentry are disabled by default in the offline environment example.
+- Vercel-specific configuration and Supabase transaction-pooler handling have been removed from the active deployment code. The local LAN startup path uses the configured local PostgreSQL service.
+
+These changes prepare a deployment path. They do not prove that the complete application is ready for the barangay. The current app still contains starter-template features that must be reviewed against the signed Creative Brief.
+
+## 3. Prepare the host computer
+
+Use a Windows 10/11 64-bit computer that can remain powered on during office hours. Confirm that it has sufficient disk space, reliable power, a supported Docker Desktop setup, and access to the same local network as staff computers.
+
+Before going offline, on a trusted development computer:
+
+1. Clone or update the repository and check out the agreed `Foundation` branch.
+2. Install Docker Desktop and start it once.
+3. Download the required Docker images and build the application image while internet access is available.
+4. Test the full setup with fictional data before bringing it to the client site.
+5. Copy the repository and required installation materials to the deployment computer using an approved method.
+
+Do not copy production passwords, private keys, or real resident records into the repository or class materials.
+
+## 4. Configure the local environment
+
+From the repository root in PowerShell:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Edit `.env` and set unique values for:
+
+- `SECRET_KEY`: a random secret of at least 32 bytes.
+- `POSTGRES_PASSWORD`: a strong database password. Until URL-encoding is handled explicitly in the Compose configuration, use a long random alphanumeric password without URL-reserved characters such as `@`, `:`, `/`, or `#`.
+- `FIRST_SUPERUSER`: the initial administrator username/email.
+- `FIRST_SUPERUSER_PASSWORD`: a strong initial administrator password.
+- `APP_PORT`: normally `8000`.
+
+For a deployment test, remove `FASTAPI_ENV=development` from `.env` or leave `FASTAPI_ENV=` blank. The current settings accept `development` or an unset value, not a `production` value. In development mode, weak-secret checks only warn; with the setting unset, invalid default secrets or a signing key shorter than 32 bytes prevent startup. This setting alone does not make the application production-secure, so still review authentication, permissions, network exposure, and other deployment controls.
+
+Keep SMTP, Sentry, and external hosted database settings empty for the offline deployment. Never commit the real `.env` file. The example values are placeholders and must be replaced.
+
+## 5. Validate configuration, build, and start the system
+
+Before building, ask Docker Compose to parse the configuration and resolve required environment variables:
+
+```powershell
+docker compose -f compose.yml config --quiet
+```
+
+If this command reports a missing variable or invalid configuration, fix `.env` before continuing. Do not paste the contents of `.env` into issue reports or chat messages because it contains secrets.
+
+Build and start the services from the repository root:
+
+```powershell
+docker compose -f compose.yml build
+docker compose -f compose.yml up -d
+docker compose -f compose.yml ps
+```
+
+Wait until the database and backend report healthy. If a service is not healthy, inspect its logs before proceeding:
+
+```powershell
+docker compose -f compose.yml logs --tail 100 db
+docker compose -f compose.yml logs --tail 100 backend
+```
+
+On a first installation, apply migrations and create the initial administrator:
+
+```powershell
+docker compose -f compose.yml exec backend alembic upgrade head
+docker compose -f compose.yml exec backend python app/initial_data.py
+```
+
+If the administrator already exists, the initialization script should not be treated as a way to reset its password. Follow the application's approved account-recovery procedure instead.
+
+Check the health endpoint on the host computer:
+
+```powershell
+Invoke-WebRequest http://localhost:8000/api/v1/utils/health-check/
+```
+
+Open `http://localhost:8000` on the host computer and confirm that login and the expected pages load. Do not mark deployment complete based only on the health endpoint.
+
+## 6. Allow office computers to connect
+
+1. Connect the host computer and staff computers to the same trusted private LAN. Do not expose the service to the public internet.
+2. On the host computer, run `ipconfig` and record the IPv4 address for the office LAN adapter.
+3. In Windows Defender Firewall, allow inbound TCP traffic on port `8000` only on the Private profile and only as needed for the trusted office LAN. Do not disable the firewall.
+4. On another office computer, open `http://<host-computer-IPv4>:8000` in a browser, replacing the placeholder with the host's actual LAN address.
+5. Test login, record search, data entry, printing, logout, and simultaneous use from more than one authorized computer.
+6. Ask the network administrator whether the host's address can be reserved in the router so it does not change unexpectedly.
+
+This setup uses HTTP on a private LAN. It is not encrypted in transit. Before real resident data is used, the team must assess the actual network, access controls, and whether HTTPS is required for the client's risk level. A private LAN is not a substitute for application authentication, least-privilege permissions, or physical security.
+
+## 7. Offline limitations to resolve
+
+- **Password recovery and account setup by email:** These depend on SMTP and will not work when no mail service is configured. Admins must have a client-approved local account setup and password reset procedure. Do not leave staff locked out without a recovery plan.
+- **ID photo background removal:** The client's current workflow uses an online service. That step must be replaced with an approved local tool or a manual process that does not upload resident photos to an external service.
+- **External resources:** Verify that the UI, fonts, icons, scripts, and all other assets load without internet. The packaged frontend should use local assets and same-origin API calls.
+- **Updates and dependencies:** Download and test updates before taking the host offline. Do not rely on live package downloads at the barangay.
+- **Backups:** A Docker volume protects against ordinary container replacement but is not a backup. Set a backup schedule, store encrypted/protected copies separately from the host, and test restoring a backup before deployment.
+- **Host availability:** Other computers depend on the host computer and its database. Agree who restarts it, applies updates, and responds to hardware failure.
+- **Data migration:** Import existing spreadsheets only after agreeing on field mapping, duplicate handling, validation, and the client-approved retention process.
+
+## 8. Backup and restore preparation
+
+The repository includes PowerShell scripts for a basic local PostgreSQL backup and restore. Run them from the repository root with Docker Compose running.
+
+Create a backup:
+
+```powershell
+.\scripts\backup-db.ps1
+```
+
+The script creates a timestamped PostgreSQL custom-format dump under `backups\`, copies it out of the database container, and removes its temporary container copy. The `backups\` directory is ignored by Git because backup files may contain resident personal information.
+
+Before restoring, create a fresh backup of the current database. Then choose the dump file and run:
+
+```powershell
+.\scripts\backup-db.ps1
+.\scripts\restore-db.ps1 -BackupFile ".\backups\mayondon-db-YYYYMMDD-HHMMSS.dump"
+```
+
+The restore script asks for the exact confirmation word `RESTORE`, checks that PostgreSQL can read the backup archive before stopping the backend, and uses `pg_restore --exit-on-error` during the restore. It starts the backend again only after the restore command succeeds. If the restore reports an error, keep the backend stopped and investigate before restarting the application. Restoring can replace existing database objects and data. Use only a backup from a compatible application/database version. After restore, verify login, representative records, document generation, and the main workflows before returning the system to use. Do not assume the restore succeeded solely because the command completed.
+
+These scripts are initial utilities and still require execution and recovery testing on the actual deployment environment. Store a protected backup copy on a separate physical device or approved storage location, restrict access, and agree on a backup frequency with the client. A backup stored only on the host computer does not protect against disk failure, theft, ransomware, or accidental deletion.
+
+## 9. Required verification before client deployment
+
+- [ ] Client approves the LAN hosting arrangement and identifies the responsible host computer.
+- [ ] The signed Creative Brief and architecture documents reflect the offline operating model.
+- [ ] The system starts after a host reboot without requiring internet access.
+- [ ] A second computer can use the system when the internet connection is disconnected.
+- [ ] Login, staff account management, records, printing, and concurrent access work as expected.
+- [ ] No feature sends resident data or photos to an external service.
+- [ ] Email-dependent workflows have an approved offline alternative.
+- [ ] Windows Firewall and LAN access are configured and reviewed.
+- [ ] Backup and restore have been tested and recorded.
+- [ ] User permissions, password handling, staff training, and the Data Privacy Act of 2012 requirements have been reviewed with the client.
+- [ ] Client and instructor approval is recorded before real data is loaded.
+
+This deployment guide supports the Client-Server Technologies and Networking 2 milestones, and informs the Integrative Programming work. It does not replace the testing instruments, technology-transfer records, signed Certificate of Utilization, or final report required by the project guide.
+
+## 10. Source-code protection and deployment packaging
+
+### Keep development separate from client deployment
+
+The GitHub repository is the team's development workspace. The barangay's main computer does not need a clone of the repository for normal operation. Keeping the repository private protects access to the hosted copy, but it does not protect source files after they have been downloaded to another computer.
+
+Recommended approach:
+
+1. Keep the private repository and development credentials on the team's development computers. Grant repository access only to the people who need it.
+2. Build and test the application on a trusted development computer.
+3. Prepare a deployment package containing the production Docker images, a production Compose file, required configuration templates, and installation instructions. Prefer prebuilt images so the client host does not need the source tree to build the app.
+4. Transfer the approved package to the designated host using an agreed method. Verify that the package runs without cloning the repository or accessing GitHub.
+5. Keep the real production `.env` file on the host, restrict access to it, and use secrets that are different from development credentials.
+6. Never place GitHub passwords, personal access tokens, SSH private keys, development credentials, or real resident records in the deployment package or documentation.
+
+An illustrative deployment package could contain:
+
+```text
+Mayondon-Deployment/
+├── compose.production.yml
+├── mayondon-backend.tar
+├── mayondon-frontend.tar
+├── deployment-instructions.pdf
+└── scripts/
+```
+
+This is an example structure only. The actual package must match the repository's Docker configuration and be tested before handover. If the backend image contains application code, it may still be possible for a sufficiently privileged local administrator to inspect or extract parts of it. Frontend code delivered to a browser can also be inspected. Docker images reduce the need to distribute the repository, but they do not make the software impossible to copy.
+
+### Host and client computer access
+
+- The designated host computer runs the application and local PostgreSQL database.
+- Other office computers use a browser and the trusted local network. They should not need Git, the source repository, Docker, or their own PostgreSQL installation.
+- Do not publish the PostgreSQL port to the LAN. Office computers should communicate with the application, and the application should communicate with the database.
+- Keep Windows Defender Firewall enabled. Allow only the required application traffic on the trusted private LAN.
+- Do not save GitHub credentials or administrator passwords in shortcuts, scripts, or browser launch commands.
+- Use separate production secrets and staff accounts. Limit Windows administrator access and access to deployment files and database storage.
+
+### Ownership and client handover
+
+Before final turnover, clarify with the instructor and client what source code, deployment files, documentation, maintenance support, and usage rights are expected to be handed over. Record the agreed arrangement rather than assuming that a private repository or a Docker image determines ownership.
+
+Do not build hidden access mechanisms or make the system dependent on the students' personal accounts. The client must retain legitimate access to its records and operate the system according to the agreed handover arrangement.
+
+## 11. One-time setup and daily startup
+
+The goal is to configure the host once so staff do not need to run terminal commands or start PostgreSQL manually every workday. This is a target behavior, not a verified capability until it has been tested on the intended host computer.
+
+### One-time setup by the project team
+
+- Install and configure Docker Desktop on the designated host computer.
+- Copy the approved deployment package, configure the production `.env` file with unique secrets, and load the required images.
+- Initialize PostgreSQL, apply migrations, and create the approved administrator account.
+- Configure Docker Desktop to start at the appropriate Windows startup or sign-in point.
+- Confirm the Compose services have suitable restart policies and that the database and backend become healthy.
+- Configure the firewall and trusted LAN access.
+- Create a desktop shortcut or browser bookmark for the system address.
+- Document the approved shutdown, restart, update, backup, restore, and troubleshooting procedures.
+
+### Intended daily workflow
+
+1. Turn on the designated main computer and sign in to Windows as required by the agreed setup.
+2. Docker Desktop and its engine start according to the configured startup behavior.
+3. The application and database containers start according to their restart policies.
+4. Wait until the application is ready.
+5. Open the system using a desktop shortcut or browser bookmark. On the host, use `http://localhost:8000`. On other office computers, use `http://<host-computer-LAN-IP>:8000`.
+6. Staff sign in and use the system through the browser.
+
+The main computer may also be used as a clerk workstation. Other office computers need a supported browser and access to the trusted local network only.
+
+### Startup limitations and verification
+
+- A Compose restart policy can restart containers when the Docker engine starts. It does not, by itself, make Docker Desktop launch when Windows starts.
+- Docker Desktop startup may depend on Windows sign-in and the configured user account. Test the actual startup sequence on the intended host.
+- A browser shortcut does not start the server. Opening it before the application is healthy may show a connection error.
+- Do not store administrator credentials in a shortcut or startup script.
+- If the client expects the application to be available before anyone signs in to Windows, assess that requirement separately. Do not promise unattended pre-login startup until a supported setup has been selected and tested.
+- Do not disable Windows Defender Firewall to make the system accessible.
+
+### Daily operation acceptance checklist
+
+- [ ] Docker Desktop / the engine starts as expected after a normal host startup and sign-in.
+- [ ] Database and application containers start without manual terminal commands.
+- [ ] The backend health check becomes healthy after startup.
+- [ ] The system opens from the prepared shortcut or bookmark.
+- [ ] The host can also be used as a clerk workstation.
+- [ ] At least one other authorized computer can access the same application through the LAN.
+- [ ] Approved workflows work without internet using locally available resources.
+- [ ] A host restart does not lose database data.
+- [ ] Staff have simple instructions for checking readiness, opening the system, and reporting problems.
+- [ ] The team documents any requirement for a Windows user to sign in before Docker starts.
+
+### Client-facing instructions for the user manual
+
+After the actual deployment is verified, the user manual should explain how to turn on and sign in to the host, tell whether the system is ready, open the system on the host and other office computers, respond when the page does not load, identify who may restart the application or host, contact the designated support person, and shut down the host safely. Keep Docker commands in an administrator troubleshooting section rather than the normal daily staff workflow.
+
+These are target procedures only. Automatic startup, shortcuts, LAN access from another computer, and client-site operation remain unverified until tested. Backup and restore testing remains a separate required deployment check before real resident data is used.

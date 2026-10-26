@@ -8,38 +8,38 @@ This guide explains how our three-person team works on the Barangay Mayondon LGU
 2. [Complete Tech Stacks](Complete-Tech-Stacks.md) for the architecture, technology choices, and deployment notes.
 3. [Root README](../README.md) for the local setup, test commands, and project structure.
 
-**How to run the project:** follow [How-To-Start.md](How-To-Start.md) for the tested Windows PowerShell startup steps. The root [README](../README.md) links to this guide. Update the guide whenever the verified startup process changes.
+**How to run the project:** follow [How-To-Start.md](How-To-Start.md) for local development. For the proposed self-hosted LAN package, follow [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). That guide is preparation only until the packaged app is built and tested without internet on the target network.
 
 ## 2. Team responsibilities
 
 | Member | Main responsibility | Expected contributions |
 |---|---|---|
-| Vic John O. Salen Jr. | Project Leader, Lead Developer | Coordinate tasks and milestones, guide technical decisions, review cross-stack changes, check integration, and coordinate releases. |
-| Justin Adrian P. Reboton | Backend Developer, Technical Writer | Implement backend logic and APIs, maintain database models and migrations, write backend tests, and keep technical documentation accurate. |
-| Jean Mervin G. Fajardo | Frontend Developer | Implement UI and frontend behavior, reusable components, responsive layouts, API integration, and frontend tests. |
+| Vic John O. Salen Jr. | Project Leader, Full Stack Developer | Coordinate tasks and milestones while contributing to frontend, backend, database integration, authentication, deployment, testing, and technical decisions. |
+| Justin Adrian P. Reboton | Backend Developer, Technical Writer | Focus on backend logic and APIs, database models and migrations, backend tests, and accurate technical documentation. Coordinate backend changes with both full-stack developers. |
+| Jean Mervin G. Fajardo | Full Stack Developer | Contribute to both frontend and backend implementation, with particular ownership of UI/UX, responsive layouts, frontend behavior, API integration, and related tests. |
 
 Responsibilities are areas of ownership, not permission to ignore code outside your assigned area. Discuss changes that affect another person's work before implementing them.
 
 ## 3. Current project stage
 
-The team is working on the `Foundation` branch while preparing for the client interview. The system's actual modules and requirements must be decided with Barangay Mayondon LGU. Do not treat proposed features, placeholder pages, or assumptions as approved client requirements.
+The team is working on the `Foundation` branch after client interviews on October 19–20, 2026. A draft clerical records and document-issuance scope is recorded in [Creative-Brief.md](Creative-Brief.md), but client review and signatures are still pending. The client prefers fully offline LAN operation. The repository now has an initial Docker Compose deployment path using local PostgreSQL and FastAPI-served frontend assets, documented in [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). It still needs a full build, no-internet testing, LAN/firewall testing, backup/restore verification, and client approval.
 
-Until the interview clarifies the problem and requirements:
-- Keep work focused on the project foundation, developer documentation, and verified existing behavior.
-- Record open questions instead of guessing.
-- Update [Source-of-Truth.md](Source-of-Truth.md) when a client decision is confirmed.
-- Do not create the future `production` branch or deploy a client-facing system yet.
+Until the Creative Brief and architecture are reviewed:
+- Keep the repository on `Foundation`; do not rename or merge it or create the future `production` branch.
+- Update [Source-of-Truth.md](Source-of-Truth.md) and the system specification when a decision is confirmed.
+- Record remaining questions rather than guessing, especially around the local host, LAN access, photo background removal, account permissions, and backups.
+- Do not describe either the retained Vercel + Supabase setup or the new local LAN preparation as client-approved or production-ready.
 
 ## 4. Agreed branching strategy
 
-The team plans to use two long-lived branches after the client interview and when the team is ready to adopt the release workflow:
+The team plans to use two long-lived branches when the team is ready to adopt the reviewed release workflow:
 
 | Branch | Purpose | Rules |
 |---|---|---|
 | `master` | Integration branch for reviewed work | Contains features that have passed review and required checks. It is not automatically considered production-ready. |
 | `production` | Release and deployment branch | Contains only a tested, approved release intended for deployment. Deploy from this branch only after the hosting and deployment process is verified. |
 
-The names and roles above are the agreed plan. **At present, continue using `Foundation` until the client interview.** Do not rename it, merge it into `master`, or create `production` as part of ordinary feature work before the team reviews the post-interview plan.
+The names and roles above are the planned workflow. **At present, continue using `Foundation`** as requested. Do not rename it, merge it into `master`, or create `production` unless the team explicitly reviews and changes the branch plan.
 
 Use short-lived branches for individual tasks:
 
