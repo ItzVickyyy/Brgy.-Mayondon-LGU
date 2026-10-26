@@ -5,6 +5,7 @@ on:
     branches:
       - Foundation
       - master
+      - draft/admin-portal
   pull_request:
   workflow_dispatch:
 
