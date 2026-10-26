@@ -13,7 +13,7 @@ Laguna State Polytechnic University – Los Baños Campus
 | [Justin Adrian P. Reboton](https://github.com/jOstin-7) | Backend Developer, Technical Writer |
 | [Jean Mervin G. Fajardo](https://github.com/JeanMervin) | Frontend Developer |
 
-> **Status (October 25, 2026):** client interviews were conducted on October 19–20. The staff-only records and document-issuance scope and Creative Brief still await client review and signatures. The Foundation branch now has an initial Docker-based self-hosted LAN path, but the actual office deployment, offline workflows, backup/restore, security, and client approval remain unverified. See [Offline-LAN-Deployment.md](docs/Offline-LAN-Deployment.md), [Creative-Brief.md](docs/Creative-Brief.md), and [Source-of-Truth.md](docs/Source-of-Truth.md).
+> **Status (October 25, 2026):** client interviews were conducted on October 19–20. The staff-only records and document-issuance scope and Creative Brief still await client review and signatures. The Foundation branch has an initial Docker-based self-hosted LAN path, but actual office deployment, offline workflows, backup/restore, security, automatic startup, and client approval remain unverified. See [Offline-LAN-Deployment.md](docs/Offline-LAN-Deployment.md), [Client-Startup-and-Operation.md](docs/Client-Startup-and-Operation.md), [Creative-Brief.md](docs/Creative-Brief.md), and [Source-of-Truth.md](docs/Source-of-Truth.md).
 
 ## Stack at a glance
 
@@ -30,6 +30,8 @@ For local development with separate backend/frontend terminals, follow
 [`docs/How-To-Start.md`](docs/How-To-Start.md). For the proposed packaged LAN setup
 that serves the frontend and API together, follow [`docs/Offline-LAN-Deployment.md`](docs/Offline-LAN-Deployment.md).
 The LAN deployment guide is a preparation guide, not proof of a verified client installation.
+
+For the planned client experience, where the host computer starts the services and staff open the system through a browser shortcut without manually starting Docker, see [`docs/Client-Startup-and-Operation.md`](docs/Client-Startup-and-Operation.md). This is a target requirement that still needs implementation and testing.
 
 Log in with `FIRST_SUPERUSER` / `FIRST_SUPERUSER_PASSWORD` from the root `.env`.
 There is no public sign-up: an admin creates accounts from the **Admin** page.
