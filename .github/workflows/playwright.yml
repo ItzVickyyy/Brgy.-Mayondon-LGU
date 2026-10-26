@@ -3,10 +3,10 @@ name: Playwright Tests
 on:
   push:
     branches:
-    - Foundation
-    - master
-
-      - draft/admin-portal  pull_request:
+      - Foundation
+      - master
+      - draft/admin-portal
+  pull_request:
   workflow_dispatch:
     inputs:
       debug_enabled:
