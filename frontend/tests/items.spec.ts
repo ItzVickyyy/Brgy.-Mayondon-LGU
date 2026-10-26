@@ -30,7 +30,7 @@ test("Records Management search filters results", async ({ page }) => {
 
 test("Officials page displays sample officials", async ({ page }) => {
   await page.goto("/officials")
-  await expect(page.getByRole("heading", { name: "Officials" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Officials", exact: true })).toBeVisible()
   await expect(page.getByText("Sample Official One")).toBeVisible()
 })
 
