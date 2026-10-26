@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - Foundation
+      - draft/admin-portal
   pull_request:
     branches:
       - Foundation
+      - draft/admin-portal
   workflow_dispatch:
 
 permissions:
