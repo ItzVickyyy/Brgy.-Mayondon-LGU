@@ -37,14 +37,11 @@ Last updated: October 25, 2026
 
 | Member | Role |
 |---|---|
-| Vic John O. Salen Jr. | Project Leader, Lead Developer (also fills out the Peer Evaluation Sheet) |
+| Vic John O. Salen Jr. | Project Leader, Full Stack Developer (also fills out the Peer Evaluation Sheet) |
 | Justin Adrian P. Reboton | Backend Developer, Technical Writer |
-| Jean Mervin G. Fajardo | Frontend Developer |
+| Jean Mervin G. Fajardo | Full Stack Developer |
 
-Suggested ownership: **Vic** architecture, auth/roles, deployment, integration,
-final demo · **Justin** models, migrations, API, tests, Creative Brief, user
-manual, final report · **Jean** sitemap, wireframes, mockups, pages and
-components, responsiveness, mobile view.
+Suggested areas of focus, not exclusive boundaries: **Vic** project coordination, architecture, authentication/roles, deployment, integration, and final demo · **Justin** backend logic, models, migrations, APIs, tests, and technical writing for the Creative Brief, user manual, and final report · **Jean** UI/UX design, sitemap, wireframes, mockups, responsive interface, and full-stack implementation. Vic and Jean are both full-stack developers and should coordinate on frontend/backend tasks based on workload and experience.
 
 ---
 
