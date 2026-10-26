@@ -14,9 +14,9 @@ This guide explains how our three-person team works on the Barangay Mayondon LGU
 
 | Member | Main responsibility | Expected contributions |
 |---|---|---|
-| Vic John O. Salen Jr. | Project Leader, Lead Developer | Coordinate tasks and milestones, guide technical decisions, review cross-stack changes, check integration, and coordinate releases. |
-| Justin Adrian P. Reboton | Backend Developer, Technical Writer | Implement backend logic and APIs, maintain database models and migrations, write backend tests, and keep technical documentation accurate. |
-| Jean Mervin G. Fajardo | Frontend Developer | Implement UI and frontend behavior, reusable components, responsive layouts, API integration, and frontend tests. |
+| Vic John O. Salen Jr. | Project Leader, Full Stack Developer | Coordinate tasks and milestones while contributing to frontend, backend, database integration, authentication, deployment, testing, and technical decisions. |
+| Justin Adrian P. Reboton | Backend Developer, Technical Writer | Focus on backend logic and APIs, database models and migrations, backend tests, and accurate technical documentation. Coordinate backend changes with both full-stack developers. |
+| Jean Mervin G. Fajardo | Full Stack Developer | Contribute to both frontend and backend implementation, with particular ownership of UI/UX, responsive layouts, frontend behavior, API integration, and related tests. |
 
 Responsibilities are areas of ownership, not permission to ignore code outside your assigned area. Discuss changes that affect another person's work before implementing them.
 
