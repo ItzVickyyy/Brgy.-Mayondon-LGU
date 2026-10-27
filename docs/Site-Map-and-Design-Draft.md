@@ -199,7 +199,7 @@ This checklist compares the Creative Brief with the current branch. A draft scre
 | Resident records: add, edit, search | Resident Records draft now prioritizes residents, sample ID references, resident type, registration status, and archive status. | Resident create/edit/profile actions and backend persistence are not implemented. Confirm search fields with the client. |
 | Family, beneficiary, and marginalized-sector details | A draft tab describes these groups of information. | Confirm actual fields and sector categories against the client-provided masterlists. |
 | Import existing masterlists | Draft file-selection area and planned validation summary are shown. | File parsing, column mapping, preview, validation, duplicate detection, and import are not implemented. |
-| Resident and Barangay ID records | Only ID references are shown in Resident Records. | Dedicated Barangay ID Management screen is still missing. Include number series, validity, status, photo, create/renew, and print layout. |
+| Resident and Barangay ID records | A dedicated Barangay ID Management draft route is now present with searchable sample records, status filter, issue/expiry dates, and Create, Details, Renew, and Print prototype actions. | Connect to resident and ID records, verify status/validity rules with the client, implement photo handling and numbering, and build/test the approved physical ID print layout. |
 | Document request entry and editable purpose list | Existing Document Management form supports draft fields and document types. Purpose list is currently hard-coded. | Add resident selection before document entry, purpose-list maintenance, and client-approved document types and fields. |
 | Separate issuance history with issue and expiry dates | Issuance History tab exists, but records are sample/session-only and no expiry date is shown. | Add persistent issuance records, expiry where applicable, details, and correction history that preserves the original. |
 | Auto-filled printing with existing formats | Current print view is a generic draft preview. | Create a separate print layout per approved document, then calibrate against actual pre-printed paper and the client printer. Signatures and dry seals remain manual. |
@@ -210,9 +210,23 @@ This checklist compares the Creative Brief with the current branch. A draft scre
 
 ### Remaining design priorities
 
-1. Draft the Barangay ID Management screen.
-2. Refine Document Management so resident selection and request entry happen before issuance, and the history remains a separate view.
+1. Refine Document Management so resident selection and request entry happen before issuance, and the history remains a separate view.
+2. Continue the admin-page drafts only after confirming the account access model.
 3. Draft Officials, User Accounts, Pending Registrations, Activity Log, Management Reports, Backup and Restore screens only after confirming the access model.
 4. Keep the previous dashboard layout unchanged unless the group and client explicitly request a redesign.
 5. Label every hard-coded row and figure as sample data. Do not use actual resident records in screenshots, commits, or demonstrations.
 6. Validate the site map and mockups with the client before treating the design as approved.
+
+
+## 10. Barangay ID Management draft — October 27, 2026
+
+A dedicated route, `/barangay-ids`, has been added to the `draft/admin-portal` prototype. The page includes:
+- Search by sample resident, reference, resident type, and status.
+- Status filter for Valid, Expiring soon, Expired, and Archived.
+- Sample issue and expiry dates and registration status.
+- Prototype actions for Create Barangay ID, Details, Renew, and Print.
+- A reminder to confirm ID numbering, validity rules, registration requirements, and the approved print layout.
+
+The route currently uses hard-coded sample data. The buttons display a prototype notice. There is no database persistence, resident lookup, photo upload/storage, ID number assignment, expiry calculation, renewal workflow, or physical print calibration yet. These controls are layout placeholders, not working ID operations.
+
+Before implementation, confirm the existing ID numbering series, the normal one-year validity rule, the six-month rule for new/renting residents, and the proof needed to change registration status with the client. Test the approved layout with the actual ID dimensions and printer.
