@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Search, Users, House, Vote, Info } from "lucide-react"
+import { Search, Users, House, Vote } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
@@ -54,10 +54,6 @@ function RecordsManagement() {
         <p className="mt-2 text-sm text-muted-foreground">Organize resident, household, and voter records in one place.</p>
       </div>
 
-      <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-muted-foreground">
-        <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-        <p>Draft preview using fictional sample records only. This page is not connected to the database and does not save changes.</p>
-      </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
         {[
@@ -71,7 +67,7 @@ function RecordsManagement() {
               <item.icon className="size-5 text-primary" aria-hidden="true" />
             </div>
             <p className="mt-3 text-2xl font-semibold tabular-nums">{item.count}</p>
-            <p className="mt-1 text-xs text-muted-foreground">Illustrative count</p>
+            <p className="mt-1 text-xs text-muted-foreground">Records</p>
           </button>
         ))}
       </div>
@@ -80,7 +76,7 @@ function RecordsManagement() {
         <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="font-semibold">{recordType === "residents" ? "Residents" : recordType === "households" ? "Households" : "Registered Voters"}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Search the sample list below.</p>
+            <p className="mt-1 text-sm text-muted-foreground">Search records below.</p>
           </div>
           <label className="relative block w-full sm:max-w-xs">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
@@ -95,7 +91,7 @@ function RecordsManagement() {
             </table>
           ) : recordType === "households" ? (
             <table className="w-full min-w-[560px] text-left text-sm">
-              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Household ID</th><th className="px-4 py-3 font-medium">Household Head</th><th className="px-4 py-3 font-medium">Members</th><th className="px-4 py-3 font-medium">Sample Address</th></tr></thead>
+              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Household ID</th><th className="px-4 py-3 font-medium">Household Head</th><th className="px-4 py-3 font-medium">Members</th><th className="px-4 py-3 font-medium">Address</th></tr></thead>
               <tbody className="divide-y">{filteredHouseholds.map((item) => <tr key={item.id} className="hover:bg-muted/20"><td className="px-4 py-3 font-medium">{item.id}</td><td className="px-4 py-3">{item.head}</td><td className="px-4 py-3">{item.members}</td><td className="px-4 py-3">{item.address}</td></tr>)}</tbody>
             </table>
           ) : (
@@ -104,9 +100,9 @@ function RecordsManagement() {
               <tbody className="divide-y">{filteredVoters.map((item) => <tr key={item.id} className="hover:bg-muted/20"><td className="px-4 py-3 font-medium">{item.id}</td><td className="px-4 py-3">{item.name}</td><td className="px-4 py-3">{item.household}</td><td className="px-4 py-3">Registered</td></tr>)}</tbody>
             </table>
           )}
-          {((recordType === "residents" && filteredResidents.length === 0) || (recordType === "households" && filteredHouseholds.length === 0) || (recordType === "voters" && filteredVoters.length === 0)) && <p className="p-8 text-center text-sm text-muted-foreground">No sample records match your search.</p>}
+          {((recordType === "residents" && filteredResidents.length === 0) || (recordType === "households" && filteredHouseholds.length === 0) || (recordType === "voters" && filteredVoters.length === 0)) && <p className="p-8 text-center text-sm text-muted-foreground">No records match your search.</p>}
         </div>
-        <div className="border-t px-4 py-3 text-xs text-muted-foreground">Displayed rows are fictional and intended only to help review the proposed layout.</div>
+        
       </section>
     </div>
   )
