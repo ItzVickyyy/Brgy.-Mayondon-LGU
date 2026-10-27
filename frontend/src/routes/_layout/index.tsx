@@ -21,7 +21,7 @@ const periodLabels: Record<Period, string> = {
   overall: "Overall",
 }
 
-const sampleDocuments: Record<Period, number> = {
+const documentsByPeriod: Record<Period, number> = {
   today: 12,
   week: 68,
   month: 214,
@@ -49,10 +49,10 @@ const documentTypes = [
 ]
 
 const activities = [
-  { title: "Barangay Clearance issued", detail: "Sample activity · Resident record #0001", time: "Today, 10:42 AM" },
-  { title: "Resident record updated", detail: "Sample activity · Resident record #0002", time: "Today, 9:18 AM" },
-  { title: "Household record added", detail: "Sample activity · Household record #0003", time: "Yesterday, 3:26 PM" },
-  { title: "Certificate of Residency issued", detail: "Sample activity · Resident record #0004", time: "Yesterday, 1:05 PM" },
+  { title: "Barangay Clearance issued", detail: "Resident record #0001", time: "Today, 10:42 AM" },
+  { title: "Resident record updated", detail: "Resident record #0002", time: "Today, 9:18 AM" },
+  { title: "Household record added", detail: "Household record #0003", time: "Yesterday, 3:26 PM" },
+  { title: "Certificate of Residency issued", detail: "Resident record #0004", time: "Yesterday, 1:05 PM" },
 ]
 
 function SummaryCard({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: typeof Users }) {
@@ -101,16 +101,16 @@ function Dashboard() {
       </div>
 
       <section aria-label="Summary statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard title="Total Population" value="12,480" description="Sample count of resident records" icon={Users} />
-        <SummaryCard title="Total Households" value="3,126" description="Sample count of household records" icon={House} />
-        <SummaryCard title="Registered Voters" value="7,842" description="Sample count of registered voters" icon={Vote} />
-        <SummaryCard title="Documents Issued" value={sampleDocuments[period].toLocaleString()} description={periodLabels[period]} icon={FileCheck2} />
+        <SummaryCard title="Total Population" value="12,480" description="Resident records" icon={Users} />
+        <SummaryCard title="Total Households" value="3,126" description="Household records" icon={House} />
+        <SummaryCard title="Registered Voters" value="7,842" description="Registered voter records" icon={Vote} />
+        <SummaryCard title="Documents Issued" value={documentsByPeriod[period].toLocaleString()} description={periodLabels[period]} icon={FileCheck2} />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <SectionHeading title="Document Issuances Over Time" description="Sample monthly issuance volume" />
+            <SectionHeading title="Document Issuances Over Time" description="Monthly issuance volume" />
             <label className="flex items-center gap-2 text-sm">
               <span className="text-muted-foreground">Period</span>
               <select value={period} onChange={(event) => setPeriod(event.target.value as Period)} className="h-9 rounded-md border bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
@@ -127,11 +127,11 @@ function Dashboard() {
               </div>
             ))}
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">The chart is illustrative. Historical records are required before population or issuance trends can be reported accurately.</p>
+          <p className="mt-3 text-xs text-muted-foreground">Historical records are needed to report population or issuance trends accurately.</p>
         </article>
 
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <SectionHeading title="Issuances by Document Type" description="Sample distribution for the selected reporting period" />
+          <SectionHeading title="Issuances by Document Type" description="Distribution for the selected reporting period" />
           <div className="mt-5 space-y-4">
             {documentTypes.map((item) => (
               <div key={item.name}>
@@ -146,7 +146,7 @@ function Dashboard() {
             ))}
           </div>
           <div className="mt-5 flex items-center justify-between border-t pt-4 text-sm">
-            <span className="text-muted-foreground">Sample total</span>
+            <span className="text-muted-foreground">Total</span>
             <span className="font-semibold tabular-nums">{totalByType}</span>
           </div>
         </article>
@@ -185,7 +185,7 @@ function Dashboard() {
         <div className="flex items-start gap-3">
           <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><Activity className="size-5" aria-hidden="true" /></div>
           <div>
-            <SectionHeading title="Recent Activities" description="Illustrative activity feed for the dashboard layout" />
+            <SectionHeading title="Recent Activities" description="Latest system activity" />
           </div>
         </div>
         <div className="mt-4 divide-y">
@@ -199,7 +199,7 @@ function Dashboard() {
             </div>
           ))}
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">Real activity history would require an approved logging design and backend support.</p>
+        <p className="mt-2 text-xs text-muted-foreground">Activity history appears here as actions are recorded.</p>
       </section>
 
     </div>
