@@ -23,16 +23,17 @@ export const Route = createFileRoute("/_layout")({
 
 const PAGE_LABELS: Record<string, string> = {
   "/": "Dashboard",
-  "/issuances": "Issuances Management",
-  "/records": "Records Management",
+  "/issuances": "Document Management",
+  "/records": "Resident Records",
   "/officials": "Officials",
-  "/admin": "User Management",
+  "/admin": "User Accounts",
   "/settings": "System Settings",
+  "/my-account": "My Account",
 }
 
 function Layout() {
   const pathname = useRouterState({ select: (state) => state.location.pathname })
-  const pageLabel = PAGE_LABELS[pathname] ?? "Admin Portal"
+  const pageLabel = PAGE_LABELS[pathname] ?? "Barangay Records System"
   const [now, setNow] = useState(() => new Date())
 
   useEffect(() => {
@@ -48,7 +49,6 @@ function Layout() {
   const timeText = new Intl.DateTimeFormat("en-PH", {
     hour: "2-digit",
     minute: "2-digit",
-    second: "2-digit",
   }).format(now)
 
   return (
