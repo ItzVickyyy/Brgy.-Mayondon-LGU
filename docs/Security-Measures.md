@@ -154,6 +154,26 @@ Complete this record for a release or a scheduled security review.
 - Passing automated tests means the tested checks passed. It does not guarantee the application is secure or ready for production.
 
 
+## Project-specific barangay safeguards and LGUSS-BIMS context
+
+On October 27, 2026, the barangay contact told the team that LGUSS-BIMS was old and was no longer being used by the barangay. This is a record of the contact's statement, not confirmation that DILG has discontinued LGUSS-BIMS.
+
+The 2025 DILG memorandum circular on LGUSS-BIMS should inform our thinking about data protection and barangay information management, but this student project is a separate local system. Do not claim that it replaces or integrates with LGUSS-BIMS. No integration or synchronization is in scope unless the client and the appropriate system owner explicitly confirm it and the team documents an approved technical approach.
+
+For the Records and Document Issuance System, include the following in project planning and deployment review:
+- [ ] Confirm the client-approved resident data fields and avoid collecting information that is not needed for the agreed workflows.
+- [ ] Confirm the six staff accounts' actual permissions. The draft Creative Brief says all six accounts have full access, but deletion, export, account administration, and access to sensitive data should be explicitly reviewed with the client.
+- [ ] Test backend authorization for every protected operation, including direct API requests. Frontend button visibility is not authorization.
+- [ ] Identify which record changes and document-issuance actions need an audit trail, and avoid logging unnecessary personal information.
+- [ ] Confirm the host computer, LAN/firewall rules, database access, physical access, backup drive custody, and backup schedule.
+- [ ] Perform and record a backup restoration test before client turnover.
+- [ ] Confirm the process for disabling staff accounts after reassignment, resignation, or loss of need for access.
+- [ ] Confirm data purpose, permitted access, retention, correction, disclosure, and incident-reporting procedures with the client, consistent with the Data Privacy Act of 2012 and applicable procedures.
+- [ ] Use synthetic or masked resident records for development, testing, screenshots, and class demonstrations unless real-data use is explicitly authorized and appropriately protected.
+- [ ] Add authentication, authorization, input-validation, document issuance, export, backup, and restore checks to functional/security testing. Fix failed checks and retest before turnover.
+
+These items are safeguards to implement and verify, not evidence that they are already implemented. Do not claim a formal Privacy Impact Assessment, penetration test, encryption at rest, or compliance certification unless the work was completed and evidence is recorded. See the System Specification and Architecture document for the current client scope and [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md) for deployment-specific checks.
+
 ## 8. Final Foundation security review (October 18, 2026)
 
 ### Implemented in code and verified by CI
