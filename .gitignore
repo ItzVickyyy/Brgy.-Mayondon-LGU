@@ -6,6 +6,7 @@ backend/app/frontend/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+/frontend/src/routeTree.gen.ts
 
 # Local secrets (copy .env.example to .env)
 .env
