@@ -37,5 +37,5 @@ test("Officials page displays sample officials", async ({ page }) => {
 test("Officials search filters results", async ({ page }) => {
   await page.goto("/officials")
   await page.getByPlaceholder("Search officials...").fill("no-official-matches-this")
-  await expect(page.getByText("No sample officials match your search.")).toBeVisible()
+  await expect(page.getByText("No officials match your search.")).toBeVisible()
 })
