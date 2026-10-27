@@ -358,7 +358,7 @@ function IssuancesManagement() {
                     })}
                   </div>
                 ) : (
-                  <input type={field.type ?? "text"} value={formValues[field.name] ?? ""} onChange={(event) => updateField(field.name, event.target.value)} className={inputClassName} placeholder={field.type === "date" ? undefined : "Enter " + field.label.toLowerCase()} />
+                  <input type={field.type ?? "text"} value={formValues[field.name] ?? ""} onChange={(event) => updateField(field.name, event.target.value)} readOnly={field.name === "age"} className={inputClassName + (field.name === "age" ? " bg-muted/50" : "")} placeholder={field.name === "age" ? "Calculated from birthdate" : field.type === "date" ? undefined : "Enter " + field.label.toLowerCase()} />
                 )}
               </div>
             ))}
