@@ -200,7 +200,7 @@ This checklist compares the Creative Brief with the current branch. A draft scre
 | Family, beneficiary, and marginalized-sector details | A draft tab describes these groups of information. | Confirm actual fields and sector categories against the client-provided masterlists. |
 | Import existing masterlists | Draft file-selection area and planned validation summary are shown. | File parsing, column mapping, preview, validation, duplicate detection, and import are not implemented. |
 | Resident and Barangay ID records | A dedicated Barangay ID Management draft route is now present with searchable sample records, status filter, issue/expiry dates, and Create, Details, Renew, and Print prototype actions. | Connect to resident and ID records, verify status/validity rules with the client, implement photo handling and numbering, and build/test the approved physical ID print layout. |
-| Document request entry and editable purpose list | Existing Document Management form supports draft fields and document types. Purpose list is currently hard-coded. | Add resident selection before document entry, purpose-list maintenance, and client-approved document types and fields. |
+| Document request entry and editable purpose list | Document Management now has a sample resident selector before document type and pre-fills sample name/address. Drafts still live only in session state. | Connect selector to saved Resident Records, confirm fields for each document, make the purpose list maintainable, and persist requests/issuances in the database. |
 | Separate issuance history with issue and expiry dates | Issuance History tab exists, but records are sample/session-only and no expiry date is shown. | Add persistent issuance records, expiry where applicable, details, and correction history that preserves the original. |
 | Auto-filled printing with existing formats | Current print view is a generic draft preview. | Create a separate print layout per approved document, then calibrate against actual pre-printed paper and the client printer. Signatures and dry seals remain manual. |
 | Six staff accounts with full access | Current branch has Admin-only routes and navigation for Officials, User Accounts, and System Settings. | **Requirements conflict:** the Creative Brief says all six staff accounts have full access, while prior workflow planning has Admin and Staff permission differences. Confirm this with the client before changing access controls. |
@@ -210,7 +210,7 @@ This checklist compares the Creative Brief with the current branch. A draft scre
 
 ### Remaining design priorities
 
-1. Refine Document Management so resident selection and request entry happen before issuance, and the history remains a separate view.
+1. Connect resident-first Document Management to saved resident records and add purpose-list maintenance.
 2. Continue the admin-page drafts only after confirming the account access model.
 3. Draft Officials, User Accounts, Pending Registrations, Activity Log, Management Reports, Backup and Restore screens only after confirming the access model.
 4. Keep the previous dashboard layout unchanged unless the group and client explicitly request a redesign.
@@ -230,3 +230,18 @@ A dedicated route, `/barangay-ids`, has been added to the `draft/admin-portal` p
 The route currently uses hard-coded sample data. The buttons display a prototype notice. There is no database persistence, resident lookup, photo upload/storage, ID number assignment, expiry calculation, renewal workflow, or physical print calibration yet. These controls are layout placeholders, not working ID operations.
 
 Before implementation, confirm the existing ID numbering series, the normal one-year validity rule, the six-month rule for new/renting residents, and the proof needed to change registration status with the client. Test the approved layout with the actual ID dimensions and printer.
+
+
+## 11. Document Management resident-first draft — October 27, 2026
+
+The Issue Document view now begins with a resident selector before document type and document fields. Selecting one of the clearly labeled sample residents pre-fills the name and address fields. Saving a draft is blocked until a resident is selected.
+
+Current limitations:
+- The resident selector uses hard-coded sample records and is not connected to Resident Records or the database.
+- Drafts are kept in the current browser session only and are not official issuances.
+- Document purposes are still hard-coded.
+- Document types and fields still require client confirmation against the supplied paper forms.
+- The print review remains a generic preview and is not aligned to the actual pre-printed forms.
+- Persistent issuance history, expiry handling where applicable, and corrections with a reason are not implemented.
+
+The next implementation step should be to connect the resident selector to the approved resident search/list API after the resident-record schema and required fields are confirmed. Do not treat the sample list as real client data.
