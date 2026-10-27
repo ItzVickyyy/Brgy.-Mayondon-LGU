@@ -25,6 +25,7 @@ const PAGE_LABELS: Record<string, string> = {
   "/": "Dashboard",
   "/issuances": "Document Management",
   "/records": "Resident Records",
+  "/barangay-ids": "Barangay ID Management",
   "/officials": "Officials",
   "/admin": "User Accounts",
   "/settings": "System Settings",
