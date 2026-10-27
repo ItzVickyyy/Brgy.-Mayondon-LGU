@@ -129,7 +129,7 @@ jobs:
           docker exec -i "$app" python - <<'PY'
           import json
           from html.parser import HTMLParser
-          from urllib.parse import urlencode
+          from urllib.parse import quote, urlencode
           from urllib.request import Request, urlopen
 
           base = "http://127.0.0.1:8000"
@@ -155,7 +155,7 @@ jobs:
           assert parser.urls, "No frontend script or stylesheet assets were found."
           for asset in parser.urls:
               assert asset.startswith("/"), f"Unexpected external frontend asset: {asset}"
-              with urlopen(base + asset, timeout=10) as response:
+              with urlopen(base + quote(asset, safe="/%:@?=&"), timeout=10) as response:
                   assert response.status == 200, f"Frontend asset failed: {asset}"
           with urlopen(base + "/login", timeout=10) as response:
               assert response.status == 200, "SPA login route did not load."
