@@ -1,4 +1,4 @@
-import { BookUser, FileCheck2, LayoutDashboard, Settings, Users, ShieldCheck, UserRound } from "lucide-react"
+import { BookUser, CreditCard, FileCheck2, LayoutDashboard, Settings, Users, ShieldCheck, UserRound } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -18,6 +18,7 @@ const items: NavigationItem[] = [
   { icon: LayoutDashboard, title: "Dashboard", path: "/" },
   { icon: Users, title: "Resident Records", path: "/records" },
   { icon: FileCheck2, title: "Document Management", path: "/issuances" },
+  { icon: CreditCard, title: "Barangay ID Management", path: "/barangay-ids" },
   { icon: UserRound, title: "My Account", path: "/my-account" },
   { icon: BookUser, title: "Officials", path: "/officials", adminOnly: true },
   { icon: ShieldCheck, title: "User Accounts", path: "/admin", adminOnly: true },
