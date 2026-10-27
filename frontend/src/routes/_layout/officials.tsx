@@ -1,11 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { Search, UserRound } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
+import { UsersService } from "@/client"
 
 export const Route = createFileRoute("/_layout/officials")({
   component: OfficialsManagement,
+  beforeLoad: async () => {
+    const { data: user } = await UsersService.readUserMe()
+    if (!user.is_superuser) {
+      throw redirect({ to: "/" })
+    }
+  },
   head: () => ({ meta: [{ title: pageTitle("Officials") }] }),
 })
 
@@ -27,17 +34,16 @@ function OfficialsManagement() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <p className="text-sm font-medium text-primary">Admin Portal</p>
+        <p className="text-sm font-medium text-primary">Administration</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Officials</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Maintain barangay officials and their terms.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Draft screen for maintaining the list of barangay officials and their terms. This prototype uses sample data only.</p>
       </div>
-
 
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><UserRound className="size-5" aria-hidden="true" /></div>
-            <div><h2 className="font-semibold">Officials List</h2><p className="mt-1 text-sm text-muted-foreground">Search officials below.</p></div>
+            <div><h2 className="font-semibold">Officials List</h2><p className="mt-1 text-sm text-muted-foreground">Search the draft list. Add/edit/archive actions and backend persistence are not implemented yet.</p></div>
           </div>
           <label className="relative block w-full sm:max-w-xs"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search officials..." className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
         </div>
