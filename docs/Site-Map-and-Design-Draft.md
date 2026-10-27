@@ -313,3 +313,8 @@ Paper size, printer, orientation, margins, scaling, exact field coordinates, and
 - Confirm photo dimensions/cropping, and whether the photo is captured, uploaded, or selected from an existing resident record.
 - Confirm age calculation and the source of the birthdate.
 - Confirm the actual printer(s) and whether every workstation uses the same printer settings.
+
+
+### Prototype safety update — October 27, 2026
+
+The generic document print action has been paused. It no longer opens the browser print dialog for the current generic layout, because printing labels, logos, or other recreated elements would conflict with the client's pre-printed form workflow. The UI now explains that printing is unavailable until form-specific overlay positions are calibrated. This is an intentional safeguard, not completed printing functionality.
