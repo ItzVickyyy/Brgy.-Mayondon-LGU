@@ -9,7 +9,7 @@ Project Guide*, the Guide wins; fix this file.
 a new chat, then ask your question. Update the file whenever a decision changes
 (see [Maintenance](#maintenance)).
 
-Last updated: October 25, 2026
+Last updated: October 27, 2026
 
 ---
 
@@ -313,3 +313,38 @@ When this file is pasted into a chat, the assistant should:
 - Update this file in the same pull request that changes a decision.
 - Move items from **Open items** to **Decisions made** as they are settled, and tick the **Status** list.
 - Anything that grows long (interview notes, mockups, test results) goes into its own file or the final report appendices; link it here.
+
+
+---
+
+## 12. Client update: LGUSS-BIMS and project safeguards (October 27, 2026)
+
+### Client-reported status
+
+The team asked the barangay contact whether they were aware of the DILG Local Government Unit Support System – Barangay Information Management System (LGUSS-BIMS) and why it was not being used. The contact replied: **"yung LGUSS-BIMS dati na po yan. Di na nagagamit"** (the barangay considers it an old system and says it is no longer used).
+
+Record this as the barangay contact's statement only. It does not prove that DILG has discontinued LGUSS-BIMS or that the system is unavailable to other barangays.
+
+### Project boundary
+
+- Treat the 2025 DILG memorandum circular on LGUSS-BIMS as a reference for identifying relevant barangay information-management and privacy concerns.
+- This student-developed Records and Document Issuance System is a separate local system. Do not describe it as a replacement for, certified compliant with, or integrated with LGUSS-BIMS.
+- No LGUSS-BIMS data exchange, synchronization, or official DILG connection is included in the current project scope.
+- The client has stated a preference for offline operation on the barangay local network. Confirm the signed Creative Brief and actual deployment setup before treating that arrangement as approved and verified.
+
+### Safeguards to implement and verify
+
+Use [Security-Measures.md](Security-Measures.md) as the detailed checklist. Project-specific priorities include:
+
+- Collect only resident information required for client-approved workflows.
+- Use individual staff accounts and confirm whether the six proposed accounts truly need full access to viewing, editing, deleting, exporting, and account administration.
+- Enforce authentication and authorization in backend API operations, not only by hiding frontend controls.
+- Keep an accountability trail for important record changes and document issuance without logging unnecessary personal information.
+- Protect the host computer, LAN access, database, printed documents, exports, and backup media.
+- Agree on local backup ownership and schedule, then test restoring a backup before turnover.
+- Disable access when staff leave or no longer require access, while preserving required issuance history.
+- Use synthetic or masked data during development and demonstrations. Keep real resident records and secrets out of source control.
+- Add security and recovery cases to Instrument A, fix failures, and retest before deployment.
+- Confirm the client's approved access, retention, correction, disclosure, and incident-handling procedures before real resident data is entered.
+
+These are project requirements to implement and verify, not claims that all safeguards already exist. Do not claim a formal Privacy Impact Assessment, penetration test, encryption-at-rest implementation, or full compliance with LGUSS-BIMS unless the relevant work has actually been completed, documented, and appropriately verified.
