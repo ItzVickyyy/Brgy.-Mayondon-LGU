@@ -1,4 +1,4 @@
-import { BookUser, FileCheck2, LayoutDashboard, Settings, Users, ShieldCheck } from "lucide-react"
+import { BookUser, FileCheck2, LayoutDashboard, Settings, Users, ShieldCheck, UserRound } from "lucide-react"
 
 import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
@@ -16,10 +16,11 @@ type NavigationItem = Item & { adminOnly?: boolean }
 
 const items: NavigationItem[] = [
   { icon: LayoutDashboard, title: "Dashboard", path: "/" },
-  { icon: FileCheck2, title: "Issuances Management", path: "/issuances" },
-  { icon: Users, title: "Records Management", path: "/records" },
+  { icon: Users, title: "Resident Records", path: "/records" },
+  { icon: FileCheck2, title: "Document Management", path: "/issuances" },
+  { icon: UserRound, title: "My Account", path: "/my-account" },
   { icon: BookUser, title: "Officials", path: "/officials", adminOnly: true },
-  { icon: ShieldCheck, title: "User Management", path: "/admin", adminOnly: true },
+  { icon: ShieldCheck, title: "User Accounts", path: "/admin", adminOnly: true },
   { icon: Settings, title: "System Settings", path: "/settings", adminOnly: true },
 ]
 
