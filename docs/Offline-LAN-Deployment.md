@@ -29,7 +29,7 @@ This is **LAN operation without internet**, not a standalone copy of the databas
 - SMTP and Sentry are disabled by default in the offline environment example.
 - Vercel-specific configuration and Supabase transaction-pooler handling have been removed from the active deployment code. The local LAN startup path uses the configured local PostgreSQL service.
 
-These changes prepare a deployment path. They do not prove that the complete application is ready for the barangay. The current app still contains starter-template features that must be reviewed against the signed Creative Brief.
+These changes prepare a deployment path. They do not prove that the complete application is ready for the barangay. Review the application against the professor-reviewed Creative Brief before implementation and deployment. In particular, the brief specifies six staff accounts with full access, while the current foundation distinguishes Admin and Staff. Resolve that mismatch before treating authorization as complete.
 
 ## 3. Prepare the host computer
 
@@ -124,7 +124,7 @@ This setup uses HTTP on a private LAN. It is not encrypted in transit. Before re
 - **ID photo background removal:** The client's current workflow uses an online service. That step must be replaced with an approved local tool or a manual process that does not upload resident photos to an external service.
 - **External resources:** Verify that the UI, fonts, icons, scripts, and all other assets load without internet. The packaged frontend should use local assets and same-origin API calls.
 - **Updates and dependencies:** Download and test updates before taking the host offline. Do not rely on live package downloads at the barangay.
-- **Backups:** A Docker volume protects against ordinary container replacement but is not a backup. Set a backup schedule, store encrypted/protected copies separately from the host, and test restoring a backup before deployment.
+- **Backups:** The Creative Brief specifies scheduled and manual local backups saved to an external drive. A Docker volume protects against ordinary container replacement but is not a backup. Agree on the schedule and drive custody, protect backup files, keep copies separate from the host, and test restoring a backup before deployment.
 - **Host availability:** Other computers depend on the host computer and its database. Agree who restarts it, applies updates, and responds to hardware failure.
 - **Data migration:** Import existing spreadsheets only after agreeing on field mapping, duplicate handling, validation, and the client-approved retention process.
 
@@ -162,6 +162,8 @@ These scripts are initial utilities and still require execution and recovery tes
 - [ ] Email-dependent workflows have an approved offline alternative.
 - [ ] Windows Firewall and LAN access are configured and reviewed.
 - [ ] Backup and restore have been tested and recorded.
+- [ ] The six staff accounts have the full access specified in the Creative Brief, and the current Admin/Staff model has been reconciled with that requirement.
+- [ ] Scheduled and manual backups to an external drive have been configured or their agreed procedures documented, and restore testing is recorded.
 - [ ] User permissions, password handling, staff training, and the Data Privacy Act of 2012 requirements have been reviewed with the client.
 - [ ] Client and instructor approval is recorded before real data is loaded.
 
