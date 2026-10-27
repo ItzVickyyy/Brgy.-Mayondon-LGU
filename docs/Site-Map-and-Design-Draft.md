@@ -245,3 +245,71 @@ Current limitations:
 - Persistent issuance history, expiry handling where applicable, and corrections with a reason are not implemented.
 
 The next implementation step should be to connect the resident selector to the approved resident search/list API after the resident-record schema and required fields are confirmed. Do not treat the sample list as real client data.
+
+
+## 12. Client-provided hard-copy form specifications — October 27, 2026
+
+### Printing rule for every form
+
+The system must print typed values only onto the client's existing pre-printed paper. It must not recreate or print the letterhead, logos or watermark, document title, fixed paragraphs, pre-printed field labels/colons, signatory's existing signature, DRY SEAL label, or footer. Staff will apply the dry seal and residents will complete the thumbmark and signature areas by hand where applicable. The system's print output must be a transparent field overlay, not a redesigned document.
+
+Paper size, printer, orientation, margins, scaling, exact field coordinates, and photo dimensions remain unconfirmed. Do not finalize print coordinates until the client provides or approves physical samples and a calibration test is completed. Browser print must use actual size / 100% scaling, with headers and footers disabled where the browser offers those settings.
+
+### Form-specific typed content
+
+1. **Barangay Clearance**
+   - Date at the top right, above the pre-printed Date line.
+   - Name, address, age calculated from birthdate, birthdate, birthplace, civil status, purpose, purpose note on the following line, remarks, and a second remarks line such as `c/o [Kagawad]`.
+   - Resident photo in the designated box on the right.
+   - Bottom fields: valid ID presented, ID number, place of issue, date of issue, and official receipt number.
+   - Do not print in the right thumbmark box or resident signature line.
+   - The pre-printed two-month validity statement, Punong Barangay signature, watermark, letterhead, labels, and footer must not be printed by the system.
+
+2. **Certificate of Indigency**
+   - Date, name, address, age, sector, purpose, and the line `Addressed to the office of [office]`.
+   - The `SECTOR :` label is not pre-printed and must be included in the typed overlay together with one or two sector names.
+   - Punong Barangay signature and all other pre-printed elements remain on the paper.
+
+3. **Barangay Clearance (Electrical and Water Connection)**
+   - Date, check marks for Electric and/or Water, name, address, one choice between New and Reconnection, one choice between Residential and Commercial, location, CTC number, place of issue, date of issue, and official receipt number.
+   - Use the specific pre-printed paper variant with the different letterhead email. Do not print any letterhead.
+
+4. **Barangay Franchise Clearance (tricycle)**
+   - Date, name, address, tricycle association, and an indented vehicle-details block containing make, type of body, motor number, color, and plate number.
+   - Bottom fields: CTC number, place of issue, date of issue, and official receipt number.
+
+5. **Certification for assistance request (likely Damayan)**
+   - Treat as a separate form layout, not as a clearance layout.
+   - Logo is pre-printed at the top left, with no watermark and no DRY SEAL label.
+   - Print values directly on the existing underlines or inside parentheses: name after Mr./Ms.; address after resident of; years of residency; sector; one assistance choice (financial, medical, or burial); one recipient choice (oneself or relationship); name under which assistance is requested; and day, month, and year in the Given this line.
+   - Signatory is a Barangay Kagawad, unlike the clearance forms signed by the Punong Barangay.
+
+6. **Barangay ID front**
+   - Print only the remaining ID number after the pre-printed `ID No. 18-128-3597-` prefix, the full name and address inside the light-blue block above the pre-printed `MAYONDON, LOS BAÑOS, LAGUNA` line, and the resident photo inside the photo box.
+   - Do not print the logo, government/place heading, number prefix, blue block, motto/footer, or any other pre-printed element.
+
+7. **Barangay ID back**
+   - Print values for birthdate, birthplace, sex, civil status, valid until, emergency contact name, emergency contact address, and emergency contact number.
+   - Do not print the pre-printed labels, red emergency-contact heading, signatures, countersignature, blue footer band, or warning text.
+
+### Print-template implementation requirements
+
+- Keep each form template separate. Clearance forms, the assistance certification, ID front, and ID back have different layouts and must not share one generic print page.
+- Store field positions and photo boxes as template-specific configuration, preferably relative to the confirmed paper dimensions. Positions in the current prototype are not calibrated.
+- Print typed text only. Avoid rendering logos, labels, field captions, signature images, borders, footers, or decorative content in the print layer.
+- Keep thumbmark and resident signature areas blank. Keep signatory signature areas blank in the overlay so the pre-printed signature remains visible.
+- Compute age from birthdate for Barangay Clearance and any other approved form that requires age. Confirm how to handle a missing or invalid birthdate.
+- For choice fields, print the mark only inside the corresponding pre-printed box or parentheses. Do not print both options as text when only one is selected.
+- For photos, use the client-approved size and placement, preserving the aspect ratio according to client preference.
+- Provide a print calibration mode or checklist using a plain test sheet before printing on official pre-printed stock. Verify all seven templates against actual paper.
+- Test that the printer does not scale, crop, or shift the overlay. Record printer model, paper size, orientation, scaling setting, and approved template revision.
+
+### Decisions still required from the client
+
+- Confirm paper/card dimensions and orientation for all seven layouts.
+- Provide or approve physical samples, especially the two Barangay ID sides and assistance certification.
+- Confirm the exact name and fields for the assistance certification and whether it is the Damayan form.
+- Confirm the allowed sector choices, purpose notes, remarks defaults, and office-addressed wording.
+- Confirm photo dimensions/cropping, and whether the photo is captured, uploaded, or selected from an existing resident record.
+- Confirm age calculation and the source of the birthdate.
+- Confirm the actual printer(s) and whether every workstation uses the same printer settings.
