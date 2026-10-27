@@ -12,7 +12,9 @@ import useAuth from "@/hooks/useAuth"
 import { type Item, Main } from "./Main"
 import { User } from "./User"
 
-const items: Item[] = [
+type NavigationItem = Item & { adminOnly?: boolean }
+
+const items: NavigationItem[] = [
   { icon: LayoutDashboard, title: "Dashboard", path: "/" },
   { icon: FileCheck2, title: "Issuances Management", path: "/issuances" },
   { icon: Users, title: "Records Management", path: "/records" },
@@ -23,7 +25,7 @@ const items: Item[] = [
 
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
-  const visibleItems = items.filter((item) => !("adminOnly" in item && item.adminOnly) || currentUser?.is_superuser)
+  const visibleItems = items.filter((item) => !item.adminOnly || currentUser?.is_superuser)
 
   return (
     <Sidebar collapsible="icon">
