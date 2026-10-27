@@ -108,6 +108,13 @@ const documentFields: Record<string, DocumentField[]> = {
   ],
 }
 
+const sampleResidents = [
+  { id: "SAMPLE-0001", name: "Sample Resident One", address: "Sample Address One" },
+  { id: "SAMPLE-0002", name: "Sample Resident Two", address: "Sample Address Two" },
+  { id: "SAMPLE-0003", name: "Sample Resident Three", address: "Sample Address Three" },
+  { id: "SAMPLE-0004", name: "Sample Resident Four", address: "Sample Address Four" },
+]
+
 const sampleIssuances: IssuanceRecord[] = [
   { id: "SAMPLE-001", resident: "Sample Resident One", type: "Barangay Clearance", date: "2026-10-23", status: "Sample", fields: {} },
   { id: "SAMPLE-002", resident: "Sample Resident Two", type: "Barangay Franchise Clearance", date: "2026-10-22", status: "Sample", fields: {} },
@@ -142,6 +149,7 @@ function formatDate(value: string) {
 function IssuancesManagement() {
   const [activeTab, setActiveTab] = useState<"issue" | "history">("issue")
   const [selectedType, setSelectedType] = useState(documentTypes[0])
+  const [selectedResidentId, setSelectedResidentId] = useState("")
   const [search, setSearch] = useState("")
   const [historyType, setHistoryType] = useState("All document types")
   const [formValues, setFormValues] = useState<Record<string, string>>(() => createDefaultFormValues(documentTypes[0]))
@@ -150,7 +158,8 @@ function IssuancesManagement() {
   const [notice, setNotice] = useState("")
 
   const fields = documentFields[selectedType] ?? []
-  const currentName = formValues.name?.trim() || "Name not entered"
+  const selectedResident = sampleResidents.find((resident) => resident.id === selectedResidentId)
+  const currentName = formValues.name?.trim() || "Select a resident first"
   const currentDate = formValues.date || ""
   const allRecords = useMemo(() => [...drafts, ...sampleIssuances], [drafts])
   const filteredIssuances = useMemo(() => allRecords.filter((item) => {
@@ -166,20 +175,42 @@ function IssuancesManagement() {
     setNotice("")
   }
 
+  function changeResident(value: string) {
+    setSelectedResidentId(value)
+    const resident = sampleResidents.find((item) => item.id === value)
+    setFormValues((previous) => ({
+      ...createDefaultFormValues(selectedType),
+      ...(resident ? { name: resident.name, address: resident.address } : {}),
+      ...(previous.date ? { date: previous.date } : {}),
+    }))
+    setNotice("")
+    setPrintRecord(null)
+  }
+
   function changeDocumentType(value: string) {
     setSelectedType(value)
-    setFormValues(createDefaultFormValues(value))
+    setFormValues({
+      ...createDefaultFormValues(value),
+      ...(selectedResident ? { name: selectedResident.name, address: selectedResident.address } : {}),
+    })
     setNotice("")
     setPrintRecord(null)
   }
 
   function clearForm() {
-    setFormValues(createDefaultFormValues(selectedType))
+    setFormValues({
+      ...createDefaultFormValues(selectedType),
+      ...(selectedResident ? { name: selectedResident.name, address: selectedResident.address } : {}),
+    })
     setNotice("")
     setPrintRecord(null)
   }
 
   function saveDraft() {
+    if (!selectedResident) {
+      setNotice("Select a resident before saving a document draft.")
+      return
+    }
     const record: IssuanceRecord = {
       id: "DRAFT-" + String(drafts.length + 1).padStart(3, "0"),
       resident: currentName,
@@ -230,6 +261,13 @@ function IssuancesManagement() {
             <div><h2 className="font-semibold">Document Details</h2><p className="mt-1 text-sm text-muted-foreground">Choose a document to show its corresponding hardcopy fields.</p></div>
           </div>
           <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 md:grid-cols-2">
+            <label className={labelClassName + " md:col-span-2"}>Resident
+              <select required value={selectedResidentId} onChange={(event) => changeResident(event.target.value)} className={inputClassName}>
+                <option value="">Select a sample resident first</option>
+                {sampleResidents.map((resident) => <option key={resident.id} value={resident.id}>{resident.id} · {resident.name}</option>)}
+              </select>
+              <span className="text-xs font-normal text-muted-foreground">Sample resident list only. This selector is not connected to Resident Records yet.</span>
+            </label>
             <label className={labelClassName + " md:col-span-2"}>Document Type
               <select value={selectedType} onChange={(event) => changeDocumentType(event.target.value)} className={inputClassName}>
                 {documentTypes.map((type) => <option key={type} value={type}>{type}</option>)}
@@ -269,7 +307,8 @@ function IssuancesManagement() {
 
             <div className="md:col-span-2 rounded-lg bg-muted/40 p-4 text-sm">
               <p className="font-medium">Draft summary</p>
-              <p className="mt-1 text-muted-foreground">Document: {selectedType}</p>
+              <p className="mt-1 text-muted-foreground">Resident: {selectedResident ? selectedResident.name : "Not selected"}</p>
+              <p className="text-muted-foreground">Document: {selectedType}</p>
               <p className="text-muted-foreground">Name: {currentName}</p>
               <p className="text-muted-foreground">Date: {formatDate(currentDate)}</p>
             </div>
