@@ -21,7 +21,7 @@ Barangay Mayondon Records and Document Issuance System
 
 Based on interviews on October 19 and 20, 2026, staff currently use Google Sheets, Excel, and document templates to manage resident information, ID details, and document preparation. They described spreadsheet errors, saving problems, missing files, repeated data entry, and difficulty preserving the history of earlier issuances because existing templates or rows are edited and reused.
 
-Staff want a system where they can find existing resident records, enter document-request details, fill approved document formats, and print without repeatedly retyping the same information. Barangay ID preparation currently uses Excel and Publisher, including manual print-size adjustments. The office reported slow internet, prefers an offline system, has no dedicated server, and has computers connected through a local network.
+Staff want a system where they can find existing resident records, enter document-request details, fill approved document formats, and print without repeatedly retyping the same information. For clearances, staff currently enter the resident and transaction details in an Excel workbook. Each worksheet corresponds to a different form, and the workbook prints only the entered details onto a blank pre-printed form. The pre-printed paper already contains the official header, labels, signature area, and space for the dry seal. The system should follow this workflow: staff enter the required details once, then print those details in the matching positions on the same approved blank form. Print placement must be calibrated and tested so the text lines up accurately with the pre-printed fields. Barangay ID preparation currently uses Excel and Publisher, including manual print-size adjustments. The office reported slow internet, prefers an offline system, has no dedicated server, and has computers connected through a local network.
 
 ## 4. Project objectives
 
@@ -72,7 +72,7 @@ The scope is based on interview notes and the current Creative Brief draft. Conf
 4. **Family and Sector Details:** Store family, beneficiary, and sector details where the client's workflow requires them.
 5. **ID Records:** Preserve existing Barangay ID numbering. The client described one-year validity in the usual case and six-month validity for new or renting residents until proof of voter registration is provided. The client also maintains a separate list of newer residents dating from 2019 with registered/unregistered remarks.
 6. **Document Requests:** Record requests, select or maintain document purposes, and preserve issuance history.
-7. **Document and ID Printing:** Populate approved document layouts and Barangay IDs, including an ID photo where required. Official signatures and dry seals remain manual.
+7. **Document and ID Printing:** Populate approved document layouts and Barangay IDs, including an ID photo where required. For documents issued on pre-printed paper, print only the variable details into the corresponding spaces on the existing blank form. Match the current Excel workbook workflow, where each worksheet corresponds to a different form. Calibrate print position, scaling, paper size, margins, and printer settings against the actual forms, then test printed samples before client acceptance. Do not recreate or print the pre-printed header, labels, signature, or dry-seal area unless the client explicitly approves a different layout. Official signatures and dry seals remain manual.
 8. **Backup and Restore:** Support local manual and/or scheduled backups, with the exact procedure to be agreed and tested.
 
 Document types discussed or shown include Barangay Clearance, Franchise Clearance, Certificate of Indigency, clearance for electrical and water connection, residency-related documents, First-Time Jobseeker documents, and Barangay ID. Confirm the final list and the exact approved formats with the client. Do not add documents merely because a sample exists.
@@ -132,7 +132,7 @@ This draft records what the group understood from the interviews. Review it with
 
 ## Open confirmations before design and implementation
 
-- Confirm the final feature list, document types, and approved print layouts.
+- Confirm the final feature list, document types, and approved print layouts. Obtain the current Excel workbook and clean blank copies of each form, map each worksheet to its matching form, confirm paper size and printer settings, and approve the printed alignment with the client.
 - Confirm the account and permission model for the six staff users.
 - Confirm whether the proposed one-computer local host and LAN access is acceptable and identify the designated computer.
 - Confirm how photos will be processed if background removal currently depends on an online service. No internet-dependent photo service can be assumed available in a fully offline system.
