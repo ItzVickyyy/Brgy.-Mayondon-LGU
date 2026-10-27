@@ -16,13 +16,14 @@ const items: Item[] = [
   { icon: LayoutDashboard, title: "Dashboard", path: "/" },
   { icon: FileCheck2, title: "Issuances Management", path: "/issuances" },
   { icon: Users, title: "Records Management", path: "/records" },
-  { icon: BookUser, title: "Officials", path: "/officials" },
-  { icon: ShieldCheck, title: "User Management", path: "/admin" },
-  { icon: Settings, title: "System Settings", path: "/settings" },
+  { icon: BookUser, title: "Officials", path: "/officials", adminOnly: true },
+  { icon: ShieldCheck, title: "User Management", path: "/admin", adminOnly: true },
+  { icon: Settings, title: "System Settings", path: "/settings", adminOnly: true },
 ]
 
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
+  const visibleItems = items.filter((item) => !("adminOnly" in item && item.adminOnly) || currentUser?.is_superuser)
 
   return (
     <Sidebar collapsible="icon">
@@ -30,7 +31,7 @@ export function AppSidebar() {
         <Logo variant="responsive" />
       </SidebarHeader>
       <SidebarContent>
-        <Main items={items} />
+        <Main items={visibleItems} />
       </SidebarContent>
       <SidebarFooter>
         <SidebarAppearance />
