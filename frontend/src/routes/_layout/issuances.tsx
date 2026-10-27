@@ -179,6 +179,19 @@ function createDefaultFormValues(type: string) {
   return Object.fromEntries((documentFields[type] ?? []).filter((field) => field.defaultToday).map((field) => [field.name, today])) as Record<string, string>
 }
 
+function calculateAge(birthdate: string) {
+  if (!birthdate) return ""
+  const birth = new Date(birthdate + "T00:00:00")
+  if (Number.isNaN(birth.getTime())) return ""
+  const today = new Date()
+  let age = today.getFullYear() - birth.getFullYear()
+  const birthdayHasNotOccurred =
+    today.getMonth() < birth.getMonth() ||
+    (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())
+  if (birthdayHasNotOccurred) age -= 1
+  return age >= 0 ? String(age) : ""
+}
+
 function formatDate(value: string) {
   if (!value) return "Not entered"
   const parsed = new Date(value + "T00:00:00")
@@ -212,7 +225,11 @@ function IssuancesManagement() {
   }), [allRecords, historyType, search])
 
   function updateField(name: string, value: string) {
-    setFormValues((previous) => ({ ...previous, [name]: value }))
+    setFormValues((previous) => ({
+      ...previous,
+      [name]: value,
+      ...(name === "birthdate" ? { age: calculateAge(value) } : {}),
+    }))
     setNotice("")
   }
 
