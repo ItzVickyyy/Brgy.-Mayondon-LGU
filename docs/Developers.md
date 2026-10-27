@@ -28,7 +28,7 @@ Until the Creative Brief and architecture are reviewed:
 - Keep the repository on `Foundation`; do not rename or merge it or create the future `production` branch.
 - Update [Source-of-Truth.md](Source-of-Truth.md) and the system specification when a decision is confirmed.
 - Record remaining questions rather than guessing, especially around the local host, LAN access, photo background removal, account permissions, and backups.
-- Do not describe either the retained Vercel + Supabase setup or the new local LAN preparation as client-approved or production-ready.
+- The Vercel and Supabase deployment plan has been removed. Treat Docker Compose with local PostgreSQL and the FastAPI-served frontend as the current proposed LAN deployment path. It is not client-approved or production-ready until site testing and client approval are complete.
 
 ## 4. Agreed branching strategy
 
