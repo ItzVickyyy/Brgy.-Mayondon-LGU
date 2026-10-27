@@ -1,3 +1,4 @@
+
 .vscode/*
 !.vscode/extensions.json
 node_modules/
@@ -6,6 +7,10 @@ backend/app/frontend/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Generated TanStack Router files
+/frontend/src/routeTree.gen.ts
+/frontend/.tanstack/
 
 # Local secrets (copy .env.example to .env)
 .env
@@ -17,6 +22,3 @@ backend/app/frontend/
 openapi.json
 __pycache__/
 .venv/
-
-/frontend/src/routeTree.gen.ts
-/frontend/.tanstack/
