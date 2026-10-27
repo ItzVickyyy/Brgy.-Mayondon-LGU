@@ -187,3 +187,32 @@ The existing prototype should be aligned with the current scope:
 - [ ] Prepare a one-page style guide and mobile mockups for at least the suggested two pages.
 - [ ] Confirm suggested quantities with Prof. Camba.
 - [ ] Revise the designs from client feedback before coding against them.
+
+
+## 9. Creative Brief alignment review — October 27, 2026
+
+This checklist compares the Creative Brief with the current branch. A draft screen is not evidence that the feature is operational or approved.
+
+| Requirement from the Creative Brief | Current branch design status | Remaining work |
+|---|---|---|
+| Dashboard: issued documents and expiring clearances/IDs | Previous dashboard layout retained. Displayed values are sample values. | Keep the layout. Connect verified database totals later and label prototype data clearly. |
+| Resident records: add, edit, search | Resident Records draft now prioritizes residents, sample ID references, resident type, registration status, and archive status. | Resident create/edit/profile actions and backend persistence are not implemented. Confirm search fields with the client. |
+| Family, beneficiary, and marginalized-sector details | A draft tab describes these groups of information. | Confirm actual fields and sector categories against the client-provided masterlists. |
+| Import existing masterlists | Draft file-selection area and planned validation summary are shown. | File parsing, column mapping, preview, validation, duplicate detection, and import are not implemented. |
+| Resident and Barangay ID records | Only ID references are shown in Resident Records. | Dedicated Barangay ID Management screen is still missing. Include number series, validity, status, photo, create/renew, and print layout. |
+| Document request entry and editable purpose list | Existing Document Management form supports draft fields and document types. Purpose list is currently hard-coded. | Add resident selection before document entry, purpose-list maintenance, and client-approved document types and fields. |
+| Separate issuance history with issue and expiry dates | Issuance History tab exists, but records are sample/session-only and no expiry date is shown. | Add persistent issuance records, expiry where applicable, details, and correction history that preserves the original. |
+| Auto-filled printing with existing formats | Current print view is a generic draft preview. | Create a separate print layout per approved document, then calibrate against actual pre-printed paper and the client printer. Signatures and dry seals remain manual. |
+| Six staff accounts with full access | Current branch has Admin-only routes and navigation for Officials, User Accounts, and System Settings. | **Requirements conflict:** the Creative Brief says all six staff accounts have full access, while prior workflow planning has Admin and Staff permission differences. Confirm this with the client before changing access controls. |
+| Local scheduled and manual backup/restore | No dedicated Backup and Restore screen in the navigation. | Draft Admin-accessible backup/restore UI and define destination, schedule, confirmation, restore procedure, and outcome display. Actual backup automation and restore tests remain separate work. |
+| Fully offline local-network use | Deployment foundation exists, but client-site LAN operation is not yet verified. | Test host startup, access from other office computers, printer operation, firewall configuration, and recovery without internet. |
+| Public-facing features excluded | Welcome page is staff-oriented; no public announcement module is intended. | Keep public resident access, online applications, payments, announcements, and blotter workflows out of scope. |
+
+### Remaining design priorities
+
+1. Draft the Barangay ID Management screen.
+2. Refine Document Management so resident selection and request entry happen before issuance, and the history remains a separate view.
+3. Draft Officials, User Accounts, Pending Registrations, Activity Log, Management Reports, Backup and Restore screens only after confirming the access model.
+4. Keep the previous dashboard layout unchanged unless the group and client explicitly request a redesign.
+5. Label every hard-coded row and figure as sample data. Do not use actual resident records in screenshots, commits, or demonstrations.
+6. Validate the site map and mockups with the client before treating the design as approved.
