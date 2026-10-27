@@ -317,7 +317,7 @@ When this file is pasted into a chat, the assistant should:
 
 ---
 
-## 12. Client update: LGUSS-BIMS and project safeguards (October 27, 2026)
+## Client update: LGUSS-BIMS and project safeguards (October 27, 2026)
 
 ### Client-reported status
 
