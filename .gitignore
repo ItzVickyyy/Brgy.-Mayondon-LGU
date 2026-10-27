@@ -18,3 +18,4 @@ backend/app/frontend/
 openapi.json
 __pycache__/
 .venv/
+/frontend/.tanstack/
