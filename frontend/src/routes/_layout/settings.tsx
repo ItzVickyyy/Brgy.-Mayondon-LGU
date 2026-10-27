@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+import type { ReactNode } from "react"
 import { Building2, ClipboardList, FileText } from "lucide-react"
 
 import ChangePassword from "@/components/UserSettings/ChangePassword"
@@ -12,7 +13,7 @@ export const Route = createFileRoute("/_layout/settings")({
   head: () => ({ meta: [{ title: pageTitle("System Settings") }] }),
 })
 
-function SettingsPanel({ title, description, children }: { title: string; description: string; children?: React.ReactNode }) {
+function SettingsPanel({ title, description, children }: { title: string; description: string; children?: ReactNode }) {
   return (
     <section className="rounded-xl border bg-card p-5 sm:p-6">
       <div>
