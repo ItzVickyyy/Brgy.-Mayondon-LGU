@@ -233,7 +233,7 @@ function IssuancesManagement() {
       status: "Draft",
       fields: { ...formValues },
     })
-    window.setTimeout(() => window.print(), 100)
+    setNotice("Print is paused until the selected form has a client-approved paper size and calibrated field positions. The current generic preview must not be printed on official pre-printed stock.")
   }
 
   const printFields = printRecord ? documentFields[printRecord.type] ?? [] : fields
@@ -259,6 +259,9 @@ function IssuancesManagement() {
           <div className="mb-5 flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><FileCheck2 className="size-5" aria-hidden="true" /></div>
             <div><h2 className="font-semibold">Document Details</h2><p className="mt-1 text-sm text-muted-foreground">Choose a document to show its corresponding hardcopy fields.</p></div>
+          </div>
+          <div role="note" className="mb-5 rounded-lg border border-amber-300/70 bg-amber-50/60 p-3 text-sm leading-6 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
+            Official-form printing is intentionally paused. The client requires typed values only on pre-printed paper. Paper size, orientation, printer settings, and field coordinates must be calibrated before printing is enabled.
           </div>
           <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 md:grid-cols-2">
             <label className={labelClassName + " md:col-span-2"}>Resident
@@ -354,31 +357,9 @@ function IssuancesManagement() {
       )}
 
       <section id="issuance-print" className="hidden print:block p-6 text-black">
-        <header className="mb-6 border-b border-gray-400 pb-4 text-center">
-          <img
-            src="/assets/images/Barangay%20Mayondon%20Logo.png"
-            alt="Barangay Mayondon LGU logo"
-            className="mx-auto mb-3 h-16 w-16 object-contain"
-          />
-          <p className="text-sm font-medium">Barangay Mayondon LGU</p>
-          <p className="text-xs">Los Baños, Laguna</p>
-          <h1 className="mt-3 text-xl font-bold">{printRecord?.type ?? selectedType}</h1>
-        </header>
-        <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-          {printFields.map((field) => {
-            const value = printValues[field.name] ?? ""
-            const displayValue = value.split("||").filter(Boolean).join(", ")
-            return (
-              <div key={field.name} className={field.fullWidth || field.type === "textarea" || field.type === "checkboxes" ? "col-span-2" : ""}>
-                <p className="text-xs font-semibold">{field.label}</p>
-                <p className="mt-1 min-h-6 whitespace-pre-wrap border-b border-gray-300 pb-1 text-sm">{displayValue || " "}</p>
-              </div>
-            )
-          })}
-        </div>
-        <footer className="mt-10 border-t border-gray-300 pt-3 text-xs">
-          Record: {printRecord?.id ?? "Print preview"}
-        </footer>
+        <p className="text-sm">Print overlay is unavailable until the form template is calibrated.</p>
+        <p className="text-sm">Selected document: {printRecord?.type ?? selectedType}</p>
+        <p className="text-sm">No official form elements are rendered by this placeholder.</p>
       </section>
     </div>
   )
