@@ -236,9 +236,6 @@ function IssuancesManagement() {
     setNotice("Print is paused until the selected form has a client-approved paper size and calibrated field positions. The current generic preview must not be printed on official pre-printed stock.")
   }
 
-  const printFields = printRecord ? documentFields[printRecord.type] ?? [] : fields
-  const printValues = printRecord?.fields ?? formValues
-
   return (
     <div className="flex flex-col gap-6">
       <style>{"@media print { body * { visibility: hidden !important; } #issuance-print, #issuance-print * { visibility: visible !important; } #issuance-print { display: block !important; position: fixed; inset: 0; width: 100%; padding: 24px; color: #111 !important; background: white !important; } }"}</style>
