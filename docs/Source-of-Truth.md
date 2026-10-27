@@ -252,6 +252,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 | Existing foundation architecture | React + FastAPI + PostgreSQL. The Docker Compose self-hosted path builds the frontend into the FastAPI image and uses local PostgreSQL. Legacy Vercel-specific configuration and Supabase transaction-pooler handling have been removed. The LAN path is preparation only and remains untested at the client site. |
 | Accounts | Admin-only account creation; open sign-up is disabled. `is_superuser` = Admin, other users = Staff. New passwords require 12–128 characters; five failed logins trigger a 15-minute account lockout |
 | Branding | Centralized in `frontend/src/config/site.ts`; client supplied the Barangay Mayondon logo on October 20, 2026. Final UI palette and use of logo remain subject to client design feedback. |
+| Document printing workflow | For forms such as Barangay Clearance, the current process uses an Excel worksheet to print variable resident/request details onto a blank pre-printed form. The system should preserve this workflow: print only the entered details in the matching spaces, while the pre-printed paper supplies the header, labels, signature area, and dry-seal space. Exact alignment must be calibrated and tested against actual blank forms and printer settings. This is documented in the draft Creative Brief and remains subject to client confirmation. |
 | AI tools | Free-tier AI assistants only; this folder is the shared context |
 
 ---
@@ -260,7 +261,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 
 - [ ] Confirm the request letter has the instructor signatures and client receiving copy required by the Final Project Guide.
 - [ ] Review [Creative-Brief.md](Creative-Brief.md) with the client and obtain client and group leader signatures before design begins.
-- [ ] Confirm final document types, approved print layouts, required resident fields, import rules, ID numbering and validity rules, and account permissions.
+- [ ] Confirm final document types, approved print layouts, required resident fields, import rules, ID numbering and validity rules, and account permissions. For pre-printed forms, map each Excel worksheet to its matching form and validate print alignment using the actual paper and printer.
 - [ ] Validate the prepared offline/LAN setup with the client, identify the designated host computer and staff computers, confirm printer access, and assign maintenance responsibilities.
 - [ ] Decide how ID photo background removal will work without internet. The client described using an online service today.
 - [ ] Agree on backup frequency, external-drive custody, restore testing, and recovery responsibilities.
@@ -287,6 +288,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 - [ ] Creative Brief reviewed and signed
 - [ ] Offline/LAN setup tested without internet and approved by client; host, backup, photo workflow, and recovery responsibilities confirmed
 - [ ] Initial design reviewed with client
+- [ ] Pre-printed form layouts calibrated and sample print alignment approved by client
 - [ ] Version 1
 - [ ] Testing and technology transfer
 - [ ] Presentation
