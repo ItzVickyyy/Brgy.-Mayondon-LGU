@@ -13,7 +13,7 @@ Laguna State Polytechnic University – Los Baños Campus
 | [Justin Adrian P. Reboton](https://github.com/jOstin-7) | Backend Developer, Technical Writer |
 | [Jean Mervin G. Fajardo](https://github.com/JeanMervin) | Full Stack Developer |
 
-> **Status (October 25, 2026):** client interviews were conducted on October 19–20. The staff-only records and document-issuance scope and Creative Brief still await client review and signatures. The Foundation branch has an initial Docker-based self-hosted LAN path, but actual office deployment, offline workflows, backup/restore, security, automatic startup, and client approval remain unverified. See [Offline-LAN-Deployment.md](docs/Offline-LAN-Deployment.md), [Creative-Brief.md](docs/Creative-Brief.md), and [Source-of-Truth.md](docs/Source-of-Truth.md).
+> **Status (October 27, 2026):** client interviews were conducted on October 19–20, and the revised Creative Brief was reviewed by the professor and reflected in the docs. Verify the required client and group leader signatures on the copy retained for submission. The Foundation branch has an initial Docker-based self-hosted LAN path, but actual office deployment, offline workflows, backup/restore, security, automatic startup, and client-site operation remain unverified. See [Offline-LAN-Deployment.md](docs/Offline-LAN-Deployment.md), [Creative-Brief.md](docs/Creative-Brief.md), and [Source-of-Truth.md](docs/Source-of-Truth.md).
 
 ## Stack at a glance
 
