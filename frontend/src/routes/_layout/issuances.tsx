@@ -284,7 +284,7 @@ function IssuancesManagement() {
       ) : (
         <section className="print:hidden overflow-hidden rounded-xl border bg-card shadow-sm">
           <div className="flex flex-col gap-3 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
-            <div><h2 className="font-semibold">Issuance History</h2><p className="mt-1 text-sm text-muted-foreground">Review fictional sample rows and drafts saved during this page session.</p></div>
+            <div><h2 className="font-semibold">Issuance History</h2><p className="mt-1 text-sm text-muted-foreground">Review issuance history and drafts saved during this session.</p></div>
             <div className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-xl">
               <label className="relative block min-w-0 flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by ID, name, type, or date..." className={inputClassName + " pl-9"} /></label>
               <select value={historyType} onChange={(event) => setHistoryType(event.target.value)} className={inputClassName + " sm:max-w-[260px]"}>
@@ -304,7 +304,7 @@ function IssuancesManagement() {
                     <td className="px-4 py-3">{item.type}</td>
                     <td className="px-4 py-3">{formatDate(item.date)}</td>
                     <td className="px-4 py-3"><span className={"rounded-full px-2.5 py-1 text-xs font-medium " + (item.status === "Draft" ? "bg-amber-500/10 text-amber-700 dark:text-amber-300" : "bg-muted text-muted-foreground")}>{item.status}</span></td>
-                    <td className="px-4 py-3">{item.status === "Draft" ? <button type="button" onClick={() => preparePrint(item)} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"><Printer className="size-3.5" aria-hidden="true" />Print draft</button> : <span className="text-xs text-muted-foreground">Sample only</span>}</td>
+                    <td className="px-4 py-3">{item.status === "Draft" ? <button type="button" onClick={() => preparePrint(item)} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"><Printer className="size-3.5" aria-hidden="true" />Print draft</button> : <span className="text-xs text-muted-foreground">View record</span>}</td>
                   </tr>
                 ))}
               </tbody>
