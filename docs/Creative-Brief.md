@@ -3,7 +3,7 @@
 **Project:** Barangay Mayondon Records and Document Issuance System  
 **Client:** Barangay Mayondon Local Government Unit, Los Baños, Laguna  
 **Interview dates:** October 19 and 20, 2026  
-**Status:** Draft based on the two client interviews. Client signature and final approval are still pending. Do not treat this file as signed approval.
+**Status:** Updated on October 27, 2026, to reflect the revised Creative Brief reviewed by the professor. Use this as the approved planning baseline. The uploaded copy's client and group leader signature fields appear blank, so verify and retain the signed copy separately if signatures are required.
 
 ## 1. Project title
 
@@ -19,7 +19,7 @@ Barangay Mayondon Records and Document Issuance System
 
 ## 3. Background and problem
 
-Based on interviews on October 19 and 20, 2026, staff currently use Google Sheets, Excel, and document templates to manage resident information, ID details, and document preparation. They described spreadsheet errors, saving problems, missing files, repeated data entry, and difficulty preserving the history of earlier issuances because existing templates or rows are edited and reused.
+Based on interviews on October 19 and 20, 2026, staff use Google Sheets, Excel, and document templates to manage resident records, ID details, and document requests. Reusing templates requires repeated data entry and makes previous issuances difficult to track. Staff also reported spreadsheet errors, saving issues, and missing files.
 
 Staff want a system where they can find existing resident records, enter document-request details, fill approved document formats, and print without repeatedly retyping the same information. For clearances, staff currently enter the resident and transaction details in an Excel workbook. Each worksheet corresponds to a different form, and the workbook prints only the entered details onto a blank pre-printed form. The pre-printed paper already contains the official header, labels, signature area, and space for the dry seal. The system should follow this workflow: staff enter the required details once, then print those details in the matching positions on the same approved blank form. Print placement must be calibrated and tested so the text lines up accurately with the pre-printed fields. Barangay ID preparation currently uses Excel and Publisher, including manual print-size adjustments. The office reported slow internet, prefers an offline system, has no dedicated server, and has computers connected through a local network.
 
@@ -33,15 +33,13 @@ Staff want a system where they can find existing resident records, enter documen
 
 ## 5. Target users
 
-The primary users are six clerical personnel who handle resident records, document preparation, and issuance, including the night-duty staff member. The interface should be easy to navigate, readable, and suitable for staff with different levels of computer experience, including senior staff.
-
-The interview described different office responsibilities. Clerical staff are the main users for this project. Admin duties are not primarily clerical. Specific account permissions still need to be confirmed with the client.
+The primary users are six clerical staff members, two female and four male, who handle resident records, document preparation, and issuance, including the night-duty staff member. Their ages are estimated at around 30 to 60 years old. The interface should be simple, easy to navigate, and readable for staff with different levels of computer experience, including senior staff.
 
 ## 6. Scope and limitations
 
 ### Included in the current draft scope
 
-- Staff login for six accounts.
+- Staff login for six accounts, all with full access as specified in the revised Creative Brief.
 - Dashboard showing documents issued and clearances or IDs nearing expiry.
 - Resident record management, search, and import of existing masterlist data.
 - Family, beneficiary, and marginalized-sector details where required by the current office workflow.
@@ -66,14 +64,14 @@ The scope is based on interview notes and the current Creative Brief draft. Conf
 
 ## 7. Main features
 
-1. **Login:** Six staff accounts, with account permissions to be confirmed.
+1. **Login:** Six staff accounts, all with full access.
 2. **Dashboard:** Overview of issued documents and clearances or IDs nearing expiry.
 3. **Resident Records:** Add, edit, search, and import existing masterlist data.
 4. **Family and Sector Details:** Store family, beneficiary, and sector details where the client's workflow requires them.
 5. **ID Records:** Preserve existing Barangay ID numbering. The client described one-year validity in the usual case and six-month validity for new or renting residents until proof of voter registration is provided. The client also maintains a separate list of newer residents dating from 2019 with registered/unregistered remarks.
 6. **Document Requests:** Record requests, select or maintain document purposes, and preserve issuance history.
 7. **Document and ID Printing:** Populate approved document layouts and Barangay IDs, including an ID photo where required. For documents issued on pre-printed paper, print only the variable details into the corresponding spaces on the existing blank form. Match the current Excel workbook workflow, where each worksheet corresponds to a different form. Calibrate print position, scaling, paper size, margins, and printer settings against the actual forms, then test printed samples before client acceptance. Do not recreate or print the pre-printed header, labels, signature, or dry-seal area unless the client explicitly approves a different layout. Official signatures and dry seals remain manual.
-8. **Backup and Restore:** Support local manual and/or scheduled backups, with the exact procedure to be agreed and tested.
+8. **Backup and Restore:** Support scheduled and manual local backups saved to an external drive. Agree on the schedule, drive custody, restore procedure, and responsibilities, then test backup and recovery.
 
 Document types discussed or shown include Barangay Clearance, Franchise Clearance, Certificate of Indigency, clearance for electrical and water connection, residency-related documents, First-Time Jobseeker documents, and Barangay ID. Confirm the final list and the exact approved formats with the client. Do not add documents merely because a sample exists.
 
@@ -83,7 +81,7 @@ Document types discussed or shown include Barangay Clearance, Franchise Clearanc
 - **Devices:** Existing barangay office computers and printers.
 - **Proposed installation:** One designated office computer runs the system; other office computers access it over the local network. The designated computer must remain on during service hours.
 - **Backup destination:** External drive, subject to an agreed backup and restore procedure.
-- **Important technical decision:** The current repository foundation was prepared with a Vercel and Supabase online architecture. That does not match the client's stated offline preference. The team must review and validate a suitable local-network architecture before implementing or deploying the final system. Do not describe the current online setup as approved or production-ready.
+- **Technical direction:** Use a locally hosted application and database accessible over the office LAN, without internet access during normal operation. The repository's current Docker-based local-host path is preparation only. The actual offline workflows, LAN access, backup and restore, startup behavior, and client-site deployment still require testing.
 
 ## 9. Look and feel
 
@@ -109,21 +107,21 @@ Treat resident records and identification data as confidential. Do not commit re
 
 ## 11. Timeline
 
-The academic schedule in the ITST301 Final Project Guide takes precedence. The dates below are the working milestones recorded in the current draft and should be reconciled with the Guide and client availability.
+The dates below are the timeline in the professor-reviewed Creative Brief. The ITST301 Final Project Guide remains the source for academic submission milestones and takes precedence if dates conflict.
 
 | Milestone | Working date |
 |---|---|
 | Client interviews | October 19–20, 2026 |
-| Information architecture approval | October 26, 2026 |
+| Information architecture approval | October 27, 2026 |
 | Design phase | October 26–31, 2026 |
 | Development phase | November 1–8, 2026 |
 | Testing | November 9–13, 2026 |
 | Presentation | November 16 or 19, 2026 |
-| Launch / turnover target | November 26, 2026 |
+
 
 ## 12. Approval
 
-This draft records what the group understood from the interviews. Review it with the client, resolve open questions, and obtain the client's and group leader's signatures before treating it as approved or proceeding on the assumption that the full scope is final.
+This version reflects the Creative Brief reviewed by the professor and is the current planning baseline. The approval table in the supplied copy has blank signature fields. Confirm whether client and group leader signatures have been obtained and keep the signed copy for the required documentation.
 
 | Client representative | Group leader |
 |---|---|
@@ -133,11 +131,11 @@ This draft records what the group understood from the interviews. Review it with
 ## Open confirmations before design and implementation
 
 - Confirm the final feature list, document types, and approved print layouts. Obtain the current Excel workbook and clean blank copies of each form, map each worksheet to its matching form, confirm paper size and printer settings, and approve the printed alignment with the client.
-- Confirm the account and permission model for the six staff users.
+- Configure the six staff accounts with full access, as specified in the revised Creative Brief. Confirm the safe account setup and recovery procedure before deployment.
 - Confirm whether the proposed one-computer local host and LAN access is acceptable and identify the designated computer.
 - Confirm how photos will be processed if background removal currently depends on an online service. No internet-dependent photo service can be assumed available in a fully offline system.
 - Confirm how resident masterlists will be imported, how duplicate or outdated records will be handled, and which data fields are actually needed.
 - Confirm ID-number rules, validity exceptions, and how voter-registration proof is recorded.
-- Agree on backup frequency, external-drive custody, restoration responsibilities, and data-retention procedures.
+- Agree on the scheduled and manual backup frequency, external-drive custody, restoration responsibilities, and data-retention procedures.
 - Confirm which sample documents are still in use. Business and building clearances described as municipal processes should remain excluded unless the client corrects that understanding.
-- Confirm the final scope and this brief with the client, then obtain signatures.
+- Confirm whether the client and group leader signature fields have been completed on the approved copy, and store the signed version for the final report.
