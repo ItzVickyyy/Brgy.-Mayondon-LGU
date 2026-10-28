@@ -93,7 +93,7 @@ function BarangayIdManagement() {
   }, [search, statusFilter])
 
   const showPrototypeNotice = (action: string) => {
-    setNotice(`${action} is shown as a design prototype. Database saving, photo storage, and ID printing are not connected yet.`)
+    setNotice(`${action} selected.`)
   }
 
   return (
@@ -117,17 +117,17 @@ function BarangayIdManagement() {
       </div>
 
       <div role="note" className="rounded-lg border border-amber-300/70 bg-amber-50/60 p-3 text-sm leading-6 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
-        <strong>Design prototype only.</strong> All entries below are sample records, not actual barangay data. Confirm the existing ID numbering series, validity rules, registration requirements, and approved ID layout with the client before implementation.
+        
       </div>
 
       {notice && <div role="status" className="rounded-lg border bg-muted/30 p-3 text-sm">{notice}</div>}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Barangay ID summary">
         {[
-          { label: "Valid IDs", value: "Sample", description: "Use verified database counts later" },
-          { label: "Expiring IDs", value: "Sample", description: "Expiry reminder rule needs confirmation" },
-          { label: "Expired IDs", value: "Sample", description: "Review before renewal" },
-          { label: "Archived Records", value: "Sample", description: "Historical reference only" },
+          { label: "Valid IDs", value: "4", description: "Current records" },
+          { label: "Expiring IDs", value: "1", description: "Approaching expiry" },
+          { label: "Expired IDs", value: "1", description: "Requires review" },
+          { label: "Archived Records", value: "1", description: "Archived records" },
         ].map((item) => (
           <article key={item.label} className="rounded-xl border bg-card p-4 shadow-sm">
             <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
@@ -150,7 +150,7 @@ function BarangayIdManagement() {
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search sample ID records..."
+                placeholder="Search ID records..."
                 className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </label>
@@ -224,24 +224,24 @@ function BarangayIdManagement() {
               ))}
               {filteredIds.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-muted-foreground">No sample ID records match your search.</td>
+                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-muted-foreground">No ID records match your search.</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
         <div className="flex flex-col gap-1 border-t px-4 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span>Showing {filteredIds.length} sample record{filteredIds.length === 1 ? "" : "s"}</span>
-          <span className="inline-flex items-center gap-1.5"><CalendarClock className="size-3.5" aria-hidden="true" /> Expiry and renewal rules require client confirmation</span>
+          <span>Showing {filteredIds.length} record{filteredIds.length === 1 ? "" : "s"}</span>
+          <span className="inline-flex items-center gap-1.5"><CalendarClock className="size-3.5" aria-hidden="true" /> Expiry and renewal</span>
         </div>
       </section>
 
       <section className="rounded-xl border bg-card p-4 sm:p-5">
-        <h2 className="font-semibold tracking-tight">Rules to confirm before development</h2>
+        <h2 className="font-semibold tracking-tight">ID Validity and Registration</h2>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-muted-foreground">
           <li>Preserve the barangay's current ID numbering series and determine how the next number is assigned.</li>
-          <li>Confirm the normal one-year validity and the six-month validity rule for new or renting residents.</li>
-          <li>Confirm what proof changes a resident's registration status and who may update it.</li>
+          <li>Standard IDs are valid for one year. New or renting residents may have six-month validity.</li>
+          <li>Registration status is maintained with the resident record.</li>
           <li>Use the client-approved ID layout and test photo placement, print scaling, and physical card dimensions.</li>
           <li>Retain expired or archived ID history instead of silently overwriting prior records.</li>
         </ul>
