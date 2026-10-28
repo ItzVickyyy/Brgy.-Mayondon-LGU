@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import {
   Building2,
   ChevronsUpDown,
@@ -6,6 +6,7 @@ import {
   LogOut,
   Monitor,
   Moon,
+  Search,
   Settings,
   Sun,
   UserRound,
@@ -16,7 +17,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -63,7 +63,8 @@ function SettingsModal({
   onOpenChange: (open: boolean) => void
   isAdmin: boolean
 }) {
-  const [section, setSection] = useState<SettingsSection>("account")
+  const [section, setSection] = useState<SettingsSection>("preferences")
+  const [search, setSearch] = useState("")
   const { theme, setTheme } = useTheme()
 
   const sections = [
@@ -74,62 +75,90 @@ function SettingsModal({
       : []),
   ]
 
+  const filteredSections = useMemo(
+    () => sections.filter((item) => item.label.toLowerCase().includes(search.trim().toLowerCase())),
+    [search, isAdmin],
+  )
+
   const themes: { value: Theme; label: string; icon: typeof Sun }[] = [
+    { value: "system", label: "System default", icon: Monitor },
     { value: "light", label: "Light", icon: Sun },
     { value: "dark", label: "Dark", icon: Moon },
-    { value: "system", label: "System default", icon: Monitor },
   ]
+
+  const selectSection = (value: SettingsSection) => {
+    setSection(value)
+    setSearch("")
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[85vh] min-h-[420px] max-h-[760px] flex-col gap-0 overflow-hidden p-0 sm:min-h-[560px] sm:max-w-4xl">
-        <DialogHeader className="shrink-0 border-b px-6 py-5 text-left">
-          <DialogTitle>Settings</DialogTitle>
-          <DialogDescription>
-            Manage your account, preferences, and office configuration.
-          </DialogDescription>
+      <DialogContent className="flex h-[82vh] min-h-[500px] max-h-[720px] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
+        <DialogHeader className="flex h-12 shrink-0 flex-row items-center border-b px-4 py-0 text-left">
+          <DialogTitle className="text-sm font-semibold">Settings</DialogTitle>
         </DialogHeader>
 
-        <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden sm:grid-cols-[190px_minmax(0,1fr)]">
-          <nav
-            aria-label="Settings sections"
-            className="flex shrink-0 gap-2 overflow-x-auto border-b p-3 sm:flex-col sm:overflow-y-auto sm:border-b-0 sm:border-r sm:p-4"
-          >
-            {sections.map((item) => {
-              const Icon = item.icon
-              const active = section === item.value
-              return (
-                <Button
-                  key={item.value}
-                  type="button"
-                  variant={active ? "secondary" : "ghost"}
-                  aria-current={active ? "page" : undefined}
-                  onClick={() => setSection(item.value)}
-                  className="shrink-0 justify-start gap-2 sm:w-full"
-                >
-                  <Icon className="size-4" />
-                  <span>{item.label}</span>
-                </Button>
-              )
-            })}
-          </nav>
+        <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden sm:grid-cols-[210px_minmax(0,1fr)]">
+          <aside className="flex min-h-0 flex-col border-b p-3 sm:border-b-0 sm:border-r sm:p-4">
+            <div className="relative mb-3 shrink-0">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <input
+                aria-label="Search settings"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search settings"
+                className="h-9 w-full rounded-md border bg-muted/40 pl-8 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
+              />
+            </div>
 
-          <div className="min-h-0 min-w-0 overflow-y-auto p-4 sm:p-6">
+            <nav
+              aria-label="Settings sections"
+              className="flex min-h-0 gap-1 overflow-x-auto sm:flex-1 sm:flex-col sm:overflow-y-auto"
+            >
+              {filteredSections.map((item, index) => {
+                const Icon = item.icon
+                const active = section === item.value
+                const previous = filteredSections[index - 1]
+                const showDivider =
+                  (item.value === "preferences" && previous?.value === "account") ||
+                  item.value === "office"
+
+                return (
+                  <div key={item.value} className="shrink-0">
+                    {showDivider ? <div className="my-2 hidden border-t sm:block" /> : null}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      aria-current={active ? "page" : undefined}
+                      onClick={() => selectSection(item.value)}
+                      className={
+                        "h-9 justify-start gap-2 rounded-md px-2.5 text-sm sm:w-full " +
+                        (active ? "bg-accent font-medium text-accent-foreground hover:bg-accent" : "font-normal")
+                      }
+                    >
+                      <Icon className="size-4 shrink-0" />
+                      <span>{item.label}</span>
+                    </Button>
+                  </div>
+                )
+              })}
+              {filteredSections.length === 0 ? (
+                <p className="px-2 py-3 text-sm text-muted-foreground">No settings found.</p>
+              ) : null}
+            </nav>
+          </aside>
+
+          <main className="min-h-0 min-w-0 overflow-y-auto p-4 sm:p-6">
             {section === "account" ? (
               <div className="space-y-5">
-                <div>
-                  <h3 className="text-lg font-semibold">My Account</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Manage your profile information and account security.
-                  </p>
-                </div>
+                <h3 className="text-sm font-semibold">My Account</h3>
                 <div className="grid gap-5 xl:grid-cols-2">
                   <section className="min-w-0 rounded-lg border p-4">
-                    <h4 className="mb-3 font-semibold">Account Information</h4>
+                    <h4 className="mb-3 text-sm font-medium">Account Information</h4>
                     <UserInformation />
                   </section>
                   <section className="min-w-0 rounded-lg border p-4">
-                    <h4 className="mb-3 font-semibold">Change Password</h4>
+                    <h4 className="mb-3 text-sm font-medium">Change Password</h4>
                     <ChangePassword />
                   </section>
                 </div>
@@ -137,50 +166,64 @@ function SettingsModal({
             ) : null}
 
             {section === "preferences" ? (
-              <section className="rounded-lg border p-4">
-                <div>
-                  <h3 className="font-semibold">Appearance</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Choose how the system interface appears on this workstation.
-                  </p>
+              <div className="space-y-1">
+                <h3 className="mb-4 text-sm font-semibold">General</h3>
+                <div className="flex min-h-16 flex-col justify-center gap-3 border-b py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-sm font-medium">Theme</p>
+                    <p className="text-xs text-muted-foreground sm:hidden">Choose the interface appearance.</p>
+                  </div>
+                  <div className="flex items-center gap-1 rounded-md border p-1">
+                    {themes.map((option) => {
+                      const Icon = option.icon
+                      const selected = theme === option.value
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => setTheme(option.value)}
+                          aria-label={option.label}
+                          aria-pressed={selected}
+                          title={option.label}
+                          className={
+                            "flex size-8 items-center justify-center rounded-md transition-colors " +
+                            (selected ? "bg-accent text-accent-foreground shadow-sm" : "text-muted-foreground hover:bg-muted")
+                          }
+                        >
+                          <Icon className="size-4" />
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                  {themes.map((option) => {
-                    const Icon = option.icon
-                    const selected = theme === option.value
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => setTheme(option.value)}
-                        aria-pressed={selected}
-                        className={
-                          "flex items-center gap-3 rounded-lg border p-4 text-left transition-colors hover:bg-muted " +
-                          (selected ? "border-primary bg-primary/5" : "")
-                        }
-                      >
-                        <Icon className="size-5" />
-                        <span className="flex-1 text-sm font-medium">{option.label}</span>
-                        {selected ? (
-                          <span className="text-xs text-primary">Selected</span>
-                        ) : null}
-                      </button>
-                    )
-                  })}
+                <div className="flex min-h-16 flex-col justify-center gap-1 border-b py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm font-medium">Interface font</p>
+                  <span className="text-sm text-muted-foreground">Default</span>
                 </div>
-              </section>
+                <div className="flex min-h-16 flex-col justify-center gap-1 border-b py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm font-medium">Response font</p>
+                  <span className="text-sm text-muted-foreground">Default</span>
+                </div>
+                <div className="flex min-h-16 flex-col justify-center gap-1 border-b py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm font-medium">Text size</p>
+                  <span className="text-sm text-muted-foreground">Medium</span>
+                </div>
+                <div className="flex min-h-16 flex-col justify-center gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-sm font-medium">Motion</p>
+                  <span className="text-sm text-muted-foreground">System default</span>
+                </div>
+              </div>
             ) : null}
 
             {section === "office" && isAdmin ? (
-              <div className="flex flex-col gap-4">
-                <section className="rounded-lg border p-4">
+              <div className="space-y-1">
+                <h3 className="mb-4 text-sm font-semibold">Office Setup</h3>
+                <section className="border-b py-4">
                   <div className="mb-4 flex items-start gap-3">
-                    <Building2 className="mt-0.5 size-5 text-primary" />
+                    <Building2 className="mt-0.5 size-4 text-muted-foreground" />
                     <div>
-                      <h3 className="font-semibold">Barangay Information</h3>
-                      <p className="text-sm text-muted-foreground">
-                        Office details used throughout the system.
-                      </p>
+                      <h4 className="text-sm font-medium">Barangay Information</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">Office details used throughout the system.</p>
                     </div>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
@@ -198,11 +241,11 @@ function SettingsModal({
                     </label>
                   </div>
                 </section>
-                <section className="rounded-lg border p-4">
+                <section className="py-4">
                   <div className="flex items-start gap-3">
-                    <FileText className="mt-0.5 size-5 text-primary" />
+                    <FileText className="mt-0.5 size-4 text-muted-foreground" />
                     <div>
-                      <h3 className="font-semibold">Document Templates</h3>
+                      <h4 className="text-sm font-medium">Document Templates</h4>
                       <p className="mt-1 text-sm text-muted-foreground">
                         Manage the document templates used for barangay clearances, certificates, and IDs.
                       </p>
@@ -211,7 +254,7 @@ function SettingsModal({
                 </section>
               </div>
             ) : null}
-          </div>
+          </main>
         </div>
       </DialogContent>
     </Dialog>
