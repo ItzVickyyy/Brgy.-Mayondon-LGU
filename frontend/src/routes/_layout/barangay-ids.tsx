@@ -24,9 +24,9 @@ type BarangayIdRecord = {
 
 const sampleIds: BarangayIdRecord[] = [
   {
-    reference: "SAMPLE-ID-0001",
-    resident: "Sample Resident One",
-    idNumber: "Sample numbering series",
+    reference: "ID-0001",
+    resident: "Resident One",
+    idNumber: "18-128-3597-0001",
     residentType: "Existing resident",
     registrationStatus: "Registered",
     issuedOn: "2026-01-15",
@@ -34,9 +34,9 @@ const sampleIds: BarangayIdRecord[] = [
     status: "Valid",
   },
   {
-    reference: "SAMPLE-ID-0002",
-    resident: "Sample Resident Two",
-    idNumber: "Sample numbering series",
+    reference: "ID-0002",
+    resident: "Resident Two",
+    idNumber: "18-128-3597-0001",
     residentType: "New / renting resident",
     registrationStatus: "Unregistered",
     issuedOn: "2026-05-20",
@@ -44,9 +44,9 @@ const sampleIds: BarangayIdRecord[] = [
     status: "Expiring soon",
   },
   {
-    reference: "SAMPLE-ID-0003",
-    resident: "Sample Resident Three",
-    idNumber: "Sample numbering series",
+    reference: "ID-0003",
+    resident: "Resident Three",
+    idNumber: "18-128-3597-0001",
     residentType: "Existing resident",
     registrationStatus: "Registered",
     issuedOn: "2024-08-01",
@@ -54,9 +54,9 @@ const sampleIds: BarangayIdRecord[] = [
     status: "Expired",
   },
   {
-    reference: "SAMPLE-ID-0004",
-    resident: "Sample Resident Four",
-    idNumber: "Sample numbering series",
+    reference: "ID-0004",
+    resident: "Resident Four",
+    idNumber: "18-128-3597-0001",
     residentType: "Existing resident",
     registrationStatus: "Unregistered",
     issuedOn: "2025-03-12",
