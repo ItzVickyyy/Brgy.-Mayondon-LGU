@@ -9,7 +9,7 @@ import {
   Settings,
   Sun,
   UserRound,
-  Users,
+  SlidersHorizontal,
 } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -36,7 +36,7 @@ import ChangePassword from "@/components/UserSettings/ChangePassword"
 import useAuth from "@/hooks/useAuth"
 import { getInitials } from "@/utils"
 
-type SettingsSection = "account" | "user" | "system"
+type SettingsSection = "account" | "preferences" | "office"
 
 function UserInfo({ fullName, email }: { fullName?: string; email?: string }) {
   return (
@@ -68,9 +68,9 @@ function SettingsModal({
 
   const sections = [
     { value: "account" as const, label: "My Account", icon: UserRound },
-    { value: "user" as const, label: "User Settings", icon: Users },
+    { value: "preferences" as const, label: "Preferences", icon: SlidersHorizontal },
     ...(isAdmin
-      ? [{ value: "system" as const, label: "System Settings", icon: Building2 }]
+      ? [{ value: "office" as const, label: "Office Setup", icon: Building2 }]
       : []),
   ]
 
@@ -82,18 +82,18 @@ function SettingsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
+      <DialogContent className="flex h-[85vh] min-h-[420px] max-h-[760px] flex-col gap-0 overflow-hidden p-0 sm:min-h-[560px] sm:max-w-4xl">
         <DialogHeader className="shrink-0 border-b px-6 py-5 text-left">
           <DialogTitle>Settings</DialogTitle>
           <DialogDescription>
-            Manage your account, personal preferences, and system configuration.
+            Manage your account, preferences, and office configuration.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="grid min-h-0 flex-1 grid-cols-1 overflow-y-auto sm:grid-cols-[190px_minmax(0,1fr)] sm:overflow-hidden">
+        <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden sm:grid-cols-[190px_minmax(0,1fr)]">
           <nav
             aria-label="Settings sections"
-            className="flex gap-2 overflow-x-auto border-b p-3 sm:flex-col sm:overflow-y-auto sm:border-b-0 sm:border-r sm:p-4"
+            className="flex shrink-0 gap-2 overflow-x-auto border-b p-3 sm:flex-col sm:overflow-y-auto sm:border-b-0 sm:border-r sm:p-4"
           >
             {sections.map((item) => {
               const Icon = item.icon
@@ -114,7 +114,7 @@ function SettingsModal({
             })}
           </nav>
 
-          <div className="min-w-0 overflow-y-auto p-4 sm:p-6">
+          <div className="min-h-0 min-w-0 overflow-y-auto p-4 sm:p-6">
             {section === "account" ? (
               <div className="space-y-5">
                 <div>
@@ -136,7 +136,7 @@ function SettingsModal({
               </div>
             ) : null}
 
-            {section === "user" ? (
+            {section === "preferences" ? (
               <section className="rounded-lg border p-4">
                 <div>
                   <h3 className="font-semibold">Appearance</h3>
@@ -171,7 +171,7 @@ function SettingsModal({
               </section>
             ) : null}
 
-            {section === "system" && isAdmin ? (
+            {section === "office" && isAdmin ? (
               <div className="flex flex-col gap-4">
                 <section className="rounded-lg border p-4">
                   <div className="mb-4 flex items-start gap-3">
@@ -179,34 +179,22 @@ function SettingsModal({
                     <div>
                       <h3 className="font-semibold">Barangay Information</h3>
                       <p className="text-sm text-muted-foreground">
-                        Proposed office details for the portal and generated documents.
+                        Office details used throughout the system.
                       </p>
                     </div>
                   </div>
                   <div className="grid gap-4 sm:grid-cols-2">
                     <label className="flex flex-col gap-2 text-sm font-medium">
                       Official Barangay Name
-                      <input
-                        readOnly
-                        value="Barangay Mayondon LGU"
-                        className="h-10 rounded-md border bg-muted/30 px-3 font-normal"
-                      />
+                      <input readOnly value="Barangay Mayondon LGU" className="h-10 rounded-md border bg-muted/30 px-3 font-normal" />
                     </label>
                     <label className="flex flex-col gap-2 text-sm font-medium">
                       Location
-                      <input
-                        readOnly
-                        value="Los Baños, Laguna"
-                        className="h-10 rounded-md border bg-muted/30 px-3 font-normal"
-                      />
+                      <input readOnly value="Los Baños, Laguna" className="h-10 rounded-md border bg-muted/30 px-3 font-normal" />
                     </label>
                     <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
                       Office Address
-                      <input
-                        readOnly
-                        placeholder="To be confirmed with the client"
-                        className="h-10 rounded-md border bg-muted/30 px-3 font-normal"
-                      />
+                      <input readOnly placeholder="Office address" className="h-10 rounded-md border bg-muted/30 px-3 font-normal" />
                     </label>
                   </div>
                 </section>
@@ -216,8 +204,7 @@ function SettingsModal({
                     <div>
                       <h3 className="font-semibold">Document Templates</h3>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Template editing and persistence are not implemented. Print layouts
-                        must be calibrated against actual pre-printed paper and the office printer.
+                        Manage the document templates used for barangay clearances, certificates, and IDs.
                       </p>
                     </div>
                   </div>
@@ -248,40 +235,21 @@ export function User({ user }: { user: any }) {
         <SidebarMenuItem>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <SidebarMenuButton
-                size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                data-testid="user-menu"
-              >
+              <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground" data-testid="user-menu">
                 <UserInfo fullName={user?.full_name} email={user?.email} />
                 <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-              side={isMobile ? "bottom" : "right"}
-              align="end"
-              sideOffset={4}
-            >
+            <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg" side={isMobile ? "bottom" : "right"} align="end" sideOffset={4}>
               <DropdownMenuLabel className="p-0 font-normal">
                 <UserInfo fullName={user?.full_name} email={user?.email} />
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onSelect={() => {
-                  handleMenuClick()
-                  setSettingsOpen(true)
-                }}
-              >
+              <DropdownMenuItem onSelect={() => { handleMenuClick(); setSettingsOpen(true) }}>
                 <Settings />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onSelect={async () => {
-                  handleMenuClick()
-                  await logout()
-                }}
-              >
+              <DropdownMenuItem onSelect={async () => { handleMenuClick(); await logout() }}>
                 <LogOut />
                 Logout
               </DropdownMenuItem>
@@ -289,11 +257,7 @@ export function User({ user }: { user: any }) {
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
-      <SettingsModal
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-        isAdmin={Boolean(user?.is_superuser)}
-      />
+      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} isAdmin={Boolean(user?.is_superuser)} />
     </>
   )
 }
