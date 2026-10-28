@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { AlertTriangle, Archive, CheckCircle2, Clock3, DatabaseBackup, HardDriveDownload, History, RotateCcw, ShieldCheck } from "lucide-react"
+import { Archive, CheckCircle2, Clock3, DatabaseBackup, HardDriveDownload, History, RotateCcw, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 
 import { UsersService } from "@/client"
@@ -31,14 +31,6 @@ function BackupRestore() {
         <p className="text-sm font-medium text-primary">Administration</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Backup and Restore</h1>
         <p className="mt-2 text-sm text-muted-foreground">Protect the barangay's local records and recover from data loss.</p>
-      </div>
-
-      <div className="flex items-start gap-3 rounded-xl border border-amber-500/40 bg-amber-500/5 p-4">
-        <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-600" />
-        <div>
-          <p className="font-medium">Sample interface only</p>
-          <p className="mt-1 text-sm text-muted-foreground">These buttons do not create, download, schedule, or restore a database backup. Connect them to the verified local backup scripts and test recovery before operational use.</p>
-        </div>
       </div>
 
       {notice ? <div role="status" className="rounded-lg border bg-muted/40 p-3 text-sm">{notice}</div> : null}
@@ -90,7 +82,7 @@ function BackupRestore() {
           <label className="flex flex-col gap-2 text-sm font-medium">Backup archive<select value={selectedBackup} onChange={(event) => { setSelectedBackup(event.target.value); setConfirmRestore(false) }} className="h-10 rounded-md border bg-background px-3 font-normal">{sampleBackups.map((backup) => <option key={backup.name} value={backup.name}>{backup.name}</option>)}</select></label>
           <button type="button" onClick={() => setConfirmRestore((value) => !value)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-destructive/50 px-4 text-sm font-medium text-destructive hover:bg-destructive/5"><RotateCcw className="size-4" />{confirmRestore ? "Cancel Restore" : "Prepare Restore"}</button>
         </div>
-        {confirmRestore ? <div className="mt-4 rounded-lg border border-destructive/40 p-4"><p className="font-medium">Confirm restore preparation</p><p className="mt-1 text-sm text-muted-foreground">Selected archive: {selectedBackup}.</p><label className="mt-3 flex items-start gap-2 text-sm"><input type="checkbox" className="mt-1" />Confirm that you want to restore the selected backup.</label><button type="button" onClick={() => setNotice("")} className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"><ShieldCheck className="size-4" />Confirm Restore</button></div> : null}
+        {confirmRestore ? <div className="mt-4 rounded-lg border border-destructive/40 p-4"><p className="font-medium">Confirm restore preparation</p><p className="mt-1 text-sm text-muted-foreground">Selected archive: {selectedBackup}.</p><p className="mt-3 text-sm">Selected backup: {selectedBackup}</p><button type="button" onClick={() => setNotice("")} className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"><ShieldCheck className="size-4" />Confirm Restore</button></div> : null}
       </section>
       
     </div>
