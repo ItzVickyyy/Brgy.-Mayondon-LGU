@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
-import { Archive, CheckCircle2, Clock3, DatabaseBackup, HardDriveDownload, History, RotateCcw, ShieldCheck } from "lucide-react"
+import { Archive, CheckCircle2, Clock3, DatabaseBackup, HardDriveDownload, RotateCcw, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 
 import { UsersService } from "@/client"
