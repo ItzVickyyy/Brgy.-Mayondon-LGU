@@ -28,11 +28,8 @@ const PAGE_LABELS: Record<string, string> = {
   "/barangay-ids": "Barangay ID Management",
   "/officials": "Officials",
   "/admin": "User Accounts",
-  "/settings": "System Settings",
-  "/my-account": "My Account",
-  "/my-activity": "My Activity",
   "/pending-registrations": "Pending Registrations",
-  "/activity-log": "All Users' Activity",
+  "/activity-log": "Activity Log",
   "/reports": "Management Reports",
   "/backup-restore": "Backup and Restore",
 }
