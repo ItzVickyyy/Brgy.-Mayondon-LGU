@@ -15,9 +15,7 @@ import { isLoggedIn } from "@/hooks/useAuth"
 export const Route = createFileRoute("/_layout")({
   component: Layout,
   beforeLoad: async () => {
-    if (!isLoggedIn()) {
-      throw redirect({ to: "/welcome" })
-    }
+    if (!isLoggedIn()) throw redirect({ to: "/welcome" })
   },
 })
 
@@ -28,7 +26,6 @@ const PAGE_LABELS: Record<string, string> = {
   "/barangay-ids": "Barangay ID Management",
   "/officials": "Officials",
   "/admin": "User Accounts",
-  "/pending-registrations": "Pending Registrations",
   "/activity-log": "Activity Log",
   "/reports": "Management Reports",
   "/backup-restore": "Backup and Restore",
