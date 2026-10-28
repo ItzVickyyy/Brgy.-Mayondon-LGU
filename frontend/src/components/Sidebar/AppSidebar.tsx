@@ -1,6 +1,5 @@
-import { Activity, BarChart3, BookUser, CreditCard, DatabaseBackup, FileCheck2, LayoutDashboard, Settings, Users, ShieldCheck, UserRound, UserRoundCheck } from "lucide-react"
+import { Activity, BarChart3, BookUser, CreditCard, DatabaseBackup, FileCheck2, LayoutDashboard, Users, ShieldCheck, UserRoundCheck } from "lucide-react"
 
-import { SidebarAppearance } from "@/components/Common/Appearance"
 import { Logo } from "@/components/Common/Logo"
 import {
   Sidebar,
@@ -19,15 +18,12 @@ const items: NavigationItem[] = [
   { icon: Users, title: "Resident Records", path: "/records" },
   { icon: FileCheck2, title: "Document Management", path: "/issuances" },
   { icon: CreditCard, title: "Barangay ID Management", path: "/barangay-ids" },
-  { icon: UserRound, title: "My Account", path: "/my-account" },
-  { icon: Activity, title: "My Activity", path: "/my-activity" },
   { icon: BookUser, title: "Officials", path: "/officials", adminOnly: true },
   { icon: ShieldCheck, title: "User Accounts", path: "/admin", adminOnly: true },
   { icon: UserRoundCheck, title: "Pending Registrations", path: "/pending-registrations", adminOnly: true },
-  { icon: Activity, title: "All Users' Activity", path: "/activity-log", adminOnly: true },
+  { icon: Activity, title: "Activity Log", path: "/activity-log" },
   { icon: BarChart3, title: "Management Reports", path: "/reports", adminOnly: true },
   { icon: DatabaseBackup, title: "Backup and Restore", path: "/backup-restore", adminOnly: true },
-  { icon: Settings, title: "System Settings", path: "/settings", adminOnly: true },
 ]
 
 export function AppSidebar() {
@@ -43,7 +39,6 @@ export function AppSidebar() {
         <Main items={visibleItems} />
       </SidebarContent>
       <SidebarFooter>
-        <SidebarAppearance />
         <User user={currentUser} />
       </SidebarFooter>
     </Sidebar>
