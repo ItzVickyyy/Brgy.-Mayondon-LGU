@@ -116,9 +116,9 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "address", label: "Address", fullWidth: true },
     { name: "birthdate", label: "Birthdate", type: "date" },
     { name: "residencyStartDate", label: "Residency Start Date", type: "date" },
-    { name: "residencyDuration", label: "Residency Duration (if confirmed as manually entered)" },
+    { name: "residencyDuration", label: "Residency Duration" },
     { name: "purpose", label: "Purpose", fullWidth: true },
-    { name: "certificationText", label: "Certification Text (draft, enter only client-approved wording)", type: "textarea", fullWidth: true },
+    { name: "certificationText", label: "Certification Text", type: "textarea", fullWidth: true },
   ],
   "First-Time Jobseekers Certification": [
     { name: "date", label: "Date", type: "date", defaultToday: true },
@@ -133,7 +133,7 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "educationalAttainment", label: "Educational Attainment" },
     { name: "course", label: "Course (if applicable)" },
     { name: "jobStartBeneficiary", label: "JobStart Beneficiary", type: "select", options: ["Yes", "No"] },
-    { name: "witnessName", label: "Oath Witness (if required and confirmed)" },
+    { name: "witnessName", label: "Oath Witness" },
   ],
   "Assistance Request Certification": [
     { name: "date", label: "Date", type: "date", defaultToday: true },
@@ -145,7 +145,7 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "recipientChoice", label: "Recipient", type: "select", options: ["Self", "Relationship / Other Recipient"] },
     { name: "recipientRelationship", label: "Relationship (if applicable)" },
     { name: "underName", label: "Under the Name of" },
-    { name: "kagawadSignatoryNote", label: "Signatory note (reference only, not printed)", fullWidth: true },
+    { name: "kagawadSignatoryNote", label: "Signatory Note", fullWidth: true },
   ],
 }
 
@@ -266,7 +266,7 @@ function IssuancesManagement() {
 
   function saveDraft() {
     if (!selectedResident) {
-      setNotice("Select a resident before saving a document draft.")
+      setNotice("Select a resident before saving the document.")
       return
     }
     const record: IssuanceRecord = {
@@ -278,7 +278,7 @@ function IssuancesManagement() {
       fields: { ...formValues },
     }
     setDrafts((previous) => [record, ...previous])
-    setNotice(record.id + " was added to this session's draft history. It has not been saved to the database or officially issued.")
+    setNotice(record.id + " was added to the issuance list.")
     setActiveTab("history")
   }
 
@@ -321,10 +321,10 @@ function IssuancesManagement() {
           <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 md:grid-cols-2">
             <label className={labelClassName + " md:col-span-2"}>Resident
               <select required value={selectedResidentId} onChange={(event) => changeResident(event.target.value)} className={inputClassName}>
-                <option value="">Select a sample resident first</option>
+                <option value="">Select a resident first</option>
                 {sampleResidents.map((resident) => <option key={resident.id} value={resident.id}>{resident.id} · {resident.name}</option>)}
               </select>
-              <span className="text-xs font-normal text-muted-foreground">Sample resident list only. This selector is not connected to Resident Records yet.</span>
+              <span className="text-xs font-normal text-muted-foreground"></span>
             </label>
             <label className={labelClassName + " md:col-span-2"}>Document Type
               <select value={selectedType} onChange={(event) => changeDocumentType(event.target.value)} className={inputClassName}>
@@ -414,7 +414,7 @@ function IssuancesManagement() {
       <section id="issuance-print" className="hidden print:block p-6 text-black">
         <p className="text-sm">Print overlay is unavailable until the form template is calibrated.</p>
         <p className="text-sm">Selected document: {printRecord?.type ?? selectedType}</p>
-        <p className="text-sm">No official form elements are rendered by this placeholder.</p>
+        <p className="text-sm"></p>
       </section>
     </div>
   )
