@@ -36,7 +36,7 @@ function WelcomePage() {
             A staff-facing workspace for resident records, document preparation, issuance history, and Barangay ID workflows.
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
-            This system is being prepared for local use by authorized barangay office personnel. It is a design prototype and is not yet approved for handling live resident records.
+            For use by authorized barangay office personnel.
           </p>
           <RouterLink
             to="/login"
