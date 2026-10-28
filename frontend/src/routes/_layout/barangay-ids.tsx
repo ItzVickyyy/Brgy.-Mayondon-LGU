@@ -92,7 +92,7 @@ function BarangayIdManagement() {
     })
   }, [search, statusFilter])
 
-  const showPrototypeNotice = (action: string) => {
+  const showActionNotice = (action: string) => {
     setNotice(`${action} selected.`)
   }
 
