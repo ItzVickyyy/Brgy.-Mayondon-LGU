@@ -108,7 +108,7 @@ function BarangayIdManagement() {
         </div>
         <button
           type="button"
-          onClick={() => showPrototypeNotice("Create Barangay ID")}
+          onClick={() => showActionNotice("Create Barangay ID")}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           <CreditCard className="size-4" aria-hidden="true" />
@@ -209,13 +209,13 @@ function BarangayIdManagement() {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex justify-end gap-2">
-                      <button type="button" onClick={() => showPrototypeNotice("View ID details")} className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted">
+                      <button type="button" onClick={() => showActionNotice("View ID details")} className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted">
                         Details
                       </button>
-                      <button type="button" onClick={() => showPrototypeNotice("Renew ID")} className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted">
+                      <button type="button" onClick={() => showActionNotice("Renew ID")} className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted">
                         <RefreshCw className="size-3.5" aria-hidden="true" /> Renew
                       </button>
-                      <button type="button" onClick={() => showPrototypeNotice("Print ID")} className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted">
+                      <button type="button" onClick={() => showActionNotice("Print ID")} className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted">
                         <Printer className="size-3.5" aria-hidden="true" /> Print
                       </button>
                     </div>
