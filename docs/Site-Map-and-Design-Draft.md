@@ -44,9 +44,10 @@ flowchart TD
     H3 --> H4["Generate and Print ID"]
 
     E --> I["My Account"]
-    I --> I1["Account Information"]
-    I --> I2["Change Password"]
-    I --> I3["My Activity"]
+    I --> I1["Settings Modal"]
+    I1 --> I2["My Account"]
+    I1 --> I3["User Settings"]
+    I1 --> I4["System Settings (Admin)"]
 
     E --> J["Admin-only Administration"]
     J --> J1["Officials List"]
@@ -80,10 +81,9 @@ The diagram shows the proposed information architecture, not a statement that ev
 1. Officials
 2. User Accounts
 3. Pending Registrations
-4. All Users' Activity
+4. Activity Log (all users)
 5. Management Reports
 6. Backup and Restore
-7. System Settings
 
 The Staff account should not see admin-only navigation. The backend must still enforce authorization for every protected action. Hiding a menu item is not a security control.
 
@@ -132,8 +132,8 @@ The Staff account should not see admin-only navigation. The backend must still e
 - No public Admin registration. The first Admin account is provisioned through controlled initial setup.
 
 ### Activity Log
-- Staff can see only their own activity.
-- Admin can search and filter activity across users.
+- Staff can see only their own activity in the shared Activity Log page.
+- Admin can search and filter activity across users in the same page.
 - Capture actor, action, module, record reference, timestamp, outcome, and reason when required.
 - Do not log passwords, tokens, or unnecessary resident personal information.
 - Ordinary users cannot edit or delete audit history.
@@ -338,7 +338,7 @@ The following routes are now represented in `draft/admin-portal` and use clearly
 
 These are design prototypes. The added controls do not write to the database, generate reports, change real account states, or run backup/restore operations. The Backup and Restore page must be connected to the approved local scripts and tested before being treated as operational. A real restore can replace current data, so production restore must use explicit authorization, a verified archive, a clear confirmation step, and a tested recovery procedure.
 
-The sidebar now includes My Activity under common navigation and Pending Registrations, All Users' Activity, Management Reports, and Backup and Restore under Admin-only navigation. The earlier dashboard layout remains unchanged.
+The sidebar now includes one Activity Log page for both roles, plus Pending Registrations, Management Reports, and Backup and Restore for Admin. My Account, User Settings, and System Settings are accessed through the user-menu Settings modal. The earlier dashboard layout remains unchanged.
 
 
 
