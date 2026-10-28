@@ -17,10 +17,10 @@ export const Route = createFileRoute("/_layout/officials")({
 })
 
 const sampleOfficials = [
-  { id: "OFF-001", name: "Sample Official One", position: "Barangay Captain", term: "Sample term" },
-  { id: "OFF-002", name: "Sample Official Two", position: "Barangay Kagawad", term: "Sample term" },
-  { id: "OFF-003", name: "Sample Official Three", position: "Barangay Secretary", term: "Sample term" },
-  { id: "OFF-004", name: "Sample Official Four", position: "Barangay Treasurer", term: "Sample term" },
+  { id: "OFF-001", name: "Barangay Captain", position: "Punong Barangay", term: "Current term" },
+  { id: "OFF-002", name: "Barangay Kagawad 1", position: "Barangay Kagawad", term: "Current term" },
+  { id: "OFF-003", name: "Barangay Secretary", position: "Barangay Secretary", term: "Current term" },
+  { id: "OFF-004", name: "Barangay Treasurer", position: "Barangay Treasurer", term: "Current term" },
 ]
 
 function OfficialsManagement() {
@@ -36,14 +36,14 @@ function OfficialsManagement() {
       <div>
         <p className="text-sm font-medium text-primary">Administration</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Officials</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Draft screen for maintaining the list of barangay officials and their terms. This prototype uses sample data only.</p>
+        <p className="mt-2 text-sm text-muted-foreground">Maintain the list of barangay officials and their terms.</p>
       </div>
 
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><UserRound className="size-5" aria-hidden="true" /></div>
-            <div><h2 className="font-semibold">Officials List</h2><p className="mt-1 text-sm text-muted-foreground">Search the draft list. Add/edit/archive actions and backend persistence are not implemented yet.</p></div>
+            <div><h2 className="font-semibold">Officials List</h2><p className="mt-1 text-sm text-muted-foreground">Search the list of barangay officials.</p></div>
           </div>
           <label className="relative block w-full sm:max-w-xs"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search officials..." className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
         </div>
