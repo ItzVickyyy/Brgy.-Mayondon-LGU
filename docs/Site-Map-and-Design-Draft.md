@@ -340,3 +340,15 @@ These are design prototypes. The added controls do not write to the database, ge
 
 The sidebar now includes My Activity under common navigation and Pending Registrations, All Users' Activity, Management Reports, and Backup and Restore under Admin-only navigation. The earlier dashboard layout remains unchanged.
 
+
+
+## 14. Settings menu and consolidated Activity Log — October 28, 2026
+
+The sidebar no longer lists My Account, User Settings, or System Settings as main navigation pages. These options are grouped in a Settings modal opened from the user menu. The user menu contains Settings and Logout.
+
+The Settings modal has three sections:
+- My Account: account information and change password.
+- User Settings: appearance preference with Light, Dark, and System options.
+- System Settings: proposed barangay information and document-template configuration, visible to Admin accounts.
+
+The Activity Log is a single navigation page. Staff see sample entries for their own activity, while Admin sees the sample entries across accounts. Both views remain prototype-only until an actual audit log is implemented. The former separate My Activity route is removed from the navigation and route files.
