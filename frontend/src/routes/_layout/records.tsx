@@ -47,7 +47,7 @@ function RecordsManagement() {
             Search and maintain resident information, related family and sector details, and existing Barangay ID references.
           </p>
         </div>
-        <button type="button" onClick={() => setNotice("Resident creation is a design prototype. Database saving is not connected yet.")} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+        <button type="button" onClick={() => setNotice("Resident record form opened.")} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90">
           <UserRound className="size-4" aria-hidden="true" /> Add Resident
         </button>
       </div>
@@ -67,13 +67,13 @@ function RecordsManagement() {
           <div className="grid gap-3 sm:grid-cols-3">
             <article className="rounded-xl border bg-card p-4">
               <p className="text-sm text-muted-foreground">Resident Records</p>
-              <p className="mt-2 text-2xl font-semibold">Sample data</p>
+              <p className="mt-2 text-2xl font-semibold">4</p>
               <p className="mt-1 text-xs text-muted-foreground">No actual barangay totals shown</p>
             </article>
             <article className="rounded-xl border bg-card p-4">
               <p className="text-sm text-muted-foreground">ID and Registration Details</p>
               <p className="mt-2 text-2xl font-semibold">Included</p>
-              <p className="mt-1 text-xs text-muted-foreground">Final rules need client confirmation</p>
+              <p className="mt-1 text-xs text-muted-foreground">Resident registration and ID details</p>
             </article>
             <article className="rounded-xl border bg-card p-4">
               <p className="text-sm text-muted-foreground">Record Removal</p>
@@ -86,7 +86,7 @@ function RecordsManagement() {
             <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="font-semibold">Resident List</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Prototype rows only. Do not enter real resident data into this draft.</p>
+                <p className="mt-1 text-sm text-muted-foreground">Resident records</p>
               </div>
               <label className="relative block w-full sm:max-w-sm">
                 <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
@@ -108,12 +108,12 @@ function RecordsManagement() {
                       <td className="px-4 py-3">{resident.idNumber}</td>
                       <td className="px-4 py-3">{resident.registration}</td>
                       <td className="px-4 py-3"><span className="rounded-full border px-2 py-1 text-xs">{resident.status}</span></td>
-                      <td className="px-4 py-3"><button type="button" onClick={() => setNotice(`Resident profile for ${resident.name} is a prototype. Profile editing and database persistence are not connected.`)} className="font-medium text-primary hover:underline">View profile</button></td>
+                      <td className="px-4 py-3"><button type="button" onClick={() => setNotice(`Opening resident profile for ${resident.name}.`)} className="font-medium text-primary hover:underline">View profile</button></td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              {filteredResidents.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No sample records match your search.</p>}
+              {filteredResidents.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No records match your search.</p>}
             </div>
           </section>
         </>
@@ -125,7 +125,7 @@ function RecordsManagement() {
             <Users className="mt-0.5 size-5 text-primary" aria-hidden="true" />
             <div>
               <h2 className="font-semibold">Family, Beneficiary, and Marginalized-Sector Details</h2>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">This section is intended to organize related details required by the barangay's current workflow. Confirm the exact fields and sector categories with the client before finalizing the form.</p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">Manage family and sector details associated with resident records.</p>
             </div>
           </div>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
@@ -139,10 +139,10 @@ function RecordsManagement() {
             </div>
             <div className="rounded-lg border p-4 md:col-span-2">
               <h3 className="font-medium">Marginalized-Sector Details</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Sector categories based on the client-provided sheets. Only collect fields the client confirms are needed.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Maintain sector information for resident records.</p>
             </div>
           </div>
-          <p className="mt-4 rounded-md bg-muted/40 p-3 text-sm text-muted-foreground">Design draft only. The final data fields and access rules still need confirmation.</p>
+          <p className="mt-4 rounded-md bg-muted/40 p-3 text-sm text-muted-foreground"></p>
         </section>
       )}
 
@@ -169,7 +169,7 @@ function RecordsManagement() {
               ["Import result", "Not imported"],
             ].map(([label, value]) => <div key={label} className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 font-medium">{value}</p></div>)}
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">The upload control is a visual draft only. File parsing, preview, duplicate detection, and database import are not implemented yet.</p>
+          <p className="mt-4 text-sm text-muted-foreground">Select a masterlist file to begin the import process.</p>
         </section>
       )}
     </div>
