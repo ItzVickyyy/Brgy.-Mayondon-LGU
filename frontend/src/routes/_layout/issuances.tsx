@@ -150,17 +150,17 @@ const documentFields: Record<string, DocumentField[]> = {
 }
 
 const sampleResidents = [
-  { id: "SAMPLE-0001", name: "Sample Resident One", address: "Sample Address One" },
-  { id: "SAMPLE-0002", name: "Sample Resident Two", address: "Sample Address Two" },
-  { id: "SAMPLE-0003", name: "Sample Resident Three", address: "Sample Address Three" },
-  { id: "SAMPLE-0004", name: "Sample Resident Four", address: "Sample Address Four" },
+  { id: "RES-0001", name: "Resident One", address: "Mayondon, Los Baños" },
+  { id: "RES-0002", name: "Resident Two", address: "Mayondon, Los Baños" },
+  { id: "RES-0003", name: "Resident Three", address: "Mayondon, Los Baños" },
+  { id: "RES-0004", name: "Resident Four", address: "Mayondon, Los Baños" },
 ]
 
 const sampleIssuances: IssuanceRecord[] = [
-  { id: "SAMPLE-001", resident: "Sample Resident One", type: "Barangay Clearance", date: "2026-10-23", status: "Sample", fields: {} },
-  { id: "SAMPLE-002", resident: "Sample Resident Two", type: "Barangay Franchise Clearance", date: "2026-10-22", status: "Sample", fields: {} },
-  { id: "SAMPLE-003", resident: "Sample Resident Three", type: "Barangay Clearance (Electrical and Water Connection)", date: "2026-10-22", status: "Sample", fields: {} },
-  { id: "SAMPLE-004", resident: "Sample Resident Four", type: "Certificate of Indigency", date: "2026-10-21", status: "Sample", fields: {} },
+  { id: "ISS-001", resident: "Resident One", type: "Barangay Clearance", date: "2026-10-23", status: "Issued", fields: {} },
+  { id: "ISS-002", resident: "Resident Two", type: "Barangay Franchise Clearance", date: "2026-10-22", status: "Issued", fields: {} },
+  { id: "ISS-003", resident: "Resident Three", type: "Barangay Clearance (Electrical and Water Connection)", date: "2026-10-22", status: "Issued", fields: {} },
+  { id: "ISS-004", resident: "Resident Four", type: "Certificate of Indigency", date: "2026-10-21", status: "Issued", fields: {} },
 ]
 
 const inputClassName = "h-10 w-full rounded-md border bg-background px-3 text-sm font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring"
