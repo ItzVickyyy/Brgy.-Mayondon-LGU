@@ -6,7 +6,7 @@ import { pageTitle } from "@/config/site"
 
 export const Route = createFileRoute("/_layout/reports")({ component: Reports, beforeLoad: async () => { const { data: user } = await UsersService.readUserMe(); if (!user.is_superuser) throw redirect({ to: "/" }) }, head: () => ({ meta: [{ title: pageTitle("Management Reports") }] }) })
 
-const summary = [{ label: "Documents issued", value: "128", note: "Total records", icon: FileText }, { label: "Resident records", value: "1,284", note: "Sample total", icon: UsersRound }, { label: "Monthly change", value: "+12%", note: "Compared with previous period", icon: TrendingUp }]
+const summary = [{ label: "Documents issued", value: "128", note: "Total records", icon: FileText }, { label: "Resident records", value: "1,284", note: "Total records", icon: UsersRound }, { label: "Monthly change", value: "+12%", note: "Compared with previous period", icon: TrendingUp }]
 
 function Reports() {
   const [period, setPeriod] = useState("month")
