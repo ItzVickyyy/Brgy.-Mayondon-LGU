@@ -318,3 +318,25 @@ Paper size, printer, orientation, margins, scaling, exact field coordinates, and
 ### Prototype safety update — October 27, 2026
 
 The generic document print action has been paused. It no longer opens the browser print dialog for the current generic layout, because printing labels, logos, or other recreated elements would conflict with the client's pre-printed form workflow. The UI now explains that printing is unavailable until form-specific overlay positions are calibrated. This is an intentional safeguard, not completed printing functionality.
+
+
+## 13. Scope and design clarification — October 28, 2026
+
+The project team confirmed that the Admin/Staff role distinction and Staff self-registration with Admin approval are intentional proposed designs. They are not accidental conflicts with the Creative Brief. Keep these designs in the prototype for the team's client proposal and validation. The current permission rules are still a proposed design and must be explained to the client before final implementation.
+
+Damayan and other document types discussed in the interviews or represented by client-provided forms are also part of the design scope. The Creative Brief is not the only source for identifying possible document templates. Keep additional document forms as sample/provisional designs when exact requirements still need confirmation.
+
+### Newly added draft pages
+
+The following routes are now represented in `draft/admin-portal` and use clearly identified sample data or sample-only actions:
+
+- `/my-activity` — staff member's own activity history.
+- `/pending-registrations` — admin review of sample staff registration requests, with sample approve/reject states.
+- `/activity-log` — admin view of sample activity across users.
+- `/reports` — sample report selection and report preview area.
+- `/backup-restore` — manual backup concept, proposed schedule controls, sample backup history, and restore preparation/confirmation layout.
+
+These are design prototypes. The added controls do not write to the database, generate reports, change real account states, or run backup/restore operations. The Backup and Restore page must be connected to the approved local scripts and tested before being treated as operational. A real restore can replace current data, so production restore must use explicit authorization, a verified archive, a clear confirmation step, and a tested recovery procedure.
+
+The sidebar now includes My Activity under common navigation and Pending Registrations, All Users' Activity, Management Reports, and Backup and Restore under Admin-only navigation. The earlier dashboard layout remains unchanged.
+
