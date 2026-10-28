@@ -12,10 +12,10 @@ export const Route = createFileRoute("/_layout/records")({
 type View = "residents" | "family-sector" | "import"
 
 const sampleResidents = [
-  { id: "SAMPLE-0001", name: "Sample Resident One", address: "Sample Address One", residentType: "Existing resident", idNumber: "Sample ID series", registration: "Registered", status: "Active" },
-  { id: "SAMPLE-0002", name: "Sample Resident Two", address: "Sample Address Two", residentType: "New / renting resident", idNumber: "Sample ID series", registration: "Unregistered", status: "Active" },
-  { id: "SAMPLE-0003", name: "Sample Resident Three", address: "Sample Address Three", residentType: "Existing resident", idNumber: "Sample ID series", registration: "Registered", status: "Active" },
-  { id: "SAMPLE-0004", name: "Sample Resident Four", address: "Sample Address Four", residentType: "Existing resident", idNumber: "Sample ID series", registration: "Unregistered", status: "Archived" },
+  { id: "RES-0001", name: "Resident One", address: "Mayondon, Los Baños", residentType: "Existing resident", idNumber: "18-128-3597-0001", registration: "Registered", status: "Active" },
+  { id: "RES-0002", name: "Resident Two", address: "Mayondon, Los Baños", residentType: "New / renting resident", idNumber: "18-128-3597-0002", registration: "Unregistered", status: "Active" },
+  { id: "RES-0003", name: "Resident Three", address: "Mayondon, Los Baños", residentType: "Existing resident", idNumber: "18-128-3597-0003", registration: "Registered", status: "Active" },
+  { id: "RES-0004", name: "Resident Four", address: "Mayondon, Los Baños", residentType: "Existing resident", idNumber: "18-128-3597-0004", registration: "Unregistered", status: "Archived" },
 ]
 
 const inputClass = "h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
