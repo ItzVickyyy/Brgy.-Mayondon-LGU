@@ -55,6 +55,7 @@ function Layout() {
   const timeText = new Intl.DateTimeFormat("en-PH", {
     hour: "2-digit",
     minute: "2-digit",
+    second: "2-digit",
   }).format(now)
 
   return (
@@ -79,12 +80,12 @@ function Layout() {
             <Button
               type="button"
               variant="outline"
-              className="h-9 gap-2 border-border bg-muted/40 px-3 text-foreground hover:bg-muted"
+              className="h-9 w-[124px] shrink-0 justify-start gap-2 border-border bg-muted/40 px-3 text-foreground hover:bg-muted"
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               title={isDark ? "Switch to light mode" : "Switch to dark mode"}
               onClick={() => setTheme(isDark ? "light" : "dark")}
             >
-              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              {isDark ? <Sun className="size-4 shrink-0" /> : <Moon className="size-4 shrink-0" />}
               <span className="hidden sm:inline">{isDark ? "Light mode" : "Dark mode"}</span>
             </Button>
             <Button
