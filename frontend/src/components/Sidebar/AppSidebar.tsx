@@ -37,7 +37,7 @@ export function AppSidebar() {
       <SidebarContent className="pt-3">
         <Main items={visibleItems} />
       </SidebarContent>
-      <SidebarFooter className="border-t px-2 pt-3">
+      <SidebarFooter className="h-[53px] min-h-[53px] justify-center border-t px-2 py-0">
         <User user={currentUser} />
       </SidebarFooter>
     </Sidebar>
