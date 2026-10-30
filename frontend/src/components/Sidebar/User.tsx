@@ -121,11 +121,14 @@ function MyAccountModal({
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [form, setForm] = useState<ProfileForm>(() => getProfileForm(user))
   const [previewPhoto, setPreviewPhoto] = useState(user?.profile_photo_url ?? "")
+  const [selectedPhotoName, setSelectedPhotoName] = useState("")
+  const [isPhotoDragging, setIsPhotoDragging] = useState(false)
 
   useEffect(() => {
     const next = getProfileForm(user)
     setForm(next)
     setPreviewPhoto(next.profile_photo_url)
+    setSelectedPhotoName("")
   }, [user, open])
 
   const updateField = (key: keyof ProfileForm, value: string) => {
@@ -198,7 +201,7 @@ function MyAccountModal({
           <div className="min-h-0 flex-1 space-y-7 overflow-y-auto p-5 sm:p-7">
             <section>
               <SectionHeading title="Account Information" description="Your account status and assigned access level." />
-              <div className="grid gap-4 rounded-xl border bg-muted/20 p-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-4 rounded-xl border bg-muted/20 p-4 sm:grid-cols-2 xl:grid-cols-4">
                 <AccountField label="Status" value={status} />
                 <AccountField label="Username" value={username} />
                 <AccountField label="Role" value={role} />
@@ -211,21 +214,68 @@ function MyAccountModal({
 
             <section>
               <SectionHeading title="Personal Information" description="Keep your personal details accurate and up to date." />
-              <div className="mb-4 rounded-xl border p-4">
-                <Label htmlFor="profile_photo_url" className="mb-1.5 block text-xs font-medium">Profile Photo URL</Label>
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-                  <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted text-muted-foreground">
-                    {previewPhoto ? <img src={previewPhoto} alt="Profile preview" className="size-full object-cover" onError={() => setPreviewPhoto("")} /> : <UserRound className="size-7" />}
+              <div className="mb-4 rounded-xl border bg-muted/10 p-4 sm:p-5">
+                <Label htmlFor="profile_photo_file" className="mb-2 block text-xs font-medium">Profile Photo</Label>
+                <label
+                  htmlFor="profile_photo_file"
+                  onDragOver={(event) => { event.preventDefault(); setIsPhotoDragging(true) }}
+                  onDragLeave={() => setIsPhotoDragging(false)}
+                  onDrop={(event) => {
+                    event.preventDefault()
+                    setIsPhotoDragging(false)
+                    const file = event.dataTransfer.files?.[0]
+                    if (file && file.type.startsWith("image/")) {
+                      setPreviewPhoto(URL.createObjectURL(file))
+                      setSelectedPhotoName(file.name)
+                    }
+                  }}
+                  className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors sm:flex-row sm:text-left ${isPhotoDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30"}`}
+                >
+                  <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-background text-muted-foreground shadow-sm">
+                    {previewPhoto ? <img src={previewPhoto} alt="Profile preview" className="size-full object-cover" onError={() => setPreviewPhoto("")} /> : <UserRound className="size-8" />}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <Input id="profile_photo_url" value={form.profile_photo_url} onChange={(event) => updateField("profile_photo_url", event.target.value)} placeholder="Paste an image URL" className="h-10" />
-                    <p className="mt-1.5 text-xs text-muted-foreground">Use a direct image URL. Photo file uploads are not currently supported.</p>
+                    <p className="text-sm font-medium">{selectedPhotoName || "Choose a photo or drag it here"}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Click to browse files. JPG, PNG, or WEBP images recommended.</p>
                   </div>
-                  <Upload className="hidden size-4 text-muted-foreground sm:block" aria-hidden="true" />
-                </div>
+                  <span className="inline-flex shrink-0 items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm font-medium">
+                    <Upload className="size-4" /> Browse files
+                  </span>
+                  <input
+                    id="profile_photo_file"
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0]
+                      if (file && file.type.startsWith("image/")) {
+                        setPreviewPhoto(URL.createObjectURL(file))
+                        setSelectedPhotoName(file.name)
+                      }
+                    }}
+                  />
+                </label>
+                <p className="mt-2 text-xs text-muted-foreground">Photo selection and preview are available in this form. Uploading and saving the image to your account will be connected later.</p>
               </div>
-              <div className="rounded-xl border p-4">
-                {renderFields(profileFields)}
+              <div className="rounded-xl border p-4 sm:p-5">
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                  {profileFields.slice(0, 4).map((field) => (
+                    <div key={field.key}>
+                      <Label htmlFor={field.key} className="mb-1.5 block text-xs font-medium">{field.label}</Label>
+                      <Input id={field.key} type={field.type || "text"} value={form[field.key]} onChange={(event) => updateField(field.key, event.target.value)} placeholder={field.placeholder} maxLength={255} className="h-10 bg-background" />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 border-t pt-5">
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    {profileFields.slice(4).map((field) => (
+                      <div key={field.key}>
+                        <Label htmlFor={field.key} className="mb-1.5 block text-xs font-medium">{field.label}</Label>
+                        <Input id={field.key} type={field.type || "text"} value={form[field.key]} onChange={(event) => updateField(field.key, event.target.value)} placeholder={field.placeholder} maxLength={255} className="h-10 bg-background" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -238,19 +288,31 @@ function MyAccountModal({
 
             <section>
               <SectionHeading title="Security" description="Protect your account and sign-in credentials." />
-              <div className="space-y-5 rounded-xl border p-4 sm:p-5">
-                <div>
-                  <h4 className="text-sm font-medium">Change Password</h4>
-                  <p className="mb-3 mt-1 text-xs text-muted-foreground">Choose a strong password you do not use elsewhere.</p>
-                  <ChangePassword />
-                </div>
-                <div className="flex items-start gap-3 border-t pt-4">
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground"><ShieldCheck className="size-4" /></span>
-                  <div>
-                    <h4 className="text-sm font-medium">Two-Factor Authentication (2FA)</h4>
-                    <p className="mt-1 text-sm text-muted-foreground">2FA setup is not available yet. This account currently uses password-based sign-in.</p>
+              <div className="grid gap-4 lg:grid-cols-2">
+                <div className="rounded-xl border p-4 sm:p-5">
+                  <div className="mb-4 flex items-start gap-3">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><ShieldCheck className="size-5" /></span>
+                    <div>
+                      <h4 className="text-sm font-semibold">Password & Sign-in</h4>
+                      <p className="mt-1 text-xs text-muted-foreground">Update your password to help keep your account secure.</p>
+                    </div>
                   </div>
-                  <span className="ml-auto rounded-full border px-2.5 py-1 text-xs text-muted-foreground">Unavailable</span>
+                  <div className="rounded-lg bg-muted/20 p-3">
+                    <ChangePassword />
+                  </div>
+                </div>
+                <div className="flex flex-col rounded-xl border p-4 sm:p-5">
+                  <div className="flex items-start gap-3">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground"><ShieldCheck className="size-5" /></span>
+                    <div className="min-w-0 flex-1">
+                      <h4 className="text-sm font-semibold">Two-Factor Authentication</h4>
+                      <p className="mt-1 text-xs text-muted-foreground">Add another verification step when signing in.</p>
+                    </div>
+                    <span className="shrink-0 rounded-full border bg-muted/30 px-2.5 py-1 text-xs font-medium text-muted-foreground">Coming later</span>
+                  </div>
+                  <div className="mt-5 flex flex-1 items-center rounded-lg border border-dashed bg-muted/10 p-4">
+                    <p className="text-sm leading-6 text-muted-foreground">Two-factor authentication is not available yet. Your account currently uses password-based sign-in.</p>
+                  </div>
                 </div>
               </div>
             </section>
