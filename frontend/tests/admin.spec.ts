@@ -8,7 +8,7 @@ test("Admin page is accessible and shows correct title", async ({ page }) => {
   await page.goto("/admin")
   await expect(page.getByRole("heading", { name: "User Accounts" })).toBeVisible()
   await expect(
-    page.getByText("Manage staff access and registration requests."),
+    page.getByText("Manage staff access and registration requests"),
   ).toBeVisible()
 })
 
