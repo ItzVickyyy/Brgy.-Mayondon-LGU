@@ -6,9 +6,9 @@ import { logInUser } from "./utils/user"
 
 test("Admin page is accessible and shows correct title", async ({ page }) => {
   await page.goto("/admin")
-  await expect(page.getByRole("heading", { name: "User Management" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "User Accounts" })).toBeVisible()
   await expect(
-    page.getByText("Manage administrator accounts and account status"),
+    page.getByText("Manage staff access and registration requests."),
   ).toBeVisible()
 })
 
@@ -190,7 +190,7 @@ test.describe("Admin page access control", () => {
 
     await page.goto("/admin")
 
-    await expect(page.getByRole("heading", { name: "User Management" })).not.toBeVisible()
+    await expect(page.getByRole("heading", { name: "User Accounts" })).not.toBeVisible()
     await expect(page).not.toHaveURL(/\/admin/)
   })
 
@@ -199,6 +199,6 @@ test.describe("Admin page access control", () => {
 
     await page.goto("/admin")
 
-    await expect(page.getByRole("heading", { name: "User Management" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "User Accounts" })).toBeVisible()
   })
 })
