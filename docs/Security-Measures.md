@@ -145,7 +145,7 @@ Complete this record for a release or a scheduled security review.
 
 ## 7. Project-specific notes
 
-- The client interview and signed Creative Brief must define the actual modules, user roles, personal data, and operational needs before feature-specific controls can be finalized.
+- The professor-reviewed Creative Brief is the planning baseline. Confirm unresolved account permissions, actual modules, personal data, and operational needs with the client before feature-specific controls are finalized.
 - The final hosting choice matters. HTTPS, network exposure, rate limiting, backups, monitoring, and database connectivity must be verified against the actual hosting and Networking 2 setup.
 - Keep uncertain starter-template modules until the client requirements confirm whether they are needed. Removing a module is not itself a security measure.
 - **Implemented onboarding control:** When email is configured, admin-created account emails use a time-limited setup link and do not include the supplied password. The setup link is based on a password-hash-bound token and is invalidated after a password change. Confirm email delivery and the setup flow in the deployed environment before creating real accounts.
@@ -153,6 +153,26 @@ Complete this record for a release or a scheduled security review.
 - **Implemented recovery URL privacy control:** The recovery email is accepted in a POST JSON body instead of a URL path. Verify the deployed frontend and backend use the same API version after deployment.
 - Passing automated tests means the tested checks passed. It does not guarantee the application is secure or ready for production.
 
+
+## Project-specific barangay safeguards and LGUSS-BIMS context
+
+On October 27, 2026, the barangay contact told the team that LGUSS-BIMS was old and was no longer being used by the barangay. This is a record of the contact's statement, not confirmation that DILG has discontinued LGUSS-BIMS.
+
+The 2025 DILG memorandum circular on LGUSS-BIMS should inform our thinking about data protection and barangay information management, but this student project is a separate local system. Do not claim that it replaces or integrates with LGUSS-BIMS. No integration or synchronization is in scope unless the client and the appropriate system owner explicitly confirm it and the team documents an approved technical approach.
+
+For the Records and Document Issuance System, include the following in project planning and deployment review:
+- [ ] Confirm the client-approved resident data fields and avoid collecting information that is not needed for the agreed workflows.
+- [ ] Confirm the six staff accounts' actual permissions with the client, including deletion, export, account administration, and access to sensitive data.
+- [ ] Test backend authorization for every protected operation, including direct API requests. Frontend button visibility is not authorization.
+- [ ] Identify which record changes and document-issuance actions need an audit trail, and avoid logging unnecessary personal information.
+- [ ] Confirm the host computer, LAN/firewall rules, database access, physical access, backup drive custody, and backup schedule.
+- [ ] Perform and record a backup restoration test before client turnover.
+- [ ] Confirm the process for disabling staff accounts after reassignment, resignation, or loss of need for access.
+- [ ] Confirm data purpose, permitted access, retention, correction, disclosure, and incident-reporting procedures with the client, consistent with the Data Privacy Act of 2012 and applicable procedures.
+- [ ] Use synthetic or masked resident records for development, testing, screenshots, and class demonstrations unless real-data use is explicitly authorized and appropriately protected.
+- [ ] Add authentication, authorization, input-validation, document issuance, export, backup, and restore checks to functional/security testing. Fix failed checks and retest before turnover.
+
+These items are safeguards to implement and verify, not evidence that they are already implemented. Do not claim a formal Privacy Impact Assessment, penetration test, encryption at rest, or compliance certification unless the work was completed and evidence is recorded. See the System Specification and Architecture document for the current client scope and [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md) for deployment-specific checks.
 
 ## 8. Final Foundation security review (October 18, 2026)
 
