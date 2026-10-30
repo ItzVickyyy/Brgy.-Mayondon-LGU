@@ -198,12 +198,12 @@ export function User({ user }: { user: any }) {
   return (
     <>
       <div className="px-2 pb-1 group-data-[collapsible=icon]:px-1">
-        <div className="flex items-center gap-1 rounded-lg border bg-muted/50 p-1">
+        <div className="flex items-center gap-1 rounded-lg border bg-muted/50 p-1 group-data-[collapsible=icon]:flex-col-reverse">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="h-auto min-w-0 flex-1 justify-start gap-2 px-2 py-2 text-left"
+                className="h-auto min-w-0 flex-1 justify-start gap-2 px-2 py-2 text-left group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-1"
                 aria-label="User menu"
               >
                 <UserRound className="size-5 shrink-0" />
@@ -238,7 +238,7 @@ export function User({ user }: { user: any }) {
             type="button"
             variant="ghost"
             size="icon"
-            className="shrink-0"
+            className="shrink-0 group-data-[collapsible=icon]:size-8"
             aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
             title={isDark ? "Switch to light mode" : "Switch to dark mode"}
             onClick={() => setTheme(isDark ? "light" : "dark")}
