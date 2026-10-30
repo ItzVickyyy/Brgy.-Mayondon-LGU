@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { FileCheck2, Printer, Search, Plus, Eye, IdCard, UserRound, RotateCcw } from "lucide-react"
+import { FileCheck2, Printer, Search, Plus, Eye } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
@@ -47,13 +47,14 @@ const indigencySectorOptions = [
   "Government Employee", "STUDENT", "other marginalized sector",
 ]
 const documentTypes = [
+  "Barangay ID",
   "Barangay Clearance",
-  "Barangay Franchise Clearance",
+  "Franchise Clearance",
   "Barangay Clearance (Electrical and Water Connection)",
   "Certificate of Indigency",
-  "Residency Certification",
   "First-Time Jobseekers Certification",
   "Assistance Request Certification",
+  "Damayan",
 ]
 
 const documentFields: Record<string, DocumentField[]> = {
@@ -73,7 +74,7 @@ const documentFields: Record<string, DocumentField[]> = {
     { name: "idDateOfIssue", label: "Date of Issue", type: "date", defaultToday: true },
     { name: "officialReceiptNumber", label: "Paid under Official Receipt Number" },
   ],
-  "Barangay Franchise Clearance": [
+  "Franchise Clearance": [
     { name: "date", label: "Date", type: "date", defaultToday: true },
     { name: "name", label: "Name" },
     { name: "address", label: "Address", fullWidth: true },
@@ -274,11 +275,11 @@ function IssuancesManagement() {
       resident: currentName,
       type: selectedType,
       date: currentDate,
-      status: "Draft",
+      status: "Issued",
       fields: { ...formValues },
     }
     setDrafts((previous) => [record, ...previous])
-    setNotice(record.id + " was added to the issuance list.")
+    setNotice(record.id + " was recorded as issued. You can now print the record.")
     setActiveTab("history")
   }
 
