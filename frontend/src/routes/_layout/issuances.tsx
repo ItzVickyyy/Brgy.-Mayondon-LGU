@@ -291,7 +291,7 @@ function IssuancesManagement() {
       status: "Draft",
       fields: { ...formValues },
     })
-    setNotice("Print is paused until the selected form has a client-approved paper size and calibrated field positions. The current generic preview must not be printed on official pre-printed stock.")
+    setNotice("")
   }
 
   return (
@@ -315,10 +315,7 @@ function IssuancesManagement() {
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><FileCheck2 className="size-5" aria-hidden="true" /></div>
             <div><h2 className="font-semibold">Document Details</h2><p className="mt-1 text-sm text-muted-foreground">Choose a document to show its corresponding hardcopy fields.</p></div>
           </div>
-          <div role="note" className="mb-5 rounded-lg border border-amber-300/70 bg-amber-50/60 p-3 text-sm leading-6 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
-            Official-form printing is intentionally paused. The client requires typed values only on pre-printed paper. Paper size, orientation, printer settings, and field coordinates must be calibrated before printing is enabled.
-          </div>
-          <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 md:grid-cols-2">
+              <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 md:grid-cols-2">
             <label className={labelClassName + " md:col-span-2"}>Resident
               <select required value={selectedResidentId} onChange={(event) => changeResident(event.target.value)} className={inputClassName}>
                 <option value="">Select a resident first</option>
@@ -412,7 +409,6 @@ function IssuancesManagement() {
       )}
 
       <section id="issuance-print" className="hidden print:block p-6 text-black">
-        <p className="text-sm">Print overlay is unavailable until the form template is calibrated.</p>
         <p className="text-sm">Selected document: {printRecord?.type ?? selectedType}</p>
         <p className="text-sm"></p>
       </section>
