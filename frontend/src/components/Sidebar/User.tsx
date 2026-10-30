@@ -192,13 +192,12 @@ export function User({ user }: { user: any }) {
 
   return (
     <>
-      <div className="px-2 pb-1 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:pb-0">
-        <div className="rounded-lg border bg-muted/50 p-1 group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:border-transparent group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0">
+      <div className="px-2 group-data-[collapsible=icon]:px-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="h-auto w-full min-w-0 justify-start gap-2 px-2 py-2 text-left group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
+                className="h-auto w-full min-w-0 justify-start gap-2 rounded-lg px-2 py-2 text-left group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
                 aria-label="User menu"
                 title={user?.full_name || user?.email || "User menu"}
               >
@@ -232,7 +231,6 @@ export function User({ user }: { user: any }) {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-        </div>
       </div>
       <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
