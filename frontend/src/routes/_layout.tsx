@@ -62,10 +62,10 @@ function Layout() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex h-[53px] min-h-[53px] shrink-0 flex-nowrap items-center gap-3 border-b bg-background/95 px-3 py-0 backdrop-blur sm:px-4">
+        <header className="sticky top-0 z-10 flex min-h-16 shrink-0 flex-wrap items-center gap-3 border-b bg-background/95 px-3 py-2 backdrop-blur sm:px-4">
           <SidebarTrigger className="-ml-1 shrink-0 text-muted-foreground" />
 
-          <div className="flex min-w-0 items-center gap-x-3 text-xs text-muted-foreground sm:text-sm">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
             <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
               <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
               <span>{formattedDate}</span>
@@ -76,7 +76,7 @@ function Layout() {
             </span>
           </div>
 
-          <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
+          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
             <Button
               type="button"
               variant="outline"
