@@ -10,7 +10,7 @@ const rows = [
   { time: "Oct 28, 2026 · 9:55 AM", user: "staff", owner: "staff", action: "Prepared document request", module: "Document Management", outcome: "In progress" },
   { time: "Oct 28, 2026 · 8:04 AM", user: "staff", owner: "staff", action: "Signed in to the system", module: "Authentication", outcome: "Success" },
   { time: "Oct 27, 2026 · 4:10 PM", user: "admin", owner: "admin", action: "Changed user account status", module: "User Accounts", outcome: "Success" },
-  { time: "Oct 27, 2026 · 3:32 PM", user: "staff.sample", owner: "staff", action: "Imported masterlist", module: "Resident Records", outcome: "Completed" },
+  { time: "Oct 27, 2026 · 3:32 PM", user: "staff", owner: "staff", action: "Imported masterlist", module: "Resident Records", outcome: "Completed" },
 ]
 function ActivityLog() {
   const { user } = useAuth()
