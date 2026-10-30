@@ -12,7 +12,6 @@ import {
   UserRound,
 } from "lucide-react"
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Dialog,
   DialogContent,
@@ -33,25 +32,8 @@ import { type Theme, useTheme } from "@/components/theme-provider"
 import UserInformation from "@/components/UserSettings/UserInformation"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import useAuth from "@/hooks/useAuth"
-import { getInitials } from "@/utils"
 
 type SettingsSection = "account" | "preferences"
-
-function UserInfo({ fullName, email }: { fullName?: string; email?: string }) {
-  return (
-    <div className="flex w-full min-w-0 items-center gap-2.5">
-      <Avatar className="size-8">
-        <AvatarFallback className="bg-zinc-600 text-white">
-          {getInitials(fullName || "User")}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex min-w-0 flex-col items-start">
-        <p className="w-full truncate text-sm font-medium">{fullName}</p>
-        <p className="w-full truncate text-xs text-muted-foreground">{email}</p>
-      </div>
-    </div>
-  )
-}
 
 function SettingsModal({
   open,
