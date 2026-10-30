@@ -15,9 +15,9 @@ type NavigationItem = Item & { adminOnly?: boolean }
 
 const items: NavigationItem[] = [
   { icon: LayoutDashboard, title: "Dashboard", path: "/" },
-  { icon: Users, title: "Resident Records", path: "/records" },
   { icon: FileCheck2, title: "Document Management", path: "/issuances" },
   { icon: CreditCard, title: "Barangay ID Management", path: "/barangay-ids" },
+  { icon: Users, title: "Resident Records", path: "/records" },
   { icon: BookUser, title: "Officials", path: "/officials", adminOnly: true },
   { icon: ShieldCheck, title: "User Accounts", path: "/admin", adminOnly: true },
   { icon: Activity, title: "Activity Log", path: "/activity-log" },
