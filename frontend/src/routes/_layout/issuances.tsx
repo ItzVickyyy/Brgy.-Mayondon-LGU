@@ -58,6 +58,15 @@ const documentTypes = [
 ]
 
 const documentFields: Record<string, DocumentField[]> = {
+  "Barangay ID": [
+    { name: "idAction", label: "ID Transaction", type: "select", options: ["New ID", "Renewal", "Replacement"] },
+    { name: "date", label: "Date Issued", type: "date", defaultToday: true },
+    { name: "idNumber", label: "Barangay ID Number" },
+    { name: "validUntil", label: "Valid Until", type: "date" },
+    { name: "residentType", label: "Resident Type", type: "select", options: ["Existing resident", "New / renting resident"] },
+    { name: "remarks", label: "Remarks", type: "textarea", fullWidth: true },
+  ],
+
   "Barangay Clearance": [
     { name: "date", label: "Date", type: "date", defaultToday: true },
     { name: "name", label: "Name" },
