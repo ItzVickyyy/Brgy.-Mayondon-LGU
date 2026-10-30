@@ -198,53 +198,57 @@ export function User({ user }: { user: any }) {
   return (
     <>
       <div className="px-2 pb-1 group-data-[collapsible=icon]:px-1">
-        <div className="flex items-center gap-1 rounded-lg border bg-muted/50 p-1 group-data-[collapsible=icon]:flex-col-reverse">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className="h-auto min-w-0 flex-1 justify-start gap-2 px-2 py-2 text-left group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:flex-none group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-1"
-                aria-label="User menu"
-              >
-                <UserRound className="size-5 shrink-0" />
-                <span className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                  <span className="block truncate text-sm font-medium">{user?.full_name || user?.email || "User"}</span>
-                  <span className="block truncate text-xs font-normal text-muted-foreground">{user?.email || ""}</span>
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" side="top" align="start" sideOffset={8}>
-              <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
-                <Settings className="size-4" />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
-                <CircleHelp className="size-4" />
-                Get help
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
-                <Info className="size-4" />
-                Learn more
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={async () => { handleMenuClick(); await logout() }}>
-                <LogOut className="size-4" />
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            className="shrink-0 group-data-[collapsible=icon]:size-8"
-            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            onClick={() => setTheme(isDark ? "light" : "dark")}
-          >
-            {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-          </Button>
+        <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col-reverse">
+          <div className="min-w-0 flex-1 rounded-lg border bg-muted/50 p-1 group-data-[collapsible=icon]:flex-none">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="h-auto w-full min-w-0 justify-start gap-2 px-2 py-2 text-left group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-1"
+                  aria-label="User menu"
+                >
+                  <UserRound className="size-5 shrink-0" />
+                  <span className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+                    <span className="block truncate text-sm font-medium">{user?.full_name || user?.email || "User"}</span>
+                    <span className="block truncate text-xs font-normal text-muted-foreground">{user?.email || ""}</span>
+                  </span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-56" side="top" align="start" sideOffset={8}>
+                <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
+                  <Settings className="size-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
+                  <CircleHelp className="size-4" />
+                  Get help
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
+                  <Info className="size-4" />
+                  Learn more
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={async () => { handleMenuClick(); await logout() }}>
+                  <LogOut className="size-4" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <div className="shrink-0 rounded-lg border bg-muted/50 p-1 group-data-[collapsible=icon]:flex-none">
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="shrink-0 group-data-[collapsible=icon]:size-8"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+            >
+              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            </Button>
+          </div>
         </div>
       </div>
       <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
