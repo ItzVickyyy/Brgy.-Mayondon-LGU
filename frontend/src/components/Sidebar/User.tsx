@@ -123,6 +123,7 @@ function MyAccountModal({
   const [previewPhoto, setPreviewPhoto] = useState(user?.profile_photo_url ?? "")
   const [selectedPhotoName, setSelectedPhotoName] = useState("")
   const [isPhotoDragging, setIsPhotoDragging] = useState(false)
+  const [isEditing, setIsEditing] = useState(false)
   const [addressParts, setAddressParts] = useState(() => ({
     address_line: user?.address ?? "",
     purok_sitio: "",
@@ -145,6 +146,7 @@ function MyAccountModal({
       province: "",
       zip_code: "",
     })
+    if (open) setIsEditing(false)
   }, [user, open])
 
   const updateField = (key: keyof ProfileForm, value: string) => {
@@ -224,6 +226,55 @@ function MyAccountModal({
 
         <form onSubmit={saveProfile} className="flex min-h-0 flex-1 flex-col">
           <div className="min-h-0 flex-1 space-y-7 overflow-y-auto p-5 sm:p-7">
+            {!isEditing ? (
+              <>
+                <section>
+                  <SectionHeading title="Account Information" description="Your account status and assigned access level." />
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-4 rounded-xl border bg-muted/20 px-4 py-3.5 sm:grid-cols-4 sm:gap-x-3 sm:gap-y-2 xl:grid-cols-[0.8fr_1.25fr_1fr_1.7fr]">
+                    <AccountField label="Status" value={status} />
+                    <AccountField label="Username" value={username} />
+                    <AccountField label="Role" value={role} />
+                    <AccountField label="Governing LGU" value="Brgy. Mayondon Los Baños, Laguna" />
+                  </div>
+                </section>
+                <section>
+                  <SectionHeading title="Personal Information" description="Your profile and personal details." />
+                  <div className="flex items-center gap-4 rounded-xl border bg-muted/10 p-4">
+                    <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-background text-muted-foreground">
+                      {previewPhoto ? <img src={previewPhoto} alt="Profile" className="size-full object-cover" onError={() => setPreviewPhoto("")} /> : <UserRound className="size-7" />}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{[form.first_name, form.middle_name, form.last_name, form.extension_name].filter(Boolean).join(" ") || user?.full_name || "Name not provided"}</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Profile photo</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 grid gap-4 rounded-xl border p-4 sm:grid-cols-2 xl:grid-cols-4">
+                    {profileFields.map((field) => <AccountField key={field.key} label={field.label} value={form[field.key]} />)}
+                  </div>
+                </section>
+                <section>
+                  <SectionHeading title="Contact Information" description="These details help the office reach you when needed." />
+                  <div className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2">
+                    <AccountField label="Email" value={form.email} />
+                    <AccountField label="Phone Number" value={form.phone_number} />
+                    <div className="sm:col-span-2">
+                      <AccountField label="Residential Address" value={form.address} />
+                    </div>
+                  </div>
+                </section>
+                <section>
+                  <SectionHeading title="Security" description="Protect your account and sign-in credentials." />
+                  <div className="flex items-center gap-3 rounded-xl border p-4 sm:p-5">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><ShieldCheck className="size-5" /></span>
+                    <div>
+                      <h4 className="text-sm font-semibold">Password & Sign-in</h4>
+                      <p className="mt-1 text-xs text-muted-foreground">Manage your password from edit mode.</p>
+                    </div>
+                  </div>
+                </section>
+              </>
+            ) : (
+              <>
             <section>
               <SectionHeading title="Account Information" description="Your account status and assigned access level." />
               <div className="grid grid-cols-2 gap-x-3 gap-y-4 rounded-xl border bg-muted/20 px-4 py-3.5 sm:grid-cols-4 sm:gap-x-3 sm:gap-y-2 xl:grid-cols-[0.8fr_1.25fr_1fr_1.7fr]">
@@ -366,16 +417,28 @@ function MyAccountModal({
                 </div>
               </div>
             </section>
+              </>
+            )}
           </div>
 
           <div className="flex shrink-0 flex-col-reverse gap-2 border-t bg-background px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-7">
             <p className="text-xs text-muted-foreground">Account status and role can only be changed by an administrator.</p>
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={mutation.isPending}>Close</Button>
-              <Button type="submit" disabled={mutation.isPending} className="gap-2">
-                <Save className="size-4" />
-                {mutation.isPending ? "Saving..." : "Save Changes"}
-              </Button>
+              {!isEditing ? (
+                <>
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Close</Button>
+                  <Button type="button" onClick={() => setIsEditing(true)} className="gap-2"><UserRound className="size-4" />Edit Account</Button>
+                </>
+              ) : (
+                <>
+                  <Button type="button" variant="outline" onClick={() => { setForm(getProfileForm(user)); setAddressParts({ address_line: user?.address ?? "", purok_sitio: "", barangay: "", municipality_city: "", province: "", zip_code: "" }); setPreviewPhoto(user?.profile_photo_url ?? ""); setIsEditing(false) }} disabled={mutation.isPending}>Cancel Edit</Button>
+                  <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={mutation.isPending}>Close</Button>
+                  <Button type="submit" disabled={mutation.isPending} className="gap-2">
+                    <Save className="size-4" />
+                    {mutation.isPending ? "Saving..." : "Save Changes"}
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </form>
@@ -419,7 +482,7 @@ export function User({ user, compact = false }: { user: any; compact?: boolean }
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-56" side={compact ? "bottom" : "top"} align={compact ? "end" : "start"} sideOffset={8}>
             <DropdownMenuItem onSelect={() => setAccountOpen(true)}>
-              <Settings className="size-4" />
+              <UserRound className="size-4" />
               My Account
             </DropdownMenuItem>
             <DropdownMenuSub>
