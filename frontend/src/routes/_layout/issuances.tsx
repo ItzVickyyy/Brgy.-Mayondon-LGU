@@ -60,6 +60,8 @@ const documentTypes = [
 const documentFields: Record<string, DocumentField[]> = {
   "Barangay ID": [
     { name: "idAction", label: "ID Transaction", type: "select", options: ["New ID", "Renewal", "Replacement"] },
+    { name: "name", label: "Full Name" },
+    { name: "address", label: "Complete Address", fullWidth: true },
     { name: "date", label: "Date Issued", type: "date", defaultToday: true },
     { name: "idNumber", label: "Barangay ID Number" },
     { name: "validUntil", label: "Valid Until", type: "date" },
@@ -159,13 +161,6 @@ const documentFields: Record<string, DocumentField[]> = {
   ],
 }
 
-const sampleResidents = [
-  { id: "RES-0001", name: "Resident One", address: "Mayondon, Los Baños" },
-  { id: "RES-0002", name: "Resident Two", address: "Mayondon, Los Baños" },
-  { id: "RES-0003", name: "Resident Three", address: "Mayondon, Los Baños" },
-  { id: "RES-0004", name: "Resident Four", address: "Mayondon, Los Baños" },
-]
-
 const sampleIssuances: IssuanceRecord[] = [
   { id: "ISS-001", resident: "Resident One", type: "Barangay Clearance", date: "2026-10-23", status: "Issued", fields: {} },
   { id: "ISS-002", resident: "Resident Two", type: "Barangay Franchise Clearance", date: "2026-10-22", status: "Issued", fields: {} },
@@ -213,7 +208,6 @@ function formatDate(value: string) {
 function IssuancesManagement() {
   const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(false)
   const [selectedType, setSelectedType] = useState(documentTypes[0])
-  const [selectedResidentId, setSelectedResidentId] = useState("")
   const [search, setSearch] = useState("")
   const [historyType, setHistoryType] = useState("All document types")
   const [formValues, setFormValues] = useState<Record<string, string>>(() => createDefaultFormValues(documentTypes[0]))
@@ -222,8 +216,7 @@ function IssuancesManagement() {
   const [notice, setNotice] = useState("")
 
   const fields = documentFields[selectedType] ?? []
-  const selectedResident = sampleResidents.find((resident) => resident.id === selectedResidentId)
-  const currentName = formValues.name?.trim() || "Select a resident first"
+  const currentName = formValues.name?.trim() || "Name not entered"
   const currentDate = formValues.date || ""
   const allRecords = useMemo(() => [...drafts, ...sampleIssuances], [drafts])
   const filteredIssuances = useMemo(() => allRecords.filter((item) => {
@@ -243,40 +236,22 @@ function IssuancesManagement() {
     setNotice("")
   }
 
-  function changeResident(value: string) {
-    setSelectedResidentId(value)
-    const resident = sampleResidents.find((item) => item.id === value)
-    setFormValues((previous) => ({
-      ...createDefaultFormValues(selectedType),
-      ...(resident ? { name: resident.name, address: resident.address } : {}),
-      ...(previous.date ? { date: previous.date } : {}),
-    }))
-    setNotice("")
-    setPrintRecord(null)
-  }
-
   function changeDocumentType(value: string) {
     setSelectedType(value)
-    setFormValues({
-      ...createDefaultFormValues(value),
-      ...(selectedResident ? { name: selectedResident.name, address: selectedResident.address } : {}),
-    })
+    setFormValues((previous) => ({ ...createDefaultFormValues(value), ...previous }))
     setNotice("")
     setPrintRecord(null)
   }
 
   function clearForm() {
-    setFormValues({
-      ...createDefaultFormValues(selectedType),
-      ...(selectedResident ? { name: selectedResident.name, address: selectedResident.address } : {}),
-    })
+    setFormValues(createDefaultFormValues(selectedType))
     setNotice("")
     setPrintRecord(null)
   }
 
   function saveIssuance() {
-    if (!selectedResident) {
-      setNotice("Select a resident before saving the document.")
+    if (!formValues.name?.trim()) {
+      setNotice("Enter the resident's name before saving the issuance.")
       return
     }
     const record: IssuanceRecord = {
@@ -319,22 +294,15 @@ function IssuancesManagement() {
       {notice && <div role="status" className="print:hidden rounded-lg border bg-muted/40 px-4 py-3 text-sm">{notice}</div>}
 
       {isIssuanceModalOpen && (
-        <div className="print:hidden fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-3 sm:items-center sm:p-6" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsIssuanceModalOpen(false) }}>
-          <section role="dialog" aria-modal="true" aria-labelledby="new-issuance-title" className="my-3 w-full max-w-4xl rounded-xl border bg-card p-4 shadow-xl sm:my-6 sm:p-6">
-          <div className="mb-5 flex items-center gap-3">
+        <div className="print:hidden fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-3 sm:items-center sm:p-6" >
+          <section role="dialog" aria-modal="true" aria-labelledby="new-issuance-title" className="my-3 w-full max-w-5xl rounded-2xl border bg-card shadow-2xl sm:my-6">\n          <div className="max-h-[calc(100dvh-3rem)] overflow-y-auto p-4 sm:p-6">
+          <div className="mb-6 flex items-start gap-3 border-b pb-5">
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><Plus className="size-5" aria-hidden="true" /></div>
-            <div className="min-w-0 flex-1"><h2 id="new-issuance-title" className="font-semibold">New Issuance</h2><p className="mt-1 text-sm text-muted-foreground">Select the issuance type and resident, then complete the required details.</p></div><button type="button" onClick={() => setIsIssuanceModalOpen(false)} aria-label="Close new issuance form" className="rounded-md border px-3 py-2 text-sm hover:bg-muted">Close</button>
+            <div className="min-w-0 flex-1"><h2 id="new-issuance-title" className="font-semibold">New Issuance</h2><p className="mt-1 text-sm text-muted-foreground">Choose an issuance type, then fill in the details below.</p></div><button type="button" onClick={() => setIsIssuanceModalOpen(false)} aria-label="Close new issuance form" className="rounded-md border px-3 py-2 text-sm hover:bg-muted">Close</button>
           </div>
               <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 md:grid-cols-2">
-            <label className={labelClassName + " md:col-span-2"}>Resident
-              <select required value={selectedResidentId} onChange={(event) => changeResident(event.target.value)} className={inputClassName}>
-                <option value="">Select a resident first</option>
-                {sampleResidents.map((resident) => <option key={resident.id} value={resident.id}>{resident.id} · {resident.name}</option>)}
-              </select>
-              <span className="text-xs font-normal text-muted-foreground"></span>
-            </label>
-            <label className={labelClassName + " md:col-span-2"}>Issuance Type
-              <select value={selectedType} onChange={(event) => changeDocumentType(event.target.value)} className={inputClassName}>
+            <label className={labelClassName + " md:col-span-2 rounded-xl border bg-muted/20 p-4"}>Issuance Type
+              <select value={selectedType} onChange={(event) => changeDocumentType(event.target.value)} className={inputClassName + " bg-background"}>
                 {documentTypes.map((type) => <option key={type} value={type}>{type}</option>)}
               </select>
             </label>
@@ -370,20 +338,22 @@ function IssuancesManagement() {
               </div>
             ))}
 
-            <div className="md:col-span-2 rounded-lg bg-muted/40 p-4 text-sm">
-              <p className="font-medium">Draft summary</p>
-              <p className="mt-1 text-muted-foreground">Resident: {selectedResident ? selectedResident.name : "Not selected"}</p>
-              <p className="text-muted-foreground">Document: {selectedType}</p>
-              <p className="text-muted-foreground">Name: {currentName}</p>
-              <p className="text-muted-foreground">Date: {formatDate(currentDate)}</p>
+            <div className="md:col-span-2 rounded-xl border bg-muted/30 p-4 text-sm">
+              <p className="font-semibold">Issuance Summary</p>
+              <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                <div><p className="text-xs text-muted-foreground">Issuance Type</p><p className="mt-1 font-medium">{selectedType}</p></div>
+                <div><p className="text-xs text-muted-foreground">Resident Name</p><p className="mt-1 font-medium">{currentName}</p></div>
+                <div><p className="text-xs text-muted-foreground">Date</p><p className="mt-1 font-medium">{formatDate(currentDate)}</p></div>
+              </div>
             </div>
-            <div className="md:col-span-2 flex flex-wrap gap-2">
+            <div className="sticky bottom-0 md:col-span-2 -mx-1 flex flex-wrap justify-end gap-2 border-t bg-card/95 px-1 pb-1 pt-4 backdrop-blur-sm">
               <button type="button" onClick={clearForm} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Clear Form</button>
               <button type="button" onClick={saveIssuance} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"><FileCheck2 className="size-4" aria-hidden="true" />Save as Issued</button>
               <button type="button" onClick={() => { preparePrint(); window.setTimeout(() => window.print(), 100) }} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium hover:bg-muted"><Printer className="size-4" aria-hidden="true" />Print Preview</button>
               <button type="button" onClick={() => setIsIssuanceModalOpen(false)} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Cancel</button>
             </div>
           </form>
+          </div>
           </section>
         </div>
       )}
