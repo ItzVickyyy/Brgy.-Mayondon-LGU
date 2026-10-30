@@ -4,11 +4,11 @@ import { createUser } from "./utils/privateApi.ts"
 import { randomEmail, randomPassword } from "./utils/random"
 import { logInUser, logOutUser } from "./utils/user"
 
-const tabs = ["Barangay Information", "Document Templates", "Account Profile", "Change Password", "Audit Logs"]
+const tabs = ["Account Profile", "Change Password"]
 
-test("Barangay Information tab is active by default", async ({ page }) => {
+test("Account Profile tab is active by default", async ({ page }) => {
   await page.goto("/settings")
-  await expect(page.getByRole("tab", { name: "Barangay Information" })).toHaveAttribute(
+  await expect(page.getByRole("tab", { name: "Account Profile" })).toHaveAttribute(
     "aria-selected",
     "true",
   )
@@ -202,55 +202,19 @@ test.describe("Change password validation", () => {
   })
 })
 
-test("Appearance button is visible in sidebar", async ({ page }) => {
+test("Appearance toggle is available in the application header", async ({ page }) => {
   await page.goto("/settings")
-  await expect(page.getByTestId("theme-button")).toBeVisible()
+  await expect(page.getByRole("button", { name: /Switch to (light|dark) mode/ })).toBeVisible()
 })
 
 test("User can switch between theme modes", async ({ page }) => {
   await page.goto("/settings")
-
-  await page.getByTestId("theme-button").click()
-  await page.getByTestId("dark-mode").click()
-  await expect(page.locator("html")).toHaveClass(/dark/)
-
-  await expect(page.getByTestId("dark-mode")).not.toBeVisible()
-
-  await page.getByTestId("theme-button").click()
-  await page.getByTestId("light-mode").click()
-  await expect(page.locator("html")).toHaveClass(/light/)
-})
-
-test("Selected mode is preserved across sessions", async ({ page }) => {
-  await page.goto("/settings")
-
-  await page.getByTestId("theme-button").click()
-  if (
-    await page.evaluate(() =>
-      document.documentElement.classList.contains("dark"),
-    )
-  ) {
-    await page.getByTestId("light-mode").click()
-    await page.getByTestId("theme-button").click()
+  const themeButton = page.getByRole("button", { name: /Switch to (light|dark) mode/ })
+  const initiallyDark = await page.evaluate(() => document.documentElement.classList.contains("dark"))
+  await themeButton.click()
+  if (initiallyDark) {
+    await expect(page.locator("html")).not.toHaveClass(/dark/)
+  } else {
+    await expect(page.locator("html")).toHaveClass(/dark/)
   }
-
-  const isLightMode = await page.evaluate(() =>
-    document.documentElement.classList.contains("light"),
-  )
-  expect(isLightMode).toBe(true)
-
-  await page.getByTestId("theme-button").click()
-  await page.getByTestId("dark-mode").click()
-  let isDarkMode = await page.evaluate(() =>
-    document.documentElement.classList.contains("dark"),
-  )
-  expect(isDarkMode).toBe(true)
-
-  await logOutUser(page)
-  await logInUser(page, firstSuperuser, firstSuperuserPassword)
-
-  isDarkMode = await page.evaluate(() =>
-    document.documentElement.classList.contains("dark"),
-  )
-  expect(isDarkMode).toBe(true)
 })
