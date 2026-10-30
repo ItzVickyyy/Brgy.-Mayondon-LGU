@@ -6,7 +6,6 @@ import {
   Languages,
   Check,
   LogOut,
-  Settings,
   UserRound,
   Save,
   Upload,
@@ -158,6 +157,7 @@ function MyAccountModal({
     mutationFn: (data: UserUpdateMe) => UsersService.updateUserMe({ body: data }),
     onSuccess: () => {
       showSuccessToast("My Account updated successfully")
+      setIsEditing(false)
       queryClient.invalidateQueries({ queryKey: ["currentUser"] })
       queryClient.invalidateQueries()
     },
