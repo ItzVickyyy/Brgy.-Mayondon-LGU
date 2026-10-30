@@ -113,6 +113,7 @@ function Layout() {
             >
               {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
             </Button>
+            <div aria-hidden="true" className="mx-1 h-7 w-px shrink-0 bg-border" />
             <User user={currentUser} compact />
           </div>
         </header>
