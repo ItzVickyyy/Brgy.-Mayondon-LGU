@@ -94,7 +94,7 @@ function AccountField({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 space-y-1.5">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="break-words text-sm font-medium leading-5">{value || "Not provided"}</p>
+      <p className={`break-words font-medium leading-5 ${label === "Governing LGU" ? "text-xs tracking-tight" : "text-sm"}`}>{value || "Not provided"}</p>
     </div>
   )
 }
@@ -285,31 +285,16 @@ function MyAccountModal({
 
             <section>
               <SectionHeading title="Security" description="Protect your account and sign-in credentials." />
-              <div className="grid gap-4 lg:grid-cols-2">
-                <div className="rounded-xl border p-4 sm:p-5">
-                  <div className="mb-4 flex items-start gap-3">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><ShieldCheck className="size-5" /></span>
-                    <div>
-                      <h4 className="text-sm font-semibold">Password & Sign-in</h4>
-                      <p className="mt-1 text-xs text-muted-foreground">Update your password to help keep your account secure.</p>
-                    </div>
-                  </div>
-                  <div className="rounded-lg bg-muted/20 p-3">
-                    <ChangePassword />
+              <div className="rounded-xl border p-4 sm:p-5">
+                <div className="mb-4 flex items-start gap-3">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"><ShieldCheck className="size-5" /></span>
+                  <div>
+                    <h4 className="text-sm font-semibold">Password & Sign-in</h4>
+                    <p className="mt-1 text-xs text-muted-foreground">Update your password to help keep your account secure.</p>
                   </div>
                 </div>
-                <div className="flex flex-col rounded-xl border p-4 sm:p-5">
-                  <div className="flex items-start gap-3">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground"><ShieldCheck className="size-5" /></span>
-                    <div className="min-w-0 flex-1">
-                      <h4 className="text-sm font-semibold">Two-Factor Authentication</h4>
-                      <p className="mt-1 text-xs text-muted-foreground">Add another verification step when signing in.</p>
-                    </div>
-                    <span className="shrink-0 rounded-full border bg-muted/30 px-2.5 py-1 text-xs font-medium text-muted-foreground">Coming later</span>
-                  </div>
-                  <div className="mt-5 flex flex-1 items-center rounded-lg border border-dashed bg-muted/10 p-4">
-                    <p className="text-sm leading-6 text-muted-foreground">Two-factor authentication is not available yet. Your account currently uses password-based sign-in.</p>
-                  </div>
+                <div className="rounded-lg bg-muted/20 p-3">
+                  <ChangePassword />
                 </div>
               </div>
             </section>
