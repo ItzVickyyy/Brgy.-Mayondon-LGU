@@ -9,7 +9,7 @@ Project Guide*, the Guide wins; fix this file.
 a new chat, then ask your question. Update the file whenever a decision changes
 (see [Maintenance](#maintenance)).
 
-Last updated: October 25, 2026
+Last updated: October 30, 2026
 
 ---
 
@@ -88,8 +88,7 @@ presented, and submitted the complete report.
    and keep the client-signed receiving copy (the *approved request letter*).
 2. Prepare interview questions (maximum 7 main questions for our group).
 3. Conduct the interview; take notes and, with permission, photos or a recording.
-4. Write the **Creative Brief** (template in section 6) and have the client sign it
-   **before** designing.
+4. Prepare the **Creative Brief**, get instructor review, and retain the approved version. Confirm that the client and group leader signature fields are completed on the copy required for submission before treating it as fully signed.
 
 Our 7 interview questions (each also has a Filipino version in `Questionnaires.docx`):
 1. What problems in your current way of handling requests, records and announcements do you hope a website or system can solve?
@@ -140,7 +139,7 @@ Hard copy and soft copy (section 10), together with the Peer Evaluation Sheet.
 
 ---
 
-## 6. Creative Brief (2–3 pages, signed by the client)\n\nThe current interview-based draft is maintained in [Creative-Brief.md](Creative-Brief.md). It records the October 19–20 interviews and is **pending client review and signatures**. Use that document as the working version, but do not call it approved until the client signs it. The Final Project Guide requires client approval before design starts.
+## 6. Creative Brief (2–3 pages, signed by the client)\n\nThe current professor-reviewed planning baseline is maintained in [Creative-Brief.md](Creative-Brief.md), updated from the revised Creative Brief supplied on October 27, 2026. Verify and retain the completed signed copy required by the Final Project Guide.
 
 | # | Part | What to write |
 |---|---|---|
@@ -250,8 +249,10 @@ Ratings are confidential and members may receive different grades. Rating guide:
 | Backend | FastAPI + SQLModel + PostgreSQL, Python 3.14 |
 | Frontend | React + TypeScript + Vite + Tailwind CSS + shadcn/ui |
 | Existing foundation architecture | React + FastAPI + PostgreSQL. The Docker Compose self-hosted path builds the frontend into the FastAPI image and uses local PostgreSQL. Legacy Vercel-specific configuration and Supabase transaction-pooler handling have been removed. The LAN path is preparation only and remains untested at the client site. |
-| Accounts | Admin-only account creation; open sign-up is disabled. `is_superuser` = Admin, other users = Staff. New passwords require 12–128 characters; five failed logins trigger a 15-minute account lockout |
+| Accounts | Six staff accounts are planned, but their permissions still need to be confirmed with the client. The current foundation distinguishes Admin and Staff and reserves account creation for admins. Agree on the access model before implementation or client demo. Open sign-up remains disabled; existing password and login-lockout controls must be reviewed against the agreed account workflow. |
 | Branding | Centralized in `frontend/src/config/site.ts`; client supplied the Barangay Mayondon logo on October 20, 2026. Final UI palette and use of logo remain subject to client design feedback. |
+| Document printing workflow | For forms such as Barangay Clearance, the current process uses an Excel worksheet to print variable resident/request details onto a blank pre-printed form. The system should preserve this workflow: print only the entered details in the matching spaces, while the pre-printed paper supplies the header, labels, signature area, and dry-seal space. Exact alignment must be calibrated and tested against actual blank forms and printer settings. This workflow was described by the team and should be validated using the supplied Excel workbook and forms. |
+| Backup requirement | The planning baseline calls for local backups, manual and/or scheduled, saved to an external drive. The exact procedure, frequency, drive custody, restore responsibilities, and successful recovery tests still need to be agreed and verified. |
 | AI tools | Free-tier AI assistants only; this folder is the shared context |
 
 ---
@@ -259,11 +260,13 @@ Ratings are confidential and members may receive different grades. Rating guide:
 ## 13. Open items
 
 - [ ] Confirm the request letter has the instructor signatures and client receiving copy required by the Final Project Guide.
-- [ ] Review [Creative-Brief.md](Creative-Brief.md) with the client and obtain client and group leader signatures before design begins.
-- [ ] Confirm final document types, approved print layouts, required resident fields, import rules, ID numbering and validity rules, and account permissions.
+- [x] Creative Brief reviewed by the professor and updated in [Creative-Brief.md](Creative-Brief.md) from the revised copy supplied October 27.
+- [ ] Verify and retain the required client and group leader signatures on the Creative Brief copy for submission.
+- [ ] Confirm the final document types, required resident fields, import rules, ID numbering and validity rules. For pre-printed forms, map each Excel worksheet to its matching form and validate print alignment using the actual paper and printer.
+- [ ] Confirm the permissions for the six staff accounts with the client, reconcile the agreed access model with the current Admin/Staff authorization model, and agree on account creation and recovery.
 - [ ] Validate the prepared offline/LAN setup with the client, identify the designated host computer and staff computers, confirm printer access, and assign maintenance responsibilities.
 - [ ] Decide how ID photo background removal will work without internet. The client described using an online service today.
-- [ ] Agree on backup frequency, external-drive custody, restore testing, and recovery responsibilities.
+- [ ] Agree on the schedule for both scheduled and manual backups, external-drive custody, restore testing, and recovery responsibilities.
 - [ ] Confirm bracketed values in the Guide with Prof. Camba: number of mockup pages, mobile pages, presentation length, survey respondents, photos per narrative, paper size, and submission platform.
 - [ ] Confirm with Sir Ramos what Networking 2 expects for local network setup, connectivity, and security at the barangay site, and what Sir Matute expects for Client-Server Technologies.
 - [ ] Review the Foundation implementation against the signed scope before adapting, removing, or adding modules.
@@ -273,20 +276,21 @@ Ratings are confidential and members may receive different grades. Rating guide:
 
 ## 14. Status
 
-**Current status (October 25, 2026):** Interviews were conducted on October 19–20 and an interview-based Creative Brief draft is available in `docs/Creative-Brief.md`. It is not yet signed by the client. The client prefers fully offline operation over the local network. The Foundation branch now includes an initial Docker Compose path for a local host and database, plus [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). This path has not yet been built, tested without internet, or verified at the client site. Keep the repository on `Foundation`; do not rename or merge this branch or create `production` unless the team explicitly reviews the branch plan.
+**Current status (October 27, 2026):** Interviews were conducted on October 19–20. The revised Creative Brief supplied on October 27 was reviewed by the professor and is now reflected in `docs/Creative-Brief.md`. Verify and retain the required signed copy separately. The client prefers fully offline operation over the local network. The Foundation branch now includes an initial Docker Compose path for a local host and database, plus [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). This path has not yet been built, tested without internet, or verified at the client site. Keep the repository on `Foundation`; do not rename or merge this branch or create `production` unless the team explicitly reviews the branch plan.
 
 - [x] Group formed; client assigned
 - [x] Questionnaire drafted and fixed (7 questions)
 - [x] Client interviews conducted on October 19–20, 2026
-- [x] Interview-based Creative Brief draft documented
+- [x] Professor-reviewed revised Creative Brief reflected in `docs/Creative-Brief.md`
 - [x] Sample document formats, current issuing file, logo, ID layout, and resident/ID data sheets reported as received during the interviews
 - [x] Initial Docker-based self-hosting configuration and offline LAN deployment guide prepared on Foundation; actual deployment and offline behavior remain unverified
 - [x] Existing authentication, authorization, login lockout, and security controls documented
 - [x] Added responsive app-header breadcrumbs and a public `/welcome` landing page with placeholder announcements/contact details; public content is not in the current draft scope and needs review before use
 - [x] Closed the three template-generated Dependabot pull requests that targeted `master`; dependency updates will be handled deliberately
-- [ ] Creative Brief reviewed and signed
+- [ ] Verify required client and group leader signatures on the Creative Brief copy for submission
 - [ ] Offline/LAN setup tested without internet and approved by client; host, backup, photo workflow, and recovery responsibilities confirmed
 - [ ] Initial design reviewed with client
+- [ ] Pre-printed form layouts calibrated and sample print alignment approved by client
 - [ ] Version 1
 - [ ] Testing and technology transfer
 - [ ] Presentation
@@ -311,3 +315,38 @@ When this file is pasted into a chat, the assistant should:
 - Update this file in the same pull request that changes a decision.
 - Move items from **Open items** to **Decisions made** as they are settled, and tick the **Status** list.
 - Anything that grows long (interview notes, mockups, test results) goes into its own file or the final report appendices; link it here.
+
+
+---
+
+## Client update: LGUSS-BIMS and project safeguards (October 27, 2026)
+
+### Client-reported status
+
+The team asked the barangay contact whether they were aware of the DILG Local Government Unit Support System – Barangay Information Management System (LGUSS-BIMS) and why it was not being used. The contact replied: **"yung LGUSS-BIMS dati na po yan. Di na nagagamit"** (the barangay considers it an old system and says it is no longer used).
+
+Record this as the barangay contact's statement only. It does not prove that DILG has discontinued LGUSS-BIMS or that the system is unavailable to other barangays.
+
+### Project boundary
+
+- Treat the 2025 DILG memorandum circular on LGUSS-BIMS as a reference for identifying relevant barangay information-management and privacy concerns.
+- This student-developed Records and Document Issuance System is a separate local system. Do not describe it as a replacement for, certified compliant with, or integrated with LGUSS-BIMS.
+- No LGUSS-BIMS data exchange, synchronization, or official DILG connection is included in the current project scope.
+- The client has stated a preference for offline operation on the barangay local network. Confirm the signed Creative Brief and actual deployment setup before treating that arrangement as approved and verified.
+
+### Safeguards to implement and verify
+
+Use [Security-Measures.md](Security-Measures.md) as the detailed checklist. Project-specific priorities include:
+
+- Collect only resident information required for client-approved workflows.
+- Use individual staff accounts and confirm whether the six proposed accounts truly need full access to viewing, editing, deleting, exporting, and account administration.
+- Enforce authentication and authorization in backend API operations, not only by hiding frontend controls.
+- Keep an accountability trail for important record changes and document issuance without logging unnecessary personal information.
+- Protect the host computer, LAN access, database, printed documents, exports, and backup media.
+- Agree on local backup ownership and schedule, then test restoring a backup before turnover.
+- Disable access when staff leave or no longer require access, while preserving required issuance history.
+- Use synthetic or masked data during development and demonstrations. Keep real resident records and secrets out of source control.
+- Add security and recovery cases to Instrument A, fix failures, and retest before deployment.
+- Confirm the client's approved access, retention, correction, disclosure, and incident-handling procedures before real resident data is entered.
+
+These are project requirements to implement and verify, not claims that all safeguards already exist. Do not claim a formal Privacy Impact Assessment, penetration test, encryption-at-rest implementation, or full compliance with LGUSS-BIMS unless the relevant work has actually been completed, documented, and appropriately verified.
