@@ -92,9 +92,9 @@ function getProfileForm(user: any): ProfileForm {
 
 function AccountField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="space-y-1">
+    <div className="min-w-0 space-y-1.5">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="break-words text-sm font-medium">{value || "Not provided"}</p>
+      <p className="break-words text-sm font-medium leading-5">{value || "Not provided"}</p>
     </div>
   )
 }
@@ -201,7 +201,7 @@ function MyAccountModal({
           <div className="min-h-0 flex-1 space-y-7 overflow-y-auto p-5 sm:p-7">
             <section>
               <SectionHeading title="Account Information" description="Your account status and assigned access level." />
-              <div className="grid gap-4 rounded-xl border bg-muted/20 p-4 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="grid grid-cols-2 gap-x-5 gap-y-4 rounded-xl border bg-muted/20 px-4 py-3.5 sm:grid-cols-4 sm:gap-x-4 sm:gap-y-2">
                 <AccountField label="Status" value={status} />
                 <AccountField label="Username" value={username} />
                 <AccountField label="Role" value={role} />
