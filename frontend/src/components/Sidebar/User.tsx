@@ -205,10 +205,7 @@ function MyAccountModal({
                 <AccountField label="Status" value={status} />
                 <AccountField label="Username" value={username} />
                 <AccountField label="Role" value={role} />
-                <div className="sm:col-span-2 lg:col-span-3">
-                  <Label htmlFor="governing_lgu" className="mb-1.5 block text-xs font-medium">Governing LGU</Label>
-                  <Input id="governing_lgu" value={form.governing_lgu} onChange={(event) => updateField("governing_lgu", event.target.value)} placeholder="Enter assigned LGU" className="h-10 bg-background" />
-                </div>
+                <AccountField label="Governing LGU" value="Brgy. Mayondon Los Baños, Laguna" />
               </div>
             </section>
 
