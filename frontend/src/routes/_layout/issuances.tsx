@@ -295,7 +295,8 @@ function IssuancesManagement() {
 
       {isIssuanceModalOpen && (
         <div className="print:hidden fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-3 sm:items-center sm:p-6" >
-          <section role="dialog" aria-modal="true" aria-labelledby="new-issuance-title" className="my-3 w-full max-w-5xl rounded-2xl border bg-card shadow-2xl sm:my-6">\n          <div className="max-h-[calc(100dvh-3rem)] overflow-y-auto p-4 sm:p-6">
+          <section role="dialog" aria-modal="true" aria-labelledby="new-issuance-title" className="my-3 w-full max-w-5xl rounded-2xl border bg-card shadow-2xl sm:my-6">
+          <div className="max-h-[calc(100dvh-3rem)] overflow-y-auto p-4 sm:p-6">
           <div className="mb-6 flex items-start gap-3 border-b pb-5">
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><Plus className="size-5" aria-hidden="true" /></div>
             <div className="min-w-0 flex-1"><h2 id="new-issuance-title" className="font-semibold">New Issuance</h2><p className="mt-1 text-sm text-muted-foreground">Choose an issuance type, then fill in the details below.</p></div><button type="button" onClick={() => setIsIssuanceModalOpen(false)} aria-label="Close new issuance form" className="rounded-md border px-3 py-2 text-sm hover:bg-muted">Close</button>
