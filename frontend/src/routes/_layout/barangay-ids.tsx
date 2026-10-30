@@ -116,9 +116,6 @@ function BarangayIdManagement() {
         </button>
       </div>
 
-      <div role="note" className="rounded-lg border border-amber-300/70 bg-amber-50/60 p-3 text-sm leading-6 text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
-        
-      </div>
 
       {notice && <div role="status" className="rounded-lg border bg-muted/30 p-3 text-sm">{notice}</div>}
 
