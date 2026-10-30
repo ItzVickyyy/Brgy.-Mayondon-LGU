@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import {
   createFileRoute,
+  Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
 import { ArrowRight } from "lucide-react"
@@ -111,12 +112,12 @@ function Login() {
                 <FormItem>
                   <div className="flex items-center">
                     <FormLabel>Password</FormLabel>
-                    <a
-                      href="/recover-password"
+                    <RouterLink
+                      to="/recover-password"
                       className="ml-auto text-sm font-medium text-primary underline-offset-4 hover:underline"
                     >
                       Forgot password?
-                    </a>
+                    </RouterLink>
                   </div>
                   <FormControl>
                     <PasswordInput
