@@ -1,5 +1,5 @@
 import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router"
-import { CalendarDays, ChevronRight, Clock3, Moon, Sun } from "lucide-react"
+import { CalendarDays, ChevronRight, Clock3, LogOut, Maximize2, Minimize2, Moon, Sun } from "lucide-react"
 import { useEffect, useState } from "react"
 
 import { Footer } from "@/components/Common/Footer"
@@ -11,6 +11,8 @@ import {
 } from "@/components/ui/sidebar"
 import { SITE } from "@/config/site"
 import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import useAuth from "@/hooks/useAuth"
 import { useTheme } from "@/components/theme-provider"
 import { isLoggedIn } from "@/hooks/useAuth"
 
@@ -38,12 +40,25 @@ function Layout() {
   const pageLabel = PAGE_LABELS[pathname] ?? "Barangay Records System"
   const [now, setNow] = useState(() => new Date())
   const { theme, setTheme } = useTheme()
+  const { logout } = useAuth()
   const isDark = theme === "dark"
+  const [logoutOpen, setLogoutOpen] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000)
-    return () => window.clearInterval(timer)
+    const handleFullscreenChange = () => setIsFullscreen(Boolean(document.fullscreenElement))
+    document.addEventListener("fullscreenchange", handleFullscreenChange)
+    return () => {
+      window.clearInterval(timer)
+      document.removeEventListener("fullscreenchange", handleFullscreenChange)
+    }
   }, [])
+
+  const toggleFullscreen = async () => {
+    if (document.fullscreenElement) await document.exitFullscreen()
+    else await document.documentElement.requestFullscreen()
+  }
 
   const dateText = new Intl.DateTimeFormat("en-PH", {
     month: "long",
