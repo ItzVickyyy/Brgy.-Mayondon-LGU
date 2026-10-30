@@ -1,5 +1,5 @@
-import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router"
-import { CalendarDays, ChevronRight, Clock3, LogOut, Maximize2, Minimize2, Moon, Sun } from "lucide-react"
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
+import { CalendarDays, Clock3, LogOut, Maximize2, Minimize2, Moon, Sun } from "lucide-react"
 import { useEffect, useState } from "react"
 
 import { Footer } from "@/components/Common/Footer"
@@ -9,7 +9,6 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { SITE } from "@/config/site"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import useAuth from "@/hooks/useAuth"
@@ -23,21 +22,7 @@ export const Route = createFileRoute("/_layout")({
   },
 })
 
-const PAGE_LABELS: Record<string, string> = {
-  "/": "Dashboard",
-  "/issuances": "Document Management",
-  "/records": "Resident Records",
-  "/barangay-ids": "Barangay ID Management",
-  "/officials": "Officials",
-  "/admin": "User Accounts",
-  "/activity-log": "Activity Log",
-  "/reports": "Management Reports",
-  "/backup-restore": "Backup and Restore",
-}
-
 function Layout() {
-  const pathname = useRouterState({ select: (state) => state.location.pathname })
-  const pageLabel = PAGE_LABELS[pathname] ?? "Barangay Records System"
   const [now, setNow] = useState(() => new Date())
   const { theme, setTheme } = useTheme()
   const { logout } = useAuth()
@@ -64,7 +49,9 @@ function Layout() {
     month: "long",
     day: "numeric",
     year: "numeric",
+    weekday: "long",
   }).format(now)
+  const formattedDate = dateText.replace(/,\s*(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/, " ($1)")
   const timeText = new Intl.DateTimeFormat("en-PH", {
     hour: "2-digit",
     minute: "2-digit",
@@ -76,24 +63,19 @@ function Layout() {
       <SidebarInset>
         <header className="sticky top-0 z-10 flex min-h-16 shrink-0 flex-wrap items-center gap-3 border-b bg-background/95 px-3 py-2 backdrop-blur sm:px-4">
           <SidebarTrigger className="-ml-1 shrink-0 text-muted-foreground" />
-          <nav aria-label="Breadcrumb" className="min-w-0">
-            <ol className="flex items-center gap-2 text-sm">
-              <li className="truncate text-muted-foreground">{SITE.shortName}</li>
-              <li aria-hidden="true"><ChevronRight className="size-4 text-muted-foreground" /></li>
-              <li aria-current="page" className="truncate font-medium">{pageLabel}</li>
-            </ol>
-          </nav>
+
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-            <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground sm:text-sm">
+            <div className="flex min-w-0 items-center gap-2 whitespace-nowrap text-xs text-muted-foreground sm:gap-3 sm:text-sm">
               <span className="inline-flex items-center gap-1.5">
                 <CalendarDays className="size-4" aria-hidden="true" />
-                <span>{dateText}</span>
+                <span>{formattedDate}</span>
               </span>
               <span className="inline-flex items-center gap-1.5 tabular-nums">
                 <Clock3 className="size-4" aria-hidden="true" />
                 <span>{timeText}</span>
               </span>
             </div>
+            <span aria-hidden="true" className="text-muted-foreground/60">|</span>
             <Button type="button" variant="ghost" size="icon" className="shrink-0" aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"} title={isDark ? "Switch to light mode" : "Switch to dark mode"} onClick={() => setTheme(isDark ? "light" : "dark")}>
               {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
