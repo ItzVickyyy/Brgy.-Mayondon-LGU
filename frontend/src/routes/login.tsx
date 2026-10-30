@@ -93,7 +93,7 @@ function Login() {
                   <FormControl>
                     <Input
                       data-testid="email-input"
-                      placeholder="name@example.com"
+                      placeholder="Enter your email address"
                       type="email"
                       autoComplete="username"
                       className="h-11"
