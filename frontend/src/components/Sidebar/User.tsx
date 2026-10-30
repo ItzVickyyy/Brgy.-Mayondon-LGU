@@ -183,7 +183,7 @@ function SettingsModal({
   )
 }
 
-export function User({ user }: { user: any }) {
+export function User({ user, compact = false }: { user: any; compact?: boolean }) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -198,25 +198,25 @@ export function User({ user }: { user: any }) {
 
   return (
     <>
-      <div className="w-full px-2 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:px-0">
+      <div className={compact ? "w-auto min-w-0" : "w-full px-2 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:px-0"}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
-                className="h-auto w-full min-w-0 justify-start gap-2 rounded-lg px-2 py-2 text-left group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:min-w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
+                className={compact ? "h-10 w-auto max-w-[280px] min-w-0 justify-start gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted/70" : "h-auto w-full min-w-0 justify-start gap-2 rounded-lg px-2 py-2 text-left group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:min-w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"}
                 aria-label="User menu"
                 title={user?.full_name || user?.email || "User menu"}
               >
                 <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary transition-colors group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:border-border group-data-[collapsible=icon]:bg-muted group-data-[collapsible=icon]:text-muted-foreground">
                   <UserRound className="size-4" />
                 </span>
-                <span className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+                <span className={compact ? "min-w-0 flex-1" : "min-w-0 flex-1 group-data-[collapsible=icon]:hidden"}>
                   <span className="block truncate text-sm font-medium">{user?.full_name || user?.email || "User"}</span>
                   <span className="block truncate text-xs font-normal text-muted-foreground">{user?.email || ""}</span>
                 </span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" side="top" align="start" sideOffset={8}>
+            <DropdownMenuContent className="w-56" side={compact ? "bottom" : "top"} align={compact ? "end" : "start"} sideOffset={8}>
               <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
                 <Settings className="size-4" />
                 Settings
