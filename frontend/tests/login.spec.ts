@@ -81,8 +81,8 @@ test("Successful log out", async ({ page }) => {
     page.getByRole("heading", { name: "Dashboard" }),
   ).toBeVisible()
 
-  await page.getByTestId("user-menu").click()
-  await page.getByRole("menuitem", { name: "Log out" }).click()
+  await page.getByRole("button", { name: "Log out" }).click()
+  await page.getByRole("dialog").getByRole("button", { name: "Log out" }).click()
   await page.waitForURL("/login")
 })
 
@@ -98,8 +98,8 @@ test("Logged-out user cannot access protected routes", async ({ page }) => {
     page.getByRole("heading", { name: "Dashboard" }),
   ).toBeVisible()
 
-  await page.getByTestId("user-menu").click()
-  await page.getByRole("menuitem", { name: "Log out" }).click()
+  await page.getByRole("button", { name: "Log out" }).click()
+  await page.getByRole("dialog").getByRole("button", { name: "Log out" }).click()
   await page.waitForURL("/login")
 
   await page.goto("/settings")
