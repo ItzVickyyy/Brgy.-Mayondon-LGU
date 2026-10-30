@@ -69,18 +69,7 @@ function Layout() {
             </ol>
           </nav>
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="shrink-0"
-              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-            >
-              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            </Button>
-            <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+            <div className="flex flex-col items-end gap-0.5 text-xs text-muted-foreground sm:text-sm">
               <span className="inline-flex items-center gap-1.5">
                 <CalendarDays className="size-4" aria-hidden="true" />
                 <span>{dateText}</span>
@@ -90,8 +79,29 @@ function Layout() {
                 <span>{timeText}</span>
               </span>
             </div>
+            <Button type="button" variant="ghost" size="icon" className="shrink-0" aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"} title={isDark ? "Switch to light mode" : "Switch to dark mode"} onClick={() => setTheme(isDark ? "light" : "dark")}>
+              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+            </Button>
+            <Button type="button" variant="ghost" size="icon" className="shrink-0" aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"} title={isFullscreen ? "Exit full screen" : "Enter full screen"} onClick={() => { void toggleFullscreen() }}>
+              {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+            </Button>
+            <Button type="button" variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" aria-label="Log out" title="Log out" onClick={() => setLogoutOpen(true)}>
+              <LogOut className="size-4" />
+            </Button>
           </div>
         </header>
+        <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Log out?</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-muted-foreground">Are you sure you want to log out of your account?</p>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setLogoutOpen(false)}>Cancel</Button>
+              <Button type="button" variant="destructive" onClick={() => { setLogoutOpen(false); void logout() }}>Log out</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
         <main className="flex-1 p-4 sm:p-6 md:p-8">
           <div className="mx-auto max-w-7xl">
             <Outlet />
