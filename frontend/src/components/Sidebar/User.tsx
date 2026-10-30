@@ -223,7 +223,7 @@ export function User({ user }: { user: any }) {
               </DropdownMenuItem>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger className="gap-2 data-[state=open]:text-foreground">
-                  <Languages className="size-4" />
+                  <Languages className="size-4 text-muted-foreground" />
                   Language
                 </DropdownMenuSubTrigger>
                 <DropdownMenuSubContent className="w-44">
