@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Activity, Filter, Search } from "lucide-react"
+import { Filter, Search } from "lucide-react"
 import { useMemo, useState } from "react"
 import useAuth from "@/hooks/useAuth"
 import { pageTitle } from "@/config/site"
