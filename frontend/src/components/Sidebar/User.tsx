@@ -222,7 +222,7 @@ export function User({ user }: { user: any }) {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger>
+                <DropdownMenuSubTrigger className="gap-2">
                   <Languages className="size-4" />
                   Language
                 </DropdownMenuSubTrigger>
@@ -233,6 +233,7 @@ export function User({ user }: { user: any }) {
                       <DropdownMenuItem
                         key={language}
                         onSelect={() => setSelectedLanguage(language)}
+                        className="gap-2 px-3 py-2"
                       >
                         <span className="flex-1">{language}</span>
                         {selected ? <Check className="size-4 text-primary" /> : null}
