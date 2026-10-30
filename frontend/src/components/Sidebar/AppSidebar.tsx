@@ -4,12 +4,10 @@ import { Logo } from "@/components/Common/Logo"
 import {
   Sidebar,
   SidebarContent,
-  SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
 import { type Item, Main } from "./Main"
-import { User } from "./User"
 
 type NavigationItem = Item & { adminOnly?: boolean }
 
@@ -37,9 +35,6 @@ export function AppSidebar() {
       <SidebarContent className="pt-3">
         <Main items={visibleItems} />
       </SidebarContent>
-      <SidebarFooter className="h-[53px] min-h-[53px] justify-center border-t px-2 py-0 group-data-[collapsible=icon]:px-0">
-        <User user={currentUser} />
-      </SidebarFooter>
     </Sidebar>
   )
 }
