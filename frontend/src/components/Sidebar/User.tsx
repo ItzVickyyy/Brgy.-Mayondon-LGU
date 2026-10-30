@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react"
 import {
-  Building2,
   ChevronsUpDown,
-  FileText,
+  CircleHelp,
+  Info,
   LogOut,
   Monitor,
   Moon,
@@ -10,7 +10,6 @@ import {
   Settings,
   Sun,
   UserRound,
-  SlidersHorizontal,
 } from "lucide-react"
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -36,7 +35,7 @@ import ChangePassword from "@/components/UserSettings/ChangePassword"
 import useAuth from "@/hooks/useAuth"
 import { getInitials } from "@/utils"
 
-type SettingsSection = "account" | "preferences" | "office"
+type SettingsSection = "account" | "preferences"
 
 function UserInfo({ fullName, email }: { fullName?: string; email?: string }) {
   return (
@@ -57,11 +56,9 @@ function UserInfo({ fullName, email }: { fullName?: string; email?: string }) {
 function SettingsModal({
   open,
   onOpenChange,
-  isAdmin,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
-  isAdmin: boolean
 }) {
   const [section, setSection] = useState<SettingsSection>("preferences")
   const [search, setSearch] = useState("")
@@ -69,10 +66,7 @@ function SettingsModal({
 
   const sections = [
     { value: "account" as const, label: "My Account", icon: UserRound },
-    { value: "preferences" as const, label: "Preferences", icon: SlidersHorizontal },
-    ...(isAdmin
-      ? [{ value: "office" as const, label: "Office Setup", icon: Building2 }]
-      : []),
+    { value: "preferences" as const, label: "Preferences", icon: Settings },
   ]
 
   const filteredSections = useMemo(
@@ -119,9 +113,7 @@ function SettingsModal({
                 const Icon = item.icon
                 const active = section === item.value
                 const previous = filteredSections[index - 1]
-                const showDivider =
-                  (item.value === "preferences" && previous?.value === "account") ||
-                  item.value === "office"
+                const showDivider = item.value === "preferences" && previous?.value === "account"
 
                 return (
                   <div key={item.value} className="shrink-0">
@@ -196,64 +188,10 @@ function SettingsModal({
                     })}
                   </div>
                 </div>
-                <div className="flex min-h-16 flex-col justify-center gap-1 border-b py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm font-medium">Interface font</p>
-                  <span className="text-sm text-muted-foreground">Default</span>
-                </div>
-                <div className="flex min-h-16 flex-col justify-center gap-1 border-b py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm font-medium">Response font</p>
-                  <span className="text-sm text-muted-foreground">Default</span>
-                </div>
-                <div className="flex min-h-16 flex-col justify-center gap-1 border-b py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm font-medium">Text size</p>
-                  <span className="text-sm text-muted-foreground">Medium</span>
-                </div>
-                <div className="flex min-h-16 flex-col justify-center gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-sm font-medium">Motion</p>
-                  <span className="text-sm text-muted-foreground">System default</span>
-                </div>
               </div>
             ) : null}
 
-            {section === "office" && isAdmin ? (
-              <div className="space-y-1">
-                <h3 className="mb-4 text-sm font-semibold">Office Setup</h3>
-                <section className="border-b py-4">
-                  <div className="mb-4 flex items-start gap-3">
-                    <Building2 className="mt-0.5 size-4 text-muted-foreground" />
-                    <div>
-                      <h4 className="text-sm font-medium">Barangay Information</h4>
-                      <p className="mt-1 text-sm text-muted-foreground">Office details used throughout the system.</p>
-                    </div>
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <label className="flex flex-col gap-2 text-sm font-medium">
-                      Official Barangay Name
-                      <input readOnly value="Barangay Mayondon LGU" className="h-10 rounded-md border bg-muted/30 px-3 font-normal" />
-                    </label>
-                    <label className="flex flex-col gap-2 text-sm font-medium">
-                      Location
-                      <input readOnly value="Los Baños, Laguna" className="h-10 rounded-md border bg-muted/30 px-3 font-normal" />
-                    </label>
-                    <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
-                      Office Address
-                      <input readOnly placeholder="Office address" className="h-10 rounded-md border bg-muted/30 px-3 font-normal" />
-                    </label>
-                  </div>
-                </section>
-                <section className="py-4">
-                  <div className="flex items-start gap-3">
-                    <FileText className="mt-0.5 size-4 text-muted-foreground" />
-                    <div>
-                      <h4 className="text-sm font-medium">Document Templates</h4>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Manage the document templates used for barangay clearances, certificates, and IDs.
-                      </p>
-                    </div>
-                  </div>
-                </section>
-              </div>
-            ) : null}
+
           </main>
         </div>
       </DialogContent>
@@ -283,7 +221,7 @@ export function User({ user }: { user: any }) {
                 <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg" side={isMobile ? "bottom" : "right"} align="end" sideOffset={4}>
+            <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg" side="top" align="start" sideOffset={8}>
               <DropdownMenuLabel className="p-0 font-normal">
                 <UserInfo fullName={user?.full_name} email={user?.email} />
               </DropdownMenuLabel>
@@ -300,7 +238,7 @@ export function User({ user }: { user: any }) {
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
-      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} isAdmin={Boolean(user?.is_superuser)} />
+      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   )
 }
