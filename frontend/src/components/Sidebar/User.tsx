@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   CircleHelp,
   Info,
@@ -7,8 +8,12 @@ import {
   LogOut,
   Settings,
   UserRound,
+  Save,
+  Upload,
+  ShieldCheck,
 } from "lucide-react"
 
+import { UsersService, type UserUpdateMe } from "@/client"
 import {
   Dialog,
   DialogContent,
@@ -26,19 +31,79 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { useSidebar } from "@/components/ui/sidebar"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import useAuth from "@/hooks/useAuth"
+import useCustomToast from "@/hooks/useCustomToast"
+import { handleError } from "@/utils"
 
-function displayValue(value: unknown) {
-  return value === null || value === undefined || value === "" ? "Not provided" : String(value)
+type ProfileForm = {
+  email: string
+  first_name: string
+  middle_name: string
+  last_name: string
+  extension_name: string
+  sex: string
+  civil_status: string
+  birthdate: string
+  birthplace: string
+  phone_number: string
+  address: string
+  governing_lgu: string
+  profile_photo_url: string
 }
 
-function AccountField({ label, value }: { label: string; value: unknown }) {
+const profileFields: { key: keyof ProfileForm; label: string; type?: string; placeholder?: string }[] = [
+  { key: "first_name", label: "First Name", placeholder: "Enter first name" },
+  { key: "middle_name", label: "Middle Name", placeholder: "Enter middle name or initial" },
+  { key: "last_name", label: "Last Name", placeholder: "Enter last name" },
+  { key: "extension_name", label: "Extension Name", placeholder: "Jr., Sr., III, etc." },
+  { key: "sex", label: "Sex", placeholder: "Enter sex" },
+  { key: "civil_status", label: "Civil Status", placeholder: "Enter civil status" },
+  { key: "birthdate", label: "Birthdate", type: "date" },
+  { key: "birthplace", label: "Birthplace", placeholder: "City or municipality" },
+]
+
+const contactFields: { key: keyof ProfileForm; label: string; type?: string; placeholder?: string }[] = [
+  { key: "email", label: "Email", type: "email", placeholder: "name@example.com" },
+  { key: "phone_number", label: "Phone Number", type: "tel", placeholder: "09XX XXX XXXX" },
+  { key: "address", label: "Address", placeholder: "House no., street, barangay, city" },
+]
+
+function getProfileForm(user: any): ProfileForm {
+  return {
+    email: user?.email ?? "",
+    first_name: user?.first_name ?? "",
+    middle_name: user?.middle_name ?? "",
+    last_name: user?.last_name ?? "",
+    extension_name: user?.extension_name ?? "",
+    sex: user?.sex ?? "",
+    civil_status: user?.civil_status ?? "",
+    birthdate: user?.birthdate ?? "",
+    birthplace: user?.birthplace ?? "",
+    phone_number: user?.phone_number ?? "",
+    address: user?.address ?? "",
+    governing_lgu: user?.governing_lgu ?? "",
+    profile_photo_url: user?.profile_photo_url ?? "",
+  }
+}
+
+function AccountField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-0 space-y-1">
+    <div className="space-y-1">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="break-words text-sm">{displayValue(value)}</p>
+      <p className="break-words text-sm font-medium">{value || "Not provided"}</p>
+    </div>
+  )
+}
+
+function SectionHeading({ title, description }: { title: string; description: string }) {
+  return (
+    <div className="mb-4">
+      <h3 className="text-sm font-semibold tracking-tight">{title}</h3>
+      <p className="mt-1 text-xs text-muted-foreground">{description}</p>
     </div>
   )
 }
@@ -52,87 +117,156 @@ function MyAccountModal({
   onOpenChange: (open: boolean) => void
   user: any
 }) {
-  const profilePhoto = user?.profile_photo_url || user?.profile_photo || user?.avatar_url
-  const role = user?.role || (user?.is_superuser ? "Administrator" : "Staff")
-  const status = user?.is_active === undefined ? "Active" : user.is_active ? "Active" : "Inactive"
-  const twoFactorEnabled = user?.two_factor_enabled ?? user?.mfa_enabled
+  const queryClient = useQueryClient()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const [form, setForm] = useState<ProfileForm>(() => getProfileForm(user))
+  const [previewPhoto, setPreviewPhoto] = useState(user?.profile_photo_url ?? "")
+
+  useEffect(() => {
+    const next = getProfileForm(user)
+    setForm(next)
+    setPreviewPhoto(next.profile_photo_url)
+  }, [user, open])
+
+  const updateField = (key: keyof ProfileForm, value: string) => {
+    setForm((previous) => ({ ...previous, [key]: value }))
+    if (key === "profile_photo_url") setPreviewPhoto(value)
+  }
+
+  const mutation = useMutation({
+    mutationFn: (data: UserUpdateMe) => UsersService.updateUserMe({ body: data }),
+    onSuccess: () => {
+      showSuccessToast("My Account updated successfully")
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] })
+      queryClient.invalidateQueries()
+    },
+    onError: handleError.bind(showErrorToast),
+  })
+
+  const saveProfile = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const fullName = [form.first_name, form.middle_name, form.last_name, form.extension_name]
+      .map((part) => part.trim())
+      .filter(Boolean)
+      .join(" ")
+    const payload = {
+      ...form,
+      full_name: fullName || user?.full_name || "",
+    }
+    mutation.mutate(payload as unknown as UserUpdateMe)
+  }
+
+  const status = user?.is_active === false ? "Inactive" : "Active"
+  const role = user?.is_superuser ? "Administrator" : "Staff"
+  const username = user?.username || user?.email || "Not provided"
+
+  const renderFields = (fields: typeof profileFields) => (
+    <div className="grid gap-4 sm:grid-cols-2">
+      {fields.map((field) => (
+        <div key={field.key} className={field.key === "address" ? "sm:col-span-2" : ""}>
+          <Label htmlFor={field.key} className="mb-1.5 block text-xs font-medium">{field.label}</Label>
+          <Input
+            id={field.key}
+            type={field.type || "text"}
+            value={form[field.key]}
+            onChange={(event) => updateField(field.key, event.target.value)}
+            placeholder={field.placeholder}
+            maxLength={field.key === "address" ? 500 : 255}
+            className="h-10 bg-background"
+          />
+        </div>
+      ))}
+    </div>
+  )
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[88vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
-        <DialogHeader className="shrink-0 border-b px-5 py-4 text-left sm:px-6">
-          <DialogTitle className="text-base font-semibold">My Account</DialogTitle>
-          <p className="text-sm text-muted-foreground">View your account details and security settings.</p>
+      <DialogContent className="flex max-h-[92vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
+        <DialogHeader className="shrink-0 border-b bg-muted/20 px-5 py-4 text-left sm:px-7">
+          <div className="flex items-center gap-3">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+              <UserRound className="size-5" />
+            </span>
+            <div>
+              <DialogTitle className="text-base font-semibold">My Account</DialogTitle>
+              <p className="mt-1 text-sm text-muted-foreground">Manage your personal details, contact information, and security.</p>
+            </div>
+          </div>
         </DialogHeader>
 
-        <div className="min-h-0 space-y-6 overflow-y-auto p-5 sm:p-6">
-          <section className="space-y-4">
-            <h3 className="text-sm font-semibold">Account Information</h3>
-            <div className="grid gap-x-6 gap-y-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
-              <AccountField label="Status" value={status} />
-              <AccountField label="Username" value={user?.username} />
-              <AccountField label="Email" value={user?.email} />
-              <AccountField label="Role" value={role} />
-              <AccountField label="Governing LGU" value={user?.governing_lgu_name || user?.governing_lgu} />
-            </div>
-          </section>
-
-          <section className="space-y-4">
-            <h3 className="text-sm font-semibold">Personal Information</h3>
-            <div className="rounded-lg border p-4">
-              <p className="mb-3 text-xs font-medium text-muted-foreground">Profile Photo</p>
-              <div className="flex items-center gap-3">
-                {profilePhoto ? (
-                  <img src={profilePhoto} alt="Profile" className="size-14 rounded-full border object-cover" />
-                ) : (
-                  <span className="flex size-14 items-center justify-center rounded-full border bg-muted text-muted-foreground">
-                    <UserRound className="size-6" />
-                  </span>
-                )}
-                <span className="text-sm text-muted-foreground">{profilePhoto ? "Current profile photo" : "No profile photo uploaded"}</span>
+        <form onSubmit={saveProfile} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 space-y-7 overflow-y-auto p-5 sm:p-7">
+            <section>
+              <SectionHeading title="Account Information" description="Your account status and assigned access level." />
+              <div className="grid gap-4 rounded-xl border bg-muted/20 p-4 sm:grid-cols-2 lg:grid-cols-3">
+                <AccountField label="Status" value={status} />
+                <AccountField label="Username" value={username} />
+                <AccountField label="Role" value={role} />
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <Label htmlFor="governing_lgu" className="mb-1.5 block text-xs font-medium">Governing LGU</Label>
+                  <Input id="governing_lgu" value={form.governing_lgu} onChange={(event) => updateField("governing_lgu", event.target.value)} placeholder="Enter assigned LGU" className="h-10 bg-background" />
+                </div>
               </div>
-            </div>
-            <div className="grid gap-x-6 gap-y-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
-              <AccountField label="First Name" value={user?.first_name} />
-              <AccountField label="Middle Name" value={user?.middle_name} />
-              <AccountField label="Last Name" value={user?.last_name} />
-              <AccountField label="Extension Name" value={user?.extension_name} />
-              <AccountField label="Sex" value={user?.sex} />
-              <AccountField label="Civil Status" value={user?.civil_status} />
-              <AccountField label="Birthdate" value={user?.birthdate} />
-              <AccountField label="Birthplace" value={user?.birthplace} />
-            </div>
-          </section>
+            </section>
 
-          <section className="space-y-4">
-            <h3 className="text-sm font-semibold">Contact Information</h3>
-            <div className="grid gap-x-6 gap-y-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
-              <AccountField label="Email" value={user?.email} />
-              <AccountField label="Phone Number" value={user?.phone_number || user?.phone} />
-              <AccountField label="Address" value={user?.address} />
-            </div>
-          </section>
+            <section>
+              <SectionHeading title="Personal Information" description="Keep your personal details accurate and up to date." />
+              <div className="mb-4 rounded-xl border p-4">
+                <Label htmlFor="profile_photo_url" className="mb-1.5 block text-xs font-medium">Profile Photo URL</Label>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                  <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-muted text-muted-foreground">
+                    {previewPhoto ? <img src={previewPhoto} alt="Profile preview" className="size-full object-cover" onError={() => setPreviewPhoto("")} /> : <UserRound className="size-7" />}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <Input id="profile_photo_url" value={form.profile_photo_url} onChange={(event) => updateField("profile_photo_url", event.target.value)} placeholder="Paste an image URL" className="h-10" />
+                    <p className="mt-1.5 text-xs text-muted-foreground">Use a direct image URL. Photo file uploads are not currently supported.</p>
+                  </div>
+                  <Upload className="hidden size-4 text-muted-foreground sm:block" aria-hidden="true" />
+                </div>
+              </div>
+              <div className="rounded-xl border p-4">
+                {renderFields(profileFields)}
+              </div>
+            </section>
 
-          <section className="space-y-4">
-            <h3 className="text-sm font-semibold">Security</h3>
-            <div className="space-y-5 rounded-lg border p-4">
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium">Change Password</h4>
-                <ChangePassword />
+            <section>
+              <SectionHeading title="Contact Information" description="These details help the office reach you when needed." />
+              <div className="rounded-xl border p-4">
+                {renderFields(contactFields)}
               </div>
-              <div className="border-t pt-4">
-                <h4 className="text-sm font-medium">Two-Factor Authentication (2FA)</h4>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {twoFactorEnabled === true
-                    ? "Two-factor authentication is enabled for this account."
-                    : twoFactorEnabled === false
-                      ? "Two-factor authentication is disabled for this account."
-                      : "Two-factor authentication status is not available."}
-                </p>
+            </section>
+
+            <section>
+              <SectionHeading title="Security" description="Protect your account and sign-in credentials." />
+              <div className="space-y-5 rounded-xl border p-4 sm:p-5">
+                <div>
+                  <h4 className="text-sm font-medium">Change Password</h4>
+                  <p className="mb-3 mt-1 text-xs text-muted-foreground">Choose a strong password you do not use elsewhere.</p>
+                  <ChangePassword />
+                </div>
+                <div className="flex items-start gap-3 border-t pt-4">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted text-muted-foreground"><ShieldCheck className="size-4" /></span>
+                  <div>
+                    <h4 className="text-sm font-medium">Two-Factor Authentication (2FA)</h4>
+                    <p className="mt-1 text-sm text-muted-foreground">2FA setup is not available yet. This account currently uses password-based sign-in.</p>
+                  </div>
+                  <span className="ml-auto rounded-full border px-2.5 py-1 text-xs text-muted-foreground">Unavailable</span>
+                </div>
               </div>
+            </section>
+          </div>
+
+          <div className="flex shrink-0 flex-col-reverse gap-2 border-t bg-background px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+            <p className="text-xs text-muted-foreground">Account status and role can only be changed by an administrator.</p>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={mutation.isPending}>Close</Button>
+              <Button type="submit" disabled={mutation.isPending} className="gap-2">
+                <Save className="size-4" />
+                {mutation.isPending ? "Saving..." : "Save Changes"}
+              </Button>
             </div>
-          </section>
-        </div>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   )
@@ -162,12 +296,8 @@ export function User({ user, compact = false }: { user: any; compact?: boolean }
               aria-label="User menu"
               title={user?.full_name || user?.email || "User menu"}
             >
-              <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/20 bg-primary/10 text-primary transition-colors group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:border-border group-data-[collapsible=icon]:bg-muted group-data-[collapsible=icon]:text-muted-foreground">
-                {user?.profile_photo_url || user?.profile_photo || user?.avatar_url ? (
-                  <img src={user.profile_photo_url || user.profile_photo || user.avatar_url} alt="" className="size-full object-cover" />
-                ) : (
-                  <UserRound className="size-4" />
-                )}
+              <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/20 bg-primary/10 text-primary">
+                {user?.profile_photo_url ? <img src={user.profile_photo_url} alt="" className="size-full object-cover" /> : <UserRound className="size-4" />}
               </span>
               <span className={compact ? "min-w-0 flex-1" : "min-w-0 flex-1 group-data-[collapsible=icon]:hidden"}>
                 <span className="block truncate text-sm font-medium">{user?.full_name || user?.email || "User"}</span>
@@ -189,11 +319,7 @@ export function User({ user, compact = false }: { user: any; compact?: boolean }
                 {(["English", "Filipino"] as const).map((language) => {
                   const selected = selectedLanguage === language
                   return (
-                    <DropdownMenuItem
-                      key={language}
-                      onSelect={() => setSelectedLanguage(language)}
-                      className="gap-2 px-3 py-2"
-                    >
+                    <DropdownMenuItem key={language} onSelect={() => setSelectedLanguage(language)} className="gap-2 px-3 py-2">
                       <span className="flex-1">{language}</span>
                       {selected ? <Check className="size-4 text-primary" /> : null}
                     </DropdownMenuItem>
@@ -203,17 +329,14 @@ export function User({ user, compact = false }: { user: any; compact?: boolean }
             </DropdownMenuSub>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
-              <CircleHelp className="size-4" />
-              Get help
+              <CircleHelp className="size-4" />Get help
             </DropdownMenuItem>
             <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
-              <Info className="size-4" />
-              Learn more
+              <Info className="size-4" />Learn more
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onSelect={() => { handleMenuClick(); setLogoutOpen(true) }}>
-              <LogOut className="size-4" />
-              Logout
+              <LogOut className="size-4" />Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -221,9 +344,7 @@ export function User({ user, compact = false }: { user: any; compact?: boolean }
       <MyAccountModal open={accountOpen} onOpenChange={setAccountOpen} user={user} />
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Log out?</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Log out?</DialogTitle></DialogHeader>
           <p className="text-sm text-muted-foreground">Are you sure you want to log out of your account?</p>
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => setLogoutOpen(false)}>Cancel</Button>
