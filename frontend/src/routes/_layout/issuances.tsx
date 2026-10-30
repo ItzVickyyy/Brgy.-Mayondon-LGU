@@ -211,7 +211,7 @@ function formatDate(value: string) {
 }
 
 function IssuancesManagement() {
-  const [activeTab, setActiveTab] = useState<"issue" | "history">("issue")
+  const [activeTab, setActiveTab] = useState<"issue" | "history">("history")
   const [selectedType, setSelectedType] = useState(documentTypes[0])
   const [selectedResidentId, setSelectedResidentId] = useState("")
   const [search, setSearch] = useState("")
@@ -307,9 +307,13 @@ function IssuancesManagement() {
   return (
     <div className="flex flex-col gap-6">
       <style>{"@media print { body * { visibility: hidden !important; } #issuance-print, #issuance-print * { visibility: visible !important; } #issuance-print { display: block !important; position: fixed; inset: 0; width: 100%; padding: 24px; color: #111 !important; background: white !important; } }"}</style>
-      <div className="print:hidden">
-        <p className="text-sm font-medium text-primary">Admin Portal</p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Issuance Management</h1>\n        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Manage Barangay IDs and document issuances, print records, and review issuance history.</p>
+      <div className="print:hidden flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-primary">Admin Portal</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Issuance Management</h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Manage Barangay IDs and document issuances, print records, and review issuance history.</p>
+        </div>
+        <button type="button" onClick={() => setActiveTab("issue")} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"><Plus className="size-4" aria-hidden="true" />New Issuance</button>
       </div>
 
       {notice && <div role="status" className="print:hidden rounded-lg border bg-muted/40 px-4 py-3 text-sm">{notice}</div>}
