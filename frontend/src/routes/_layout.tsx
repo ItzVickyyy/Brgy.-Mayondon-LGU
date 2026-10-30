@@ -1,16 +1,16 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
-import { CalendarDays, Clock3, LogOut, Maximize2, Minimize2, Moon, Sun } from "lucide-react"
+import { CalendarDays, Clock3, Maximize2, Minimize2, Moon, Sun } from "lucide-react"
 import { useEffect, useState } from "react"
 
 import { Footer } from "@/components/Common/Footer"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
+import { User } from "@/components/Sidebar/User"
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import useAuth from "@/hooks/useAuth"
 import { useTheme } from "@/components/theme-provider"
 import { isLoggedIn } from "@/hooks/useAuth"
@@ -39,9 +39,8 @@ export const Route = createFileRoute("/_layout")({
 function Layout() {
   const [now, setNow] = useState(() => new Date())
   const { theme, setTheme } = useTheme()
-  const { logout } = useAuth()
+  const { user: currentUser } = useAuth()
   const isDark = theme === "dark"
-  const [logoutOpen, setLogoutOpen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
 
   useEffect(() => {
@@ -76,68 +75,47 @@ function Layout() {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <header className="sticky top-0 z-10 flex min-h-16 shrink-0 flex-wrap items-center gap-3 border-b bg-background/95 px-3 py-2 backdrop-blur sm:px-4">
-          <SidebarTrigger className="-ml-1 shrink-0 text-muted-foreground" />
-
-          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
-            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
-              <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
-              <span>{formattedDate}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 whitespace-nowrap tabular-nums">
-              <Clock3 className="size-4 shrink-0" aria-hidden="true" />
-              <span>{timeText}</span>
-            </span>
+        <header className="sticky top-0 z-10 flex min-h-16 shrink-0 items-center gap-3 border-b bg-background/95 px-3 py-2 backdrop-blur sm:px-4">
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <SidebarTrigger className="-ml-1 shrink-0 text-muted-foreground" />
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+              <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
+                <span>{formattedDate}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 whitespace-nowrap tabular-nums">
+                <Clock3 className="size-4 shrink-0" aria-hidden="true" />
+                <span>{timeText}</span>
+              </span>
+            </div>
           </div>
 
-          <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+          <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
             <Button
               type="button"
               variant="outline"
-              className="h-9 w-[124px] shrink-0 justify-start gap-2 border-border bg-muted/40 px-3 text-foreground hover:bg-muted"
+              size="icon"
+              className="size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               title={isDark ? "Switch to light mode" : "Switch to dark mode"}
               onClick={() => setTheme(isDark ? "light" : "dark")}
             >
-              {isDark ? <Sun className="size-4 shrink-0" /> : <Moon className="size-4 shrink-0" />}
-              <span className="hidden sm:inline">{isDark ? "Light mode" : "Dark mode"}</span>
+              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
             <Button
               type="button"
               variant="outline"
-              className="h-9 gap-2 border-border bg-muted/40 px-3 text-foreground hover:bg-muted"
+              size="icon"
+              className="size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
               aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
               title={isFullscreen ? "Exit full screen" : "Enter full screen"}
               onClick={() => { void toggleFullscreen() }}
             >
               {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
-              <span className="hidden sm:inline">{isFullscreen ? "Exit fullscreen" : "Fullscreen"}</span>
             </Button>
-            <Button
-              type="button"
-              variant="outline"
-              className="h-9 gap-2 border-destructive/20 bg-destructive/5 px-3 text-destructive hover:bg-destructive/10"
-              aria-label="Log out"
-              title="Log out"
-              onClick={() => setLogoutOpen(true)}
-            >
-              <LogOut className="size-4" />
-              <span className="hidden sm:inline">Log out</span>
-            </Button>
+            <User user={currentUser} compact />
           </div>
         </header>
-        <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Log out?</DialogTitle>
-            </DialogHeader>
-            <p className="text-sm text-muted-foreground">Are you sure you want to log out of your account?</p>
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setLogoutOpen(false)}>Cancel</Button>
-              <Button type="button" variant="destructive" onClick={() => { setLogoutOpen(false); void logout() }}>Log out</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
         <main className="flex-1 p-4 sm:p-6 md:p-8">
           <div className="mx-auto max-w-7xl">
             <Outlet />
