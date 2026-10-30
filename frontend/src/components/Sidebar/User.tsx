@@ -171,8 +171,6 @@ function SettingsModal({
                 </div>
               </div>
             ) : null}
-
-
           </main>
         </div>
       </DialogContent>
@@ -194,43 +192,46 @@ export function User({ user }: { user: any }) {
 
   return (
     <>
-      <div className="px-2 pb-1 group-data-[collapsible=icon]:px-1">
-        <div className="rounded-lg border bg-muted/50 p-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  className="h-auto w-full min-w-0 justify-start gap-2 px-2 py-2 text-left group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
-                  aria-label="User menu"
-                >
-                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary shadow-sm transition-colors group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:bg-primary/15 group-data-[collapsible=icon]:ring-2 group-data-[collapsible=icon]:ring-primary/10"><UserRound className="size-4" /></span>
-                  <span className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-                    <span className="block truncate text-sm font-medium">{user?.full_name || user?.email || "User"}</span>
-                    <span className="block truncate text-xs font-normal text-muted-foreground">{user?.email || ""}</span>
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" side="top" align="start" sideOffset={8}>
-                <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
-                  <Settings className="size-4" />
-                  Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
-                  <CircleHelp className="size-4" />
-                  Get help
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
-                  <Info className="size-4" />
-                  Learn more
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={() => { handleMenuClick(); setLogoutOpen(true) }}>
-                  <LogOut className="size-4" />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+      <div className="px-2 pb-1 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:pb-0">
+        <div className="rounded-lg border bg-muted/50 p-1 group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:border-transparent group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-0">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                className="h-auto w-full min-w-0 justify-start gap-2 px-2 py-2 text-left group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
+                aria-label="User menu"
+                title={user?.full_name || user?.email || "User menu"}
+              >
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary transition-colors group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:border-border group-data-[collapsible=icon]:bg-muted group-data-[collapsible=icon]:text-muted-foreground">
+                  <UserRound className="size-4" />
+                </span>
+                <span className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+                  <span className="block truncate text-sm font-medium">{user?.full_name || user?.email || "User"}</span>
+                  <span className="block truncate text-xs font-normal text-muted-foreground">{user?.email || ""}</span>
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-56" side="top" align="start" sideOffset={8}>
+              <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
+                <Settings className="size-4" />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
+                <CircleHelp className="size-4" />
+                Get help
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
+                <Info className="size-4" />
+                Learn more
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => { handleMenuClick(); setLogoutOpen(true) }}>
+                <LogOut className="size-4" />
+                Logout
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
       <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
