@@ -79,7 +79,7 @@ function Layout() {
             <Button
               type="button"
               variant="outline"
-              className="h-9 gap-2 border-primary/15 bg-primary/5 px-3 hover:bg-primary/10"
+              className="h-9 gap-2 border-border bg-muted/40 px-3 text-foreground hover:bg-muted"
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               title={isDark ? "Switch to light mode" : "Switch to dark mode"}
               onClick={() => setTheme(isDark ? "light" : "dark")}
@@ -90,7 +90,7 @@ function Layout() {
             <Button
               type="button"
               variant="outline"
-              className="h-9 gap-2 border-sky-500/20 bg-sky-500/10 px-3 text-sky-700 hover:bg-sky-500/20 dark:text-sky-300"
+              className="h-9 gap-2 border-border bg-muted/40 px-3 text-foreground hover:bg-muted"
               aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
               title={isFullscreen ? "Exit full screen" : "Enter full screen"}
               onClick={() => { void toggleFullscreen() }}
