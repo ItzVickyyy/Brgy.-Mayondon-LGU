@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState, type FormEvent } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   CircleHelp,
@@ -143,7 +143,7 @@ function MyAccountModal({
     onError: handleError.bind(showErrorToast),
   })
 
-  const saveProfile = (event: React.FormEvent<HTMLFormElement>) => {
+  const saveProfile = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const fullName = [form.first_name, form.middle_name, form.last_name, form.extension_name]
       .map((part) => part.trim())
