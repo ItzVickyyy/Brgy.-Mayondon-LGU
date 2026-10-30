@@ -222,7 +222,7 @@ export function User({ user }: { user: any }) {
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="gap-2">
+                <DropdownMenuSubTrigger className="gap-2 data-[state=open]:text-foreground">
                   <Languages className="size-4" />
                   Language
                 </DropdownMenuSubTrigger>
