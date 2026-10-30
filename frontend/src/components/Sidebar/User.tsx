@@ -200,10 +200,10 @@ export function User({ user }: { user: any }) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="h-auto w-full min-w-0 justify-start gap-2 px-2 py-2 text-left group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-1"
+                  className="h-auto w-full min-w-0 justify-start gap-2 px-2 py-2 text-left group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-lg group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
                   aria-label="User menu"
                 >
-                  <UserRound className="size-5 shrink-0" />
+                  <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary shadow-sm transition-colors group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:bg-primary/15 group-data-[collapsible=icon]:ring-2 group-data-[collapsible=icon]:ring-primary/10"><UserRound className="size-4" /></span>
                   <span className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
                     <span className="block truncate text-sm font-medium">{user?.full_name || user?.email || "User"}</span>
                     <span className="block truncate text-xs font-normal text-muted-foreground">{user?.email || ""}</span>
