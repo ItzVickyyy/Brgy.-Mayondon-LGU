@@ -28,7 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar"
+import { useSidebar } from "@/components/ui/sidebar"
 import { type Theme, useTheme } from "@/components/theme-provider"
 import UserInformation from "@/components/UserSettings/UserInformation"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
@@ -204,6 +204,8 @@ export function User({ user }: { user: any }) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const { theme, setTheme } = useTheme()
+  const isDark = theme === "dark"
 
   if (!user) return null
 
@@ -213,42 +215,47 @@ export function User({ user }: { user: any }) {
 
   return (
     <>
-      <SidebarMenu>
-        <SidebarMenuItem>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <SidebarMenuButton size="lg" className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground" data-testid="user-menu">
-                <UserInfo fullName={user?.full_name} email={user?.email} />
-                <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
-              </SidebarMenuButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg" side="top" align="start" sideOffset={8}>
-              <DropdownMenuLabel className="p-0 font-normal">
-                <UserInfo fullName={user?.full_name} email={user?.email} />
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => { handleMenuClick(); setSettingsOpen(true) }}>
-                <Settings />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
-                <CircleHelp />
-                Get help
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
-                <Info />
-                Learn more
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={async () => { handleMenuClick(); await logout() }}>
-                <LogOut />
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </SidebarMenuItem>
-      </SidebarMenu>
+      <div className="flex items-center gap-1 px-2 group-data-[collapsible=icon]:px-1">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="min-w-0 flex-1 justify-start gap-2 px-2">
+              <ChevronsUpDown className="size-4 shrink-0" />
+              <span className="truncate text-sm group-data-[collapsible=icon]:hidden">Menu</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" side="top" align="start" sideOffset={8}>
+            <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
+              <Settings className="size-4" />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
+              <CircleHelp className="size-4" />
+              Get help
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
+              <Info className="size-4" />
+              Learn more
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={async () => { handleMenuClick(); await logout() }}>
+              <LogOut className="size-4" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="shrink-0"
+          aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+          onClick={() => setTheme(isDark ? "light" : "dark")}
+        >
+          {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+        </Button>
+      </div>
       <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
   )
