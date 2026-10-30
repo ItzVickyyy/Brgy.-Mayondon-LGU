@@ -23,7 +23,7 @@ type IssuanceRecord = {
   resident: string
   type: string
   date: string
-  status: "Sample" | "Draft"
+  status: "Issued" | "Sample" | "Draft"
   fields: Record<string, string>
 }
 
