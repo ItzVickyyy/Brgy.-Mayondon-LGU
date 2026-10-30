@@ -184,6 +184,7 @@ export function User({ user }: { user: any }) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [logoutOpen, setLogoutOpen] = useState(false)
 
   if (!user) return null
 
@@ -224,7 +225,7 @@ export function User({ user }: { user: any }) {
                   Learn more
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onSelect={async () => { handleMenuClick(); await logout() }}>
+                <DropdownMenuItem onSelect={() => { handleMenuClick(); setLogoutOpen(true) }}>
                   <LogOut className="size-4" />
                   Logout
                 </DropdownMenuItem>
@@ -233,6 +234,18 @@ export function User({ user }: { user: any }) {
         </div>
       </div>
       <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Log out?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">Are you sure you want to log out of your account?</p>
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={() => setLogoutOpen(false)}>Cancel</Button>
+            <Button type="button" variant="destructive" onClick={() => { setLogoutOpen(false); void logout() }}>Log out</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }
