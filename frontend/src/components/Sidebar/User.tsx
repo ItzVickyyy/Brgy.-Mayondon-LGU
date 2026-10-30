@@ -123,12 +123,28 @@ function MyAccountModal({
   const [previewPhoto, setPreviewPhoto] = useState(user?.profile_photo_url ?? "")
   const [selectedPhotoName, setSelectedPhotoName] = useState("")
   const [isPhotoDragging, setIsPhotoDragging] = useState(false)
+  const [addressParts, setAddressParts] = useState(() => ({
+    address_line: user?.address ?? "",
+    purok_sitio: "",
+    barangay: "",
+    municipality_city: "",
+    province: "",
+    zip_code: "",
+  }))
 
   useEffect(() => {
     const next = getProfileForm(user)
     setForm(next)
     setPreviewPhoto(next.profile_photo_url)
     setSelectedPhotoName("")
+    setAddressParts({
+      address_line: user?.address ?? "",
+      purok_sitio: "",
+      barangay: "",
+      municipality_city: "",
+      province: "",
+      zip_code: "",
+    })
   }, [user, open])
 
   const updateField = (key: keyof ProfileForm, value: string) => {
@@ -152,8 +168,17 @@ function MyAccountModal({
       .map((part) => part.trim())
       .filter(Boolean)
       .join(" ")
+    const formattedAddress = [
+      addressParts.address_line,
+      addressParts.purok_sitio,
+      addressParts.barangay,
+      addressParts.municipality_city,
+      addressParts.province,
+      addressParts.zip_code,
+    ].map((part) => part.trim()).filter(Boolean).join(", ")
     const payload = {
       ...form,
+      address: formattedAddress,
       full_name: fullName || user?.full_name || "",
     }
     mutation.mutate(payload as unknown as UserUpdateMe)
@@ -278,8 +303,51 @@ function MyAccountModal({
 
             <section>
               <SectionHeading title="Contact Information" description="These details help the office reach you when needed." />
-              <div className="rounded-xl border p-4">
-                {renderFields(contactFields)}
+              <div className="rounded-xl border p-4 sm:p-5">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {contactFields.filter((field) => field.key !== "address").map((field) => (
+                    <div key={field.key}>
+                      <Label htmlFor={field.key} className="mb-1.5 block text-xs font-medium">{field.label}</Label>
+                      <Input
+                        id={field.key}
+                        type={field.type || "text"}
+                        value={form[field.key]}
+                        onChange={(event) => updateField(field.key, event.target.value)}
+                        placeholder={field.placeholder}
+                        maxLength={255}
+                        className="h-10 bg-background"
+                      />
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-5 border-t pt-5">
+                  <div className="mb-3">
+                    <h4 className="text-sm font-semibold">Residential Address</h4>
+                    <p className="mt-1 text-xs text-muted-foreground">Enter each part of the address in its own field.</p>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {[
+                      { key: "address_line", label: "House/Lot/Block No. and Street", placeholder: "House no., street name" },
+                      { key: "purok_sitio", label: "Purok / Sitio / Subdivision", placeholder: "Purok, sitio, or subdivision" },
+                      { key: "barangay", label: "Barangay", placeholder: "Barangay name" },
+                      { key: "municipality_city", label: "Municipality / City", placeholder: "Municipality or city" },
+                      { key: "province", label: "Province", placeholder: "Province name" },
+                      { key: "zip_code", label: "ZIP Code", placeholder: "ZIP code" },
+                    ].map((field) => (
+                      <div key={field.key}>
+                        <Label htmlFor={field.key} className="mb-1.5 block text-xs font-medium">{field.label}</Label>
+                        <Input
+                          id={field.key}
+                          value={addressParts[field.key as keyof typeof addressParts]}
+                          onChange={(event) => setAddressParts((previous) => ({ ...previous, [field.key]: event.target.value }))}
+                          placeholder={field.placeholder}
+                          maxLength={field.key === "zip_code" ? 10 : 255}
+                          className="h-10 bg-background"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </section>
 
