@@ -64,26 +64,50 @@ function Layout() {
         <header className="sticky top-0 z-10 flex min-h-16 shrink-0 flex-wrap items-center gap-3 border-b bg-background/95 px-3 py-2 backdrop-blur sm:px-4">
           <SidebarTrigger className="-ml-1 shrink-0 text-muted-foreground" />
 
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+              <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
+              <span>{formattedDate}</span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 whitespace-nowrap tabular-nums">
+              <Clock3 className="size-4 shrink-0" aria-hidden="true" />
+              <span>{timeText}</span>
+            </span>
+          </div>
+
           <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
-            <div className="flex min-w-0 items-center gap-2 whitespace-nowrap text-xs text-muted-foreground sm:gap-3 sm:text-sm">
-              <span className="inline-flex items-center gap-1.5">
-                <CalendarDays className="size-4" aria-hidden="true" />
-                <span>{formattedDate}</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5 tabular-nums">
-                <Clock3 className="size-4" aria-hidden="true" />
-                <span>{timeText}</span>
-              </span>
-            </div>
-            <span aria-hidden="true" className="text-muted-foreground/60">|</span>
-            <Button type="button" variant="ghost" size="icon" className="shrink-0" aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"} title={isDark ? "Switch to light mode" : "Switch to dark mode"} onClick={() => setTheme(isDark ? "light" : "dark")}>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 gap-2 border-primary/15 bg-primary/5 px-3 hover:bg-primary/10"
+              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              onClick={() => setTheme(isDark ? "light" : "dark")}
+            >
               {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              <span className="hidden sm:inline">{isDark ? "Light mode" : "Dark mode"}</span>
             </Button>
-            <Button type="button" variant="ghost" size="icon" className="shrink-0" aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"} title={isFullscreen ? "Exit full screen" : "Enter full screen"} onClick={() => { void toggleFullscreen() }}>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 gap-2 border-sky-500/20 bg-sky-500/10 px-3 text-sky-700 hover:bg-sky-500/20 dark:text-sky-300"
+              aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+              title={isFullscreen ? "Exit full screen" : "Enter full screen"}
+              onClick={() => { void toggleFullscreen() }}
+            >
               {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+              <span className="hidden sm:inline">{isFullscreen ? "Exit fullscreen" : "Fullscreen"}</span>
             </Button>
-            <Button type="button" variant="ghost" size="icon" className="shrink-0 text-destructive hover:text-destructive" aria-label="Log out" title="Log out" onClick={() => setLogoutOpen(true)}>
+            <Button
+              type="button"
+              variant="outline"
+              className="h-9 gap-2 border-destructive/20 bg-destructive/5 px-3 text-destructive hover:bg-destructive/10"
+              aria-label="Log out"
+              title="Log out"
+              onClick={() => setLogoutOpen(true)}
+            >
               <LogOut className="size-4" />
+              <span className="hidden sm:inline">Log out</span>
             </Button>
           </div>
         </header>
