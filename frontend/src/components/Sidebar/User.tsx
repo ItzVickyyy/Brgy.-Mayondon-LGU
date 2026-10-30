@@ -197,7 +197,21 @@ export function User({ user }: { user: any }) {
 
   return (
     <>
-      <div className="flex items-center gap-1 px-2 group-data-[collapsible=icon]:px-1">
+      <div className="space-y-2 px-2 pb-1 group-data-[collapsible=icon]:px-1">
+        <div className="flex min-w-0 items-center gap-2 rounded-lg border bg-muted/50 p-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-1">
+          <div className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-background text-sm font-semibold">
+            {user?.avatar_url ? (
+              <img src={user.avatar_url} alt="" className="size-full object-cover" />
+            ) : (
+              String(user?.full_name || user?.email || "U").slice(0, 1).toUpperCase()
+            )}
+          </div>
+          <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
+            <p className="truncate text-sm font-medium">{user?.full_name || user?.email || "User"}</p>
+            <p className="truncate text-xs text-muted-foreground">{user?.email || ""}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 rounded-lg border bg-muted/50 p-1">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="min-w-0 flex-1 justify-start gap-2 px-2">
@@ -237,6 +251,7 @@ export function User({ user }: { user: any }) {
         >
           {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
         </Button>
+        </div>
       </div>
       <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
     </>
