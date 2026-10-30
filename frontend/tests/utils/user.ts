@@ -13,7 +13,8 @@ export async function logInUser(page: Page, email: string, password: string) {
 }
 
 export async function logOutUser(page: Page) {
-  await page.getByRole("button", { name: "Log out" }).click()
+  await page.getByRole("button", { name: "User menu" }).click()
+  await page.getByRole("menuitem", { name: "Logout" }).click()
   await page.getByRole("dialog").getByRole("button", { name: "Log out" }).click()
   await page.waitForURL(/\/login$/)
 }
