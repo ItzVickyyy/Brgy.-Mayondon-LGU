@@ -102,16 +102,16 @@ test("Logged-out user cannot access protected routes", async ({ page }) => {
   await page.getByRole("dialog").getByRole("button", { name: "Log out" }).click()
   await page.waitForURL("/login")
 
-  await page.goto("/settings")
+  await page.goto("/")
   await page.waitForURL("/welcome")
 })
 
-test("Redirects to /login when token is wrong", async ({ page }) => {
-  await page.goto("/settings")
-  await page.evaluate(() => {
+test("Redirects to /login and clears an invalid token", async ({ page }) => {
+  await page.addInitScript(() => {
     localStorage.setItem("access_token", "invalid_token")
   })
-  await page.goto("/settings")
+  await page.goto("/")
   await page.waitForURL("/login")
   await expect(page).toHaveURL("/login")
+  await expect.poll(() => page.evaluate(() => localStorage.getItem("access_token"))).toBeNull()
 })
