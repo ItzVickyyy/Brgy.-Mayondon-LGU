@@ -178,11 +178,12 @@ function SettingsModal({
                           aria-pressed={selected}
                           title={option.label}
                           className={
-                            "flex size-8 items-center justify-center rounded-md transition-colors " +
+                            "flex h-9 items-center justify-center gap-2 rounded-md px-3 text-sm transition-colors " +
                             (selected ? "bg-accent text-accent-foreground shadow-sm" : "text-muted-foreground hover:bg-muted")
                           }
                         >
                           <Icon className="size-4" />
+                          <span>{option.label}</span>
                         </button>
                       )
                     })}
@@ -230,6 +231,16 @@ export function User({ user }: { user: any }) {
                 <Settings />
                 Settings
               </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
+                <CircleHelp />
+                Get help
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
+                <Info />
+                Learn more
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={async () => { handleMenuClick(); await logout() }}>
                 <LogOut />
                 Logout
