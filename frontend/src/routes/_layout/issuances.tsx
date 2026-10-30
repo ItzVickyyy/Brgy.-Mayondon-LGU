@@ -211,7 +211,7 @@ function formatDate(value: string) {
 }
 
 function IssuancesManagement() {
-  const [activeTab, setActiveTab] = useState<"issue" | "history">("history")
+  const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(false)
   const [selectedType, setSelectedType] = useState(documentTypes[0])
   const [selectedResidentId, setSelectedResidentId] = useState("")
   const [search, setSearch] = useState("")
@@ -289,7 +289,7 @@ function IssuancesManagement() {
     }
     setDrafts((previous) => [record, ...previous])
     setNotice(record.id + " was recorded as issued. You can now print the record.")
-    setActiveTab("history")
+    setIsIssuanceModalOpen(false)
   }
 
   function preparePrint(record?: IssuanceRecord) {
@@ -313,21 +313,17 @@ function IssuancesManagement() {
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Issuance Management</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Manage Barangay IDs and document issuances, print records, and review issuance history.</p>
         </div>
-        <button type="button" onClick={() => setActiveTab("issue")} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"><Plus className="size-4" aria-hidden="true" />New Issuance</button>
+        <button type="button" onClick={() => setIsIssuanceModalOpen(true)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"><Plus className="size-4" aria-hidden="true" />New Issuance</button>
       </div>
 
       {notice && <div role="status" className="print:hidden rounded-lg border bg-muted/40 px-4 py-3 text-sm">{notice}</div>}
 
-      <div className="print:hidden flex flex-wrap gap-2 border-b">
-        <button type="button" onClick={() => setActiveTab("issue")} className={"border-b-2 px-4 py-3 text-sm font-medium " + (activeTab === "issue" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>New Issuance</button>
-        <button type="button" onClick={() => setActiveTab("history")} className={"border-b-2 px-4 py-3 text-sm font-medium " + (activeTab === "history" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>Issuance History</button>
-      </div>
-
-      {activeTab === "issue" ? (
-        <section className="print:hidden rounded-xl border bg-card p-4 shadow-sm sm:p-6">
+      {isIssuanceModalOpen && (
+        <div className="print:hidden fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 p-3 sm:items-center sm:p-6" onMouseDown={(event) => { if (event.target === event.currentTarget) setIsIssuanceModalOpen(false) }}>
+          <section role="dialog" aria-modal="true" aria-labelledby="new-issuance-title" className="my-3 w-full max-w-4xl rounded-xl border bg-card p-4 shadow-xl sm:my-6 sm:p-6">
           <div className="mb-5 flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><Plus className="size-5" aria-hidden="true" /></div>
-            <div><h2 className="font-semibold">New Issuance</h2><p className="mt-1 text-sm text-muted-foreground">Select the issuance type and resident, then complete the required details.</p></div>
+            <div className="min-w-0 flex-1"><h2 id="new-issuance-title" className="font-semibold">New Issuance</h2><p className="mt-1 text-sm text-muted-foreground">Select the issuance type and resident, then complete the required details.</p></div><button type="button" onClick={() => setIsIssuanceModalOpen(false)} aria-label="Close new issuance form" className="rounded-md border px-3 py-2 text-sm hover:bg-muted">Close</button>
           </div>
               <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 md:grid-cols-2">
             <label className={labelClassName + " md:col-span-2"}>Resident
@@ -385,12 +381,14 @@ function IssuancesManagement() {
               <button type="button" onClick={clearForm} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Clear Form</button>
               <button type="button" onClick={saveIssuance} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"><FileCheck2 className="size-4" aria-hidden="true" />Save as Issued</button>
               <button type="button" onClick={() => { preparePrint(); window.setTimeout(() => window.print(), 100) }} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium hover:bg-muted"><Printer className="size-4" aria-hidden="true" />Print Preview</button>
-              <button type="button" onClick={() => setActiveTab("history")} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">View History</button>
+              <button type="button" onClick={() => setIsIssuanceModalOpen(false)} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Cancel</button>
             </div>
           </form>
-        </section>
-      ) : (
-        <section className="print:hidden overflow-hidden rounded-xl border bg-card shadow-sm">
+          </section>
+        </div>
+      )}
+
+      <section className="print:hidden overflow-hidden rounded-xl border bg-card shadow-sm">
           <div className="flex flex-col gap-3 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
             <div><h2 className="font-semibold">Issuance History</h2><p className="mt-1 text-sm text-muted-foreground">Search and review previous Barangay ID and document issuances.</p></div>
             <div className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-xl">
@@ -419,8 +417,7 @@ function IssuancesManagement() {
             </table>
             {filteredIssuances.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No records match your search and filter.</p>}
           </div>
-        </section>
-      )}
+      </section>
 
       <section id="issuance-print" className="hidden print:block p-6 text-black">
         <p className="text-sm">Selected document: {printRecord?.type ?? selectedType}</p>
