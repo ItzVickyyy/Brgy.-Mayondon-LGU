@@ -13,25 +13,25 @@ test("Issuances Management page is accessible", async ({ page }) => {
 
 test("Records Management page displays sample resident records", async ({ page }) => {
   await page.goto("/records")
-  await expect(page.getByRole("heading", { name: "Records Management" })).toBeVisible()
-  await expect(page.getByText("Sample Resident One")).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Resident Records" })).toBeVisible()
+  await expect(page.getByText("Resident One")).toBeVisible()
 
-  const search = page.getByPlaceholder("Search records...")
-  await search.fill("Sample Resident One")
-  await expect(page.getByText("Sample Resident One")).toBeVisible()
-  await expect(page.getByText("Sample Resident Two")).not.toBeVisible()
+  const search = page.getByPlaceholder("Search name, address, ID, or status...")
+  await search.fill("Resident One")
+  await expect(page.getByText("Resident One")).toBeVisible()
+  await expect(page.getByText("Resident Two")).not.toBeVisible()
 })
 
 test("Records Management search filters results", async ({ page }) => {
   await page.goto("/records")
-  await page.getByPlaceholder("Search records...").fill("no-record-matches-this")
-  await expect(page.getByText("Sample Resident One")).not.toBeVisible()
+  await page.getByPlaceholder("Search name, address, ID, or status...").fill("no-record-matches-this")
+  await expect(page.getByText("Resident One")).not.toBeVisible()
 })
 
 test("Officials page displays sample officials", async ({ page }) => {
   await page.goto("/officials")
   await expect(page.getByRole("heading", { name: "Officials", exact: true })).toBeVisible()
-  await expect(page.getByText("Sample Official One")).toBeVisible()
+  await expect(page.getByText("Barangay Captain")).toBeVisible()
 })
 
 test("Officials search filters results", async ({ page }) => {
