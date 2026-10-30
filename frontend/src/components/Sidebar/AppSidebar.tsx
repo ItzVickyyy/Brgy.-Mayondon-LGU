@@ -34,7 +34,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b px-4 py-6 group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:items-center">
         <Logo variant="responsive" />
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="pt-3">
         <Main items={visibleItems} />
       </SidebarContent>
       <SidebarFooter className="border-t px-2 pt-3">
