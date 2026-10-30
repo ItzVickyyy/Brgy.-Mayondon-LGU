@@ -53,7 +53,7 @@ function SettingsModal({
 
   const filteredSections = useMemo(
     () => sections.filter((item) => item.label.toLowerCase().includes(search.trim().toLowerCase())),
-    [search, isAdmin],
+    [search],
   )
 
   const themes: { value: Theme; label: string; icon: typeof Sun }[] = [
