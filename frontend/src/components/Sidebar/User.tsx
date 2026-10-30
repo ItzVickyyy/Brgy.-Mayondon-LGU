@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react"
 import {
-  ChevronsUpDown,
   CircleHelp,
   Info,
   LogOut,
@@ -22,7 +21,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
@@ -186,8 +184,6 @@ export function User({ user }: { user: any }) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const { theme, setTheme } = useTheme()
-  const isDark = theme === "dark"
 
   if (!user) return null
 
@@ -198,8 +194,7 @@ export function User({ user }: { user: any }) {
   return (
     <>
       <div className="px-2 pb-1 group-data-[collapsible=icon]:px-1">
-        <div className="flex items-center gap-2 group-data-[collapsible=icon]:flex-col-reverse">
-          <div className="min-w-0 flex-1 rounded-lg border bg-muted/50 p-1 group-data-[collapsible=icon]:flex-none">
+        <div className="rounded-lg border bg-muted/50 p-1">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -235,20 +230,6 @@ export function User({ user }: { user: any }) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
-          </div>
-          <div className="shrink-0 rounded-lg border bg-muted/50 p-1 group-data-[collapsible=icon]:flex-none">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="shrink-0 group-data-[collapsible=icon]:size-8"
-              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              onClick={() => setTheme(isDark ? "light" : "dark")}
-            >
-              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            </Button>
-          </div>
         </div>
       </div>
       <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
