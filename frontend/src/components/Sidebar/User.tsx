@@ -1,15 +1,11 @@
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import {
   CircleHelp,
   Info,
   Languages,
   Check,
   LogOut,
-  Monitor,
-  Moon,
-  Search,
   Settings,
-  Sun,
   UserRound,
 } from "lucide-react"
 
@@ -31,152 +27,111 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "@/components/ui/sidebar"
-import { type Theme, useTheme } from "@/components/theme-provider"
-import UserInformation from "@/components/UserSettings/UserInformation"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import useAuth from "@/hooks/useAuth"
 
-type SettingsSection = "account" | "preferences"
+function displayValue(value: unknown) {
+  return value === null || value === undefined || value === "" ? "Not provided" : String(value)
+}
 
-function SettingsModal({
+function AccountField({ label, value }: { label: string; value: unknown }) {
+  return (
+    <div className="min-w-0 space-y-1">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p className="break-words text-sm">{displayValue(value)}</p>
+    </div>
+  )
+}
+
+function MyAccountModal({
   open,
   onOpenChange,
+  user,
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
+  user: any
 }) {
-  const [section, setSection] = useState<SettingsSection>("preferences")
-  const [search, setSearch] = useState("")
-  const { theme, setTheme } = useTheme()
-
-  const sections = [
-    { value: "account" as const, label: "My Account", icon: UserRound },
-    { value: "preferences" as const, label: "Preferences", icon: Settings },
-  ]
-
-  const filteredSections = useMemo(
-    () => sections.filter((item) => item.label.toLowerCase().includes(search.trim().toLowerCase())),
-    [search],
-  )
-
-  const themes: { value: Theme; label: string; icon: typeof Sun }[] = [
-    { value: "system", label: "System default", icon: Monitor },
-    { value: "light", label: "Light", icon: Sun },
-    { value: "dark", label: "Dark", icon: Moon },
-  ]
-
-  const selectSection = (value: SettingsSection) => {
-    setSection(value)
-    setSearch("")
-  }
+  const profilePhoto = user?.profile_photo_url || user?.profile_photo || user?.avatar_url
+  const role = user?.role || (user?.is_superuser ? "Administrator" : "Staff")
+  const status = user?.is_active === undefined ? "Active" : user.is_active ? "Active" : "Inactive"
+  const twoFactorEnabled = user?.two_factor_enabled ?? user?.mfa_enabled
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[82vh] min-h-[500px] max-h-[720px] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
-        <DialogHeader className="flex h-12 shrink-0 flex-row items-center border-b px-4 py-0 text-left">
-          <DialogTitle className="text-sm font-semibold">Settings</DialogTitle>
+      <DialogContent className="flex max-h-[88vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
+        <DialogHeader className="shrink-0 border-b px-5 py-4 text-left sm:px-6">
+          <DialogTitle className="text-base font-semibold">My Account</DialogTitle>
+          <p className="text-sm text-muted-foreground">View your account details and security settings.</p>
         </DialogHeader>
 
-        <div className="grid min-h-0 flex-1 grid-cols-1 overflow-hidden sm:grid-cols-[210px_minmax(0,1fr)]">
-          <aside className="flex min-h-0 flex-col border-b p-3 sm:border-b-0 sm:border-r sm:p-4">
-            <div className="relative mb-3 shrink-0">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                aria-label="Search settings"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search settings"
-                className="h-9 w-full rounded-md border bg-muted/40 pl-8 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30"
-              />
+        <div className="min-h-0 space-y-6 overflow-y-auto p-5 sm:p-6">
+          <section className="space-y-4">
+            <h3 className="text-sm font-semibold">Account Information</h3>
+            <div className="grid gap-x-6 gap-y-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
+              <AccountField label="Status" value={status} />
+              <AccountField label="Username" value={user?.username} />
+              <AccountField label="Email" value={user?.email} />
+              <AccountField label="Role" value={role} />
+              <AccountField label="Governing LGU" value={user?.governing_lgu_name || user?.governing_lgu} />
             </div>
+          </section>
 
-            <nav
-              aria-label="Settings sections"
-              className="flex min-h-0 gap-1 overflow-x-auto sm:flex-1 sm:flex-col sm:overflow-y-auto"
-            >
-              {filteredSections.map((item, index) => {
-                const Icon = item.icon
-                const active = section === item.value
-                const previous = filteredSections[index - 1]
-                const showDivider = item.value === "preferences" && previous?.value === "account"
-
-                return (
-                  <div key={item.value} className="shrink-0">
-                    {showDivider ? <div className="my-2 hidden border-t sm:block" /> : null}
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      aria-current={active ? "page" : undefined}
-                      onClick={() => selectSection(item.value)}
-                      className={
-                        "h-9 justify-start gap-2 rounded-md px-2.5 text-sm sm:w-full " +
-                        (active ? "bg-accent font-medium text-accent-foreground hover:bg-accent" : "font-normal")
-                      }
-                    >
-                      <Icon className="size-4 shrink-0" />
-                      <span>{item.label}</span>
-                    </Button>
-                  </div>
-                )
-              })}
-              {filteredSections.length === 0 ? (
-                <p className="px-2 py-3 text-sm text-muted-foreground">No settings found.</p>
-              ) : null}
-            </nav>
-          </aside>
-
-          <main className="min-h-0 min-w-0 overflow-y-auto p-4 sm:p-6">
-            {section === "account" ? (
-              <div className="space-y-5">
-                <h3 className="text-sm font-semibold">My Account</h3>
-                <div className="grid gap-5 xl:grid-cols-2">
-                  <section className="min-w-0 rounded-lg border p-4">
-                    <h4 className="mb-3 text-sm font-medium">Account Information</h4>
-                    <UserInformation />
-                  </section>
-                  <section className="min-w-0 rounded-lg border p-4">
-                    <h4 className="mb-3 text-sm font-medium">Change Password</h4>
-                    <ChangePassword />
-                  </section>
-                </div>
+          <section className="space-y-4">
+            <h3 className="text-sm font-semibold">Personal Information</h3>
+            <div className="rounded-lg border p-4">
+              <p className="mb-3 text-xs font-medium text-muted-foreground">Profile Photo</p>
+              <div className="flex items-center gap-3">
+                {profilePhoto ? (
+                  <img src={profilePhoto} alt="Profile" className="size-14 rounded-full border object-cover" />
+                ) : (
+                  <span className="flex size-14 items-center justify-center rounded-full border bg-muted text-muted-foreground">
+                    <UserRound className="size-6" />
+                  </span>
+                )}
+                <span className="text-sm text-muted-foreground">{profilePhoto ? "Current profile photo" : "No profile photo uploaded"}</span>
               </div>
-            ) : null}
+            </div>
+            <div className="grid gap-x-6 gap-y-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
+              <AccountField label="First Name" value={user?.first_name} />
+              <AccountField label="Middle Name" value={user?.middle_name} />
+              <AccountField label="Last Name" value={user?.last_name} />
+              <AccountField label="Extension Name" value={user?.extension_name} />
+              <AccountField label="Sex" value={user?.sex} />
+              <AccountField label="Civil Status" value={user?.civil_status} />
+              <AccountField label="Birthdate" value={user?.birthdate} />
+              <AccountField label="Birthplace" value={user?.birthplace} />
+            </div>
+          </section>
 
-            {section === "preferences" ? (
-              <div className="space-y-1">
-                <h3 className="mb-4 text-sm font-semibold">General</h3>
-                <div className="flex min-h-16 flex-col justify-center gap-3 border-b py-3 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm font-medium">Theme</p>
-                    <p className="text-xs text-muted-foreground sm:hidden">Choose the interface appearance.</p>
-                  </div>
-                  <div className="flex items-center gap-1 rounded-md border p-1">
-                    {themes.map((option) => {
-                      const Icon = option.icon
-                      const selected = theme === option.value
-                      return (
-                        <button
-                          key={option.value}
-                          type="button"
-                          onClick={() => setTheme(option.value)}
-                          aria-label={option.label}
-                          aria-pressed={selected}
-                          title={option.label}
-                          className={
-                            "flex h-9 items-center justify-center gap-2 rounded-md px-3 text-sm transition-colors " +
-                            (selected ? "bg-accent text-accent-foreground shadow-sm" : "text-muted-foreground hover:bg-muted")
-                          }
-                        >
-                          <Icon className="size-4" />
-                          <span>{option.label}</span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
+          <section className="space-y-4">
+            <h3 className="text-sm font-semibold">Contact Information</h3>
+            <div className="grid gap-x-6 gap-y-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
+              <AccountField label="Email" value={user?.email} />
+              <AccountField label="Phone Number" value={user?.phone_number || user?.phone} />
+              <AccountField label="Address" value={user?.address} />
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <h3 className="text-sm font-semibold">Security</h3>
+            <div className="space-y-5 rounded-lg border p-4">
+              <div className="space-y-3">
+                <h4 className="text-sm font-medium">Change Password</h4>
+                <ChangePassword />
               </div>
-            ) : null}
-          </main>
+              <div className="border-t pt-4">
+                <h4 className="text-sm font-medium">Two-Factor Authentication (2FA)</h4>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {twoFactorEnabled === true
+                    ? "Two-factor authentication is enabled for this account."
+                    : twoFactorEnabled === false
+                      ? "Two-factor authentication is disabled for this account."
+                      : "Two-factor authentication status is not available."}
+                </p>
+              </div>
+            </div>
+          </section>
         </div>
       </DialogContent>
     </Dialog>
@@ -186,7 +141,7 @@ function SettingsModal({
 export function User({ user, compact = false }: { user: any; compact?: boolean }) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
-  const [settingsOpen, setSettingsOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState<"English" | "Filipino">("English")
   const [logoutOpen, setLogoutOpen] = useState(false)
 
@@ -199,67 +154,71 @@ export function User({ user, compact = false }: { user: any; compact?: boolean }
   return (
     <>
       <div className={compact ? "w-auto min-w-0" : "w-full px-2 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:px-0"}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                className={compact ? "h-10 w-auto max-w-[280px] min-w-0 justify-start gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted/70" : "h-auto w-full min-w-0 justify-start gap-2 rounded-lg px-2 py-2 text-left group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:min-w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"}
-                aria-label="User menu"
-                title={user?.full_name || user?.email || "User menu"}
-              >
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-primary/20 bg-primary/10 text-primary transition-colors group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:border-border group-data-[collapsible=icon]:bg-muted group-data-[collapsible=icon]:text-muted-foreground">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className={compact ? "h-10 w-auto max-w-[280px] min-w-0 justify-start gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted/70" : "h-auto w-full min-w-0 justify-start gap-2 rounded-lg px-2 py-2 text-left group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:min-w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"}
+              aria-label="User menu"
+              title={user?.full_name || user?.email || "User menu"}
+            >
+              <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/20 bg-primary/10 text-primary transition-colors group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:border-border group-data-[collapsible=icon]:bg-muted group-data-[collapsible=icon]:text-muted-foreground">
+                {user?.profile_photo_url || user?.profile_photo || user?.avatar_url ? (
+                  <img src={user.profile_photo_url || user.profile_photo || user.avatar_url} alt="" className="size-full object-cover" />
+                ) : (
                   <UserRound className="size-4" />
-                </span>
-                <span className={compact ? "min-w-0 flex-1" : "min-w-0 flex-1 group-data-[collapsible=icon]:hidden"}>
-                  <span className="block truncate text-sm font-medium">{user?.full_name || user?.email || "User"}</span>
-                  <span className="block truncate text-xs font-normal text-muted-foreground">{user?.email || ""}</span>
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-56" side={compact ? "bottom" : "top"} align={compact ? "end" : "start"} sideOffset={8}>
-              <DropdownMenuItem onSelect={() => setSettingsOpen(true)}>
-                <Settings className="size-4" />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger className="gap-2 data-[state=open]:text-foreground">
-                  <Languages className="size-4 text-muted-foreground" />
-                  Language
-                </DropdownMenuSubTrigger>
-                <DropdownMenuSubContent className="w-44">
-                  {(["English", "Filipino"] as const).map((language) => {
-                    const selected = selectedLanguage === language
-                    return (
-                      <DropdownMenuItem
-                        key={language}
-                        onSelect={() => setSelectedLanguage(language)}
-                        className="gap-2 px-3 py-2"
-                      >
-                        <span className="flex-1">{language}</span>
-                        {selected ? <Check className="size-4 text-primary" /> : null}
-                      </DropdownMenuItem>
-                    )
-                  })}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
-                <CircleHelp className="size-4" />
-                Get help
-              </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
-                <Info className="size-4" />
-                Learn more
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => { handleMenuClick(); setLogoutOpen(true) }}>
-                <LogOut className="size-4" />
-                Logout
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                )}
+              </span>
+              <span className={compact ? "min-w-0 flex-1" : "min-w-0 flex-1 group-data-[collapsible=icon]:hidden"}>
+                <span className="block truncate text-sm font-medium">{user?.full_name || user?.email || "User"}</span>
+                <span className="block truncate text-xs font-normal text-muted-foreground">{user?.email || ""}</span>
+              </span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56" side={compact ? "bottom" : "top"} align={compact ? "end" : "start"} sideOffset={8}>
+            <DropdownMenuItem onSelect={() => setAccountOpen(true)}>
+              <Settings className="size-4" />
+              My Account
+            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="gap-2 data-[state=open]:text-foreground">
+                <Languages className="size-4 text-muted-foreground" />
+                Language
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-44">
+                {(["English", "Filipino"] as const).map((language) => {
+                  const selected = selectedLanguage === language
+                  return (
+                    <DropdownMenuItem
+                      key={language}
+                      onSelect={() => setSelectedLanguage(language)}
+                      className="gap-2 px-3 py-2"
+                    >
+                      <span className="flex-1">{language}</span>
+                      {selected ? <Check className="size-4 text-primary" /> : null}
+                    </DropdownMenuItem>
+                  )
+                })}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
+              <CircleHelp className="size-4" />
+              Get help
+            </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
+              <Info className="size-4" />
+              Learn more
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => { handleMenuClick(); setLogoutOpen(true) }}>
+              <LogOut className="size-4" />
+              Logout
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <MyAccountModal open={accountOpen} onOpenChange={setAccountOpen} user={user} />
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
