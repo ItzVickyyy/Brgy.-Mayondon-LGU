@@ -24,6 +24,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
@@ -184,7 +187,6 @@ export function User({ user }: { user: any }) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [languageOpen, setLanguageOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState<"English" | "Filipino">("English")
   const [logoutOpen, setLogoutOpen] = useState(false)
 
@@ -219,10 +221,26 @@ export function User({ user }: { user: any }) {
                 <Settings className="size-4" />
                 Settings
               </DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => setLanguageOpen(true)}>
-                <Languages className="size-4" />
-                Language
-              </DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <Languages className="size-4" />
+                  Language
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="w-44">
+                  {(["English", "Filipino"] as const).map((language) => {
+                    const selected = selectedLanguage === language
+                    return (
+                      <DropdownMenuItem
+                        key={language}
+                        onSelect={() => setSelectedLanguage(language)}
+                      >
+                        <span className="flex-1">{language}</span>
+                        {selected ? <Check className="size-4 text-primary" /> : null}
+                      </DropdownMenuItem>
+                    )
+                  })}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
               <DropdownMenuSeparator />
               <DropdownMenuItem onSelect={() => { handleMenuClick(); window.open("https://www.dilg.gov.ph/", "_blank", "noopener,noreferrer") }}>
                 <CircleHelp className="size-4" />
@@ -241,39 +259,6 @@ export function User({ user }: { user: any }) {
           </DropdownMenu>
       </div>
       <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <Dialog open={languageOpen} onOpenChange={setLanguageOpen}>
-        <DialogContent className="sm:max-w-xs lg:fixed lg:left-[calc(50%+26rem)] lg:top-1/2 lg:translate-x-0 lg:-translate-y-1/2">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Languages className="size-4" />
-              Language
-            </DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">Choose your preferred language.</p>
-          <div className="grid gap-2 pt-2">
-            {(["English", "Filipino"] as const).map((language) => {
-              const selected = selectedLanguage === language
-              return (
-                <button
-                  key={language}
-                  type="button"
-                  onClick={() => setSelectedLanguage(language)}
-                  aria-pressed={selected}
-                  className={
-                    "flex min-h-11 items-center justify-between rounded-md border px-3 text-left text-sm transition-colors " +
-                    (selected
-                      ? "border-primary bg-accent text-accent-foreground"
-                      : "border-border hover:bg-muted")
-                  }
-                >
-                  <span>{language}</span>
-                  {selected ? <Check className="size-4 text-primary" /> : null}
-                </button>
-              )
-            })}
-          </div>
-        </DialogContent>
-      </Dialog>
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
