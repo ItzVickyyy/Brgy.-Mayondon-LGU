@@ -11,10 +11,13 @@ test("Public landing page shows barangay information and staff login", async ({
     page.getByRole("heading", { name: "Barangay Mayondon LGU" }),
   ).toBeVisible()
   await expect(
-    page.getByRole("heading", { name: "Announcements" }),
+    page.getByRole("heading", { name: "Resident Records" }),
   ).toBeVisible()
   await expect(
-    page.getByRole("heading", { name: "Contact Information" }),
+    page.getByRole("heading", { name: "Document Preparation" }),
+  ).toBeVisible()
+  await expect(
+    page.getByRole("heading", { name: "Issuance History" }),
   ).toBeVisible()
   await expect(
     page.getByRole("link", { name: "Staff Login" }).first(),
