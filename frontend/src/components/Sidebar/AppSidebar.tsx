@@ -1,4 +1,4 @@
-import { Activity, BarChart3, BookUser, CreditCard, DatabaseBackup, FileCheck2, LayoutDashboard, Users, ShieldCheck } from "lucide-react"
+import { Activity, BarChart3, BookUser, DatabaseBackup, FileCheck2, LayoutDashboard, Users, ShieldCheck } from "lucide-react"
 
 import { Logo } from "@/components/Common/Logo"
 import {
@@ -14,7 +14,6 @@ type NavigationItem = Item & { adminOnly?: boolean }
 const items: NavigationItem[] = [
   { icon: LayoutDashboard, title: "Dashboard", path: "/" },
   { icon: FileCheck2, title: "Issuance Management", path: "/issuances" },
-  { icon: CreditCard, title: "Barangay ID Management", path: "/barangay-ids" },
   { icon: Users, title: "Resident Records", path: "/records" },
   { icon: BookUser, title: "Officials", path: "/officials", adminOnly: true },
   { icon: ShieldCheck, title: "User Accounts", path: "/admin", adminOnly: true },
