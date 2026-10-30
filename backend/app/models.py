@@ -16,6 +16,18 @@ class UserBase(SQLModel):
     is_active: bool = True
     is_superuser: bool = False
     full_name: str | None = Field(default=None, max_length=255)
+    first_name: str | None = Field(default=None, max_length=100)
+    middle_name: str | None = Field(default=None, max_length=100)
+    last_name: str | None = Field(default=None, max_length=100)
+    extension_name: str | None = Field(default=None, max_length=20)
+    sex: str | None = Field(default=None, max_length=30)
+    civil_status: str | None = Field(default=None, max_length=30)
+    birthdate: str | None = Field(default=None, max_length=10)
+    birthplace: str | None = Field(default=None, max_length=255)
+    phone_number: str | None = Field(default=None, max_length=30)
+    address: str | None = Field(default=None, max_length=500)
+    governing_lgu: str | None = Field(default=None, max_length=255)
+    profile_photo_url: str | None = Field(default=None, max_length=1000)
 
 
 # Properties to receive via API on creation
@@ -41,6 +53,18 @@ class UserUpdate(SQLModel):
 class UserUpdateMe(SQLModel):
     full_name: str | None = Field(default=None, max_length=255)
     email: EmailStr | None = Field(default=None, max_length=255)
+    first_name: str | None = Field(default=None, max_length=100)
+    middle_name: str | None = Field(default=None, max_length=100)
+    last_name: str | None = Field(default=None, max_length=100)
+    extension_name: str | None = Field(default=None, max_length=20)
+    sex: str | None = Field(default=None, max_length=30)
+    civil_status: str | None = Field(default=None, max_length=30)
+    birthdate: str | None = Field(default=None, max_length=10)
+    birthplace: str | None = Field(default=None, max_length=255)
+    phone_number: str | None = Field(default=None, max_length=30)
+    address: str | None = Field(default=None, max_length=500)
+    governing_lgu: str | None = Field(default=None, max_length=255)
+    profile_photo_url: str | None = Field(default=None, max_length=1000)
 
 
 class UpdatePassword(SQLModel):
