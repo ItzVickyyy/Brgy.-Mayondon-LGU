@@ -351,7 +351,6 @@ function IssuancesManagement() {
               <button type="button" onClick={clearForm} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Clear Form</button>
               <button type="button" onClick={saveIssuance} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"><FileCheck2 className="size-4" aria-hidden="true" />Save as Issued</button>
               <button type="button" onClick={() => { preparePrint(); window.setTimeout(() => window.print(), 100) }} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium hover:bg-muted"><Printer className="size-4" aria-hidden="true" />Print Preview</button>
-              <button type="button" onClick={() => setIsIssuanceModalOpen(false)} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Cancel</button>
             </div>
           </form>
           </div>
