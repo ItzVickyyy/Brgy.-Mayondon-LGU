@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { FileCheck2, Printer, Search } from "lucide-react"
+import { FileCheck2, Printer, Search, Plus, Eye, IdCard, UserRound, RotateCcw } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
@@ -264,13 +264,13 @@ function IssuancesManagement() {
     setPrintRecord(null)
   }
 
-  function saveDraft() {
+  function saveIssuance() {
     if (!selectedResident) {
       setNotice("Select a resident before saving the document.")
       return
     }
     const record: IssuanceRecord = {
-      id: "DRAFT-" + String(drafts.length + 1).padStart(3, "0"),
+      id: "ISS-" + String(drafts.length + 1).padStart(4, "0"),
       resident: currentName,
       type: selectedType,
       date: currentDate,
@@ -299,21 +299,21 @@ function IssuancesManagement() {
       <style>{"@media print { body * { visibility: hidden !important; } #issuance-print, #issuance-print * { visibility: visible !important; } #issuance-print { display: block !important; position: fixed; inset: 0; width: 100%; padding: 24px; color: #111 !important; background: white !important; } }"}</style>
       <div className="print:hidden">
         <p className="text-sm font-medium text-primary">Admin Portal</p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Issuances Management</h1>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Issuance Management</h1>\n        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">Manage Barangay IDs and document issuances, print records, and review issuance history.</p>
       </div>
 
       {notice && <div role="status" className="print:hidden rounded-lg border bg-muted/40 px-4 py-3 text-sm">{notice}</div>}
 
       <div className="print:hidden flex flex-wrap gap-2 border-b">
-        <button type="button" onClick={() => setActiveTab("issue")} className={"border-b-2 px-4 py-3 text-sm font-medium " + (activeTab === "issue" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>Issue Document</button>
+        <button type="button" onClick={() => setActiveTab("issue")} className={"border-b-2 px-4 py-3 text-sm font-medium " + (activeTab === "issue" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>New Issuance</button>
         <button type="button" onClick={() => setActiveTab("history")} className={"border-b-2 px-4 py-3 text-sm font-medium " + (activeTab === "history" ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground")}>Issuance History</button>
       </div>
 
       {activeTab === "issue" ? (
         <section className="print:hidden rounded-xl border bg-card p-4 shadow-sm sm:p-6">
           <div className="mb-5 flex items-center gap-3">
-            <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><FileCheck2 className="size-5" aria-hidden="true" /></div>
-            <div><h2 className="font-semibold">Document Details</h2><p className="mt-1 text-sm text-muted-foreground">Choose a document to show its corresponding hardcopy fields.</p></div>
+            <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><Plus className="size-5" aria-hidden="true" /></div>
+            <div><h2 className="font-semibold">New Issuance</h2><p className="mt-1 text-sm text-muted-foreground">Select the issuance type and resident, then complete the required details.</p></div>
           </div>
               <form onSubmit={(event) => event.preventDefault()} className="grid gap-5 md:grid-cols-2">
             <label className={labelClassName + " md:col-span-2"}>Resident
@@ -323,7 +323,7 @@ function IssuancesManagement() {
               </select>
               <span className="text-xs font-normal text-muted-foreground"></span>
             </label>
-            <label className={labelClassName + " md:col-span-2"}>Document Type
+            <label className={labelClassName + " md:col-span-2"}>Issuance Type
               <select value={selectedType} onChange={(event) => changeDocumentType(event.target.value)} className={inputClassName}>
                 {documentTypes.map((type) => <option key={type} value={type}>{type}</option>)}
               </select>
@@ -369,8 +369,8 @@ function IssuancesManagement() {
             </div>
             <div className="md:col-span-2 flex flex-wrap gap-2">
               <button type="button" onClick={clearForm} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Clear Form</button>
-              <button type="button" onClick={saveDraft} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Save Draft to Session</button>
-              <button type="button" onClick={() => preparePrint()} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"><Printer className="size-4" aria-hidden="true" />Print Review Copy</button>
+              <button type="button" onClick={saveIssuance} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:opacity-90"><FileCheck2 className="size-4" aria-hidden="true" />Save as Issued</button>
+              <button type="button" onClick={() => { preparePrint(); window.setTimeout(() => window.print(), 100) }} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border px-4 text-sm font-medium hover:bg-muted"><Printer className="size-4" aria-hidden="true" />Print Preview</button>
               <button type="button" onClick={() => setActiveTab("history")} className="inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">View History</button>
             </div>
           </form>
@@ -378,9 +378,9 @@ function IssuancesManagement() {
       ) : (
         <section className="print:hidden overflow-hidden rounded-xl border bg-card shadow-sm">
           <div className="flex flex-col gap-3 border-b p-4 lg:flex-row lg:items-center lg:justify-between">
-            <div><h2 className="font-semibold">Issuance History</h2><p className="mt-1 text-sm text-muted-foreground">Review issuance history and drafts saved during this session.</p></div>
+            <div><h2 className="font-semibold">Issuance History</h2><p className="mt-1 text-sm text-muted-foreground">Search and review previous Barangay ID and document issuances.</p></div>
             <div className="flex w-full flex-col gap-2 sm:flex-row lg:max-w-xl">
-              <label className="relative block min-w-0 flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by ID, name, type, or date..." className={inputClassName + " pl-9"} /></label>
+              <label className="relative block min-w-0 flex-1"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search reference number, resident, type, or date..." className={inputClassName + " pl-9"} /></label>
               <select value={historyType} onChange={(event) => setHistoryType(event.target.value)} className={inputClassName + " sm:max-w-[260px]"}>
                 <option>All document types</option>
                 {documentTypes.map((type) => <option key={type} value={type}>{type}</option>)}
@@ -389,7 +389,7 @@ function IssuancesManagement() {
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[760px] text-left text-sm">
-              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Record ID</th><th className="px-4 py-3 font-medium">Name</th><th className="px-4 py-3 font-medium">Document Type</th><th className="px-4 py-3 font-medium">Date</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Action</th></tr></thead>
+              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Record ID</th><th className="px-4 py-3 font-medium">Name</th><th className="px-4 py-3 font-medium">Issuance Type</th><th className="px-4 py-3 font-medium">Date</th><th className="px-4 py-3 font-medium">Status</th><th className="px-4 py-3 font-medium">Action</th></tr></thead>
               <tbody className="divide-y">
                 {filteredIssuances.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/20">
@@ -397,8 +397,8 @@ function IssuancesManagement() {
                     <td className="px-4 py-3">{item.resident}</td>
                     <td className="px-4 py-3">{item.type}</td>
                     <td className="px-4 py-3">{formatDate(item.date)}</td>
-                    <td className="px-4 py-3"><span className={"rounded-full px-2.5 py-1 text-xs font-medium " + (item.status === "Draft" ? "bg-amber-500/10 text-amber-700 dark:text-amber-300" : "bg-muted text-muted-foreground")}>{item.status}</span></td>
-                    <td className="px-4 py-3">{item.status === "Draft" ? <button type="button" onClick={() => preparePrint(item)} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"><Printer className="size-3.5" aria-hidden="true" />Print draft</button> : <span className="text-xs text-muted-foreground">View record</span>}</td>
+                    <td className="px-4 py-3"><span className={"rounded-full px-2.5 py-1 text-xs font-medium " + (item.status === "Draft" ? "bg-amber-500/10 text-amber-700 dark:text-amber-300" : item.status === "Issued" ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300" : "bg-muted text-muted-foreground")}>{item.status}</span></td>
+                    <td className="px-4 py-3"><div className="flex items-center gap-2"><button type="button" onClick={() => { preparePrint(item); setNotice("Print preview prepared for " + item.id + ".") }} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"><Eye className="size-3.5" aria-hidden="true" />View</button><button type="button" onClick={() => { preparePrint(item); window.setTimeout(() => window.print(), 100) }} className="inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium hover:bg-muted"><Printer className="size-3.5" aria-hidden="true" />Print</button></div></td>
                   </tr>
                 ))}
               </tbody>
