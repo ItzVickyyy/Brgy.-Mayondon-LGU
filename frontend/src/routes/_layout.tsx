@@ -81,14 +81,14 @@ function Layout() {
               {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
             <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 text-xs text-muted-foreground sm:text-sm">
-            <span className="inline-flex items-center gap-1.5">
-              <CalendarDays className="size-4" aria-hidden="true" />
-              <span>{dateText}</span>
-            </span>
-            <span className="inline-flex items-center gap-1.5 tabular-nums">
-              <Clock3 className="size-4" aria-hidden="true" />
-              <span>{timeText}</span>
-            </span>
+              <span className="inline-flex items-center gap-1.5">
+                <CalendarDays className="size-4" aria-hidden="true" />
+                <span>{dateText}</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 tabular-nums">
+                <Clock3 className="size-4" aria-hidden="true" />
+                <span>{timeText}</span>
+              </span>
             </div>
           </div>
         </header>
