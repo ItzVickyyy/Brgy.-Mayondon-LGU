@@ -220,6 +220,18 @@ export type UserPublic = {
      * Email
      */
     email: string;
+    first_name?: string | null;
+    middle_name?: string | null;
+    last_name?: string | null;
+    extension_name?: string | null;
+    sex?: string | null;
+    civil_status?: string | null;
+    birthdate?: string | null;
+    birthplace?: string | null;
+    phone_number?: string | null;
+    address?: string | null;
+    governing_lgu?: string | null;
+    profile_photo_url?: string | null;
     /**
      * Is Active
      */
@@ -290,14 +302,20 @@ export type UserUpdate = {
  * UserUpdateMe
  */
 export type UserUpdateMe = {
-    /**
-     * Full Name
-     */
     full_name?: string | null;
-    /**
-     * Email
-     */
     email?: string | null;
+    first_name?: string | null;
+    middle_name?: string | null;
+    last_name?: string | null;
+    extension_name?: string | null;
+    sex?: string | null;
+    civil_status?: string | null;
+    birthdate?: string | null;
+    birthplace?: string | null;
+    phone_number?: string | null;
+    address?: string | null;
+    governing_lgu?: string | null;
+    profile_photo_url?: string | null;
 };
 
 /**
