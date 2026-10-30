@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
+import { useEffect } from "react"
 
 import {
   type Body_login_login_access_token as AccessToken,
@@ -20,11 +21,23 @@ const useAuth = () => {
   const queryClient = useQueryClient()
   const { showErrorToast } = useCustomToast()
 
-  const { data: user } = useQuery<UserPublic | null, Error>({
+  const { data: user, error: userError } = useQuery<UserPublic | null, Error>({
     queryKey: ["currentUser"],
     queryFn: async () => (await UsersService.readUserMe()).data,
     enabled: isLoggedIn(),
+    retry: false,
   })
+
+  useEffect(() => {
+    if (!userError || !("status" in userError)) return
+
+    const status = userError.status
+    if (status === 401 || status === 403) {
+      localStorage.removeItem("access_token")
+      queryClient.removeQueries({ queryKey: ["currentUser"] })
+      navigate({ to: "/login", replace: true })
+    }
+  }, [userError, queryClient, navigate])
 
   const signUpMutation = useMutation({
     mutationFn: (data: UserRegister) =>
