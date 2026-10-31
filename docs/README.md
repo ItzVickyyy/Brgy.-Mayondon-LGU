@@ -5,7 +5,7 @@ Everything the team needs to know about the project lives in this folder.
 | File | What it is | When to read it |
 |---|---|---|
 | [Source-of-Truth.md](Source-of-Truth.md) | Project requirements, schedule, grading, decisions, open items, and status | Before any task; check this after client discussions |
-| [Creative-Brief.md](Creative-Brief.md) | Interview-based scope, objectives, features, exclusions, platform preference, content, timeline, and approval fields | Use as the current draft; client review and signatures are still required |
+| [Creative-Brief.md](Creative-Brief.md) | Interview-based scope, objectives, features, exclusions, platform preference, content, timeline, and approval fields | Professor-reviewed revised brief is the approved planning baseline; verify required client and group leader signatures on the retained copy |
 | [Developers.md](Developers.md) | Team roles, branch plan, workflows, reviews, testing, migrations, and security guidance | Before starting development or opening a pull request |
 | [How-To-Start.md](How-To-Start.md) | Windows PowerShell steps to run the development setup with separate backend and frontend terminals | When developing locally |
 | [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md) | Initial Docker-based self-hosting setup for an office LAN without internet, including host setup, firewall, offline limitations, and deployment verification | When preparing and testing the proposed client-site installation |
