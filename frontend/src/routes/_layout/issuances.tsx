@@ -698,7 +698,6 @@ function IssuancesManagement() {
       {/* Page header */}
       <header className="print:hidden flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-primary">Admin Portal</p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             Issuance Management
           </h1>
@@ -708,8 +707,8 @@ function IssuancesManagement() {
           </p>
         </div>
         <Button
-          size="lg"
-          className="h-11 w-full px-5 text-base sm:w-auto"
+          size="default"
+          className="w-full sm:w-auto"
           onClick={() => setIsIssuanceModalOpen(true)}
         >
           <Plus aria-hidden="true" />
