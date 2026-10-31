@@ -12,14 +12,14 @@ import { type Item, Main } from "./Main"
 type NavigationItem = Item & { adminOnly?: boolean }
 
 const items: NavigationItem[] = [
-  { icon: LayoutDashboard, title: "Dashboard", path: "/" },
-  { icon: FileCheck2, title: "Issuance Management", path: "/issuances" },
-  { icon: Users, title: "Resident Records", path: "/records" },
-  { icon: BookUser, title: "Officials", path: "/officials", adminOnly: true },
-  { icon: ShieldCheck, title: "User Accounts", path: "/admin", adminOnly: true },
-  { icon: Activity, title: "Activity Log", path: "/activity-log" },
-  { icon: BarChart3, title: "Management Reports", path: "/reports", adminOnly: true },
-  { icon: DatabaseBackup, title: "Backup and Restore", path: "/backup-restore", adminOnly: true },
+  { icon: LayoutDashboard, title: "Dashboard", path: "/", section: "Workspace" },
+  { icon: FileCheck2, title: "Issuance Management", path: "/issuances", section: "Records and Documents" },
+  { icon: Users, title: "Resident Records", path: "/records", section: "Records and Documents" },
+  { icon: BookUser, title: "Officials", path: "/officials", adminOnly: true, section: "Administration" },
+  { icon: ShieldCheck, title: "User Accounts", path: "/admin", adminOnly: true, section: "Administration" },
+  { icon: Activity, title: "Activity Log", path: "/activity-log", section: "Administration" },
+  { icon: BarChart3, title: "Management Reports", path: "/reports", adminOnly: true, section: "Administration" },
+  { icon: DatabaseBackup, title: "Backup and Restore", path: "/backup-restore", adminOnly: true, section: "Administration" },
 ]
 
 export function AppSidebar() {
