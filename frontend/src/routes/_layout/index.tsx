@@ -83,21 +83,31 @@ function SectionHeading({ title, description }: { title: string; description?: s
 
 function Dashboard() {
   const [period, setPeriod] = useState<Period>("overall")
-  const maxMonthly = Math.max(...monthlyIssuances.map((item) => item.count))
-  const totalByType = useMemo(() => documentTypes.reduce((sum, item) => sum + item.count, 0), [])
+  const visibleMonths = useMemo(() => {
+    if (period === "today" || period === "week" || period === "month") return monthlyIssuances.slice(-1)
+    if (period === "3months") return monthlyIssuances.slice(-3)
+    if (period === "6months") return monthlyIssuances.slice(-6)
+    return monthlyIssuances
+  }, [period])
+  const maxMonthly = Math.max(...visibleMonths.map((item) => item.count))
+  const baseTypeTotal = useMemo(() => documentTypes.reduce((sum, item) => sum + item.count, 0), [])
+  const totalByType = documentsByPeriod[period]
+  const visibleDocumentTypes = useMemo(() => documentTypes.map((item) => ({ ...item, count: Math.round((item.count / baseTypeTotal) * totalByType) })), [baseTypeTotal, totalByType])
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-primary">Admin Portal</p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
           <p className="mt-2 text-sm text-muted-foreground">An overview of household, population, voter, and document records.</p>
         </div>
-        <div className="flex items-center gap-2 self-start rounded-lg border bg-card px-3 py-2 text-sm text-muted-foreground sm:self-auto">
-          <CalendarDays className="size-4" aria-hidden="true" />
-          <span>Dashboard overview</span>
-        </div>
+        <label className="flex items-center gap-2 self-start text-sm sm:self-auto">
+          <CalendarDays className="size-4 text-muted-foreground" aria-hidden="true" />
+          <span className="text-muted-foreground">Period</span>
+          <select aria-label="Dashboard reporting period" value={period} onChange={(event) => setPeriod(event.target.value as Period)} className="h-9 rounded-md border bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+            {Object.entries(periodLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+          </select>
+        </label>
       </div>
 
       <section aria-label="Summary statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -111,15 +121,9 @@ function Dashboard() {
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <SectionHeading title="Document Issuances Over Time" description="Monthly issuance volume" />
-            <label className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Period</span>
-              <select value={period} onChange={(event) => setPeriod(event.target.value as Period)} className="h-9 rounded-md border bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                {Object.entries(periodLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-              </select>
-            </label>
           </div>
           <div className="mt-6 flex h-48 items-end gap-3 border-b px-1 sm:gap-5">
-            {monthlyIssuances.map((item) => (
+            {visibleMonths.map((item) => (
               <div key={item.month} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
                 <span className="text-xs tabular-nums text-muted-foreground">{item.count}</span>
                 <div className="w-full max-w-12 rounded-t-md bg-primary/80 transition-all" style={{ height: `${(item.count / maxMonthly) * 72}%` }} />
@@ -133,7 +137,7 @@ function Dashboard() {
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <SectionHeading title="Issuances by Document Type" description="Distribution for the selected reporting period" />
           <div className="mt-5 space-y-4">
-            {documentTypes.map((item) => (
+            {visibleDocumentTypes.map((item) => (
               <div key={item.name}>
                 <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
                   <span className="truncate">{item.name}</span>
