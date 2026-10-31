@@ -158,6 +158,7 @@ The current `draft/admin-portal` branch already contains draft pages for Dashboa
 
 The existing prototype should be aligned with the current scope:
 - Avoid making unsupported population/voter management a primary module unless the client confirms it is needed.
+- Replace population, household, voter, and issuance figures with clearly marked sample values until real aggregate data is connected.
 - Separate request entry from issuance history.
 - Remove the public-announcement direction from the welcome screen unless the client requests a public-facing site.
 - Move activity logs out of System Settings into a clear Activity Log page with role-dependent visibility.
