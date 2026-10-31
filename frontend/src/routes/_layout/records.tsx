@@ -26,6 +26,7 @@ function RecordsManagement() {
   const [search, setSearch] = useState("")
   const [notice, setNotice] = useState("")
   const [selectedFile, setSelectedFile] = useState("")
+  const [importStep, setImportStep] = useState(0)
   const [selectedResident, setSelectedResident] = useState<(typeof sampleResidents)[number] | null>(null)
   const [profileTab, setProfileTab] = useState("Details")
 
@@ -161,21 +162,33 @@ function RecordsManagement() {
               <p className="mt-1 text-sm leading-6 text-muted-foreground">Prepare a controlled import from client-provided spreadsheets. Validate the file and preview changes before anything is saved.</p>
             </div>
           </div>
-          <label className="mt-5 flex min-h-36 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-6 text-center hover:bg-muted/30">
-            <Upload className="size-6 text-muted-foreground" aria-hidden="true" />
-            <span className="font-medium">{selectedFile || "Choose a masterlist file"}</span>
-            <span className="text-sm text-muted-foreground">Select a spreadsheet file for the design preview</span>
-            <input type="file" accept=".csv,.xlsx,.xls" className="sr-only" onChange={(event) => { setSelectedFile(event.target.files?.[0]?.name ?? ""); setNotice("") }} />
-          </label>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              ["Preview rows", "Not generated"],
-              ["Validation errors", "Not checked"],
-              ["Possible duplicates", "Not checked"],
-              ["Import result", "Not imported"],
-            ].map(([label, value]) => <div key={label} className="rounded-lg border p-3"><p className="text-xs text-muted-foreground">{label}</p><p className="mt-1 font-medium">{value}</p></div>)}
+          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Masterlist import steps">
+            {["Select file", "Map columns", "Preview", "Results"].map((label, index) => (
+              <button key={label} type="button" onClick={() => setImportStep(index)} aria-current={importStep === index ? "step" : undefined} className={importStep === index ? "min-h-11 rounded-lg border border-primary bg-primary px-3 text-sm font-semibold text-primary-foreground" : "min-h-11 rounded-lg border bg-background px-3 text-sm font-semibold text-muted-foreground hover:bg-muted"}>{index + 1}. {label}</button>
+            ))}
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">Select a masterlist file to begin the import process.</p>
+          {importStep === 0 ? <label className="mt-4 flex min-h-36 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 text-center hover:border-primary/50 hover:bg-muted/30">
+            <Upload className="size-7 text-primary" aria-hidden="true" />
+            <span className="font-semibold">{selectedFile || "Choose a masterlist file"}</span>
+            <span className="text-sm text-muted-foreground">Supported formats: CSV, XLSX, XLS</span>
+            <input type="file" accept=".csv,.xlsx,.xls" className="sr-only" onChange={(event) => { setSelectedFile(event.target.files?.[0]?.name ?? ""); setNotice("") }} />
+          </label> : null}
+          {importStep === 1 ? <div className="mt-4 rounded-xl border p-4">
+            <h3 className="font-semibold">Map spreadsheet columns</h3>
+            <p className="mt-1 text-sm text-muted-foreground">Match each resident field to a column in the selected masterlist.</p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              {["Full name", "Complete address", "Resident type", "Barangay ID number"].map((field) => <label key={field} className="flex flex-col gap-2 text-sm font-medium">{field}<select className="h-11 rounded-md border bg-background px-3 font-normal"><option>Choose source column</option><option>Name</option><option>Address</option><option>Resident Type</option><option>ID Number</option></select></label>)}
+            </div>
+          </div> : null}
+          {importStep === 2 ? <div className="mt-4 overflow-x-auto rounded-xl border">
+            <div className="border-b p-4"><h3 className="font-semibold">Preview before import</h3><p className="mt-1 text-sm text-muted-foreground">Review the mapped fields and validation summary before confirming.</p></div>
+            <table className="w-full min-w-[560px] text-left text-sm"><thead className="bg-muted/40"><tr>{["Field", "Source column", "Validation"].map((label) => <th key={label} className="px-4 py-3 font-medium">{label}</th>)}</tr></thead><tbody>{[["Full name", "Name", "Required"], ["Complete address", "Address", "Review format"], ["Resident type", "Resident Type", "Check allowed values"], ["Barangay ID number", "ID Number", "Check duplicates"]].map((row) => <tr key={row[0]} className="border-t"><td className="px-4 py-3 font-medium">{row[0]}</td><td className="px-4 py-3">{row[1]}</td><td className="px-4 py-3 text-muted-foreground">{row[2]}</td></tr>)}</tbody></table>
+          </div> : null}
+          {importStep === 3 ? <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[["Imported", "Pending"], ["Updated", "Pending"], ["Skipped", "Pending"], ["Failed", "Pending"]].map(([label, value]) => <div key={label} className="rounded-xl border p-4"><p className="text-sm text-muted-foreground">{label}</p><p className="mt-2 text-xl font-semibold">{value}</p></div>)}</div> : null}
+          <div className="mt-5 flex flex-wrap justify-between gap-3 border-t pt-4">
+            <button type="button" disabled={importStep === 0} onClick={() => setImportStep((step) => Math.max(0, step - 1))} className="inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-semibold disabled:opacity-40">Previous step</button>
+            <button type="button" disabled={importStep === 3 || (importStep === 0 && !selectedFile)} onClick={() => setImportStep((step) => Math.min(3, step + 1))} className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-40">{importStep === 2 ? "Review results" : "Continue"}</button>
+          </div>
         </section>
       )}
 
