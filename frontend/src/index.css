@@ -111,17 +111,31 @@
 }
 
 @layer base {
-  .theme-transition,
-  .theme-transition *,
-  .theme-transition *::before,
-  .theme-transition *::after {
-    transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease, fill 220ms ease, stroke 220ms ease;
+  body,
+  header,
+  main,
+  aside,
+  [data-sidebar],
+  [data-slot="card"],
+  [class~="bg-background"],
+  [class~="bg-card"],
+  [class~="bg-sidebar"],
+  [class~="bg-muted"],
+  [class~="bg-popover"] {
+    transition: background-color 140ms ease-out, border-color 140ms ease-out;
   }
   @media (prefers-reduced-motion: reduce) {
-    .theme-transition,
-    .theme-transition *,
-    .theme-transition *::before,
-    .theme-transition *::after {
+    body,
+    header,
+    main,
+    aside,
+    [data-sidebar],
+    [data-slot="card"],
+    [class~="bg-background"],
+    [class~="bg-card"],
+    [class~="bg-sidebar"],
+    [class~="bg-muted"],
+    [class~="bg-popover"] {
       transition-duration: 0ms !important;
     }
   }
