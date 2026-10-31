@@ -53,6 +53,14 @@ function Layout() {
     }
   }, [])
 
+  const toggleTheme = () => {
+    document.documentElement.classList.add("theme-transition")
+    setTheme(isDark ? "light" : "dark")
+    window.setTimeout(() => {
+      document.documentElement.classList.remove("theme-transition")
+    }, 240)
+  }
+
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) await document.exitFullscreen()
     else await document.documentElement.requestFullscreen()
@@ -99,7 +107,7 @@ function Layout() {
               className="size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
               aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
               title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-              onClick={() => setTheme(isDark ? "light" : "dark")}
+              onClick={toggleTheme}
             >
               {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </Button>
