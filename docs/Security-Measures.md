@@ -145,7 +145,7 @@ Complete this record for a release or a scheduled security review.
 
 ## 7. Project-specific notes
 
-- The client interview and signed Creative Brief must define the actual modules, user roles, personal data, and operational needs before feature-specific controls can be finalized.
+- The professor-reviewed Creative Brief is the planning baseline. Reconcile its requirement of six full-access staff accounts with the current Admin/Staff authorization model, and confirm the actual modules, personal data, and operational needs with the client before feature-specific controls are finalized.
 - The final hosting choice matters. HTTPS, network exposure, rate limiting, backups, monitoring, and database connectivity must be verified against the actual hosting and Networking 2 setup.
 - Keep uncertain starter-template modules until the client requirements confirm whether they are needed. Removing a module is not itself a security measure.
 - **Implemented onboarding control:** When email is configured, admin-created account emails use a time-limited setup link and do not include the supplied password. The setup link is based on a password-hash-bound token and is invalidated after a password change. Confirm email delivery and the setup flow in the deployed environment before creating real accounts.
