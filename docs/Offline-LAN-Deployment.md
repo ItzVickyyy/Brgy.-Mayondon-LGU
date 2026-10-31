@@ -29,7 +29,7 @@ This is **LAN operation without internet**, not a standalone copy of the databas
 - SMTP and Sentry are disabled by default in the offline environment example.
 - Vercel-specific configuration and Supabase transaction-pooler handling have been removed from the active deployment code. The local LAN startup path uses the configured local PostgreSQL service.
 
-These changes prepare a deployment path. They do not prove that the complete application is ready for the barangay. Review the application against the professor-reviewed Creative Brief before implementation and deployment. In particular, the brief specifies six staff accounts with full access, while the current foundation distinguishes Admin and Staff. Resolve that mismatch before treating authorization as complete.
+These changes prepare a deployment path. They do not prove that the complete application is ready for the barangay. Review the application against the final Creative Brief before implementation and deployment. In particular, the brief specifies six staff accounts with full access, while the current foundation distinguishes Admin and Staff. Resolve that mismatch before treating authorization as complete.
 
 ## 3. Prepare the host computer
 
@@ -154,7 +154,7 @@ These scripts are initial utilities and still require execution and recovery tes
 ## 9. Required verification before client deployment
 
 - [ ] Client approves the LAN hosting arrangement and identifies the responsible host computer.
-- [ ] The signed Creative Brief and architecture documents reflect the offline operating model.
+- [ ] The final Creative Brief and architecture documents reflect the offline operating model.
 - [ ] The system starts after a host reboot without requiring internet access.
 - [ ] A second computer can use the system when the internet connection is disconnected.
 - [ ] Login, staff account management, records, printing, and concurrent access work as expected.

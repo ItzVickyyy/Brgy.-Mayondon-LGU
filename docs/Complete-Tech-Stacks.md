@@ -107,7 +107,7 @@ The offline deployment guide contains the current setup procedure, LAN access in
 
 The current target is a designated office computer hosting the frontend, API, and local PostgreSQL database. Use the offline LAN deployment guide for the client installation.
 
-- [ ] Review and approve the operating model in the signed Creative Brief.
+- [ ] Review and approve the operating model described in the final Creative Brief.
 - [ ] Build the Docker image while required dependencies and images are available.
 - [ ] Configure unique `.env` secrets and strong initial administrator credentials.
 - [ ] Start Compose, apply migrations, and initialize the first administrator.
