@@ -9,7 +9,7 @@ Project Guide*, the Guide wins; fix this file.
 a new chat, then ask your question. Update the file whenever a decision changes
 (see [Maintenance](#maintenance)).
 
-Last updated: October 30, 2026
+Last updated: October 27, 2026
 
 ---
 
@@ -139,7 +139,7 @@ Hard copy and soft copy (section 10), together with the Peer Evaluation Sheet.
 
 ---
 
-## 6. Creative Brief (2–3 pages, signed by the client)\n\nThe current professor-reviewed planning baseline is maintained in [Creative-Brief.md](Creative-Brief.md), updated from the revised Creative Brief supplied on October 27, 2026. Verify and retain the completed signed copy required by the Final Project Guide.
+## 6. Creative Brief (2–3 pages, signed by the client)\n\nThe current professor-reviewed planning baseline is maintained in [Creative-Brief.md](Creative-Brief.md), updated from the revised Creative Brief supplied on October 27, 2026. The uploaded copy's client and group leader signature fields appear blank. Verify and retain the completed signed copy required by the Final Project Guide.
 
 | # | Part | What to write |
 |---|---|---|
@@ -249,10 +249,10 @@ Ratings are confidential and members may receive different grades. Rating guide:
 | Backend | FastAPI + SQLModel + PostgreSQL, Python 3.14 |
 | Frontend | React + TypeScript + Vite + Tailwind CSS + shadcn/ui |
 | Existing foundation architecture | React + FastAPI + PostgreSQL. The Docker Compose self-hosted path builds the frontend into the FastAPI image and uses local PostgreSQL. Legacy Vercel-specific configuration and Supabase transaction-pooler handling have been removed. The LAN path is preparation only and remains untested at the client site. |
-| Accounts | Six staff accounts are planned, but their permissions still need to be confirmed with the client. The current foundation distinguishes Admin and Staff and reserves account creation for admins. Agree on the access model before implementation or client demo. Open sign-up remains disabled; existing password and login-lockout controls must be reviewed against the agreed account workflow. |
+| Accounts | The professor-reviewed Creative Brief specifies six staff accounts with full access. The current foundation distinguishes Admin and Staff and reserves account creation for admins. Reconcile this mismatch against the approved requirement before implementation or client demo. Open sign-up remains disabled; existing password and login-lockout controls must be reviewed against the agreed account workflow. |
 | Branding | Centralized in `frontend/src/config/site.ts`; client supplied the Barangay Mayondon logo on October 20, 2026. Final UI palette and use of logo remain subject to client design feedback. |
 | Document printing workflow | For forms such as Barangay Clearance, the current process uses an Excel worksheet to print variable resident/request details onto a blank pre-printed form. The system should preserve this workflow: print only the entered details in the matching spaces, while the pre-printed paper supplies the header, labels, signature area, and dry-seal space. Exact alignment must be calibrated and tested against actual blank forms and printer settings. This workflow was described by the team and should be validated using the supplied Excel workbook and forms. |
-| Backup requirement | The planning baseline calls for local backups, manual and/or scheduled, saved to an external drive. The exact procedure, frequency, drive custody, restore responsibilities, and successful recovery tests still need to be agreed and verified. |
+| Backup requirement | The professor-reviewed Creative Brief specifies both scheduled and manual local backups saved to an external drive. Frequency, drive custody, restore responsibilities, and successful recovery tests still need to be agreed and verified. |
 | AI tools | Free-tier AI assistants only; this folder is the shared context |
 
 ---
@@ -263,7 +263,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 - [x] Creative Brief reviewed by the professor and updated in [Creative-Brief.md](Creative-Brief.md) from the revised copy supplied October 27.
 - [ ] Verify and retain the required client and group leader signatures on the Creative Brief copy for submission.
 - [ ] Confirm the final document types, required resident fields, import rules, ID numbering and validity rules. For pre-printed forms, map each Excel worksheet to its matching form and validate print alignment using the actual paper and printer.
-- [ ] Confirm the permissions for the six staff accounts with the client, reconcile the agreed access model with the current Admin/Staff authorization model, and agree on account creation and recovery.
+- [ ] Review the approved requirement that all six staff accounts have full access against the current Admin/Staff authorization model, and agree on account creation and recovery.
 - [ ] Validate the prepared offline/LAN setup with the client, identify the designated host computer and staff computers, confirm printer access, and assign maintenance responsibilities.
 - [ ] Decide how ID photo background removal will work without internet. The client described using an online service today.
 - [ ] Agree on the schedule for both scheduled and manual backups, external-drive custody, restore testing, and recovery responsibilities.
@@ -276,7 +276,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 
 ## 14. Status
 
-**Current status (October 27, 2026):** Interviews were conducted on October 19–20. The revised Creative Brief supplied on October 27 was reviewed by the professor and is now reflected in `docs/Creative-Brief.md`. Verify and retain the required signed copy separately. The client prefers fully offline operation over the local network. The Foundation branch now includes an initial Docker Compose path for a local host and database, plus [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). This path has not yet been built, tested without internet, or verified at the client site. Keep the repository on `Foundation`; do not rename or merge this branch or create `production` unless the team explicitly reviews the branch plan.
+**Current status (October 27, 2026):** Interviews were conducted on October 19–20. The revised Creative Brief supplied on October 27 was reviewed by the professor and is now reflected in `docs/Creative-Brief.md`. The uploaded copy's client and group leader signature fields appear blank, so verify the required signed copy separately. The client prefers fully offline operation over the local network. The Foundation branch now includes an initial Docker Compose path for a local host and database, plus [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). This path has not yet been built, tested without internet, or verified at the client site. Keep the repository on `Foundation`; do not rename or merge this branch or create `production` unless the team explicitly reviews the branch plan.
 
 - [x] Group formed; client assigned
 - [x] Questionnaire drafted and fixed (7 questions)
