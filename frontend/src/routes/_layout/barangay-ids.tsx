@@ -1,12 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, redirect } from "@tanstack/react-router"
 import { CreditCard, Search, UserRound, CalendarClock, Printer, RefreshCw } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
 
 export const Route = createFileRoute("/_layout/barangay-ids")({
+  beforeLoad: () => {
+    throw redirect({ to: "/issuances" })
+  },
   component: BarangayIdManagement,
-  head: () => ({ meta: [{ title: pageTitle("Barangay ID Management") }] }),
+  head: () => ({ meta: [{ title: pageTitle("Issuance Management") }] }),
 })
 
 type IdStatus = "Valid" | "Expiring soon" | "Expired" | "Archived"
