@@ -39,7 +39,7 @@ The primary users are six clerical staff members, two female and four male, who 
 
 ### Included in the current draft scope
 
-- Staff login for six accounts. Account permissions are still to be confirmed with the client.
+- Staff login for six accounts, all with full access as specified in the revised Creative Brief.
 - Dashboard showing documents issued and clearances or IDs nearing expiry.
 - Resident record management, search, and import of existing masterlist data.
 - Family, beneficiary, and marginalized-sector details where required by the current office workflow.
@@ -60,18 +60,18 @@ The primary users are six clerical staff members, two female and four male, who 
 - Cloud hosting, online data synchronization, and other internet-dependent services.
 - Purchase of hardware, network equipment, or internet service.
 
-The scope reflects the professor-reviewed revised Creative Brief as the current planning baseline. Confirm unresolved operational details with the client before coding.
+The scope is based on interview notes and the current Creative Brief draft. Confirm the final inclusion and exclusion list with the client before coding.
 
 ## 7. Main features
 
-1. **Login:** Six staff accounts, with account permissions to be confirmed.
+1. **Login:** Six staff accounts, all with full access.
 2. **Dashboard:** Overview of issued documents and clearances or IDs nearing expiry.
 3. **Resident Records:** Add, edit, search, and import existing masterlist data.
 4. **Family and Sector Details:** Store family, beneficiary, and sector details where the client's workflow requires them.
 5. **ID Records:** Preserve existing Barangay ID numbering. The client described one-year validity in the usual case and six-month validity for new or renting residents until proof of voter registration is provided. The client also maintains a separate list of newer residents dating from 2019 with registered/unregistered remarks.
 6. **Document Requests:** Record requests, select or maintain document purposes, and preserve issuance history.
 7. **Document and ID Printing:** Populate approved document layouts and Barangay IDs, including an ID photo where required. For documents issued on pre-printed paper, print only the variable details into the corresponding spaces on the existing blank form. Match the current Excel workbook workflow, where each worksheet corresponds to a different form. Calibrate print position, scaling, paper size, margins, and printer settings against the actual forms, then test printed samples before client acceptance. Do not recreate or print the pre-printed header, labels, signature, or dry-seal area unless the client explicitly approves a different layout. Official signatures and dry seals remain manual.
-8. **Backup and Restore:** Support manual and/or scheduled local backups saved to an external drive. Agree on the exact procedure, schedule, drive custody, restore responsibilities, and recovery testing with the client.
+8. **Backup and Restore:** Support scheduled and manual local backups saved to an external drive. Agree on the schedule, drive custody, restore procedure, and responsibilities, then test backup and recovery.
 
 Document types discussed or shown include Barangay Clearance, Franchise Clearance, Certificate of Indigency, clearance for electrical and water connection, residency-related documents, First-Time Jobseeker documents, and Barangay ID. Confirm the final list and the exact approved formats with the client. Do not add documents merely because a sample exists.
 
@@ -131,7 +131,7 @@ This version reflects the Creative Brief reviewed by the professor and is the cu
 ## Open confirmations before design and implementation
 
 - Confirm the final feature list, document types, and approved print layouts. Obtain the current Excel workbook and clean blank copies of each form, map each worksheet to its matching form, confirm paper size and printer settings, and approve the printed alignment with the client.
-- Confirm the permissions required for the six staff accounts, then agree on account setup, access boundaries, and recovery procedures before deployment.
+- Configure the six staff accounts with full access, as specified in the revised Creative Brief. Confirm the safe account setup and recovery procedure before deployment.
 - Confirm whether the proposed one-computer local host and LAN access is acceptable and identify the designated computer.
 - Confirm how photos will be processed if background removal currently depends on an online service. No internet-dependent photo service can be assumed available in a fully offline system.
 - Confirm how resident masterlists will be imported, how duplicate or outdated records will be handled, and which data fields are actually needed.
