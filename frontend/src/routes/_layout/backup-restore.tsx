@@ -24,6 +24,7 @@ function BackupRestore() {
   const [notice, setNotice] = useState("")
   const [confirmRestore, setConfirmRestore] = useState(false)
   const [selectedBackup, setSelectedBackup] = useState(sampleBackups[0].name)
+  const [restoreConfirmation, setRestoreConfirmation] = useState("")
 
   return (
     <div className="flex flex-col gap-6">
@@ -79,10 +80,18 @@ function BackupRestore() {
       <section className="rounded-xl border border-destructive/30 bg-card p-5">
         <div className="flex items-start gap-3"><div className="rounded-lg bg-destructive/10 p-2.5"><RotateCcw className="size-5 text-destructive" /></div><div><h2 className="font-semibold">Restore a Backup</h2><p className="mt-1 text-sm text-muted-foreground">Restoring can replace current database contents. Choose the archive and confirm only after verifying the target system and backup.</p></div></div>
         <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-          <label className="flex flex-col gap-2 text-sm font-medium">Backup archive<select value={selectedBackup} onChange={(event) => { setSelectedBackup(event.target.value); setConfirmRestore(false) }} className="h-10 rounded-md border bg-background px-3 font-normal">{sampleBackups.map((backup) => <option key={backup.name} value={backup.name}>{backup.name}</option>)}</select></label>
+          <label className="flex flex-col gap-2 text-sm font-medium">Backup archive<select value={selectedBackup} onChange={(event) => { setSelectedBackup(event.target.value); setConfirmRestore(false); setRestoreConfirmation("") }} className="h-10 rounded-md border bg-background px-3 font-normal">{sampleBackups.map((backup) => <option key={backup.name} value={backup.name}>{backup.name}</option>)}</select></label>
           <button type="button" onClick={() => setConfirmRestore((value) => !value)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-destructive/50 px-4 text-sm font-medium text-destructive hover:bg-destructive/5"><RotateCcw className="size-4" />{confirmRestore ? "Cancel Restore" : "Prepare Restore"}</button>
         </div>
-        {confirmRestore ? <div className="mt-4 rounded-lg border border-destructive/40 p-4"><p className="font-medium">Confirm restore preparation</p><p className="mt-1 text-sm text-muted-foreground">Selected archive: {selectedBackup}.</p><p className="mt-3 text-sm">Selected backup: {selectedBackup}</p><button type="button" onClick={() => setNotice("")} className="mt-4 inline-flex h-10 items-center justify-center gap-2 rounded-md bg-destructive px-4 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"><ShieldCheck className="size-4" />Confirm Restore</button></div> : null}
+        {confirmRestore ? <div className="mt-4 rounded-lg border border-destructive/40 bg-destructive/5 p-4">
+          <p className="font-semibold">Confirm restore</p>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">This action can replace the current database. Verify the selected archive and type <strong className="text-foreground">RESTORE</strong> to confirm.</p>
+          <p className="mt-3 rounded-md bg-background p-3 font-mono text-sm">{selectedBackup}</p>
+          <label className="mt-4 block text-sm font-medium">Type RESTORE to continue
+            <input value={restoreConfirmation} onChange={(event) => setRestoreConfirmation(event.target.value)} placeholder="RESTORE" autoComplete="off" className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring sm:max-w-xs" />
+          </label>
+          <button type="button" disabled={restoreConfirmation !== "RESTORE"} onClick={() => { setNotice("Restore confirmation recorded in this UI prototype. No database was changed."); setConfirmRestore(false); setRestoreConfirmation("") }} className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-destructive px-4 text-sm font-semibold text-destructive-foreground hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50"><ShieldCheck className="size-4" />Confirm Restore</button>
+        </div> : null}
       </section>
       
     </div>
