@@ -43,7 +43,7 @@ export function Main({ items }: MainProps) {
 
             return (
               <>
-                {showSection ? <SidebarGroupLabel className="px-2 pt-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground group-data-[collapsible=icon]:hidden">{item.section}</SidebarGroupLabel> : null}
+                {showSection ? <SidebarGroupLabel className="px-2 pt-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground group-data-[collapsible=icon]:hidden">{item.section}</SidebarGroupLabel> : null}
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   tooltip={item.title}
