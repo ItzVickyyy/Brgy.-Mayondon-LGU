@@ -162,7 +162,7 @@ function RecordsManagement() {
               <p className="mt-1 text-sm leading-6 text-muted-foreground">Prepare a controlled import from client-provided spreadsheets. Validate the file and preview changes before anything is saved.</p>
             </div>
           </div>
-          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4" aria-label="Masterlist import steps">
+          <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4" role="group" aria-label="Masterlist import steps">
             {["Select file", "Map columns", "Preview", "Results"].map((label, index) => (
               <button key={label} type="button" onClick={() => setImportStep(index)} aria-current={importStep === index ? "step" : undefined} className={importStep === index ? "min-h-11 rounded-lg border border-primary bg-primary px-3 text-sm font-semibold text-primary-foreground" : "min-h-11 rounded-lg border bg-background px-3 text-sm font-semibold text-muted-foreground hover:bg-muted"}>{index + 1}. {label}</button>
             ))}
