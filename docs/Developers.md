@@ -22,13 +22,13 @@ Responsibilities are areas of ownership, not permission to ignore code outside y
 
 ## 3. Current project stage
 
-The team is working on the `Foundation` branch after client interviews on October 19–20, 2026. The revised Creative Brief supplied on October 27 was reviewed by the professor and is reflected in [Creative-Brief.md](Creative-Brief.md). Verify the required client and group leader signatures on the copy retained for submission. The client prefers fully offline LAN operation. The repository has an initial Docker Compose deployment path using local PostgreSQL and FastAPI-served frontend assets, documented in [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). It still needs a full build, no-internet testing, LAN/firewall testing, backup/restore verification, and client-site validation.
+The team is working on the `Foundation` branch after client interviews on October 19–20, 2026. The Creative Brief is final and was signed by the professor; it is reflected in [Creative-Brief.md](Creative-Brief.md). The client prefers fully offline LAN operation. The repository has an initial Docker Compose deployment path using local PostgreSQL and FastAPI-served frontend assets, documented in [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). It still needs a full build, no-internet testing, LAN/firewall testing, backup/restore verification, and client-site validation.
 
-Until the Creative Brief and architecture are reviewed:
-- Keep the repository on `Foundation`; do not rename or merge it or create the future `production` branch.
+Until the architecture is reviewed and validated at the client site:
+- Keep documentation and planning on `Foundation` and the admin portal UI on `draft/admin-portal` (see "Foundation and draft/admin-portal: merge readiness" below). Do not rename `Foundation`, merge it into `master`, or create the future `production` branch.
 - Update [Source-of-Truth.md](Source-of-Truth.md) and the system specification when a decision is confirmed.
 - Record remaining questions rather than guessing, especially around the local host, LAN access, photo background removal, the approved full-access account requirement, and backups.
-- Reconcile the current Admin/Staff authorization model with the revised Creative Brief's requirement that all six staff accounts have full access.
+- Reconcile the current Admin/Staff authorization model with the final Creative Brief's requirement that all six staff accounts have full access.
 - Do not describe the local LAN preparation as production-ready or as verified at the client site.
 
 ## 4. Agreed branching strategy

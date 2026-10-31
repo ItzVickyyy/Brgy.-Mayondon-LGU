@@ -9,7 +9,7 @@ This document combines the initial site map with the current page-layout directi
 
 ## 1. Design basis
 
-The design is based on the October 19–20 client interviews and the current Creative Brief draft. The client described an office workflow using spreadsheets and document templates, repeated data entry, file-saving problems, and manual adjustments when printing onto pre-printed forms. The client prefers offline operation over the office local network.
+The design is based on the October 19–20 client interviews and the final Creative Brief. The client described an office workflow using spreadsheets and document templates, repeated data entry, file-saving problems, and manual adjustments when printing onto pre-printed forms. The client prefers offline operation over the office local network.
 
 The system is staff-facing. Do not add public resident accounts, public document applications, announcements, online payments, or blotter workflows without client confirmation. Do not use real resident data in sample screens, commits, or demonstrations.
 

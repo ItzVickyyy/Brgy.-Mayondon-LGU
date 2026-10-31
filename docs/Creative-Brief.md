@@ -3,7 +3,7 @@
 **Project:** Barangay Mayondon Records and Document Issuance System  
 **Client:** Barangay Mayondon Local Government Unit, Los Baños, Laguna  
 **Interview dates:** October 19 and 20, 2026  
-**Status:** Updated on October 27, 2026, to reflect the revised Creative Brief reviewed by the professor. Use this as the approved planning baseline. The uploaded copy's client and group leader signature fields appear blank, so verify and retain the signed copy separately if signatures are required.
+**Status:** Final. The Creative Brief was signed by the professor and is the approved planning baseline. This file reflects the revised copy supplied on October 27, 2026.
 
 ## 1. Project title
 
@@ -37,7 +37,7 @@ The primary users are six clerical staff members, two female and four male, who 
 
 ## 6. Scope and limitations
 
-### Included in the current draft scope
+### Included in scope
 
 - Staff login for six accounts, all with full access as specified in the revised Creative Brief.
 - Dashboard showing documents issued and clearances or IDs nearing expiry.
@@ -49,7 +49,7 @@ The primary users are six clerical staff members, two female and four male, who 
 - Auto-filled printing of approved documents and Barangay IDs, including ID photo upload.
 - Local data backup and restore.
 
-### Excluded from the current draft scope
+### Excluded from scope
 
 - Public-facing resident accounts, online announcements, and website content.
 - Online payments and fee collection.
@@ -60,7 +60,7 @@ The primary users are six clerical staff members, two female and four male, who 
 - Cloud hosting, online data synchronization, and other internet-dependent services.
 - Purchase of hardware, network equipment, or internet service.
 
-The scope is based on interview notes and the current Creative Brief draft. Confirm the final inclusion and exclusion list with the client before coding.
+The scope is based on interview notes and the final Creative Brief. Confirm any change to the inclusion and exclusion list with the client before coding.
 
 ## 7. Main features
 
@@ -107,7 +107,7 @@ Treat resident records and identification data as confidential. Do not commit re
 
 ## 11. Timeline
 
-The dates below are the timeline in the professor-reviewed Creative Brief. The ITST301 Final Project Guide remains the source for academic submission milestones and takes precedence if dates conflict.
+The dates below are the timeline in the final Creative Brief. The ITST301 Final Project Guide remains the source for academic submission milestones and takes precedence if dates conflict.
 
 | Milestone | Working date |
 |---|---|
@@ -121,7 +121,7 @@ The dates below are the timeline in the professor-reviewed Creative Brief. The I
 
 ## 12. Approval
 
-This version reflects the Creative Brief reviewed by the professor and is the current planning baseline. The approval table in the supplied copy has blank signature fields. Confirm whether client and group leader signatures have been obtained and keep the signed copy for the required documentation.
+This version reflects the final Creative Brief, which was signed by the professor, and is the approved planning baseline. Keep the signed copy with the project documentation for the final report.
 
 | Client representative | Group leader |
 |---|---|
@@ -138,4 +138,3 @@ This version reflects the Creative Brief reviewed by the professor and is the cu
 - Confirm ID-number rules, validity exceptions, and how voter-registration proof is recorded.
 - Agree on the scheduled and manual backup frequency, external-drive custody, restoration responsibilities, and data-retention procedures.
 - Confirm which sample documents are still in use. Business and building clearances described as municipal processes should remain excluded unless the client corrects that understanding.
-- Confirm whether the client and group leader signature fields have been completed on the approved copy, and store the signed version for the final report.

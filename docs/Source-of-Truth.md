@@ -9,7 +9,7 @@ Project Guide*, the Guide wins; fix this file.
 a new chat, then ask your question. Update the file whenever a decision changes
 (see [Maintenance](#maintenance)).
 
-Last updated: October 27, 2026
+Last updated: October 31, 2026
 
 ---
 
@@ -19,7 +19,7 @@ Last updated: October 27, 2026
 |---|---|
 | Project | A working web system for a real client, designed, built, tested and turned over by one group |
 | Client | Barangay Mayondon LGU, Los Baños, Laguna (assigned by Prof. Camba) |
-| System to build | **Barangay Mayondon Records and Document Issuance System** (draft scope from interviews on October 19–20, 2026; client signature still pending) |
+| System to build | **Barangay Mayondon Records and Document Issuance System** (scope from interviews on October 19–20, 2026, defined in the final Creative Brief signed by the professor) |
 | Operating model | Client prefers a fully offline system on the barangay office's local network. An initial Docker-based local-host deployment path is now prepared on Foundation, but the actual LAN setup, offline workflows, backup/restore, and client approval remain unverified. |
 | School | Laguna State Polytechnic University – Los Baños Campus |
 | Program | BSIT, Major in Web and Mobile Application Development (WMAD), Section 3A |
@@ -88,7 +88,7 @@ presented, and submitted the complete report.
    and keep the client-signed receiving copy (the *approved request letter*).
 2. Prepare interview questions (maximum 7 main questions for our group).
 3. Conduct the interview; take notes and, with permission, photos or a recording.
-4. Prepare the **Creative Brief**, get instructor review, and retain the approved version. Confirm that the client and group leader signature fields are completed on the copy required for submission before treating it as fully signed.
+4. Prepare the **Creative Brief**, get instructor review, and retain the approved version. The final Creative Brief has been signed by the professor.
 
 Our 7 interview questions (each also has a Filipino version in `Questionnaires.docx`):
 1. What problems in your current way of handling requests, records and announcements do you hope a website or system can solve?
@@ -139,7 +139,9 @@ Hard copy and soft copy (section 10), together with the Peer Evaluation Sheet.
 
 ---
 
-## 6. Creative Brief (2–3 pages, signed by the client)\n\nThe current professor-reviewed planning baseline is maintained in [Creative-Brief.md](Creative-Brief.md), updated from the revised Creative Brief supplied on October 27, 2026. The uploaded copy's client and group leader signature fields appear blank. Verify and retain the completed signed copy required by the Final Project Guide.
+## 6. Creative Brief (2–3 pages, signed by the client)
+
+The final Creative Brief, signed by the professor, is the approved planning baseline. It is maintained in [Creative-Brief.md](Creative-Brief.md), updated from the revised Creative Brief supplied on October 27, 2026.
 
 | # | Part | What to write |
 |---|---|---|
@@ -249,10 +251,10 @@ Ratings are confidential and members may receive different grades. Rating guide:
 | Backend | FastAPI + SQLModel + PostgreSQL, Python 3.14 |
 | Frontend | React + TypeScript + Vite + Tailwind CSS + shadcn/ui |
 | Existing foundation architecture | React + FastAPI + PostgreSQL. The Docker Compose self-hosted path builds the frontend into the FastAPI image and uses local PostgreSQL. Legacy Vercel-specific configuration and Supabase transaction-pooler handling have been removed. The LAN path is preparation only and remains untested at the client site. |
-| Accounts | The professor-reviewed Creative Brief specifies six staff accounts with full access. The current foundation distinguishes Admin and Staff and reserves account creation for admins. Reconcile this mismatch against the approved requirement before implementation or client demo. Open sign-up remains disabled; existing password and login-lockout controls must be reviewed against the agreed account workflow. |
+| Accounts | The final Creative Brief specifies six staff accounts with full access. The current foundation distinguishes Admin and Staff and reserves account creation for admins. Reconcile this mismatch against the approved requirement before implementation or client demo. Open sign-up remains disabled; existing password and login-lockout controls must be reviewed against the agreed account workflow. |
 | Branding | Centralized in `frontend/src/config/site.ts`; client supplied the Barangay Mayondon logo on October 20, 2026. Final UI palette and use of logo remain subject to client design feedback. |
 | Document printing workflow | For forms such as Barangay Clearance, the current process uses an Excel worksheet to print variable resident/request details onto a blank pre-printed form. The system should preserve this workflow: print only the entered details in the matching spaces, while the pre-printed paper supplies the header, labels, signature area, and dry-seal space. Exact alignment must be calibrated and tested against actual blank forms and printer settings. This workflow was described by the team and should be validated using the supplied Excel workbook and forms. |
-| Backup requirement | The professor-reviewed Creative Brief specifies both scheduled and manual local backups saved to an external drive. Frequency, drive custody, restore responsibilities, and successful recovery tests still need to be agreed and verified. |
+| Backup requirement | The final Creative Brief specifies both scheduled and manual local backups saved to an external drive. Frequency, drive custody, restore responsibilities, and successful recovery tests still need to be agreed and verified. |
 | AI tools | Free-tier AI assistants only; this folder is the shared context |
 
 ---
@@ -260,8 +262,7 @@ Ratings are confidential and members may receive different grades. Rating guide:
 ## 13. Open items
 
 - [ ] Confirm the request letter has the instructor signatures and client receiving copy required by the Final Project Guide.
-- [x] Creative Brief reviewed by the professor and updated in [Creative-Brief.md](Creative-Brief.md) from the revised copy supplied October 27.
-- [ ] Verify and retain the required client and group leader signatures on the Creative Brief copy for submission.
+- [x] Creative Brief finalized and signed by the professor; reflected in [Creative-Brief.md](Creative-Brief.md).
 - [ ] Confirm the final document types, required resident fields, import rules, ID numbering and validity rules. For pre-printed forms, map each Excel worksheet to its matching form and validate print alignment using the actual paper and printer.
 - [ ] Review the approved requirement that all six staff accounts have full access against the current Admin/Staff authorization model, and agree on account creation and recovery.
 - [ ] Validate the prepared offline/LAN setup with the client, identify the designated host computer and staff computers, confirm printer access, and assign maintenance responsibilities.
@@ -276,18 +277,17 @@ Ratings are confidential and members may receive different grades. Rating guide:
 
 ## 14. Status
 
-**Current status (October 27, 2026):** Interviews were conducted on October 19–20. The revised Creative Brief supplied on October 27 was reviewed by the professor and is now reflected in `docs/Creative-Brief.md`. The uploaded copy's client and group leader signature fields appear blank, so verify the required signed copy separately. The client prefers fully offline operation over the local network. The Foundation branch now includes an initial Docker Compose path for a local host and database, plus [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). This path has not yet been built, tested without internet, or verified at the client site. Keep the repository on `Foundation`; do not rename or merge this branch or create `production` unless the team explicitly reviews the branch plan.
+**Current status (October 31, 2026):** Interviews were conducted on October 19–20. The Creative Brief is final and was signed by the professor; it is reflected in `docs/Creative-Brief.md`. The client prefers fully offline operation over the local network. The Foundation branch now includes an initial Docker Compose path for a local host and database, plus [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). This path has not yet been built, tested without internet, or verified at the client site. `Foundation` holds all documentation and planning, and `draft/admin-portal` holds the admin portal UI, layout, and design; the two are kept merge-ready (see [Developers.md](Developers.md)). Do not rename `Foundation`, merge it into `master`, or create `production` unless the team explicitly reviews the branch plan.
 
 - [x] Group formed; client assigned
 - [x] Questionnaire drafted and fixed (7 questions)
 - [x] Client interviews conducted on October 19–20, 2026
-- [x] Professor-reviewed revised Creative Brief reflected in `docs/Creative-Brief.md`
+- [x] Final Creative Brief signed by the professor and reflected in `docs/Creative-Brief.md`
 - [x] Sample document formats, current issuing file, logo, ID layout, and resident/ID data sheets reported as received during the interviews
 - [x] Initial Docker-based self-hosting configuration and offline LAN deployment guide prepared on Foundation; actual deployment and offline behavior remain unverified
 - [x] Existing authentication, authorization, login lockout, and security controls documented
 - [x] Added responsive app-header breadcrumbs and a public `/welcome` landing page with placeholder announcements/contact details; public content is not in the current draft scope and needs review before use
 - [x] Closed the three template-generated Dependabot pull requests that targeted `master`; dependency updates will be handled deliberately
-- [ ] Verify required client and group leader signatures on the Creative Brief copy for submission
 - [ ] Offline/LAN setup tested without internet and approved by client; host, backup, photo workflow, and recovery responsibilities confirmed
 - [ ] Initial design reviewed with client
 - [ ] Pre-printed form layouts calibrated and sample print alignment approved by client
@@ -332,7 +332,7 @@ Record this as the barangay contact's statement only. It does not prove that DIL
 - Treat the 2025 DILG memorandum circular on LGUSS-BIMS as a reference for identifying relevant barangay information-management and privacy concerns.
 - This student-developed Records and Document Issuance System is a separate local system. Do not describe it as a replacement for, certified compliant with, or integrated with LGUSS-BIMS.
 - No LGUSS-BIMS data exchange, synchronization, or official DILG connection is included in the current project scope.
-- The client has stated a preference for offline operation on the barangay local network. Confirm the signed Creative Brief and actual deployment setup before treating that arrangement as approved and verified.
+- The client has stated a preference for offline operation on the barangay local network. The final Creative Brief records this preference. Confirm the actual deployment setup before treating that arrangement as approved and verified.
 
 ### Safeguards to implement and verify
 
