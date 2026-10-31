@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect, useRouterState } from "@tanstack/react-router"
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
 import { CalendarDays, Clock3, Maximize2, Minimize2, Moon, Sun } from "lucide-react"
 import { useEffect, useState } from "react"
 
@@ -39,18 +39,6 @@ export const Route = createFileRoute("/_layout")({
 function Layout() {
   const [now, setNow] = useState(() => new Date())
   const { theme, setTheme } = useTheme()
-  const router = useRouterState()
-  const pageTitles: Record<string, string> = {
-    "/": "Dashboard",
-    "/records": "Resident Records",
-    "/issuances": "Issuance Management",
-    "/officials": "Officials",
-    "/admin": "User Accounts",
-    "/activity-log": "Activity Log",
-    "/reports": "Management Reports",
-    "/backup-restore": "Backup and Restore",
-  }
-  const currentTitle = pageTitles[router.location.pathname] ?? "Workspace"
   const { user: currentUser } = useAuth()
   const isDark = theme === "dark"
   const [isFullscreen, setIsFullscreen] = useState(false)
@@ -132,9 +120,6 @@ function Layout() {
         </header>
         <main id="main-content" tabIndex={-1} className="flex-1 p-4 outline-none sm:p-6 md:p-8">
           <div className="mx-auto max-w-7xl">
-            <nav aria-label="Breadcrumb" className="mb-5 flex items-center gap-2 text-sm text-muted-foreground">
-              <span>Workspace</span><span aria-hidden="true">/</span><span aria-current="page" className="font-medium text-foreground">{currentTitle}</span>
-            </nav>
             <Outlet />
           </div>
         </main>
