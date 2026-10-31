@@ -18,7 +18,7 @@ This is a checklist, not proof that the system is secure. Record evidence for co
 - **When applicable:** only required if the system uses that feature or deployment model.
 - **Before deployment:** must be verified for the actual hosting and network setup before real users or data are involved.
 
-Until the client interview and Creative Brief confirm the system's modules, roles, and hosting arrangement, do not assume that optional features such as file uploads, public registration, or database row-level security are needed.
+The final Creative Brief defines the system's modules and roles, and the hosting arrangement still needs client-site validation. Do not assume that optional features such as file uploads, public registration, or database row-level security are needed.
 
 ## Verified Foundation controls
 
@@ -145,7 +145,7 @@ Complete this record for a release or a scheduled security review.
 
 ## 7. Project-specific notes
 
-- The professor-reviewed Creative Brief is the planning baseline. Reconcile its requirement of six full-access staff accounts with the current Admin/Staff authorization model, and confirm the actual modules, personal data, and operational needs with the client before feature-specific controls are finalized.
+- The final Creative Brief, signed by the professor, is the planning baseline. Reconcile its requirement of six full-access staff accounts with the current Admin/Staff authorization model, and confirm the actual modules, personal data, and operational needs with the client before feature-specific controls are finalized.
 - The final hosting choice matters. HTTPS, network exposure, rate limiting, backups, monitoring, and database connectivity must be verified against the actual hosting and Networking 2 setup.
 - Keep uncertain starter-template modules until the client requirements confirm whether they are needed. Removing a module is not itself a security measure.
 - **Implemented onboarding control:** When email is configured, admin-created account emails use a time-limited setup link and do not include the supplied password. The setup link is based on a password-hash-bound token and is invalidated after a password change. Confirm email delivery and the setup flow in the deployed environment before creating real accounts.
@@ -162,7 +162,7 @@ The 2025 DILG memorandum circular on LGUSS-BIMS should inform our thinking about
 
 For the Records and Document Issuance System, include the following in project planning and deployment review:
 - [ ] Confirm the client-approved resident data fields and avoid collecting information that is not needed for the agreed workflows.
-- [ ] Confirm the six staff accounts' actual permissions. The draft Creative Brief says all six accounts have full access, but deletion, export, account administration, and access to sensitive data should be explicitly reviewed with the client.
+- [ ] Confirm the six staff accounts' actual permissions. The final Creative Brief says all six accounts have full access, but deletion, export, account administration, and access to sensitive data should be explicitly reviewed with the client.
 - [ ] Test backend authorization for every protected operation, including direct API requests. Frontend button visibility is not authorization.
 - [ ] Identify which record changes and document-issuance actions need an audit trail, and avoid logging unnecessary personal information.
 - [ ] Confirm the host computer, LAN/firewall rules, database access, physical access, backup drive custody, and backup schedule.
