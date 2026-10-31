@@ -42,6 +42,33 @@ The team plans to use two long-lived branches when the team is ready to adopt th
 
 The names and roles above are the planned workflow. **At present, continue using `Foundation`** as requested. Do not rename it, merge it into `master`, or create `production` unless the team explicitly reviews and changes the branch plan.
 
+### Foundation and draft/admin-portal: merge readiness
+
+The two working branches are kept so that they can be merged at any time without conflicts:
+
+| Branch | Holds | Never changes |
+|---|---|---|
+| `Foundation` | All documentation and planning: everything in `docs/` and the root `README.md` | Application code, tests, lock files, `.github/` workflows |
+| `draft/admin-portal` | The admin portal UI, layout, and design, plus the code and tests that support it | `docs/` and the root `README.md` |
+
+Rules:
+
+1. Edit documentation **only on `Foundation`**. Edit application code **only on `draft/admin-portal`**.
+2. Never copy or paste documentation files between the branches. Bring documentation into `draft/admin-portal` by merging:
+
+   ```bash
+   git checkout draft/admin-portal
+   git fetch origin
+   git merge origin/Foundation
+   git push origin draft/admin-portal
+   ```
+
+   Do this after every documentation change that is merged into `Foundation`. A real merge keeps the shared history, so Git can always tell which side changed a file.
+3. Do not merge `draft/admin-portal` into `Foundation` until the team decides to combine them. When `draft/admin-portal` already contains all of `Foundation`, that merge is a fast-forward and cannot conflict.
+4. If a change needs both documentation and code, make the documentation change on `Foundation` first, merge `Foundation` into `draft/admin-portal`, then make the code change.
+
+The **Branch sync check** workflow (`.github/workflows/branch-sync-check.yml`) runs on every push to either branch. It fails if a branch changes files it does not own, or if merging the two branches would conflict. A warning means `draft/admin-portal` is behind `Foundation`; run the merge above.
+
 Use short-lived branches for individual tasks:
 
 - `feature/<short-name>` for a new feature, such as `feature/announcements`
