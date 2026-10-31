@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router"
+import { createFileRoute, Link } from "@tanstack/react-router"
 import { Activity, FileCheck2, House, Users, Vote, TrendingUp, ChartPie, CalendarDays } from "lucide-react"
 import { useMemo, useState } from "react"
 
@@ -177,6 +177,41 @@ function Dashboard() {
             <TrendingUp className="size-7 text-muted-foreground" aria-hidden="true" />
             <p className="mt-3 font-medium">Historical population data needed</p>
             <p className="mt-1 max-w-sm text-sm text-muted-foreground">This section can show growth only when reliable resident totals from previous periods are available.</p>
+          </div>
+        </article>
+      </section>
+
+      <section className="grid gap-4 xl:grid-cols-2">
+        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <SectionHeading title="Expiring IDs and Clearances" description="Records that may need attention soon" />
+          <div className="mt-4 divide-y">
+            {[
+              { name: "Barangay ID · Resident Two", date: "Nov 20, 2026", status: "Expiring soon" },
+              { name: "Barangay Clearance · Resident Four", date: "Nov 24, 2026", status: "Review date" },
+              { name: "Barangay ID · Resident Three", date: "Dec 02, 2026", status: "Upcoming" },
+            ].map((item) => (
+              <div key={item.name} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <div><p className="font-medium">{item.name}</p><p className="mt-1 text-sm text-muted-foreground">Expiry date: {item.date}</p></div>
+                <span className="inline-flex min-h-8 items-center self-start rounded-full border px-3 text-xs font-semibold sm:self-center">{item.status}</span>
+              </div>
+            ))}
+          </div>
+          <Link to="/issuances" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary hover:underline">Open issuance history</Link>
+        </article>
+        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <SectionHeading title="Quick Actions" description="Common tasks for the barangay office" />
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {[
+              { title: "Find a resident", description: "Search resident and ID records", to: "/records", icon: Users },
+              { title: "Create an issuance", description: "Start a new document request", to: "/issuances", icon: FileCheck2 },
+              { title: "Review issuance history", description: "Find previous document records", to: "/issuances", icon: CalendarDays },
+              { title: "View dashboard activity", description: "Review recent office actions", to: "/activity-log", icon: Activity },
+            ].map((item) => (
+              <Link key={item.title} to={item.to} className="group flex min-h-24 items-start gap-3 rounded-xl border p-4 transition-colors hover:border-primary/40 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <span className="rounded-lg bg-primary/10 p-2 text-primary"><item.icon className="size-5" aria-hidden="true" /></span>
+                <span><span className="block font-semibold group-hover:text-primary">{item.title}</span><span className="mt-1 block text-sm leading-5 text-muted-foreground">{item.description}</span></span>
+              </Link>
+            ))}
           </div>
         </article>
       </section>
