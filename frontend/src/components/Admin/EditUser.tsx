@@ -37,7 +37,7 @@ const formSchema = z
     full_name: z.string().optional(),
     password: z
       .string()
-      .min(8, { message: "Password must be at least 8 characters" })
+      .min(12, { message: "Password must be at least 12 characters" })
       .optional()
       .or(z.literal("")),
     confirm_password: z.string().optional(),
@@ -197,7 +197,7 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel className="font-normal">Is superuser?</FormLabel>
+                    <FormLabel className="font-normal">Is admin?</FormLabel>
                   </FormItem>
                 )}
               />

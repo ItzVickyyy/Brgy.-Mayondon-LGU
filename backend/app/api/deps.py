@@ -41,6 +41,11 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
     user = session.get(User, token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+    if not security.verify_password_fingerprint(token_data.pwdv, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return user
@@ -49,9 +54,15 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
-def get_current_active_superuser(current_user: CurrentUser) -> User:
+def require_admin(current_user: CurrentUser) -> User:
+    """Require an authenticated admin account for protected operations."""
     if not current_user.is_superuser:
         raise HTTPException(
             status_code=403, detail="The user doesn't have enough privileges"
         )
     return current_user
+
+
+def get_current_active_superuser(current_user: CurrentUser) -> User:
+    """Backward-compatible name for existing template routes."""
+    return require_admin(current_user)

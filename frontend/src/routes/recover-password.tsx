@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
+import { pageTitle } from "@/config/site"
 import { isLoggedIn } from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
@@ -42,7 +43,7 @@ export const Route = createFileRoute("/recover-password")({
   head: () => ({
     meta: [
       {
-        title: "Recover Password - FastAPI Template",
+        title: pageTitle("Recover Password"),
       },
     ],
   }),
@@ -58,15 +59,19 @@ function RecoverPassword() {
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
   const recoverPassword = async (data: FormData) => {
-    await LoginService.recoverPassword({
-      path: { email: data.email },
+    return LoginService.recoverPassword({
+      body: { email: data.email },
     })
   }
 
   const mutation = useMutation({
     mutationFn: recoverPassword,
-    onSuccess: () => {
-      showSuccessToast("Password recovery email sent successfully")
+    onSuccess: (response) => {
+      if (response.data.message.includes("unavailable")) {
+        showErrorToast(response.data.message)
+        return
+      }
+      showSuccessToast(response.data.message)
       form.reset()
     },
     onError: handleError.bind(showErrorToast),

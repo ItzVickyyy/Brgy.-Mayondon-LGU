@@ -1,6 +1,9 @@
+import logging
 import uuid
+from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
+import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, select
 
@@ -35,12 +38,17 @@ def test_get_users_normal_user_me(
 
 
 def test_create_user_new_email(
-    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    db: Session,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
+    caplog.set_level(logging.INFO, logger="app.audit")
     with (
-        patch("app.utils.send_email", return_value=None),
+        patch("app.api.routes.users.send_email", return_value=None) as send_email_mock,
         patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
         patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
+        patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
     ):
         username = random_email()
         password = random_lower_string()
@@ -55,6 +63,13 @@ def test_create_user_new_email(
         user = crud.get_user_by_email(session=db, email=username)
         assert user
         assert user.email == created_user["email"]
+        send_email_mock.assert_called_once()
+        sent_html = send_email_mock.call_args.kwargs["html_content"]
+        assert "reset-password?token=" in sent_html
+        assert password not in sent_html
+        assert "Set Password" in sent_html
+        assert '"action":"user.create"' in caplog.text
+        assert '"target_type":"user"' in caplog.text
 
 
 def test_get_existing_user_as_superuser(
@@ -225,6 +240,17 @@ def test_update_password_me(
     client: TestClient, superuser_token_headers: dict[str, str], db: Session
 ) -> None:
     new_password = random_lower_string()
+    user_db = db.exec(
+        select(User).where(User.email == settings.FIRST_SUPERUSER)
+    ).first()
+    assert user_db
+    user_db.failed_login_attempts = settings.LOGIN_MAX_FAILED_ATTEMPTS
+    user_db.locked_until = datetime.now(UTC) + timedelta(
+        minutes=settings.LOGIN_LOCKOUT_MINUTES
+    )
+    db.add(user_db)
+    db.commit()
+
     data = {
         "current_password": settings.FIRST_SUPERUSER_PASSWORD,
         "new_password": new_password,
@@ -244,15 +270,31 @@ def test_update_password_me(
     assert user_db.email == settings.FIRST_SUPERUSER
     verified, _ = verify_password(new_password, user_db.hashed_password)
     assert verified
+    assert user_db.failed_login_attempts == 0
+    assert user_db.locked_until is None
+
+    stale_token_response = client.post(
+        f"{settings.API_V1_STR}/login/test-token",
+        headers=superuser_token_headers,
+    )
+    assert stale_token_response.status_code == 403
 
     # Revert to the old password to keep consistency in test
+    fresh_login = client.post(
+        f"{settings.API_V1_STR}/login/access-token",
+        data={"username": settings.FIRST_SUPERUSER, "password": new_password},
+    )
+    assert fresh_login.status_code == 200
+    fresh_headers = {
+        "Authorization": f"Bearer {fresh_login.json()['access_token']}"
+    }
     old_data = {
         "current_password": new_password,
         "new_password": settings.FIRST_SUPERUSER_PASSWORD,
     }
     r = client.patch(
         f"{settings.API_V1_STR}/users/me/password",
-        headers=superuser_token_headers,
+        headers=fresh_headers,
         json=old_data,
     )
     db.refresh(user_db)
@@ -316,7 +358,21 @@ def test_update_password_me_same_password_error(
     )
 
 
-def test_register_user(client: TestClient, db: Session) -> None:
+def test_register_user_disabled_by_default(client: TestClient) -> None:
+    data = {
+        "email": random_email(),
+        "password": random_lower_string(),
+        "full_name": random_lower_string(),
+    }
+    r = client.post(f"{settings.API_V1_STR}/users/signup", json=data)
+    assert r.status_code == 403
+    assert r.json()["detail"] == "Open registration is disabled"
+
+
+def test_register_user(
+    client: TestClient, db: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(settings, "USERS_OPEN_REGISTRATION", True)
     username = random_email()
     password = random_lower_string()
     full_name = random_lower_string()
@@ -339,7 +395,10 @@ def test_register_user(client: TestClient, db: Session) -> None:
     assert verified
 
 
-def test_register_user_already_exists_error(client: TestClient) -> None:
+def test_register_user_already_exists_error(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(settings, "USERS_OPEN_REGISTRATION", True)
     password = random_lower_string()
     full_name = random_lower_string()
     data = {
@@ -379,6 +438,32 @@ def test_update_user(
     db.refresh(user_db)
     assert user_db
     assert user_db.full_name == "Updated_full_name"
+
+
+def test_admin_password_change_clears_login_lockout(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    user = crud.create_user(
+        session=db,
+        user_create=UserCreate(email=random_email(), password=random_lower_string()),
+    )
+    user.failed_login_attempts = settings.LOGIN_MAX_FAILED_ATTEMPTS
+    user.locked_until = datetime.now(UTC) + timedelta(
+        minutes=settings.LOGIN_LOCKOUT_MINUTES
+    )
+    db.add(user)
+    db.commit()
+
+    response = client.patch(
+        f"{settings.API_V1_STR}/users/{user.id}",
+        headers=superuser_token_headers,
+        json={"password": random_lower_string()},
+    )
+
+    assert response.status_code == 200
+    db.refresh(user)
+    assert user.failed_login_attempts == 0
+    assert user.locked_until is None
 
 
 def test_update_user_not_exists(
@@ -519,3 +604,42 @@ def test_delete_user_without_privileges(
     )
     assert r.status_code == 403
     assert r.json()["detail"] == "The user doesn't have enough privileges"
+
+
+def test_normal_user_cannot_escalate_privileges_through_profile_update(
+    client: TestClient,
+    normal_user_token_headers: dict[str, str],
+) -> None:
+    response = client.patch(
+        f"{settings.API_V1_STR}/users/me",
+        headers=normal_user_token_headers,
+        json={"full_name": "Updated Name", "is_superuser": True, "is_active": True},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["is_superuser"] is False
+    assert response.json()["is_active"] is True
+
+
+def test_admin_user_list_rejects_unauthenticated_requests(
+    client: TestClient,
+) -> None:
+    response = client.get(f"{settings.API_V1_STR}/users/")
+
+    assert response.status_code == 401
+
+
+def test_retrieve_users_rejects_invalid_pagination(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    negative_skip = client.get(
+        f"{settings.API_V1_STR}/users/?skip=-1",
+        headers=superuser_token_headers,
+    )
+    excessive_limit = client.get(
+        f"{settings.API_V1_STR}/users/?limit=101",
+        headers=superuser_token_headers,
+    )
+
+    assert negative_skip.status_code == 422
+    assert excessive_limit.status_code == 422

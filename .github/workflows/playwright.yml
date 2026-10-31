@@ -3,6 +3,7 @@ name: Playwright Tests
 on:
   push:
     branches:
+    - Foundation
     - master
   pull_request:
   workflow_dispatch:
@@ -45,6 +46,9 @@ jobs:
     if: ${{ needs.changes.outputs.changed == 'true' }}
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    env:
+      # Avoid the PostgreSQL service port already used on GitHub-hosted runners.
+      POSTGRES_PORT: "5433"
     strategy:
       matrix:
         shardIndex: [1, 2, 3, 4]
@@ -73,6 +77,9 @@ jobs:
       working-directory: backend
     - run: bun ci
       working-directory: frontend
+    # The API schema generator imports app settings, so provide safe CI defaults first.
+    # .env is intentionally not tracked; use placeholders for local CI.
+    - run: cp .env.example .env
     - run: bash scripts/generate-client.sh
     - run: docker compose build
     - run: docker compose down -v --remove-orphans

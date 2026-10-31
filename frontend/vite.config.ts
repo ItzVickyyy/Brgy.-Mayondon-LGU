@@ -7,7 +7,9 @@ import { defineConfig } from "vite"
 // https://vitejs.dev/config/
 export default defineConfig({
   build: {
-    outDir: "../backend/app/frontend",
+    // Local/self-hosted builds share the frontend with FastAPI. On Vercel set
+    // VITE_BUILD_OUT_DIR=dist in the frontend project settings.
+    outDir: process.env.VITE_BUILD_OUT_DIR || "../backend/app/frontend",
     emptyOutDir: true,
   },
   resolve: {

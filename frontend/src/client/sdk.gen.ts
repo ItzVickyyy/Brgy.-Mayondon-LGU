@@ -59,8 +59,12 @@ export class LoginService {
     public static recoverPassword<ThrowOnError extends boolean = true>(options: Options<loginRecoverPasswordData, ThrowOnError>) {
         return (options.client ?? client).post<loginRecoverPasswordResponses, loginRecoverPasswordErrors, ThrowOnError>({
             responseType: 'json',
-            url: '/api/v1/password-recovery/{email}',
-            ...options
+            url: '/api/v1/password-recovery',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
         });
     }
     

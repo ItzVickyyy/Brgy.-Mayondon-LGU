@@ -80,3 +80,4 @@ error-on-warning = true
 
 [tool.fastapi]
 entrypoint = "app.main:app"
+

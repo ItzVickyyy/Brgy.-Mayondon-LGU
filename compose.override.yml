@@ -1,33 +1,15 @@
 services:
 
-  proxy:
-    image: traefik:v3.7
-    ports:
-      - "80:80"
-      - "8090:8080"
-    # Duplicate the command from compose.yml to add --api.insecure=true
-    command:
-      # Enable Docker in Traefik, so that it reads labels from Docker services
-      - --providers.docker
-      # Do not expose all Docker services, only the ones explicitly exposed
-      - --providers.docker.exposedbydefault=false
-      # Create an entrypoint "http" listening on port 80
-      - --entrypoints.http.address=:80
-      # Enable the access log, with HTTP requests
-      - --accesslog
-      # Enable the Traefik log, for configurations and errors
-      - --log
-      # Enable debug logging for local development
-      - --log.level=DEBUG
-      # Enable the Dashboard and API
-      - --api
-      # Enable the Dashboard and API in insecure mode for local development
-      - --api.insecure=true
   db:
     ports:
       - "5432:5432"
 
   adminer:
+    image: adminer
+    depends_on:
+      - db
+    environment:
+      - ADMINER_DESIGN=pepa-linha-dark
     ports:
       - "8080:8080"
 
@@ -37,7 +19,6 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    # command: sleep infinity  # Infinite loop to keep container alive doing nothing
     command:
       - fastapi
       - dev
@@ -59,7 +40,7 @@ services:
             - ./frontend/dist
             - ./frontend/blob-report
             - ./frontend/test-results
-    # TODO: remove once coverage is done locally
+    # Persist the HTML coverage report for local review.
     volumes:
       - ./backend/htmlcov:/app/backend/htmlcov
     environment:
@@ -67,6 +48,9 @@ services:
       SMTP_HOST: "mailpit"
       SMTP_PORT: "1025"
       SMTP_TLS: "false"
+      # Enable email only in the local development override so Playwright can
+      # exercise password recovery through the Mailpit test inbox.
+      EMAILS_FROM_EMAIL: "noreply@example.com"
 
   mailpit:
     image: axllent/mailpit

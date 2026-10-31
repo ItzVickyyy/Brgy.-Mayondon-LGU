@@ -1,88 +1,87 @@
-# Full Stack FastAPI Template
+# Barangay Mayondon LGU – Web System
 
-[![Test Docker Compose](../../actions/workflows/test-docker-compose.yml/badge.svg)](../../actions/workflows/test-docker-compose.yml)
-[![Test Backend](../../actions/workflows/test-backend.yml/badge.svg)](../../actions/workflows/test-backend.yml)
+Final Project for **ITST301 Principles of Web Design**, **Integrative
+Programming**, **Client-Server Technologies** and **Networking 2**. One system,
+built for a real client: **Barangay Mayondon LGU, Los Baños, Laguna**.
 
-## Technology Stack and Features
+BSIT major in Web and Mobile Application Development (WMAD) ·
+Laguna State Polytechnic University – Los Baños Campus
 
-- ⚡ [**FastAPI**](https://fastapi.tiangolo.com) for the Python backend API.
-  - 🧰 [SQLModel](https://sqlmodel.tiangolo.com) for the Python SQL database interactions (ORM).
-  - 🔍 [Pydantic](https://docs.pydantic.dev), used by FastAPI, for the data validation and settings management.
-  - 💾 [PostgreSQL](https://www.postgresql.org) as the SQL database.
-- 🚀 [React](https://react.dev) for the frontend.
-  - 🧩 Built into the backend application and served by FastAPI on the same domain as the API.
-  - 💃 Using TypeScript, hooks, [Vite](https://vitejs.dev), and other parts of a modern frontend stack.
-  - 🎨 [Tailwind CSS](https://tailwindcss.com) and [shadcn/ui](https://ui.shadcn.com) for the frontend components.
-  - 🤖 An automatically generated frontend client.
-  - 🧪 [Playwright](https://playwright.dev) for end-to-end testing.
-  - 🦇 Dark mode support.
-- ☁️ [FastAPI Cloud](https://fastapicloud.com) for deployment.
-- 🐋 [Docker Compose](https://www.docker.com) for local services and self-hosted deployment.
-  - 📞 [Traefik](https://traefik.io) as a reverse proxy with automatic HTTPS.
-- 🔒 Secure password hashing by default.
-- 🔑 JWT (JSON Web Token) authentication.
-- 📫 Email-based password recovery.
-- ✉️ [React Email](https://react.email) for email templates.
-- 📬 [Mailpit](https://mailpit.axllent.org) for local email testing during development.
-- ✅ Tests with [Pytest](https://pytest.org).
-- 🏭 CI (continuous integration) and CD (continuous deployment) based on GitHub Actions.
+| Member | Role |
+|---|---|
+| [Vic John O. Salen Jr.](https://github.com/ItzVickyyy) | Project Leader, Full Stack Developer |
+| [Justin Adrian P. Reboton](https://github.com/jOstin-7) | Backend Developer, Technical Writer |
+| [Jean Mervin G. Fajardo](https://github.com/JeanMervin) | Full Stack Developer |
 
-### Dashboard Login
+> **Status (October 31, 2026):** client interviews were conducted on October 19–20, and the Creative Brief is now final and was signed by the professor. The Foundation branch has an initial Docker-based self-hosted LAN path, but actual office deployment, offline workflows, backup/restore, security, automatic startup, and client-site operation remain unverified. See [Offline-LAN-Deployment.md](docs/Offline-LAN-Deployment.md), [Creative-Brief.md](docs/Creative-Brief.md), and [Source-of-Truth.md](docs/Source-of-Truth.md).
 
-![Dashboard login screenshot](img/login.png)
+## Stack at a glance
 
-### Dashboard - Admin
+FastAPI · SQLModel · local PostgreSQL · React · TypeScript · Vite ·
+Tailwind CSS · shadcn/ui · Docker Compose for self-hosting. Full list in
+[`docs/Complete-Tech-Stacks.md`](docs/Complete-Tech-Stacks.md).
 
-![Admin dashboard screenshot](img/dashboard.png)
+## Run it locally
 
-### Dashboard - Items
+Requirements: [uv](https://docs.astral.sh/uv/) (Python environment and dependencies),
+[Bun](https://bun.sh), and Docker for a local PostgreSQL database.
 
-![Items dashboard screenshot](img/dashboard-items.png)
+For local development with separate backend/frontend terminals, follow
+[`docs/How-To-Start.md`](docs/How-To-Start.md). For the proposed packaged LAN setup
+that serves the frontend and API together, follow [`docs/Offline-LAN-Deployment.md`](docs/Offline-LAN-Deployment.md).
+The LAN deployment guide is a preparation guide, not proof of a verified client installation.
 
-### Dashboard - Dark Mode
 
-![Dark mode dashboard screenshot](img/dashboard-dark.png)
+Log in with `FIRST_SUPERUSER` / `FIRST_SUPERUSER_PASSWORD` from the root `.env`.
+There is no public sign-up: an admin creates accounts from the **Admin** page.
 
-### React Email Templates
+### Tests and checks
 
-![Email templates screenshot](img/react-email.png)
+```bash
+cd backend && uv run pytest                      # backend tests
+cd frontend && bun run lint && bun run build     # lint + type-check + build
+```
 
-### Mailpit - Local Email Testing
+## Team workflow
 
-![Mailpit screenshot](img/mailpit.png)
+Read [`docs/Developers.md`](docs/Developers.md) for the full team workflow,
+branching strategy, review checklist, testing guidance, and developer roles.
 
-### Interactive API Documentation
+**Current branch policy:** keep working on `Foundation` while the team reviews
+the offline LAN preparation and obtains client approval. Do not rename or merge
+this branch or create the planned `production` branch unless the team explicitly
+reviews and changes the branch plan.
 
-![API docs](img/docs.png)
+**Planned branch policy after client approval and team review:**
+- `master` will be the integration branch for reviewed changes that pass the
+  required checks.
+- `production` will contain only approved, tested releases intended for
+  deployment. Deployment remains unverified until the real hosting process is
+  tested.
+- Use short-lived `feature/`, `fix/`, `hotfix/`, `docs/`, and `chore/`
+  branches for individual tasks, with pull requests and teammate review.
 
-## How to Use It
+### Database and API changes
 
-Click the **Use this template** button at the top of this page to create a new repository.
+- Changed a model in `backend/app/models.py`? Create and inspect a migration:
+  `cd backend && uv run alembic revision --autogenerate -m "what changed"`,
+  then test it with `uv run alembic upgrade head`.
+- Changed an API route or schema? Regenerate the typed client with
+  `bash scripts/generate-client.sh` from the repository root.
+- Never commit `.env`, passwords, secrets, or real resident data.
 
-## Backend Development
+## Project layout
 
-Backend docs: [backend/README.md](./backend/README.md).
-
-## Frontend Development
-
-Frontend docs: [frontend/README.md](./frontend/README.md).
-
-## Deployment
-
-FastAPI Cloud deployment: [deployment.md](./deployment.md).
-
-Self-hosted deployment with Docker Compose: [deployment-docker-compose.md](./deployment-docker-compose.md).
-
-## Development
-
-General development docs: [development.md](./development.md).
-
-This includes the local FastAPI and Vite workflow, Docker Compose services, `.env` configuration, and more.
-
-## Release Notes
-
-Check the file [release-notes.md](./release-notes.md).
+```
+backend/    FastAPI app, database models, migrations, tests
+frontend/   React app (branding in src/config/site.ts)
+packages/   React Email templates for system emails
+docs/       Source of truth, tech stack, developer and local startup guides, documentation index
+scripts/    Client generation and test helpers
+```
 
 ## License
 
-The Full Stack FastAPI Template is licensed under the terms of the MIT license.
+MIT, inherited from the
+[Full Stack FastAPI Template](https://github.com/fastapi/full-stack-fastapi-template)
+this project started from. See [LICENSE](LICENSE).
