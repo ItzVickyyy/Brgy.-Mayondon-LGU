@@ -1,15 +1,16 @@
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import col, delete, func, select
 
 from app import crud
 from app.api.deps import (
     CurrentUser,
     SessionDep,
-    get_current_active_superuser,
+    require_admin,
 )
+from app.core.audit import record_admin_action
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
 from app.models import (
@@ -24,17 +25,25 @@ from app.models import (
     UserUpdate,
     UserUpdateMe,
 )
-from app.utils import generate_new_account_email, send_email
+from app.utils import (
+    generate_new_account_email,
+    generate_password_reset_token,
+    send_email,
+)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get(
     "/",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(require_admin)],
     response_model=UsersPublic,
 )
-def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
+def read_users(
+    session: SessionDep,
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=100, ge=1, le=100),
+) -> Any:
     """
     Retrieve users.
     """
@@ -52,9 +61,9 @@ def read_users(session: SessionDep, skip: int = 0, limit: int = 100) -> Any:
 
 
 @router.post(
-    "/", dependencies=[Depends(get_current_active_superuser)], response_model=UserPublic
+    "/", dependencies=[Depends(require_admin)], response_model=UserPublic
 )
-def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
+def create_user(*, session: SessionDep, user_in: UserCreate, current_user: CurrentUser) -> Any:
     """
     Create new user.
     """
@@ -66,9 +75,13 @@ def create_user(*, session: SessionDep, user_in: UserCreate) -> Any:
         )
 
     user = crud.create_user(session=session, user_create=user_in)
+    record_admin_action(actor_id=current_user.id, action="user.create", target_type="user", target_id=user.id)
     if settings.emails_enabled and user_in.email:
+        setup_token = generate_password_reset_token(
+            email=user.email, hashed_password=user.hashed_password
+        )
         email_data = generate_new_account_email(
-            email_to=user_in.email, username=user_in.email, password=user_in.password
+            email_to=user.email, username=user.email, token=setup_token
         )
         send_email(
             email_to=user_in.email,
@@ -116,6 +129,9 @@ def update_password_me(
         )
     hashed_password = get_password_hash(body.new_password)
     current_user.hashed_password = hashed_password
+    # A password change releases any failed-login lockout for this account.
+    current_user.failed_login_attempts = 0
+    current_user.locked_until = None
     session.add(current_user)
     session.commit()
     return Message(message="Password updated successfully")
@@ -147,7 +163,12 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
 def register_user(session: SessionDep, user_in: UserRegister) -> Any:
     """
     Create new user without the need to be logged in.
+
+    Disabled by default (USERS_OPEN_REGISTRATION=False): accounts are created
+    by an admin from the Admin page.
     """
+    if not settings.USERS_OPEN_REGISTRATION:
+        raise HTTPException(status_code=403, detail="Open registration is disabled")
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
         raise HTTPException(
@@ -181,7 +202,7 @@ def read_user_by_id(
 
 @router.patch(
     "/{user_id}",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(require_admin)],
     response_model=UserPublic,
 )
 def update_user(
@@ -189,6 +210,7 @@ def update_user(
     session: SessionDep,
     user_id: uuid.UUID,
     user_in: UserUpdate,
+    current_user: CurrentUser,
 ) -> Any:
     """
     Update a user.
@@ -208,10 +230,11 @@ def update_user(
             )
 
     db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
+    record_admin_action(actor_id=current_user.id, action="user.update", target_type="user", target_id=db_user.id)
     return db_user
 
 
-@router.delete("/{user_id}", dependencies=[Depends(get_current_active_superuser)])
+@router.delete("/{user_id}", dependencies=[Depends(require_admin)])
 def delete_user(
     session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
 ) -> Message:
@@ -229,4 +252,5 @@ def delete_user(
     session.exec(statement)
     session.delete(user)
     session.commit()
+    record_admin_action(actor_id=current_user.id, action="user.delete", target_type="user", target_id=user_id)
     return Message(message="User deleted successfully")

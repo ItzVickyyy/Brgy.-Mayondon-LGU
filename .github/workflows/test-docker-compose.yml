@@ -3,6 +3,7 @@ name: Test Docker Compose
 on:
   push:
     branches:
+      - Foundation
       - master
   pull_request:
 permissions:
@@ -13,11 +14,22 @@ jobs:
   test-docker-compose:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    env:
+      # Avoid the PostgreSQL service port already used on GitHub-hosted runners.
+      POSTGRES_PORT: "5433"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      # .env is intentionally not tracked; use placeholders for local CI.
+      - run: cp .env.example .env
+      - name: Keep Adminer out of the base Compose stack
+        run: |
+          if docker compose -f compose.yml config --services | grep -qx adminer; then
+            echo "Adminer must only be available through the development override."
+            exit 1
+          fi
       - run: docker compose build
       - run: docker compose down -v --remove-orphans
       - run: docker compose run --rm backend bash scripts/prestart.sh

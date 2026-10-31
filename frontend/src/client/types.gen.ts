@@ -384,15 +384,12 @@ export type loginTestTokenResponses = {
 export type loginTestTokenResponse = loginTestTokenResponses[keyof loginTestTokenResponses];
 
 export type loginRecoverPasswordData = {
-    body?: never;
-    path: {
-        /**
-         * Email
-         */
+    body: {
         email: string;
     };
+    path?: never;
     query?: never;
-    url: '/api/v1/password-recovery/{email}';
+    url: '/api/v1/password-recovery';
 };
 
 export type loginRecoverPasswordErrors = {

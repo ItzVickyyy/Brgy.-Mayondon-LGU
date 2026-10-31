@@ -6,3 +6,16 @@ backend/app/frontend/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+/frontend/src/routeTree.gen.ts
+
+# Local secrets (copy .env.example to .env)
+.env
+
+# Local database backups can contain resident personal information
+/backups/
+
+# Local build output & tooling
+openapi.json
+__pycache__/
+.venv/
+/frontend/.tanstack/

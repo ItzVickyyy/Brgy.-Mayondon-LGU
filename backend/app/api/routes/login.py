@@ -1,23 +1,33 @@
 from datetime import timedelta
 from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app import crud
-from app.api.deps import CurrentUser, SessionDep, get_current_active_superuser
+from app.api.deps import CurrentUser, SessionDep, require_admin
 from app.core import security
 from app.core.config import settings
-from app.models import Message, NewPassword, Token, UserPublic, UserUpdate
+from app.core.password_recovery import is_password_recovery_rate_limited
+from app.models import (
+    Message,
+    NewPassword,
+    PasswordRecoveryRequest,
+    Token,
+    UserPublic,
+    UserUpdate,
+)
 from app.utils import (
     generate_password_reset_token,
+    get_password_reset_token_email,
     generate_reset_password_email,
     send_email,
     verify_password_reset_token,
 )
 
 router = APIRouter(tags=["login"])
+dev_router = APIRouter(tags=["login"])
 
 
 @router.post("/login/access-token")
@@ -37,7 +47,9 @@ def login_access_token(
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
         access_token=security.create_access_token(
-            user.id, expires_delta=access_token_expires
+            user.id,
+            expires_delta=access_token_expires,
+            hashed_password=user.hashed_password,
         )
     )
 
@@ -50,17 +62,35 @@ def test_token(current_user: CurrentUser) -> Any:
     return current_user
 
 
-@router.post("/password-recovery/{email}")
-def recover_password(email: str, session: SessionDep) -> Message:
+@router.post("/password-recovery")
+def recover_password(
+    body: PasswordRecoveryRequest, request: Request, session: SessionDep
+) -> Message:
+    email = str(body.email)
     """
     Password Recovery
     """
-    user = crud.get_user_by_email(session=session, email=email)
+    rate_limited = is_password_recovery_rate_limited(
+        session=session,
+        email=email,
+        client_ip=request.client.host if request.client else None,
+    )
+    user = None if rate_limited else crud.get_user_by_email(session=session, email=email)
 
-    # Always return the same response to prevent email enumeration attacks
-    # Only send email if user actually exists
+    if not settings.emails_enabled:
+        return Message(
+            message=(
+                "Email-based password recovery is unavailable in this offline "
+                "installation. Contact the system administrator."
+            )
+        )
+
+    # Always return the same response to prevent email enumeration attacks.
+    # Do not send email or reveal account existence after a rate limit is reached.
     if user:
-        password_reset_token = generate_password_reset_token(email=email)
+        password_reset_token = generate_password_reset_token(
+            email=email, hashed_password=user.hashed_password
+        )
         email_data = generate_reset_password_email(
             email_to=user.email, email=email, token=password_reset_token
         )
@@ -79,7 +109,7 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
     """
     Reset password
     """
-    email = verify_password_reset_token(token=body.token)
+    email = get_password_reset_token_email(token=body.token)
     if not email:
         raise HTTPException(status_code=400, detail="Invalid token")
     user = crud.get_user_by_email(session=session, email=email)
@@ -88,6 +118,13 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
         raise HTTPException(status_code=400, detail="Invalid token")
     elif not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
+    if (
+        verify_password_reset_token(
+            token=body.token, hashed_password=user.hashed_password
+        )
+        != user.email
+    ):
+        raise HTTPException(status_code=400, detail="Invalid token")
     user_in_update = UserUpdate(password=body.new_password)
     crud.update_user(
         session=session,
@@ -97,9 +134,9 @@ def reset_password(session: SessionDep, body: NewPassword) -> Message:
     return Message(message="Password updated successfully")
 
 
-@router.post(
+@dev_router.post(
     "/password-recovery-html-content/{email}",
-    dependencies=[Depends(get_current_active_superuser)],
+    dependencies=[Depends(require_admin)],
     response_class=HTMLResponse,
 )
 def recover_password_html_content(email: str, session: SessionDep) -> Any:
@@ -113,7 +150,9 @@ def recover_password_html_content(email: str, session: SessionDep) -> Any:
             status_code=404,
             detail="The user with this username does not exist in the system.",
         )
-    password_reset_token = generate_password_reset_token(email=email)
+    password_reset_token = generate_password_reset_token(
+        email=email, hashed_password=user.hashed_password
+    )
     email_data = generate_reset_password_email(
         email_to=user.email, email=email, token=password_reset_token
     )

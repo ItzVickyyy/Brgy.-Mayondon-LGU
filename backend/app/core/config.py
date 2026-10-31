@@ -3,6 +3,7 @@ from typing import Literal, Self
 
 from pydantic import (
     EmailStr,
+    Field,
     HttpUrl,
     PostgresDsn,
     computed_field,
@@ -22,8 +23,19 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str
     # 60 minutes * 24 hours * 8 days = 8 days
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60 * 24 * 8, gt=0)
+    LOGIN_MAX_FAILED_ATTEMPTS: int = Field(default=5, gt=0)
+    LOGIN_LOCKOUT_MINUTES: int = Field(default=15, gt=0)
+    PASSWORD_RECOVERY_WINDOW_MINUTES: int = Field(default=15, gt=0)
+    PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_EMAIL: int = Field(default=5, gt=0)
+    PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_IP: int = Field(default=30, gt=0)
     FRONTEND_HOST: str = "http://localhost:5173"
+    # Comma-separated trusted origins, useful for production and selected previews.
+    # FRONTEND_HOST remains as a backwards-compatible local/default origin.
+    FRONTEND_HOSTS: str | None = None
+    # Barangay system: only an admin creates accounts. Keep False unless the
+    # client explicitly wants public self-registration.
+    USERS_OPEN_REGISTRATION: bool = False
     FASTAPI_ENV: Literal["development"] | None = None
 
     PROJECT_NAME: str
@@ -32,16 +44,33 @@ class Settings(BaseSettings):
 
     @field_validator("DATABASE_URL", mode="before")
     @classmethod
-    def _use_psycopg_driver(cls, value: str | PostgresDsn) -> str:
+    def _use_psycopg_driver(cls, value: str | PostgresDsn | None) -> str | None:
+        if value is None:
+            return None
         database_url = str(value)
         for scheme in ("postgres://", "postgresql://"):
             if database_url.startswith(scheme):
                 return database_url.replace(scheme, "postgresql+psycopg://", 1)
         return database_url
 
+    @property
+    def frontend_origins(self) -> list[str]:
+        """Return explicitly trusted browser origins for CORS."""
+        if self.FRONTEND_HOSTS:
+            origins = list(
+                dict.fromkeys(
+                    origin.strip()
+                    for origin in self.FRONTEND_HOSTS.split(",")
+                    if origin.strip()
+                )
+            )
+            if origins:
+                return origins
+        return [self.FRONTEND_HOST]
+
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
-    SMTP_PORT: int = 587
+    SMTP_PORT: int = Field(default=587, gt=0, le=65535)
     SMTP_HOST: str | None = None
     SMTP_USER: str | None = None
     SMTP_PASSWORD: str | None = None
@@ -54,7 +83,7 @@ class Settings(BaseSettings):
             self.EMAILS_FROM_NAME = self.PROJECT_NAME
         return self
 
-    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
+    EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = Field(default=48, gt=0)
 
     @computed_field  # type: ignore[prop-decorator]
     @property
@@ -79,6 +108,15 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
+        if len(self.SECRET_KEY.encode("utf-8")) < 32:
+            message = (
+                "SECRET_KEY must be at least 32 bytes long for secure HS256 signing."
+            )
+            if self.FASTAPI_ENV == "development":
+                warnings.warn(message, stacklevel=1)
+            else:
+                raise ValueError(message)
+
         for host in self.DATABASE_URL.hosts():
             self._check_default_secret("DATABASE_URL password", host["password"])
         self._check_default_secret(

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/form"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { PasswordInput } from "@/components/ui/password-input"
+import { pageTitle } from "@/config/site"
 import { isLoggedIn } from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
@@ -34,7 +35,7 @@ const formSchema = z
     new_password: z
       .string()
       .min(1, { message: "Password is required" })
-      .min(8, { message: "Password must be at least 8 characters" }),
+      .min(12, { message: "Password must be at least 12 characters" }),
     confirm_password: z
       .string()
       .min(1, { message: "Password confirmation is required" }),
@@ -60,7 +61,7 @@ export const Route = createFileRoute("/reset-password")({
   head: () => ({
     meta: [
       {
-        title: "Reset Password - FastAPI Template",
+        title: pageTitle("Reset Password"),
       },
     ],
   }),
