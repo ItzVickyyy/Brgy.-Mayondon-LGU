@@ -45,7 +45,6 @@ function RecordsManagement() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-primary">Records</p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Resident Records</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
             Search and maintain resident information, related family and sector details, and existing Barangay ID references.
