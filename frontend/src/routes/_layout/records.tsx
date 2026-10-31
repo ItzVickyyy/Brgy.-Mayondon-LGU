@@ -129,20 +129,23 @@ function RecordsManagement() {
             </div>
           </div>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            <div className="rounded-lg border p-4">
-              <h3 className="font-medium">Family Details</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Family or household reference, relationship to household member, and related resident records.</p>
-            </div>
-            <div className="rounded-lg border p-4">
-              <h3 className="font-medium">Beneficiary Details</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Beneficiary information required by approved barangay forms and existing masterlists.</p>
-            </div>
-            <div className="rounded-lg border p-4 md:col-span-2">
-              <h3 className="font-medium">Marginalized-Sector Details</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Maintain sector information for resident records.</p>
-            </div>
+            {[
+              { title: "Family Details", description: "Household reference, family members, and relationships.", icon: Users, action: "Manage family details" },
+              { title: "Beneficiary Details", description: "Beneficiary information used by approved barangay forms.", icon: UserRound, action: "Manage beneficiaries" },
+              { title: "Marginalized-Sector Details", description: "Sector classifications associated with resident records.", icon: FileUp, action: "Manage sector details" },
+            ].map((item) => (
+              <article key={item.title} className="flex min-h-36 flex-col rounded-xl border bg-background p-4 transition-colors hover:border-primary/40">
+                <div className="flex items-center gap-2">
+                  <span className="rounded-lg bg-primary/10 p-2 text-primary"><item.icon className="size-4" aria-hidden="true" /></span>
+                  <h3 className="font-semibold">{item.title}</h3>
+                </div>
+                <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">{item.description}</p>
+                <button type="button" onClick={() => setNotice(`${item.action} screen selected.`)} className="mt-4 inline-flex min-h-11 items-center self-start rounded-md border px-3 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                  {item.action}
+                </button>
+              </article>
+            ))}
           </div>
-          <p className="mt-4 rounded-md bg-muted/40 p-3 text-sm text-muted-foreground"></p>
         </section>
       )}
 
