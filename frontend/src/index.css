@@ -111,17 +111,17 @@
 }
 
 @layer base {
-  *,
-  *::before,
-  *::after {
-    transition-property: background-color, border-color, color, fill, stroke;
-    transition-duration: 180ms;
-    transition-timing-function: ease;
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease, fill 220ms ease, stroke 220ms ease;
   }
   @media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
+    .theme-transition,
+    .theme-transition *,
+    .theme-transition *::before,
+    .theme-transition *::after {
       transition-duration: 0ms !important;
     }
   }
