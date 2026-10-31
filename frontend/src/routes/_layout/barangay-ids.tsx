@@ -103,7 +103,6 @@ function BarangayIdManagement() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="text-sm font-medium text-primary">Resident Services</p>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Barangay ID Management</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
             Review existing ID records, check validity, and prepare creation or renewal workflows.
