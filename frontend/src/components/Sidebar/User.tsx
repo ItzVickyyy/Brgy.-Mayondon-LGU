@@ -190,25 +190,6 @@ function MyAccountModal({
   const role = user?.is_superuser ? "Administrator" : "Staff"
   const username = user?.username || user?.email || "Not provided"
 
-  const renderFields = (fields: typeof profileFields) => (
-    <div className="grid gap-4 sm:grid-cols-2">
-      {fields.map((field) => (
-        <div key={field.key} className={field.key === "address" ? "sm:col-span-2" : ""}>
-          <Label htmlFor={field.key} className="mb-1.5 block text-xs font-medium">{field.label}</Label>
-          <Input
-            id={field.key}
-            type={field.type || "text"}
-            value={form[field.key]}
-            onChange={(event) => updateField(field.key, event.target.value)}
-            placeholder={field.placeholder}
-            maxLength={field.key === "address" ? 500 : 255}
-            className="h-10 bg-background"
-          />
-        </div>
-      ))}
-    </div>
-  )
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[92vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
