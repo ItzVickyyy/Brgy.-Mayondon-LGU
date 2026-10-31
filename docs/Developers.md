@@ -27,8 +27,8 @@ The team is working on the `Foundation` branch after client interviews on Octobe
 Until the Creative Brief and architecture are reviewed:
 - Keep the repository on `Foundation`; do not rename or merge it or create the future `production` branch.
 - Update [Source-of-Truth.md](Source-of-Truth.md) and the system specification when a decision is confirmed.
-- Record remaining questions rather than guessing, especially around the local host, LAN access, photo background removal, the unresolved permissions for the six staff accounts, and backups.
-- Confirm the six staff accounts' permissions with the client and reconcile the agreed access model with the current Admin/Staff authorization model.
+- Record remaining questions rather than guessing, especially around the local host, LAN access, photo background removal, the approved full-access account requirement, and backups.
+- Reconcile the current Admin/Staff authorization model with the revised Creative Brief's requirement that all six staff accounts have full access.
 - Do not describe the local LAN preparation as production-ready or as verified at the client site.
 
 ## 4. Agreed branching strategy
