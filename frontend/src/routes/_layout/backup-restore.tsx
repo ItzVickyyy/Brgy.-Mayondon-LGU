@@ -29,7 +29,6 @@ function BackupRestore() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <p className="text-sm font-medium text-primary">Administration</p>
         <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Backup and Restore</h1>
         <p className="mt-2 text-sm text-muted-foreground">Protect the barangay's local records and recover from data loss.</p>
       </div>
