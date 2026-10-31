@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { FileUp, Search, Users, UserRound, Upload } from "lucide-react"
+import { FileUp, Search, Users, UserRound, Upload, CreditCard, FileCheck2 } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 export const Route = createFileRoute("/_layout/records")({
   component: RecordsManagement,
@@ -25,6 +26,8 @@ function RecordsManagement() {
   const [search, setSearch] = useState("")
   const [notice, setNotice] = useState("")
   const [selectedFile, setSelectedFile] = useState("")
+  const [selectedResident, setSelectedResident] = useState<(typeof sampleResidents)[number] | null>(null)
+  const [profileTab, setProfileTab] = useState("Details")
 
   const filteredResidents = useMemo(() => sampleResidents.filter((resident) =>
     [resident.id, resident.name, resident.address, resident.residentType, resident.idNumber, resident.registration, resident.status]
@@ -68,7 +71,7 @@ function RecordsManagement() {
             <article className="rounded-xl border bg-card p-4">
               <p className="text-sm text-muted-foreground">Resident Records</p>
               <p className="mt-2 text-2xl font-semibold">4</p>
-              <p className="mt-1 text-xs text-muted-foreground">No actual barangay totals shown</p>
+              <p className="mt-1 text-xs text-muted-foreground">Resident records in this view</p>
             </article>
             <article className="rounded-xl border bg-card p-4">
               <p className="text-sm text-muted-foreground">ID and Registration Details</p>
@@ -108,7 +111,7 @@ function RecordsManagement() {
                       <td className="px-4 py-3">{resident.idNumber}</td>
                       <td className="px-4 py-3">{resident.registration}</td>
                       <td className="px-4 py-3"><span className="rounded-full border px-2 py-1 text-xs">{resident.status}</span></td>
-                      <td className="px-4 py-3"><button type="button" onClick={() => setNotice(`Opening resident profile for ${resident.name}.`)} className="font-medium text-primary hover:underline">View profile</button></td>
+                      <td className="px-4 py-3"><button type="button" onClick={() => { setSelectedResident(resident); setProfileTab("Details") }} className="inline-flex min-h-11 items-center font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">View profile</button></td>
                     </tr>
                   ))}
                 </tbody>
@@ -175,6 +178,29 @@ function RecordsManagement() {
           <p className="mt-4 text-sm text-muted-foreground">Select a masterlist file to begin the import process.</p>
         </section>
       )}
+
+      <Dialog open={Boolean(selectedResident)} onOpenChange={(open) => { if (!open) setSelectedResident(null) }}>
+        <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-xl">Resident Profile</DialogTitle>
+            <DialogDescription>Review resident details, family and sector information, ID records, and issuance history.</DialogDescription>
+          </DialogHeader>
+          {selectedResident ? <>
+            <div className="flex flex-col gap-3 rounded-xl border bg-muted/20 p-4 sm:flex-row sm:items-center">
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><UserRound className="size-6" /></span>
+              <div className="min-w-0 flex-1"><p className="text-lg font-semibold">{selectedResident.name}</p><p className="text-sm text-muted-foreground">{selectedResident.id} · {selectedResident.address}</p></div>
+              <span className="inline-flex min-h-8 items-center rounded-full border px-3 text-sm font-medium">{selectedResident.status}</span>
+            </div>
+            <div className="flex flex-wrap gap-2 border-b pb-3" role="tablist" aria-label="Resident profile sections">
+              {["Details", "Family & Sector", "Barangay ID", "Issuance History"].map((tab) => <button key={tab} type="button" role="tab" aria-selected={profileTab === tab} onClick={() => setProfileTab(tab)} className={profileTab === tab ? "min-h-11 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground" : "min-h-11 rounded-md px-3 text-sm font-semibold text-muted-foreground hover:bg-muted"}>{tab}</button>)}
+            </div>
+            {profileTab === "Details" ? <div className="grid gap-3 sm:grid-cols-2">{[["Resident reference", selectedResident.id], ["Full name", selectedResident.name], ["Complete address", selectedResident.address], ["Resident type", selectedResident.residentType], ["Registration", selectedResident.registration], ["Record status", selectedResident.status]].map(([label, value]) => <div key={label} className="rounded-lg border p-3"><p className="text-sm text-muted-foreground">{label}</p><p className="mt-1 font-semibold">{value}</p></div>)}</div> : null}
+            {profileTab === "Family & Sector" ? <div className="grid gap-3 sm:grid-cols-2"><section className="rounded-xl border p-4"><Users className="size-5 text-primary" /><h3 className="mt-2 font-semibold">Family details</h3><p className="mt-1 text-sm text-muted-foreground">Household reference, family members, and relationships.</p></section><section className="rounded-xl border p-4"><UserRound className="size-5 text-primary" /><h3 className="mt-2 font-semibold">Beneficiary and sector details</h3><p className="mt-1 text-sm text-muted-foreground">Beneficiary information and sector classifications.</p></section></div> : null}
+            {profileTab === "Barangay ID" ? <div className="grid gap-3 sm:grid-cols-2"><section className="rounded-xl border p-4"><CreditCard className="size-5 text-primary" /><p className="mt-2 text-sm text-muted-foreground">Barangay ID number</p><p className="mt-1 font-semibold">{selectedResident.idNumber}</p></section><section className="rounded-xl border p-4"><p className="text-sm text-muted-foreground">Registration status</p><p className="mt-1 font-semibold">{selectedResident.registration}</p></section></div> : null}
+            {profileTab === "Issuance History" ? <section className="rounded-xl border p-5"><FileCheck2 className="size-6 text-primary" /><h3 className="mt-2 font-semibold">Issuance history</h3><p className="mt-1 text-sm leading-6 text-muted-foreground">Documents associated with this resident will appear here when the issuance records are connected.</p></section> : null}
+          </> : null}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
