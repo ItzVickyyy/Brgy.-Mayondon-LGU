@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react"
 import {
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -14,6 +15,7 @@ export type Item = {
   icon: LucideIcon
   title: string
   path: string
+  section?: string
 }
 
 interface MainProps {
@@ -35,10 +37,13 @@ export function Main({ items }: MainProps) {
     <SidebarGroup>
       <SidebarGroupContent>
         <SidebarMenu>
-          {items.map((item) => {
+          {items.map((item, index) => {
             const isActive = currentPath === item.path
+            const showSection = Boolean(item.section && item.section !== items[index - 1]?.section)
 
             return (
+              <>
+                {showSection ? <SidebarGroupLabel className="px-2 pt-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground group-data-[collapsible=icon]:hidden">{item.section}</SidebarGroupLabel> : null}
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
                   tooltip={item.title}
@@ -51,6 +56,7 @@ export function Main({ items }: MainProps) {
                   </RouterLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              </>
             )
           })}
         </SidebarMenu>
