@@ -1,6 +1,6 @@
 # System Specification and Architecture
 
-**Status: Interview-derived requirements draft — Creative Brief signature, final approval, local-network architecture, and deployment verification are pending.**
+**Status: Requirements derived from the client interviews and the final Creative Brief (signed by the professor) — local-network architecture approval and deployment verification are pending.**
 
 This document combines client requirements and technical architecture in one place so the team can maintain a single system reference. The snapshot below records the October 19–20, 2026 interviews. The requirements are not formally approved until the client reviews and signs `Creative-Brief.md`. The repository now uses an initial Docker-based local-host path for offline LAN operation, with legacy Vercel configuration and Supabase transaction-pooler handling removed. The local path is preparation only and has not yet been tested on the barangay's network or approved by the client.
 
@@ -16,6 +16,7 @@ The academic schedule, grading, team workflow, and overall project status remain
 - **Interview date:**
 - **Client contacts interviewed:** Ma’am Margarita R. Rivera, Admin Assistant; Sir Kelly Renz G. Villegas, Barangay Clerk
 - **Last updated:**
+- **Creative Brief:** Final; signed by the professor
 - **Client approval / signature:** Pending
 - **Architecture status:** Docker-based offline LAN preparation added; client approval and site verification pending
 - **Deployment verification:** Pending
@@ -91,9 +92,9 @@ The current spreadsheet and template workflow makes it difficult to maintain con
 
 | ID | Goal / success criterion | Proposed verification | Source / date | Status |
 |---|---|---|---|---|
-| GOAL-01 | Centralize resident records and related information | Create, edit, search, and retrieve sample resident records | Interviews, Oct 19–20, 2026 | Draft, pending signed brief |
-| GOAL-02 | Preserve document request and issuance history | Issue multiple sample documents for one resident without overwriting prior transactions | Interviews, Oct 19–20, 2026 | Draft, pending signed brief |
-| GOAL-03 | Reduce repeated data entry for approved documents and Barangay IDs | Populate approved sample layouts from stored records and verify print preview | Interviews, Oct 19–20, 2026 | Draft, pending signed brief |
+| GOAL-01 | Centralize resident records and related information | Create, edit, search, and retrieve sample resident records | Interviews, Oct 19–20, 2026 | In the final Creative Brief |
+| GOAL-02 | Preserve document request and issuance history | Issue multiple sample documents for one resident without overwriting prior transactions | Interviews, Oct 19–20, 2026 | In the final Creative Brief |
+| GOAL-03 | Reduce repeated data entry for approved documents and Barangay IDs | Populate approved sample layouts from stored records and verify print preview | Interviews, Oct 19–20, 2026 | In the final Creative Brief |
 | GOAL-04 | Work without internet for normal office tasks | Test the approved workflow with internet disconnected on the agreed LAN setup | Client preference, Oct 19–20, 2026 | Architecture not yet validated |
 | GOAL-05 | Provide local backup and recovery | Complete a backup and restore test using synthetic data | Draft objective in Creative Brief | Procedure to be agreed |
 
@@ -107,16 +108,16 @@ These are proposed ways to verify the interview goals. Confirm them with the cli
 | Admin Assistant / other office staff | Interview contacts; duties include office administration and may overlap with clerical work | Confirm whether they need the same or different permissions | Pending |
 | Residents / public | Subjects of stored records and requesters of documents | No public account or direct system access requested in the interviews | Draft scope exclusion |
 
-Do not assume that all six accounts should have identical privileges merely because the Creative Brief draft currently describes full access. Confirm who may view, edit, import, print, back up, restore, and manage accounts. Enforce the final permission matrix in the backend and test direct API requests.
+Do not assume that all six accounts should have identical privileges merely because the final Creative Brief describes full access. Confirm who may view, edit, import, print, back up, restore, and manage accounts. Enforce the final permission matrix in the backend and test direct API requests.
 
 ## 6. Functional requirements
 
-The requirements below are an interview-derived draft, not formally approved requirements until the Creative Brief is signed.
+The requirements below come from the client interviews and the final Creative Brief, which was signed by the professor. Client-site validation of the architecture and deployment is still pending.
 
 | ID | Requirement | Draft acceptance criteria | Source / status |
 |---|---|---|---|
 | FR-001 | Staff login | Only approved office accounts can sign in; no public sign-up | Interview-derived draft |
-| FR-002 | Dashboard | Show document issuance counts and clearances/IDs nearing expiry | Creative Brief draft |
+| FR-002 | Dashboard | Show document issuance counts and clearances/IDs nearing expiry | Final Creative Brief |
 | FR-003 | Resident records | Add, edit, search, retrieve, and import client-approved resident masterlist fields | Interview-derived draft; field mapping pending |
 | FR-004 | Family and sector details | Store family, beneficiary, and marginalized-sector details only where required by the approved workflow | Interview-derived draft |
 | FR-005 | ID records | Store existing ID numbers and agreed validity/registration details without inventing numbering rules | Interview-derived draft; exceptions to confirm |
@@ -172,7 +173,7 @@ Do not commit real resident records to source control. Agree on import validatio
 
 ## 9. Platform, connectivity, and operating environment
 
-- **Online, offline, or hybrid:** Client stated a preference for fully offline operation during the October 19–20, 2026 interviews. Final approval is pending the signed Creative Brief.
+- **Online, offline, or hybrid:** Client stated a preference for fully offline operation during the October 19–20, 2026 interviews. The final Creative Brief records this preference; client-site validation is pending.
 - **Internet availability / reliability:** Pending
 - **Devices available at the office:** Pending
 - **Expected users and concurrent use:** Pending
@@ -297,7 +298,7 @@ Never rely only on frontend visibility to enforce permissions. Test protected AP
 
 **Status: Not production-verified.**
 
-- **Client preference (online/offline/hybrid):** Client stated a preference for fully offline operation during the October 19–20, 2026 interviews. The signed Creative Brief and deployment arrangement are still pending.
+- **Client preference (online/offline/hybrid):** Client stated a preference for fully offline operation during the October 19–20, 2026 interviews. The final Creative Brief records this preference; the deployment arrangement is still pending.
 - **Client internet and devices:** Pending verification.
 - **Prepared option:** Docker Compose local-host deployment for offline LAN use. Vercel-specific configuration and Supabase transaction-pooler handling have been removed from the active deployment code.
 - **Alternative:** Assess if connectivity, provider terms, privacy requirements, or instructor expectations make the planned option unsuitable.
@@ -315,7 +316,7 @@ Do not describe the application as deployed until it has actually been configure
 | ID | Question / constraint | Why it matters | Owner | Target date, if known | Status / answer |
 |---|---|---|---|---|---|
 | OPEN-001 | What problem and process should the system address? | Defines scope and system design | Project team | Client interview | Open |
-| OPEN-002 | Confirm the client's fully offline preference in the signed Creative Brief and validate the proposed local-host/LAN arrangement | Affects architecture, hosting, availability, and Networking 2 | Project team / client | Before design approval and deployment planning | Preference stated in Oct 19–20 interviews; approval and site validation pending |
+| OPEN-002 | Validate the proposed local-host/LAN arrangement against the client's fully offline preference recorded in the final Creative Brief | Affects architecture, hosting, availability, and Networking 2 | Project team / client | Before design approval and deployment planning | Preference stated in Oct 19–20 interviews and recorded in the final Creative Brief; site validation pending |
 | OPEN-003 | Who will use the system, and what permissions are needed? | Affects UX and authorization | Project team / client | Client interview | Open |
 | OPEN-004 | What data is necessary, and what must remain outside the system? | Affects schema, privacy, and scope | Project team / client | Client interview | Open |
 | OPEN-005 | What devices, connectivity, maintenance, and support are available at the barangay? | Affects deployment and handover | Project team / client | Client interview | Open |
@@ -334,7 +335,7 @@ Record decisions that have actually been made. Keep proposals in the open questi
 |---|---|---|---|---|
 | 2026-10-18 | Keep Foundation as the current working branch | Project workflow decision | Project team | Confirmed |
 | 2026-10-18 | Pause additional Foundation security code changes and leave production verification pending | Hosting environment is not yet available for verification | Project team | Confirmed |
-| — | Final system modules, sitemap, and ERD | Awaiting client interview and signed Creative Brief | Client / project team | Pending |
+| — | Final system modules, sitemap, and ERD | Awaiting design work based on the final Creative Brief | Client / project team | Pending |
 
 For future changes, include date and time, requirement or design section, change requested, reason/source, decision maker, and status. Preserve important rejected or deferred decisions so the team can explain the scope.
 
@@ -343,7 +344,7 @@ For future changes, include date and time, requirement or design section, change
 - **Reviewed with client by:**
 - **Review date:**
 - **Client comments / requested changes:**
-- **Creative Brief signed:** No — pending
+- **Creative Brief signed:** Yes — signed by the professor (final)
 - **Client approver name and position:**
 - **Approval date:**
 - **Related meeting / interview notes:**

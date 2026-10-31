@@ -22,13 +22,13 @@ Responsibilities are areas of ownership, not permission to ignore code outside y
 
 ## 3. Current project stage
 
-The team is working on the `Foundation` branch after client interviews on October 19–20, 2026. The revised Creative Brief supplied on October 27 was reviewed by the professor and is reflected in [Creative-Brief.md](Creative-Brief.md). Verify the required client and group leader signatures on the copy retained for submission. The client prefers fully offline LAN operation. The repository has an initial Docker Compose deployment path using local PostgreSQL and FastAPI-served frontend assets, documented in [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). It still needs a full build, no-internet testing, LAN/firewall testing, backup/restore verification, and client-site validation.
+The team is working on the `Foundation` branch after client interviews on October 19–20, 2026. The Creative Brief is final and was signed by the professor; it is reflected in [Creative-Brief.md](Creative-Brief.md). The client prefers fully offline LAN operation. The repository has an initial Docker Compose deployment path using local PostgreSQL and FastAPI-served frontend assets, documented in [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). It still needs a full build, no-internet testing, LAN/firewall testing, backup/restore verification, and client-site validation.
 
-Until the Creative Brief and architecture are reviewed:
-- Keep the repository on `Foundation`; do not rename or merge it or create the future `production` branch.
+Until the architecture is reviewed and validated at the client site:
+- Keep documentation and planning on `Foundation` and the admin portal UI on `draft/admin-portal` (see "Foundation and draft/admin-portal: merge readiness" below). Do not rename `Foundation`, merge it into `master`, or create the future `production` branch.
 - Update [Source-of-Truth.md](Source-of-Truth.md) and the system specification when a decision is confirmed.
 - Record remaining questions rather than guessing, especially around the local host, LAN access, photo background removal, the approved full-access account requirement, and backups.
-- Reconcile the current Admin/Staff authorization model with the revised Creative Brief's requirement that all six staff accounts have full access.
+- Reconcile the current Admin/Staff authorization model with the final Creative Brief's requirement that all six staff accounts have full access.
 - Do not describe the local LAN preparation as production-ready or as verified at the client site.
 
 ## 4. Agreed branching strategy
@@ -41,6 +41,33 @@ The team plans to use two long-lived branches when the team is ready to adopt th
 | `production` | Release and deployment branch | Contains only a tested, approved release intended for deployment. Deploy from this branch only after the hosting and deployment process is verified. |
 
 The names and roles above are the planned workflow. **At present, continue using `Foundation`** as requested. Do not rename it, merge it into `master`, or create `production` unless the team explicitly reviews and changes the branch plan.
+
+### Foundation and draft/admin-portal: merge readiness
+
+The two working branches are kept so that they can be merged at any time without conflicts:
+
+| Branch | Holds | Never changes |
+|---|---|---|
+| `Foundation` | All documentation and planning: everything in `docs/` and the root `README.md` | Application code, tests, lock files, `.github/` workflows |
+| `draft/admin-portal` | The admin portal UI, layout, and design, plus the code and tests that support it | `docs/` and the root `README.md` |
+
+Rules:
+
+1. Edit documentation **only on `Foundation`**. Edit application code **only on `draft/admin-portal`**.
+2. Never copy or paste documentation files between the branches. Bring documentation into `draft/admin-portal` by merging:
+
+   ```bash
+   git checkout draft/admin-portal
+   git fetch origin
+   git merge origin/Foundation
+   git push origin draft/admin-portal
+   ```
+
+   Do this after every documentation change that is merged into `Foundation`. A real merge keeps the shared history, so Git can always tell which side changed a file.
+3. Do not merge `draft/admin-portal` into `Foundation` until the team decides to combine them. When `draft/admin-portal` already contains all of `Foundation`, that merge is a fast-forward and cannot conflict.
+4. If a change needs both documentation and code, make the documentation change on `Foundation` first, merge `Foundation` into `draft/admin-portal`, then make the code change.
+
+The **Branch sync check** workflow (`.github/workflows/branch-sync-check.yml`) runs on every push to either branch. It fails if a branch changes files it does not own, or if merging the two branches would conflict. A warning means `draft/admin-portal` is behind `Foundation`; run the merge above.
 
 Use short-lived branches for individual tasks:
 
