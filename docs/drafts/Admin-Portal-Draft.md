@@ -14,16 +14,26 @@ The modules and fields are proposals. They must be validated with the barangay b
 
 ## Draft navigation
 
+**Workspace**
 - Dashboard
-- Issuances Management
-- Records Management
-  - Residents
-  - Households
-  - Registered Voters
+- Activity Log
+
+**Records and Documents**
+- Resident Records
+- Issuance Management
+- Barangay IDs
+
+**Administration — System Administrator only**
 - Officials
-- User Management
-- System Settings
-- Account menu with profile, password, and logout
+- User Accounts
+- Pending Registrations
+- Management Reports
+- Backup and Restore
+
+**User menu**
+- My Account
+- User Settings
+- System Settings — System Administrator only
 
 ## Dashboard proposal
 
@@ -84,7 +94,7 @@ Current prototype behavior:
 - The sample history is fictional and must not be mistaken for actual barangay records.
 - Barangay Information, Document Templates, and Audit Logs in System Settings are visual placeholders.
 - Account profile, password change, and account management continue to use the existing foundation functionality.
-- The interface presents a single Admin role. New accounts created through the draft interface are submitted as Admin. The backend still uses its existing is_superuser authorization field, so confirm that account authorization is consistent before any deployment.
+- The account form now offers Staff and System Administrator. It maps System Administrator to the existing `is_superuser = true` API field and Staff to `is_superuser = false`. It does not add a separate backend role enum. Confirm this proposal with the client before deployment.\n- Pending Registrations, Request Access, and Pending Approval are prototype-only. Requests are not saved, and approve/reject actions do not create or update backend accounts. The existing `is_active` flag is not a pending/rejected status workflow.
 - Terms of Use and Privacy Policy in the footer are placeholders, not approved legal documents.
 - Do not enter real resident or barangay data into this draft.
 
@@ -99,3 +109,25 @@ Current prototype behavior:
 7. Confirm role and authorization behavior in the backend.
 8. Replace fictional sample data only after an approved data plan exists.
 9. Keep this branch separate from Foundation until the team and client review the draft.
+
+
+## Update notes — November 1, 2026
+
+This branch update adds Barangay IDs to the sidebar, moves Activity Log under Workspace, separates Pending Registrations into its own administrator-only page, adds role selection to account forms, and shows the role flag in the account table. Dashboard summary cards now focus on document issuance and upcoming expiries. The dashboard's fictional cards, charts, and sample lists are marked with Sample Data badges.
+
+The Request Access and Pending Approval screens are visual prototypes only. They do not submit, save, approve, reject, or create accounts. The sidebar pending count and pending-registration examples are also fictional.
+
+Administrator-only pages show a friendly restricted-access screen for Staff. Frontend access checks improve navigation clarity but do not replace server-side authorization. Every protected API action must be checked by the backend before real deployment.
+
+The proposed role split conflicts with the current Creative Brief statement that all six staff accounts have full access. The team must confirm this difference with the client and instructors. The proposed role/status fields and access matrix are documented in `docs/Roles-and-Access-Plan.md`.
+
+The unused Items route and its dedicated components were removed. The generic portal Playwright checks were moved from `frontend/tests/items.spec.ts` to `frontend/tests/admin-portal-pages.spec.ts` and updated for the dashboard heading copy.
+
+### Review before merge
+
+- [ ] Run `cd frontend && bun run lint && bun run build` on a local checkout.
+- [ ] Run the Playwright suite and review any route, navigation, and role-related failures.
+- [ ] Manually check the dashboard, sidebar, login, request-access, pending-approval, pending-registrations, and user-account flows at 375px, 768px, and 1280px.
+- [ ] Test Staff and System Administrator views separately, including direct navigation to restricted routes.
+- [ ] Confirm the role split and account approval workflow with the barangay. Do not claim approval based on the prototype.
+- [ ] Confirm that backend role/status enforcement and audit logging are implemented before any real resident data is entered.
