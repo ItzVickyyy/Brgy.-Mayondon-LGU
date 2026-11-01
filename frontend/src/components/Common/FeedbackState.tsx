@@ -1,11 +1,16 @@
 import { AlertCircle, Inbox, LoaderCircle } from "lucide-react"
 
-type StateProps = {
+type EmptyStateProps = {
   title: string
   description?: string
 }
 
-export function EmptyState({ title, description }: StateProps) {
+type ErrorStateProps = {
+  title?: string
+  description?: string
+}
+
+export function EmptyState({ title, description }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 p-8 text-center">
       <Inbox className="size-6 text-muted-foreground" aria-hidden="true" />
@@ -24,7 +29,7 @@ export function LoadingState({ title = "Loading..." }: { title?: string }) {
   )
 }
 
-export function ErrorState({ title = "Something went wrong", description }: StateProps) {
+export function ErrorState({ title = "Something went wrong", description }: ErrorStateProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 p-8 text-center" role="alert">
       <AlertCircle className="size-6 text-destructive" aria-hidden="true" />
