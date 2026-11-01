@@ -13,13 +13,13 @@ Laguna State Polytechnic University – Los Baños Campus
 | [Justin Adrian P. Reboton](https://github.com/jOstin-7) | Backend Developer, Technical Writer |
 | [Jean Mervin G. Fajardo](https://github.com/JeanMervin) | Full Stack Developer |
 
-> **Status (October 31, 2026):** client interviews were conducted on October 19–20, and the Creative Brief is now final and was signed by the professor. The Foundation branch has an initial Docker-based self-hosted LAN path, but actual office deployment, offline workflows, backup/restore, security, automatic startup, and client-site operation remain unverified. See [Offline-LAN-Deployment.md](docs/Offline-LAN-Deployment.md), [Creative-Brief.md](docs/Creative-Brief.md), and [Source-of-Truth.md](docs/Source-of-Truth.md).
+> **Status (October 31, 2026):** client interviews were conducted on October 19–20, and the Creative Brief is now final and was signed by the professor. The Foundation branch has an initial Docker-based self-hosted LAN path, but actual office deployment, offline workflows, backup/restore, security, automatic startup, and client-site operation remain unverified. See [06-Architecture-and-Deployment.md](docs/06-Architecture-and-Deployment.md), [02-Requirements-and-Scope.md](docs/02-Requirements-and-Scope.md), and [01-Project-and-Schedule.md](docs/01-Project-and-Schedule.md).
 
 ## Stack at a glance
 
 FastAPI · SQLModel · local PostgreSQL · React · TypeScript · Vite ·
 Tailwind CSS · shadcn/ui · Docker Compose for self-hosting. Full list in
-[`docs/Complete-Tech-Stacks.md`](docs/Complete-Tech-Stacks.md).
+[`docs/06-Architecture-and-Deployment.md`](docs/06-Architecture-and-Deployment.md).
 
 ## Run it locally
 
@@ -27,8 +27,8 @@ Requirements: [uv](https://docs.astral.sh/uv/) (Python environment and dependenc
 [Bun](https://bun.sh), and Docker for a local PostgreSQL database.
 
 For local development with separate backend/frontend terminals, follow
-[`docs/How-To-Start.md`](docs/How-To-Start.md). For the proposed packaged LAN setup
-that serves the frontend and API together, follow [`docs/Offline-LAN-Deployment.md`](docs/Offline-LAN-Deployment.md).
+[`docs/07-Developer-Guide.md`](docs/07-Developer-Guide.md) (section 9). For the proposed packaged LAN setup
+that serves the frontend and API together, follow [`docs/06-Architecture-and-Deployment.md`](docs/06-Architecture-and-Deployment.md).
 The LAN deployment guide is a preparation guide, not proof of a verified client installation.
 
 
@@ -44,7 +44,7 @@ cd frontend && bun run lint && bun run build     # lint + type-check + build
 
 ## Team workflow
 
-Read [`docs/Developers.md`](docs/Developers.md) for the full team workflow,
+Read [`docs/07-Developer-Guide.md`](docs/07-Developer-Guide.md) for the full team workflow,
 branching strategy, review checklist, testing guidance, and developer roles.
 
 **Current branch policy:** keep working on `Foundation` while the team reviews
@@ -76,7 +76,7 @@ reviews and changes the branch plan.
 backend/    FastAPI app, database models, migrations, tests
 frontend/   React app (branding in src/config/site.ts)
 packages/   React Email templates for system emails
-docs/       Source of truth, tech stack, developer and local startup guides, documentation index
+docs/       Project, requirements, design, printing, security, deployment, developer guide, open decisions
 scripts/    Client generation and test helpers
 ```
 
