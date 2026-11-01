@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Save, ShieldCheck, Upload, UserRound } from "lucide-react"
-import { type FormEvent, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 
 import { UsersService, type UserUpdateMe } from "@/client"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
@@ -193,8 +193,7 @@ export function MyAccountModal({
     onError: handleError.bind(showErrorToast),
   })
 
-  const saveProfile = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const saveProfile = () => {
     const fullName = [
       form.first_name,
       form.middle_name,
@@ -246,7 +245,7 @@ export function MyAccountModal({
           </div>
         </DialogHeader>
 
-        <form onSubmit={saveProfile} className="flex min-h-0 flex-1 flex-col">
+        <div className="flex min-h-0 flex-1 flex-col">
           <div className="min-h-0 flex-1 space-y-7 overflow-y-auto p-5 sm:p-7">
             {!isEditing ? (
               <>
@@ -681,7 +680,8 @@ export function MyAccountModal({
                     Close
                   </Button>
                   <Button
-                    type="submit"
+                    type="button"
+                    onClick={saveProfile}
                     disabled={mutation.isPending}
                     className="gap-2"
                   >
@@ -692,7 +692,7 @@ export function MyAccountModal({
               )}
             </div>
           </div>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   )
