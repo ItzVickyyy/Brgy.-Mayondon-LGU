@@ -147,6 +147,12 @@ function Login() {
               Request access
             </RouterLink>
           </p>
+          <p className="text-center text-sm text-muted-foreground">
+            Account pending or not approved?{" "}
+            <RouterLink to="/pending-approval" className="font-medium text-primary underline-offset-4 hover:underline">
+              View sample status messages
+            </RouterLink>
+          </p>
         </form>
       </Form>
     </AuthLayout>
