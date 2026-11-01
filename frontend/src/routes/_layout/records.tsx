@@ -3,6 +3,8 @@ import { FileUp, Search, Users, UserRound, Upload, CreditCard, FileCheck2 } from
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
+import useAuth from "@/hooks/useAuth"
+import { isSystemAdministrator } from "@/lib/access"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 export const Route = createFileRoute("/_layout/records")({
@@ -29,6 +31,8 @@ function RecordsManagement() {
   const [importStep, setImportStep] = useState(0)
   const [selectedResident, setSelectedResident] = useState<(typeof sampleResidents)[number] | null>(null)
   const [profileTab, setProfileTab] = useState("Details")
+  const { user } = useAuth()
+  const isAdmin = isSystemAdministrator(user)
 
   const filteredResidents = useMemo(() => sampleResidents.filter((resident) =>
     [resident.id, resident.name, resident.address, resident.residentType, resident.idNumber, resident.registration, resident.status]
@@ -38,7 +42,7 @@ function RecordsManagement() {
   const tabs: { id: View; label: string }[] = [
     { id: "residents", label: "Residents" },
     { id: "family-sector", label: "Family & Sector Details" },
-    { id: "import", label: "Import Masterlist" },
+    ...(isAdmin ? [{ id: "import" as const, label: "Import Masterlist" }] : []),
   ]
 
   return (
@@ -152,7 +156,7 @@ function RecordsManagement() {
         </section>
       )}
 
-      {view === "import" && (
+      {view === "import" && isAdmin && (
         <section className="rounded-xl border bg-card p-5 shadow-sm">
           <div className="flex items-start gap-3">
             <FileUp className="mt-0.5 size-5 text-primary" aria-hidden="true" />
