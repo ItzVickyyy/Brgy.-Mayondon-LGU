@@ -16,6 +16,7 @@ export type Item = {
   title: string
   path: string
   section?: string
+  badge?: number | string
 }
 
 interface MainProps {
