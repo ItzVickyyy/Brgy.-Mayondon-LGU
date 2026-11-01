@@ -115,7 +115,7 @@ function Dashboard() {
         <label className="flex items-center gap-2 self-start text-sm sm:self-auto">
           <CalendarDays className="size-4 text-muted-foreground" aria-hidden="true" />
           <span className="text-muted-foreground">Period</span>
-          <select aria-label="Dashboard reporting period" value={period} onChange={(event) => setPeriod(event.target.value as Period)} className="h-9 rounded-md border bg-background px-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+          <select aria-label="Dashboard reporting period" value={period} onChange={(event) => setPeriod(event.target.value as Period)} className="min-h-11 rounded-md border bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
             {Object.entries(periodLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
           </select>
         </label>
