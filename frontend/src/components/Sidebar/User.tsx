@@ -10,12 +10,14 @@ import {
   Save,
   Upload,
   ShieldCheck,
+  Settings,
 } from "lucide-react"
 
 import { UsersService, type UserUpdateMe } from "@/client"
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -36,7 +38,8 @@ import { useSidebar } from "@/components/ui/sidebar"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
-import { handleError } from "@/utils"\nimport { isSystemAdministrator } from "@/lib/access"
+import { handleError } from "@/utils"
+import { isSystemAdministrator } from "@/lib/access"
 
 type ProfileForm = {
   email: string
@@ -431,7 +434,11 @@ function MyAccountModal({
 export function User({ user, compact = false }: { user: any; compact?: boolean }) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
-  const [accountOpen, setAccountOpen] = useState(false)\n  const [userSettingsOpen, setUserSettingsOpen] = useState(false)\n  const [systemSettingsOpen, setSystemSettingsOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const [userSettingsOpen, setUserSettingsOpen] = useState(false)
+  const [systemSettingsOpen, setSystemSettingsOpen] = useState(false)
+  const [userSettingsOpen, setUserSettingsOpen] = useState(false)
+  const [systemSettingsOpen, setSystemSettingsOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState<"English" | "Filipino">("English")
   const [logoutOpen, setLogoutOpen] = useState(false)
 
