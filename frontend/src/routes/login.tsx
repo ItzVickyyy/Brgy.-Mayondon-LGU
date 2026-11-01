@@ -34,6 +34,43 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>
 
+function getLoginErrorMessage(error: unknown): string {
+  const candidate = error as {
+    message?: unknown
+    body?: { detail?: unknown; message?: unknown }
+    detail?: unknown
+    status?: unknown
+  } | null
+  const apiMessage = [
+    candidate?.body?.detail,
+    candidate?.body?.message,
+    candidate?.detail,
+    candidate?.message,
+  ].find((value): value is string => typeof value === "string")
+  const normalized = apiMessage?.toLowerCase() ?? ""
+
+  if (normalized.includes("pending") && normalized.includes("approval")) {
+    return "Your account is pending approval. Please wait for the System Administrator to review your request."
+  }
+  if (
+    normalized.includes("not approved") ||
+    normalized.includes("rejected")
+  ) {
+    return "Your access request has not been approved. Contact the System Administrator for assistance."
+  }
+  if (
+    normalized.includes("incorrect") ||
+    normalized.includes("invalid credentials") ||
+    normalized.includes("wrong password")
+  ) {
+    return "The email address or password is incorrect. Please check your credentials and try again."
+  }
+  if (candidate?.status === 401) {
+    return "The email address or password is incorrect. Please check your credentials and try again."
+  }
+  return "We could not sign you in. Please try again or contact the System Administrator if the problem continues."
+}
+
 export const Route = createFileRoute("/login")({
   component: Login,
   beforeLoad: async () => {
@@ -54,6 +91,9 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   const { loginMutation } = useAuth()
+  const loginErrorMessage = loginMutation.error
+    ? getLoginErrorMessage(loginMutation.error)
+    : null
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
@@ -82,6 +122,15 @@ function Login() {
               Sign in to access the barangay personnel portal.
             </p>
           </div>
+
+          {loginErrorMessage ? (
+            <p
+              role="alert"
+              className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+            >
+              {loginErrorMessage}
+            </p>
+          ) : null}
 
           <div className="grid gap-5">
             <FormField
