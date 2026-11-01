@@ -34,6 +34,7 @@ The base radius token is `0.625rem`. Theme variants and utility names are mapped
 - Page headings use the current utility pattern `text-2xl font-bold tracking-tight sm:text-3xl`.
 - Body text should remain readable. Use at least 16px for form/table content where practical; supporting labels can be smaller only when still legible.
 - Use the existing Tailwind spacing scale and recurring card padding patterns such as `p-4` and `sm:p-5`. Do not introduce arbitrary spacing values without a layout need.
+- Existing icon sizes commonly use `size-4` for 16px, `size-5` for 20px, and `size-6` for 24px. Keep matching actions consistent.
 - Preserve responsive grid behavior: single-column on narrow screens, then expand at existing breakpoints.
 
 ## Components and interaction
