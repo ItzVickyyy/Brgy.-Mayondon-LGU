@@ -53,6 +53,9 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Email").fill(email)
     await page.getByPlaceholder("Password").first().fill(password)
     await page.getByPlaceholder("Password").last().fill(password)
+
+    await page.getByRole("combobox").selectOption({ label: "System Administrator" })
+    
     await page.getByLabel("Is active?").check()
 
     await page.getByRole("button", { name: "Save" }).click()
