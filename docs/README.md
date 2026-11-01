@@ -1,40 +1,33 @@
 # Documentation
 
-Everything the team needs to know about the project lives in this folder.
+Everything the team needs to know about the project lives in this folder, grouped by topic. Start with the open decisions if you are unsure what is still unsettled.
 
-| File | What it is | When to read it |
+| File | Covers | Read it when |
 |---|---|---|
-| [Source-of-Truth.md](Source-of-Truth.md) | Project requirements, schedule, grading, decisions, open items, and status | Before any task; check this after client discussions |
-| [Creative-Brief.md](Creative-Brief.md) | Interview-based scope, objectives, features, exclusions, platform preference, content, timeline, and approval fields | Final Creative Brief, signed by the professor; the approved planning baseline |
-| [Developers.md](Developers.md) | Team roles, branch plan, workflows, reviews, testing, migrations, and security guidance | Before starting development or opening a pull request |
-| [How-To-Start.md](How-To-Start.md) | Windows PowerShell steps to run the development setup with separate backend and frontend terminals | When developing locally |
-| [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md) | Initial Docker-based self-hosting setup for an office LAN without internet, including host setup, firewall, offline limitations, and deployment verification | When preparing and testing the proposed client-site installation |
-| [Complete-Tech-Stacks.md](Complete-Tech-Stacks.md) | Technologies and architecture, including the original online Foundation setup and the local deployment option | Before coding or planning deployment |
-| [Security-Measures.md](Security-Measures.md) | Recurring security checklist; production hosting verification is explicitly pending | During development, before releases, and before handling real data |
-| [Developers-Journal/README.md](Developers-Journal/README.md) | Rules and individual journals for recording work, achievements, AI tools, and workflow with date/time | Every time you work on the project |
-| [Bug-and-Issue-Log.md](Bug-and-Issue-Log.md) | Central record of bugs, defects, incidents, and issues found during development, testing, or launch | Whenever an issue is found or its status changes |
-| [System-Specification-and-Architecture.md](System-Specification-and-Architecture.md) | Single reference combining client-confirmed requirements, scope, roles, technical architecture, sitemap, database, security, hosting, and open decisions | Before design or implementation changes, and after client discussions or technical decisions |
+| [01-Project-and-Schedule.md](01-Project-and-Schedule.md) | Project at a glance, team, subjects, schedule, weekly requirements, testing instruments, user manual, Certificate of Utilization, final report, grading, status, AI rules | Before any task; to check milestones and status |
+| [02-Requirements-and-Scope.md](02-Requirements-and-Scope.md) | Final Creative Brief, client problem, objectives, scope and exclusions, features, FR/NFR, LGUSS-BIMS boundary, decisions made | Before designing or building anything; after client discussions |
+| [03-Design-and-UI.md](03-Design-and-UI.md) | Site map, navigation, page layouts, style guide, Admin portal prototype status | Designing or changing the interface |
+| [04-Documents-and-Printing.md](04-Documents-and-Printing.md) | Document types, fields, pre-printed form overlay rules, print templates | Working on issuance or printing |
+| [05-Roles-Security-and-Privacy.md](05-Roles-Security-and-Privacy.md) | Roles and access plan, security checklist, privacy safeguards, verification status | Auth, permissions, data handling, before releases |
+| [06-Architecture-and-Deployment.md](06-Architecture-and-Deployment.md) | Tech stack, architecture, offline LAN deployment, backup/restore, packaging, daily startup | Planning or testing the client installation |
+| [07-Developer-Guide.md](07-Developer-Guide.md) | Roles, branching, reviews, testing, migrations, local startup | Before development or a pull request |
+| [08-Open-Decisions.md](08-Open-Decisions.md) | **Every undecided, vague or contradictory item**, with owner and deadline | After client or instructor discussions |
 
-Use [How-To-Start.md](How-To-Start.md) as the detailed guide for running the development setup in Windows PowerShell. For the proposed offline client installation, read [Offline-LAN-Deployment.md](Offline-LAN-Deployment.md). These are preparation documents, not proof of a verified client installation.
+**Precedence if documents conflict:** the instructor's *Final Project Guide* → the signed Creative Brief (client scope) → these documents.
 
-## Using an AI assistant (free tiers)
+**Documentation is preparation, not proof.** Setup guides, checklists and design drafts describe what is planned. Nothing here proves a client-site installation, a verified deployment, client approval or a working feature unless it says so with evidence.
 
-1. Open a new chat and paste the contents of `Source-of-Truth.md`. Add
-   `Complete-Tech-Stacks.md` for technical architecture or `Developers.md`
-   for team workflow.
-2. Say which milestone and role you are working on, for example: *"I'm Jean
-   (frontend), Week 14: help me plan the sitemap for the pages we decided on."*
-3. For code questions, paste the relevant file or error message.
-4. Treat answers as suggestions. Check them against the Final Project Guide,
-   the client-approved requirements, and your instructors.
-5. Never paste passwords, `.env` contents, secrets, or real resident data.
+## Using an AI assistant
+
+1. Open a new chat and paste `01-Project-and-Schedule.md`; add `02-Requirements-and-Scope.md` for client scope, `06-Architecture-and-Deployment.md` for technical work, or `07-Developer-Guide.md` for workflow.
+2. Say your milestone and role, e.g. *"I'm Jean (frontend), Week 15: help me connect the resident list to the API."*
+3. For code questions paste the relevant file or error. Treat answers as suggestions and check them against the Guide and the client-approved requirements.
+4. Never paste passwords, `.env` contents, secrets or real resident data.
 
 ## Keeping the docs current
 
-- Update documentation in the same pull request that changes a decision or workflow. The interviews on October 19–20, 2026 established a draft clerical records and document-issuance scope. The client prefers fully offline LAN operation, which conflicts with the current online-oriented Foundation hosting plan. Keep this conflict visible until resolved.
-- Keep source-code protection, simplified startup behavior, browser shortcuts, and client-site readiness documented as targets until the package is prepared and the actual setup is configured and tested. Do not claim these items are complete before verification.
-- Move items from "Open items" to "Decisions made" in `Source-of-Truth.md`
-  only after they are confirmed. Update the status checklist and date as needed.
-- Keep files focused. Interview notes, test results, mockups, and narrative
-  reports belong in their appropriate working documents or final report appendices.
+- Update the relevant file in the same pull request that changes a decision or workflow.
+- When a decision is made, answer it in [08-Open-Decisions.md](08-Open-Decisions.md), move the answer into the file it affects, and mark the row Closed.
+- Keep long material (interview notes, mockups, test results, narrative reports) in its own working file or the final report appendices.
+- Edit documentation **only on `master`**; code changes go on `draft/admin-portal` (see [07](07-Developer-Guide.md)).
 - Use clear file names and plain English.
