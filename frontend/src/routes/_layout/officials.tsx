@@ -44,7 +44,7 @@ function OfficialsManagement() {
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><UserRound className="size-5" aria-hidden="true" /></div>
             <div><h2 className="font-semibold">Officials List</h2><p className="mt-1 text-sm text-muted-foreground">Search the list of barangay officials.</p></div>
           </div>
-          <label className="relative block w-full sm:max-w-xs"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search officials..." className="min-h-11 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
+          <label className="relative block w-full sm:max-w-xs"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search officials..." className="min-h-11 w-full rounded-md border bg-background pl-9 pr-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-left text-base">
