@@ -1,6 +1,6 @@
 # Admin Portal Draft
 
-Status: **Draft only. Not approved for production or client handover.**
+Status: Working frontend reference for internal review and client validation.
 
 Base branch: Foundation
 
@@ -14,16 +14,25 @@ The modules and fields are proposals. They must be validated with the barangay b
 
 ## Draft navigation
 
+**Workspace**
 - Dashboard
-- Issuances Management
-- Records Management
-  - Residents
-  - Households
-  - Registered Voters
+- Activity Log
+
+**Records and Documents**
+- Resident Records
+- Issuance Management
+- Barangay IDs
+
+**Administration — System Administrator only**
 - Officials
-- User Management
-- System Settings
-- Account menu with profile, password, and logout
+- User Accounts
+- Pending Registrations
+- Management Reports
+- Backup and Restore
+
+**User menu**
+- My Account
+- User Settings
 
 ## Dashboard proposal
 
@@ -68,12 +77,12 @@ Current prototype behavior:
 - The form can be cleared.
 - A draft can be added to an in-memory history for the current page session.
 - The history can be searched and filtered by document type.
-- The print action opens a print dialog with a review-only layout, clearly marked as a draft and not an official document.
+- The print action behavior remains paused until the form-specific overlay positions are calibrated against the client's pre-printed forms.
 
-## Important limitations
+## Implementation status and safeguards
 
-- Dashboard figures, issuance history, names, and activity items are fictional sample data.
-- Dashboard charts are illustrative, not connected to live statistics.
+- Dashboard figures, issuance history, names, and activity items use fictional data for development and must never be replaced with real resident data before an approved data plan exists.
+- Dashboard charts are not connected to live statistics.
 - Records and Officials pages display sample rows only. They do not create, update, or delete database records.
 - Issuance drafts exist only in frontend memory for the current page session. Refreshing the page clears them.
 - Issuance forms are not connected to a database or backend API. They do not issue official documents or persist records.
@@ -81,12 +90,12 @@ Current prototype behavior:
 - The supplied workbook contains different purpose lists across sheets. The current four-form draft uses the BRGY CLEARANCE purpose list for Barangay Clearance. The separate CLEARANCE POSTAL purpose list is not currently mapped to one of the four forms, so it should be added only after confirming how that sheet relates to the proposed document types.
 - Explicit Excel dropdown validation was only confirmed in the converted workbook for CLEARANCE POSTAL and BRGY CLEARANCE. Other workbook option lists were not confirmed as active dropdowns.
 - Required fields and validation rules have not been confirmed. The prototype does not assume official eligibility rules.
-- The sample history is fictional and must not be mistaken for actual barangay records.
-- Barangay Information, Document Templates, and Audit Logs in System Settings are visual placeholders.
+- History rows are fictional and do not represent actual barangay records.
 - Account profile, password change, and account management continue to use the existing foundation functionality.
-- The interface presents a single Admin role. New accounts created through the draft interface are submitted as Admin. The backend still uses its existing is_superuser authorization field, so confirm that account authorization is consistent before any deployment.
-- Terms of Use and Privacy Policy in the footer are placeholders, not approved legal documents.
-- Do not enter real resident or barangay data into this draft.
+- The account form now offers Staff and System Administrator. It maps System Administrator to the existing `is_superuser = true` API field and Staff to `is_superuser = false`. It does not add a separate backend role enum. Confirm this proposal with the client before deployment.
+- Pending Registrations, Request Access, and Pending Approval are prototype-only. Requests are not saved, and approve/reject actions do not create or update backend accounts. The existing `is_active` flag is not a pending/rejected status workflow.
+- The current footer shows branding only. Terms of Use and Privacy Policy links are not implemented. If legal text is added later, mark it “Draft, pending barangay review” until reviewed and approved by the barangay.
+- Do not enter real resident or barangay data into this application until approved data handling, access controls, and backend enforcement are in place.
 
 ## Review before any merge
 
@@ -99,3 +108,30 @@ Current prototype behavior:
 7. Confirm role and authorization behavior in the backend.
 8. Replace fictional sample data only after an approved data plan exists.
 9. Keep this branch separate from Foundation until the team and client review the draft.
+
+
+## Update notes — November 1, 2026
+
+This branch update adds Barangay IDs to the sidebar, moves Activity Log under Workspace, separates Pending Registrations into its own administrator-only page, adds role selection to account forms, and shows the role flag in the account table. Dashboard summary cards now focus on document issuance and upcoming expiries. Fictional cards, charts, and list rows remain in the UI for development, without visible sample-data badges or prototype banners.
+
+Visible sample-data badges and prototype banners have been removed. The data shown remains fictional and must not be used as actual barangay records.
+
+The Request Access and Pending Approval screens are visual prototypes only. They do not submit, save, approve, reject, or create accounts. The sidebar pending count and pending-registration examples are also fictional.
+
+Administrator-only pages show a friendly restricted-access screen for Staff. Frontend access checks improve navigation clarity but do not replace server-side authorization. Every protected API action must be checked by the backend before real deployment.
+
+The proposed role split conflicts with the current Creative Brief statement that all six staff accounts have full access. The team must confirm this difference with the client and instructors. The proposed role/status fields and access matrix are documented in `docs/Roles-and-Access-Plan.md`.
+
+The unused Items route and its dedicated components were removed. The generic portal Playwright checks were moved from `frontend/tests/items.spec.ts` to `frontend/tests/admin-portal-pages.spec.ts` and updated for the dashboard heading copy.
+
+### Review before merge
+
+- [ ] Run `cd frontend && bun run lint && bun run build` on a local checkout.
+- [ ] Run the Playwright suite and review any route, navigation, and role-related failures.
+- [ ] Manually check the dashboard, sidebar, login, request-access, pending-approval, pending-registrations, and user-account flows at 375px, 768px, and 1280px.
+- [ ] Test Staff and System Administrator views separately, including direct navigation to restricted routes.
+- [ ] Confirm the role split and account approval workflow with the barangay. Do not claim approval based on the prototype.
+- [ ] Confirm that backend role/status enforcement and audit logging are implemented before any real resident data is entered.
+
+
+Team decision (Nov 1, 2026): on-screen sample/prototype notices were removed. All data in the app is still fictional. Never enter real resident data. Screens are not evidence that a feature is operational.
