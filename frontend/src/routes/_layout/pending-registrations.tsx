@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
 import { NoPermission } from "@/components/Common/NoPermission"
+import { isSystemAdministrator } from "@/lib/access"
 import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/pending-registrations")({
@@ -45,7 +46,7 @@ function PendingRegistrations() {
     )
   }
 
-  if (!user?.is_superuser) return <NoPermission />
+  if (!isSystemAdministrator(user)) return <NoPermission />
 
   return (
     <div className="flex flex-col gap-6">
