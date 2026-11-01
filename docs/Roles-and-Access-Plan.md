@@ -43,12 +43,12 @@ If account approval becomes a real feature, the backend and database need an exp
 
 ## Questions for the barangay
 
-
-1. Who should be the System Administrator, and who is authorized to approve or disable accounts?
-2. May Staff import or replace a resident masterlist?
-3. May Staff trigger manual backups, or should backup/restore be restricted to the System Administrator?
-4. Does the client still require all six staff accounts to have full access, as written in the Creative Brief, or does the client approve role-based restrictions?
-5. Which actions must require a reason and be recorded in an audit history?
+1. Where will the System Administrator maintain the purpose list now that System Settings was removed?
+2. Who should be the System Administrator, and who is authorized to approve or disable accounts?
+3. May Staff import or replace a resident masterlist?
+4. May Staff trigger manual backups, or should backup/restore be restricted to the System Administrator?
+5. Does the client still require all six staff accounts to have full access, as written in the Creative Brief, or does the client approve role-based restrictions?
+6. Which actions must require a reason and be recorded in an audit history?
 
 ## Security and privacy requirements to verify
 
