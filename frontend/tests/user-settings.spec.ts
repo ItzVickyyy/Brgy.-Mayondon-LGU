@@ -56,7 +56,7 @@ test.describe("Edit user profile", () => {
     await dialog.getByRole("button", { name: "Save Changes" }).click()
 
     await expect(page.getByText("My Account updated successfully")).toBeVisible()
-    await expect(dialog.getByText(updatedName, { exact: true })).toBeVisible()
+    await expect(dialog.getByText(updatedName, { exact: true }).first()).toBeVisible()
   })
 
   test("Invalid email is blocked by browser validation", async ({ page }) => {
@@ -86,7 +86,7 @@ test.describe("Edit user email", () => {
     await dialog.getByRole("button", { name: "Save Changes" }).click()
 
     await expect(page.getByText("My Account updated successfully")).toBeVisible()
-    await expect(dialog.getByText(updatedEmail, { exact: true })).toBeVisible()
+    await expect(dialog.getByText(updatedEmail, { exact: true }).first()).toBeVisible()
   })
 })
 
@@ -106,7 +106,7 @@ test.describe("Cancel edit actions", () => {
     await dialog.getByLabel("First Name").fill("Changed Name")
     await dialog.getByRole("button", { name: "Cancel Edit" }).click()
 
-    await expect(dialog.getByText(user.full_name as string, { exact: true })).toBeVisible()
+    await expect(dialog.getByText(user.full_name as string, { exact: true }).first()).toBeVisible()
   })
 
   test("Cancel edit restores the original email", async ({ page }) => {
@@ -122,7 +122,7 @@ test.describe("Cancel edit actions", () => {
     await dialog.getByLabel("Email").fill(randomEmail())
     await dialog.getByRole("button", { name: "Cancel Edit" }).click()
 
-    await expect(dialog.getByText(email, { exact: true })).toBeVisible()
+    await expect(dialog.getByText(email, { exact: true }).first()).toBeVisible()
   })
 })
 
