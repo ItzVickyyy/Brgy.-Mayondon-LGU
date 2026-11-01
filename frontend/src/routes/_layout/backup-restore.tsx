@@ -70,7 +70,7 @@ function BackupRestore() {
           
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[620px] text-left text-sm">
+          <table className="w-full min-w-[620px] text-left text-base">
             <thead className="bg-muted/40 text-muted-foreground"><tr><th className="px-5 py-3 font-medium">Backup file</th><th className="px-5 py-3 font-medium">Created</th><th className="px-5 py-3 font-medium">Size</th><th className="px-5 py-3 font-medium">Validation</th></tr></thead>
             <tbody>{sampleBackups.map((backup) => <tr key={backup.name} className="border-t"><td className="px-5 py-3"><span className="inline-flex items-center gap-2"><Archive className="size-4 text-muted-foreground" />{backup.name}</span></td><td className="px-5 py-3">{backup.date}</td><td className="px-5 py-3">{backup.size}</td><td className="px-5 py-3"><span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400"><CheckCircle2 className="size-4" />{backup.status}</span></td></tr>)}</tbody>
           </table>
