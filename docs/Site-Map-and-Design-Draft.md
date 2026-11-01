@@ -426,6 +426,10 @@ My Account and User Settings remain in the user menu. System Settings is intende
 - Kept the document issuance trend and document-type chart. Added Sample Data badges to dashboard summary cards, charts, and sample lists.
 - Removed the unused Items route and its related frontend components. Renamed the generic portal Playwright tests so their filename matches what they test.
 
+### Task B — global sample-data labels
+
+A global sample-data banner and shared badge on every page were intentionally not added because the instruction was to avoid labeling sample data everywhere. Dashboard-specific Sample Data badges remain in place as required by Task A5. Other prototype pages must still be described accurately in their page copy and documentation.
+
 ### Task C — Role-aware navigation and restricted pages
 
 - Added a shared frontend helper for the current API administrator flag.
