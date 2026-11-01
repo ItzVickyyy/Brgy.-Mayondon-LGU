@@ -2,7 +2,7 @@ name: Branch sync check
 
 # Keeps master (documentation and planning) and draft/admin-portal (admin
 # portal UI, layout and design) merge-ready. The rules are explained in
-# "master and draft/admin-portal: merge readiness" in docs/Developers.md.
+# "master and draft/admin-portal: merge readiness" in docs/07-Developer-Guide.md.
 
 on:
   push:
