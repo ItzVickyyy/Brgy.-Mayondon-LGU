@@ -3,7 +3,7 @@
 **Project:** Barangay Mayondon Records and Document Issuance System  
 **Working branch:** `draft/admin-portal`  
 **Status:** Design draft for group review and client validation  
-**Last updated:** October 27, 2026
+**Last updated:** November 1, 2026
 
 This document combines the initial site map with the current page-layout direction. It is a design working document, not a replacement for the Final Project Guide or a client-signed requirements document.
 
@@ -18,8 +18,8 @@ The system is staff-facing. Do not add public resident accounts, public document
 ```mermaid
 flowchart TD
     A["System Entry"] --> B["Staff Login"]
-    A --> C["Staff Self-Registration"]
-    C --> D["Pending Approval"]
+    A --> C["Request Access"]
+    C --> D["Pending / Rejected Status Messages"]
     B --> E["Dashboard"]
 
     E --> F["Resident Records"]
@@ -44,10 +44,8 @@ flowchart TD
     H3 --> H4["Generate and Print ID"]
 
     E --> I["My Account"]
-    I --> I1["Settings Modal"]
-    I1 --> I2["My Account"]
-    I1 --> I3["User Settings"]
-    I1 --> I4["System Settings (Admin)"]
+    I --> I1["My Account"]
+    I --> I2["User Settings"]
 
     E --> J["Admin-only Administration"]
     J --> J1["Officials List"]
@@ -57,10 +55,9 @@ flowchart TD
     J3 --> J5["Edit / Deactivate Staff"]
     J --> J6["Pending Registrations"]
     J6 --> J7["Approve / Reject Registration"]
-    J --> J8["All Users' Activity"]
+    E --> J8["Activity Log (role-filtered)"]
     J --> J9["Management Reports"]
     J --> J10["Backup and Restore"]
-    J --> J11["System Settings"]
 ```
 
 The diagram shows the proposed information architecture, not a statement that every page is already implemented. Some entries may be tabs or subviews rather than separate URLs.
@@ -68,24 +65,30 @@ The diagram shows the proposed information architecture, not a statement that ev
 ## 3. Main navigation draft
 
 ### Common navigation
+
+**Workspace**
 1. Dashboard
-2. Resident Records
-3. Document Management
-   - Document Requests
-   - Issuance History
-4. Barangay ID Management
-5. My Account
-6. My Activity
+2. Activity Log
+
+**Records and Documents**
+1. Resident Records
+2. Issuance Management
+3. Barangay IDs
+
+**User menu**
+1. My Account
+2. User Settings
 
 ### Admin-only navigation
+
 1. Officials
 2. User Accounts
 3. Pending Registrations
-4. Activity Log (all users)
-5. Management Reports
-6. Backup and Restore
+4. Management Reports
+5. Backup and Restore
 
-The Staff account should not see admin-only navigation. The backend must still enforce authorization for every protected action. Hiding a menu item is not a security control.
+Staff sees only their own activity in Activity Log. System Administrators can review all users' activity with filters. The frontend must not be treated as the authorization boundary. The backend must enforce every protected API operation.
+
 
 ## 4. Page and layout draft
 
@@ -94,7 +97,7 @@ The Staff account should not see admin-only navigation. The backend must still e
 - Summary cards for document issuances and upcoming expiry reminders, using real database values when connected.
 - Quick links to Resident Records, Document Requests, Issuance History, and Barangay IDs.
 - Recent activity is limited to the current user's actions for Staff. Admin may see a system-wide activity summary if approved.
-- Any prototype values must be visibly identified as sample data. Never present invented figures as barangay statistics.
+- Do not show sample-data badges or prototype banners. Keep all demonstration values fictional, and never present invented figures as barangay statistics.
 
 ### Resident Records
 - Page heading, search, and clear primary actions.
@@ -140,7 +143,7 @@ The Staff account should not see admin-only navigation. The backend must still e
 
 ### Reports, settings, and backup
 - Management reports should focus on useful office summaries such as issuances by date/type/purpose, expiring records, imports, corrections, and account activity. Confirm report needs with the client.
-- System settings should contain only settings that are agreed and supported.
+- Keep user preferences in User Settings. System-level purpose-list maintenance needs a separate team decision and client validation.
 - Backup and restore are Admin-only. Include clear confirmation before destructive restore actions and record the outcome. The backup destination, schedule, responsibility, and restore procedure still require practical verification.
 
 ## 5. Visual direction
@@ -155,14 +158,13 @@ The Staff account should not see admin-only navigation. The backend must still e
 
 ## 6. Current branch prototype notes
 
-The current `draft/admin-portal` branch already contains draft pages for Dashboard, Records Management, Issuances Management, Officials, User Management, and System Settings. Several pages use hard-coded sample data and are not connected to a complete backend workflow. Treat these pages as visual prototypes, not operational features.
+The current `draft/admin-portal` branch contains frontend pages for Dashboard, Records Management, Issuances Management, Officials, and User Management. Several pages use hard-coded fictional data and are not connected to a complete backend workflow.
 
 The existing prototype should be aligned with the current scope:
-- Replace population, household, voter, and issuance figures with clearly marked sample values until real aggregate data is connected.
+- Replace population, household, voter, and issuance figures with verified aggregate values only after a backend data source is connected. Do not display sample-data badges or prototype banners.
 - Avoid making unsupported population/voter management a primary module unless the client confirms it is needed.
 - Separate request entry from issuance history.
 - Remove the public-announcement direction from the welcome screen unless the client requests a public-facing site.
-- Move activity logs out of System Settings into a clear Activity Log page with role-dependent visibility.
 - Keep Officials management separate from User Management.
 - Do not show links to pages until a draft route or screen exists.
 
@@ -203,7 +205,6 @@ This checklist compares the Creative Brief with the current branch. A draft scre
 | Document request entry and editable purpose list | Document Management now has a sample resident selector before document type and pre-fills sample name/address. Drafts still live only in session state. | Connect selector to saved Resident Records, confirm fields for each document, make the purpose list maintainable, and persist requests/issuances in the database. |
 | Separate issuance history with issue and expiry dates | Issuance History tab exists, but records are sample/session-only and no expiry date is shown. | Add persistent issuance records, expiry where applicable, details, and correction history that preserves the original. |
 | Auto-filled printing with existing formats | Current print view is a generic draft preview. | Create a separate print layout per approved document, then calibrate against actual pre-printed paper and the client printer. Signatures and dry seals remain manual. |
-| Six staff accounts with full access | Current branch has Admin-only routes and navigation for Officials, User Accounts, and System Settings. | **Requirements conflict:** the Creative Brief says all six staff accounts have full access, while prior workflow planning has Admin and Staff permission differences. Confirm this with the client before changing access controls. |
 | Local scheduled and manual backup/restore | No dedicated Backup and Restore screen in the navigation. | Draft Admin-accessible backup/restore UI and define destination, schedule, confirmation, restore procedure, and outcome display. Actual backup automation and restore tests remain separate work. |
 | Fully offline local-network use | Deployment foundation exists, but client-site LAN operation is not yet verified. | Test host startup, access from other office computers, printer operation, firewall configuration, and recovery without internet. |
 | Public-facing features excluded | Welcome page is staff-oriented; no public announcement module is intended. | Keep public resident access, online applications, payments, announcements, and blotter workflows out of scope. |
@@ -338,17 +339,100 @@ The following routes are now represented in `draft/admin-portal` and use clearly
 
 These are design prototypes. The added controls do not write to the database, generate reports, change real account states, or run backup/restore operations. The Backup and Restore page must be connected to the approved local scripts and tested before being treated as operational. A real restore can replace current data, so production restore must use explicit authorization, a verified archive, a clear confirmation step, and a tested recovery procedure.
 
-The sidebar now includes one Activity Log page for both roles, plus Pending Registrations, Management Reports, and Backup and Restore for Admin. My Account, User Settings, and System Settings are accessed through the user-menu Settings modal. The earlier dashboard layout remains unchanged.
 
 
 
 ## 14. Settings menu and consolidated Activity Log — October 28, 2026
 
-The sidebar no longer lists My Account, User Settings, or System Settings as main navigation pages. These options are grouped in a Settings modal opened from the user menu. The user menu contains Settings and Logout.
 
-The Settings modal has three sections:
-- My Account: account information and change password.
-- User Settings: appearance preference with Light, Dark, and System options.
-- System Settings: proposed barangay information and document-template configuration, visible to Admin accounts.
 
 The Activity Log is a single navigation page. Staff see sample entries for their own activity, while Admin sees the sample entries across accounts. Both views remain prototype-only until an actual audit log is implemented. The former separate My Activity route is removed from the navigation and route files.
+
+
+## 10. Admin and Staff access plan — November 1, 2026
+
+This access plan is a proposal for the frontend prototype, not a client-approved permissions policy. The final Creative Brief currently says all six staff accounts have full access. Confirm any role restrictions with the barangay before treating this proposal as final or deploying with real data.
+
+### Navigation
+
+**Workspace**
+1. Dashboard
+2. Activity Log
+
+**Records and Documents**
+1. Resident Records
+2. Issuance Management
+3. Barangay IDs
+
+**Administration — System Administrator only**
+1. Officials
+2. User Accounts
+3. Pending Registrations
+4. Management Reports
+5. Backup and Restore
+
+
+### Proposed access matrix
+
+| Module / action | Staff | System Administrator |
+|---|---|---|
+| Dashboard | Operational summary and own recent activity | Same, plus system-wide activity |
+| Resident Records: search, view, add, edit | Allowed | Allowed |
+| Resident Records: import masterlist | No, proposed restriction; confirm with client | Allowed |
+| Resident Records: archive | No | Allowed |
+| Issuance Management: create, review, print, correct with reason | Allowed | Allowed |
+| Issuance Management: void/cancel | No | Allowed |
+| Barangay IDs: list, create, renew, print | Allowed | Allowed |
+| Barangay IDs: override validity rules | No | Allowed |
+| Activity Log | Own activity | All users, with filters |
+| My Account and User Settings | Allowed | Allowed |
+| Officials, User Accounts, Pending Registrations | No | Allowed |
+| Management Reports | No | Allowed |
+| Backup and Restore | No; manual backup permission to be confirmed | Allowed |
+
+### Prototype and authorization limitations
+
+- The user account role selector maps System Administrator to the existing API field `is_superuser = true` and Staff to `is_superuser = false`. This does not add a separate backend role enum.
+- The Pending Registrations, Request Access, and Pending Approval screens use fictional sample content. Access requests are not submitted or saved. Approve/reject decisions only change temporary frontend state and do not create or update accounts.
+- The current API's `is_active` boolean does not by itself represent pending or rejected account status. If approval becomes a real feature, design and implement an explicit backend status field and authorization rules first.
+- Administrator-only frontend routes show a friendly restricted-access screen for Staff. This UI behavior is not a substitute for server-side authorization.
+- Proposed account statuses are `pending`, `active`, `rejected`, and `inactive`. These are suggestions requiring technical review, not verified existing fields.
+- Confirm who can approve or disable accounts, whether Staff may import masterlists, and whether Staff may perform manual backups.
+
+## 11. Changes made in this update
+
+### Task A — Navigation, roles, registration prototype, and dashboard
+
+- Added Barangay IDs under Records and Documents.
+- Moved Activity Log into Workspace.
+- Added a System Administrator / Staff selector to Add User and Edit User. The account table displays the API role flag rather than a hard-coded Admin badge.
+- Separated Pending Registrations into an administrator-only route and added a sample pending-count badge to the sidebar.
+- Added Request Access and Pending Approval prototype screens and links from Welcome and Staff Login. These screens do not save requests or create accounts.
+- Replaced population/household/voter summary cards with document issuances, expiring clearances, expiring Barangay IDs, and a role-specific pending queue card.
+- Kept the document issuance trend and document-type chart. Added Sample Data badges to dashboard summary cards, charts, and sample lists.
+- Removed the unused Items route and its related frontend components. Renamed the generic portal Playwright tests so their filename matches what they test.
+
+### Task B — global sample-data labels
+
+A global sample-data banner and shared badge on every page were intentionally not added because the instruction was to avoid labeling sample data everywhere. Dashboard-specific Sample Data badges remain in place as required by Task A5. Other prototype pages must still be described accurately in their page copy and documentation.
+
+### Task C — Role-aware navigation and restricted pages
+
+- Added a shared frontend helper for the current API administrator flag.
+- Added a reusable restricted-access component with a Back to Dashboard action for administrator-only pages.
+- Kept Staff activity description scoped to the current user's activity in the dashboard prototype, while the administrator view describes system-wide activity.
+
+### Task D — Documentation and review notes
+
+- Added `docs/Roles-and-Access-Plan.md` and `docs/Style-Guide.md`.
+- This site map and `docs/drafts/Admin-Portal-Draft.md` record the new navigation, role proposal, prototype-only limitations, and review steps.
+- Security notes reinforce backend authorization, audit-log protection, data minimization, and the Data Privacy Act of 2012.
+- No client approval is claimed by these draft documents. Validate the proposed access split and design with the client and instructors before treating them as final.
+
+
+## 15. Changes made November 1, 2026 (round 2)
+
+- Removed user-visible sample-data badges and prototype banners while retaining fictional development data.
+- Clarified that My Account owns account information and Change Password, while User Settings owns appearance preferences.
+- Kept role restrictions, confirmation requirements, and backend authorization as requirements for implementation and testing.
+- UI screens and fictional rows do not prove that backend persistence, authorization, audit logging, printing, or backup/restore operations are operational.
