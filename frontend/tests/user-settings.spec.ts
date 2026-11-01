@@ -72,8 +72,7 @@ test.describe("Edit user email", () => {
 
     await createUser({ email, password })
     await logInUser(page, email, password)
-    await page.goto("/settings")
-
+    await openMyAccount(page)
     await page.getByRole("button", { name: "Edit" }).click()
     await page.getByLabel("Email").fill(updatedEmail)
     await page.getByRole("button", { name: "Save" }).click()
@@ -94,8 +93,7 @@ test.describe("Cancel edit actions", () => {
     const user = await createUser({ email, password })
 
     await logInUser(page, email, password)
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "Account Profile" }).click()
+    await openMyAccount(page)
     await page.getByRole("button", { name: "Edit" }).click()
     await page.getByLabel("Full name").fill("Test User")
     await page.getByRole("button", { name: "Cancel" }).first().click()
@@ -111,8 +109,7 @@ test.describe("Cancel edit actions", () => {
     await createUser({ email, password })
 
     await logInUser(page, email, password)
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "Account Profile" }).click()
+    await openMyAccount(page)
     await page.getByRole("button", { name: "Edit" }).click()
     await page.getByLabel("Email").fill(randomEmail())
     await page.getByRole("button", { name: "Cancel" }).first().click()
@@ -133,8 +130,7 @@ test.describe("Change password", () => {
 
     await createUser({ email, password })
     await logInUser(page, email, password)
-
-    await page.goto("/settings")
+    await openMyAccount(page)
     await page.getByTestId("current-password-input").fill(password)
     await page.getByTestId("new-password-input").fill(newPassword)
     await page.getByTestId("confirm-password-input").fill(newPassword)
@@ -160,7 +156,7 @@ test.describe("Change password validation", () => {
 
   test.beforeEach(async ({ page }) => {
     await logInUser(page, email, password)
-    await page.goto("/settings")
+    await openMyAccount(page)
     })
 
   test("Update password with weak passwords", async ({ page }) => {
@@ -202,14 +198,14 @@ test.describe("Change password validation", () => {
 test("Appearance toggle is available in the application header", async ({
   page,
 }) => {
-  await page.goto("/settings")
+    await openMyAccount(page)
   await expect(
     page.getByRole("button", { name: /Switch to (light|dark) mode/ }),
   ).toBeVisible()
 })
 
 test("User can switch between theme modes", async ({ page }) => {
-  await page.goto("/settings")
+    await openMyAccount(page)
   const themeButton = page.getByRole("button", {
     name: /Switch to (light|dark) mode/,
   })
