@@ -40,8 +40,6 @@ export function User({ user, compact = false }: { user: any; compact?: boolean }
   const [accountOpen, setAccountOpen] = useState(false)
   const [userSettingsOpen, setUserSettingsOpen] = useState(false)
   const [systemSettingsOpen, setSystemSettingsOpen] = useState(false)
-  const [userSettingsOpen, setUserSettingsOpen] = useState(false)
-  const [systemSettingsOpen, setSystemSettingsOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState<"English" | "Filipino">("English")
   const [logoutOpen, setLogoutOpen] = useState(false)
 

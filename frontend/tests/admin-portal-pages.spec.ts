@@ -8,7 +8,7 @@ test("Dashboard page is accessible", async ({ page }) => {
 
 test("Issuances Management page is accessible", async ({ page }) => {
   await page.goto("/issuances")
-  await expect(page.getByRole("heading", { name: "Issuances Management" })).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Issuance Management" })).toBeVisible()
 })
 
 test("Records Management page displays sample resident records", async ({ page }) => {
