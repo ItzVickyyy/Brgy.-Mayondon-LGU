@@ -8,24 +8,25 @@
 
 Use a calm, formal, office-focused interface. Keep the existing navy-leaning primary color, white/light-gray surfaces, clear page headings, consistent borders, and responsive cards and tables. The exact brand palette must be confirmed with the barangay.
 
-## Current theme tokens
+## Current theme palette
 
-Values below are copied from `frontend/src/index.css`. The stylesheet defines colors in OKLCH, not hexadecimal notation. No hex equivalents are declared in the source, so this guide does not invent hex values.
+The global stylesheet defines these colors with OKLCH tokens. The hexadecimal values below are rounded 8-bit sRGB equivalents calculated from the current tokens. The source CSS remains authoritative for actual rendering.
 
 | Token | Light theme | Dark theme | Intended use |
 |---|---|---|---|
-| Background | `oklch(1 0 0)` | `oklch(0.145 0 0)` | Main page surface |
-| Foreground | `oklch(0.145 0 0)` | `oklch(0.985 0 0)` | Main text |
-| Card | `oklch(1 0 0)` | `oklch(0.205 0 0)` | Cards and panels |
-| Primary | `oklch(0.30 0.075 252)` | `oklch(0.36 0.075 252)` | Primary actions and key accents |
-| Primary foreground | `oklch(0.985 0 0)` | `oklch(0.985 0 0)` | Text/icons on primary surfaces |
-| Secondary / muted | `oklch(0.97 0 0)` | `oklch(0.269 0 0)` | Secondary controls and quiet surfaces |
-| Muted foreground | `oklch(0.556 0 0)` | `oklch(0.708 0 0)` | Supporting text |
-| Border / input | `oklch(0.922 0 0)` | Border `oklch(1 0 0 / 10%)`, input `oklch(1 0 0 / 15%)` | Separators and form controls |
-| Destructive | `oklch(0.577 0.245 27.325)` | `oklch(0.704 0.191 22.216)` | Destructive actions and errors |
-| Focus ring | `oklch(0.708 0 0)` | `oklch(0.556 0 0)` | Keyboard focus indicator |
+| Background | `#FFFFFF` | `#0A0A0A` | Main page surface |
+| Foreground | `#0A0A0A` | `#FAFAFA` | Main text |
+| Card | `#FFFFFF` | `#343434` | Cards and panels |
+| Primary | `#0C2F52` | `#1D3F63` | Primary actions and key accents |
+| Primary foreground | `#FAFAFA` | `#FAFAFA` | Text/icons on primary surfaces |
+| Secondary / muted | `#F5F5F5` | `#262626` | Secondary controls and quiet surfaces |
+| Muted foreground | `#737373` | `#A1A1A1` | Supporting text |
+| Border / input | `#E5E5E5` | Alpha-white border/input tokens | Separators and form controls |
+| Destructive | `#E7000B` | `#FF6467` | Destructive actions and errors |
+| Focus ring | `#A1A1A1` | `#737373` | Keyboard focus indicator |
+| Sidebar | `#FAFAFA` | `#343434` | Navigation surface |
 
-The base radius token is `0.625rem`. Theme variants and utility names are mapped through the existing Tailwind CSS theme configuration in `index.css`.
+The base radius token is `0.625rem`. Theme variants and utility names are mapped through the existing Tailwind CSS theme configuration in `index.css`. These values describe the current implementation, not client-approved brand specifications.
 
 ## Typography and spacing
 
