@@ -95,7 +95,7 @@ Current prototype behavior:
 - Barangay Information, Document Templates, and Audit Logs in System Settings are visual placeholders.
 - Account profile, password change, and account management continue to use the existing foundation functionality.
 - The account form now offers Staff and System Administrator. It maps System Administrator to the existing `is_superuser = true` API field and Staff to `is_superuser = false`. It does not add a separate backend role enum. Confirm this proposal with the client before deployment.\n- Pending Registrations, Request Access, and Pending Approval are prototype-only. Requests are not saved, and approve/reject actions do not create or update backend accounts. The existing `is_active` flag is not a pending/rejected status workflow.
-- Terms of Use and Privacy Policy in the footer are placeholders, not approved legal documents.
+- The current footer shows branding only. Terms of Use and Privacy Policy links are not implemented. If legal text is added later, mark it “Draft, pending barangay review” until reviewed and approved by the barangay.
 - Do not enter real resident or barangay data into this draft.
 
 ## Review before any merge
