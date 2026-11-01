@@ -1,5 +1,4 @@
 import { expect, test } from "@playwright/test"
-import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
 import { createUser } from "./utils/privateApi.ts"
 import { randomEmail, randomPassword } from "./utils/random"
 import { logInUser, logOutUser } from "./utils/user"
@@ -8,10 +7,9 @@ const tabs = ["Account Profile", "Change Password"]
 
 test("Account Profile tab is active by default", async ({ page }) => {
   await page.goto("/settings")
-  await expect(page.getByRole("tab", { name: "Account Profile" })).toHaveAttribute(
-    "aria-selected",
-    "true",
-  )
+  await expect(
+    page.getByRole("tab", { name: "Account Profile" }),
+  ).toHaveAttribute("aria-selected", "true")
 })
 
 test("All tabs are visible", async ({ page }) => {
@@ -202,15 +200,23 @@ test.describe("Change password validation", () => {
   })
 })
 
-test("Appearance toggle is available in the application header", async ({ page }) => {
+test("Appearance toggle is available in the application header", async ({
+  page,
+}) => {
   await page.goto("/settings")
-  await expect(page.getByRole("button", { name: /Switch to (light|dark) mode/ })).toBeVisible()
+  await expect(
+    page.getByRole("button", { name: /Switch to (light|dark) mode/ }),
+  ).toBeVisible()
 })
 
 test("User can switch between theme modes", async ({ page }) => {
   await page.goto("/settings")
-  const themeButton = page.getByRole("button", { name: /Switch to (light|dark) mode/ })
-  const initiallyDark = await page.evaluate(() => document.documentElement.classList.contains("dark"))
+  const themeButton = page.getByRole("button", {
+    name: /Switch to (light|dark) mode/,
+  })
+  const initiallyDark = await page.evaluate(() =>
+    document.documentElement.classList.contains("dark"),
+  )
   await themeButton.click()
   if (initiallyDark) {
     await expect(page.locator("html")).not.toHaveClass(/dark/)

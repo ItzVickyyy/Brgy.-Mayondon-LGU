@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react"
+import type { FileText } from "lucide-react"
 import type { ReactNode } from "react"
 
 export function SummaryCard({
@@ -19,7 +19,9 @@ export function SummaryCard({
       </div>
       <div className="min-w-0">
         <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="text-2xl font-semibold leading-tight tracking-tight">{value}</p>
+        <p className="text-2xl font-semibold leading-tight tracking-tight">
+          {value}
+        </p>
         <p className="truncate text-xs text-muted-foreground">{hint}</p>
       </div>
     </div>
@@ -39,7 +41,9 @@ export function FormSection({
     <section className="rounded-xl border bg-card p-4 sm:p-5">
       <div className="mb-4">
         <h3 className="text-sm font-semibold">{title}</h3>
-        {description ? <p className="mt-0.5 text-xs text-muted-foreground">{description}</p> : null}
+        {description ? (
+          <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+        ) : null}
       </div>
       <div className="grid gap-4 md:grid-cols-2">{children}</div>
     </section>

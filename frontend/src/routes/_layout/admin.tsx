@@ -6,11 +6,11 @@ import { type UserPublic, UsersService } from "@/client"
 import AddUser from "@/components/Admin/AddUser"
 import { columns, type UserTableData } from "@/components/Admin/columns"
 import { DataTable } from "@/components/Common/DataTable"
-import PendingUsers from "@/components/Pending/PendingUsers"
 import { NoPermission } from "@/components/Common/NoPermission"
-import { isSystemAdministrator } from "@/lib/access"
+import PendingUsers from "@/components/Pending/PendingUsers"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
+import { isSystemAdministrator } from "@/lib/access"
 
 function getUsersQueryOptions() {
   return {
@@ -51,8 +51,12 @@ function Admin() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">User Accounts</h1>
-          <p className="text-muted-foreground">Manage system users and their access roles.</p>
+          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+            User Accounts
+          </h1>
+          <p className="text-muted-foreground">
+            Manage system users and their access roles.
+          </p>
         </div>
         <AddUser />
       </div>

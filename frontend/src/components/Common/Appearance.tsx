@@ -2,10 +2,7 @@ import { Moon, Sun } from "lucide-react"
 
 import { useTheme } from "@/components/theme-provider"
 import { Button } from "@/components/ui/button"
-import {
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar"
+import { SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar"
 
 export const SidebarAppearance = () => {
   const { setTheme, theme } = useTheme()
@@ -45,11 +42,7 @@ export const Appearance = () => {
       title={isDark ? "Switch to light mode" : "Switch to dark mode"}
       onClick={() => setTheme(isDark ? "light" : "dark")}
     >
-      {isDark ? (
-        <Sun className="size-4" />
-      ) : (
-        <Moon className="size-4" />
-      )}
+      {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
       <span className="sr-only">
         {isDark ? "Switch to light mode" : "Switch to dark mode"}
       </span>

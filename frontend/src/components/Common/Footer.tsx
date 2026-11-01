@@ -9,7 +9,6 @@ export function Footer() {
         <p className="text-sm text-muted-foreground">
           © {currentYear} {SITE.fullName}, {SITE.location}
         </p>
-
       </div>
     </footer>
   )

@@ -1,5 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { CreditCard, Search, UserRound, CalendarClock, Printer, RefreshCw } from "lucide-react"
+import {
+  CalendarClock,
+  CreditCard,
+  Printer,
+  RefreshCw,
+  Search,
+  UserRound,
+} from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
@@ -66,9 +73,12 @@ const sampleIds: BarangayIdRecord[] = [
 ]
 
 const statusStyles: Record<IdStatus, string> = {
-  Valid: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  "Expiring soon": "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
-  Expired: "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
+  Valid:
+    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
+  "Expiring soon":
+    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
+  Expired:
+    "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
   Archived: "border-border bg-muted text-muted-foreground",
 }
 
@@ -88,7 +98,10 @@ function BarangayIdManagement() {
         record.registrationStatus,
         record.status,
       ].some((value) => value.toLowerCase().includes(query))
-      return matchesSearch && (statusFilter === "All" || record.status === statusFilter)
+      return (
+        matchesSearch &&
+        (statusFilter === "All" || record.status === statusFilter)
+      )
     })
   }, [search, statusFilter])
 
@@ -100,9 +113,12 @@ function BarangayIdManagement() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Barangay ID Management</h1>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+            Barangay ID Management
+          </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-            Review existing ID records, check validity, and prepare creation or renewal workflows.
+            Review existing ID records, check validity, and prepare creation or
+            renewal workflows.
           </p>
         </div>
         <button
@@ -115,20 +131,46 @@ function BarangayIdManagement() {
         </button>
       </div>
 
+      {notice && (
+        <div
+          role="status"
+          className="rounded-lg border bg-muted/30 p-3 text-sm"
+        >
+          {notice}
+        </div>
+      )}
 
-      {notice && <div role="status" className="rounded-lg border bg-muted/30 p-3 text-sm">{notice}</div>}
-
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Barangay ID summary">
+      <section
+        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        aria-label="Barangay ID summary"
+      >
         {[
           { label: "Valid IDs", value: "4", description: "Current records" },
-          { label: "Expiring IDs", value: "1", description: "Approaching expiry" },
+          {
+            label: "Expiring IDs",
+            value: "1",
+            description: "Approaching expiry",
+          },
           { label: "Expired IDs", value: "1", description: "Requires review" },
-          { label: "Archived Records", value: "1", description: "Archived records" },
+          {
+            label: "Archived Records",
+            value: "1",
+            description: "Archived records",
+          },
         ].map((item) => (
-          <article key={item.label} className="rounded-xl border bg-card p-4 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">{item.label}</p>
-            <p className="mt-2 text-2xl font-semibold tracking-tight">{item.value}</p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.description}</p>
+          <article
+            key={item.label}
+            className="rounded-xl border bg-card p-4 shadow-sm"
+          >
+            <p className="text-sm font-medium text-muted-foreground">
+              {item.label}
+            </p>
+            <p className="mt-2 text-2xl font-semibold tracking-tight">
+              {item.value}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              {item.description}
+            </p>
           </article>
         ))}
       </section>
@@ -137,12 +179,17 @@ function BarangayIdManagement() {
         <div className="flex flex-col gap-3 border-b p-4 sm:p-5">
           <div>
             <h2 className="font-semibold tracking-tight">ID Records</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Search by resident, ID reference, resident type, or status.</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Search by resident, ID reference, resident type, or status.
+            </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_200px]">
             <label className="relative block">
               <span className="sr-only">Search ID records</span>
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
@@ -154,7 +201,9 @@ function BarangayIdManagement() {
               <span className="shrink-0 text-muted-foreground">Status</span>
               <select
                 value={statusFilter}
-                onChange={(event) => setStatusFilter(event.target.value as "All" | IdStatus)}
+                onChange={(event) =>
+                  setStatusFilter(event.target.value as "All" | IdStatus)
+                }
                 className="min-h-11 min-w-0 flex-1 rounded-md border bg-background px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option>All</option>
@@ -183,7 +232,10 @@ function BarangayIdManagement() {
             </thead>
             <tbody className="divide-y">
               {filteredIds.map((record) => (
-                <tr key={record.reference} className="align-top hover:bg-muted/20">
+                <tr
+                  key={record.reference}
+                  className="align-top hover:bg-muted/20"
+                >
                   <td className="px-4 py-4">
                     <div className="flex items-start gap-2">
                       <div className="mt-0.5 rounded-md bg-primary/10 p-2 text-primary">
@@ -191,28 +243,54 @@ function BarangayIdManagement() {
                       </div>
                       <div>
                         <p className="font-medium">{record.resident}</p>
-                        <p className="mt-1 text-xs text-muted-foreground">{record.reference}</p>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {record.reference}
+                        </p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-4 text-muted-foreground">{record.idNumber}</td>
+                  <td className="px-4 py-4 text-muted-foreground">
+                    {record.idNumber}
+                  </td>
                   <td className="px-4 py-4">{record.residentType}</td>
                   <td className="px-4 py-4">{record.registrationStatus}</td>
-                  <td className="whitespace-nowrap px-4 py-4">{record.issuedOn}</td>
-                  <td className="whitespace-nowrap px-4 py-4">{record.expiresOn}</td>
+                  <td className="whitespace-nowrap px-4 py-4">
+                    {record.issuedOn}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-4">
+                    {record.expiresOn}
+                  </td>
                   <td className="px-4 py-4">
-                    <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[record.status]}`}>{record.status}</span>
+                    <span
+                      className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-medium ${statusStyles[record.status]}`}
+                    >
+                      {record.status}
+                    </span>
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex justify-end gap-2">
-                      <button type="button" onClick={() => showActionNotice("View ID details")} className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted">
+                      <button
+                        type="button"
+                        onClick={() => showActionNotice("View ID details")}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted"
+                      >
                         Details
                       </button>
-                      <button type="button" onClick={() => showActionNotice("Renew ID")} className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted">
-                        <RefreshCw className="size-3.5" aria-hidden="true" /> Renew
+                      <button
+                        type="button"
+                        onClick={() => showActionNotice("Renew ID")}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted"
+                      >
+                        <RefreshCw className="size-3.5" aria-hidden="true" />{" "}
+                        Renew
                       </button>
-                      <button type="button" onClick={() => showActionNotice("Print ID")} className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted">
-                        <Printer className="size-3.5" aria-hidden="true" /> Print
+                      <button
+                        type="button"
+                        onClick={() => showActionNotice("Print ID")}
+                        className="inline-flex h-8 items-center gap-1.5 rounded-md border px-2.5 text-xs font-medium hover:bg-muted"
+                      >
+                        <Printer className="size-3.5" aria-hidden="true" />{" "}
+                        Print
                       </button>
                     </div>
                   </td>
@@ -220,26 +298,51 @@ function BarangayIdManagement() {
               ))}
               {filteredIds.length === 0 && (
                 <tr>
-                  <td colSpan={8} className="px-4 py-10 text-center text-sm text-muted-foreground">No ID records match your search.</td>
+                  <td
+                    colSpan={8}
+                    className="px-4 py-10 text-center text-sm text-muted-foreground"
+                  >
+                    No ID records match your search.
+                  </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
         <div className="flex flex-col gap-1 border-t px-4 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <span>Showing {filteredIds.length} record{filteredIds.length === 1 ? "" : "s"}</span>
-          <span className="inline-flex items-center gap-1.5"><CalendarClock className="size-3.5" aria-hidden="true" /> Expiry and renewal</span>
+          <span>
+            Showing {filteredIds.length} record
+            {filteredIds.length === 1 ? "" : "s"}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <CalendarClock className="size-3.5" aria-hidden="true" /> Expiry and
+            renewal
+          </span>
         </div>
       </section>
 
       <section className="rounded-xl border bg-card p-4 sm:p-5">
-        <h2 className="font-semibold tracking-tight">ID Validity and Registration</h2>
+        <h2 className="font-semibold tracking-tight">
+          ID Validity and Registration
+        </h2>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-6 text-muted-foreground">
-          <li>Preserve the barangay's current ID numbering series and determine how the next number is assigned.</li>
-          <li>Standard IDs are valid for one year. New or renting residents may have six-month validity.</li>
+          <li>
+            Preserve the barangay's current ID numbering series and determine
+            how the next number is assigned.
+          </li>
+          <li>
+            Standard IDs are valid for one year. New or renting residents may
+            have six-month validity.
+          </li>
           <li>Registration status is maintained with the resident record.</li>
-          <li>Use the client-approved ID layout and test photo placement, print scaling, and physical card dimensions.</li>
-          <li>Retain expired or archived ID history instead of silently overwriting prior records.</li>
+          <li>
+            Use the client-approved ID layout and test photo placement, print
+            scaling, and physical card dimensions.
+          </li>
+          <li>
+            Retain expired or archived ID history instead of silently
+            overwriting prior records.
+          </li>
         </ul>
       </section>
     </div>

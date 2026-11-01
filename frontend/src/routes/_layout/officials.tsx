@@ -1,12 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Search, UserRound } from "lucide-react"
 import { useMemo, useState } from "react"
-
-import { pageTitle } from "@/config/site"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { NoPermission } from "@/components/Common/NoPermission"
-import { isSystemAdministrator } from "@/lib/access"
+import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
+import { isSystemAdministrator } from "@/lib/access"
 
 export const Route = createFileRoute("/_layout/officials")({
   component: OfficialsManagement,
@@ -14,44 +13,111 @@ export const Route = createFileRoute("/_layout/officials")({
 })
 
 const sampleOfficials = [
-  { id: "OFF-001", name: "Barangay Captain", position: "Punong Barangay", term: "Current term" },
-  { id: "OFF-002", name: "Barangay Kagawad 1", position: "Barangay Kagawad", term: "Current term" },
-  { id: "OFF-003", name: "Barangay Secretary", position: "Barangay Secretary", term: "Current term" },
-  { id: "OFF-004", name: "Barangay Treasurer", position: "Barangay Treasurer", term: "Current term" },
+  {
+    id: "OFF-001",
+    name: "Barangay Captain",
+    position: "Punong Barangay",
+    term: "Current term",
+  },
+  {
+    id: "OFF-002",
+    name: "Barangay Kagawad 1",
+    position: "Barangay Kagawad",
+    term: "Current term",
+  },
+  {
+    id: "OFF-003",
+    name: "Barangay Secretary",
+    position: "Barangay Secretary",
+    term: "Current term",
+  },
+  {
+    id: "OFF-004",
+    name: "Barangay Treasurer",
+    position: "Barangay Treasurer",
+    term: "Current term",
+  },
 ]
 
 function OfficialsManagement() {
   const { user } = useAuth()
   const [search, setSearch] = useState("")
-  const filteredOfficials = useMemo(() => sampleOfficials.filter((official) =>
-    [official.id, official.name, official.position, official.term].some((value) =>
-      value.toLowerCase().includes(search.toLowerCase()),
-    ),
-  ), [search])
+  const filteredOfficials = useMemo(
+    () =>
+      sampleOfficials.filter((official) =>
+        [official.id, official.name, official.position, official.term].some(
+          (value) => value.toLowerCase().includes(search.toLowerCase()),
+        ),
+      ),
+    [search],
+  )
 
   if (!isSystemAdministrator(user)) return <NoPermission />
 
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Officials</h1>
-        <p className="mt-2 text-sm text-muted-foreground">Maintain the list of barangay officials and their terms.</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+          Officials
+        </h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Maintain the list of barangay officials and their terms.
+        </p>
       </div>
 
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><UserRound className="size-5" aria-hidden="true" /></div>
-            <div><h2 className="font-semibold">Officials List</h2><p className="mt-1 text-sm text-muted-foreground">Search the list of barangay officials.</p></div>
+            <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
+              <UserRound className="size-5" aria-hidden="true" />
+            </div>
+            <div>
+              <h2 className="font-semibold">Officials List</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Search the list of barangay officials.
+              </p>
+            </div>
           </div>
-          <label className="relative block w-full sm:max-w-xs"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search officials..." className="min-h-11 w-full rounded-md border bg-background pl-9 pr-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
+          <label className="relative block w-full sm:max-w-xs">
+            <Search
+              className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Search officials..."
+              className="min-h-11 w-full rounded-md border bg-background pl-9 pr-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            />
+          </label>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-left text-base">
-            <thead className="bg-muted/50 text-sm uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Official ID</th><th className="px-4 py-3 font-medium">Name</th><th className="px-4 py-3 font-medium">Position</th><th className="px-4 py-3 font-medium">Term / Period</th></tr></thead>
-            <tbody className="divide-y">{filteredOfficials.map((official) => <tr key={official.id} className="hover:bg-muted/20"><td className="px-4 py-3 font-medium">{official.id}</td><td className="px-4 py-3">{official.name}</td><td className="px-4 py-3">{official.position}</td><td className="px-4 py-3">{official.term}</td></tr>)}</tbody>
+            <thead className="bg-muted/50 text-sm uppercase tracking-wide text-muted-foreground">
+              <tr>
+                <th className="px-4 py-3 font-medium">Official ID</th>
+                <th className="px-4 py-3 font-medium">Name</th>
+                <th className="px-4 py-3 font-medium">Position</th>
+                <th className="px-4 py-3 font-medium">Term / Period</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {filteredOfficials.map((official) => (
+                <tr key={official.id} className="hover:bg-muted/20">
+                  <td className="px-4 py-3 font-medium">{official.id}</td>
+                  <td className="px-4 py-3">{official.name}</td>
+                  <td className="px-4 py-3">{official.position}</td>
+                  <td className="px-4 py-3">{official.term}</td>
+                </tr>
+              ))}
+            </tbody>
           </table>
-          {filteredOfficials.length === 0 && <EmptyState title="No matching officials" description="Try a different name or position." />}
+          {filteredOfficials.length === 0 && (
+            <EmptyState
+              title="No matching officials"
+              description="Try a different name or position."
+            />
+          )}
         </div>
       </section>
     </div>

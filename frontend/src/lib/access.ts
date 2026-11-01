@@ -1,6 +1,9 @@
-type UserRoleSource = {
-  is_superuser?: boolean | null
-} | null | undefined
+type UserRoleSource =
+  | {
+      is_superuser?: boolean | null
+    }
+  | null
+  | undefined
 
 /**
  * Maps the current API authorization flag to the prototype's role model.

@@ -16,7 +16,11 @@ export function AuthLayout({ children }: AuthLayoutProps) {
       <main className="flex flex-1 items-center justify-center px-4 pb-10 pt-20 sm:px-6 sm:py-12">
         <div className="w-full max-w-md">
           <header className="mb-8 flex flex-col items-center gap-3 text-center">
-            <Logo variant="icon" className="size-28 sm:size-32" asLink={false} />
+            <Logo
+              variant="icon"
+              className="size-28 sm:size-32"
+              asLink={false}
+            />
             <div className="space-y-1">
               <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
                 Brgy. Mayondon

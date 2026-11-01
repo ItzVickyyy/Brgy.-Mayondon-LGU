@@ -13,7 +13,14 @@ import {
   X,
 } from "lucide-react"
 import { useMemo, useState } from "react"
-
+import {
+  type DocumentField,
+  documentFields,
+  documentTypes,
+  type IssuanceRecord,
+  sampleIssuances,
+} from "@/components/Issuances/config"
+import { FormSection, SummaryCard } from "@/components/Issuances/IssuanceLayout"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -26,8 +33,6 @@ import {
 } from "@/components/ui/dialog"
 import { pageTitle } from "@/config/site"
 import { cn } from "@/lib/utils"
-import { documentFields, documentTypes, sampleIssuances, type DocumentField, type IssuanceRecord } from "@/components/Issuances/config"
-import { FormSection, SummaryCard } from "@/components/Issuances/IssuanceLayout"
 
 export const Route = createFileRoute("/_layout/issuances")({
   component: IssuancesManagement,
@@ -65,7 +70,7 @@ function createDefaultFormValues(type: string) {
 
 function calculateAge(birthdate: string) {
   if (!birthdate) return ""
-  const birth = new Date(birthdate + "T00:00:00")
+  const birth = new Date(`${birthdate}T00:00:00`)
   if (Number.isNaN(birth.getTime())) return ""
   const today = new Date()
   let age = today.getFullYear() - birth.getFullYear()
@@ -78,7 +83,7 @@ function calculateAge(birthdate: string) {
 
 function formatDate(value: string) {
   if (!value) return "Not entered"
-  const parsed = new Date(value + "T00:00:00")
+  const parsed = new Date(`${value}T00:00:00`)
   return Number.isNaN(parsed.getTime())
     ? value
     : parsed.toLocaleDateString("en-US", {
@@ -170,7 +175,7 @@ function IssuancesManagement() {
       return
     }
     const record: IssuanceRecord = {
-      id: "ISS-" + String(drafts.length + 1).padStart(4, "0"),
+      id: `ISS-${String(drafts.length + 1).padStart(4, "0")}`,
       resident: currentName,
       type: selectedType,
       date: currentDate,
@@ -179,7 +184,7 @@ function IssuancesManagement() {
     }
     setDrafts((previous) => [record, ...previous])
     setNotice(
-      record.id + " was recorded as issued. You can now print the record.",
+      `${record.id} was recorded as issued. You can now print the record.`,
     )
     setIsIssuanceModalOpen(false)
   }
@@ -251,10 +256,10 @@ function IssuancesManagement() {
 
     return (
       <div key={field.name} className={wrapperClass}>
-        <label htmlFor={"field-" + field.name}>{field.label}</label>
+        <label htmlFor={`field-${field.name}`}>{field.label}</label>
         {field.type === "select" ? (
           <select
-            id={"field-" + field.name}
+            id={`field-${field.name}`}
             value={value}
             onChange={(event) => updateField(field.name, event.target.value)}
             className={inputClassName}
@@ -268,16 +273,16 @@ function IssuancesManagement() {
           </select>
         ) : field.type === "textarea" ? (
           <textarea
-            id={"field-" + field.name}
+            id={`field-${field.name}`}
             value={value}
             onChange={(event) => updateField(field.name, event.target.value)}
             rows={3}
             className={cn(inputClassName, "h-auto py-2")}
-            placeholder={"Enter " + field.label.toLowerCase()}
+            placeholder={`Enter ${field.label.toLowerCase()}`}
           />
         ) : (
           <input
-            id={"field-" + field.name}
+            id={`field-${field.name}`}
             type={field.type ?? "text"}
             value={value}
             onChange={(event) => updateField(field.name, event.target.value)}
@@ -291,7 +296,7 @@ function IssuancesManagement() {
                 ? "Calculated from birthdate"
                 : field.type === "date"
                   ? undefined
-                  : "Enter " + field.label.toLowerCase()
+                  : `Enter ${field.label.toLowerCase()}`
             }
           />
         )}
@@ -627,7 +632,7 @@ function IssuancesManagement() {
                         variant="outline"
                         size="sm"
                         onClick={() => setViewRecord(item)}
-                        aria-label={"View " + item.id}
+                        aria-label={`View ${item.id}`}
                       >
                         <Eye aria-hidden="true" />
                         View
@@ -636,7 +641,7 @@ function IssuancesManagement() {
                         variant="outline"
                         size="sm"
                         onClick={() => printNow(item)}
-                        aria-label={"Print " + item.id}
+                        aria-label={`Print ${item.id}`}
                       >
                         <Printer aria-hidden="true" />
                         Print
