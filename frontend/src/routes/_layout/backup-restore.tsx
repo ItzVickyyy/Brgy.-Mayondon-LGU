@@ -3,6 +3,7 @@ import { Archive, CheckCircle2, Clock3, DatabaseBackup, HardDriveDownload, Rotat
 import { useState } from "react"
 
 import { NoPermission } from "@/components/Common/NoPermission"
+import { isSystemAdministrator } from "@/lib/access"
 import useAuth from "@/hooks/useAuth"
 import { pageTitle } from "@/config/site"
 
@@ -24,7 +25,7 @@ function BackupRestore() {
   const [selectedBackup, setSelectedBackup] = useState(sampleBackups[0].name)
   const [restoreConfirmation, setRestoreConfirmation] = useState("")
 
-  if (!user?.is_superuser) return <NoPermission />
+  if (!isSystemAdministrator(user)) return <NoPermission />
 
   return (
     <div className="flex flex-col gap-6">
