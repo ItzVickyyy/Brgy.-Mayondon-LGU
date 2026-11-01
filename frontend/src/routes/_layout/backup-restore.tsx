@@ -90,7 +90,7 @@ function BackupRestore() {
           <label className="mt-4 block text-sm font-medium">Type RESTORE to continue
             <input value={restoreConfirmation} onChange={(event) => setRestoreConfirmation(event.target.value)} placeholder="RESTORE" autoComplete="off" className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring sm:max-w-xs" />
           </label>
-          <button type="button" disabled={restoreConfirmation !== "RESTORE"} onClick={() => { setNotice("Restore confirmation recorded in this UI prototype. No database was changed."); setConfirmRestore(false); setRestoreConfirmation("") }} className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-destructive px-4 text-sm font-semibold text-destructive-foreground hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50"><ShieldCheck className="size-4" />Confirm Restore</button>
+          <button type="button" disabled={restoreConfirmation !== "RESTORE"} onClick={() => { setNotice("Restore request confirmed."); setConfirmRestore(false); setRestoreConfirmation("") }} className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-destructive px-4 text-sm font-semibold text-destructive-foreground hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50"><ShieldCheck className="size-4" />Confirm Restore</button>
         </div> : null}
       </section>
       

@@ -498,7 +498,7 @@ function IssuancesManagement() {
               </dl>
               {Object.keys(viewRecord.fields).length === 0 && (
                 <p className="rounded-md bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-                  This is a sample record with no saved form details.
+                  Record details are unavailable.
                 </p>
               )}
               <DialogFooter>

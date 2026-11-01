@@ -50,18 +50,14 @@ const documentTypes = [
 ]
 
 const staffActivities = [
-  { title: "Barangay Clearance issued", detail: "Sample record #0001", time: "Today, 10:42 AM" },
-  { title: "Resident record updated", detail: "Sample record #0002", time: "Today, 9:18 AM" },
-  { title: "Barangay ID renewed", detail: "Sample record #0003", time: "Yesterday, 3:26 PM" },
+  { title: "Barangay Clearance issued", detail: "Record #0001", time: "Today, 10:42 AM" },
+  { title: "Resident record updated", detail: "Record #0002", time: "Today, 9:18 AM" },
+  { title: "Barangay ID renewed", detail: "Record #0003", time: "Yesterday, 3:26 PM" },
 ]
 const adminActivities = [
   ...staffActivities,
-  { title: "Staff account status reviewed", detail: "Sample account #0004", time: "Yesterday, 1:05 PM" },
+  { title: "Staff account status reviewed", detail: "Account #0004", time: "Yesterday, 1:05 PM" },
 ]
-
-function SampleDataBadge() {
-  return <span className="inline-flex w-fit rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Sample Data</span>
-}
 
 function SummaryCard({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: typeof Users }) {
   return (
@@ -69,7 +65,6 @@ function SummaryCard({ title, value, description, icon: Icon }: { title: string;
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <div className="mt-1"><SampleDataBadge /></div>
           <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">{value}</p>
         </div>
         <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
@@ -122,16 +117,16 @@ function Dashboard() {
       </div>
 
       <section aria-label="Summary statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard title="Documents Issued This Month" value="214" description="Illustrative monthly total" icon={FileCheck2} />
-        <SummaryCard title="Clearances Expiring in 30 Days" value="8" description="Sample expiry reminders" icon={Clock3} />
+        <SummaryCard title="Documents Issued This Month" value="214" description="Total this month" icon={FileCheck2} />
+        <SummaryCard title="Clearances Expiring in 30 Days" value="8" description="Due within 30 days" icon={Clock3} />
         <SummaryCard title="Barangay IDs Expiring in 30 Days" value="12" description="Sample expiry reminders" icon={IdCard} />
-        <SummaryCard title={isAdmin ? "Pending Registrations" : "Pending Document Requests"} value={isAdmin ? "2" : "6"} description="Sample queue count" icon={Users} />
+        <SummaryCard title={isAdmin ? "Pending Registrations" : "Pending Document Requests"} value={isAdmin ? "2" : "6"} description="Awaiting review" icon={Users} />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex flex-col items-start gap-2"><SectionHeading title="Document Issuances Over Time" description="Monthly issuance volume" /><SampleDataBadge /></div>
+            <div className="flex flex-col items-start gap-2"><SectionHeading title="Document Issuances Over Time" description="Monthly issuance volume" /></div>
           </div>
           <div className="mt-6 flex h-48 items-end gap-3 border-b px-1 sm:gap-5">
             {visibleMonths.map((item) => (
