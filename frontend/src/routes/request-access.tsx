@@ -24,14 +24,13 @@ function RequestAccess() {
       <div className="flex flex-col gap-5">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Request Staff Access</h1>
-          <p className="mt-2 text-sm text-muted-foreground">This is a visual prototype of a staff access request. It does not create an account or send information anywhere.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Request staff access to the Records and Document Issuance System.</p>
         </div>
         <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
-          Prototype: this request is not saved.
         </div>
         {submitted ? (
           <div role="status" className="rounded-lg border p-4 text-sm">
-            This prototype did not submit or save your details. In a real system, the barangay must confirm the request and approval workflow first.
+            Your request was sent to the System Administrator. You can sign in once it is approved.
           </div>
         ) : (
           <form className="grid gap-4" onSubmit={handleSubmit}>

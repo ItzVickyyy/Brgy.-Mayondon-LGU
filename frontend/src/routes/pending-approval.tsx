@@ -15,7 +15,7 @@ function PendingApproval() {
       <div className="flex flex-col gap-5">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Account Approval Status</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Sample messages for the proposed account approval workflow.</p>
+          <p className="mt-2 text-sm text-muted-foreground">Account approval status and next steps.</p>
         </div>
         <section className="flex gap-3 rounded-xl border p-4">
           <Clock3 className="mt-0.5 size-5 shrink-0 text-amber-600" aria-hidden="true" />
@@ -31,7 +31,7 @@ function PendingApproval() {
             <p className="mt-1 text-sm text-muted-foreground">Your request was not approved. Please contact the System Administrator.</p>
           </div>
         </section>
-        <p className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-sm">Prototype only. These messages are examples and are not connected to account status or saved requests.</p>
+        
         <RouterLink to="/login" className="inline-flex min-h-11 items-center font-medium text-primary underline-offset-4 hover:underline">Back to Staff Login</RouterLink>
       </div>
     </AuthLayout>

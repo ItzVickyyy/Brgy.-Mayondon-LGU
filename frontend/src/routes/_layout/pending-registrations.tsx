@@ -41,7 +41,7 @@ function PendingRegistrations() {
 
   const decide = (username: string, status: "Approved" | "Rejected") => {
     const action = status === "Approved" ? "approve" : "reject"
-    if (!window.confirm(`Are you sure you want to ${action} this sample request?`)) return
+    if (!window.confirm(`Are you sure you want to ${action} this request?`)) return
     setRegistrations((current) =>
       current.map((row) => row.username === username ? { ...row, status } : row),
     )
@@ -53,7 +53,7 @@ function PendingRegistrations() {
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">Pending Registrations</h1>
-        <p className="mt-2 text-muted-foreground">Review sample staff access requests. This prototype does not save decisions or create accounts.</p>
+        <p className="mt-2 text-muted-foreground">Review and manage staff access requests.</p>
       </div>
       <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
         Prototype only. The requests below are fictional examples, and approve/reject actions are temporary local state.
