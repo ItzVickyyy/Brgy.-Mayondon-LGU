@@ -146,7 +146,7 @@ test.describe("Change password", () => {
     await dialog.getByRole("button", { name: "Update Password" }).click()
 
     await expect(page.getByText("Password updated successfully")).toBeVisible()
-    await dialog.getByRole("button", { name: "Close" }).click()
+    await dialog.getByRole("button", { name: "Close" }).last().click()
     await logOutUser(page)
     await logInUser(page, email, newPassword)
   })
