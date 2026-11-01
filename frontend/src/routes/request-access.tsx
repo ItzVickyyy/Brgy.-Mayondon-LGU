@@ -30,7 +30,6 @@ function RequestAccess() {
             Request staff access to the Records and Document Issuance System.
           </p>
         </div>
-        <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-sm"></div>
         {submitted ? (
           <div role="status" className="rounded-lg border p-4 text-sm">
             Your request was sent to the System Administrator. You can sign in
