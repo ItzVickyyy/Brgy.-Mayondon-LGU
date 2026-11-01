@@ -46,7 +46,7 @@ The base radius token is `0.625rem`. Theme variants and utility names are mapped
 - Use confirmation before archive, void/cancel, reject, or restore actions.
 - Use status text as well as color so status is not conveyed by color alone.
 - Wrap wide tables in horizontal scrolling containers or use a mobile-friendly card layout.
-- Use explicit “Sample Data” badges on the dashboard's fictional summary cards, charts, and sample lists. Do not label every page indiscriminately. Never present sample values as real barangay statistics.
+- Do not show sample-data badges or prototype banners in the user interface. Keep all demonstration data fictional, and never present invented figures as real barangay statistics.
 
 ## Assets and decisions to confirm
 
