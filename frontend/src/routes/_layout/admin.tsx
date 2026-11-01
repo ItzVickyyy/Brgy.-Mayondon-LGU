@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_layout/admin")({
   head: () => ({ meta: [{ title: pageTitle("User Accounts") }] }),
 })
 
-function UsersTableContent() {
+function UsersTable() {
   const { user: currentUser } = useAuth()
   const {
     data: users,
