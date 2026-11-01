@@ -8,7 +8,7 @@ test("Admin page is accessible and shows correct title", async ({ page }) => {
   await page.goto("/admin")
   await expect(page.getByRole("heading", { name: "User Accounts" })).toBeVisible()
   await expect(
-    page.getByText("Manage staff access and registration requests"),
+    page.getByText("Manage system users and their access roles."),
   ).toBeVisible()
 })
 
@@ -62,7 +62,7 @@ test.describe("Admin user management", () => {
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
     const userRow = page.getByRole("row").filter({ hasText: email })
-    await expect(userRow.getByText("Admin")).toBeVisible()
+    await expect(userRow.getByText("System Administrator")).toBeVisible()
   })
 
   test("Edit a user successfully", async ({ page }) => {
@@ -92,7 +92,7 @@ test.describe("Admin user management", () => {
     await page.getByRole("button", { name: "Save" }).click()
 
     await expect(page.getByText("User updated successfully")).toBeVisible()
-    await expect(page.getByText(updatedName)).toBeVisible()
+    await expect(userRow.getByText(updatedName)).toBeVisible()
   })
 
   test("Delete a user successfully", async ({ page }) => {
@@ -190,8 +190,8 @@ test.describe("Admin page access control", () => {
 
     await page.goto("/admin")
 
+    await expect(page.getByRole("heading", { name: "Access restricted" })).toBeVisible()
     await expect(page.getByRole("heading", { name: "User Accounts" })).not.toBeVisible()
-    await expect(page).not.toHaveURL(/\/admin/)
   })
 
   test("Superuser can access admin page", async ({ page }) => {
