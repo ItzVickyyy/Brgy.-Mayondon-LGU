@@ -47,7 +47,7 @@ function BackupRestore() {
             <div className="flex justify-between gap-4"><span className="text-muted-foreground">File format</span><span className="font-medium">PostgreSQL custom archive (.dump)</span></div>
             <div className="flex justify-between gap-4"><span className="text-muted-foreground">Last backup</span><span className="font-medium">Oct 28, 2026 · 9:00 AM</span></div>
           </div>
-          <button type="button" onClick={() => setNotice("")} className="mt-5 inline-flex h-10 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"><HardDriveDownload className="size-4" />Create Backup</button>
+          <button type="button" onClick={() => setNotice("")} className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"><HardDriveDownload className="size-4" />Create Backup</button>
         </section>
 
         <section className="rounded-xl border bg-card p-5">
@@ -56,11 +56,11 @@ function BackupRestore() {
             <div><h2 className="font-semibold">Backup Schedule</h2><p className="text-sm text-muted-foreground">Set a recurring backup schedule</p></div>
           </div>
           <div className="mt-5 space-y-3">
-            <label className="flex items-center justify-between gap-3 text-sm"><span>Automatic backup</span><select className="h-9 rounded-md border bg-background px-2" defaultValue="daily"><option value="disabled">Disabled</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
-            <label className="flex items-center justify-between gap-3 text-sm"><span>Preferred time</span><input type="time" defaultValue="17:00" className="h-9 rounded-md border bg-background px-2" /></label>
-            <label className="flex items-center justify-between gap-3 text-sm"><span>Keep recent backups</span><select className="h-9 rounded-md border bg-background px-2" defaultValue="7"><option value="3">3 copies</option><option value="7">7 copies</option><option value="14">14 copies</option><option value="30">30 copies</option></select></label>
+            <label className="flex items-center justify-between gap-3 text-sm"><span>Automatic backup</span><select className="min-h-11 rounded-md border bg-background px-2" defaultValue="daily"><option value="disabled">Disabled</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
+            <label className="flex items-center justify-between gap-3 text-sm"><span>Preferred time</span><input type="time" defaultValue="17:00" className="min-h-11 rounded-md border bg-background px-2" /></label>
+            <label className="flex items-center justify-between gap-3 text-sm"><span>Keep recent backups</span><select className="min-h-11 rounded-md border bg-background px-2" defaultValue="7"><option value="3">3 copies</option><option value="7">7 copies</option><option value="14">14 copies</option><option value="30">30 copies</option></select></label>
           </div>
-          <button type="button" onClick={() => setNotice("")} className="mt-5 inline-flex h-10 w-full items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Save Schedule</button>
+          <button type="button" onClick={() => setNotice("")} className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted">Save Schedule</button>
         </section>
       </div>
 
@@ -80,8 +80,8 @@ function BackupRestore() {
       <section className="rounded-xl border border-destructive/30 bg-card p-5">
         <div className="flex items-start gap-3"><div className="rounded-lg bg-destructive/10 p-2.5"><RotateCcw className="size-5 text-destructive" /></div><div><h2 className="font-semibold">Restore a Backup</h2><p className="mt-1 text-sm text-muted-foreground">Restoring can replace current database contents. Choose the archive and confirm only after verifying the target system and backup.</p></div></div>
         <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-          <label className="flex flex-col gap-2 text-sm font-medium">Backup archive<select value={selectedBackup} onChange={(event) => { setSelectedBackup(event.target.value); setConfirmRestore(false); setRestoreConfirmation("") }} className="h-10 rounded-md border bg-background px-3 font-normal">{sampleBackups.map((backup) => <option key={backup.name} value={backup.name}>{backup.name}</option>)}</select></label>
-          <button type="button" onClick={() => setConfirmRestore((value) => !value)} className="inline-flex h-10 items-center justify-center gap-2 rounded-md border border-destructive/50 px-4 text-sm font-medium text-destructive hover:bg-destructive/5"><RotateCcw className="size-4" />{confirmRestore ? "Cancel Restore" : "Prepare Restore"}</button>
+          <label className="flex flex-col gap-2 text-sm font-medium">Backup archive<select value={selectedBackup} onChange={(event) => { setSelectedBackup(event.target.value); setConfirmRestore(false); setRestoreConfirmation("") }} className="min-h-11 rounded-md border bg-background px-3 font-normal">{sampleBackups.map((backup) => <option key={backup.name} value={backup.name}>{backup.name}</option>)}</select></label>
+          <button type="button" onClick={() => setConfirmRestore((value) => !value)} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-destructive/50 px-4 text-sm font-medium text-destructive hover:bg-destructive/5"><RotateCcw className="size-4" />{confirmRestore ? "Cancel Restore" : "Prepare Restore"}</button>
         </div>
         {confirmRestore ? <div className="mt-4 rounded-lg border border-destructive/40 bg-destructive/5 p-4">
           <p className="font-semibold">Confirm restore</p>
