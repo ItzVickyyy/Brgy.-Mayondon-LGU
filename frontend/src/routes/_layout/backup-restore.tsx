@@ -1,16 +1,13 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { Archive, CheckCircle2, Clock3, DatabaseBackup, HardDriveDownload, RotateCcw, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 
-import { UsersService } from "@/client"
+import { NoPermission } from "@/components/Common/NoPermission"
+import useAuth from "@/hooks/useAuth"
 import { pageTitle } from "@/config/site"
 
 export const Route = createFileRoute("/_layout/backup-restore")({
   component: BackupRestore,
-  beforeLoad: async () => {
-    const { data: user } = await UsersService.readUserMe()
-    if (!user.is_superuser) throw redirect({ to: "/" })
-  },
   head: () => ({ meta: [{ title: pageTitle("Backup and Restore") }] }),
 })
 
@@ -21,6 +18,7 @@ const sampleBackups = [
 ]
 
 function BackupRestore() {
+  const { user } = useAuth()
   const [notice, setNotice] = useState("")
   const [confirmRestore, setConfirmRestore] = useState(false)
   const [selectedBackup, setSelectedBackup] = useState(sampleBackups[0].name)
