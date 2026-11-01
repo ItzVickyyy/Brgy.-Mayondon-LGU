@@ -6,7 +6,6 @@ import {
   Check,
   LogOut,
   UserRound,
-  ShieldCheck,
   Settings,
 } from "lucide-react"
 
@@ -29,17 +28,14 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "@/components/ui/sidebar"
-import ChangePassword from "@/components/UserSettings/ChangePassword"
 import { MyAccountModal } from "@/components/Settings/MyAccountModal"
 import useAuth from "@/hooks/useAuth"
-import { isSystemAdministrator } from "@/lib/access"
 
 export function User({ user, compact = false }: { user: any; compact?: boolean }) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
   const [accountOpen, setAccountOpen] = useState(false)
   const [userSettingsOpen, setUserSettingsOpen] = useState(false)
-  const [systemSettingsOpen, setSystemSettingsOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState<"English" | "Filipino">("English")
   const [logoutOpen, setLogoutOpen] = useState(false)
 
@@ -78,12 +74,6 @@ export function User({ user, compact = false }: { user: any; compact?: boolean }
               <Settings className="size-4" />
               User Settings
             </DropdownMenuItem>
-            {isSystemAdministrator(user) ? (
-              <DropdownMenuItem onSelect={() => setSystemSettingsOpen(true)}>
-                <ShieldCheck className="size-4" />
-                System Settings
-              </DropdownMenuItem>
-            ) : null}
             <DropdownMenuSub>
               <DropdownMenuSubTrigger className="gap-2 data-[state=open]:text-foreground">
                 <Languages className="size-4 text-muted-foreground" />
@@ -120,37 +110,11 @@ export function User({ user, compact = false }: { user: any; compact?: boolean }
         <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>User Settings</DialogTitle>
-            <DialogDescription>Manage personal preferences and account security.</DialogDescription>
+            <DialogDescription>Choose how the application appears on this device.</DialogDescription>
           </DialogHeader>
-          <div className="mt-4">
-            <ChangePassword />
-          </div>
+          <div className="mt-4 rounded-lg border p-4"><p className="text-sm font-medium">Appearance</p><p className="mt-1 text-sm text-muted-foreground">Choose Light, Dark, or System appearance from the application theme control.</p></div>
         </DialogContent>
       </Dialog>
-      {isSystemAdministrator(user) ? (
-        <Dialog open={systemSettingsOpen} onOpenChange={setSystemSettingsOpen}>
-          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>System Settings</DialogTitle>
-              <DialogDescription>Draft settings areas for administrator review. These placeholders are not connected to saved system configuration.</DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {[
-                { title: "Barangay Information", description: "Review the barangay name and office details." },
-                { title: "Document Templates", description: "Review approved document layouts and print settings." },
-                { title: "Document Purposes", description: "Review the purpose list used in issuance forms." },
-                { title: "Access and Audit", description: "Review account access rules and audit-history requirements." },
-              ].map((item) => (
-                <section key={item.title} className="rounded-lg border p-4">
-                  <h3 className="font-semibold">{item.title}</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>
-                  <p className="mt-3 text-xs font-medium text-muted-foreground">Draft, pending barangay review</p>
-                </section>
-              ))}
-            </div>
-          </DialogContent>
-        </Dialog>
-      ) : null}
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader><DialogTitle>Log out?</DialogTitle></DialogHeader>
