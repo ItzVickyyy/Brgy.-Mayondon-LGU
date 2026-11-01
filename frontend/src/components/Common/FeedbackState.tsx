@@ -1,4 +1,5 @@
 import { AlertCircle, Inbox, LoaderCircle, RotateCw } from "lucide-react"
+
 import { Button } from "@/components/ui/button"
 
 type EmptyStateProps = {
@@ -19,12 +20,6 @@ export function EmptyState({ title, description }: EmptyStateProps) {
       <p className="text-base font-medium">{title}</p>
       {description ? (
         <p className="max-w-md text-sm text-muted-foreground">{description}</p>
-      ) : null}
-      {onRetry ? (
-        <Button type="button" variant="outline" onClick={onRetry}>
-          <RotateCw className="mr-2 size-4" aria-hidden="true" />
-          Retry
-        </Button>
       ) : null}
     </div>
   )
@@ -56,6 +51,12 @@ export function ErrorState({
       <p className="text-base font-medium">{title}</p>
       {description ? (
         <p className="max-w-md text-sm text-muted-foreground">{description}</p>
+      ) : null}
+      {onRetry ? (
+        <Button type="button" variant="outline" onClick={onRetry}>
+          <RotateCw className="mr-2 size-4" aria-hidden="true" />
+          Retry
+        </Button>
       ) : null}
     </div>
   )
