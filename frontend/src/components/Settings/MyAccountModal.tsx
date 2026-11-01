@@ -165,7 +165,7 @@ export function MyAccountModal({
   }
 
   const status = user?.is_active === false ? "Inactive" : "Active"
-  const role = user?.is_superuser ? "Administrator" : "Staff"
+  const role = user?.is_superuser ? "System Administrator" : "Staff"
   const username = user?.username || user?.email || "Not provided"
 
   return (
