@@ -147,7 +147,7 @@ function BarangayIdManagement() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search ID records..."
-                className="min-h-11 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="min-h-11 w-full rounded-md border bg-background pl-9 pr-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </label>
             <label className="flex items-center gap-2 text-sm">
@@ -155,7 +155,7 @@ function BarangayIdManagement() {
               <select
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value as "All" | IdStatus)}
-                className="min-h-11 min-w-0 flex-1 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="min-h-11 min-w-0 flex-1 rounded-md border bg-background px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option>All</option>
                 <option>Valid</option>
