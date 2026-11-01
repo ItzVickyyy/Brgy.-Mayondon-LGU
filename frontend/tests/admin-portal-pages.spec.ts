@@ -56,17 +56,17 @@ test("Officials search filters results", async ({ page }) => {
   await expect(page.getByText("No matching officials")).toBeVisible()
 })
 
-test("Dashboard uses document-focused sample summary cards", async ({
+test("Dashboard uses document-focused summary cards without a data badge", async ({
   page,
 }) => {
   await page.goto("/")
   await expect(page.getByText("Documents Issued This Month")).toBeVisible()
   await expect(page.getByText("Clearances Expiring in 30 Days")).toBeVisible()
   await expect(page.getByText("Barangay IDs Expiring in 30 Days")).toBeVisible()
-  await expect(page.getByText("Sample Data").first()).toBeVisible()
+  await expect(page.getByText("Sample Data")).toHaveCount(0)
 })
 
-test("Barangay IDs route displays the ID management prototype", async ({
+test("Barangay IDs route displays the ID management page", async ({
   page,
 }) => {
   await page.goto("/barangay-ids")
@@ -76,26 +76,23 @@ test("Barangay IDs route displays the ID management prototype", async ({
   await expect(page.getByText("Resident One")).toBeVisible()
 })
 
-test("Request Access makes clear that submissions are not saved", async ({
+test("Request Access presents the staff access form", async ({
   page,
 }) => {
   await page.goto("/request-access")
   await expect(
     page.getByRole("heading", { name: "Request Staff Access" }),
   ).toBeVisible()
-  await expect(
-    page.getByText("Prototype: this request is not saved."),
-  ).toBeVisible()
   await page.getByLabel("Full name").fill("Sample Applicant")
   await page.getByLabel("Barangay office email").fill("sample@example.test")
   await page.getByLabel("Position or office assignment").fill("Office Staff")
   await page.getByRole("button", { name: "Preview Request" }).click()
   await expect(page.getByRole("status")).toContainText(
-    "did not submit or save your details",
+    "Your request was sent to the System Administrator",
   )
 })
 
-test("Pending Approval shows pending and rejected sample messages", async ({
+test("Pending Approval shows account status guidance", async ({
   page,
 }) => {
   await page.goto("/pending-approval")
@@ -107,7 +104,6 @@ test("Pending Approval shows pending and rejected sample messages", async ({
       "Your request was not approved. Please contact the System Administrator.",
     ),
   ).toBeVisible()
-  await expect(page.getByText(/These messages are examples/)).toBeVisible()
 })
 
 test("User account form offers Staff and System Administrator roles", async ({
@@ -123,7 +119,7 @@ test("User account form offers Staff and System Administrator roles", async ({
   ])
 })
 
-test("Pending registration decisions are temporary prototype state", async ({
+test("Pending registration decisions update the displayed status", async ({
   page,
 }) => {
   await page.goto("/pending-registrations")
