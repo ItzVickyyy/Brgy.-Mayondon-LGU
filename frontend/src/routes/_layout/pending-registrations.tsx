@@ -6,38 +6,16 @@ import { NoPermission } from "@/components/Common/NoPermission"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { updateRegistrationStatus, useRegistrations } from "@/lib/registration-store"
 
 export const Route = createFileRoute("/_layout/pending-registrations")({
   component: PendingRegistrations,
   head: () => ({ meta: [{ title: pageTitle("Pending Registrations") }] }),
 })
 
-type Registration = {
-  username: string
-  name: string
-  submitted: string
-  status: "Pending" | "Approved" | "Rejected"
-}
-
-// Fictional examples for layout review only. These decisions are not saved.
-const initialRegistrations: Registration[] = [
-  {
-    name: "Staff Applicant 1",
-    username: "staff.applicant1",
-    submitted: "Oct 28, 2026",
-    status: "Pending",
-  },
-  {
-    name: "Staff Applicant 2",
-    username: "staff.applicant2",
-    submitted: "Oct 27, 2026",
-    status: "Pending",
-  },
-]
-
 function PendingRegistrations() {
   const { user } = useAuth()
-  const [registrations, setRegistrations] = useState(initialRegistrations)
+  const registrations = useRegistrations()
   const [search, setSearch] = useState("")
   const visibleRegistrations = useMemo(() => {
     const query = search.trim().toLowerCase()
@@ -52,11 +30,7 @@ function PendingRegistrations() {
     const action = status === "Approved" ? "approve" : "reject"
     if (!window.confirm(`Are you sure you want to ${action} this request?`))
       return
-    setRegistrations((current) =>
-      current.map((row) =>
-        row.username === username ? { ...row, status } : row,
-      ),
-    )
+    updateRegistrationStatus(username, status)
   }
 
   if (!isSystemAdministrator(user)) return <NoPermission />
