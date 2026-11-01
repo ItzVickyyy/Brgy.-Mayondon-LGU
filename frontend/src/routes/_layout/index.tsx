@@ -59,12 +59,17 @@ const adminActivities = [
   { title: "Staff account status reviewed", detail: "Sample account #0004", time: "Yesterday, 1:05 PM" },
 ]
 
-function SampleDataBadge() {\n  return <span className="inline-flex w-fit rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Sample Data</span>\n}\n\nfunction SummaryCard({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: typeof Users }) {
+function SampleDataBadge() {
+  return <span className="inline-flex w-fit rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Sample Data</span>
+}
+
+function SummaryCard({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: typeof Users }) {
   return (
     <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>\n          <div className="mt-1"><SampleDataBadge /></div>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <div className="mt-1"><SampleDataBadge /></div>
           <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">{value}</p>
         </div>
         <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
@@ -86,7 +91,9 @@ function SectionHeading({ title, description }: { title: string; description?: s
 }
 
 function Dashboard() {
-  const { user } = useAuth()\n  const isAdmin = Boolean(user?.is_superuser)\n  const [period, setPeriod] = useState<Period>("overall")
+  const { user } = useAuth()
+  const isAdmin = Boolean(user?.is_superuser)
+  const [period, setPeriod] = useState<Period>("overall")
   const visibleMonths = useMemo(() => {
     if (period === "today" || period === "week" || period === "month") return monthlyIssuances.slice(-1)
     if (period === "3months") return monthlyIssuances.slice(-3)
