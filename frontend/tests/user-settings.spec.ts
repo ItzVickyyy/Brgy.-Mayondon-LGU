@@ -3,20 +3,23 @@ import { createUser } from "./utils/privateApi.ts"
 import { randomEmail, randomPassword } from "./utils/random"
 import { logInUser, logOutUser } from "./utils/user"
 
-const tabs = ["Account Profile", "Change Password"]
+async function openMyAccount(page: import("@playwright/test").Page) {
+  await page.goto("/")
+  await page.getByRole("button").filter({ hasText: /@/ }).last().click()
+  await page.getByRole("menuitem", { name: "My Account" }).click()
+  await expect(page.getByRole("dialog")).toBeVisible()
+}
 
-test("Account Profile tab is active by default", async ({ page }) => {
-  await page.goto("/settings")
-  await expect(
-    page.getByRole("tab", { name: "Account Profile" }),
-  ).toHaveAttribute("aria-selected", "true")
+test("My Account opens from the user menu", async ({ page }) => {
+  await openMyAccount(page)
+  await expect(page.getByRole("heading", { name: "My Account" })).toBeVisible()
 })
 
-test("All tabs are visible", async ({ page }) => {
-  await page.goto("/settings")
-  for (const tab of tabs) {
-    await expect(page.getByRole("tab", { name: tab })).toBeVisible()
-  }
+test("Change Password is available inside My Account", async ({ page }) => {
+  await openMyAccount(page)
+  await page.getByRole("button", { name: "Edit" }).click()
+  await expect(page.getByText("Password & Sign-in")).toBeVisible()
+  await expect(page.getByTestId("current-password-input")).toBeVisible()
 })
 
 test.describe("Edit user profile", () => {
@@ -32,8 +35,7 @@ test.describe("Edit user profile", () => {
 
   test.beforeEach(async ({ page }) => {
     await logInUser(page, email, password)
-    await page.goto("/settings")
-    await page.getByRole("tab", { name: "Account Profile" }).click()
+    await openMyAccount(page)
   })
 
   test("Edit user name with a valid name", async ({ page }) => {
@@ -71,7 +73,6 @@ test.describe("Edit user email", () => {
     await createUser({ email, password })
     await logInUser(page, email, password)
     await page.goto("/settings")
-    await page.getByRole("tab", { name: "Account Profile" }).click()
 
     await page.getByRole("button", { name: "Edit" }).click()
     await page.getByLabel("Email").fill(updatedEmail)
@@ -134,7 +135,6 @@ test.describe("Change password", () => {
     await logInUser(page, email, password)
 
     await page.goto("/settings")
-    await page.getByRole("tab", { name: "Change Password" }).click()
     await page.getByTestId("current-password-input").fill(password)
     await page.getByTestId("new-password-input").fill(newPassword)
     await page.getByTestId("confirm-password-input").fill(newPassword)
@@ -161,8 +161,7 @@ test.describe("Change password validation", () => {
   test.beforeEach(async ({ page }) => {
     await logInUser(page, email, password)
     await page.goto("/settings")
-    await page.getByRole("tab", { name: "Change Password" }).click()
-  })
+    })
 
   test("Update password with weak passwords", async ({ page }) => {
     const weakPassword = "weak"
