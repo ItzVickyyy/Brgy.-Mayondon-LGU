@@ -24,6 +24,8 @@ function BackupRestore() {
   const [selectedBackup, setSelectedBackup] = useState(sampleBackups[0].name)
   const [restoreConfirmation, setRestoreConfirmation] = useState("")
 
+  if (!user?.is_superuser) return <NoPermission />
+
   return (
     <div className="flex flex-col gap-6">
       <div>
