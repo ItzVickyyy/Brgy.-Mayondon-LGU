@@ -1,13 +1,13 @@
 name: Branch sync check
 
-# Keeps Foundation (documentation and planning) and draft/admin-portal (admin
+# Keeps master (documentation and planning) and draft/admin-portal (admin
 # portal UI, layout and design) merge-ready. The rules are explained in
-# "Foundation and draft/admin-portal: merge readiness" in docs/Developers.md.
+# "master and draft/admin-portal: merge readiness" in docs/Developers.md.
 
 on:
   push:
     branches:
-      - Foundation
+      - master
       - draft/admin-portal
   workflow_dispatch:
 
@@ -28,7 +28,7 @@ jobs:
       - name: Fetch both branches
         run: |
           git fetch --no-tags origin \
-            "+refs/heads/Foundation:refs/remotes/origin/Foundation" \
+            "+refs/heads/master:refs/remotes/origin/master" \
             "+refs/heads/draft/admin-portal:refs/remotes/origin/draft/admin-portal"
 
       - name: Check that each branch only changes its own files
@@ -36,16 +36,16 @@ jobs:
           BRANCH: ${{ github.ref_name }}
         run: |
           set -euo pipefail
-          FOUNDATION=origin/Foundation
+          MASTER=origin/master
           ADMIN=origin/draft/admin-portal
           failed=0
 
           # Files changed on Foundation since the two branches last shared history.
-          check_foundation() {
-            bad=$(git diff --name-only "$ADMIN...$FOUNDATION" \
+          check_master() {
+            bad=$(git diff --name-only "$ADMIN...$MASTER" \
               | grep -vE '^(docs/|README\.md$|\.github/workflows/branch-sync-check\.yml$)' || true)
             if [ -n "$bad" ]; then
-              echo "::error::Foundation may only change docs/ and README.md. Move these changes to draft/admin-portal:"
+              echo "::error::master may only change docs/ and README.md. Move these changes to draft/admin-portal:"
               echo "$bad"
               failed=1
             fi
@@ -53,19 +53,19 @@ jobs:
 
           # Files changed on draft/admin-portal since the two branches last shared history.
           check_admin() {
-            bad=$(git diff --name-only "$FOUNDATION...$ADMIN" \
+            bad=$(git diff --name-only "$MASTER...$ADMIN" \
               | grep -E '^(docs/|README\.md$)' || true)
             if [ -n "$bad" ]; then
-              echo "::error::draft/admin-portal must not edit documentation. Make the change on Foundation, then run 'git merge origin/Foundation' on draft/admin-portal:"
+              echo "::error::draft/admin-portal must not edit documentation. Make the change on master, then run 'git merge origin/master' on draft/admin-portal:"
               echo "$bad"
               failed=1
             fi
           }
 
           case "$BRANCH" in
-            Foundation) check_foundation ;;
+            master) check_master ;;
             draft/admin-portal) check_admin ;;
-            *) check_foundation; check_admin ;;
+            *) check_master; check_admin ;;
           esac
           exit "$failed"
 
@@ -76,16 +76,16 @@ jobs:
           git config user.email "branch-sync-check@users.noreply.github.com"
           git checkout --quiet --detach origin/draft/admin-portal
 
-          if git merge-base --is-ancestor origin/Foundation HEAD; then
+          if git merge-base --is-ancestor origin/master HEAD; then
             echo "draft/admin-portal already contains all of Foundation, so merging the two is a fast-forward."
             exit 0
           fi
 
-          if git merge --no-commit --no-ff origin/Foundation; then
+          if git merge --no-commit --no-ff origin/master; then
             git merge --abort || true
-            echo "::warning::draft/admin-portal is behind Foundation but merges cleanly. Run 'git merge origin/Foundation' on draft/admin-portal to catch up."
+            echo "::warning::draft/admin-portal is behind Foundation but merges cleanly. Run 'git merge origin/master' on draft/admin-portal to catch up."
           else
-            echo "::error::Merging Foundation into draft/admin-portal has conflicts in:"
+            echo "::error::Merging master into draft/admin-portal has conflicts in:"
             git diff --name-only --diff-filter=U
             git merge --abort || true
             exit 1
