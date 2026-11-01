@@ -11,7 +11,7 @@ Last updated: November 1, 2026
 1. [01-Project-and-Schedule.md](01-Project-and-Schedule.md) — status, milestones, instructor requirements.
 2. [02-Requirements-and-Scope.md](02-Requirements-and-Scope.md) — what the client asked for.
 3. [06-Architecture-and-Deployment.md](06-Architecture-and-Deployment.md) — stack, architecture, offline LAN deployment.
-4. The root [README](../README.md) — setup commands and project layout. (`frontend/src/config/site.ts` still points to a non-existent `docs/ROADMAP.md`; see **D-09**.)
+4. The root [README](../README.md) — setup commands and project layout. (`frontend/src/config/site.ts` still points to a non-existent `docs/ROADMAP.md`; **D-09** decided Nov 1, 2026: fix it in the next code commit on `draft/admin-portal`.)
 
 Run locally: section 9 below. Package for the office LAN: [06-Architecture-and-Deployment.md](06-Architecture-and-Deployment.md) (preparation only until built and tested offline on the target network).
 
@@ -37,7 +37,14 @@ Until the architecture is validated at the client site:
 
 ## 4. Branching
 
-> **Conflict to resolve (D-08).** The documents disagreed on branches. The old Source of Truth and README said work stays on `Foundation` and that `Foundation` holds docs and planning, with `draft/admin-portal` holding the UI. The old Developers guide and the branch-sync workflow say **`master` holds docs and planning** and `draft/admin-portal` holds UI. The branch-sync workflow is what is actually enforced, so this guide follows **master + draft/admin-portal**. Confirm the intended role of `Foundation` and update the root README, which still says "keep working on `Foundation`".
+> **Decided Nov 1, 2026 (D-08).** The old documents disagreed on branches (old Source of Truth and README: work on `Foundation`; old Developers guide and branch-sync workflow: `master` for docs, `draft/admin-portal` for UI). The team settled it as follows:
+>
+> - **`master`** holds documentation and planning.
+> - **`draft/admin-portal`** holds the UI and supporting code, and **the Version 1 demo runs from it**.
+> - **`Foundation`** is frozen as a read-only reference. As of Nov 1 it contained no commit that `master` lacks (check with `git rev-list --count origin/master..origin/Foundation` before relying on this). Do not commit to it, rename it or delete it.
+> - The planned `production` branch is still not created.
+>
+> The root README was updated to match.
 
 ### Interim arrangement (enforced by CI)
 
@@ -143,7 +150,7 @@ Optional: VS Code. You do not need Node.js or a separate PostgreSQL install. Ver
 
 ### 9.2 Steps
 
-1. **Open the project.** `git clone https://github.com/ItzVickyyy/Brgy.-Mayondon-LGU.git`, open the folder in a terminal, and check `Get-Location`, `git branch --show-current`, `git status`. Inspect local changes before switching or pulling anything. *(Which branch to use for local development is part of D-08; the old guide said `Foundation`.)*
+1. **Open the project.** `git clone https://github.com/ItzVickyyy/Brgy.-Mayondon-LGU.git`, open the folder in a terminal, and check `Get-Location`, `git branch --show-current`, `git status`. Inspect local changes before switching or pulling anything. *(Use `draft/admin-portal` for code and the demo; `master` is for docs. D-08 decided Nov 1, 2026. The old guide said `Foundation`; ignore that.)*
 2. **Create `.env`** from the repo root (only if missing):
    `if (-not (Test-Path .env)) { Copy-Item .env.example .env }`
    Review it; the database URL and `POSTGRES_PASSWORD` must match. The `changethis` placeholders warn and are for local setup only — never deploy with them, commit `.env` or share it.

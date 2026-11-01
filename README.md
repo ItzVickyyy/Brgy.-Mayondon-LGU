@@ -13,7 +13,7 @@ Laguna State Polytechnic University – Los Baños Campus
 | [Justin Adrian P. Reboton](https://github.com/jOstin-7) | Backend Developer, Technical Writer |
 | [Jean Mervin G. Fajardo](https://github.com/JeanMervin) | Full Stack Developer |
 
-> **Status (October 31, 2026):** client interviews were conducted on October 19–20, and the Creative Brief is now final and was signed by the professor. The Foundation branch has an initial Docker-based self-hosted LAN path, but actual office deployment, offline workflows, backup/restore, security, automatic startup, and client-site operation remain unverified. See [06-Architecture-and-Deployment.md](docs/06-Architecture-and-Deployment.md), [02-Requirements-and-Scope.md](docs/02-Requirements-and-Scope.md), and [01-Project-and-Schedule.md](docs/01-Project-and-Schedule.md).
+> **Status (November 1, 2026):** client interviews were conducted on October 19–20, and the Creative Brief is now final and was signed by the professor. The repository has an initial Docker-based self-hosted LAN path, but actual office deployment, offline workflows, backup/restore, security, automatic startup, and client-site operation remain unverified. See [06-Architecture-and-Deployment.md](docs/06-Architecture-and-Deployment.md), [02-Requirements-and-Scope.md](docs/02-Requirements-and-Scope.md), and [01-Project-and-Schedule.md](docs/01-Project-and-Schedule.md).
 
 ## Stack at a glance
 
@@ -47,10 +47,13 @@ cd frontend && bun run lint && bun run build     # lint + type-check + build
 Read [`docs/07-Developer-Guide.md`](docs/07-Developer-Guide.md) for the full team workflow,
 branching strategy, review checklist, testing guidance, and developer roles.
 
-**Current branch policy:** keep working on `Foundation` while the team reviews
-the offline LAN preparation and obtains client approval. Do not rename or merge
-this branch or create the planned `production` branch unless the team explicitly
-reviews and changes the branch plan.
+**Current branch policy (decided November 1, 2026):**
+- `master` holds documentation and planning (`docs/`, this README).
+- `draft/admin-portal` holds the admin portal UI and supporting code. **The Version 1 demo runs from this branch.**
+- `Foundation` is frozen as a read-only reference. Do not commit to, rename or delete it.
+- Do not create the planned `production` branch unless the team explicitly
+  reviews and changes the branch plan. See
+  [`docs/07-Developer-Guide.md`](docs/07-Developer-Guide.md) section 4.
 
 **Planned branch policy after client approval and team review:**
 - `master` will be the integration branch for reviewed changes that pass the

@@ -13,6 +13,7 @@ Everything the team needs to know about the project lives in this folder, groupe
 | [07-Developer-Guide.md](07-Developer-Guide.md) | Roles, branching, reviews, testing, migrations, local startup | Before development or a pull request |
 | [08-Open-Decisions.md](08-Open-Decisions.md) | **Every undecided, vague or contradictory item**, with owner and deadline | After client or instructor discussions |
 | [Bug-and-Issue-Log.md](Bug-and-Issue-Log.md) | Defects, test failures, security and deployment issues | Whenever an issue is found or changes status |
+| [testing/](testing/README.md) | Working files for Instrument A (test cases) and Instrument B (user survey) | Week 16 testing; when adding test cases |
 | [Developers-Journal/](Developers-Journal/README.md) | Rules, template and each member's journal | Every time you work on the project |
 
 **Precedence if documents conflict:** the instructor's *Final Project Guide* → the signed Creative Brief (client scope) → these documents.

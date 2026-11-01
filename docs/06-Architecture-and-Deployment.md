@@ -101,11 +101,11 @@ Do not change the stack or remove starter-template modules just because they see
 
 ## 4. Prepare the host computer
 
-Documented assumption: a **Windows 10/11 64-bit** PC that can stay on during office hours, with enough disk space, reliable power, a supported Docker Desktop setup, and the same LAN as staff computers. The actual host, its OS and specs are unconfirmed **(D-31)**. Check Docker Desktop licensing terms for the client's use **(D-34)**.
+Documented assumption: a **Windows 10/11 64-bit** PC that can stay on during office hours, with enough disk space, reliable power, a supported Docker Desktop setup, and the same LAN as staff computers. The actual host, its OS and specs are unconfirmed **(D-31)**. Check Docker Desktop licensing terms for the client's use **(D-34, licence check still owed)**.
 
 Before going offline, on a trusted development computer:
 
-1. Clone/update the repo and check out the agreed branch **(D-08)**.
+1. Clone/update the repo and check out `draft/admin-portal`, the branch the Version 1 demo runs from **(D-08, decided Nov 1, 2026)**.
 2. Install and start Docker Desktop once.
 3. Download images and build the app image while online.
 4. Test the full setup with fictional data.
@@ -181,7 +181,7 @@ The backup script creates a timestamped PostgreSQL custom-format dump in `backup
 - **Password recovery and account setup by email** depend on SMTP and will not work offline **(D-12)**.
 - **ID photo background removal:** the client uses an online service today. Replace it with an approved local tool or a manual process; **never upload resident photos to an external service** **(D-18)**.
 - **External resources:** verify fonts, icons and scripts load offline (the packaged frontend uses local assets and same-origin calls).
-- **API docs page:** the custom `/docs` endpoint uses CDN-hosted Swagger UI assets and may not render offline. Decide whether it must work offline and, if so, package the assets **(D-37)**.
+- **API docs page:** the custom `/docs` endpoint uses CDN-hosted Swagger UI assets and may not render offline. **Decision (Nov 1, 2026, D-37):** staff do not need it offline, so leave it as is; package the assets only if wanted for a demo.
 - **Updates and dependencies:** download and test before taking the host offline; never rely on live package downloads at the barangay.
 - **Host availability:** other computers depend on the host and its database. Agree who restarts it, applies updates and handles hardware failure **(D-36)**.
 - **Night-duty staff:** the brief lists a night-duty user, so the host must be on during those hours or the system will be unavailable **(D-31)**.
@@ -214,7 +214,7 @@ Host rules: do not publish the PostgreSQL port to the LAN; keep the firewall on;
 
 **Limitations to verify**
 - A Compose restart policy restarts containers when Docker starts; it does **not** make Docker Desktop launch at Windows boot.
-- Docker Desktop startup may depend on Windows sign-in and the configured account. Do not promise availability before anyone signs in until a supported setup is chosen and tested **(D-34)**.
+- Docker Desktop startup may depend on Windows sign-in and the configured account. **Decision (Nov 1, 2026, D-34):** plan for Docker Desktop to start at Windows **sign-in**, and state in the user manual that someone must sign in to the host first. Do not promise availability before anyone signs in until a real reboot test on the host succeeds. Consider another container runtime only if that test fails.
 - A shortcut does not start the server; opening it before the app is healthy shows a connection error.
 - Never store admin credentials in a shortcut or startup script; never disable the firewall to make access work.
 
