@@ -1,4 +1,4 @@
-import { Activity, BarChart3, BookUser, DatabaseBackup, FileCheck2, IdCard, LayoutDashboard, Users, ShieldCheck } from "lucide-react"
+import { Activity, BarChart3, BookUser, Clock3, DatabaseBackup, FileCheck2, IdCard, LayoutDashboard, Users, ShieldCheck } from "lucide-react"
 
 import { Logo } from "@/components/Common/Logo"
 import {
@@ -18,6 +18,7 @@ const items: NavigationItem[] = [
   { icon: Users, title: "Resident Records", path: "/records", section: "Records and Documents" },
   { icon: BookUser, title: "Officials", path: "/officials", adminOnly: true, section: "Administration" },
   { icon: ShieldCheck, title: "User Accounts", path: "/admin", adminOnly: true, section: "Administration" },
+  { icon: Clock3, title: "Pending Registrations", path: "/pending-registrations", adminOnly: true, section: "Administration" },
   { icon: Activity, title: "Activity Log", path: "/activity-log", section: "Workspace" },
   { icon: BarChart3, title: "Management Reports", path: "/reports", adminOnly: true, section: "Administration" },
   { icon: DatabaseBackup, title: "Backup and Restore", path: "/backup-restore", adminOnly: true, section: "Administration" },
