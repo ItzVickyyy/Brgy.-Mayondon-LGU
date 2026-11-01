@@ -46,9 +46,8 @@ const labelClassName = "flex min-w-0 flex-col gap-1.5 text-base font-medium"
 const statusStyles: Record<IssuanceRecord["status"], string> = {
   Issued:
     "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Draft:
+  Pending:
     "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
-  Sample: "border-border bg-muted text-muted-foreground",
 }
 
 function localDateValue() {
@@ -196,7 +195,7 @@ function IssuancesManagement() {
         resident: currentName,
         type: selectedType,
         date: currentDate,
-        status: "Draft",
+        status: "Pending",
         fields: { ...formValues },
       },
     )

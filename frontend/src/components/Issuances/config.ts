@@ -12,7 +12,7 @@ export type IssuanceRecord = {
   resident: string
   type: string
   date: string
-  status: "Issued" | "Sample" | "Draft"
+  status: "Issued" | "Pending"
   fields: Record<string, string>
 }
 
