@@ -41,6 +41,7 @@ const formSchema = z
       .optional()
       .or(z.literal("")),
     confirm_password: z.string().optional(),
+    // Existing API role flag. Do not treat is_active as pending/rejected status.
     is_superuser: z.boolean().optional(),
     is_active: z.boolean().optional(),
   })
