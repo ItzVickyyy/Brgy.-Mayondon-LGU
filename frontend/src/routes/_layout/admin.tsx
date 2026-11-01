@@ -7,7 +7,6 @@ import { columns, type UserTableData } from "@/components/Admin/columns"
 import { DataTable } from "@/components/Common/DataTable"
 import { EmptyState, ErrorState, LoadingState } from "@/components/Common/FeedbackState"
 import { NoPermission } from "@/components/Common/NoPermission"
-import PendingUsers from "@/components/Pending/PendingUsers"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
@@ -27,7 +26,12 @@ export const Route = createFileRoute("/_layout/admin")({
 
 function UsersTableContent() {
   const { user: currentUser } = useAuth()
-  const { data: users, isLoading, isError, refetch } = useQuery(getUsersQueryOptions())
+  const {
+    data: users,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery(getUsersQueryOptions())
 
   if (isLoading) return <LoadingState title="Loading user accounts..." />
   if (isError) {
@@ -40,10 +44,12 @@ function UsersTableContent() {
     )
   }
 
-  const tableData: UserTableData[] = (users?.data ?? []).map((user: UserPublic) => ({
-    ...user,
-    isCurrentUser: currentUser?.id === user.id,
-  }))
+  const tableData: UserTableData[] = (users?.data ?? []).map(
+    (user: UserPublic) => ({
+      ...user,
+      isCurrentUser: currentUser?.id === user.id,
+    }),
+  )
 
   if (tableData.length === 0) {
     return (
