@@ -29,7 +29,6 @@ For a future backend implementation, propose a role enum with values `admin` and
 | Barangay IDs: override validity rules | No | Allowed |
 | Activity Log | Own activity | All users, with filters |
 | My Account and User Settings | Allowed | Allowed |
-| System Settings: barangay information, templates, purpose list | No | Allowed |
 | Officials | No | Allowed |
 | User Accounts | No | Allowed |
 | Pending Registrations | No | Allowed |
@@ -43,6 +42,7 @@ The prototype may show sample pending/approved/rejected requests for design revi
 If account approval becomes a real feature, the backend and database need an explicit, reviewed status field and server-side rules. Suggested statuses are `pending`, `active`, `rejected`, and `inactive`. These are proposed values, not existing verified backend fields. The current API's `is_active` boolean does not by itself represent pending and rejected states. Do not implement approval by relying only on a frontend label or local component state.
 
 ## Questions for the barangay
+
 
 1. Who should be the System Administrator, and who is authorized to approve or disable accounts?
 2. May Staff import or replace a resident masterlist?

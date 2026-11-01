@@ -78,7 +78,6 @@ The diagram shows the proposed information architecture, not a statement that ev
 **User menu**
 1. My Account
 2. User Settings
-3. System Settings — System Administrator only
 
 ### Admin-only navigation
 
@@ -166,7 +165,6 @@ The existing prototype should be aligned with the current scope:
 - Avoid making unsupported population/voter management a primary module unless the client confirms it is needed.
 - Separate request entry from issuance history.
 - Remove the public-announcement direction from the welcome screen unless the client requests a public-facing site.
-- Move activity logs out of System Settings into a clear Activity Log page with role-dependent visibility.
 - Keep Officials management separate from User Management.
 - Do not show links to pages until a draft route or screen exists.
 
@@ -207,7 +205,6 @@ This checklist compares the Creative Brief with the current branch. A draft scre
 | Document request entry and editable purpose list | Document Management now has a sample resident selector before document type and pre-fills sample name/address. Drafts still live only in session state. | Connect selector to saved Resident Records, confirm fields for each document, make the purpose list maintainable, and persist requests/issuances in the database. |
 | Separate issuance history with issue and expiry dates | Issuance History tab exists, but records are sample/session-only and no expiry date is shown. | Add persistent issuance records, expiry where applicable, details, and correction history that preserves the original. |
 | Auto-filled printing with existing formats | Current print view is a generic draft preview. | Create a separate print layout per approved document, then calibrate against actual pre-printed paper and the client printer. Signatures and dry seals remain manual. |
-| Six staff accounts with full access | Current branch has Admin-only routes and navigation for Officials, User Accounts, and System Settings. | **Requirements conflict:** the Creative Brief says all six staff accounts have full access, while prior workflow planning has Admin and Staff permission differences. Confirm this with the client before changing access controls. |
 | Local scheduled and manual backup/restore | No dedicated Backup and Restore screen in the navigation. | Draft Admin-accessible backup/restore UI and define destination, schedule, confirmation, restore procedure, and outcome display. Actual backup automation and restore tests remain separate work. |
 | Fully offline local-network use | Deployment foundation exists, but client-site LAN operation is not yet verified. | Test host startup, access from other office computers, printer operation, firewall configuration, and recovery without internet. |
 | Public-facing features excluded | Welcome page is staff-oriented; no public announcement module is intended. | Keep public resident access, online applications, payments, announcements, and blotter workflows out of scope. |
@@ -342,15 +339,12 @@ The following routes are now represented in `draft/admin-portal` and use clearly
 
 These are design prototypes. The added controls do not write to the database, generate reports, change real account states, or run backup/restore operations. The Backup and Restore page must be connected to the approved local scripts and tested before being treated as operational. A real restore can replace current data, so production restore must use explicit authorization, a verified archive, a clear confirmation step, and a tested recovery procedure.
 
-The sidebar includes one Activity Log page for both roles, plus Pending Registrations, Management Reports, and Backup and Restore for Admin. My Account and User Settings are accessed from the user menu. System Settings has been removed from the interface.
 
 
 
 ## 14. Settings menu and consolidated Activity Log — October 28, 2026
 
-The sidebar no longer lists My Account, User Settings, or System Settings as main navigation pages. These options are grouped in a Settings modal opened from the user menu. The user menu contains Settings and Logout.
 
-My Account contains account information and Change Password. User Settings contains the Light, Dark, and System appearance options. System Settings has been removed from the interface.
 
 The Activity Log is a single navigation page. Staff see sample entries for their own activity, while Admin sees the sample entries across accounts. Both views remain prototype-only until an actual audit log is implemented. The former separate My Activity route is removed from the navigation and route files.
 
@@ -377,7 +371,6 @@ This access plan is a proposal for the frontend prototype, not a client-approved
 4. Management Reports
 5. Backup and Restore
 
-My Account and User Settings remain in the user menu. System Settings is intended for the System Administrator only. The current sidebar hides administrator navigation from Staff, but the backend must enforce authorization for every protected API operation.
 
 ### Proposed access matrix
 
@@ -393,7 +386,6 @@ My Account and User Settings remain in the user menu. System Settings is intende
 | Barangay IDs: override validity rules | No | Allowed |
 | Activity Log | Own activity | All users, with filters |
 | My Account and User Settings | Allowed | Allowed |
-| System Settings | No | Allowed |
 | Officials, User Accounts, Pending Registrations | No | Allowed |
 | Management Reports | No | Allowed |
 | Backup and Restore | No; manual backup permission to be confirmed | Allowed |
@@ -441,8 +433,6 @@ A global sample-data banner and shared badge on every page were intentionally no
 ## 15. Changes made November 1, 2026 (round 2)
 
 - Removed user-visible sample-data badges and prototype banners while retaining fictional development data.
-- Removed System Settings from the user menu and navigation documentation.
 - Clarified that My Account owns account information and Change Password, while User Settings owns appearance preferences.
 - Kept role restrictions, confirmation requirements, and backend authorization as requirements for implementation and testing.
-- Added a follow-up decision: where should the System Administrator maintain the document purpose list after System Settings was removed? One option is a small admin-only Purposes section inside Issuance Management.
 - UI screens and fictional rows do not prove that backend persistence, authorization, audit logging, printing, or backup/restore operations are operational.

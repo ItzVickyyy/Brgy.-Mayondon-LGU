@@ -91,7 +91,6 @@ Current prototype behavior:
 - Explicit Excel dropdown validation was only confirmed in the converted workbook for CLEARANCE POSTAL and BRGY CLEARANCE. Other workbook option lists were not confirmed as active dropdowns.
 - Required fields and validation rules have not been confirmed. The prototype does not assume official eligibility rules.
 - History rows are fictional and do not represent actual barangay records.
-- System Settings has been removed from the user interface. The purpose-list maintenance location still needs a team decision and client validation.
 - Account profile, password change, and account management continue to use the existing foundation functionality.
 - The account form now offers Staff and System Administrator. It maps System Administrator to the existing `is_superuser = true` API field and Staff to `is_superuser = false`. It does not add a separate backend role enum. Confirm this proposal with the client before deployment.
 - Pending Registrations, Request Access, and Pending Approval are prototype-only. Requests are not saved, and approve/reject actions do not create or update backend accounts. The existing `is_active` flag is not a pending/rejected status workflow.
@@ -133,3 +132,6 @@ The unused Items route and its dedicated components were removed. The generic po
 - [ ] Test Staff and System Administrator views separately, including direct navigation to restricted routes.
 - [ ] Confirm the role split and account approval workflow with the barangay. Do not claim approval based on the prototype.
 - [ ] Confirm that backend role/status enforcement and audit logging are implemented before any real resident data is entered.
+
+
+Team decision (Nov 1, 2026): on-screen sample/prototype notices were removed. All data in the app is still fictional. Never enter real resident data. Screens are not evidence that a feature is operational.
