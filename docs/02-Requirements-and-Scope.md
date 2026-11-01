@@ -190,13 +190,19 @@ The instructor's Final Project Guide governs academic dates and wins on conflict
 | Date | Decision | Evidence / decision maker |
 |---|---|---|
 | 2026-10-15/18 | Start from the Full Stack FastAPI Template, tailored for this project | Project team |
-| 2026-10-18 | Keep the `Foundation` branch as the working branch (see branch conflict, D-08) | Project team |
+| 2026-10-18 | Keep the `Foundation` branch as the working branch. **Superseded Nov 1, 2026 (D-08):** see the Nov 1 branch decision below | Project team |
 | 2026-10-18 | Pause additional security code changes until a real hosting setup can be inspected | Project team |
 | 2026-10-19/20 | Offline-first, local-network operation preferred | Client interviews; recorded in brief |
 | 2026-10-25 | Replace Vercel/Supabase hosting direction with Docker Compose + local PostgreSQL | Project team |
 | 2026-10-27 | Print only variable details onto existing pre-printed forms (overlay), never recreate the form | Client description; team |
 | 2026-10-28 | Admin/Staff split and staff self-registration with admin approval are **intentional proposals** to take to the client | Project team |
 | 2026-11-01 | Remove on-screen sample/prototype banners; all data remains fictional | Project team |
+| 2026-11-01 | Branches: `master` = docs; `draft/admin-portal` = UI and code, and the Version 1 demo runs from it; `Foundation` frozen as a read-only reference (D-08) | Project team |
+| 2026-11-01 | The design was coded directly as the `draft/admin-portal` prototype; no wireframes, separate mockups, mobile mockups or client feedback exist yet (D-06) | Project team (fact, not an approval) |
+| 2026-11-01 | Drop the public `/welcome` direction; entry goes to staff login (D-27) | Project team |
+| 2026-11-01 | Responsive but desktop-first; phone view not prioritized (D-29) | Project team |
+| 2026-11-01 | Docker Desktop to start at Windows sign-in; sign-in required first, to be verified by a reboot test (D-34) | Project team |
+| 2026-11-01 | `/docs` API page need not work offline (D-37); test instruments kept in `docs/testing/` (D-07) | Project team |
 | — | Free-tier AI assistants only; the docs are the shared context | Project team |
 
 ## 16. Approval

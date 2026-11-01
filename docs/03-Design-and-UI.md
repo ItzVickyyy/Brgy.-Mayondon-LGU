@@ -103,7 +103,7 @@ Reports: issuances by date/type/purpose, expiring records, imports, corrections,
 
 ## 5. Visual direction and style guide
 
-**Direction:** formal, calm, clean, office-focused. Keep the navy-leaning primary, white/light-gray surfaces, clear headings, consistent borders, responsive cards and tables. Persistent sidebar on desktop, collapsible on small screens, visible focus states, tables usable on phones (how far to go on mobile is **D-29**).
+**Direction:** formal, calm, clean, office-focused. Keep the navy-leaning primary, white/light-gray surfaces, clear headings, consistent borders, responsive cards and tables. Persistent sidebar on desktop, collapsible on small screens, visible focus states, tables usable on phones (**decided Nov 1, 2026, D-29:** responsive, desktop-first; phone view is not a priority, and only the phone mockups the Guide requires are produced, count per D-03).
 
 **Current theme palette** (OKLCH tokens in the global stylesheet; hex values are rounded sRGB equivalents; the source CSS is authoritative):
 
@@ -160,7 +160,9 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 - Backup/Restore screen is a concept (manual backup, proposed schedule controls, sample history, restore confirmation layout). It does not run any backup or restore.
 - Account profile, password change and account management use the existing foundation functionality.
 - The footer shows branding only; Terms of Use and Privacy Policy are not implemented. Any legal text must be marked "Draft, pending barangay review".
-- A public `/welcome` landing page with placeholder announcements and contact details exists from earlier work. Public content is **out of scope**; remove or make staff-oriented **(D-27)**. Do not publish placeholder contact details as facts.
+- A public `/welcome` landing page with placeholder announcements and contact details exists from earlier work. Public content is **out of scope**. **Decision (Nov 1, 2026, D-27):** remove the public landing direction; entry goes to staff login. Placeholder contact details are never shown as facts. The code change is still owed on `draft/admin-portal`.
+
+**Design status:** the prototype was coded directly instead of being designed in Figma or similar, so wireframes, separate mockups, mobile mockups and client feedback do not exist (D-06; see section 8).
 
 ## 7. Creative Brief alignment (updated)
 
@@ -176,9 +178,11 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 | Auto-filled printing on existing formats | Printing paused | Per-document overlay templates calibrated on real paper/printer |
 | Scheduled and manual backup/restore | Concept screen exists; no automation | Wire to approved scripts; define schedule/destination; test restore |
 | Fully offline LAN use | Deployment foundation exists | Test host startup, other-PC access, printers, firewall, recovery offline |
-| Public features excluded | Welcome page still has placeholder content | Remove public/announcement direction (D-27) |
+| Public features excluded | Welcome page still has placeholder content | Remove public/announcement direction; go to staff login (D-27, decided Nov 1; code change pending) |
 
 ## 8. Week 14 checklist
+
+> **Status (D-06, Nov 1, 2026):** wireframes, full-color mockups, mobile mockups and client feedback were **not produced**. The design exists only as the coded `draft/admin-portal` prototype and the site map and style guide in this file. Proposed way to close the gap (not yet decided): ask Prof. Camba whether the prototype is accepted, and if not, make the mockups from prototype screenshots; either way, show the prototype to the client and record their feedback. Steps are in [08-Open-Decisions.md](08-Open-Decisions.md#d-06-follow-up-proposed-not-yet-decided).
 
 - [ ] Review the site map as a group.
 - [ ] Validate workflows and exclusions against the brief and interview notes.

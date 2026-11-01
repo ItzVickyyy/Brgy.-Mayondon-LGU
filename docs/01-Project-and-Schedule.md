@@ -70,7 +70,7 @@ By the end of Week 18 the group must have: interviewed the client, built a syste
 
 ### Week 13 — Interview and Creative Brief
 
-1. Get the **request letter** signed by the instructors, deliver it to the client, and keep the client-signed receiving copy **(D-01)**.
+1. Get the **request letter** signed by the instructors, deliver it to the client, and keep the client-signed receiving copy. *Done: the team holds the approved letter (D-01 closed Nov 1, 2026); include it in the final report.*
 2. Prepare interview questions (maximum 7 main questions for our group).
 3. Conduct the interview; take notes and, with permission, photos or a recording.
 4. Prepare the **Creative Brief**, get instructor review, and retain the approved version.
@@ -99,6 +99,8 @@ Present to the client and get feedback **before coding**; revise afterward. Must
 6. **Client feedback** — the client's comments and the changes made.
 
 Design principles: consistency across pages, clear navigation, readable text with enough contrast, visual hierarchy, simple forms with clear labels. Where each item stands is in [03-Design-and-UI.md](03-Design-and-UI.md).
+
+> **Actual state (D-06, Nov 1, 2026):** items 2–6 were **not produced** as separate deliverables. The team coded the design directly as the `draft/admin-portal` prototype instead of using Figma or similar. Whether the instructor accepts that is unconfirmed; see the follow-up steps in [08-Open-Decisions.md](08-Open-Decisions.md#d-06-follow-up-proposed-not-yet-decided).
 
 ### Week 15 — Version 1
 
@@ -145,7 +147,7 @@ The final brief lives in [02-Requirements-and-Scope.md](02-Requirements-and-Scop
 ## 7. Testing instruments
 
 - **Instrument A — Test Case Form** (filled in by the group). Columns: test no., feature/module, test steps, expected result, actual result, pass/fail, remarks. Starter cases: login (correct and wrong password), add record (valid and missing required field), search, edit, delete with confirmation, report generation and printing, responsiveness on a phone, logout (protected pages cannot be opened afterward). **Project additions required by our own safeguards:** authentication, authorization (including direct API calls), input validation, document issuance, export, backup and restore. Fix every failed test, retest, and record the result.
-- **Instrument B — User Evaluation Survey** (client and real users, at least **[10]** respondents including the client; who takes part is **D-41**). Scale 5 Strongly Agree to 1 Strongly Disagree, 12 statements in five categories: Functionality, Usability, Design, Performance and Reliability, Security. Compute the mean per item and per category. The 12 statements themselves are not in the repository **(D-07)**.
+- **Instrument B — User Evaluation Survey** (client and real users, at least **[10]** respondents including the client; who takes part is **D-41**). Scale 5 Strongly Agree to 1 Strongly Disagree, 12 statements in five categories: Functionality, Usability, Design, Performance and Reliability, Security. Compute the mean per item and per category. The 12 statements themselves are not in the repository **(D-07)**; copy them from the Final Project Guide. Working files for both instruments are in [`testing/`](testing/README.md).
 
 | Mean | Interpretation |
 |---|---|
@@ -199,7 +201,8 @@ The client prefers fully offline operation on the office LAN. The repository has
 - [x] Authentication, authorization, lockout and security controls documented
 - [x] Admin portal UI draft built (fictional data; not connected to backend)
 - [x] Three template-generated Dependabot pull requests closed; dependency updates handled deliberately
-- [ ] Week 14 deliverables: wireframes, full-color mockups, mobile mockups, one-page style guide and client feedback **(D-06)** — a site map, design draft and working style guide exist in the docs, but no evidence of wireframes/mockups or client review is recorded
+- [x] Request letter approved and held by the team (D-01, closed)
+- [ ] Week 14 deliverables: wireframes, full-color mockups, mobile mockups, one-page style guide and client feedback **(D-06)** — **confirmed not produced** (Nov 1, 2026). The design was coded directly as the `draft/admin-portal` prototype. A site map and working style guide exist in the docs. Needs the instructor's answer on whether the prototype is accepted, plus client feedback on it
 - [ ] Offline/LAN setup tested without internet and approved by the client; host, backup, photo workflow and recovery responsibilities confirmed
 - [ ] Pre-printed form layouts calibrated and sample print alignment approved by the client
 - [ ] Version 1 (working demo)
