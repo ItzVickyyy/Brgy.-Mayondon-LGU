@@ -14,13 +14,13 @@ type NavigationItem = Item & { adminOnly?: boolean }
 
 const items: NavigationItem[] = [
   { icon: LayoutDashboard, title: "Dashboard", path: "/", section: "Workspace" },
+  { icon: Activity, title: "Activity Log", path: "/activity-log", section: "Workspace" },
   { icon: Users, title: "Resident Records", path: "/records", section: "Records and Documents" },
   { icon: FileCheck2, title: "Issuance Management", path: "/issuances", section: "Records and Documents" },
   { icon: IdCard, title: "Barangay IDs", path: "/barangay-ids", section: "Records and Documents" },
   { icon: BookUser, title: "Officials", path: "/officials", adminOnly: true, section: "Administration" },
   { icon: ShieldCheck, title: "User Accounts", path: "/admin", adminOnly: true, section: "Administration" },
   { icon: Clock3, title: "Pending Registrations", path: "/pending-registrations", adminOnly: true, section: "Administration", badge: 2 },
-  { icon: Activity, title: "Activity Log", path: "/activity-log", section: "Workspace" },
   { icon: BarChart3, title: "Management Reports", path: "/reports", adminOnly: true, section: "Administration" },
   { icon: DatabaseBackup, title: "Backup and Restore", path: "/backup-restore", adminOnly: true, section: "Administration" },
 ]
