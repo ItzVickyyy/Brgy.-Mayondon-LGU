@@ -13,6 +13,8 @@ This is a proposal for the prototype. It is not a client-approved permissions po
 
 The current API user model exposes `is_superuser`. The prototype's role selector maps **System Administrator** to `is_superuser = true` and **Staff** to `is_superuser = false`. This is a UI/API mapping, not a separate role enum or a complete permission system.
 
+For a future backend implementation, propose a role enum with values `admin` and `staff`, where the UI label for `admin` is **System Administrator**. This is a planned model, not a field implemented by the current frontend-only update.
+
 ## Proposed access matrix
 
 | Module / action | Staff | System Administrator |
@@ -52,7 +54,7 @@ If account approval becomes a real feature, the backend and database need an exp
 
 - Enforce every role and record permission on the backend for each protected API operation. Hiding a route or button in the frontend is not security enforcement.
 - Protect role changes, account status, approval decisions, record ownership, and other privileged fields from unauthorized updates.
-- Keep audit history append-only for users who must not be allowed to edit or delete it. Record who performed sensitive actions and when.
+- Audit history should be append-only and unavailable for ordinary users to edit or delete. Record who performed sensitive actions and when. Any retention or cleanup process must be explicitly controlled and documented.
 - Do not place passwords, access tokens, or unnecessary resident personal information in logs.
 - Confirm the purpose, minimum required resident data, permitted access, retention, correction, disclosure, backup custody, and incident process with the client, consistent with the Philippine Data Privacy Act of 2012.
 - Use synthetic sample data in development, screenshots, and demonstrations. Do not claim legal approval, privacy compliance certification, or client approval without documented evidence.
