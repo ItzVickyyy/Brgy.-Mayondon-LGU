@@ -19,13 +19,19 @@ function SettingsPage() {
     <div className="flex flex-col gap-6">
       <div>
         <p className="text-sm font-medium text-primary">Account</p>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Settings</h1>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+          Settings
+        </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Manage your account information and password.
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-2 border-b pb-3" role="tablist" aria-label="Account settings">
+      <div
+        className="flex flex-wrap gap-2 border-b pb-3"
+        role="tablist"
+        aria-label="Account settings"
+      >
         <button
           type="button"
           role="tab"
@@ -46,7 +52,10 @@ function SettingsPage() {
         </button>
       </div>
 
-      <section className="rounded-xl border bg-card p-5 shadow-sm" role="tabpanel">
+      <section
+        className="rounded-xl border bg-card p-5 shadow-sm"
+        role="tabpanel"
+      >
         {activeTab === "profile" ? <UserInformation /> : <ChangePassword />}
       </section>
     </div>

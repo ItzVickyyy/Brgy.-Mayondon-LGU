@@ -33,7 +33,8 @@ function WelcomePage() {
             {SITE.systemName}
           </h1>
           <p className="mt-4 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-            A staff-facing workspace for resident records, document preparation, issuance history, and Barangay ID workflows.
+            A staff-facing workspace for resident records, document preparation,
+            issuance history, and Barangay ID workflows.
           </p>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
             For use by authorized barangay office personnel.
@@ -46,20 +47,38 @@ function WelcomePage() {
           </RouterLink>
           <p className="mt-4 text-sm text-muted-foreground">
             Barangay personnel who need access can{" "}
-            <RouterLink to="/request-access" className="font-medium text-primary underline-offset-4 hover:underline">
+            <RouterLink
+              to="/request-access"
+              className="font-medium text-primary underline-offset-4 hover:underline"
+            >
               preview the access request
-            </RouterLink>.
+            </RouterLink>
+            .
           </p>
         </section>
         <section className="grid gap-4 sm:grid-cols-3">
           {[
-            { title: "Resident Records", description: "Find and maintain resident information in one place." },
-            { title: "Document Preparation", description: "Prepare approved documents and print variable details." },
-            { title: "Issuance History", description: "Keep a clear history of document issuance and corrections." },
+            {
+              title: "Resident Records",
+              description:
+                "Find and maintain resident information in one place.",
+            },
+            {
+              title: "Document Preparation",
+              description:
+                "Prepare approved documents and print variable details.",
+            },
+            {
+              title: "Issuance History",
+              description:
+                "Keep a clear history of document issuance and corrections.",
+            },
           ].map((item) => (
             <article key={item.title} className="rounded-xl border bg-card p-5">
               <h2 className="font-semibold">{item.title}</h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">{item.description}</p>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                {item.description}
+              </p>
             </article>
           ))}
         </section>

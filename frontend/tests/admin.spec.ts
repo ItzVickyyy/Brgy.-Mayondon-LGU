@@ -6,7 +6,9 @@ import { logInUser } from "./utils/user"
 
 test("Admin page is accessible and shows correct title", async ({ page }) => {
   await page.goto("/admin")
-  await expect(page.getByRole("heading", { name: "User Accounts" })).toBeVisible()
+  await expect(
+    page.getByRole("heading", { name: "User Accounts" }),
+  ).toBeVisible()
   await expect(
     page.getByText("Manage system users and their access roles."),
   ).toBeVisible()
@@ -54,8 +56,10 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Password").first().fill(password)
     await page.getByPlaceholder("Password").last().fill(password)
 
-    await page.getByRole("combobox").selectOption({ label: "System Administrator" })
-    
+    await page
+      .getByRole("combobox")
+      .selectOption({ label: "System Administrator" })
+
     await page.getByLabel("Is active?").check()
 
     await page.getByRole("button", { name: "Save" }).click()
@@ -185,8 +189,12 @@ test.describe("Admin page access control", () => {
 
     await page.goto("/admin")
 
-    await expect(page.getByRole("heading", { name: "Access restricted" })).toBeVisible()
-    await expect(page.getByRole("heading", { name: "User Accounts" })).not.toBeVisible()
+    await expect(
+      page.getByRole("heading", { name: "Access restricted" }),
+    ).toBeVisible()
+    await expect(
+      page.getByRole("heading", { name: "User Accounts" }),
+    ).not.toBeVisible()
   })
 
   test("Superuser can access admin page", async ({ page }) => {
@@ -194,6 +202,8 @@ test.describe("Admin page access control", () => {
 
     await page.goto("/admin")
 
-    await expect(page.getByRole("heading", { name: "User Accounts" })).toBeVisible()
+    await expect(
+      page.getByRole("heading", { name: "User Accounts" }),
+    ).toBeVisible()
   })
 })

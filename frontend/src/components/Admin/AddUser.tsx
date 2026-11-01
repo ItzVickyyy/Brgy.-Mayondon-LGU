@@ -199,7 +199,9 @@ const AddUser = () => {
                       <select
                         className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         value={field.value ? "admin" : "staff"}
-                        onChange={(event) => field.onChange(event.target.value === "admin")}
+                        onChange={(event) =>
+                          field.onChange(event.target.value === "admin")
+                        }
                       >
                         <option value="staff">Staff</option>
                         <option value="admin">System Administrator</option>

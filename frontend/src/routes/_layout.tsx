@@ -1,20 +1,25 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
-import { CalendarDays, Clock3, Maximize2, Minimize2, Moon, Sun } from "lucide-react"
+import {
+  CalendarDays,
+  Clock3,
+  Maximize2,
+  Minimize2,
+  Moon,
+  Sun,
+} from "lucide-react"
 import { useEffect, useState } from "react"
-
+import { UsersService } from "@/client"
 import { Footer } from "@/components/Common/Footer"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
 import { User } from "@/components/Sidebar/User"
+import { useTheme } from "@/components/theme-provider"
+import { Button } from "@/components/ui/button"
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
-import { Button } from "@/components/ui/button"
-import useAuth from "@/hooks/useAuth"
-import { useTheme } from "@/components/theme-provider"
-import { isLoggedIn } from "@/hooks/useAuth"
-import { UsersService } from "@/client"
+import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout")({
   component: Layout,
@@ -45,7 +50,8 @@ function Layout() {
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000)
-    const handleFullscreenChange = () => setIsFullscreen(Boolean(document.fullscreenElement))
+    const handleFullscreenChange = () =>
+      setIsFullscreen(Boolean(document.fullscreenElement))
     document.addEventListener("fullscreenchange", handleFullscreenChange)
     return () => {
       window.clearInterval(timer)
@@ -53,7 +59,7 @@ function Layout() {
     }
   }, [])
 
-const toggleFullscreen = async () => {
+  const toggleFullscreen = async () => {
     if (document.fullscreenElement) await document.exitFullscreen()
     else await document.documentElement.requestFullscreen()
   }
@@ -64,7 +70,10 @@ const toggleFullscreen = async () => {
     year: "numeric",
     weekday: "long",
   }).format(now)
-  const formattedDate = dateText.replace(/,\s*(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/, " ($1)")
+  const formattedDate = dateText.replace(
+    /,\s*(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/,
+    " ($1)",
+  )
   const timeText = new Intl.DateTimeFormat("en-PH", {
     hour: "2-digit",
     minute: "2-digit",
@@ -75,7 +84,12 @@ const toggleFullscreen = async () => {
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <a href="#main-content" className="sr-only z-50 rounded-md bg-background px-4 py-3 text-sm font-semibold text-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:ring-2 focus:ring-ring">Skip to main content</a>
+        <a
+          href="#main-content"
+          className="sr-only z-50 rounded-md bg-background px-4 py-3 text-sm font-semibold text-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:ring-2 focus:ring-ring"
+        >
+          Skip to main content
+        </a>
         <header className="sticky top-0 z-10 flex min-h-16 shrink-0 items-center gap-3 border-b bg-background/95 px-3 py-2 backdrop-blur sm:px-4">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <SidebarTrigger className="-ml-1 shrink-0 text-muted-foreground" />
@@ -97,28 +111,49 @@ const toggleFullscreen = async () => {
               variant="outline"
               size="icon"
               className="size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
-              aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              aria-label={
+                isDark ? "Switch to light mode" : "Switch to dark mode"
+              }
               title={isDark ? "Switch to light mode" : "Switch to dark mode"}
               onClick={() => setTheme(isDark ? "light" : "dark")}
             >
-              {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
+              {isDark ? (
+                <Sun className="size-4" />
+              ) : (
+                <Moon className="size-4" />
+              )}
             </Button>
             <Button
               type="button"
               variant="outline"
               size="icon"
               className="size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
-              aria-label={isFullscreen ? "Exit full screen" : "Enter full screen"}
+              aria-label={
+                isFullscreen ? "Exit full screen" : "Enter full screen"
+              }
               title={isFullscreen ? "Exit full screen" : "Enter full screen"}
-              onClick={() => { void toggleFullscreen() }}
+              onClick={() => {
+                void toggleFullscreen()
+              }}
             >
-              {isFullscreen ? <Minimize2 className="size-4" /> : <Maximize2 className="size-4" />}
+              {isFullscreen ? (
+                <Minimize2 className="size-4" />
+              ) : (
+                <Maximize2 className="size-4" />
+              )}
             </Button>
-            <div aria-hidden="true" className="mx-1 h-7 w-px shrink-0 bg-border" />
+            <div
+              aria-hidden="true"
+              className="mx-1 h-7 w-px shrink-0 bg-border"
+            />
             <User user={currentUser} compact />
           </div>
         </header>
-        <main id="main-content" tabIndex={-1} className="flex-1 p-4 outline-none sm:p-6 md:p-8">
+        <main
+          id="main-content"
+          tabIndex={-1}
+          className="flex-1 p-4 outline-none sm:p-6 md:p-8"
+        >
           <div className="mx-auto max-w-7xl">
             <Outlet />
           </div>

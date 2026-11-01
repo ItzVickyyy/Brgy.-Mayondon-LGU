@@ -45,9 +45,7 @@ test("Log in with valid email and password ", async ({ page }) => {
 
   await page.waitForURL("/")
 
-  await expect(
-    page.getByRole("heading", { name: "Dashboard" }),
-  ).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible()
 })
 
 test("Log in with invalid email", async ({ page }) => {
@@ -77,13 +75,14 @@ test("Successful log out", async ({ page }) => {
 
   await page.waitForURL("/")
 
-  await expect(
-    page.getByRole("heading", { name: "Dashboard" }),
-  ).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible()
 
   await page.getByRole("button", { name: "User menu" }).click()
   await page.getByRole("menuitem", { name: "Logout" }).click()
-  await page.getByRole("dialog").getByRole("button", { name: "Log out" }).click()
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Log out" })
+    .click()
   await page.waitForURL("/login")
 })
 
@@ -95,13 +94,14 @@ test("Logged-out user cannot access protected routes", async ({ page }) => {
 
   await page.waitForURL("/")
 
-  await expect(
-    page.getByRole("heading", { name: "Dashboard" }),
-  ).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible()
 
   await page.getByRole("button", { name: "User menu" }).click()
   await page.getByRole("menuitem", { name: "Logout" }).click()
-  await page.getByRole("dialog").getByRole("button", { name: "Log out" }).click()
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Log out" })
+    .click()
   await page.waitForURL("/login")
 
   await page.goto("/")
@@ -115,5 +115,7 @@ test("Redirects to /login and clears an invalid token", async ({ page }) => {
   await page.goto("/")
   await page.waitForURL("/login")
   await expect(page).toHaveURL("/login")
-  await expect.poll(() => page.evaluate(() => localStorage.getItem("access_token"))).toBeNull()
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem("access_token")))
+    .toBeNull()
 })
