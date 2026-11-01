@@ -55,7 +55,7 @@ test.describe("Edit user profile", () => {
     await dialog.getByLabel("First Name").fill(updatedName)
     await dialog.getByRole("button", { name: "Save Changes" }).click()
 
-    await expect(dialog.getByText("My Account updated successfully")).toBeVisible()
+    await expect(page.getByText("My Account updated successfully")).toBeVisible()
     await expect(dialog.getByText(updatedName, { exact: true })).toBeVisible()
   })
 
@@ -145,7 +145,7 @@ test.describe("Change password", () => {
     await dialog.getByTestId("confirm-password-input").fill(newPassword)
     await dialog.getByRole("button", { name: "Update Password" }).click()
 
-    await expect(dialog.getByText("Password updated successfully")).toBeVisible()
+    await expect(page.getByText("Password updated successfully")).toBeVisible()
     await dialog.getByRole("button", { name: "Close" }).click()
     await logOutUser(page)
     await logInUser(page, email, newPassword)
