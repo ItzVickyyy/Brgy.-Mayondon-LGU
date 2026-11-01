@@ -28,7 +28,9 @@ let registrations: Registration[] = [
 const listeners = new Set<() => void>()
 
 function notify() {
-  listeners.forEach((listener) => listener())
+  listeners.forEach((listener) => {
+    listener()
+  })
 }
 
 export function getRegistrations(): Registration[] {
