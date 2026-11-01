@@ -156,7 +156,7 @@ function Login() {
               to="/pending-approval"
               className="font-medium text-primary underline-offset-4 hover:underline"
             >
-              View sample status messages
+              Request Access
             </RouterLink>
           </p>
         </form>

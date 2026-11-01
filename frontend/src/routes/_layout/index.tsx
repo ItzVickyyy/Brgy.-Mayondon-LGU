@@ -119,7 +119,7 @@ function Dashboard() {
       <section aria-label="Summary statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <SummaryCard title="Documents Issued This Month" value="214" description="Total this month" icon={FileCheck2} />
         <SummaryCard title="Clearances Expiring in 30 Days" value="8" description="Due within 30 days" icon={Clock3} />
-        <SummaryCard title="Barangay IDs Expiring in 30 Days" value="12" description="Sample expiry reminders" icon={IdCard} />
+        <SummaryCard title="Barangay IDs Expiring in 30 Days" value="12" description="Due within 30 days" icon={IdCard} />
         <SummaryCard title={isAdmin ? "Pending Registrations" : "Pending Document Requests"} value={isAdmin ? "2" : "6"} description="Awaiting review" icon={Users} />
       </section>
 
