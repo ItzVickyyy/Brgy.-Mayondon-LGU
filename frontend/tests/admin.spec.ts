@@ -34,8 +34,8 @@ test.describe("Admin user management", () => {
 
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
-
+    // Assert the outcome of the operation rather than the transient toast.
+    // Toast descriptions can disappear before Playwright observes them.
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
     const userRow = page.getByRole("row").filter({ hasText: email })
@@ -60,8 +60,7 @@ test.describe("Admin user management", () => {
 
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
-
+    // Verify the persisted role in the table instead of relying on a transient toast.
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
     const userRow = page.getByRole("row").filter({ hasText: email })
@@ -83,7 +82,6 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Password").last().fill(password)
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
     const userRow = page.getByRole("row").filter({ hasText: email })
@@ -94,7 +92,7 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Full name").fill(updatedName)
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User updated successfully")).toBeVisible()
+    await expect(page.getByRole("dialog")).not.toBeVisible()
     await expect(userRow.getByText(updatedName)).toBeVisible()
   })
 
@@ -110,8 +108,6 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Password").last().fill(password)
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
-
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
     const userRow = page.getByRole("row").filter({ hasText: email })
@@ -120,10 +116,6 @@ test.describe("Admin user management", () => {
     await page.getByRole("menuitem", { name: "Delete User" }).click()
 
     await page.getByRole("button", { name: "Delete" }).click()
-
-    await expect(
-      page.getByText("The user was deleted successfully"),
-    ).toBeVisible()
 
     await expect(
       page.getByRole("row").filter({ hasText: email }),
