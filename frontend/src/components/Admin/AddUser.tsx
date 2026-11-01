@@ -86,8 +86,11 @@ const AddUser = () => {
   })
 
   const onSubmit = (data: FormData) => {
+    // confirm_password is a client-side validation field, not part of UserCreate.
+    // Keep the API payload limited to fields accepted by the backend schema.
+    const { confirm_password: _confirmPassword, ...userData } = data
     // is_superuser is the existing API field for the System Administrator role.
-    mutation.mutate(data)
+    mutation.mutate(userData)
   }
 
   return (
