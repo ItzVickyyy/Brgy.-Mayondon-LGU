@@ -10,7 +10,7 @@ export type Registration = {
 }
 
 // Fictional examples for layout review only. These decisions are not saved.
-const registrations: Registration[] = [
+let registrations: Registration[] = [
   {
     name: "Staff Applicant 1",
     username: "staff.applicant1",
@@ -52,8 +52,10 @@ export function updateRegistrationStatus(
   username: string,
   status: Exclude<RegistrationStatus, "Pending">,
 ): void {
-  const index = registrations.findIndex((row) => row.username === username)
-  if (index === -1 || registrations[index].status !== "Pending") return
-  registrations[index] = { ...registrations[index], status }
+  const current = registrations.find((row) => row.username === username)
+  if (!current || current.status !== "Pending") return
+  registrations = registrations.map((row) =>
+    row.username === username ? { ...row, status } : row,
+  )
   notify()
 }
