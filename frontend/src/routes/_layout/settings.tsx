@@ -31,7 +31,7 @@ function SettingsPage() {
           role="tab"
           aria-selected={activeTab === "profile"}
           onClick={() => setActiveTab("profile")}
-          className={`rounded-md px-3 py-2 text-sm font-medium ${activeTab === "profile" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+          className={`min-h-11 rounded-md px-3 py-2 text-base font-medium ${activeTab === "profile" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
         >
           Account Profile
         </button>
@@ -40,7 +40,7 @@ function SettingsPage() {
           role="tab"
           aria-selected={activeTab === "password"}
           onClick={() => setActiveTab("password")}
-          className={`rounded-md px-3 py-2 text-sm font-medium ${activeTab === "password" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
+          className={`min-h-11 rounded-md px-3 py-2 text-base font-medium ${activeTab === "password" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted"}`}
         >
           Change Password
         </button>
