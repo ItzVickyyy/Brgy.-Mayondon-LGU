@@ -294,7 +294,7 @@ export function MyAccountModal({
                   {profileFields.slice(0, 4).map((field) => (
                     <div key={field.key}>
                       <Label htmlFor={field.key} className="mb-1.5 block text-xs font-medium">{field.label}</Label>
-                      <Input id={field.key} type={field.type || "text"} value={form[field.key]} onChange={(event) => updateField(field.key, event.target.value)} placeholder={field.placeholder} maxLength={255} className="h-10 bg-background" />
+                      <Input id={field.key} type={field.type || "text"} value={form[field.key]} onChange={(event) => updateField(field.key, event.target.value)} placeholder={field.placeholder} maxLength={255} className="min-h-11 bg-background" />
                     </div>
                   ))}
                 </div>
@@ -303,7 +303,7 @@ export function MyAccountModal({
                     {profileFields.slice(4).map((field) => (
                       <div key={field.key}>
                         <Label htmlFor={field.key} className="mb-1.5 block text-xs font-medium">{field.label}</Label>
-                        <Input id={field.key} type={field.type || "text"} value={form[field.key]} onChange={(event) => updateField(field.key, event.target.value)} placeholder={field.placeholder} maxLength={255} className="h-10 bg-background" />
+                        <Input id={field.key} type={field.type || "text"} value={form[field.key]} onChange={(event) => updateField(field.key, event.target.value)} placeholder={field.placeholder} maxLength={255} className="min-h-11 bg-background" />
                       </div>
                     ))}
                   </div>
@@ -325,7 +325,7 @@ export function MyAccountModal({
                         onChange={(event) => updateField(field.key, event.target.value)}
                         placeholder={field.placeholder}
                         maxLength={255}
-                        className="h-10 bg-background"
+                        className="min-h-11 bg-background"
                       />
                     </div>
                   ))}
@@ -352,7 +352,7 @@ export function MyAccountModal({
                           onChange={(event) => setAddressParts((previous) => ({ ...previous, [field.key]: event.target.value }))}
                           placeholder={field.placeholder}
                           maxLength={field.key === "zip_code" ? 10 : 255}
-                          className="h-10 bg-background"
+                          className="min-h-11 bg-background"
                         />
                       </div>
                     ))}
