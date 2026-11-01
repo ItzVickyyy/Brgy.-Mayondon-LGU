@@ -141,7 +141,7 @@ function Dashboard() {
         </article>
 
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <div className="flex flex-col items-start gap-2"><SectionHeading title="Issuances by Document Type" description="Distribution for the selected reporting period" /><SampleDataBadge /></div>
+          <div className="flex flex-col items-start gap-2"><SectionHeading title="Issuances by Document Type" description="Distribution for the selected reporting period" /></div>
           <div className="mt-5 space-y-4">
             {visibleDocumentTypes.map((item) => (
               <div key={item.name}>
@@ -164,7 +164,7 @@ function Dashboard() {
 
       <section className="grid gap-4 xl:grid-cols-2">
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <div className="flex flex-col items-start gap-2"><SectionHeading title="Expiring IDs and Clearances" description="Records that may need attention soon" /><SampleDataBadge /></div>
+          <div className="flex flex-col items-start gap-2"><SectionHeading title="Expiring IDs and Clearances" description="Records that may need attention soon" /></div>
           <div className="mt-4 divide-y">
             {[
               { name: "Barangay ID · Resident Two", date: "Nov 20, 2026", status: "Expiring soon" },
@@ -201,7 +201,7 @@ function Dashboard() {
         <div className="flex items-start gap-3">
           <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><Activity className="size-5" aria-hidden="true" /></div>
           <div>
-            <div className="flex flex-col items-start gap-2"><SectionHeading title="Recent Activities" description={isAdmin ? "Recent system-wide activity" : "Your recent activity"} /><SampleDataBadge /></div>
+            <div className="flex flex-col items-start gap-2"><SectionHeading title="Recent Activities" description={isAdmin ? "Recent system-wide activity" : "Your recent activity"} /></div>
           </div>
         </div>
         <div className="mt-4 divide-y">
