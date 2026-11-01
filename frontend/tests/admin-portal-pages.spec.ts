@@ -132,3 +132,32 @@ test("Pending registration decisions update the displayed status", async ({
   await page.reload()
   await expect(page.getByText("Pending").first()).toBeVisible()
 })
+
+
+test("Application pages do not display sample or prototype notices", async ({
+  page,
+}) => {
+  const routes = [
+    "/",
+    "/records",
+    "/issuances",
+    "/barangay-ids",
+    "/officials",
+    "/activity-log",
+    "/admin",
+    "/pending-registrations",
+    "/reports",
+    "/backup-restore",
+    "/request-access",
+    "/pending-approval",
+    "/login",
+  ]
+
+  for (const route of routes) {
+    await page.goto(route)
+    await expect(
+      page.getByText(/sample|prototype/i),
+      `Unexpected sample or prototype notice on ${route}`,
+    ).toHaveCount(0)
+  }
+})
