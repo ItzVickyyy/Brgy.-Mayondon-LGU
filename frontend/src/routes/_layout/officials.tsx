@@ -3,6 +3,7 @@ import { Search, UserRound } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
+import { EmptyState } from "@/components/Common/FeedbackState"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { isSystemAdministrator } from "@/lib/access"
 import useAuth from "@/hooks/useAuth"
@@ -50,7 +51,7 @@ function OfficialsManagement() {
             <thead className="bg-muted/50 text-sm uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Official ID</th><th className="px-4 py-3 font-medium">Name</th><th className="px-4 py-3 font-medium">Position</th><th className="px-4 py-3 font-medium">Term / Period</th></tr></thead>
             <tbody className="divide-y">{filteredOfficials.map((official) => <tr key={official.id} className="hover:bg-muted/20"><td className="px-4 py-3 font-medium">{official.id}</td><td className="px-4 py-3">{official.name}</td><td className="px-4 py-3">{official.position}</td><td className="px-4 py-3">{official.term}</td></tr>)}</tbody>
           </table>
-          {filteredOfficials.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No officials match your search.</p>}
+          {filteredOfficials.length === 0 && <EmptyState title="No matching officials" description="Try a different name or position." />}
         </div>
       </section>
     </div>
