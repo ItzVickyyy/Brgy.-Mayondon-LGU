@@ -19,7 +19,7 @@ The current API user model exposes `is_superuser`. The prototype's role selector
 |---|---|---|
 | Dashboard | Operational cards and own recent activity | Same, plus system-wide activity |
 | Resident Records: search, view, add, edit | Allowed | Allowed |
-| Resident Records: import masterlist | To confirm with client; proposed restricted | Allowed |
+| Resident Records: import masterlist | No, proposed restriction; confirm with client | Allowed |
 | Resident Records: archive | No | Allowed |
 | Issuance Management: create, review, print, correct with reason | Allowed | Allowed |
 | Issuance Management: void/cancel | No | Allowed |
