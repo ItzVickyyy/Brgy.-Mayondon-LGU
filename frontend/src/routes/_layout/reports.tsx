@@ -1,14 +1,16 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { BarChart3, Download, FileText, TrendingUp, UsersRound } from "lucide-react"
 import { useState } from "react"
-import { UsersService } from "@/client"
+import { NoPermission } from "@/components/Common/NoPermission"
+import useAuth from "@/hooks/useAuth"
 import { pageTitle } from "@/config/site"
 
-export const Route = createFileRoute("/_layout/reports")({ component: Reports, beforeLoad: async () => { const { data: user } = await UsersService.readUserMe(); if (!user.is_superuser) throw redirect({ to: "/" }) }, head: () => ({ meta: [{ title: pageTitle("Management Reports") }] }) })
+export const Route = createFileRoute("/_layout/reports")({ component: Reports, head: () => ({ meta: [{ title: pageTitle("Management Reports") }] }) })
 
 const summary = [{ label: "Documents issued", value: "128", note: "Total records", icon: FileText }, { label: "Resident records", value: "1,284", note: "Total records", icon: UsersRound }, { label: "Monthly change", value: "+12%", note: "Compared with previous period", icon: TrendingUp }]
 
 function Reports() {
+  const { user } = useAuth()
   const [period, setPeriod] = useState("month")
   const [report, setReport] = useState("issuances")
   const [notice, setNotice] = useState("")
