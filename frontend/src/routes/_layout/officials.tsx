@@ -1,18 +1,13 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { Search, UserRound } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
-import { UsersService } from "@/client"
+import { NoPermission } from "@/components/Common/NoPermission"
+import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/officials")({
   component: OfficialsManagement,
-  beforeLoad: async () => {
-    const { data: user } = await UsersService.readUserMe()
-    if (!user.is_superuser) {
-      throw redirect({ to: "/" })
-    }
-  },
   head: () => ({ meta: [{ title: pageTitle("Officials") }] }),
 })
 
@@ -24,12 +19,15 @@ const sampleOfficials = [
 ]
 
 function OfficialsManagement() {
+  const { user } = useAuth()
   const [search, setSearch] = useState("")
   const filteredOfficials = useMemo(() => sampleOfficials.filter((official) =>
     [official.id, official.name, official.position, official.term].some((value) =>
       value.toLowerCase().includes(search.toLowerCase()),
     ),
   ), [search])
+
+  if (!user?.is_superuser) return <NoPermission />
 
   return (
     <div className="flex flex-col gap-6">
