@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useSidebar } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
+import { type Theme, useTheme } from "@/components/theme-provider"
 
 export function User({
   user,
@@ -38,6 +39,7 @@ export function User({
   compact?: boolean
 }) {
   const { logout } = useAuth()
+  const { setTheme, theme } = useTheme()
   const { isMobile, setOpenMobile } = useSidebar()
   const [accountOpen, setAccountOpen] = useState(false)
   const [userSettingsOpen, setUserSettingsOpen] = useState(false)
@@ -191,10 +193,24 @@ export function User({
             </DialogDescription>
           </DialogHeader>
           <div className="mt-4 rounded-lg border p-4">
-            <p className="text-sm font-medium">Appearance</p>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Choose Light, Dark, or System appearance from the application
-              theme control.
+            <label
+              htmlFor="user-settings-theme"
+              className="mb-2 block text-sm font-medium"
+            >
+              Appearance
+            </label>
+            <select
+              id="user-settings-theme"
+              value={theme}
+              onChange={(event) => setTheme(event.target.value as Theme)}
+              className="min-h-11 w-full rounded-md border bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="system">System</option>
+            </select>
+            <p className="mt-2 text-sm text-muted-foreground">
+              System follows your device's appearance preference.
             </p>
           </div>
         </DialogContent>
