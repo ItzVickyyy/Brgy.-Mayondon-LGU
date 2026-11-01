@@ -84,7 +84,7 @@ For the record, these contradictions were found and resolved in the merged files
 | Old Security-Measures, section 8 | Described **Vercel + Supabase** as the planned hosting | Replaced with a note that hosting changed to local Docker; old items removed; LAN verification is the open item |
 | Old Source of Truth | Heading said the brief is "signed by the client"; body said the professor signed | Both facts kept; flagged as D-02 |
 | Old System Specification | Still said the sitemap, ERD and client approval were "pending"/"not defined" and used the old template sitemap | Sitemap is in [03](03-Design-and-UI.md); ERD remains undone (see below) |
-| Old Vic's journal (Oct 25) | Said the brief was unsigned | Left as historical record; current state is in [01](01-Project-and-Schedule.md) |
+| Old Vic's journal (Oct 25) | Said the brief was unsigned | Journal since removed (Nov 1, 2026); current state is in [01](01-Project-and-Schedule.md) |
 | Old Admin Portal Draft | Described the original dashboard (population, households, voters) | Replaced by the Nov 1 version (documents issued and expiries) |
 | Old Site Map doc | Two sections numbered 10 and two numbered 11; "Sample Data" badges described as both present and removed | Renumbered and merged; badges removed per the Nov 1 team decision |
 | Old Source of Truth status | Status checklist ticked the public `/welcome` page as an achievement although the design says to remove public content | Reframed as a prototype item; D-27 |

@@ -226,4 +226,4 @@ When this file is pasted into a chat, the assistant should:
 - Update the relevant file in the same pull request that changes a decision.
 - When an open decision is settled, move it from [08-Open-Decisions.md](08-Open-Decisions.md) into the file it affects, and tick it off.
 - Long material (interview notes, mockups, test results, narrative reports) belongs in its own working file or the final report appendices.
-- Record work in the individual journals ([Developers-Journal/README.md](Developers-Journal/README.md)) and issues in [Bug-and-Issue-Log.md](Bug-and-Issue-Log.md).
+- The developer journals and the bug and issue log were removed from the repository on Nov 1, 2026 (team decision). Agree where defects found during testing are recorded; Instrument A retests need a defect reference.

@@ -12,7 +12,7 @@ Rules:
 - Use **fictional data only**. Never put real resident data, passwords or tokens in a test case, result or screenshot.
 - Leave **Actual result** and **Pass/Fail** blank until the test is really run. Do not pre-fill results.
 - Fix every failed test, retest, and record both results. Keep failed attempts as history.
-- Log defects in [../Bug-and-Issue-Log.md](../Bug-and-Issue-Log.md) and reference the ID in Remarks.
+- Record each defect wherever the team tracks them (the repository's bug log was removed Nov 1, 2026) and reference it in Remarks.
 - The starter cases come from the Guide as summarized in [../01-Project-and-Schedule.md](../01-Project-and-Schedule.md) section 7. The Guide itself is the authority; correct these files if they differ.
 
 Context: [../01-Project-and-Schedule.md](../01-Project-and-Schedule.md) section 7 · open items in [../08-Open-Decisions.md](../08-Open-Decisions.md) (D-07, D-41).

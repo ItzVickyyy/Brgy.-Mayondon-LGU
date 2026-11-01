@@ -181,8 +181,7 @@ Optional: VS Code. You do not need Node.js or a separate PostgreSQL install. Ver
 
 ## 10. Records: journals and issue log
 
-- **Developer journals** — every member keeps their own in [Developers-Journal](Developers-Journal/README.md). Record work **every time** you work on the project (tasks, investigations, bugs, fixes, reviews, decisions, tests, docs, AI use). Include date, time and timezone (`YYYY-MM-DD HH:MM Asia/Manila, UTC+08:00`; "Time not recorded" rather than guessing), what you personally did, evidence (paths, commits, test results — say when a test was *not* run), AI tools and how you reviewed their output, and blockers. No secrets or resident data. Don't claim another member's work.
-- **Bug and issue log** — [Bug-and-Issue-Log.md](Bug-and-Issue-Log.md) for defects, test failures, security findings and deployment issues.
+The developer journals (`docs/Developers-Journal/`) and the bug and issue log (`docs/Bug-and-Issue-Log.md`) were **removed from the repository on Nov 1, 2026** by team decision. They remain in git history before that commit. Decide where defects found during testing will be recorded; Instrument A retests need a defect reference. Never put secrets or real resident data in any record the team keeps.
 
 ## 11. Milestone alignment
 

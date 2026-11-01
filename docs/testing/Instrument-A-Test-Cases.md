@@ -46,6 +46,6 @@ These come from [../05-Roles-Security-and-Privacy.md](../05-Roles-Security-and-P
 
 ## C. Retest log
 
-| Test no. | Failed on | Defect ID (Bug log) | Fixed in commit | Retest date | Retest result |
+| Test no. | Failed on | Defect reference | Fixed in commit | Retest date | Retest result |
 |---|---|---|---|---|---|
 | | | | | | |
