@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router"
-import { Activity, FileCheck2, House, Users, Vote, TrendingUp, ChartPie, CalendarDays } from "lucide-react"
+import { Activity, FileCheck2, Users, CalendarDays, IdCard, Clock3 } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
+import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -48,19 +49,22 @@ const documentTypes = [
   { name: "Other Documents", count: 27 },
 ]
 
-const activities = [
-  { title: "Barangay Clearance issued", detail: "Resident record #0001", time: "Today, 10:42 AM" },
-  { title: "Resident record updated", detail: "Resident record #0002", time: "Today, 9:18 AM" },
-  { title: "Household record added", detail: "Household record #0003", time: "Yesterday, 3:26 PM" },
-  { title: "Certificate of Residency issued", detail: "Resident record #0004", time: "Yesterday, 1:05 PM" },
+const staffActivities = [
+  { title: "Barangay Clearance issued", detail: "Sample record #0001", time: "Today, 10:42 AM" },
+  { title: "Resident record updated", detail: "Sample record #0002", time: "Today, 9:18 AM" },
+  { title: "Barangay ID renewed", detail: "Sample record #0003", time: "Yesterday, 3:26 PM" },
+]
+const adminActivities = [
+  ...staffActivities,
+  { title: "Staff account status reviewed", detail: "Sample account #0004", time: "Yesterday, 1:05 PM" },
 ]
 
-function SummaryCard({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: typeof Users }) {
+function SampleDataBadge() {\n  return <span className="inline-flex w-fit rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Sample Data</span>\n}\n\nfunction SummaryCard({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: typeof Users }) {
   return (
     <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>\n          <div className="mt-1"><SampleDataBadge /></div>
           <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">{value}</p>
         </div>
         <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
@@ -82,7 +86,7 @@ function SectionHeading({ title, description }: { title: string; description?: s
 }
 
 function Dashboard() {
-  const [period, setPeriod] = useState<Period>("overall")
+  const { user } = useAuth()\n  const isAdmin = Boolean(user?.is_superuser)\n  const [period, setPeriod] = useState<Period>("overall")
   const visibleMonths = useMemo(() => {
     if (period === "today" || period === "week" || period === "month") return monthlyIssuances.slice(-1)
     if (period === "3months") return monthlyIssuances.slice(-3)
@@ -99,7 +103,7 @@ function Dashboard() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Dashboard</h1>
-          <p className="mt-2 text-sm text-muted-foreground">An overview of household, population, voter, and document records.</p>
+          <p className="mt-2 text-sm text-muted-foreground">An overview of document issuance, upcoming expiries, and work requiring attention.</p>
         </div>
         <label className="flex items-center gap-2 self-start text-sm sm:self-auto">
           <CalendarDays className="size-4 text-muted-foreground" aria-hidden="true" />
@@ -111,16 +115,16 @@ function Dashboard() {
       </div>
 
       <section aria-label="Summary statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard title="Total Population" value="12,480" description="Resident records" icon={Users} />
-        <SummaryCard title="Total Households" value="3,126" description="Household records" icon={House} />
-        <SummaryCard title="Registered Voters" value="7,842" description="Registered voter records" icon={Vote} />
-        <SummaryCard title="Documents Issued" value={documentsByPeriod[period].toLocaleString()} description={periodLabels[period]} icon={FileCheck2} />
+        <SummaryCard title="Documents Issued This Month" value="214" description="Illustrative monthly total" icon={FileCheck2} />
+        <SummaryCard title="Clearances Expiring in 30 Days" value="8" description="Sample expiry reminders" icon={Clock3} />
+        <SummaryCard title="Barangay IDs Expiring in 30 Days" value="12" description="Sample expiry reminders" icon={IdCard} />
+        <SummaryCard title={isAdmin ? "Pending Registrations" : "Pending Document Requests"} value={isAdmin ? "2" : "6"} description="Sample queue count" icon={Users} />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <SectionHeading title="Document Issuances Over Time" description="Monthly issuance volume" />
+            <div className="flex flex-col items-start gap-2"><SectionHeading title="Document Issuances Over Time" description="Monthly issuance volume" /><SampleDataBadge /></div>
           </div>
           <div className="mt-6 flex h-48 items-end gap-3 border-b px-1 sm:gap-5">
             {visibleMonths.map((item) => (
@@ -135,7 +139,7 @@ function Dashboard() {
         </article>
 
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <SectionHeading title="Issuances by Document Type" description="Distribution for the selected reporting period" />
+          <div className="flex flex-col items-start gap-2"><SectionHeading title="Issuances by Document Type" description="Distribution for the selected reporting period" /><SampleDataBadge /></div>
           <div className="mt-5 space-y-4">
             {visibleDocumentTypes.map((item) => (
               <div key={item.name}>
@@ -158,36 +162,7 @@ function Dashboard() {
 
       <section className="grid gap-4 xl:grid-cols-2">
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <SectionHeading title="Resident Demographics" description="Proposed population breakdowns for reporting" />
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            {[
-              { title: "By Sex", detail: "Resident distribution" },
-              { title: "By Age", detail: "Age-group distribution" },
-              { title: "By Sector", detail: "Approved sector categories" },
-            ].map((item) => (
-              <div key={item.title} className="rounded-lg border bg-muted/20 p-4">
-                <ChartPie className="mb-3 size-5 text-primary" aria-hidden="true" />
-                <p className="font-medium">{item.title}</p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">{item.detail}</p>
-                <p className="mt-3 text-xs font-medium text-amber-700 dark:text-amber-300">Needs data validation</p>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <SectionHeading title="Population Growth" description="Proposed comparison using historical resident totals" />
-          <div className="mt-5 flex min-h-36 flex-col items-center justify-center rounded-lg border border-dashed bg-muted/20 p-6 text-center">
-            <TrendingUp className="size-7 text-muted-foreground" aria-hidden="true" />
-            <p className="mt-3 font-medium">Historical population data needed</p>
-            <p className="mt-1 max-w-sm text-sm text-muted-foreground">This section can show growth only when reliable resident totals from previous periods are available.</p>
-          </div>
-        </article>
-      </section>
-
-      <section className="grid gap-4 xl:grid-cols-2">
-        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <SectionHeading title="Expiring IDs and Clearances" description="Records that may need attention soon" />
+          <div className="flex flex-col items-start gap-2"><SectionHeading title="Expiring IDs and Clearances" description="Records that may need attention soon" /><SampleDataBadge /></div>
           <div className="mt-4 divide-y">
             {[
               { name: "Barangay ID · Resident Two", date: "Nov 20, 2026", status: "Expiring soon" },
@@ -224,11 +199,11 @@ function Dashboard() {
         <div className="flex items-start gap-3">
           <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><Activity className="size-5" aria-hidden="true" /></div>
           <div>
-            <SectionHeading title="Recent Activities" description="Latest system activity" />
+            <div className="flex flex-col items-start gap-2"><SectionHeading title="Recent Activities" description={isAdmin ? "Recent system-wide activity" : "Your recent activity"} /><SampleDataBadge /></div>
           </div>
         </div>
         <div className="mt-4 divide-y">
-          {activities.map((activity) => (
+          {(isAdmin ? adminActivities : staffActivities).map((activity) => (
             <div key={activity.title + activity.time} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
               <div>
                 <p className="text-sm font-medium">{activity.title}</p>
