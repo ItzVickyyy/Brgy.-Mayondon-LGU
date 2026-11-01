@@ -8,6 +8,7 @@ import { columns, type UserTableData } from "@/components/Admin/columns"
 import { DataTable } from "@/components/Common/DataTable"
 import PendingUsers from "@/components/Pending/PendingUsers"
 import { NoPermission } from "@/components/Common/NoPermission"
+import { isSystemAdministrator } from "@/lib/access"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 
@@ -44,7 +45,7 @@ function UsersTable() {
 
 function Admin() {
   const { user } = useAuth()
-  if (!user?.is_superuser) return <NoPermission />
+  if (!isSystemAdministrator(user)) return <NoPermission />
 
   return (
     <div className="flex flex-col gap-6">
