@@ -1,4 +1,5 @@
 import { Link as RouterLink, useRouterState } from "@tanstack/react-router"
+import { Fragment } from "react"
 import type { LucideIcon } from "lucide-react"
 
 import {
@@ -43,7 +44,7 @@ export function Main({ items }: MainProps) {
             const showSection = Boolean(item.section && item.section !== items[index - 1]?.section)
 
             return (
-              <>
+              <Fragment key={item.title}>
                 {showSection ? <SidebarGroupLabel className="px-2 pt-4 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground group-data-[collapsible=icon]:hidden">{item.section}</SidebarGroupLabel> : null}
               <SidebarMenuItem key={item.title}>
                 <SidebarMenuButton
@@ -58,7 +59,7 @@ export function Main({ items }: MainProps) {
                   </RouterLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              </>
+              </Fragment>
             )
           })}
         </SidebarMenu>
