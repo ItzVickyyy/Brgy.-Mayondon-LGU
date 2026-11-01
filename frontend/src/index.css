@@ -152,3 +152,115 @@
     cursor: pointer;
   }
 }
+
+/*
+ * Admin portal UI consistency layer.
+ * Keep page-level layout rules scoped to the authenticated workspace so
+ * public/authentication screens retain their existing presentation.
+ */
+#main-content > div {
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+}
+
+#main-content > div > .flex.flex-col.gap-6 {
+  gap: 1.5rem !important;
+}
+
+/* Use the Dashboard's page-title hierarchy throughout the admin portal. */
+#main-content h1 {
+  margin-top: 0 !important;
+  font-size: 1.875rem !important;
+  line-height: 2.25rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.025em;
+}
+
+#main-content h1 + p {
+  margin-top: 0.5rem !important;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  color: var(--muted-foreground);
+}
+
+#main-content h2 {
+  font-size: 1rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* Standardize common admin cards without changing their contents or behavior. */
+#main-content .rounded-xl.border.bg-card {
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+}
+
+#main-content .rounded-xl.border.bg-card > :first-child {
+  min-width: 0;
+}
+
+#main-content .rounded-xl.border.bg-card h2 + p {
+  line-height: 1.5rem;
+}
+
+/* Keep controls comfortable to read and use across modules. */
+#main-content input:not([type="checkbox"]):not([type="radio"]),
+#main-content select,
+#main-content textarea {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+#main-content input:not([type="checkbox"]):not([type="radio"]),
+#main-content select {
+  min-height: 2.75rem;
+}
+
+#main-content button {
+  line-height: 1.25rem;
+}
+
+/* Give data tables a predictable reading rhythm across records and reports. */
+#main-content table {
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+}
+
+#main-content table thead th {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+#main-content table tbody td {
+  vertical-align: middle;
+}
+
+@media (min-width: 640px) {
+  #main-content > div > .flex.flex-col.gap-6 {
+    gap: 1.5rem !important;
+  }
+
+  #main-content .rounded-xl.border.bg-card {
+    padding: 1.25rem;
+  }
+}
+
+@media (max-width: 639px) {
+  #main-content h1 {
+    font-size: 1.5rem !important;
+    line-height: 2rem !important;
+  }
+
+  #main-content .rounded-xl.border.bg-card {
+    padding: 1rem;
+  }
+
+  #main-content table {
+    font-size: 0.8125rem;
+  }
+}
+
