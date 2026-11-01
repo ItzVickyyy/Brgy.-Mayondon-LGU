@@ -1,6 +1,6 @@
 # Admin Portal Draft
 
-Status: **Draft only. Not approved for production or client handover.**
+Status: Working frontend reference for internal review and client validation.
 
 Base branch: Foundation
 
@@ -33,7 +33,6 @@ The modules and fields are proposals. They must be validated with the barangay b
 **User menu**
 - My Account
 - User Settings
-- System Settings — System Administrator only
 
 ## Dashboard proposal
 
@@ -78,12 +77,12 @@ Current prototype behavior:
 - The form can be cleared.
 - A draft can be added to an in-memory history for the current page session.
 - The history can be searched and filtered by document type.
-- The print action opens a print dialog with a review-only layout, clearly marked as a draft and not an official document.
+- The print action behavior remains paused until the form-specific overlay positions are calibrated against the client's pre-printed forms.
 
-## Important limitations
+## Implementation status and safeguards
 
-- Dashboard figures, issuance history, names, and activity items are fictional sample data.
-- Dashboard charts are illustrative, not connected to live statistics.
+- Dashboard figures, issuance history, names, and activity items use fictional data for development and must never be replaced with real resident data before an approved data plan exists.
+- Dashboard charts are not connected to live statistics.
 - Records and Officials pages display sample rows only. They do not create, update, or delete database records.
 - Issuance drafts exist only in frontend memory for the current page session. Refreshing the page clears them.
 - Issuance forms are not connected to a database or backend API. They do not issue official documents or persist records.
@@ -91,13 +90,13 @@ Current prototype behavior:
 - The supplied workbook contains different purpose lists across sheets. The current four-form draft uses the BRGY CLEARANCE purpose list for Barangay Clearance. The separate CLEARANCE POSTAL purpose list is not currently mapped to one of the four forms, so it should be added only after confirming how that sheet relates to the proposed document types.
 - Explicit Excel dropdown validation was only confirmed in the converted workbook for CLEARANCE POSTAL and BRGY CLEARANCE. Other workbook option lists were not confirmed as active dropdowns.
 - Required fields and validation rules have not been confirmed. The prototype does not assume official eligibility rules.
-- The sample history is fictional and must not be mistaken for actual barangay records.
-- Barangay Information, Document Templates, and Audit Logs in System Settings are visual placeholders.
+- History rows are fictional and do not represent actual barangay records.
+- System Settings has been removed from the user interface. The purpose-list maintenance location still needs a team decision and client validation.
 - Account profile, password change, and account management continue to use the existing foundation functionality.
 - The account form now offers Staff and System Administrator. It maps System Administrator to the existing `is_superuser = true` API field and Staff to `is_superuser = false`. It does not add a separate backend role enum. Confirm this proposal with the client before deployment.
 - Pending Registrations, Request Access, and Pending Approval are prototype-only. Requests are not saved, and approve/reject actions do not create or update backend accounts. The existing `is_active` flag is not a pending/rejected status workflow.
 - The current footer shows branding only. Terms of Use and Privacy Policy links are not implemented. If legal text is added later, mark it “Draft, pending barangay review” until reviewed and approved by the barangay.
-- Do not enter real resident or barangay data into this draft.
+- Do not enter real resident or barangay data into this application until approved data handling, access controls, and backend enforcement are in place.
 
 ## Review before any merge
 
@@ -114,9 +113,9 @@ Current prototype behavior:
 
 ## Update notes — November 1, 2026
 
-This branch update adds Barangay IDs to the sidebar, moves Activity Log under Workspace, separates Pending Registrations into its own administrator-only page, adds role selection to account forms, and shows the role flag in the account table. Dashboard summary cards now focus on document issuance and upcoming expiries. The dashboard's fictional cards, charts, and sample lists are marked with Sample Data badges.
+This branch update adds Barangay IDs to the sidebar, moves Activity Log under Workspace, separates Pending Registrations into its own administrator-only page, adds role selection to account forms, and shows the role flag in the account table. Dashboard summary cards now focus on document issuance and upcoming expiries. Fictional cards, charts, and list rows remain in the UI for development, without visible sample-data badges or prototype banners.
 
-A global sample-data banner and shared badge across every page were intentionally not added because the instruction was to avoid labeling sample data everywhere. Dashboard cards, charts, and sample lists still show Sample Data badges as required.
+Visible sample-data badges and prototype banners have been removed. The data shown remains fictional and must not be used as actual barangay records.
 
 The Request Access and Pending Approval screens are visual prototypes only. They do not submit, save, approve, reject, or create accounts. The sidebar pending count and pending-registration examples are also fictional.
 
