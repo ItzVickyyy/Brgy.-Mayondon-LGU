@@ -42,6 +42,7 @@ const formSchema = z
     confirm_password: z
       .string()
       .min(1, { message: "Please confirm your password" }),
+    // Existing API role flag. A pending/rejected workflow needs a separate backend status field.
     is_superuser: z.boolean(),
     is_active: z.boolean(),
   })
