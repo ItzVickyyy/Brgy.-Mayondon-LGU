@@ -71,10 +71,6 @@ function PendingRegistrations() {
           Review and manage staff access requests.
         </p>
       </div>
-      <div className="rounded-lg border border-amber-500/40 bg-amber-500/5 p-3 text-sm">
-        Prototype only. The requests below are fictional examples, and
-        approve/reject actions are temporary local state.
-      </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <span className="inline-flex w-fit items-center gap-2 rounded-full border px-3 py-2 text-sm">
           <Clock3 className="size-4" aria-hidden="true" />
