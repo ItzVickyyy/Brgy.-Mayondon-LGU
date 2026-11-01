@@ -43,11 +43,11 @@ function OfficialsManagement() {
             <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><UserRound className="size-5" aria-hidden="true" /></div>
             <div><h2 className="font-semibold">Officials List</h2><p className="mt-1 text-sm text-muted-foreground">Search the list of barangay officials.</p></div>
           </div>
-          <label className="relative block w-full sm:max-w-xs"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search officials..." className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
+          <label className="relative block w-full sm:max-w-xs"><Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" /><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search officials..." className="min-h-11 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring" /></label>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[560px] text-left text-sm">
-            <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Official ID</th><th className="px-4 py-3 font-medium">Name</th><th className="px-4 py-3 font-medium">Position</th><th className="px-4 py-3 font-medium">Term / Period</th></tr></thead>
+          <table className="w-full min-w-[560px] text-left text-base">
+            <thead className="bg-muted/50 text-sm uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Official ID</th><th className="px-4 py-3 font-medium">Name</th><th className="px-4 py-3 font-medium">Position</th><th className="px-4 py-3 font-medium">Term / Period</th></tr></thead>
             <tbody className="divide-y">{filteredOfficials.map((official) => <tr key={official.id} className="hover:bg-muted/20"><td className="px-4 py-3 font-medium">{official.id}</td><td className="px-4 py-3">{official.name}</td><td className="px-4 py-3">{official.position}</td><td className="px-4 py-3">{official.term}</td></tr>)}</tbody>
           </table>
           {filteredOfficials.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No officials match your search.</p>}
