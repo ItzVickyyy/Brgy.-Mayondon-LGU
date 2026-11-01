@@ -263,4 +263,13 @@
     font-size: 0.8125rem;
   }
 }
+/* Keep the gaps between sibling content panels predictable on every page. */
+#main-content > div > .flex.flex-col.gap-6 > .grid,
+#main-content > div > .flex.flex-col.gap-6 > section.grid {
+  gap: 1rem !important;
+}
+
+#main-content .rounded-xl.border.bg-card .text-muted-foreground {
+  line-height: 1.5;
+}
 
