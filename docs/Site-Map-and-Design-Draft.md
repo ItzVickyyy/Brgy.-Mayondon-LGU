@@ -18,8 +18,8 @@ The system is staff-facing. Do not add public resident accounts, public document
 ```mermaid
 flowchart TD
     A["System Entry"] --> B["Staff Login"]
-    A --> C["Request Access (prototype only)"]
-    C --> D["Pending / Rejected Status Messages (prototype only)"]
+    A --> C["Request Access"]
+    C --> D["Pending / Rejected Status Messages"]
     B --> E["Dashboard"]
 
     E --> F["Resident Records"]
@@ -44,10 +44,8 @@ flowchart TD
     H3 --> H4["Generate and Print ID"]
 
     E --> I["My Account"]
-    I --> I1["Settings Modal"]
-    I1 --> I2["My Account"]
-    I1 --> I3["User Settings"]
-    I1 --> I4["System Settings (Admin)"]
+    I --> I1["My Account"]
+    I --> I2["User Settings"]
 
     E --> J["Admin-only Administration"]
     J --> J1["Officials List"]
@@ -60,7 +58,6 @@ flowchart TD
     E --> J8["Activity Log (role-filtered)"]
     J --> J9["Management Reports"]
     J --> J10["Backup and Restore"]
-    J --> J11["System Settings"]
 ```
 
 The diagram shows the proposed information architecture, not a statement that every page is already implemented. Some entries may be tabs or subviews rather than separate URLs.
@@ -101,7 +98,7 @@ Staff sees only their own activity in Activity Log. System Administrators can re
 - Summary cards for document issuances and upcoming expiry reminders, using real database values when connected.
 - Quick links to Resident Records, Document Requests, Issuance History, and Barangay IDs.
 - Recent activity is limited to the current user's actions for Staff. Admin may see a system-wide activity summary if approved.
-- Any prototype values must be visibly identified as sample data. Never present invented figures as barangay statistics.
+- Do not show sample-data badges or prototype banners. Keep all demonstration values fictional, and never present invented figures as barangay statistics.
 
 ### Resident Records
 - Page heading, search, and clear primary actions.
@@ -147,7 +144,7 @@ Staff sees only their own activity in Activity Log. System Administrators can re
 
 ### Reports, settings, and backup
 - Management reports should focus on useful office summaries such as issuances by date/type/purpose, expiring records, imports, corrections, and account activity. Confirm report needs with the client.
-- System settings should contain only settings that are agreed and supported.
+- Keep user preferences in User Settings. System-level purpose-list maintenance needs a separate team decision and client validation.
 - Backup and restore are Admin-only. Include clear confirmation before destructive restore actions and record the outcome. The backup destination, schedule, responsibility, and restore procedure still require practical verification.
 
 ## 5. Visual direction
@@ -162,10 +159,10 @@ Staff sees only their own activity in Activity Log. System Administrators can re
 
 ## 6. Current branch prototype notes
 
-The current `draft/admin-portal` branch already contains draft pages for Dashboard, Records Management, Issuances Management, Officials, User Management, and System Settings. Several pages use hard-coded sample data and are not connected to a complete backend workflow. Treat these pages as visual prototypes, not operational features.
+The current `draft/admin-portal` branch contains frontend pages for Dashboard, Records Management, Issuances Management, Officials, and User Management. Several pages use hard-coded fictional data and are not connected to a complete backend workflow.
 
 The existing prototype should be aligned with the current scope:
-- Replace population, household, voter, and issuance figures with clearly marked sample values until real aggregate data is connected.
+- Replace population, household, voter, and issuance figures with verified aggregate values only after a backend data source is connected. Do not display sample-data badges or prototype banners.
 - Avoid making unsupported population/voter management a primary module unless the client confirms it is needed.
 - Separate request entry from issuance history.
 - Remove the public-announcement direction from the welcome screen unless the client requests a public-facing site.
@@ -345,7 +342,7 @@ The following routes are now represented in `draft/admin-portal` and use clearly
 
 These are design prototypes. The added controls do not write to the database, generate reports, change real account states, or run backup/restore operations. The Backup and Restore page must be connected to the approved local scripts and tested before being treated as operational. A real restore can replace current data, so production restore must use explicit authorization, a verified archive, a clear confirmation step, and a tested recovery procedure.
 
-The sidebar now includes one Activity Log page for both roles, plus Pending Registrations, Management Reports, and Backup and Restore for Admin. My Account, User Settings, and System Settings are accessed through the user-menu Settings modal. The earlier dashboard layout remains unchanged.
+The sidebar includes one Activity Log page for both roles, plus Pending Registrations, Management Reports, and Backup and Restore for Admin. My Account and User Settings are accessed from the user menu. System Settings has been removed from the interface.
 
 
 
@@ -353,10 +350,7 @@ The sidebar now includes one Activity Log page for both roles, plus Pending Regi
 
 The sidebar no longer lists My Account, User Settings, or System Settings as main navigation pages. These options are grouped in a Settings modal opened from the user menu. The user menu contains Settings and Logout.
 
-The Settings modal has three sections:
-- My Account: account information and change password.
-- User Settings: appearance preference with Light, Dark, and System options.
-- System Settings: proposed barangay information and document-template configuration, visible to Admin accounts.
+My Account contains account information and Change Password. User Settings contains the Light, Dark, and System appearance options. System Settings has been removed from the interface.
 
 The Activity Log is a single navigation page. Staff see sample entries for their own activity, while Admin sees the sample entries across accounts. Both views remain prototype-only until an actual audit log is implemented. The former separate My Activity route is removed from the navigation and route files.
 
@@ -442,3 +436,13 @@ A global sample-data banner and shared badge on every page were intentionally no
 - This site map and `docs/drafts/Admin-Portal-Draft.md` record the new navigation, role proposal, prototype-only limitations, and review steps.
 - Security notes reinforce backend authorization, audit-log protection, data minimization, and the Data Privacy Act of 2012.
 - No client approval is claimed by these draft documents. Validate the proposed access split and design with the client and instructors before treating them as final.
+
+
+## 15. Changes made November 1, 2026 (round 2)
+
+- Removed user-visible sample-data badges and prototype banners while retaining fictional development data.
+- Removed System Settings from the user menu and navigation documentation.
+- Clarified that My Account owns account information and Change Password, while User Settings owns appearance preferences.
+- Kept role restrictions, confirmation requirements, and backend authorization as requirements for implementation and testing.
+- Added a follow-up decision: where should the System Administrator maintain the document purpose list after System Settings was removed? One option is a small admin-only Purposes section inside Issuance Management.
+- UI screens and fictional rows do not prove that backend persistence, authorization, audit logging, printing, or backup/restore operations are operational.
