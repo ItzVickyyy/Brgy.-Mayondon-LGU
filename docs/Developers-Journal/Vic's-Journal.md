@@ -6,7 +6,7 @@
 **Local working directory:** C:\Users\vocjo\Projects\Brgy.-Mayondon-LGU  
 **Timezone for entries:** Asia/Manila (UTC+08:00)
 
-Use [Journal-Template.md](Journal-Template.md) for future entries. Historical entries below use only known dates and work details. Times are marked “Time not recorded” when the exact time is unavailable.
+Use [the entry template](README.md#entry-template) for future entries. Historical entries below use only known dates and work details. Times are marked “Time not recorded” when the exact time is unavailable.
 
 ---
 
