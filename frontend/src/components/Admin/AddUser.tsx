@@ -66,7 +66,7 @@ const AddUser = () => {
       full_name: "",
       password: "",
       confirm_password: "",
-      is_superuser: true,
+      is_superuser: false,
       is_active: false,
     },
   })
@@ -85,7 +85,8 @@ const AddUser = () => {
   })
 
   const onSubmit = (data: FormData) => {
-    mutation.mutate({ ...data, is_superuser: true })
+    // is_superuser is the existing API field for the System Administrator role.
+    mutation.mutate(data)
   }
 
   return (
@@ -178,6 +179,27 @@ const AddUser = () => {
                         {...field}
                         required
                       />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="is_superuser"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <FormControl>
+                      <select
+                        className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        value={field.value ? "admin" : "staff"}
+                        onChange={(event) => field.onChange(event.target.value === "admin")}
+                      >
+                        <option value="staff">Staff</option>
+                        <option value="admin">System Administrator</option>
+                      </select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
