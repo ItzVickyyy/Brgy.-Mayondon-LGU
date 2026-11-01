@@ -1,16 +1,13 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
 import { Check, Clock3, Search, UserRoundCheck, X } from "lucide-react"
 import { useMemo, useState } from "react"
 
-import { UsersService } from "@/client"
 import { pageTitle } from "@/config/site"
+import { NoPermission } from "@/components/Common/NoPermission"
+import useAuth from "@/hooks/useAuth"
 
 export const Route = createFileRoute("/_layout/pending-registrations")({
   component: PendingRegistrations,
-  beforeLoad: async () => {
-    const { data: user } = await UsersService.readUserMe()
-    if (!user.is_superuser) throw redirect({ to: "/" })
-  },
   head: () => ({ meta: [{ title: pageTitle("Pending Registrations") }] }),
 })
 
@@ -28,6 +25,7 @@ const initialRegistrations: Registration[] = [
 ]
 
 function PendingRegistrations() {
+  const { user } = useAuth()
   const [registrations, setRegistrations] = useState(initialRegistrations)
   const [search, setSearch] = useState("")
   const visibleRegistrations = useMemo(() => {
@@ -46,6 +44,8 @@ function PendingRegistrations() {
       current.map((row) => row.username === username ? { ...row, status } : row),
     )
   }
+
+  if (!user?.is_superuser) return <NoPermission />
 
   return (
     <div className="flex flex-col gap-6">
