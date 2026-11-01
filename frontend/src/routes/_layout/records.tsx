@@ -7,6 +7,7 @@ import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { sampleResidents, type ResidentRecord } from "@/components/Records/records-sample-data"
 import { ResidentProfileDialog } from "@/components/Records/ResidentProfileDialog"
+import { EmptyState } from "@/components/Common/FeedbackState"
 
 export const Route = createFileRoute("/_layout/records")({
   component: RecordsManagement,
@@ -114,7 +115,7 @@ function RecordsManagement() {
                   ))}
                 </tbody>
               </table>
-              {filteredResidents.length === 0 && <p className="p-8 text-center text-sm text-muted-foreground">No records match your search.</p>}
+              {filteredResidents.length === 0 && <EmptyState title="No matching residents" description="Try a different name, address, ID, or status." />}
             </div>
           </section>
         </>
