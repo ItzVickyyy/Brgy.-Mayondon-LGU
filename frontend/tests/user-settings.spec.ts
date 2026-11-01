@@ -85,7 +85,7 @@ test.describe("Edit user email", () => {
     await dialog.getByLabel("Email").fill(updatedEmail)
     await dialog.getByRole("button", { name: "Save Changes" }).click()
 
-    await expect(dialog.getByText("My Account updated successfully")).toBeVisible()
+    await expect(page.getByText("My Account updated successfully")).toBeVisible()
     await expect(dialog.getByText(updatedEmail, { exact: true })).toBeVisible()
   })
 })
