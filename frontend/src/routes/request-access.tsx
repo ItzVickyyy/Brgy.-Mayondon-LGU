@@ -35,9 +35,12 @@ function RequestAccess() {
           </div>
         ) : (
           <form className="grid gap-4" onSubmit={handleSubmit}>
-            <label className="grid gap-2 text-sm font-medium">Full name<Input name="full_name" autoComplete="name" required /></label>
-            <label className="grid gap-2 text-sm font-medium">Barangay office email<Input name="email" type="email" autoComplete="email" required /></label>
-            <label className="grid gap-2 text-sm font-medium">Position or office assignment<Input name="position" required /></label>
+            <label htmlFor="request-full-name" className="grid gap-2 text-sm font-medium">Full name</label>
+            <Input id="request-full-name" name="full_name" autoComplete="name" required />
+            <label htmlFor="request-email" className="grid gap-2 text-sm font-medium">Barangay office email</label>
+            <Input id="request-email" name="email" type="email" autoComplete="email" required />
+            <label htmlFor="request-position" className="grid gap-2 text-sm font-medium">Position or office assignment</label>
+            <Input id="request-position" name="position" required />
             <Button type="submit" className="min-h-11">Preview Request</Button>
           </form>
         )}
