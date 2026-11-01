@@ -12,7 +12,6 @@ Everything the team needs to know about the project lives in this folder, groupe
 | [06-Architecture-and-Deployment.md](06-Architecture-and-Deployment.md) | Tech stack, architecture, offline LAN deployment, backup/restore, packaging, daily startup | Planning or testing the client installation |
 | [07-Developer-Guide.md](07-Developer-Guide.md) | Roles, branching, reviews, testing, migrations, local startup | Before development or a pull request |
 | [08-Open-Decisions.md](08-Open-Decisions.md) | **Every undecided, vague or contradictory item**, with owner and deadline | After client or instructor discussions |
-| [testing/](testing/README.md) | Working files for Instrument A (test cases) and Instrument B (user survey) | Week 16 testing; when adding test cases |
 
 **Precedence if documents conflict:** the instructor's *Final Project Guide* → the signed Creative Brief (client scope) → these documents.
 
