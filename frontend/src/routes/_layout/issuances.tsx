@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_layout/issuances")({
 
 const inputClassName =
   "h-11 w-full rounded-md border border-input bg-background px-3 text-base font-normal shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
-const labelClassName = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
+const labelClassName = "flex min-w-0 flex-col gap-1.5 text-base font-medium"
 
 const statusStyles: Record<IssuanceRecord["status"], string> = {
   Issued:
@@ -574,7 +574,7 @@ function IssuancesManagement() {
 
         {/* Desktop table */}
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full text-left text-sm">
+          <table className="w-full text-left text-base">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
                 <th scope="col" className="px-5 py-3 font-medium">
