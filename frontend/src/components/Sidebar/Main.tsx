@@ -52,7 +52,7 @@ export function Main({ items }: MainProps) {
                 >
                   <RouterLink to={item.path} onClick={handleMenuClick}>
                     <item.icon />
-                    <span>{item.title}</span>
+                    <span>{item.title}</span>\n                    {item.badge !== undefined ? <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-muted px-1.5 py-0.5 text-xs font-semibold text-muted-foreground group-data-[collapsible=icon]:hidden">{item.badge}</span> : null}
                   </RouterLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
