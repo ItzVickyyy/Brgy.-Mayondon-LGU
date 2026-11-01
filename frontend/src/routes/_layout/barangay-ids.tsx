@@ -108,7 +108,7 @@ function BarangayIdManagement() {
         <button
           type="button"
           onClick={() => showActionNotice("Create Barangay ID")}
-          className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
         >
           <CreditCard className="size-4" aria-hidden="true" />
           Create Barangay ID
@@ -147,7 +147,7 @@ function BarangayIdManagement() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder="Search ID records..."
-                className="h-10 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="min-h-11 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </label>
             <label className="flex items-center gap-2 text-sm">
@@ -155,7 +155,7 @@ function BarangayIdManagement() {
               <select
                 value={statusFilter}
                 onChange={(event) => setStatusFilter(event.target.value as "All" | IdStatus)}
-                className="h-10 min-w-0 flex-1 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="min-h-11 min-w-0 flex-1 rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 <option>All</option>
                 <option>Valid</option>
@@ -168,8 +168,8 @@ function BarangayIdManagement() {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[980px] border-collapse text-left text-sm">
-            <thead className="bg-muted/40 text-xs uppercase tracking-wide text-muted-foreground">
+          <table className="w-full min-w-[980px] border-collapse text-left text-base">
+            <thead className="bg-muted/40 text-sm uppercase tracking-wide text-muted-foreground">
               <tr>
                 <th className="px-4 py-3 font-medium">Resident / Reference</th>
                 <th className="px-4 py-3 font-medium">ID Number</th>
