@@ -42,7 +42,11 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
   {
     id: "role",
     header: "Role",
-    cell: () => <Badge>Admin</Badge>,
+    cell: ({ row }) => (
+      <Badge variant={row.original.is_superuser ? "default" : "secondary"}>
+        {row.original.is_superuser ? "System Administrator" : "Staff"}
+      </Badge>
+    ),
   },
   {
     accessorKey: "is_active",
