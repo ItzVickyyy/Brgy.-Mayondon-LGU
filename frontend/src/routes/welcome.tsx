@@ -44,6 +44,12 @@ function WelcomePage() {
           >
             Continue to Staff Login
           </RouterLink>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Barangay personnel who need access can{" "}
+            <RouterLink to="/request-access" className="font-medium text-primary underline-offset-4 hover:underline">
+              preview the access request
+            </RouterLink>.
+          </p>
         </section>
         <section className="grid gap-4 sm:grid-cols-3">
           {[
