@@ -304,7 +304,7 @@ export const documentFields: Record<string, DocumentField[]> = {
   ],
 }
 
-const sampleIssuances: IssuanceRecord[] = [
+export const sampleIssuances: IssuanceRecord[] = [
   {
     id: "ISS-001",
     resident: "Resident One",
