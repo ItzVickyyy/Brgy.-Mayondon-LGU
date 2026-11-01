@@ -131,6 +131,7 @@ test.describe("Change password", () => {
     await createUser({ email, password })
     await logInUser(page, email, password)
     await openMyAccount(page)
+    await page.getByRole("button", { name: "Edit" }).click()
     await page.getByTestId("current-password-input").fill(password)
     await page.getByTestId("new-password-input").fill(newPassword)
     await page.getByTestId("confirm-password-input").fill(newPassword)
@@ -157,7 +158,8 @@ test.describe("Change password validation", () => {
   test.beforeEach(async ({ page }) => {
     await logInUser(page, email, password)
     await openMyAccount(page)
-    })
+    await page.getByRole("button", { name: "Edit" }).click()
+  })
 
   test("Update password with weak passwords", async ({ page }) => {
     const weakPassword = "weak"
