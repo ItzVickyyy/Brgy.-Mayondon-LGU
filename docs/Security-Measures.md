@@ -207,3 +207,15 @@ The team has agreed to keep the current `Foundation` branch, preserve its passin
 - [ ] Confirm hosting terms, network requirements, and operational/data-handling procedures with the client and instructors before real resident data is used.
 
 **Current decision:** Suitable for continued development and controlled testing only. No further Foundation security code changes are planned at this time. Production verification remains open; passing CI does not prove that the deployed environment is secure. Do not treat production security as verified or enter real resident data until the deployment checks are completed and the required client/instructor approvals are obtained.
+
+
+## Role and access (planned)
+
+**Status: PLANNED, NOT IMPLEMENTED.** These are design requirements, not claims about current application behavior.
+
+- The backend must enforce role and account-status checks on every protected endpoint. Hiding a navigation item or button in the frontend is not authorization.
+- Planned account fields are `role` (`admin` or `staff`) and `status` (`pending`, `active`, `rejected`, or `inactive`). Confirm the final model before implementation.
+- Maintain append-only audit history for sensitive actions, including who acted, when, and the affected record. Do not allow ordinary users to rewrite audit entries.
+- Never include passwords, access tokens, reset links, or unnecessary resident personal data in logs.
+- Confirm lawful purpose, data minimization, access, retention, correction, disclosure, and incident procedures with the client in consideration of the Data Privacy Act of 2012.
+- Verify these controls with backend authorization tests before real resident data is entered. None of the items above should be considered implemented merely because a frontend control is hidden.
