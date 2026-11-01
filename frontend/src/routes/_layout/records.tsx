@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_layout/records")({
 
 type View = "residents" | "family-sector" | "import"
 
-const inputClass = "h-10 w-full rounded-md border bg-background px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+const inputClass = "min-h-11 w-full rounded-md border bg-background px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 function RecordsManagement() {
   const [view, setView] = useState<View>("residents")
@@ -48,7 +48,7 @@ function RecordsManagement() {
             Search and maintain resident information, related family and sector details, and existing Barangay ID references.
           </p>
         </div>
-        <button type="button" onClick={() => setNotice("Resident record form opened.")} className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+        <button type="button" onClick={() => setNotice("Resident record form opened.")} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90">
           <UserRound className="size-4" aria-hidden="true" /> Add Resident
         </button>
       </div>
@@ -95,8 +95,8 @@ function RecordsManagement() {
               </label>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[850px] text-left text-sm">
-                <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+              <table className="w-full min-w-[850px] text-left text-base">
+                <thead className="bg-muted/50 text-sm uppercase tracking-wide text-muted-foreground">
                   <tr>{["Resident Reference", "Resident Name", "Address", "Resident Type", "ID Reference", "Registration", "Record Status", "Action"].map((label) => <th key={label} className="px-4 py-3 font-medium">{label}</th>)}</tr>
                 </thead>
                 <tbody className="divide-y">
@@ -179,7 +179,7 @@ function RecordsManagement() {
           </div> : null}
           {importStep === 2 ? <div className="mt-4 overflow-x-auto rounded-xl border">
             <div className="border-b p-4"><h3 className="font-semibold">Preview before import</h3><p className="mt-1 text-sm text-muted-foreground">Review the mapped fields and validation summary before confirming.</p></div>
-            <table className="w-full min-w-[560px] text-left text-sm"><thead className="bg-muted/40"><tr>{["Field", "Source column", "Validation"].map((label) => <th key={label} className="px-4 py-3 font-medium">{label}</th>)}</tr></thead><tbody>{[["Full name", "Name", "Required"], ["Complete address", "Address", "Review format"], ["Resident type", "Resident Type", "Check allowed values"], ["Barangay ID number", "ID Number", "Check duplicates"]].map((row) => <tr key={row[0]} className="border-t"><td className="px-4 py-3 font-medium">{row[0]}</td><td className="px-4 py-3">{row[1]}</td><td className="px-4 py-3 text-muted-foreground">{row[2]}</td></tr>)}</tbody></table>
+            <table className="w-full min-w-[560px] text-left text-base"><thead className="bg-muted/40"><tr>{["Field", "Source column", "Validation"].map((label) => <th key={label} className="px-4 py-3 font-medium">{label}</th>)}</tr></thead><tbody>{[["Full name", "Name", "Required"], ["Complete address", "Address", "Review format"], ["Resident type", "Resident Type", "Check allowed values"], ["Barangay ID number", "ID Number", "Check duplicates"]].map((row) => <tr key={row[0]} className="border-t"><td className="px-4 py-3 font-medium">{row[0]}</td><td className="px-4 py-3">{row[1]}</td><td className="px-4 py-3 text-muted-foreground">{row[2]}</td></tr>)}</tbody></table>
           </div> : null}
           {importStep === 3 ? <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{[["Imported", "Pending"], ["Updated", "Pending"], ["Skipped", "Pending"], ["Failed", "Pending"]].map(([label, value]) => <div key={label} className="rounded-xl border p-4"><p className="text-sm text-muted-foreground">{label}</p><p className="mt-2 text-xl font-semibold">{value}</p></div>)}</div> : null}
           <div className="mt-5 flex flex-wrap justify-between gap-3 border-t pt-4">
