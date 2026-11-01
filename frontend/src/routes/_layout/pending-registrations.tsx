@@ -3,6 +3,7 @@ import { Check, Clock3, Search, UserRoundCheck, X } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { pageTitle } from "@/config/site"
+import { EmptyState } from "@/components/Common/FeedbackState"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { isSystemAdministrator } from "@/lib/access"
 import useAuth from "@/hooks/useAuth"
@@ -89,7 +90,7 @@ function PendingRegistrations() {
             ))}
           </tbody>
         </table>
-        {visibleRegistrations.length === 0 ? <p className="p-8 text-center text-base text-muted-foreground">No registrations found.</p> : null}
+        {visibleRegistrations.length === 0 ? <EmptyState title="No registrations found" description="Try a different applicant name, username, date, or status." /> : null}
       </div>
     </div>
   )
