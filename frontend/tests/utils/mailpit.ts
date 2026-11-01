@@ -4,7 +4,7 @@ type EmailSummary = {
   ID: string
 }
 
-const mailpitHost = (process.env.MAILPIT_HOST || "http://127.0.0.1:8025").replace(/\\/$/, "")
+const mailpitHost = (process.env.MAILPIT_HOST || "http://127.0.0.1:8025").replace(/\/$/, "")
 
 export async function waitForEmailHtml({
   request,
