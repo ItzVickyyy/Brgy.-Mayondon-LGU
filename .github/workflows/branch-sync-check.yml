@@ -40,7 +40,7 @@ jobs:
           ADMIN=origin/draft/admin-portal
           failed=0
 
-          # Files changed on Foundation since the two branches last shared history.
+          # Files changed on master since the two branches last shared history.
           check_master() {
             bad=$(git diff --name-only "$ADMIN...$MASTER" \
               | grep -vE '^(docs/|README\.md$|\.github/workflows/branch-sync-check\.yml$)' || true)
@@ -77,13 +77,13 @@ jobs:
           git checkout --quiet --detach origin/draft/admin-portal
 
           if git merge-base --is-ancestor origin/master HEAD; then
-            echo "draft/admin-portal already contains all of Foundation, so merging the two is a fast-forward."
+            echo "draft/admin-portal already contains all of master, so merging the two is a fast-forward."
             exit 0
           fi
 
           if git merge --no-commit --no-ff origin/master; then
             git merge --abort || true
-            echo "::warning::draft/admin-portal is behind Foundation but merges cleanly. Run 'git merge origin/master' on draft/admin-portal to catch up."
+            echo "::warning::draft/admin-portal is behind master but merges cleanly. Run 'git merge origin/master' on draft/admin-portal to catch up."
           else
             echo "::error::Merging master into draft/admin-portal has conflicts in:"
             git diff --name-only --diff-filter=U
