@@ -57,7 +57,7 @@ flowchart TD
     J3 --> J5["Edit / Deactivate Staff"]
     J --> J6["Pending Registrations"]
     J6 --> J7["Approve / Reject Registration"]
-    J --> J8["All Users' Activity"]
+    E --> J8["Activity Log (role-filtered)"]
     J --> J9["Management Reports"]
     J --> J10["Backup and Restore"]
     J --> J11["System Settings"]
@@ -68,24 +68,31 @@ The diagram shows the proposed information architecture, not a statement that ev
 ## 3. Main navigation draft
 
 ### Common navigation
+
+**Workspace**
 1. Dashboard
-2. Resident Records
-3. Document Management
-   - Document Requests
-   - Issuance History
-4. Barangay ID Management
-5. My Account
-6. My Activity
+2. Activity Log
+
+**Records and Documents**
+1. Resident Records
+2. Issuance Management
+3. Barangay IDs
+
+**User menu**
+1. My Account
+2. User Settings
+3. System Settings — System Administrator only
 
 ### Admin-only navigation
+
 1. Officials
 2. User Accounts
 3. Pending Registrations
-4. Activity Log (all users)
-5. Management Reports
-6. Backup and Restore
+4. Management Reports
+5. Backup and Restore
 
-The Staff account should not see admin-only navigation. The backend must still enforce authorization for every protected action. Hiding a menu item is not a security control.
+Staff sees only their own activity in Activity Log. System Administrators can review all users' activity with filters. The frontend must not be treated as the authorization boundary. The backend must enforce every protected API operation.
+
 
 ## 4. Page and layout draft
 
