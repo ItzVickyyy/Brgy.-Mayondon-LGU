@@ -94,7 +94,8 @@ Current prototype behavior:
 - The sample history is fictional and must not be mistaken for actual barangay records.
 - Barangay Information, Document Templates, and Audit Logs in System Settings are visual placeholders.
 - Account profile, password change, and account management continue to use the existing foundation functionality.
-- The account form now offers Staff and System Administrator. It maps System Administrator to the existing `is_superuser = true` API field and Staff to `is_superuser = false`. It does not add a separate backend role enum. Confirm this proposal with the client before deployment.\n- Pending Registrations, Request Access, and Pending Approval are prototype-only. Requests are not saved, and approve/reject actions do not create or update backend accounts. The existing `is_active` flag is not a pending/rejected status workflow.
+- The account form now offers Staff and System Administrator. It maps System Administrator to the existing `is_superuser = true` API field and Staff to `is_superuser = false`. It does not add a separate backend role enum. Confirm this proposal with the client before deployment.
+- Pending Registrations, Request Access, and Pending Approval are prototype-only. Requests are not saved, and approve/reject actions do not create or update backend accounts. The existing `is_active` flag is not a pending/rejected status workflow.
 - The current footer shows branding only. Terms of Use and Privacy Policy links are not implemented. If legal text is added later, mark it “Draft, pending barangay review” until reviewed and approved by the barangay.
 - Do not enter real resident or barangay data into this draft.
 
@@ -114,6 +115,8 @@ Current prototype behavior:
 ## Update notes — November 1, 2026
 
 This branch update adds Barangay IDs to the sidebar, moves Activity Log under Workspace, separates Pending Registrations into its own administrator-only page, adds role selection to account forms, and shows the role flag in the account table. Dashboard summary cards now focus on document issuance and upcoming expiries. The dashboard's fictional cards, charts, and sample lists are marked with Sample Data badges.
+
+A global sample-data banner and shared badge across every page were intentionally not added because the instruction was to avoid labeling sample data everywhere. Dashboard cards, charts, and sample lists still show Sample Data badges as required.
 
 The Request Access and Pending Approval screens are visual prototypes only. They do not submit, save, approve, reject, or create accounts. The sidebar pending count and pending-registration examples are also fictional.
 
