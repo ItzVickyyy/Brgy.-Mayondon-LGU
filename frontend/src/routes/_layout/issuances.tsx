@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/dialog"
 import { pageTitle } from "@/config/site"
 import { cn } from "@/lib/utils"
-import { documentFields, documentTypes, type DocumentField, type IssuanceRecord } from "@/components/Issuances/config"
+import { documentFields, documentTypes, sampleIssuances, type DocumentField, type IssuanceRecord } from "@/components/Issuances/config"
 import { FormSection, SummaryCard } from "@/components/Issuances/IssuanceLayout"
 
 export const Route = createFileRoute("/_layout/issuances")({
