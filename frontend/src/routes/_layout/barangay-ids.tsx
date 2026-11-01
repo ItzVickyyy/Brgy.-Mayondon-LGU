@@ -36,7 +36,7 @@ const sampleIds: BarangayIdRecord[] = [
   {
     reference: "ID-0002",
     resident: "Resident Two",
-    idNumber: "18-128-3597-0001",
+    idNumber: "18-128-3597-0002",
     residentType: "New / renting resident",
     registrationStatus: "Unregistered",
     issuedOn: "2026-05-20",
@@ -46,7 +46,7 @@ const sampleIds: BarangayIdRecord[] = [
   {
     reference: "ID-0003",
     resident: "Resident Three",
-    idNumber: "18-128-3597-0001",
+    idNumber: "18-128-3597-0003",
     residentType: "Existing resident",
     registrationStatus: "Registered",
     issuedOn: "2024-08-01",
@@ -56,7 +56,7 @@ const sampleIds: BarangayIdRecord[] = [
   {
     reference: "ID-0004",
     resident: "Resident Four",
-    idNumber: "18-128-3597-0001",
+    idNumber: "18-128-3597-0004",
     residentType: "Existing resident",
     registrationStatus: "Unregistered",
     issuedOn: "2025-03-12",
