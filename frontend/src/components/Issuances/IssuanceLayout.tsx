@@ -1,5 +1,6 @@
 import type { FileText } from "lucide-react"
 import type { ReactNode } from "react"
+import { StatCard } from "@/components/Common/StatCard"
 
 export function SummaryCard({
   icon: Icon,
@@ -13,18 +14,7 @@ export function SummaryCard({
   hint: string
 }) {
   return (
-    <div className="flex items-center gap-4 rounded-xl border bg-card p-4 shadow-xs">
-      <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-        <Icon className="size-5" aria-hidden="true" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="text-2xl font-semibold leading-tight tracking-tight">
-          {value}
-        </p>
-        <p className="truncate text-xs text-muted-foreground">{hint}</p>
-      </div>
-    </div>
+    <StatCard icon={Icon} label={label} value={value} description={hint} />
   )
 }
 
@@ -40,9 +30,9 @@ export function FormSection({
   return (
     <section className="rounded-xl border bg-card p-4 sm:p-5">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold">{title}</h3>
+        <h3 className="font-semibold tracking-tight">{title}</h3>
         {description ? (
-          <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{description}</p>
         ) : null}
       </div>
       <div className="grid gap-4 md:grid-cols-2">{children}</div>
