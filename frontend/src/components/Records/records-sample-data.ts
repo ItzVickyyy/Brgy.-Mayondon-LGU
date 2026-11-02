@@ -1,47 +1,58 @@
 export type ResidentRecord = {
   id: string
   name: string
+  birthdate: string
   address: string
   residentType: string
   idNumber: string
+  idStatus: "Valid" | "Expiring soon" | "Expired" | "None"
   registration: "Registered" | "Unregistered"
   status: "Active" | "Archived"
+  archiveReason?: string
 }
 
 export const sampleResidents: ResidentRecord[] = [
   {
     id: "RES-0001",
     name: "Resident One",
-    address: "Mayondon, Los Baños",
+    birthdate: "1990-03-14",
+    address: "Purok 1, Mayondon",
     residentType: "Existing resident",
     idNumber: "18-128-3597-0001",
+    idStatus: "Valid",
     registration: "Registered",
     status: "Active",
   },
   {
     id: "RES-0002",
     name: "Resident Two",
-    address: "Mayondon, Los Baños",
+    birthdate: "1985-07-22",
+    address: "Purok 2, Mayondon",
     residentType: "New / renting resident",
     idNumber: "18-128-3597-0002",
+    idStatus: "Expiring soon",
     registration: "Unregistered",
     status: "Active",
   },
   {
     id: "RES-0003",
     name: "Resident Three",
-    address: "Mayondon, Los Baños",
+    birthdate: "2001-11-06",
+    address: "Purok 3, Mayondon",
     residentType: "Existing resident",
     idNumber: "18-128-3597-0003",
+    idStatus: "Expired",
     registration: "Registered",
     status: "Active",
   },
   {
     id: "RES-0004",
     name: "Resident Four",
-    address: "Mayondon, Los Baños",
+    birthdate: "1972-01-18",
+    address: "Purok 4, Mayondon",
     residentType: "Existing resident",
     idNumber: "18-128-3597-0004",
+    idStatus: "None",
     registration: "Unregistered",
     status: "Archived",
   },
