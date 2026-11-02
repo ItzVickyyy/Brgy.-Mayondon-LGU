@@ -51,7 +51,7 @@ export function DateField({
     setDay(parts.day)
   }, [value])
 
-  const numericYear = /^\\d{4}$/.test(year) ? Number(year) : 0
+  const numericYear = /^\d{4}$/.test(year) ? Number(year) : 0
   const numericMonth = Number(month)
   const maxDay = numericYear && numericMonth ? daysInMonth(numericYear, numericMonth) : 31
   const dayOptions = useMemo(() => Array.from({ length: maxDay }, (_, index) => String(index + 1)), [maxDay])
