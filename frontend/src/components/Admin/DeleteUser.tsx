@@ -74,12 +74,13 @@ const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
 
           <DialogFooter className="mt-4">
             <DialogClose asChild>
-              <Button variant="outline" disabled={mutation.isPending}>
+              <Button variant="outline" className="min-h-11" disabled={mutation.isPending}>
                 Cancel
               </Button>
             </DialogClose>
             <LoadingButton
               variant="destructive"
+              className="min-h-11"
               type="submit"
               loading={mutation.isPending}
             >
