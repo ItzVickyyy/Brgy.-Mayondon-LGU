@@ -318,7 +318,7 @@ function IssuancesManagement() {
         </div>
         <Button
           size="default"
-          className="w-full sm:w-auto"
+          className="min-h-11 w-full sm:w-auto"
           onClick={() => setIsIssuanceModalOpen(true)}
         >
           <Plus aria-hidden="true" />
@@ -336,7 +336,7 @@ function IssuancesManagement() {
             aria-hidden="true"
           />
           <p className="flex-1">{notice}</p>
-          <Button variant="ghost" size="icon" className="size-8" onClick={() => setNotice("")} aria-label="Dismiss message">
+          <Button variant="ghost" size="icon" className="size-11" onClick={() => setNotice("")} aria-label="Dismiss message">
             <X aria-hidden="true" />
           </Button>
         </div>
