@@ -171,7 +171,8 @@ function IssuancesManagement() {
   }, [residentQuery, selectedResidentId, manualEntry])
 
   const allFormFields = documentSections[selectedType]?.flatMap((section) => section.fields) ?? []
-  const isDirty = Object.entries(formValues).some(([key, value]) => key !== "date" && value.trim() !== "")
+  const defaultsForDirtyCheck = createDefaultFormValues(selectedType)
+  const isDirty = Object.entries(formValues).some(([key, value]) => value.trim() !== (defaultsForDirtyCheck[key] ?? "").trim())
 
   function updateField(name: string, value: string) {
     const nextValue = ["motorNumber", "plateNumber"].includes(name) ? value.toUpperCase() :
@@ -202,7 +203,7 @@ function IssuancesManagement() {
   function changeDocumentType(value: string) {
     const sharedKeys = ["firstName", "middleName", "lastName", "birthdate", "birthplace", "civilStatus", "address", "residentId", "photoUrl"]
     const previousFields = documentSections[selectedType]?.flatMap((section) => section.fields) ?? []
-    const lost = previousFields.some((field) => !sharedKeys.includes(field.name) && Boolean(formValues[field.name]?.trim()))
+    const lost = previousFields.some((field) => !sharedKeys.includes(field.name) && field.name !== "date" && Boolean(formValues[field.name]?.trim()) && formValues[field.name] !== (field.defaultValue ?? ""))
     const preserved = Object.fromEntries(sharedKeys.filter((key) => formValues[key]).map((key) => [key, formValues[key]]))
     const defaults = createDefaultFormValues(value)
     const name = formValues.firstName || formValues.lastName
@@ -230,7 +231,7 @@ function IssuancesManagement() {
       birthplace: resident.birthplace,
       civilStatus: resident.civilStatus,
       sector: resident.sectors.join("||"),
-      residencyDuration: resident.residentSince ? String(Math.max(0, new Date().getFullYear() - resident.residentSince)) : "",
+      residencyDuration: resident.residentSince ? String(Math.max(0, new Date(`${previous.date || localDateValue()}T00:00:00`).getFullYear() - resident.residentSince)) : "",
       age: calculateAge(resident.birthdate, previous.date || localDateValue()),
       photoUrl: resident.photoUrl ?? "",
       ...(previous.recipientChoice === "Oneself" ? { underName: name } : {}),
@@ -542,9 +543,9 @@ function IssuancesManagement() {
                   <div className="my-4 border-t" />
                   <dl className="space-y-3 text-sm">
                     {[
-                      ["NAME", formValues.name],
+                      [selectedType === "Certification (assistance request)" ? "Mr./Ms." : "NAME", formValues.name],
                       ["ADDRESS", formValues.address],
-                      ...(selectedType === "Barangay Clearance" ? [["AGE", calculateAge(formValues.birthdate ?? "", currentDate) ? `${calculateAge(formValues.birthdate ?? "", currentDate)} years old` : ""] , ["BIRTHDATE", formValues.birthdate ? formatPaperDate(formValues.birthdate) : ""], ["BIRTHPLACE", formValues.birthplace], ["CIVIL STATUS", formValues.civilStatus], ["PURPOSE", formValues.purpose], ["REMARKS", formValues.remarks], ["Valid I.D. Presented", formValues.validIdPresented], ["Number", formValues.idNumber], ["Place of Issue", formValues.idPlaceOfIssue], ["Date of Issue", formValues.idDateOfIssue ? formatPaperDate(formValues.idDateOfIssue) : ""], ["Paid under OFFICIAL RECEIPT No.", formValues.officialReceiptNumber]] : []),
+                      ...(selectedType === "Barangay Clearance" ? [["AGE", calculateAge(formValues.birthdate ?? "", currentDate) ? `${calculateAge(formValues.birthdate ?? "", currentDate)} years old` : ""] , ["BIRTHDATE", formValues.birthdate ? formatPaperDate(formValues.birthdate) : ""], ["BIRTHPLACE", formValues.birthplace], ["CIVIL STATUS", formValues.civilStatus], ["PURPOSE", formValues.purpose], ["PURPOSE note", formValues.purposeNote], ["REMARKS", formValues.remarks], ["c/o", formValues.referredBy], ["Valid I.D. Presented", formValues.validIdPresented], ["Number", formValues.idNumber], ["Place of Issue", formValues.idPlaceOfIssue], ["Date of Issue", formValues.idDateOfIssue ? formatPaperDate(formValues.idDateOfIssue) : ""], ["Paid under OFFICIAL RECEIPT No.", formValues.officialReceiptNumber]] : []),
                       ...(selectedType === "Barangay Franchise Clearance" ? [["TRICYCLE ASSOCIATION", formValues.tricycleAssociation], ["MAKE", formValues.make], ["TYPE OF BODY", formValues.typeOfBody], ["MOTOR NO", formValues.motorNumber], ["COLOR", formValues.color], ["PLATE NUMBER", formValues.plateNumber], ["CTC Number", formValues.ctcNumber], ["Place of Issue", formValues.ctcPlaceOfIssue], ["Date of Issue", formValues.ctcDateOfIssue ? formatPaperDate(formValues.ctcDateOfIssue) : ""], ["Paid under OFFICIAL RECEIPT No.", formValues.officialReceiptNumber]] : []),
                       ...(selectedType === "Barangay Clearance, Electrical and Water Connection" ? [["Service", formValues.serviceType?.split("||").join(" / ")], ["TYPE OF CONNECTION", formValues.connectionType], ["CLASSIFICATION", formValues.classification], ["LOCATION", formValues.location], ["CTC Number", formValues.ctcNumber], ["Place of Issue", formValues.ctcPlaceOfIssue], ["Date of Issue", formValues.ctcDateOfIssue ? formatPaperDate(formValues.ctcDateOfIssue) : ""], ["Paid under OFFICIAL RECEIPT No.", formValues.officialReceiptNumber]] : []),
                       ...(selectedType === "Certificate of Indigency" ? [["AGE", calculateAge(formValues.birthdate ?? "", currentDate) ? `${calculateAge(formValues.birthdate ?? "", currentDate)} years old` : formValues.ageManual], ["SECTOR :", formValues.sector?.split("||").join(" / ")], ["PURPOSE", formValues.purpose], ["Addressed to the office of", formValues.addressedTo]] : []),
