@@ -130,81 +130,126 @@ function RecordsManagement() {
           </div>
 
           <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-            <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+            <div className="flex flex-col gap-3 border-b p-4 sm:p-5">
               <div>
                 <h2 className="font-semibold tracking-tight">Resident List</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Resident records
+                  Find a resident, confirm identity, and choose the next action.
                 </p>
               </div>
-              <label className="relative block w-full sm:max-w-sm">
-                <span className="sr-only">Search resident records</span>
-                <Search
-                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search name, address, ID, or status..."
-                  className={`${inputClass} pl-9`}
-                />
-              </label>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <label className="relative block min-w-0 flex-1 sm:max-w-sm">
+                  <span className="sr-only">Search resident records</span>
+                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                  <input
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Search name, address, or ID number..."
+                    className={`${inputClass} pl-9`}
+                  />
+                </label>
+                <label className="sm:w-44">
+                  <span className="sr-only">Filter by record status</span>
+                  <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "Active" | "Archived" | "all")} className={inputClass}>
+                    <option value="Active">Active</option>
+                    <option value="Archived">Archived</option>
+                    <option value="all">All statuses</option>
+                  </select>
+                </label>
+                <label className="sm:w-56">
+                  <span className="sr-only">Filter by resident type</span>
+                  <select value={residentTypeFilter} onChange={(event) => setResidentTypeFilter(event.target.value)} className={inputClass}>
+                    <option value="all">All resident types</option>
+                    {[...new Set(residents.map((resident) => resident.residentType))].map((type) => <option key={type}>{type}</option>)}
+                  </select>
+                </label>
+              </div>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[850px] text-left text-sm">
+              <table className="w-full min-w-[1040px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    {[
-                      "Resident Reference",
-                      "Resident Name",
-                      "Address",
-                      "Resident Type",
-                      "ID Reference",
-                      "Registration",
-                      "Record Status",
-                      "Action",
-                    ].map((label) => (
-                      <th key={label} className="px-4 py-3 align-middle font-medium sm:px-5">
-                        {label}
-                      </th>
+                    {["Resident", "Birthdate / Age", "Address", "Barangay ID", "Resident type", "Status", "Actions"].map((label) => (
+                      <th key={label} className={`px-4 py-3 align-middle font-medium sm:px-5 ${label === "Actions" ? "text-right" : ""}`}>{label}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {filteredResidents.map((resident) => (
-                    <tr key={resident.id} className="transition-colors hover:bg-muted/30">
-                      <td className="px-4 py-3 align-middle font-medium sm:px-5">{resident.id}</td>
-                      <td className="px-4 py-3 align-middle font-medium sm:px-5">{resident.name}</td>
-                      <td className="px-4 py-3 align-middle sm:px-5">{resident.address}</td>
-                      <td className="px-4 py-3 align-middle sm:px-5">{resident.residentType}</td>
-                      <td className="px-4 py-3 align-middle sm:px-5">{resident.idNumber}</td>
-                      <td className="px-4 py-3 align-middle sm:px-5">{resident.registration}</td>
-                      <td className="px-4 py-3 align-middle sm:px-5">
-                        <Badge variant="outline" className={statusStyles[resident.status]}>{resident.status}</Badge>
-                      </td>
-                      <td className="px-4 py-3 align-middle sm:px-5">
-                        <Button
-                          variant="link"
-                          className="min-h-11 px-0 font-semibold"
-                          onClick={() => {
-                            setSelectedResident(resident)
-                            setProfileTab("Details")
-                          }}
-                        >
-                          View profile
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredResidents.map((resident) => {
+                    const birthdate = new Date(`${resident.birthdate}T00:00:00`)
+                    const formattedBirthdate = birthdate.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
+                    const today = new Date()
+                    let age = today.getFullYear() - birthdate.getFullYear()
+                    if (today.getMonth() < birthdate.getMonth() || (today.getMonth() === birthdate.getMonth() && today.getDate() < birthdate.getDate())) age -= 1
+                    const archived = resident.status === "Archived"
+                    return (
+                      <tr key={resident.id} className={cn("transition-colors hover:bg-muted/30", archived && "opacity-70")}>
+                        <td className="px-4 py-3 align-middle sm:px-5">
+                          <p className="font-semibold">{resident.name}</p>
+                          <p className="mt-1 font-mono text-xs text-muted-foreground">{resident.id}</p>
+                        </td>
+                        <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">{formattedBirthdate} · {age} yrs</td>
+                        <td className="max-w-[220px] truncate px-4 py-3 align-middle sm:px-5" title={resident.address}>{resident.address}</td>
+                        <td className="px-4 py-3 align-middle sm:px-5">
+                          <div className="flex flex-col items-start gap-1.5">
+                            <span className="font-mono">{resident.idNumber}</span>
+                            <Badge variant="outline" className={statusStyles[resident.idStatus]}>{resident.idStatus}</Badge>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 align-middle sm:px-5">{resident.residentType}</td>
+                        <td className="px-4 py-3 align-middle sm:px-5"><Badge variant="outline" className={statusStyles[resident.status]}>{resident.status}</Badge></td>
+                        <td className="px-4 py-3 align-middle sm:px-5">
+                          <RowActions
+                            name={resident.name}
+                            isAdmin={isAdmin}
+                            primary={{
+                              label: "View profile",
+                              variant: "outline",
+                              onSelect: () => {
+                                setSelectedResident(resident)
+                                setProfileTab("Details")
+                              },
+                            }}
+                            items={[
+                              {
+                                label: "Edit details",
+                                hidden: archived,
+                                onSelect: () => {
+                                  setSelectedResident(resident)
+                                  setProfileTab("Details")
+                                  setNotice("Editing is not connected to saved resident records yet.")
+                                },
+                              },
+                              {
+                                label: "New issuance",
+                                hidden: archived,
+                                onSelect: () => setNotice(`Open Issuance Management to prepare a document for ${resident.name}.`),
+                              },
+                              {
+                                label: "Archive",
+                                adminOnly: true,
+                                hidden: archived,
+                                destructive: true,
+                                onSelect: () => setArchiveTarget(resident),
+                              },
+                              {
+                                label: "Restore from archive",
+                                adminOnly: true,
+                                hidden: !archived,
+                                onSelect: () => setRestoreTarget(resident),
+                              },
+                            ]}
+                          />
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
-              {filteredResidents.length === 0 && (
-                <EmptyState
-                  title="No matching residents"
-                  description="Try a different name, address, ID, or status."
-                />
-              )}
+              {filteredResidents.length === 0 ? <EmptyState title="No matching residents" description="Try a different name, address, ID number, or filter." /> : null}
+            </div>
+            <div className="border-t px-4 py-3 text-xs text-muted-foreground sm:px-5">
+              Showing {filteredResidents.length} of {residents.length} residents
             </div>
           </section>
         </>
