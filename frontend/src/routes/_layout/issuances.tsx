@@ -182,7 +182,7 @@ function IssuancesManagement() {
 
   const residentMatches = useMemo(() => {
     const query = residentQuery.trim().toLowerCase()
-    if (!query || selectedResidentId || manualEntry) return []
+    if (!query || selectedResidentId) return []
     return sampleResidents.filter((resident) => resident.status === "Active")
       .filter((resident) => [resident.name, resident.id, resident.idNumber, resident.address].some((value) => value.toLowerCase().includes(query)))
       .slice(0, 6)
@@ -557,7 +557,7 @@ function IssuancesManagement() {
                           if (event.key === "Escape") setResidentQuery("")
                         }} placeholder="Search name or ID number…" className={cn(inputClassName, "pl-9")} />
                       </div>
-                      {residentQuery.trim() && !selectedResidentId && !manualEntry ? (
+                      {residentQuery.trim() && !selectedResidentId ? (
                         <div id="resident-results" role="listbox" aria-label="Resident search results" className="mt-2 overflow-hidden rounded-xl border bg-card">
                           {residentMatches.length ? residentMatches.map((resident, index) => (
                             <button key={resident.id} type="button" role="option" aria-selected={activeResidentMatch === index} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} className={cn("flex min-h-14 w-full flex-col items-start gap-1 border-b px-3 py-2 text-left last:border-0 hover:bg-muted/60", activeResidentMatch === index && "bg-muted")}>
