@@ -1,3 +1,4 @@
+// Unit tests for pure issuance formatting helpers.
 import { expect, test } from "@playwright/test"
 import { calculateAge, formatPrintedName } from "../src/lib/issuance-format"
 
