@@ -572,10 +572,12 @@ function IssuancesManagement() {
                 <Button variant="outline" onClick={() => setViewRecord(null)}>
                   Close
                 </Button>
-                <Button onClick={() => printNow(viewRecord)}>
-                  <Printer aria-hidden="true" />
-                  Print
-                </Button>
+                {viewRecord.status === "Issued" ? (
+                  <Button onClick={() => printNow(viewRecord)}>
+                    <Printer aria-hidden="true" />
+                    Reprint
+                  </Button>
+                ) : null}
               </DialogFooter>
             </>
           )}
@@ -734,7 +736,7 @@ function IssuancesManagement() {
                     </td>
                     <td className="max-w-xs px-4 py-3 align-middle sm:px-5">{item.type}</td>
                     <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">{item.purpose || item.fields.purpose || "—"}</td>
-                    <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">{formatDate(item.date)}</td>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">{pending ? "—" : formatDate(item.date)}</td>
                     <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
                       {item.validUntil ? (
                         <div className="flex flex-col items-start gap-1">
@@ -799,7 +801,7 @@ function IssuancesManagement() {
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
                     <p className="text-xs text-muted-foreground">Date issued</p>
-                    <p>{formatDate(item.date)}</p>
+                    <p>{pending ? "—" : formatDate(item.date)}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">Valid until</p>
