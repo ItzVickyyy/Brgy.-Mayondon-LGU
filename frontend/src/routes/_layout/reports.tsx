@@ -101,11 +101,11 @@ function Reports() {
               <option value="year">This year</option>
             </select>
           </label>
-          <Button onClick={() => setNotice(`Report selected: ${report}, ${period}.`)}>
+          <Button className="min-h-11" onClick={() => setNotice(`Report selected: ${report}, ${period}.`)}>
             <BarChart3 aria-hidden="true" />
             Preview Report
           </Button>
-          <Button variant="outline" onClick={() => setNotice("Export requested.")}>
+          <Button variant="outline" className="min-h-11" onClick={() => setNotice("Export requested.")}>
             <Download aria-hidden="true" />
             Export
           </Button>
