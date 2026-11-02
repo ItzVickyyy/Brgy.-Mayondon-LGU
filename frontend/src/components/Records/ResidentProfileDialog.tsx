@@ -1,4 +1,6 @@
 import { CreditCard, FileCheck2, UserRound, Users } from "lucide-react"
+import { statusStyles } from "@/components/Common/statusStyles"
+import { Badge } from "@/components/ui/badge"
 
 import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import {
@@ -44,9 +46,7 @@ export function ResidentProfileDialog({
                   {resident.id} · {resident.address}
                 </p>
               </div>
-              <span className="inline-flex min-h-8 items-center rounded-full border px-3 text-sm font-medium">
-                {resident.status}
-              </span>
+              <Badge variant="outline" className={statusStyles[resident.status]}>{resident.status}</Badge>
             </div>
             <div
               className="flex flex-wrap gap-2 border-b pb-3"
@@ -67,8 +67,8 @@ export function ResidentProfileDialog({
                   onClick={() => onProfileTabChange(tab)}
                   className={
                     profileTab === tab
-                      ? "min-h-11 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground"
-                      : "min-h-11 rounded-md px-3 text-sm font-semibold text-muted-foreground hover:bg-muted"
+                      ? "min-h-11 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      : "min-h-11 rounded-md px-3 text-sm font-semibold text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                   }
                 >
                   {tab}
@@ -85,7 +85,7 @@ export function ResidentProfileDialog({
                   ["Registration", resident.registration],
                   ["Record status", resident.status],
                 ].map(([label, value]) => (
-                  <div key={label} className="rounded-lg border p-3">
+                  <div key={label} className="rounded-lg border bg-card p-4">
                     <p className="text-sm text-muted-foreground">{label}</p>
                     <p className="mt-1 font-semibold">{value}</p>
                   </div>
@@ -94,7 +94,7 @@ export function ResidentProfileDialog({
             ) : null}
             {profileTab === "Family & Sector" ? (
               <div className="grid gap-3 sm:grid-cols-2">
-                <section className="rounded-xl border p-4">
+                <section className="rounded-xl border bg-card p-4">
                   <Users className="size-5 text-primary" aria-hidden="true" />
                   <h3 className="mt-2 font-semibold">Family details</h3>
                   <p className="mt-1 text-sm text-muted-foreground">
@@ -136,7 +136,7 @@ export function ResidentProfileDialog({
               </div>
             ) : null}
             {profileTab === "Issuance History" ? (
-              <section className="rounded-xl border p-5">
+              <section className="rounded-xl border bg-card p-4 sm:p-5">
                 <FileCheck2
                   className="size-6 text-primary"
                   aria-hidden="true"
