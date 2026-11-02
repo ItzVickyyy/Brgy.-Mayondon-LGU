@@ -380,7 +380,7 @@ function IssuancesManagement() {
             className="flex min-h-0 flex-1 flex-col"
           >
             <div className="flex-1 space-y-4 overflow-y-auto bg-muted/20 px-5 py-5 sm:px-6">
-              <section className="rounded-xl border bg-card p-4 sm:p-5">
+              <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
                 <label className={labelClassName}>
                   <span className="text-sm font-semibold">Document type</span>
                   <select
@@ -523,6 +523,7 @@ function IssuancesManagement() {
               <Button
                 variant="ghost"
                 size="sm"
+                className="min-h-11"
                 onClick={() => {
                   setSearch("")
                   setHistoryType("All document types")
@@ -573,16 +574,16 @@ function IssuancesManagement() {
                 <th scope="col" className="px-4 py-3 font-medium sm:px-5">
                   Record ID
                 </th>
-                <th scope="col" className="px-5 py-3 font-medium">
+                <th scope="col" className="px-4 py-3 align-middle font-medium sm:px-5">
                   Resident
                 </th>
-                <th scope="col" className="px-5 py-3 font-medium">
+                <th scope="col" className="px-4 py-3 align-middle font-medium sm:px-5">
                   Document
                 </th>
-                <th scope="col" className="px-5 py-3 font-medium">
+                <th scope="col" className="px-4 py-3 align-middle font-medium sm:px-5">
                   Date
                 </th>
-                <th scope="col" className="px-5 py-3 font-medium">
+                <th scope="col" className="px-4 py-3 align-middle font-medium sm:px-5">
                   Status
                 </th>
                 <th scope="col" className="px-4 py-3 text-right font-medium sm:px-5">
@@ -596,17 +597,17 @@ function IssuancesManagement() {
                   key={item.id}
                   className="transition-colors hover:bg-muted/30"
                 >
-                  <td className="whitespace-nowrap px-4 py-3 sm:px-5 font-mono text-xs font-medium">
+                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5 font-mono text-xs font-medium">
                     {item.id}
                   </td>
-                  <td className="px-4 py-3 sm:px-5 font-medium">{item.resident}</td>
-                  <td className="max-w-xs px-4 py-3 sm:px-5 text-muted-foreground">
+                  <td className="px-4 py-3 align-middle sm:px-5 font-medium">{item.resident}</td>
+                  <td className="max-w-xs px-4 py-3 align-middle sm:px-5 text-muted-foreground">
                     {item.type}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 sm:px-5 text-muted-foreground">
+                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5 text-muted-foreground">
                     {formatDate(item.date)}
                   </td>
-                  <td className="px-4 py-3 sm:px-5">
+                  <td className="px-4 py-3 align-middle sm:px-5">
                     <Badge
                       variant="outline"
                       className={statusStyles[item.status]}
@@ -614,11 +615,12 @@ function IssuancesManagement() {
                       {item.status}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 sm:px-5">
+                  <td className="px-4 py-3 align-middle sm:px-5">
                     <div className="flex justify-end gap-2">
                       <Button
                         variant="outline"
                         size="sm"
+                        className="min-h-11"
                         onClick={() => setViewRecord(item)}
                         aria-label={`View ${item.id}`}
                       >
@@ -628,6 +630,7 @@ function IssuancesManagement() {
                       <Button
                         variant="outline"
                         size="sm"
+                        className="min-h-11"
                         onClick={() => printNow(item)}
                         aria-label={`Print ${item.id}`}
                       >
@@ -663,7 +666,7 @@ function IssuancesManagement() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="flex-1"
+                  className="min-h-11 flex-1"
                   onClick={() => setViewRecord(item)}
                 >
                   <Eye aria-hidden="true" />
