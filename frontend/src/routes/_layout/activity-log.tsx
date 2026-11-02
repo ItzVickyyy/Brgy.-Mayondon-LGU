@@ -92,15 +92,38 @@ function formatTimestamp(value: string) {
   }).replace(",", " ·")
 }
 
+function getInitialActivityDateRange() {
+  if (typeof window === "undefined") return { startDate: "", endDate: "" }
+  const params = new URLSearchParams(window.location.search)
+  const period = params.get("period")
+  if (!period) return { startDate: "", endDate: "" }
+  const today = new Date()
+  const start = new Date(today)
+  if (period === "week") start.setDate(today.getDate() - 6)
+  else if (period === "month") start.setDate(1)
+  else if (period === "quarter") start.setMonth(Math.floor(today.getMonth() / 3) * 3, 1)
+  else if (period === "year") start.setMonth(0, 1)
+  const toInputDate = (value: Date) => {
+    const year = value.getFullYear()
+    const month = String(value.getMonth() + 1).padStart(2, "0")
+    const day = String(value.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+  }
+  return { startDate: toInputDate(start), endDate: toInputDate(today) }
+}
+
 function ActivityLog() {
   const { user } = useAuth()
   const isAdmin = Boolean(user?.is_superuser)
   const [search, setSearch] = useState("")
   const [moduleFilter, setModuleFilter] = useState("all")
   const [outcomeFilter, setOutcomeFilter] = useState("all")
-  const [userFilter, setUserFilter] = useState("all")
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
+  const [userFilter, setUserFilter] = useState(() => {
+    if (typeof window === "undefined") return "all"
+    return new URLSearchParams(window.location.search).get("user") ?? "all"
+  })
+  const [startDate, setStartDate] = useState(() => getInitialActivityDateRange().startDate)
+  const [endDate, setEndDate] = useState(() => getInitialActivityDateRange().endDate)
 
   const visibleRows = useMemo(() => {
     const query = search.trim().toLowerCase()
