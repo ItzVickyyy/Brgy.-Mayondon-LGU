@@ -44,12 +44,16 @@ function UsersTable() {
     )
   }
 
-  const tableData: UserTableData[] = (users?.data ?? []).map(
-    (user: UserPublic) => ({
-      ...user,
-      isCurrentUser: currentUser?.id === user.id,
-    }),
-  )
+  const sourceUsers = users?.data ?? []
+  const activeAdminCount = sourceUsers.filter(
+    (user) => user.is_superuser && user.is_active,
+  ).length
+  const tableData: UserTableData[] = sourceUsers.map((user: UserPublic) => ({
+    ...user,
+    isCurrentUser: currentUser?.id === user.id,
+    isLastActiveAdmin:
+      user.is_superuser && user.is_active && activeAdminCount <= 1,
+  }))
 
   if (tableData.length === 0) {
     return (
