@@ -108,7 +108,7 @@ function BackupRestore() {
               <span className="font-medium">Oct 28, 2026 · 9:00 AM</span>
             </div>
           </div>
-          <Button className="mt-5 w-full" onClick={() => setNotice("")}>
+          <Button className="mt-5 min-h-11 w-full" onClick={() => setNotice("")}>
             <HardDriveDownload aria-hidden="true" />
             Create Backup
           </Button>
@@ -238,7 +238,7 @@ function BackupRestore() {
           </label>
           <Button
             variant="outline"
-            className="border-destructive/50 text-destructive hover:bg-destructive/5"
+            className="min-h-11 border-destructive/50 text-destructive hover:bg-destructive/5"
             onClick={() => setConfirmRestore((value) => !value)}
           >
             <RotateCcw aria-hidden="true" />
@@ -268,7 +268,7 @@ function BackupRestore() {
             </label>
             <Button
               variant="destructive"
-              className="mt-4"
+              className="mt-4 min-h-11"
               disabled={restoreConfirmation !== "RESTORE"}
               onClick={() => {
                 setNotice("Restore request confirmed.")
