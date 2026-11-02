@@ -550,7 +550,7 @@ function IssuancesManagement() {
                       <label htmlFor="resident-search" className="mb-1.5 block text-sm font-medium">Search name or ID number</label>
                       <div className="relative">
                         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-                        <input id="resident-search" role="combobox" aria-autocomplete="list" aria-expanded={residentMatches.length > 0} aria-controls="resident-results" value={residentQuery} onChange={(event) => { setResidentQuery(event.target.value); setActiveResidentMatch(0); setSelectedResidentId("") }} onKeyDown={(event) => {
+                        <input id="resident-search" role="combobox" aria-autocomplete="list" aria-expanded={Boolean(residentQuery.trim() && !selectedResidentId)} aria-controls="resident-results" aria-activedescendant={residentMatches[activeResidentMatch] ? `resident-option-${residentMatches[activeResidentMatch].id}` : undefined} value={residentQuery} onChange={(event) => { setResidentQuery(event.target.value); setActiveResidentMatch(0); setSelectedResidentId("") }} onKeyDown={(event) => {
                           if (event.key === "ArrowDown" && residentMatches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, residentMatches.length - 1)) }
                           if (event.key === "ArrowUp" && residentMatches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) }
                           if (event.key === "Enter" && residentMatches[activeResidentMatch]) { event.preventDefault(); selectResident(residentMatches[activeResidentMatch]) }
