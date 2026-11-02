@@ -93,7 +93,7 @@ function RecordsManagement() {
               setView(tab.id)
               setNotice("")
             }}
-            className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${view === tab.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+            className={`min-h-11 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${view === tab.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
           >
             {tab.label}
           </button>
@@ -105,7 +105,11 @@ function RecordsManagement() {
           role="status"
           className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm"
         >
-          {notice}
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+          <p className="flex-1">{notice}</p>
+          <Button variant="ghost" size="icon" className="size-8" onClick={() => setNotice("")} aria-label="Dismiss message">
+            <X aria-hidden="true" />
+          </Button>
         </div>
       )}
 
@@ -279,19 +283,15 @@ function RecordsManagement() {
           >
             {["Select file", "Map columns", "Preview", "Results"].map(
               (label, index) => (
-                <button
+                <Button
                   key={label}
                   type="button"
-                  onClick={() => setImportStep(index)}
+                  variant={importStep === index ? "default" : "outline"}
                   aria-current={importStep === index ? "step" : undefined}
-                  className={
-                    importStep === index
-                      ? "min-h-11 rounded-lg border border-primary bg-primary px-3 text-sm font-semibold text-primary-foreground"
-                      : "min-h-11 rounded-lg border bg-background px-3 text-sm font-semibold text-muted-foreground hover:bg-muted"
-                  }
+                  onClick={() => setImportStep(index)}
                 >
                   {index + 1}. {label}
-                </button>
+                </Button>
               ),
             )}
           </fieldset>
@@ -316,7 +316,7 @@ function RecordsManagement() {
             </label>
           ) : null}
           {importStep === 1 ? (
-            <div className="mt-4 rounded-xl border p-4">
+            <div className="mt-4 rounded-xl border bg-card p-4">
               <h3 className="font-semibold">Map spreadsheet columns</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 Match each resident field to a column in the selected
@@ -400,22 +400,8 @@ function RecordsManagement() {
             </div>
           ) : null}
           <div className="mt-5 flex flex-wrap justify-between gap-3 border-t pt-4">
-            <button
-              type="button"
-              disabled={importStep === 0}
-              onClick={() => setImportStep((step) => Math.max(0, step - 1))}
-              className="inline-flex min-h-11 items-center rounded-md border px-4 text-sm font-semibold disabled:opacity-40"
-            >
-              Previous step
-            </button>
-            <button
-              type="button"
-              disabled={importStep === 3 || (importStep === 0 && !selectedFile)}
-              onClick={() => setImportStep((step) => Math.min(3, step + 1))}
-              className="inline-flex min-h-11 items-center rounded-md bg-primary px-4 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
-            >
-              {importStep === 2 ? "Review results" : "Continue"}
-            </button>
+            <Button type="button" variant="outline" disabled={importStep === 0} onClick={() => setImportStep((step) => Math.max(0, step - 1))}>Previous step</Button>
+            <Button type="button" disabled={importStep === 3 || (importStep === 0 && !selectedFile)} onClick={() => setImportStep((step) => Math.min(3, step + 1))}>{importStep === 2 ? "Review results" : "Continue"}</Button>
           </div>
         </section>
       )}
