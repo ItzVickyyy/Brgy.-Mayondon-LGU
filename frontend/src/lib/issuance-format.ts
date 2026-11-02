@@ -80,5 +80,5 @@ export function splitIsoDate(value: string): { year: string; month: string; day:
   if (!match || buildIsoDate(match[1], match[2], match[3]) !== value) {
     return { year: "", month: "", day: "" }
   }
-  return { year: match[1], month: match[2], day: match[3] }
+  return { year: match[1], month: String(Number(match[2])), day: String(Number(match[3])) }
 }
