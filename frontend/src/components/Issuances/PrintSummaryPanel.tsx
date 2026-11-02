@@ -1,5 +1,6 @@
 import { AlertCircle, CheckCircle2 } from "lucide-react"
 import { statusStyles } from "@/components/Common/statusStyles"
+import { formatPaperDate } from "@/lib/issuance-format"
 import type { DocumentField } from "@/components/Issuances/config"
 import { getMissingFields, getPrintRows } from "@/components/Issuances/print-summary"
 import { cn } from "@/lib/utils"
@@ -19,7 +20,7 @@ export function PrintSummaryPanel({ type, values, currentDate, fields }: PrintSu
     <div className="min-w-0 break-words rounded-xl border bg-card p-4 sm:p-5 lg:sticky lg:top-0">
       <h3 className="font-semibold tracking-tight">Will print</h3>
       <p className="mt-1 break-words text-sm text-muted-foreground">{type}</p>
-      <p className="mt-1 text-sm font-medium">{currentDate ? rows.length >= 0 ? new Date(`${currentDate}T00:00:00`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "" : ""}</p>
+      <p className="mt-1 text-sm font-medium">{formatPaperDate(currentDate)}</p>
       <div className="my-4 border-t" />
       <dl className="space-y-3 text-sm">
         {rows.map(({ label, value }) => (
