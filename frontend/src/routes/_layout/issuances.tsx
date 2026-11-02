@@ -393,6 +393,11 @@ function IssuancesManagement() {
           <select id={fieldId} value={value} onChange={(event) => updateField(field.name, event.target.value)} className={cn(inputClassName, error && "border-destructive")} aria-invalid={Boolean(error)}><option value="">Select {field.label.toLowerCase()}</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select>
         ) : field.type === "combobox" ? (
           <><input id={fieldId} value={value} onChange={(event) => updateField(field.name, event.target.value)} list={`list-${field.name}`} className={cn(inputClassName, error && "border-destructive")} aria-invalid={Boolean(error)} /><datalist id={`list-${field.name}`}>{[...(field.options ?? []), ...options].map((option) => <option key={option} value={option} />)}</datalist></>
+        ) : field.name === "addressedTo" ? (
+          <div className="flex min-w-0 items-stretch">
+            <span className="inline-flex min-h-11 items-center rounded-l-md border border-r-0 bg-muted px-3 text-xs font-normal text-muted-foreground">Addressed to the office of</span>
+            <input id={fieldId} value={value} onChange={(event) => updateField(field.name, event.target.value)} className={cn(inputClassName, "min-w-0 rounded-l-none", error && "border-destructive")} aria-invalid={Boolean(error)} />
+          </div>
         ) : field.type === "readonly" ? (
           <input id={fieldId} value={value} readOnly placeholder={field.name === "age" ? (formValues.birthdate ? "Unable to calculate age" : "Enter birthdate") : undefined} className={cn(inputClassName, "bg-muted/50")} />
         ) : field.type === "textarea" ? (
