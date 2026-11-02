@@ -107,6 +107,7 @@ function IssuancesManagement() {
   const [confirmFormAction, setConfirmFormAction] = useState<"clear" | "discard" | null>(null)
   const [lostDetailsNotice, setLostDetailsNotice] = useState("")
   const [clearanceAdvancedOpen, setClearanceAdvancedOpen] = useState(false)
+  const [dateFieldResetKey, setDateFieldResetKey] = useState(0)
   const [usedAssociations, setUsedAssociations] = useState<string[]>([])
   const [usedIndigencyPurposes, setUsedIndigencyPurposes] = useState<string[]>([])
   const [search, setSearch] = useState("")
@@ -208,7 +209,7 @@ function IssuancesManagement() {
       || Boolean(validationErrors.purposeNote || validationErrors.remarks || validationErrors.referredBy)
       || formValues.purpose === "Employment Requirement/First Time Jobseeker"
     if (advancedValues) setClearanceAdvancedOpen(true)
-  }, [selectedType, formValues.purpose, formValues.purposeNote, formValues.remarks, formValues.referredBy, validationErrors])
+  }, [selectedType, formValues.purpose, formValues.purposeNote, formValues.remarks, formValues.referredBy, validationErrors.purposeNote, validationErrors.remarks, validationErrors.referredBy])
 
   function updateField(name: string, value: string) {
     const nextValue = ["motorNumber", "plateNumber", "name"].includes(name) ? value.toUpperCase() :
@@ -292,6 +293,7 @@ function IssuancesManagement() {
   }
 
   function startManualEntry() {
+    setDateFieldResetKey((key) => key + 1)
     setSelectedResidentId("")
     setShowNameParts(false)
     setResidentQuery("")
@@ -303,6 +305,8 @@ function IssuancesManagement() {
   }
 
   function performClearForm() {
+    setDateFieldResetKey((key) => key + 1)
+    setClearanceAdvancedOpen(false)
     setFormValues(createDefaultFormValues(selectedType))
     setSelectedResidentId("")
     setResidentQuery("")
@@ -426,6 +430,7 @@ function IssuancesManagement() {
       return (
         <div key={field.name} className={wrapperClass} id={`wrap-${field.name}`}>
           <DateField
+            key={`${field.name}-${dateFieldResetKey}`}
             id={fieldId}
             label={field.label}
             value={value}
@@ -594,6 +599,7 @@ function IssuancesManagement() {
                     </div>
                     <div className="md:col-span-2">
                       <DateField
+                        key={`document-date-${dateFieldResetKey}`}
                         id="field-date"
                         label="Date on document"
                         value={formValues.date ?? localDateValue()}
@@ -654,10 +660,6 @@ function IssuancesManagement() {
                   {(documentSections[selectedType] ?? []).filter((section) => !["resident", "receipt"].includes(section.id)).map((section) => {
                     const advancedFields = section.fields.filter((field) => field.advanced)
                     const regularFields = section.fields.filter((field) => !field.advanced)
-                    const advancedHasValues = advancedFields.some((field) => {
-                      const value = formValues[field.name] ?? ""
-                      return value.trim() !== (field.defaultValue ?? "").trim() || Boolean(validationErrors[field.name])
-                    })
                     const advancedSummary = [
                       formValues.purposeNote?.trim() ? "Purpose note edited" : "",
                       formValues.remarks?.trim() && formValues.remarks !== "NO DEROGATORY RECORD ON FILE" ? "Remarks edited" : "",
