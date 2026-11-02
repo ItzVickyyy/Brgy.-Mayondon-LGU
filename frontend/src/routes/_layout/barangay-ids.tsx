@@ -120,7 +120,7 @@ function BarangayIdManagement() {
             renewal workflows.
           </p>
         </div>
-        <Button onClick={() => showActionNotice("Create Barangay ID")}>
+        <Button className="min-h-11" onClick={() => showActionNotice("Create Barangay ID")}>
           <CreditCard aria-hidden="true" />
           Create Barangay ID
         </Button>
