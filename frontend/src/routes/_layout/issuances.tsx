@@ -12,7 +12,7 @@ import {
   Search,
   X,
 } from "lucide-react"
-import { Fragment, useMemo, useState } from "react"
+import { Fragment, useEffect, useMemo, useState } from "react"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { RowActions } from "@/components/Common/RowActions"
@@ -106,6 +106,7 @@ function IssuancesManagement() {
   const [formErrorSummary, setFormErrorSummary] = useState<string[]>([])
   const [confirmFormAction, setConfirmFormAction] = useState<"clear" | "discard" | null>(null)
   const [lostDetailsNotice, setLostDetailsNotice] = useState("")
+  const [clearanceAdvancedOpen, setClearanceAdvancedOpen] = useState(false)
   const [usedAssociations, setUsedAssociations] = useState<string[]>([])
   const [usedIndigencyPurposes, setUsedIndigencyPurposes] = useState<string[]>([])
   const [search, setSearch] = useState("")
@@ -197,6 +198,17 @@ function IssuancesManagement() {
   const allFormFields = documentSections[selectedType]?.flatMap((section) => section.fields) ?? []
   const defaultsForDirtyCheck = createDefaultFormValues(selectedType)
   const isDirty = Object.entries(formValues).some(([key, value]) => value.trim() !== (defaultsForDirtyCheck[key] ?? "").trim())
+  useEffect(() => {
+    if (selectedType !== "Barangay Clearance") {
+      setClearanceAdvancedOpen(false)
+      return
+    }
+    const advancedValues = ["purposeNote", "referredBy"].some((key) => Boolean(formValues[key]?.trim()))
+      || Boolean(formValues.remarks?.trim() && formValues.remarks !== "NO DEROGATORY RECORD ON FILE")
+      || Boolean(validationErrors.purposeNote || validationErrors.remarks || validationErrors.referredBy)
+      || formValues.purpose === "Employment Requirement/First Time Jobseeker"
+    if (advancedValues) setClearanceAdvancedOpen(true)
+  }, [selectedType, formValues.purpose, formValues.purposeNote, formValues.remarks, formValues.referredBy, validationErrors])
 
   function updateField(name: string, value: string) {
     const nextValue = ["motorNumber", "plateNumber", "name"].includes(name) ? value.toUpperCase() :
@@ -238,6 +250,7 @@ function IssuancesManagement() {
       ? formatPrintedName(formValues.firstName ?? "", formValues.middleName ?? "", formValues.lastName ?? "", value)
       : formValues.name ?? ""
     setSelectedType(value)
+    setClearanceAdvancedOpen(false)
     setFormValues({
       ...defaults,
       ...preserved,
@@ -650,9 +663,7 @@ function IssuancesManagement() {
                       formValues.remarks?.trim() && formValues.remarks !== "NO DEROGATORY RECORD ON FILE" ? "Remarks edited" : "",
                       formValues.referredBy?.trim() && formValues.referredBy !== "None" ? formValues.referredBy : "",
                     ].filter(Boolean).join(" · ")
-                    const showAdvanced = selectedType === "Barangay Clearance" && section.id === "details" && (
-                      advancedHasValues || formValues.purpose === "Employment Requirement/First Time Jobseeker"
-                    )
+
                     return (
                       <FormSection key={section.id} title={section.title} step={3} description={section.description}>
                         {section.id === "details" && selectedType === "Barangay Franchise Clearance" ? (
@@ -666,8 +677,8 @@ function IssuancesManagement() {
                           </>
                         ) : regularFields.map(renderField)}
                         {advancedFields.length > 0 ? (
-                          <details className="md:col-span-2" open={showAdvanced || undefined}>
-                            <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-primary underline underline-offset-4">More options (optional){!showAdvanced && advancedSummary ? <span className="ml-2 break-words text-xs font-normal text-muted-foreground">{advancedSummary}</span> : null}</summary>
+                          <details className="md:col-span-2" open={clearanceAdvancedOpen} onToggle={(event) => setClearanceAdvancedOpen(event.currentTarget.open)}>
+                            <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-primary underline underline-offset-4">More options (optional){!clearanceAdvancedOpen && advancedSummary ? <span className="ml-2 break-words text-xs font-normal text-muted-foreground">{advancedSummary}</span> : null}</summary>
                             <div className="grid gap-4 md:grid-cols-2">{advancedFields.map(renderField)}</div>
                           </details>
                         ) : null}
