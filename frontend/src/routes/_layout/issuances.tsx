@@ -176,12 +176,24 @@ function IssuancesManagement() {
   function updateField(name: string, value: string) {
     const nextValue = ["motorNumber", "plateNumber"].includes(name) ? value.toUpperCase() :
       name === "officialReceiptNumber" && value.trim().toUpperCase() === "FOC" ? "FOC" : value
-    setFormValues((previous) => ({
-      ...previous,
-      [name]: nextValue,
-      ...(name === "birthdate" ? { age: calculateAge(nextValue, previous.date || localDateValue()) } : {}),
-      ...(name === "date" ? { age: calculateAge(previous.birthdate || "", nextValue) } : {}),
-    }))
+    setFormValues((previous) => {
+      const next = {
+        ...previous,
+        [name]: nextValue,
+        ...(name === "birthdate" ? { age: calculateAge(nextValue, previous.date || localDateValue()) } : {}),
+        ...(name === "date" ? { age: calculateAge(previous.birthdate || "", nextValue) } : {}),
+      }
+      if (["firstName", "middleName", "lastName"].includes(name)) {
+        next.name = formatPrintedName(
+          next.firstName ?? "",
+          next.middleName ?? "",
+          next.lastName ?? "",
+          selectedType,
+        )
+        if (next.recipientChoice === "Oneself") next.underName = next.name
+      }
+      return next
+    })
     setValidationErrors((previous) => { const next = { ...previous }; delete next[name]; return next })
     setFormErrorSummary([])
     setNotice("")
