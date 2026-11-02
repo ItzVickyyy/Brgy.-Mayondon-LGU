@@ -12,6 +12,25 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 
+function residentBirthdateAge(value: string) {
+  const birthdate = new Date(`${value}T00:00:00`)
+  if (Number.isNaN(birthdate.getTime())) return value
+  const today = new Date()
+  let age = today.getFullYear() - birthdate.getFullYear()
+  if (
+    today.getMonth() < birthdate.getMonth() ||
+    (today.getMonth() === birthdate.getMonth() &&
+      today.getDate() < birthdate.getDate())
+  ) {
+    age -= 1
+  }
+  return `${birthdate.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  })} · ${age} yrs`
+}
+
 type ResidentProfileDialogProps = {
   resident: ResidentRecord | null
   onOpenChange: (open: boolean) => void
@@ -78,9 +97,11 @@ export function ResidentProfileDialog({
                 {[
                   ["Resident reference", resident.id],
                   ["Full name", resident.name],
+                  ["Birthdate / age", residentBirthdateAge(resident.birthdate)],
                   ["Complete address", resident.address],
                   ["Resident type", resident.residentType],
                   ["Registration", resident.registration],
+                  ["Barangay ID status", resident.idStatus],
                   ["Record status", resident.status],
                 ].map(([label, value]) => (
                   <div key={label} className="rounded-lg border bg-card p-4">
