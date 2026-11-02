@@ -57,7 +57,7 @@ test.describe("issuance summary validation helpers", () => {
 
   test("reports required fields for an empty Barangay Clearance", () => {
     const missing = getMissingFields("Barangay Clearance", {}, documentFields["Barangay Clearance"])
-    expect(missing.map((field) => field.label)).toEqual(expect.arrayContaining(["Date", "Name as printed", "ADDRESS", "BIRTHDATE", "BIRTHPLACE", "CIVIL STATUS", "PURPOSE", "Valid I.D. Presented", "Number", "Place of Issue", "Date of Issue", "Paid under OFFICIAL RECEIPT No."]))
+    expect(missing.map((field) => field.label)).toEqual(expect.arrayContaining(["Date on document", "Name as printed", "ADDRESS", "BIRTHDATE", "BIRTHPLACE", "CIVIL STATUS", "PURPOSE", "Valid I.D. Presented", "Number", "Place of Issue", "Date of Issue", "Paid under OFFICIAL RECEIPT No."]))
   })
 
   test("does not require age or birthdate for Franchise Clearance", () => {
