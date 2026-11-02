@@ -192,7 +192,7 @@ function IssuancesManagement() {
   const isDirty = Object.entries(formValues).some(([key, value]) => value.trim() !== (defaultsForDirtyCheck[key] ?? "").trim())
 
   function updateField(name: string, value: string) {
-    const nextValue = ["motorNumber", "plateNumber"].includes(name) ? value.toUpperCase() :
+    const nextValue = ["motorNumber", "plateNumber", "name"].includes(name) ? value.toUpperCase() :
       name === "officialReceiptNumber" && value.trim().toUpperCase() === "FOC" ? "FOC" : value
     setFormValues((previous) => {
       const next = {
@@ -338,7 +338,7 @@ function IssuancesManagement() {
       purpose: formValues.purpose,
       validUntil: formValues.validUntil,
       correctionReason: correctionTarget ? correctionReason : undefined,
-      fields: { ...formValues, officialReceiptNumber: formValues.officialReceiptNumber?.trim().toUpperCase() ?? "" },
+      fields: { ...formValues, officialReceiptNumber: formValues.officialReceiptNumber?.trim().toUpperCase() === "FOC" ? "FOC" : formValues.officialReceiptNumber?.trim() ?? "" },
     }
     setDrafts((previous) => [record, ...previous])
     if (selectedType === "Barangay Franchise Clearance" && formValues.tricycleAssociation?.trim()) setUsedAssociations((previous) => Array.from(new Set([...previous, formValues.tricycleAssociation.trim()])))
