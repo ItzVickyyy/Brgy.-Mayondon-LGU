@@ -101,6 +101,68 @@ function Reports() {
     setNotice(`Previewing ${report} for ${periodLabel[period].toLowerCase()}.`)
   }
 
+  function exportReport() {
+    if (!generated) {
+      setNotice("Preview a report before exporting.")
+      return
+    }
+    if (period === "week") {
+      setNotice("No activity in this period to export.")
+      return
+    }
+    let csvRows: (string | number)[][]
+    if (report === "issuances") {
+      csvRows = [
+        ["Document type", "Issued", "Voided", "Share", "vs previous period"],
+        ...documentTypeRows.map((row) => [row.document, row.issued, row.voided, row.share, row.change]),
+        ["Total", 128, 4, "100%", "+12%"],
+      ]
+    } else if (report === "purpose") {
+      csvRows = [
+        ["Purpose", "Issued", "Share"],
+        ...purposeRows.slice().sort((a, b) => b.issued - a.issued).map((row) => [row.purpose, row.issued, row.share]),
+        ["Total", 128, "100%"],
+      ]
+    } else if (report === "expiry") {
+      csvRows = [
+        ["Resident", "Record", "Reference", "Expires", "Status"],
+        ...expiringRows.map((row) => [row.resident, row.record, row.reference, formatReportDate(row.expires), row.status]),
+        ["Total", expiringRows.length, "records", "", ""],
+      ]
+    } else if (report === "imports") {
+      csvRows = [
+        ["Date", "File", "Imported by", "Imported", "Updated", "Skipped", "Failed"],
+        ...importRows.map((row) => [row.date, row.file, row.importedBy, row.imported, row.updated, row.skipped, row.failed]),
+        ["Total", "", "", 246, 12, 3, 2],
+      ]
+    } else {
+      csvRows = [
+        ["User", "Role", "Sign-ins", "Documents issued", "Records added / edited", "Last activity"],
+        ...accountActivityRows.map((row) => [row.user, row.role, row.signIns, row.documents, row.records, row.lastActivity]),
+        ["Total", "", 42, 80, 20, ""],
+      ]
+    }
+    const csv = csvRows
+      .map((row) => row.map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","))
+      .join("\r\n")
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.href = url
+    link.download = `management-report-${report}-${period}.csv`
+    link.click()
+    URL.revokeObjectURL(url)
+    setNotice("CSV export started for the displayed report.")
+  }
+
+  function printReport() {
+    if (!generated) {
+      setNotice("Preview a report before printing.")
+      return
+    }
+    window.print()
+  }
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -151,8 +213,8 @@ function Reports() {
               </select>
             </label>
             <Button onClick={previewReport}><BarChart3 aria-hidden="true" />Preview Report</Button>
-            <Button variant="outline" onClick={() => setNotice(generated ? "Export requested for the displayed report." : "Preview a report before exporting.")}><Download aria-hidden="true" />Export</Button>
-            <Button variant="outline" onClick={() => setNotice(generated ? "Print requested for the displayed report." : "Preview a report before printing.")}>Print</Button>
+            <Button variant="outline" onClick={exportReport}><Download aria-hidden="true" />Export</Button>
+            <Button variant="outline" onClick={printReport}>Print</Button>
           </div>
         </div>
 
