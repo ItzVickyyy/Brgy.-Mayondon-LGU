@@ -57,9 +57,10 @@ interface EditUserProps {
   user: UserPublic
   onSuccess: () => void
   protectRoleAndStatus?: boolean
+  asPrimaryButton?: boolean
 }
 
-const EditUser = ({ user, onSuccess, protectRoleAndStatus = false }: EditUserProps) => {
+const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButton = false }: EditUserProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -102,13 +103,20 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false }: EditUserPro
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuItem
-        onSelect={(e) => e.preventDefault()}
-        onClick={() => setIsOpen(true)}
-      >
-        <Pencil />
-        Edit User
-      </DropdownMenuItem>
+      {asPrimaryButton ? (
+        <Button type="button" variant="outline" size="sm" onClick={() => setIsOpen(true)}>
+          <Pencil aria-hidden="true" />
+          Edit
+        </Button>
+      ) : (
+        <DropdownMenuItem
+          onSelect={(e) => e.preventDefault()}
+          onClick={() => setIsOpen(true)}
+        >
+          <Pencil />
+          Edit User
+        </DropdownMenuItem>
+      )}
       <DialogContent className="sm:max-w-md">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
