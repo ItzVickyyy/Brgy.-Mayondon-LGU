@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Filter, Search } from "lucide-react"
 import { useMemo, useState } from "react"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
 import { pageTitle } from "@/config/site"
@@ -111,7 +112,7 @@ function ActivityLog() {
                     ? "Search user, action, or module"
                     : "Search your activity"
                 }
-                className="h-11 w-full rounded-md border border-input bg-background px-3 pl-9 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className={`${formControlClass} pl-9`}
               />
             </label>
             <label className="sm:w-52">
@@ -119,7 +120,7 @@ function ActivityLog() {
               <select
                 value={moduleFilter}
                 onChange={(event) => setModuleFilter(event.target.value)}
-                className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                className={formControlClass}
               >
                 <option value="all">All modules</option>
                 <option>Resident Records</option>
