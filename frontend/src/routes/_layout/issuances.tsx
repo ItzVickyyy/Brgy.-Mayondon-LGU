@@ -219,7 +219,7 @@ function IssuancesManagement() {
   }
 
   function changeDocumentType(value: string) {
-    const sharedKeys = ["firstName", "middleName", "lastName", "birthdate", "birthplace", "civilStatus", "address", "residentId", "photoUrl"]
+    const sharedKeys = ["firstName", "middleName", "lastName", "name", "birthdate", "age", "birthplace", "civilStatus", "address", "residentId", "photoUrl"]
     const previousFields = documentSections[selectedType]?.flatMap((section) => section.fields) ?? []
     const lost = previousFields.some((field) => !sharedKeys.includes(field.name) && field.name !== "date" && Boolean(formValues[field.name]?.trim()) && formValues[field.name] !== (field.defaultValue ?? ""))
     const preserved = Object.fromEntries(sharedKeys.filter((key) => formValues[key]).map((key) => [key, formValues[key]]))
