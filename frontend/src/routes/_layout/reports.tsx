@@ -68,6 +68,17 @@ const accountActivityRows = [
   { user: "staff", role: "Staff", signIns: 18, documents: 32, records: 8, lastActivity: "Oct 28, 2026" },
 ]
 
+function formatReportDate(value: string) {
+  const parsed = new Date(`${value}T00:00:00`)
+  return Number.isNaN(parsed.getTime())
+    ? value
+    : parsed.toLocaleDateString("en-US", {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+      })
+}
+
 function Reports() {
   const { user } = useAuth()
   const [period, setPeriod] = useState("month")
@@ -177,7 +188,7 @@ function Reports() {
               <h3 className="mb-3 font-semibold tracking-tight">Expiring records · {periodLabel[period]}</h3>
               <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr>{["Resident", "Record", "Reference", "Expires", "Status", "Actions"].map((label) => <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 font-medium sm:px-5"}>{label}</th>)}</tr></thead>
-                <tbody className="divide-y">{expiringRows.map((row) => <tr key={row.reference} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-semibold sm:px-5">{row.resident}</td><td className="px-4 py-3 sm:px-5">{row.record}</td><td className="px-4 py-3 font-mono sm:px-5">{row.reference}</td><td className="px-4 py-3 sm:px-5"><p>{row.expires}</p><p className="mt-1 text-xs text-muted-foreground">{row.days >= 0 ? `in ${row.days} days` : `expired ${Math.abs(row.days)} days ago`}</p></td><td className="px-4 py-3 sm:px-5"><Badge variant="outline" className={statusStyles[row.status]}>{row.status}</Badge></td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" asChild><a href={row.href}>Open record</a></Button></td></tr>)}</tbody>
+                <tbody className="divide-y">{expiringRows.map((row) => <tr key={row.reference} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-semibold sm:px-5">{row.resident}</td><td className="px-4 py-3 sm:px-5">{row.record}</td><td className="px-4 py-3 font-mono sm:px-5">{row.reference}</td><td className="px-4 py-3 sm:px-5"><p>{formatReportDate(row.expires)}</p><p className="mt-1 text-xs text-muted-foreground">{row.days >= 0 ? `in ${row.days} days` : `expired ${Math.abs(row.days)} days ago`}</p></td><td className="px-4 py-3 sm:px-5"><Badge variant="outline" className={statusStyles[row.status]}>{row.status}</Badge></td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" asChild><a href={row.href}>Open record</a></Button></td></tr>)}</tbody>
                 <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5" colSpan={6}>Total: {expiringRows.length} records</td></tr></tfoot>
               </table>
             </div>
