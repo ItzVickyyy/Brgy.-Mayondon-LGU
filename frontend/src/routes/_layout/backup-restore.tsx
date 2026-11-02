@@ -143,7 +143,7 @@ function BackupRestore() {
               <input
                 type="time"
                 defaultValue="17:00"
-                className="min-h-11 rounded-md border bg-background px-2"
+                className={`${formControlClass} max-w-40`}
               />
             </label>
             <label className="flex items-center justify-between gap-3 text-sm">
@@ -203,7 +203,7 @@ function BackupRestore() {
         </div>
       </section>
 
-      <section className="rounded-xl border border-destructive/30 bg-card p-5">
+      <section className="rounded-xl border border-destructive/30 bg-card p-4 shadow-sm sm:p-5">
         <div className="flex items-start gap-3">
           <div className="rounded-lg bg-destructive/10 p-2.5">
             <RotateCcw className="size-5 text-destructive" />
