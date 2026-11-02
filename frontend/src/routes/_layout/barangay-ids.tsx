@@ -219,7 +219,7 @@ function BarangayIdManagement() {
                   </td>
                   <td className="px-4 py-3 align-middle sm:px-5">{record.residentType}</td>
                   <td className="px-4 py-3 align-middle sm:px-5">{record.registrationStatus}</td>
-                  <td className="whitespace-nowrap px-4 py-4">
+                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
                     {record.issuedOn}
                   </td>
                   <td className="whitespace-nowrap px-4 py-4">
@@ -237,9 +237,6 @@ function BarangayIdManagement() {
                   </td>
                 </tr>
               ))}
-              {filteredIds.length === 0 && (
-                
-              )}
             </tbody>
           </table>
         </div>
