@@ -56,9 +56,10 @@ type FormData = z.infer<typeof formSchema>
 interface EditUserProps {
   user: UserPublic
   onSuccess: () => void
+  protectRoleAndStatus?: boolean
 }
 
-const EditUser = ({ user, onSuccess }: EditUserProps) => {
+const EditUser = ({ user, onSuccess, protectRoleAndStatus = false }: EditUserProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -198,6 +199,7 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                     <FormControl>
                       <select
                         className={formControlClass}
+                        disabled={protectRoleAndStatus}
                         value={field.value ? "admin" : "staff"}
                         onChange={(event) =>
                           field.onChange(event.target.value === "admin")
@@ -219,6 +221,7 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                   <FormItem className="flex items-center gap-3 space-y-0">
                     <FormControl>
                       <Checkbox
+                        disabled={protectRoleAndStatus}
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
