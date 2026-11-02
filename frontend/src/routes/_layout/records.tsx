@@ -41,6 +41,7 @@ function RecordsManagement() {
   const [importStep, setImportStep] = useState(0)
   const [selectedResident, setSelectedResident] =
     useState<ResidentRecord | null>(null)
+  const [isEditingResident, setIsEditingResident] = useState(false)
   const [profileTab, setProfileTab] = useState("Details")
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
@@ -208,6 +209,7 @@ function RecordsManagement() {
                               onSelect: () => {
                                 setSelectedResident(resident)
                                 setProfileTab("Details")
+                                setIsEditingResident(false)
                               },
                             }}
                             items={[
@@ -217,7 +219,7 @@ function RecordsManagement() {
                                 onSelect: () => {
                                   setSelectedResident(resident)
                                   setProfileTab("Details")
-                                  setNotice("Editing is not connected to saved resident records yet.")
+                                  setIsEditingResident(true)
                                 },
                               },
                               {
@@ -492,10 +494,25 @@ function RecordsManagement() {
       <ResidentProfileDialog
         resident={selectedResident}
         onOpenChange={(open) => {
-          if (!open) setSelectedResident(null)
+          if (!open) {
+            setSelectedResident(null)
+            setIsEditingResident(false)
+          }
         }}
         profileTab={profileTab}
         onProfileTabChange={setProfileTab}
+        editable={selectedResident?.status === "Active"}
+        startInEditMode={isEditingResident}
+        onSave={(updatedResident) => {
+          setResidents((current) =>
+            current.map((resident) =>
+              resident.id === updatedResident.id ? updatedResident : resident,
+            ),
+          )
+          setSelectedResident(updatedResident)
+          setNotice("Resident details updated in the current view.")
+          setIsEditingResident(false)
+        }}
       />
     </div>
   )
