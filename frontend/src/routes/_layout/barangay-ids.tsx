@@ -2,12 +2,14 @@ import { createFileRoute } from "@tanstack/react-router"
 import {
   Archive,
   CalendarClock,
+  CheckCircle2,
   Clock3,
   CreditCard,
   Printer,
   RefreshCw,
   Search,
   UserRound,
+  X,
 } from "lucide-react"
 import { useMemo, useState } from "react"
 import { EmptyState } from "@/components/Common/FeedbackState"
@@ -129,7 +131,11 @@ function BarangayIdManagement() {
           role="status"
           className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm"
         >
-          {notice}
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+          <p className="flex-1">{notice}</p>
+          <Button variant="ghost" size="icon" className="size-8" onClick={() => setNotice("")} aria-label="Dismiss message">
+            <X aria-hidden="true" />
+          </Button>
         </div>
       )}
 
