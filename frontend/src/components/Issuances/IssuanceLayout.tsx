@@ -28,7 +28,7 @@ export function FormSection({
   children: ReactNode
 }) {
   return (
-    <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+    <section className="rounded-xl border bg-card p-4 sm:p-5">
       <div className="mb-4">
         <h3 className="font-semibold tracking-tight">{title}</h3>
         {description ? (
