@@ -224,11 +224,18 @@ function IssuancesManagement() {
     const lost = previousFields.some((field) => !sharedKeys.includes(field.name) && field.name !== "date" && Boolean(formValues[field.name]?.trim()) && formValues[field.name] !== (field.defaultValue ?? ""))
     const preserved = Object.fromEntries(sharedKeys.filter((key) => formValues[key]).map((key) => [key, formValues[key]]))
     const defaults = createDefaultFormValues(value)
+    const residentRecord = sampleResidents.find((resident) => resident.id === selectedResidentId)
     const name = formValues.firstName || formValues.lastName
       ? formatPrintedName(formValues.firstName ?? "", formValues.middleName ?? "", formValues.lastName ?? "", value)
       : formValues.name ?? ""
     setSelectedType(value)
-    setFormValues({ ...defaults, ...preserved, name, age: calculateAge(formValues.birthdate ?? "", defaults.date ?? localDateValue()) })
+    setFormValues({
+      ...defaults,
+      ...preserved,
+      name,
+      age: calculateAge(formValues.birthdate ?? "", defaults.date ?? localDateValue()),
+      ...(residentRecord ? { sector: value === "Certification (assistance request)" ? residentRecord.sectors[0] ?? "" : residentRecord.sectors.slice(0, 2).join("||") } : {}),
+    })
     setValidationErrors({})
     setFormErrorSummary([])
     setLostDetailsNotice(lost ? `Details for ${selectedType} were cleared.` : "")
