@@ -509,11 +509,11 @@ function IssuancesManagement() {
       </Dialog>
 
       {/* History */}
-      <section className="print:hidden overflow-hidden rounded-xl border bg-card shadow-xs">
+      <section className="print:hidden overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-col gap-4 border-b p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="text-base font-semibold">Issuance History</h2>
+              <h2 className="font-semibold tracking-tight">Issuance History</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Showing {filteredIssuances.length} of {allRecords.length}{" "}
                 records
