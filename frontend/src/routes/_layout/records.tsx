@@ -223,7 +223,7 @@ function RecordsManagement() {
                               {
                                 label: "New issuance",
                                 hidden: archived,
-                                onSelect: () => setNotice(`Open Issuance Management to prepare a document for ${resident.name}.`),
+                                onSelect: () => window.location.assign(`/issuances?resident=${encodeURIComponent(resident.name)}`),
                               },
                               {
                                 label: "Archive",
