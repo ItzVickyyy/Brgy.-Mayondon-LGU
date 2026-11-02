@@ -69,6 +69,17 @@ const rows: ActivityRow[] = [
     outcome: "Success",
   },
   {
+    timestamp: "2026-10-27T15:48:00",
+    user: "admin",
+    owner: "other",
+    action: "Voided issuance",
+    reason: "Incorrect connection type selected",
+    module: "Issuances",
+    recordReference: "ISS-003",
+    recordHref: "/issuances",
+    outcome: "Success",
+  },
+  {
     timestamp: "2026-10-27T15:32:00",
     user: "staff",
     owner: "current",
