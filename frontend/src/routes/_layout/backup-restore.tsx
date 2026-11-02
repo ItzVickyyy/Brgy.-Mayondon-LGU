@@ -12,6 +12,7 @@ import {
 import { useState } from "react"
 
 import { NoPermission } from "@/components/Common/NoPermission"
+import { RowActions } from "@/components/Common/RowActions"
 import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
@@ -25,30 +26,66 @@ export const Route = createFileRoute("/_layout/backup-restore")({
   head: () => ({ meta: [{ title: pageTitle("Backup and Restore") }] }),
 })
 
-const sampleBackups = [
+type BackupStatus = "Verified" | "Not checked" | "Failed"
+
+type BackupRecord = {
+  name: string
+  createdAt: string
+  date: string
+  type: "Scheduled" | "Manual"
+  createdBy?: string
+  size: string
+  location: "External drive" | "This computer only"
+  status: BackupStatus
+  failureReason?: string
+}
+
+const sampleBackups: BackupRecord[] = [
   {
     name: "mayondon-db-20261028-090000.dump",
+    createdAt: "2026-10-28T09:00:00",
     date: "Oct 28, 2026 · 9:00 AM",
+    type: "Scheduled",
     size: "4.8 MB",
+    location: "This computer only",
     status: "Verified",
   },
   {
     name: "mayondon-db-20261027-170000.dump",
+    createdAt: "2026-10-27T17:00:00",
     date: "Oct 27, 2026 · 5:00 PM",
+    type: "Manual",
+    createdBy: "admin",
     size: "4.6 MB",
+    location: "External drive",
     status: "Verified",
   },
   {
     name: "mayondon-db-20261026-170000.dump",
+    createdAt: "2026-10-26T17:00:00",
     date: "Oct 26, 2026 · 5:00 PM",
+    type: "Scheduled",
     size: "4.5 MB",
-    status: "Verified",
+    location: "External drive",
+    status: "Failed",
+    failureReason: "Archive checksum did not match",
+  },
+  {
+    name: "mayondon-db-20261025-170000.dump",
+    createdAt: "2026-10-25T17:00:00",
+    date: "Oct 25, 2026 · 5:00 PM",
+    type: "Manual",
+    createdBy: "staff",
+    size: "4.4 MB",
+    location: "This computer only",
+    status: "Not checked",
   },
 ]
 
 function BackupRestore() {
   const { user } = useAuth()
   const [notice, setNotice] = useState("")
+  const [backups, setBackups] = useState(sampleBackups)
   const [confirmRestore, setConfirmRestore] = useState(false)
   const [selectedBackup, setSelectedBackup] = useState(sampleBackups[0].name)
   const [restoreConfirmation, setRestoreConfirmation] = useState("")
