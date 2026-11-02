@@ -108,7 +108,7 @@ function RecordsManagement() {
         >
           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
           <p className="flex-1">{notice}</p>
-          <Button variant="ghost" size="icon" className="size-8" onClick={() => setNotice("")} aria-label="Dismiss message">
+          <Button variant="ghost" size="icon" className="size-11" onClick={() => setNotice("")} aria-label="Dismiss message">
             <X aria-hidden="true" />
           </Button>
         </div>
@@ -166,7 +166,7 @@ function RecordsManagement() {
                 <tbody className="divide-y">
                   {filteredResidents.map((resident) => (
                     <tr key={resident.id} className="transition-colors hover:bg-muted/30">
-                      <td className="px-4 py-3 font-medium">{resident.id}</td>
+                      <td className="px-4 py-3 align-middle font-medium sm:px-5">{resident.id}</td>
                       <td className="px-4 py-3 align-middle sm:px-5">{resident.name}</td>
                       <td className="px-4 py-3 align-middle sm:px-5">{resident.address}</td>
                       <td className="px-4 py-3 align-middle sm:px-5">{resident.residentType}</td>
@@ -255,7 +255,7 @@ function RecordsManagement() {
                 </p>
                 <Button
                   variant="outline"
-                  className="mt-4 self-start"
+                  className="mt-4 min-h-11 self-start"
                   onClick={() => setNotice(`${item.action} screen selected.`)}
                 >
                   {item.action}
@@ -360,7 +360,7 @@ function RecordsManagement() {
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     {["Field", "Source column", "Validation"].map((label) => (
-                      <th key={label} className="px-4 py-3 font-medium">
+                      <th key={label} className="px-4 py-3 align-middle font-medium sm:px-5">
                         {label}
                       </th>
                     ))}
@@ -374,7 +374,7 @@ function RecordsManagement() {
                     ["Barangay ID number", "ID Number", "Check duplicates"],
                   ].map((row) => (
                     <tr key={row[0]} className="transition-colors hover:bg-muted/30">
-                      <td className="px-4 py-3 font-medium">{row[0]}</td>
+                      <td className="px-4 py-3 align-middle font-medium sm:px-5">{row[0]}</td>
                       <td className="px-4 py-3 align-middle sm:px-5">{row[1]}</td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {row[2]}
