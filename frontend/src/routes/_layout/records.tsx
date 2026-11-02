@@ -72,7 +72,7 @@ function RecordsManagement() {
             details, and existing Barangay ID references.
           </p>
         </div>
-        <Button onClick={() => setNotice("Resident record form opened.")}>
+        <Button className="min-h-11" onClick={() => setNotice("Resident record form opened.")}>
           <UserRound aria-hidden="true" />
           Add Resident
         </Button>
@@ -288,6 +288,7 @@ function RecordsManagement() {
                   key={label}
                   type="button"
                   variant={importStep === index ? "default" : "outline"}
+                  className="min-h-11"
                   aria-current={importStep === index ? "step" : undefined}
                   onClick={() => setImportStep(index)}
                 >
@@ -401,8 +402,8 @@ function RecordsManagement() {
             </div>
           ) : null}
           <div className="mt-5 flex flex-wrap justify-between gap-3 border-t pt-4">
-            <Button type="button" variant="outline" disabled={importStep === 0} onClick={() => setImportStep((step) => Math.max(0, step - 1))}>Previous step</Button>
-            <Button type="button" disabled={importStep === 3 || (importStep === 0 && !selectedFile)} onClick={() => setImportStep((step) => Math.min(3, step + 1))}>{importStep === 2 ? "Review results" : "Continue"}</Button>
+            <Button className="min-h-11" type="button" variant="outline" disabled={importStep === 0} onClick={() => setImportStep((step) => Math.max(0, step - 1))}>Previous step</Button>
+            <Button className="min-h-11" type="button" disabled={importStep === 3 || (importStep === 0 && !selectedFile)} onClick={() => setImportStep((step) => Math.min(3, step + 1))}>{importStep === 2 ? "Review results" : "Continue"}</Button>
           </div>
         </section>
       )}
