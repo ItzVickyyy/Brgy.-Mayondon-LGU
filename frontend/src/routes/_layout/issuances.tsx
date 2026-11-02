@@ -88,10 +88,11 @@ function getPreselectedResident() {
 }
 
 function IssuancesManagement() {
+  const initialResident = sampleResidents.find((resident) => resident.name === getPreselectedResident() || resident.id === getPreselectedResident())
   const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(() => Boolean(getPreselectedResident()))
   const [selectedType, setSelectedType] = useState(documentTypes[0])
   const [residentQuery, setResidentQuery] = useState("")
-  const [selectedResidentId, setSelectedResidentId] = useState("")
+  const [selectedResidentId, setSelectedResidentId] = useState(() => initialResident?.id ?? "")
   const [manualEntry, setManualEntry] = useState(false)
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
@@ -112,10 +113,25 @@ function IssuancesManagement() {
   const [continueTarget, setContinueTarget] = useState<IssuanceRecord | null>(null)
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
-  const [formValues, setFormValues] = useState<Record<string, string>>(() => ({
-    ...createDefaultFormValues(documentTypes[0]),
-    ...(getPreselectedResident() ? { name: getPreselectedResident() } : {}),
-  }))
+  const [formValues, setFormValues] = useState<Record<string, string>>(() => {
+    const defaults = createDefaultFormValues(documentTypes[0])
+    if (!initialResident) return { ...defaults, ...(getPreselectedResident() ? { name: getPreselectedResident() } : {}) }
+    const name = formatPrintedName(initialResident.firstName, initialResident.middleName, initialResident.lastName, documentTypes[0])
+    return {
+      ...defaults,
+      residentId: initialResident.id,
+      firstName: initialResident.firstName,
+      middleName: initialResident.middleName,
+      lastName: initialResident.lastName,
+      name,
+      address: initialResident.address.replace(/, Mayondon.*$/i, ""),
+      birthdate: initialResident.birthdate,
+      birthplace: initialResident.birthplace,
+      civilStatus: initialResident.civilStatus,
+      sector: initialResident.sectors.join("||"),
+      age: calculateAge(initialResident.birthdate, defaults.date || localDateValue()),
+    }
+  })
   const [drafts, setDrafts] = useState<IssuanceRecord[]>([])
   const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
   const [viewRecord, setViewRecord] = useState<IssuanceRecord | null>(null)
