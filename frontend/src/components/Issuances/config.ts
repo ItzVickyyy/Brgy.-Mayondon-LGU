@@ -146,7 +146,7 @@ export const documentSections: Record<string, DocumentSection[]> = {
       { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
     ] },
     { id: "details", title: "Franchise details", fields: [
-      { name: "tricycleAssociation", label: "TRICYCLE ASSOCIATION", type: "combobox", required: true },
+      { name: "tricycleAssociation", label: "TRICYCLE ASSOCIATION", type: "combobox", required: true, span: 3 },
       { name: "make", label: "MAKE", required: true },
       { name: "typeOfBody", label: "TYPE OF BODY", required: true, defaultValue: "TRICYCLE" },
       { name: "motorNumber", label: "MOTOR NO", required: true },
@@ -201,7 +201,7 @@ export const documentSections: Record<string, DocumentSection[]> = {
       { name: "assistanceType", label: "Assistance requested", type: "radio", options: ["Financial", "Medical", "Burial"], required: true },
       { name: "recipientChoice", label: "For", type: "radio", options: ["Oneself", "His or her"], required: true },
       { name: "recipientRelationship", label: "Relationship", showWhen: (values) => values.recipientChoice === "His or her", required: true },
-      { name: "underName", label: "Under the name of", required: true },
+      { name: "underName", label: "Under the name of", required: true, showWhen: (values) => values.recipientChoice !== "Oneself" },
     ] },
   ],
 }
