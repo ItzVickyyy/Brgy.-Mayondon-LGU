@@ -90,8 +90,13 @@ function formatDate(value: string) {
       })
 }
 
+function getPreselectedResident() {
+  if (typeof window === "undefined") return ""
+  return new URLSearchParams(window.location.search).get("resident") ?? ""
+}
+
 function IssuancesManagement() {
-  const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(false)
+  const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(() => Boolean(getPreselectedResident()))
   const [selectedType, setSelectedType] = useState(documentTypes[0])
   const [search, setSearch] = useState("")
   const [historyType, setHistoryType] = useState("All document types")
@@ -105,9 +110,10 @@ function IssuancesManagement() {
   const [continueTarget, setContinueTarget] = useState<IssuanceRecord | null>(null)
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
-  const [formValues, setFormValues] = useState<Record<string, string>>(() =>
-    createDefaultFormValues(documentTypes[0]),
-  )
+  const [formValues, setFormValues] = useState<Record<string, string>>(() => ({
+    ...createDefaultFormValues(documentTypes[0]),
+    ...(getPreselectedResident() ? { name: getPreselectedResident() } : {}),
+  }))
   const [drafts, setDrafts] = useState<IssuanceRecord[]>([])
   const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
   const [viewRecord, setViewRecord] = useState<IssuanceRecord | null>(null)
