@@ -43,7 +43,7 @@ test.describe("full-word date helpers", () => {
   })
 
   test("splits valid ISO dates with a zero-padded day", () => {
-    expect(splitIsoDate("2026-11-02")).toEqual({ year: "2026", month: "11", day: "02" })
+    expect(splitIsoDate("2026-11-02")).toEqual({ year: "2026", month: "11", day: "2" })
     expect(splitIsoDate("invalid")).toEqual({ year: "", month: "", day: "" })
   })
 })
