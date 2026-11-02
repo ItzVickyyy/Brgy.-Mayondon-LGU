@@ -1,12 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { Check, Clock3, Search, UserRoundCheck, X } from "lucide-react"
+import { Clock3, Search, UserRoundCheck } from "lucide-react"
 import { useMemo, useState } from "react"
+
+import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { formControlClass } from "@/components/Common/formStyles"
+import { RowActions } from "@/components/Common/RowActions"
+import { statusStyles } from "@/components/Common/statusStyles"
+import { Badge } from "@/components/ui/badge"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
-import { updateRegistrationStatus, useRegistrations } from "@/lib/registration-store"
+import {
+  updateRegistrationStatus,
+  useRegistrations,
+  type Registration,
+  type RegistrationStatus,
+} from "@/lib/registration-store"
 
 export const Route = createFileRoute("/_layout/pending-registrations")({
   component: PendingRegistrations,
@@ -17,123 +28,221 @@ function PendingRegistrations() {
   const { user } = useAuth()
   const registrations = useRegistrations()
   const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState<"all" | RegistrationStatus>(
+    "Pending",
+  )
+  const [pendingDecision, setPendingDecision] = useState<{
+    row: Registration
+    status: "Approved" | "Rejected"
+  } | null>(null)
+
   const visibleRegistrations = useMemo(() => {
     const query = search.trim().toLowerCase()
-    return registrations.filter((row) =>
-      [row.name, row.username, row.submitted, row.status].some((value) =>
-        value.toLowerCase().includes(query),
-      ),
-    )
-  }, [registrations, search])
+    return registrations
+      .filter((row) => {
+        const matchesSearch = [
+          row.name,
+          row.position,
+          row.username,
+          row.submitted,
+          row.status,
+          row.decidedBy ?? "",
+          row.decidedOn ?? "",
+        ].some((value) => value.toLowerCase().includes(query))
+        return (
+          matchesSearch &&
+          (statusFilter === "all" || row.status === statusFilter)
+        )
+      })
+      .sort((a, b) => {
+        if (a.status === "Pending" && b.status !== "Pending") return -1
+        if (a.status !== "Pending" && b.status === "Pending") return 1
+        return new Date(a.submitted).getTime() - new Date(b.submitted).getTime()
+      })
+  }, [registrations, search, statusFilter])
 
-  const decide = (username: string, status: "Approved" | "Rejected") => {
-    const action = status === "Approved" ? "approve" : "reject"
-    if (!window.confirm(`Are you sure you want to ${action} this request?`))
-      return
-    updateRegistrationStatus(username, status)
-  }
+  const isAdmin = isSystemAdministrator(user)
+  if (!isAdmin) return <NoPermission />
 
-  if (!isSystemAdministrator(user)) return <NoPermission />
+  const pendingCount = registrations.filter(
+    (row) => row.status === "Pending",
+  ).length
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-          Pending Registrations
-        </h1>
-        <p className="mt-2 text-muted-foreground">
-          Review and manage staff access requests.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+            Pending Registrations
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Review and manage staff access requests.
+          </p>
+        </div>
       </div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <span className="inline-flex w-fit items-center gap-2 rounded-full border px-3 py-2 text-sm">
-          <Clock3 className="size-4" aria-hidden="true" />
-          {registrations.filter((row) => row.status === "Pending").length}{" "}
-          pending
-        </span>
-        <label className="relative block w-full sm:max-w-sm">
-          <Search
-            className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <input
-            aria-label="Search registrations"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search applicants..."
-            className="h-11 w-full rounded-md border bg-background pl-9 pr-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
-        </label>
-      </div>
-      <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full min-w-[680px] text-left text-base">
-          <thead className="bg-muted/40 text-muted-foreground">
-            <tr>
-              {[
-                "Applicant",
-                "Requested username",
-                "Submitted",
-                "Status",
-                "Actions",
-              ].map((item) => (
-                <th key={item} className="px-4 py-3 font-medium">
-                  {item}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {visibleRegistrations.map((row) => (
-              <tr key={row.username} className="border-t">
-                <td className="px-4 py-4">
-                  <span className="inline-flex items-center gap-2">
-                    <UserRoundCheck
-                      className="size-4 text-muted-foreground"
-                      aria-hidden="true"
-                    />
-                    {row.name}
-                  </span>
-                </td>
-                <td className="px-4 py-4">{row.username}</td>
-                <td className="px-4 py-4">{row.submitted}</td>
-                <td className="px-4 py-4">
-                  <span className="rounded-full border px-2.5 py-1 text-sm">
-                    {row.status}
-                  </span>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      disabled={row.status !== "Pending"}
-                      onClick={() => decide(row.username, "Approved")}
-                      className="inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-sm hover:bg-muted disabled:opacity-40"
-                    >
-                      <Check className="size-4" aria-hidden="true" />
-                      Approve
-                    </button>
-                    <button
-                      type="button"
-                      disabled={row.status !== "Pending"}
-                      onClick={() => decide(row.username, "Rejected")}
-                      className="inline-flex min-h-11 items-center gap-1 rounded-md border px-3 text-sm hover:bg-muted disabled:opacity-40"
-                    >
-                      <X className="size-4" aria-hidden="true" />
-                      Reject
-                    </button>
-                  </div>
-                </td>
+
+      <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <div className="flex flex-col gap-3 border-b p-4 sm:p-5">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <h2 className="font-semibold tracking-tight">
+                Access Requests
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Review the applicant details before deciding.
+              </p>
+            </div>
+            <span className="inline-flex min-h-8 shrink-0 items-center gap-2 rounded-full border px-3 text-xs font-semibold">
+              <Clock3 className="size-4" aria-hidden="true" />
+              {pendingCount} pending
+            </span>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <label className="relative block min-w-0 flex-1 sm:max-w-sm">
+              <span className="sr-only">Search registrations</span>
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search applicants..."
+                className={`${formControlClass} pl-9`}
+              />
+            </label>
+            <label className="sm:w-52">
+              <span className="sr-only">Filter by status</span>
+              <select
+                value={statusFilter}
+                onChange={(event) =>
+                  setStatusFilter(event.target.value as "all" | RegistrationStatus)
+                }
+                className={formControlClass}
+              >
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+                <option value="all">All statuses</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[800px] text-left text-sm">
+            <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+              <tr>
+                {["Applicant", "Position", "Email / Username", "Submitted", "Status", "Actions"].map((item) => (
+                  <th
+                    key={item}
+                    className={`px-4 py-3 font-medium align-middle sm:px-5 ${item === "Actions" ? "text-right" : ""}`}
+                  >
+                    {item}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {visibleRegistrations.length === 0 ? (
-          <EmptyState
-            title="No registrations found"
-            description="Try a different applicant name, username, date, or status."
-          />
-        ) : null}
-      </div>
+            </thead>
+            <tbody className="divide-y">
+              {visibleRegistrations.map((row) => (
+                <tr key={row.username} className="transition-colors hover:bg-muted/30">
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    <div className="flex items-start gap-2">
+                      <UserRoundCheck className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                      <span className="font-medium">{row.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 align-middle sm:px-5">{row.position}</td>
+                  <td className="px-4 py-3 align-middle font-medium sm:px-5">{row.username}</td>
+                  <td className="px-4 py-3 align-middle sm:px-5">{row.submitted}</td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    <div className="flex flex-col items-start gap-1">
+                      <Badge variant="outline" className={statusStyles[row.status]}>
+                        {row.status}
+                      </Badge>
+                      {row.decidedBy && row.decidedOn ? (
+                        <span className="text-xs text-muted-foreground">
+                          by {row.decidedBy} · {row.decidedOn}
+                        </span>
+                      ) : null}
+                      {row.rejectionReason ? (
+                        <span className="text-xs text-muted-foreground">
+                          Reason: {row.rejectionReason}
+                        </span>
+                      ) : null}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    <RowActions
+                      name={row.name}
+                      isAdmin={isAdmin}
+                      primary={
+                        row.status === "Pending"
+                          ? {
+                              label: "Approve as Staff",
+                              onSelect: () =>
+                                setPendingDecision({ row, status: "Approved" }),
+                            }
+                          : undefined
+                      }
+                      items={[
+                        {
+                          label: "Reject",
+                          hidden: row.status !== "Pending",
+                          onSelect: () =>
+                            setPendingDecision({ row, status: "Rejected" }),
+                          destructive: true,
+                        },
+                      ]}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {visibleRegistrations.length === 0 ? (
+            <EmptyState
+              title="No registrations found"
+              description="Try a different applicant name, username, date, or status."
+            />
+          ) : null}
+        </div>
+        <div className="border-t px-4 py-3 text-xs text-muted-foreground sm:px-5">
+          Showing {visibleRegistrations.length} of {registrations.length} registrations
+        </div>
+      </section>
+
+      <ConfirmDialog
+        open={pendingDecision !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDecision(null)
+        }}
+        title={
+          pendingDecision?.status === "Approved"
+            ? "Approve access request?"
+            : "Reject access request?"
+        }
+        description={
+          pendingDecision
+            ? `Are you sure you want to ${pendingDecision.status.toLowerCase()} ${pendingDecision.row.name}'s request?`
+            : "Confirm this registration decision."
+        }
+        confirmLabel={
+          pendingDecision?.status === "Approved" ? "Approve as Staff" : "Reject request"
+        }
+        destructive={pendingDecision?.status === "Rejected"}
+        reason={pendingDecision?.status === "Rejected" ? "optional" : "none"}
+        onConfirm={(reason) => {
+          if (!pendingDecision) return
+          updateRegistrationStatus(
+            pendingDecision.row.username,
+            pendingDecision.status,
+            user?.username ?? user?.email ?? "admin",
+            reason,
+          )
+          setPendingDecision(null)
+        }}
+      />
     </div>
   )
 }
