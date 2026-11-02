@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Filter, Search } from "lucide-react"
 import { useMemo, useState } from "react"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { Badge } from "@/components/ui/badge"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/_layout/activity-log")({
   component: ActivityLog,
   head: () => ({ meta: [{ title: pageTitle("Activity Log") }] }),
 })
+
 const rows = [
   {
     time: "Oct 28, 2026 · 10:42 AM",
@@ -51,6 +53,15 @@ const rows = [
     outcome: "Completed",
   },
 ]
+
+const outcomeStyles: Record<string, string> = {
+  Success:
+    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
+  Completed:
+    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
+  "In progress": "border-border bg-muted text-muted-foreground",
+}
+
 function ActivityLog() {
   const { user } = useAuth()
   const isAdmin = Boolean(user?.is_superuser)
@@ -68,83 +79,124 @@ function ActivityLog() {
       ),
     [isAdmin, moduleFilter, search],
   )
+
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-          Activity Log
-        </h1>
-        <p className="mt-2 text-base text-muted-foreground">
-          {isAdmin
-            ? "Review activity across user accounts."
-            : "Review activity associated with your account."}
-        </p>
-      </div>
-      <div className="flex flex-wrap gap-3">
-        <div className="relative min-w-[220px] flex-1">
-          <Search className="absolute left-3 top-2.5 size-4 text-muted-foreground" />
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder={
-              isAdmin
-                ? "Search user, action, or module"
-                : "Search your activity"
-            }
-            className="min-h-11 w-full rounded-md border bg-background pl-9 pr-3 text-sm"
-          />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+            Activity Log
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {isAdmin
+              ? "Review activity across user accounts."
+              : "Review activity associated with your account."}
+          </p>
         </div>
-        <select
-          value={moduleFilter}
-          onChange={(event) => setModuleFilter(event.target.value)}
-          className="min-h-11 rounded-md border bg-background px-3 text-sm"
-        >
-          <option value="all">All modules</option>
-          <option>Resident Records</option>
-          <option>Document Management</option>
-          <option>User Accounts</option>
-          <option>Authentication</option>
-        </select>
-        <span className="inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm text-muted-foreground">
-          <Filter className="size-4" />
-          {visibleRows.length} entries
-        </span>
       </div>
-      <div className="overflow-x-auto rounded-xl border bg-card">
-        <table className="w-full min-w-[760px] text-left text-base">
-          <thead className="bg-muted/40 text-sm text-muted-foreground">
-            <tr>
-              {[
-                ...(isAdmin ? ["Timestamp", "User"] : ["Timestamp"]),
-                "Action",
-                "Module",
-                "Outcome",
-              ].map((item) => (
-                <th key={item} className="px-4 py-3 font-medium">
-                  {item}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {visibleRows.map((row) => (
-              <tr key={row.time + row.action} className="border-t">
-                <td className="px-4 py-4">{row.time}</td>
-                {isAdmin ? <td className="px-4 py-4">{row.user}</td> : null}
-                <td className="px-4 py-4">{row.action}</td>
-                <td className="px-4 py-4">{row.module}</td>
-                <td className="px-4 py-4">{row.outcome}</td>
+
+      <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <div className="flex flex-col gap-3 border-b p-4 sm:p-5">
+          <div>
+            <h2 className="font-semibold tracking-tight">Activity Log</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Review and filter recorded system activity.
+            </p>
+          </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <label className="relative block min-w-0 flex-1 sm:max-w-sm">
+              <span className="sr-only">Search activity</span>
+              <Search
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={
+                  isAdmin
+                    ? "Search user, action, or module"
+                    : "Search your activity"
+                }
+                className="h-11 w-full rounded-md border border-input bg-background px-3 pl-9 text-sm shadow-xs outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              />
+            </label>
+            <label className="sm:w-52">
+              <span className="sr-only">Filter by module</span>
+              <select
+                value={moduleFilter}
+                onChange={(event) => setModuleFilter(event.target.value)}
+                className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              >
+                <option value="all">All modules</option>
+                <option>Resident Records</option>
+                <option>Document Management</option>
+                <option>User Accounts</option>
+                <option>Authentication</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px] text-left text-sm">
+            <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+              <tr>
+                {(isAdmin
+                  ? ["Timestamp", "User", "Action", "Module", "Outcome"]
+                  : ["Timestamp", "Action", "Module", "Outcome"]
+                ).map((item) => (
+                  <th key={item} className="px-4 py-3 font-medium sm:px-5">
+                    {item}
+                  </th>
+                ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-        {visibleRows.length === 0 ? (
-          <EmptyState
-            title="No matching activity"
-            description="Try a different search term or module filter."
-          />
-        ) : null}
-      </div>
+            </thead>
+            <tbody className="divide-y">
+              {visibleRows.map((row) => (
+                <tr
+                  key={row.time + row.action}
+                  className="transition-colors hover:bg-muted/30"
+                >
+                  <td className="px-4 py-3 align-middle sm:px-5">{row.time}</td>
+                  {isAdmin ? (
+                    <td className="px-4 py-3 align-middle font-medium sm:px-5">
+                      {row.user}
+                    </td>
+                  ) : null}
+                  <td className="px-4 py-3 align-middle font-medium sm:px-5">
+                    {row.action}
+                  </td>
+                  <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">
+                    {row.module}
+                  </td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    <Badge variant="outline" className={outcomeStyles[row.outcome]}>
+                      {row.outcome}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {visibleRows.length === 0 ? (
+            <EmptyState
+              title="No matching activity"
+              description="Try a different search term or module filter."
+            />
+          ) : null}
+        </div>
+
+        <div className="flex items-center justify-between gap-3 border-t px-4 py-3 text-xs text-muted-foreground sm:px-5">
+          <span>
+            Showing {visibleRows.length} entr{visibleRows.length === 1 ? "y" : "ies"}
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <Filter className="size-3.5" aria-hidden="true" />
+            Activity records
+          </span>
+        </div>
+      </section>
     </div>
   )
 }
