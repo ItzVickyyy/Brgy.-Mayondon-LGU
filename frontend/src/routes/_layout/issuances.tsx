@@ -622,7 +622,7 @@ function IssuancesManagement() {
             setCorrectionTarget(record)
             setCorrectionReason(reason)
             setSelectedType(record.type)
-            setFormValues({ ...createDefaultFormValues(record.type), ...record.fields, name: record.resident, date: record.date })
+            setFormValues({ ...createDefaultFormValues(record.type), ...record.fields, name: record.resident, date: record.date, purpose: record.purpose ?? record.fields.purpose ?? "", validUntil: record.validUntil ?? record.fields.validUntil ?? "" })
             setIsIssuanceModalOpen(true)
           }
           setPendingAction(null)
