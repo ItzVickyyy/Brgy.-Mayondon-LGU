@@ -12,6 +12,7 @@ export type DocumentField = {
   span?: 1 | 2 | 3
   defaultToday?: boolean
   fullWidth?: boolean
+  advanced?: boolean
 }
 export type DocumentSection = { id: string; title: string; description?: string; fields: DocumentField[] }
 export type IssuanceRecord = {
@@ -81,9 +82,9 @@ const ctcFields: DocumentField[] = [
 ]
 const clearanceResident: DocumentField[] = [
   { name: "firstName", label: "Given names" },
-      { name: "middleName", label: "Middle name" },
-      { name: "lastName", label: "Surname" },
-      { name: "name", label: "Name as printed", required: true },
+  { name: "middleName", label: "Middle name" },
+  { name: "lastName", label: "Surname" },
+  { name: "name", label: "Name as printed", required: true },
   { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
   { name: "birthdate", label: "BIRTHDATE", type: "date", required: true },
   { name: "age", label: "AGE", type: "readonly" },
@@ -97,6 +98,13 @@ export const documentTypes = [
   "Certificate of Indigency",
   "Certification (assistance request)",
 ]
+export const documentCardInfo: Record<string, { name: string; hint: string }> = {
+  "Barangay Clearance": { name: "Barangay Clearance", hint: "Jobs, school, loans" },
+  "Barangay Franchise Clearance": { name: "Franchise Clearance", hint: "Tricycle franchise" },
+  "Barangay Clearance, Electrical and Water Connection": { name: "Electrical & Water", hint: "Utility connection" },
+  "Certificate of Indigency": { name: "Certificate of Indigency", hint: "Assistance, fee waiver" },
+  "Certification (assistance request)": { name: "Assistance Certification", hint: "Financial, medical, burial" },
+}
 export const historyDocumentTypes = [
   "Barangay ID",
   "Barangay Clearance",
@@ -107,14 +115,22 @@ export const historyDocumentTypes = [
   "Assistance Request Certification",
   "Damayan",
 ]
+export function normalizeDocumentType(value: string): string {
+  const normalized = value.trim().toLowerCase()
+  if (["franchise clearance", "barangay franchise clearance"].includes(normalized)) return "franchise-clearance"
+  if (["barangay clearance (electrical and water connection)", "barangay clearance, electrical and water connection", "electrical & water"].includes(normalized)) return "electrical-water-clearance"
+  if (["assistance request certification", "certification (assistance request)", "assistance certification"].includes(normalized)) return "assistance-certification"
+  return normalized
+}
+
 export const documentSections: Record<string, DocumentSection[]> = {
   "Barangay Clearance": [
     { id: "resident", title: "Resident", description: "Select a resident or enter details manually.", fields: clearanceResident },
     { id: "details", title: "Clearance details", fields: [
       { name: "purpose", label: "PURPOSE", type: "combobox", options: clearancePurposeOptions, required: true },
-      { name: "purposeNote", label: "Purpose note", help: "Printed on the line below PURPOSE." },
-      { name: "remarks", label: "REMARKS", defaultValue: "NO DEROGATORY RECORD ON FILE" },
-      { name: "referredBy", label: "Referred by (c/o)", type: "select", options: ["None", "c/o Kap. Barangay Captain", "c/o Kag. Barangay Kagawad 1"] },
+      { name: "purposeNote", label: "Purpose note", help: "Printed on the line below PURPOSE.", advanced: true },
+      { name: "remarks", label: "REMARKS", defaultValue: "NO DEROGATORY RECORD ON FILE", advanced: true },
+      { name: "referredBy", label: "Referred by (c/o)", type: "select", options: [], advanced: true },
     ] },
     { id: "receipt", title: "Identification & receipt", fields: [
       { name: "validIdPresented", label: "Valid I.D. Presented", type: "select", options: idTypeOptions, required: true },
@@ -140,9 +156,6 @@ export const documentSections: Record<string, DocumentSection[]> = {
     { id: "receipt", title: "CTC & receipt", fields: ctcFields },
   ],
   "Barangay Clearance, Electrical and Water Connection": [
-    { id: "services", title: "Connection service", fields: [
-      { name: "serviceType", label: "Service", type: "checkboxes", options: ["Electric", "Water"], required: true },
-    ] },
     { id: "resident", title: "Resident", fields: [
       { name: "firstName", label: "Given names" },
       { name: "middleName", label: "Middle name" },
@@ -151,6 +164,7 @@ export const documentSections: Record<string, DocumentSection[]> = {
       { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
     ] },
     { id: "details", title: "Connection details", fields: [
+      { name: "serviceType", label: "Service", type: "checkboxes", options: ["Electric", "Water"], required: true, fullWidth: true },
       { name: "connectionType", label: "TYPE OF CONNECTION", type: "radio", options: ["New", "Reconnection"], required: true },
       { name: "classification", label: "CLASSIFICATION", type: "radio", options: ["Residential", "Commercial"], required: true },
       { name: "location", label: "LOCATION", required: true, defaultValue: "Barangay Mayondon" },
