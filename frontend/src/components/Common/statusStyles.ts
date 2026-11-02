@@ -30,6 +30,7 @@ export const statusStyles: Record<string, string> = {
   Rejected:
     "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
   Archived: "border-border bg-muted text-muted-foreground",
+  None: "border-border bg-muted text-muted-foreground",
   Former: "border-border bg-muted text-muted-foreground",
   Voided: "border-border bg-muted text-muted-foreground",
   "Not checked": "border-border bg-muted text-muted-foreground",
