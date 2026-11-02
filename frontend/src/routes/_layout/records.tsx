@@ -133,7 +133,7 @@ function RecordsManagement() {
               <label className="relative block w-full sm:max-w-sm">
                 <span className="sr-only">Search resident records</span>
                 <Search
-                  className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                   aria-hidden="true"
                 />
                 <input
