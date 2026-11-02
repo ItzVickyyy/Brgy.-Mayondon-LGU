@@ -1,7 +1,15 @@
 export type ResidentRecord = {
   id: string
   name: string
+  firstName: string
+  middleName: string
+  lastName: string
   birthdate: string
+  birthplace: string
+  civilStatus: string
+  sectors: string[]
+  residentSince: number
+  photoUrl?: string
   address: string
   residentType: string
   idNumber: string
