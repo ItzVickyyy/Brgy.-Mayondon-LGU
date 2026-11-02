@@ -136,7 +136,7 @@ export function DateField({
             value={year}
             onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault() }}
             onChange={(event) => {
-              const nextYear = event.target.value.replace(/\\D/g, "").slice(0, 4)
+              const nextYear = event.target.value.replace(/\D/g, "").slice(0, 4)
               const nextMonth = month
               const nextDay = day && nextYear.length === 4 && nextMonth && Number(day) > daysInMonth(Number(nextYear), Number(nextMonth)) ? "" : day
               setYear(nextYear)
