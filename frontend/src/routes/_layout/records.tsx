@@ -84,19 +84,20 @@ function RecordsManagement() {
         aria-label="Resident record views"
       >
         {tabs.map((tab) => (
-          <button
+          <Button
             key={tab.id}
             type="button"
             role="tab"
+            variant={view === tab.id ? "default" : "ghost"}
             aria-selected={view === tab.id}
             onClick={() => {
               setView(tab.id)
               setNotice("")
             }}
-            className={`min-h-11 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${view === tab.id ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+            className="min-h-11 rounded-md px-3"
           >
             {tab.label}
-          </button>
+          </Button>
         ))}
       </div>
 
