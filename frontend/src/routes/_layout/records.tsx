@@ -168,7 +168,7 @@ function RecordsManagement() {
                   {filteredResidents.map((resident) => (
                     <tr key={resident.id} className="transition-colors hover:bg-muted/30">
                       <td className="px-4 py-3 align-middle font-medium sm:px-5">{resident.id}</td>
-                      <td className="px-4 py-3 align-middle sm:px-5">{resident.name}</td>
+                      <td className="px-4 py-3 align-middle font-medium sm:px-5">{resident.name}</td>
                       <td className="px-4 py-3 align-middle sm:px-5">{resident.address}</td>
                       <td className="px-4 py-3 align-middle sm:px-5">{resident.residentType}</td>
                       <td className="px-4 py-3 align-middle sm:px-5">{resident.idNumber}</td>
