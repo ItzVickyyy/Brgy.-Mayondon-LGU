@@ -411,7 +411,7 @@ function IssuancesManagement() {
       </div>
 
       {/* New issuance dialog */}
-      <Dialog open={isIssuanceModalOpen} onOpenChange={setIsIssuanceModalOpen}>
+      <Dialog open={isIssuanceModalOpen} onOpenChange={(open) => { setIsIssuanceModalOpen(open); if (!open) { setContinueTarget(null); setCorrectionTarget(null); setCorrectionReason("") } }}>
         <DialogContent className="print:hidden flex max-h-[92dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
           <DialogHeader className="border-b px-5 py-4 pr-12 sm:px-6">
             <DialogTitle className="text-lg">New Issuance</DialogTitle>
@@ -522,6 +522,30 @@ function IssuancesManagement() {
                   <dd className="mt-0.5 font-medium">
                     {formatDate(viewRecord.date)}
                   </dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">Purpose</dt>
+                  <dd className="mt-0.5 font-medium">{viewRecord.purpose || viewRecord.fields.purpose || "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">Valid until</dt>
+                  <dd className="mt-0.5 font-medium">{viewRecord.validUntil ? formatDate(viewRecord.validUntil) : "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">Issued by</dt>
+                  <dd className="mt-0.5 font-medium">{viewRecord.issuedBy || "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">OR number</dt>
+                  <dd className="mt-0.5 font-medium">{viewRecord.orNumber || "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">Correction reason</dt>
+                  <dd className="mt-0.5 font-medium">{viewRecord.correctionReason || "—"}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-muted-foreground">Void reason</dt>
+                  <dd className="mt-0.5 font-medium">{viewRecord.voidReason || "—"}</dd>
                 </div>
                 <div>
                   <dt className="text-xs text-muted-foreground">Status</dt>
