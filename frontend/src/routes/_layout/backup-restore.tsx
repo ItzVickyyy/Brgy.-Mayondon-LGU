@@ -73,7 +73,7 @@ function BackupRestore() {
         >
           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
           <p className="flex-1">{notice}</p>
-          <Button variant="ghost" size="icon" className="size-8" onClick={() => setNotice("")} aria-label="Dismiss message"><X aria-hidden="true" /></Button>
+          <Button variant="ghost" size="icon" className="size-11" onClick={() => setNotice("")} aria-label="Dismiss message"><X aria-hidden="true" /></Button>
         </div>
       ) : null}
 
@@ -149,7 +149,7 @@ function BackupRestore() {
             <label className="flex items-center justify-between gap-3 text-sm">
               <span>Keep recent backups</span>
               <select
-                className="min-h-11 rounded-md border bg-background px-2"
+                className={`${formControlClass} max-w-40`}
                 defaultValue="7"
               >
                 <option value="3">3 copies</option>
