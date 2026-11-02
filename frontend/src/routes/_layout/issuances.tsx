@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router"
 import {
-  AlertCircle,
   CalendarDays,
+  Check,
   CheckCircle2,
   Eraser,
   Eye,
@@ -23,13 +23,18 @@ import {
   documentSections,
   documentTypes,
   historyDocumentTypes,
+  documentCardInfo,
+  normalizeDocumentType,
   type IssuanceRecord,
   sampleIssuances,
 } from "@/components/Issuances/config"
 import { FormSection, SummaryCard } from "@/components/Issuances/IssuanceLayout"
+import { DateField } from "@/components/Issuances/DateField"
+import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
+import { getMissingFields } from "@/components/Issuances/print-summary"
 import { sampleResidents } from "@/components/Records/records-sample-data"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
-import { calculateAge, formatPaperDate, formatPrintedName, getDateParts } from "@/lib/issuance-format"
+import { calculateAge, formatPaperDate, formatPrintedName } from "@/lib/issuance-format"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -96,6 +101,7 @@ function IssuancesManagement() {
   const [residentQuery, setResidentQuery] = useState("")
   const [selectedResidentId, setSelectedResidentId] = useState(() => initialResident?.id ?? "")
   const [manualEntry, setManualEntry] = useState(false)
+  const [showNameParts, setShowNameParts] = useState(false)
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [formErrorSummary, setFormErrorSummary] = useState<string[]>([])
@@ -138,6 +144,7 @@ function IssuancesManagement() {
   const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
   const [viewRecord, setViewRecord] = useState<IssuanceRecord | null>(null)
   const [notice, setNotice] = useState("")
+  const [noticePrintRecord, setNoticePrintRecord] = useState<IssuanceRecord | null>(null)
   const currentName = formValues.name?.trim() || "Name not entered"
   const currentDate = formValues.date || ""
   const allRecords = useMemo(() => [...drafts, ...historyRecords], [drafts, historyRecords])
@@ -154,7 +161,7 @@ function IssuancesManagement() {
             item.status,
             item.purpose ?? "",
           ].some((value) => value.toLowerCase().includes(query))
-          const matchesType = historyType === "All document types" || item.type === historyType
+          const matchesType = historyType === "All document types" || normalizeDocumentType(item.type) === normalizeDocumentType(historyType)
           const matchesStatus = historyStatus === "all" || item.status === historyStatus
           return matchesSearch && matchesType && matchesStatus &&
             (!startDate || item.date >= startDate) &&
@@ -218,6 +225,7 @@ function IssuancesManagement() {
     setValidationErrors((previous) => { const next = { ...previous }; delete next[name]; return next })
     setFormErrorSummary([])
     setNotice("")
+    setNoticePrintRecord(null)
   }
 
   function changeDocumentType(value: string) {
@@ -231,6 +239,7 @@ function IssuancesManagement() {
       ? formatPrintedName(formValues.firstName ?? "", formValues.middleName ?? "", formValues.lastName ?? "", value)
       : formValues.name ?? ""
     setSelectedType(value)
+    setShowNameParts(false)
     setFormValues({
       ...defaults,
       ...preserved,
@@ -264,6 +273,7 @@ function IssuancesManagement() {
       ...(previous.recipientChoice === "Oneself" ? { underName: name } : {}),
     }))
     setSelectedResidentId(resident.id)
+    setShowNameParts(false)
     setResidentQuery("")
     setManualEntry(false)
     setValidationErrors({})
@@ -272,6 +282,7 @@ function IssuancesManagement() {
 
   function startManualEntry() {
     setSelectedResidentId("")
+    setShowNameParts(false)
     setResidentQuery("")
     setManualEntry(true)
     setFormValues((previous) => ({
@@ -362,12 +373,14 @@ function IssuancesManagement() {
     if (selectedType === "Barangay Franchise Clearance" && formValues.tricycleAssociation?.trim()) setUsedAssociations((previous) => Array.from(new Set([...previous, formValues.tricycleAssociation.trim()])))
     if (selectedType === "Certificate of Indigency" && formValues.purpose?.trim()) setUsedIndigencyPurposes((previous) => Array.from(new Set([...previous, formValues.purpose.trim()])))
     setNotice(asDraft ? `${record.id} was saved as a pending draft.` : `${record.id} was recorded as issued.`)
+    setNoticePrintRecord(asDraft ? null : record)
     setCorrectionTarget(null)
     setCorrectionReason("")
     setIsIssuanceModalOpen(false)
   }
 
   function preparePrint(record?: IssuanceRecord) {
+    setNoticePrintRecord(null)
     setPrintRecord(record ?? { id: "PRINT-PREVIEW", resident: currentName, type: selectedType, date: currentDate, status: "Pending", fields: { ...formValues } })
     setNotice("")
   }
@@ -396,6 +409,26 @@ function IssuancesManagement() {
       : field.name === "purpose" && selectedType === "Certificate of Indigency" ? usedIndigencyPurposes
       : field.options ?? []
     const wrapperClass = cn(labelClassName, field.span === 3 && "md:col-span-2")
+    if (field.type === "date") {
+      const year = new Date().getFullYear()
+      const isIssueDate = field.name === "idDateOfIssue" || field.name === "ctcDateOfIssue"
+      return (
+        <div key={field.name} className={wrapperClass} id={`wrap-${field.name}`}>
+          <DateField
+            id={fieldId}
+            label={field.label}
+            value={value}
+            onChange={(nextValue) => updateField(field.name, nextValue)}
+            required={field.required}
+            error={error}
+            help={field.help}
+            minYear={field.name === "birthdate" ? year - 110 : isIssueDate ? year - 15 : year - 1}
+            maxYear={field.name === "birthdate" || isIssueDate ? year : year + 1}
+            noFuture={field.name === "birthdate" || isIssueDate}
+          />
+        </div>
+      )
+    }
     return (
       <div key={field.name} className={wrapperClass} id={`wrap-${field.name}`}>
         <label htmlFor={fieldId}>{field.label}{field.required ? <span className="text-destructive"> *</span> : null}</label>
@@ -478,7 +511,8 @@ function IssuancesManagement() {
             aria-hidden="true"
           />
           <p className="flex-1">{notice}</p>
-          <Button variant="ghost" size="icon" className="size-11" onClick={() => setNotice("")} aria-label="Dismiss message">
+          {noticePrintRecord && notice.includes(noticePrintRecord.id) ? <Button type="button" variant="outline" size="sm" onClick={() => printNow(noticePrintRecord)}><Printer aria-hidden="true" />Print</Button> : null>
+          <Button variant="ghost" size="icon" className="size-11" onClick={() => { setNotice(""); setNoticePrintRecord(null) }} aria-label="Dismiss message">
             <X aria-hidden="true" />
           </Button>
         </div>
@@ -508,7 +542,7 @@ function IssuancesManagement() {
 
       {/* New issuance dialog */}
       <Dialog open={isIssuanceModalOpen} onOpenChange={requestCloseForm}>
-        <DialogContent className="print:hidden flex max-h-[92dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
+        <DialogContent className="print:hidden flex max-h-[92dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-6xl" onOpenAutoFocus={(event) => { event.preventDefault(); document.getElementById(initialResident ? "field-purpose" : "resident-search")?.focus() }}>
           <DialogHeader className="border-b px-5 py-4 pr-12 sm:px-6">
             <DialogTitle className="text-lg">New Issuance</DialogTitle>
             <DialogDescription>Fill in the details once, then check the print preview. Fields marked * are required to issue.</DialogDescription>
@@ -527,25 +561,36 @@ function IssuancesManagement() {
                 </div>
               ) : null}
               {lostDetailsNotice ? <p role="status" className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-sm">{lostDetailsNotice}</p> : null}
-              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+              <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
                 <div className="min-w-0 space-y-4">
-                  <FormSection title="① DOCUMENT" description="Choose the pre-printed paper that matches the request.">
-                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 md:col-span-2">
-                      {documentTypes.map((type) => (
-                        <label key={type} className={cn("flex min-h-16 cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm transition-colors focus-within:ring-[3px] focus-within:ring-ring/50", selectedType === type ? "border-primary bg-primary/5" : "bg-background hover:bg-muted")}>
-                          <input type="radio" name="documentType" checked={selectedType === type} onChange={() => changeDocumentType(type)} className="mt-1 size-4 accent-primary" />
-                          <span><span className="block font-medium">{type}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">{type === "Barangay Clearance" ? "Employment, school, loans, residency" : type === "Barangay Franchise Clearance" ? "Tricycle franchise details" : type === "Barangay Clearance, Electrical and Water Connection" ? "Electric or water connection" : type === "Certificate of Indigency" ? "Sector and purpose certification" : "Financial, medical, or burial assistance"}</span></span>
-                        </label>
-                      ))}
+                  <FormSection title="Document" step={1} description="Choose the pre-printed paper that matches the request.">
+                    <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 md:col-span-2">
+                      {documentTypes.map((type) => {
+                        const info = documentCardInfo[type]
+                        return (
+                          <label key={type} className={cn("flex min-h-16 min-w-0 cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm transition-colors focus-within:ring-[3px] focus-within:ring-ring/50", selectedType === type ? "border-primary bg-primary/5" : "bg-background hover:bg-muted")}>
+                            <input type="radio" name="documentType" checked={selectedType === type} onChange={() => changeDocumentType(type)} className="mt-1 size-4 shrink-0 accent-primary" />
+                            <span className="min-w-0 flex-1 break-words"><span className="flex items-start justify-between gap-2 font-medium">{info.name}{selectedType === type ? <Check aria-hidden="true" className="size-4 shrink-0 text-primary" /> : null}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">{info.hint}</span></span>
+                          </label>
+                        )
+                      })}
                     </div>
                     <div className="md:col-span-2">
-                      <label htmlFor="field-date" className={labelClassName}>Date on document <span className="text-destructive">*</span></label>
-                      <input id="field-date" type="date" value={formValues.date ?? localDateValue()} onChange={(event) => updateField("date", event.target.value)} className={cn(inputClassName, validationErrors.date && "border-destructive")} aria-invalid={Boolean(validationErrors.date)} aria-describedby={validationErrors.date ? "field-date-error" : undefined} required />
-                      {validationErrors.date ? <p id="field-date-error" className="text-xs text-destructive">{validationErrors.date}</p> : null}
+                      <DateField
+                        id="field-date"
+                        label="Date on document"
+                        value={formValues.date ?? localDateValue()}
+                        onChange={(value) => updateField("date", value)}
+                        required
+                        error={validationErrors.date}
+                        minYear={new Date().getFullYear() - 1}
+                        maxYear={new Date().getFullYear() + 1}
+                        showToday
+                      />
                     </div>
                   </FormSection>
 
-                  <FormSection title="② RESIDENT" description="Search the resident record or enter the details manually.">
+                  <FormSection title="Resident" step={2} description="Search the resident record or enter the details manually.">
                     <div className="md:col-span-2">
                       <label htmlFor="resident-search" className="mb-1.5 block text-sm font-medium">Search name or ID number</label>
                       <div className="relative">
@@ -554,7 +599,7 @@ function IssuancesManagement() {
                           if (event.key === "ArrowDown" && residentMatches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, residentMatches.length - 1)) }
                           if (event.key === "ArrowUp" && residentMatches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) }
                           if (event.key === "Enter" && residentMatches[activeResidentMatch]) { event.preventDefault(); selectResident(residentMatches[activeResidentMatch]) }
-                          if (event.key === "Escape") setResidentQuery("")
+                          if (event.key === "Escape") { event.preventDefault(); event.stopPropagation(); setResidentQuery("") }
                         }} placeholder="Search name or ID number…" className={cn(inputClassName, "pl-9")} />
                       </div>
                       {residentQuery.trim() && !selectedResidentId ? (
@@ -567,54 +612,88 @@ function IssuancesManagement() {
                           )) : <p className="px-3 py-4 text-sm text-muted-foreground">No match. Enter details manually.</p>}
                         </div>
                       ) : null}
-                      {selectedResidentId ? <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"><span className="min-w-0"><strong>{sampleResidents.find((resident) => resident.id === selectedResidentId)?.name ?? "Selected resident"}</strong><span className="ml-2 font-mono text-xs text-muted-foreground">{selectedResidentId}</span><span className="mt-1 block text-xs text-muted-foreground">{sampleResidents.find((resident) => resident.id === selectedResidentId)?.address ?? ""}</span></span><Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={() => { setSelectedResidentId(""); setResidentQuery(""); setManualEntry(false) }}>Change</Button></div> : null}
+                      {selectedResidentId ? <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"><span className="min-w-0"><strong>{sampleResidents.find((resident) => resident.id === selectedResidentId)?.name ?? "Selected resident"}</strong><span className="ml-2 font-mono text-xs text-muted-foreground">{selectedResidentId}</span><span className="mt-1 block text-xs text-muted-foreground">{sampleResidents.find((resident) => resident.id === selectedResidentId)?.address ?? ""}</span></span><Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={() => { setSelectedResidentId(""); setResidentQuery(""); setManualEntry(false); setShowNameParts(false) }}>Change</Button></div> : null}
                       {!manualEntry && !selectedResidentId ? <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm"><button type="button" className="min-h-11 text-primary underline underline-offset-4" onClick={startManualEntry}>Resident not found? Enter details manually</button><button type="button" className="min-h-11 text-muted-foreground underline underline-offset-4" onClick={() => setNotice("Add to Resident Records is not connected yet. Open Resident Records to add a record.")}>Add to Resident Records</button></div> : null}
                       <p className="mt-2 text-xs text-muted-foreground">Changes here apply to this document only. To change the resident's record, use Resident Records.</p>
                     </div>
-                    {(documentSections[selectedType] ?? []).find((section) => section.id === "resident")?.fields.map(renderField)}
+                    {((documentSections[selectedType] ?? []).find((section) => section.id === "resident")?.fields ?? []).map((field) => {
+                      if (selectedResidentId && ["firstName", "middleName", "lastName"].includes(field.name)) return null
+                      if (selectedResidentId && field.name === "name") {
+                        const parts = ((documentSections[selectedType] ?? []).find((section) => section.id === "resident")?.fields ?? []).filter((part) => ["firstName", "middleName", "lastName"].includes(part.name))
+                        return (
+                          <div key={field.name} className="md:col-span-2">
+                            {renderField(field)}
+                            <details className="mt-1">
+                              <summary className="min-h-11 cursor-pointer py-2 text-sm text-primary underline underline-offset-4">Edit name parts</summary>
+                              <div className="grid gap-4 md:grid-cols-2">{parts.map(renderField)}</div>
+                            </details>
+                          </div>
+                        )
+                      }
+                      return renderField(field)
+                    })}
                   </FormSection>
 
-                  {(documentSections[selectedType] ?? []).filter((section) => !["resident", "receipt"].includes(section.id)).map((section) => (
-                    <FormSection key={section.id} title={section.title === "Clearance details" ? "③ CLEARANCE DETAILS" : section.title === "Connection service" ? "③ DOCUMENT DETAILS" : section.title === "Franchise details" ? "③ FRANCHISE DETAILS" : section.title === "Connection details" ? "③ CONNECTION DETAILS" : section.title === "Indigency details" ? "③ INDIGENCY DETAILS" : "③ ASSISTANCE DETAILS"} description={section.description}>
-                      {section.fields.map(renderField)}
-                    </FormSection>
-                  ))}
+                  {(documentSections[selectedType] ?? []).filter((section) => !["resident", "receipt"].includes(section.id)).map((section) => {
+                    const advancedFields = section.fields.filter((field) => field.advanced)
+                    const regularFields = section.fields.filter((field) => !field.advanced)
+                    const advancedHasValues = advancedFields.some((field) => {
+                      const value = formValues[field.name] ?? ""
+                      return value.trim() !== (field.defaultValue ?? "").trim() || Boolean(validationErrors[field.name])
+                    })
+                    const showAdvanced = selectedType === "Barangay Clearance" && section.id === "details" && (
+                      advancedHasValues || formValues.purpose === "Employment Requirement/First Time Jobseeker"
+                    )
+                    return (
+                      <FormSection key={section.id} title={section.title} step={3} description={section.description}>
+                        {section.id === "details" && selectedType === "Barangay Franchise Clearance" ? (
+                          <>
+                            {regularFields.map((field, index) => (
+                              <>{index === 1 ? <p key="vehicle-heading" className="md:col-span-2 text-xs font-medium text-muted-foreground">Vehicle</p> : null}{renderField(field)}</>
+                            ))}
+                          </>
+                        ) : regularFields.map(renderField)}
+                        {advancedFields.length > 0 ? (
+                          <details className="md:col-span-2" open={showAdvanced || undefined}>
+                            <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-primary underline underline-offset-4">More options (optional)</summary>
+                            {!showAdvanced && <p className="pb-2 text-xs text-muted-foreground">{[
+                              formValues.purposeNote?.trim() ? "Purpose note edited" : "",
+                              formValues.remarks?.trim() && formValues.remarks !== "NO DEROGATORY RECORD ON FILE" ? "Remarks edited" : "",
+                              formValues.referredBy?.trim() && formValues.referredBy !== "None" ? `c/o ${formValues.referredBy.replace(/^c\\/o\\s*/i, "")}` : "",
+                            ].filter(Boolean).join(" · ") || "No optional values set"}</p>}
+                            <div className="grid gap-4 md:grid-cols-2">{advancedFields.map(renderField)}</div>
+                          </details>
+                        ) : null}
+                        {section.id === "details" && selectedType === "Barangay Franchise Clearance" ? null : null}
+                        {section.id === "details" && selectedType === "Certificate of Indigency" && formValues.sector ? <p className="md:col-span-2 text-xs text-muted-foreground">{formValues.sector.split("||").filter(Boolean).length} of 2 selected</p> : null}
+                      </FormSection>
+                    )
+                  })}
                   {(documentSections[selectedType] ?? []).filter((section) => section.id === "receipt").map((section) => (
-                    <FormSection key={section.id} title="④ IDENTIFICATION & RECEIPT" description="Enter the details from the CTC or identification document.">
+                    <FormSection key={section.id} title="Identification & receipt" step={4} description="Enter the details from the CTC or identification document.">
                       {section.fields.map(renderField)}
                     </FormSection>
                   ))}
+                <div className="min-w-0">
+                  {(() => {
+                    const missing = getMissingFields(selectedType, formValues, allFormFields)
+                    const summaryTitle = missing.length ? `Will print · ${missing.length} missing` : "Will print · Ready to issue"
+                    return (
+                      <>
+                        <details className="rounded-xl border bg-card lg:hidden">
+                          <summary className="min-h-12 cursor-pointer px-4 py-3 text-sm font-semibold">{summaryTitle}</summary>
+                          <PrintSummaryPanel type={selectedType} values={formValues} currentDate={currentDate} fields={allFormFields} />
+                        </details>
+                        <div className="hidden rounded-xl border bg-card lg:block">
+                          <PrintSummaryPanel type={selectedType} values={formValues} currentDate={currentDate} fields={allFormFields} />
+                        </div>
+                      </>
+                    )
+                  })()}
                 </div>
-
-                <aside className="min-w-0 rounded-xl border bg-card p-4 sm:p-5 lg:sticky lg:top-0">
-                  <h3 className="font-semibold tracking-tight">Will print</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">{selectedType}</p>
-                  <p className="mt-1 text-sm font-medium">{formatPaperDate(currentDate)}</p>
-                  <div className="my-4 border-t" />
-                  <dl className="space-y-3 text-sm">
-                    {[
-                      [selectedType === "Certification (assistance request)" ? "Mr./Ms." : "NAME", formValues.name],
-                      ["ADDRESS", formValues.address],
-                      ...(selectedType === "Barangay Clearance" ? [["AGE", calculateAge(formValues.birthdate ?? "", currentDate) ? `${calculateAge(formValues.birthdate ?? "", currentDate)} years old` : ""] , ["BIRTHDATE", formValues.birthdate ? formatPaperDate(formValues.birthdate) : ""], ["BIRTHPLACE", formValues.birthplace], ["CIVIL STATUS", formValues.civilStatus], ["PURPOSE", formValues.purpose], ["PURPOSE note", formValues.purposeNote], ["REMARKS", formValues.remarks], ["c/o", formValues.referredBy], ["Valid I.D. Presented", formValues.validIdPresented], ["Number", formValues.idNumber], ["Place of Issue", formValues.idPlaceOfIssue], ["Date of Issue", formValues.idDateOfIssue ? formatPaperDate(formValues.idDateOfIssue) : ""], ["Paid under OFFICIAL RECEIPT No.", formValues.officialReceiptNumber]] : []),
-                      ...(selectedType === "Barangay Franchise Clearance" ? [["TRICYCLE ASSOCIATION", formValues.tricycleAssociation], ["MAKE", formValues.make], ["TYPE OF BODY", formValues.typeOfBody], ["MOTOR NO", formValues.motorNumber], ["COLOR", formValues.color], ["PLATE NUMBER", formValues.plateNumber], ["CTC Number", formValues.ctcNumber], ["Place of Issue", formValues.ctcPlaceOfIssue], ["Date of Issue", formValues.ctcDateOfIssue ? formatPaperDate(formValues.ctcDateOfIssue) : ""], ["Paid under OFFICIAL RECEIPT No.", formValues.officialReceiptNumber]] : []),
-                      ...(selectedType === "Barangay Clearance, Electrical and Water Connection" ? [["Service", formValues.serviceType?.split("||").join(" / ")], ["TYPE OF CONNECTION", formValues.connectionType], ["CLASSIFICATION", formValues.classification], ["LOCATION", formValues.location], ["CTC Number", formValues.ctcNumber], ["Place of Issue", formValues.ctcPlaceOfIssue], ["Date of Issue", formValues.ctcDateOfIssue ? formatPaperDate(formValues.ctcDateOfIssue) : ""], ["Paid under OFFICIAL RECEIPT No.", formValues.officialReceiptNumber]] : []),
-                      ...(selectedType === "Certificate of Indigency" ? [["AGE", calculateAge(formValues.birthdate ?? "", currentDate) ? `${calculateAge(formValues.birthdate ?? "", currentDate)} years old` : formValues.ageManual], ["SECTOR :", formValues.sector?.split("||").join(" / ")], ["PURPOSE", formValues.purpose], ["Addressed to the office of", formValues.addressedTo]] : []),
-                      ...(selectedType === "Certification (assistance request)" ? [["Resident of", formValues.address], ["For a period of years", formValues.residencyDuration], ["Member of the sector", formValues.sector], ["Assistance requested", formValues.assistanceType], ["For", formValues.recipientChoice === "His or her" ? `his or her ${formValues.recipientRelationship ?? ""}` : formValues.recipientChoice], ["Under the name of", formValues.underName], ["Given this", currentDate ? `${getDateParts(currentDate).day} day of ${getDateParts(currentDate).month}` : ""]] : []),
-                    ].map(([label, rawValue]) => {
-                      const value = (rawValue ?? "").trim()
-                      return <div key={label} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-2"><dt className="text-xs font-medium text-muted-foreground">{label}</dt><dd className={cn("break-words text-right text-sm", !value && "font-medium text-amber-600")} >{value || <span className="inline-flex items-center gap-1"><AlertCircle className="size-3.5" aria-hidden="true" />Missing</span>}</dd></div>
-                    })}
-                  </dl>
-                  <div className="my-4 border-t" />
-                  <p className="text-sm font-semibold">Missing ({allFormFields.filter((field) => field.required && (!field.showWhen || field.showWhen(formValues)) && !formValues[field.name]?.trim()).length + (currentDate ? 0 : 1) + (selectedType === "Certificate of Indigency" && !formValues.birthdate?.trim() && !formValues.ageManual?.trim() ? 1 : 0)})</p>
-                  <ul className="mt-2 space-y-1 text-sm">
-                    {[...allFormFields.filter((field) => field.required && (!field.showWhen || field.showWhen(formValues)) && !formValues[field.name]?.trim()).map((field) => ({ name: field.name, label: field.label })), ...(selectedType === "Certificate of Indigency" && !formValues.birthdate?.trim() && !formValues.ageManual?.trim() ? [{ name: "ageManual", label: "AGE" }] : []), ...(!currentDate ? [{ name: "date", label: "Date on document" }] : [])].map((field) => <li key={field.name}><button type="button" className="min-h-8 text-left text-amber-700 underline underline-offset-4" onClick={() => { const target = document.getElementById(`field-${field.name}`); target?.scrollIntoView({ behavior: "smooth", block: "center" }); target?.focus() }}>{field.label}</button></li>)}
-                  </ul>
-                  <p className="mt-4 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">After printing: {selectedType === "Barangay Clearance" ? "Resident signs and thumbmarks; apply the dry seal." : selectedType === "Certification (assistance request)" ? "Kagawad signs." : "Apply the dry seal."}</p>
-                </aside>
               </div>
             </div>
-            <DialogFooter className="flex-col gap-2 border-t bg-card px-4 py-3 sm:flex-row sm:items-center sm:px-6">
+            <DialogFooter className="flex-col-reverse gap-2 border-t bg-card px-4 py-3 sm:flex-row sm:items-center sm:px-6">
               <Button type="button" variant="ghost" size="lg" className="sm:mr-auto" onClick={clearForm}><Eraser aria-hidden="true" />Clear form</Button>
               <Button type="button" variant="outline" size="lg" onClick={() => saveIssuance(true)}>Save as draft</Button>
               <Button type="button" variant="outline" size="lg" onClick={() => preparePrint()}><Eye aria-hidden="true" />Print preview</Button>
@@ -665,7 +744,7 @@ function IssuancesManagement() {
                 <div>
                   <dt className="text-xs text-muted-foreground">Date</dt>
                   <dd className="mt-0.5 font-medium">
-                    {formatDate(viewRecord.date)}
+                    {formatPaperDate(viewRecord.date)}
                   </dd>
                 </div>
                 <div>
@@ -674,7 +753,7 @@ function IssuancesManagement() {
                 </div>
                 <div>
                   <dt className="text-xs text-muted-foreground">Valid until</dt>
-                  <dd className="mt-0.5 font-medium">{viewRecord.validUntil ? formatDate(viewRecord.validUntil) : "—"}</dd>
+                  <dd className="mt-0.5 font-medium">{viewRecord.validUntil ? formatPaperDate(viewRecord.validUntil) : "—"}</dd>
                 </div>
                 <div>
                   <dt className="text-xs text-muted-foreground">Issued by</dt>
