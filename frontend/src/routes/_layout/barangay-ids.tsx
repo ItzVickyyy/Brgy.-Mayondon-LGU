@@ -133,7 +133,7 @@ function BarangayIdManagement() {
         >
           <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
           <p className="flex-1">{notice}</p>
-          <Button variant="ghost" size="icon" className="size-8" onClick={() => setNotice("")} aria-label="Dismiss message">
+          <Button variant="ghost" size="icon" className="size-11" onClick={() => setNotice("")} aria-label="Dismiss message">
             <X aria-hidden="true" />
           </Button>
         </div>
@@ -155,7 +155,7 @@ function BarangayIdManagement() {
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <label className="relative block">
+            <label className="relative block min-w-0 flex-1">
               <span className="sr-only">Search ID records</span>
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -236,9 +236,9 @@ function BarangayIdManagement() {
                   </td>
                   <td className="px-4 py-3 align-middle sm:px-5">
                     <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" onClick={() => showActionNotice("View ID details")}>Details</Button>
-                      <Button variant="outline" size="sm" onClick={() => showActionNotice("Renew ID")}><RefreshCw aria-hidden="true" /> Renew</Button>
-                      <Button variant="outline" size="sm" onClick={() => showActionNotice("Print ID")}><Printer aria-hidden="true" /> Print</Button>
+                      <Button variant="outline" size="sm" className="min-h-11" onClick={() => showActionNotice("View ID details")}>Details</Button>
+                      <Button variant="outline" size="sm" className="min-h-11" onClick={() => showActionNotice("Renew ID")}><RefreshCw aria-hidden="true" /> Renew</Button>
+                      <Button variant="outline" size="sm" className="min-h-11" onClick={() => showActionNotice("Print ID")}><Printer aria-hidden="true" /> Print</Button>
                     </div>
                   </td>
                 </tr>
