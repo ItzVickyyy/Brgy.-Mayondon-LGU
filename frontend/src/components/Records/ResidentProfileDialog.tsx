@@ -99,7 +99,7 @@ export function ResidentProfileDialog({
                     Household reference, family members, and relationships.
                   </p>
                 </section>
-                <section className="rounded-xl border p-4">
+                <section className="rounded-xl border bg-card p-4 shadow-sm">
                   <UserRound
                     className="size-5 text-primary"
                     aria-hidden="true"
@@ -115,7 +115,7 @@ export function ResidentProfileDialog({
             ) : null}
             {profileTab === "Barangay ID" ? (
               <div className="grid gap-3 sm:grid-cols-2">
-                <section className="rounded-xl border p-4">
+                <section className="rounded-xl border bg-card p-4 shadow-sm">
                   <CreditCard
                     className="size-5 text-primary"
                     aria-hidden="true"
@@ -125,7 +125,7 @@ export function ResidentProfileDialog({
                   </p>
                   <p className="mt-1 font-semibold">{resident.idNumber}</p>
                 </section>
-                <section className="rounded-xl border p-4">
+                <section className="rounded-xl border bg-card p-4 shadow-sm">
                   <p className="text-sm text-muted-foreground">
                     Registration status
                   </p>
