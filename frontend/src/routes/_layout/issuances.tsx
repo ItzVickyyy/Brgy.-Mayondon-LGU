@@ -12,14 +12,13 @@ import {
   Search,
   X,
 } from "lucide-react"
-import { useMemo, useRef, useState } from "react"
+import { useMemo, useState } from "react"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { RowActions } from "@/components/Common/RowActions"
 import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
 import {
-  type DocumentField,
   documentFields,
   documentSections,
   documentTypes,
@@ -121,9 +120,6 @@ function IssuancesManagement() {
   const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
   const [viewRecord, setViewRecord] = useState<IssuanceRecord | null>(null)
   const [notice, setNotice] = useState("")
-  const firstInvalidRef = useRef<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null>(null)
-
-  const fields = documentFields[selectedType] ?? []
   const currentName = formValues.name?.trim() || "Name not entered"
   const currentDate = formValues.date || ""
   const allRecords = useMemo(() => [...drafts, ...historyRecords], [drafts, historyRecords])
@@ -262,6 +258,7 @@ function IssuancesManagement() {
 
   function validateIssuedForm() {
     const errors: Record<string, string> = {}
+    if (!formValues.date?.trim()) errors.date = "Date on document is required."
     for (const field of allFormFields) {
       if (field.showWhen && !field.showWhen(formValues)) continue
       if (field.required && !formValues[field.name]?.trim()) errors[field.name] = `${field.label} is required.`
@@ -480,7 +477,8 @@ function IssuancesManagement() {
                     </div>
                     <div className="md:col-span-2">
                       <label htmlFor="field-date" className={labelClassName}>Date on document <span className="text-destructive">*</span></label>
-                      <input id="field-date" type="date" value={formValues.date ?? localDateValue()} onChange={(event) => updateField("date", event.target.value)} className={inputClassName} required />
+                      <input id="field-date" type="date" value={formValues.date ?? localDateValue()} onChange={(event) => updateField("date", event.target.value)} className={cn(inputClassName, validationErrors.date && "border-destructive")} aria-invalid={Boolean(validationErrors.date)} aria-describedby={validationErrors.date ? "field-date-error" : undefined} required />
+                      {validationErrors.date ? <p id="field-date-error" className="text-xs text-destructive">{validationErrors.date}</p> : null}
                     </div>
                   </FormSection>
 
