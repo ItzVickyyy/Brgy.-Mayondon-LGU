@@ -85,7 +85,7 @@ function formatDate(value: string) {
     ? value
     : parsed.toLocaleDateString("en-US", {
         year: "numeric",
-        month: "long",
+        month: "short",
         day: "numeric",
       })
 }
@@ -567,6 +567,9 @@ function IssuancesManagement() {
                 onClick={() => {
                   setSearch("")
                   setHistoryType("All document types")
+                  setHistoryStatus("all")
+                  setStartDate("")
+                  setEndDate("")
                 }}
               >
                 <X aria-hidden="true" />
@@ -602,6 +605,23 @@ function IssuancesManagement() {
                   </option>
                 ))}
               </select>
+            </label>
+            <label className="sm:w-44">
+              <span className="sr-only">Filter by status</span>
+              <select value={historyStatus} onChange={(event) => setHistoryStatus(event.target.value)} className={inputClassName}>
+                <option value="all">All statuses</option>
+                <option>Issued</option>
+                <option>Pending</option>
+                <option>Voided</option>
+              </select>
+            </label>
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs text-muted-foreground sm:max-w-44">
+              <span>From</span>
+              <input aria-label="Issued from date" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className={inputClassName} />
+            </label>
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs text-muted-foreground sm:max-w-44">
+              <span>To</span>
+              <input aria-label="Issued to date" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className={inputClassName} />
             </label>
           </div>
         </div>
