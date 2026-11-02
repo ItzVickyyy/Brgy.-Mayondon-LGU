@@ -92,13 +92,16 @@ const rows: ActivityRow[] = [
 
 function formatTimestamp(value: string) {
   const date = new Date(value)
-  return date.toLocaleString("en-US", {
+  const datePart = date.toLocaleDateString("en-US", {
     month: "short",
     day: "2-digit",
     year: "numeric",
+  })
+  const timePart = date.toLocaleTimeString("en-US", {
     hour: "numeric",
     minute: "2-digit",
-  }).replace(",", " ·")
+  })
+  return `${datePart} · ${timePart}`
 }
 
 function getInitialActivityDateRange() {
