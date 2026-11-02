@@ -6,13 +6,15 @@ import {
   Eye,
   FileCheck2,
   FileText,
-  Inbox,
   Plus,
   Printer,
   Search,
   X,
 } from "lucide-react"
 import { useMemo, useState } from "react"
+import { EmptyState } from "@/components/Common/FeedbackState"
+import { formControlClass } from "@/components/Common/formStyles"
+import { statusStyles } from "@/components/Common/statusStyles"
 import {
   type DocumentField,
   documentFields,
@@ -39,16 +41,8 @@ export const Route = createFileRoute("/_layout/issuances")({
   head: () => ({ meta: [{ title: pageTitle("Issuances Management") }] }),
 })
 
-const inputClassName =
-  "h-11 w-full rounded-md border border-input bg-background px-3 text-base font-normal shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 md:text-sm"
-const labelClassName = "flex min-w-0 flex-col gap-1.5 text-base font-medium"
-
-const statusStyles: Record<IssuanceRecord["status"], string> = {
-  Issued:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Pending:
-    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
-}
+const inputClassName = formControlClass
+const labelClassName = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
 
 function localDateValue() {
   const now = new Date()
@@ -354,7 +348,7 @@ function IssuancesManagement() {
       )}
 
       {/* Summary */}
-      <div className="print:hidden grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="print:hidden grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <SummaryCard
           icon={FileCheck2}
           label="Total issued"
@@ -525,7 +519,7 @@ function IssuancesManagement() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="text-base font-semibold">Issuance History</h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Showing {filteredIssuances.length} of {allRecords.length}{" "}
                 records
               </p>
@@ -578,10 +572,10 @@ function IssuancesManagement() {
 
         {/* Desktop table */}
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full text-left text-base">
+          <table className="w-full text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                <th scope="col" className="px-5 py-3 font-medium">
+                <th scope="col" className="px-4 py-3 font-medium sm:px-5">
                   Record ID
                 </th>
                 <th scope="col" className="px-5 py-3 font-medium">
@@ -596,7 +590,7 @@ function IssuancesManagement() {
                 <th scope="col" className="px-5 py-3 font-medium">
                   Status
                 </th>
-                <th scope="col" className="px-5 py-3 text-right font-medium">
+                <th scope="col" className="px-4 py-3 text-right font-medium sm:px-5">
                   Actions
                 </th>
               </tr>
@@ -607,17 +601,17 @@ function IssuancesManagement() {
                   key={item.id}
                   className="transition-colors hover:bg-muted/30"
                 >
-                  <td className="whitespace-nowrap px-5 py-3.5 font-mono text-xs font-medium">
+                  <td className="whitespace-nowrap px-4 py-3 sm:px-5 font-mono text-xs font-medium">
                     {item.id}
                   </td>
-                  <td className="px-5 py-3.5 font-medium">{item.resident}</td>
-                  <td className="max-w-xs px-5 py-3.5 text-muted-foreground">
+                  <td className="px-4 py-3 sm:px-5 font-medium">{item.resident}</td>
+                  <td className="max-w-xs px-4 py-3 sm:px-5 text-muted-foreground">
                     {item.type}
                   </td>
-                  <td className="whitespace-nowrap px-5 py-3.5 text-muted-foreground">
+                  <td className="whitespace-nowrap px-4 py-3 sm:px-5 text-muted-foreground">
                     {formatDate(item.date)}
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-4 py-3 sm:px-5">
                     <Badge
                       variant="outline"
                       className={statusStyles[item.status]}
@@ -625,7 +619,7 @@ function IssuancesManagement() {
                       {item.status}
                     </Badge>
                   </td>
-                  <td className="px-5 py-3.5">
+                  <td className="px-4 py-3 sm:px-5">
                     <div className="flex justify-end gap-2">
                       <Button
                         variant="outline"
@@ -695,15 +689,10 @@ function IssuancesManagement() {
         </ul>
 
         {filteredIssuances.length === 0 && (
-          <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-            <div className="flex size-12 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <Inbox className="size-6" aria-hidden="true" />
-            </div>
-            <p className="font-medium">No records found</p>
-            <p className="max-w-sm text-sm text-muted-foreground">
-              Try a different search or document type, or create a new issuance.
-            </p>
-          </div>
+          <EmptyState
+            title="No records found"
+            description="Try a different search or document type, or create a new issuance."
+          />
         )}
       </section>
 
