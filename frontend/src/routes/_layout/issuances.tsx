@@ -28,6 +28,7 @@ import {
 } from "@/components/Issuances/config"
 import { FormSection, SummaryCard } from "@/components/Issuances/IssuanceLayout"
 import { sampleResidents } from "@/components/Records/records-sample-data"
+import { initialOfficials } from "@/components/Officials/officials-sample-data"
 import { calculateAge, formatPaperDate, formatPrintedName, getDateParts } from "@/lib/issuance-format"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -383,9 +384,17 @@ function IssuancesManagement() {
       : formValues[field.name] ?? ""
     const error = validationErrors[field.name]
     const fieldId = `field-${field.name}`
-    const options = field.name === "tricycleAssociation" ? usedAssociations :
-      field.name === "purpose" && selectedType === "Certificate of Indigency" ? usedIndigencyPurposes :
-      field.options ?? []
+    const options = field.name === "referredBy"
+      ? ["None", ...initialOfficials.filter((official) => official.status === "Current").flatMap((official) => {
+          const title = official.position === "Punong Barangay" ? "Kap." :
+            official.position === "Barangay Kagawad" ? "Kag." :
+            official.position === "SK Chairperson" ? "SK" :
+            official.position === "Administrator" ? "Admin" : ""
+          return title ? [`c/o ${title} ${official.name}`] : []
+        })]
+      : field.name === "tricycleAssociation" ? usedAssociations
+      : field.name === "purpose" && selectedType === "Certificate of Indigency" ? usedIndigencyPurposes
+      : field.options ?? []
     const wrapperClass = cn(labelClassName, field.span === 3 && "md:col-span-2")
     return (
       <div key={field.name} className={wrapperClass} id={`wrap-${field.name}`}>
