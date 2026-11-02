@@ -608,79 +608,69 @@ function IssuancesManagement() {
 
         {/* Desktop table */}
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full text-left text-sm">
+          <table className="w-full min-w-[1100px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                <th scope="col" className="px-4 py-3 font-medium sm:px-5">
-                  Record ID
-                </th>
-                <th scope="col" className="px-4 py-3 align-middle font-medium sm:px-5">
-                  Resident
-                </th>
-                <th scope="col" className="px-4 py-3 align-middle font-medium sm:px-5">
-                  Document
-                </th>
-                <th scope="col" className="px-4 py-3 align-middle font-medium sm:px-5">
-                  Date
-                </th>
-                <th scope="col" className="px-4 py-3 align-middle font-medium sm:px-5">
-                  Status
-                </th>
-                <th scope="col" className="px-4 py-3 text-right font-medium sm:px-5">
-                  Actions
-                </th>
+                {["Resident", "Document", "Purpose", "Date issued", "Valid until", "Status", "Actions"].map((label) => (
+                  <th key={label} className="px-4 py-3 align-middle font-medium sm:px-5">{label}</th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y">
-              {filteredIssuances.map((item) => (
-                <tr
-                  key={item.id}
-                  className="transition-colors hover:bg-muted/30"
-                >
-                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5 font-mono text-xs font-medium">
-                    {item.id}
-                  </td>
-                  <td className="px-4 py-3 align-middle sm:px-5 font-medium">{item.resident}</td>
-                  <td className="max-w-xs px-4 py-3 align-middle sm:px-5 text-muted-foreground">
-                    {item.type}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5 text-muted-foreground">
-                    {formatDate(item.date)}
-                  </td>
-                  <td className="px-4 py-3 align-middle sm:px-5">
-                    <Badge
-                      variant="outline"
-                      className={statusStyles[item.status]}
-                    >
-                      {item.status}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 align-middle sm:px-5">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="min-h-11"
-                        onClick={() => setViewRecord(item)}
-                        aria-label={`View ${item.id}`}
-                      >
-                        <Eye aria-hidden="true" />
-                        View
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="min-h-11"
-                        onClick={() => printNow(item)}
-                        aria-label={`Print ${item.id}`}
-                      >
-                        <Printer aria-hidden="true" />
-                        Print
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {filteredIssuances.map((item) => {
+                const pending = item.status === "Pending"
+                const voided = item.status === "Voided"
+                const expired = Boolean(item.validUntil && item.validUntil < localDateValue())
+                return (
+                  <tr key={item.id} className="transition-colors hover:bg-muted/30">
+                    <td className="px-4 py-3 align-middle sm:px-5">
+                      <p className="font-semibold">{item.resident}</p>
+                      <p className="mt-1 font-mono text-xs text-muted-foreground">{item.id}</p>
+                    </td>
+                    <td className="max-w-xs px-4 py-3 align-middle sm:px-5">{item.type}</td>
+                    <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">{item.purpose || item.fields.purpose || "—"}</td>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">{formatDate(item.date)}</td>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                      {item.validUntil ? (
+                        <div className="flex flex-col items-start gap-1">
+                          <span>{formatDate(item.validUntil)}</span>
+                          {expired ? <Badge variant="outline" className={statusStyles.Expired}>Expired</Badge> : null}
+                        </div>
+                      ) : "—"}
+                    </td>
+                    <td className="px-4 py-3 align-middle sm:px-5">
+                      <Badge variant="outline" className={statusStyles[item.status]}>{item.status}</Badge>
+                    </td>
+                    <td className="px-4 py-3 align-middle sm:px-5">
+                      <RowActions
+                        name={item.resident}
+                        isAdmin={isAdmin}
+                        primary={
+                          voided
+                            ? { label: "View", variant: "outline", onSelect: () => setViewRecord(item) }
+                            : pending
+                              ? {
+                                  label: "Continue",
+                                  onSelect: () => {
+                                    setContinueTarget(item)
+                                    setSelectedType(item.type)
+                                    setFormValues({ ...createDefaultFormValues(item.type), ...item.fields, name: item.resident })
+                                    setIsIssuanceModalOpen(true)
+                                  },
+                                }
+                              : { label: "Reprint", variant: "outline", icon: <Printer aria-hidden="true" />, onSelect: () => printNow(item) }
+                        }
+                        items={[
+                          { label: "View details", onSelect: () => setViewRecord(item) },
+                          { label: "Correct details", hidden: pending || voided, onSelect: () => setPendingAction({ record: item, action: "correct" }) },
+                          { label: "Void issuance", adminOnly: true, hidden: pending || voided, destructive: true, onSelect: () => setPendingAction({ record: item, action: "void" }) },
+                          { label: "Discard draft", hidden: !pending, destructive: true, onSelect: () => setPendingAction({ record: item, action: "discard" }) },
+                        ]}
+                      />
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
