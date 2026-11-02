@@ -228,7 +228,7 @@ function BarangayIdManagement() {
                   <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
                     {record.issuedOn}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-4">
+                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
                     {record.expiresOn}
                   </td>
                   <td className="px-4 py-3 align-middle sm:px-5">
@@ -259,7 +259,7 @@ function BarangayIdManagement() {
         </div>
       </section>
 
-      <section className="rounded-xl border bg-card p-4 sm:p-5">
+      <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
         <h2 className="font-semibold tracking-tight">
           ID Validity and Registration
         </h2>
