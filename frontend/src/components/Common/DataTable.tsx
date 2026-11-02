@@ -93,7 +93,7 @@ export function DataTable<TData extends RowData>({
         <EmptyState title="No results found" description="There are no user accounts to display." />
       ) : null}
 
-      {table.getPageCount() > 1 && (
+      {data.length > 0 && (
         <div className="flex flex-col gap-4 border-t bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="text-sm text-muted-foreground">
