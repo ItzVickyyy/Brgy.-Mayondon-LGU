@@ -677,43 +677,60 @@ function IssuancesManagement() {
 
         {/* Mobile cards */}
         <ul className="divide-y md:hidden">
-          {filteredIssuances.map((item) => (
-            <li key={item.id} className="flex flex-col gap-3 p-4">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-medium">{item.resident}</p>
-                  <p className="text-sm text-muted-foreground">{item.type}</p>
+          {filteredIssuances.map((item) => {
+            const pending = item.status === "Pending"
+            const voided = item.status === "Voided"
+            return (
+              <li key={item.id} className="flex flex-col gap-3 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="font-semibold">{item.resident}</p>
+                    <p className="mt-1 font-mono text-xs text-muted-foreground">{item.id}</p>
+                    <p className="mt-2 text-sm">{item.type}</p>
+                    <p className="mt-1 text-sm text-muted-foreground">{item.purpose || item.fields.purpose || "—"}</p>
+                  </div>
+                  <Badge variant="outline" className={statusStyles[item.status]}>{item.status}</Badge>
                 </div>
-                <Badge variant="outline" className={statusStyles[item.status]}>
-                  {item.status}
-                </Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                <span className="font-mono">{item.id}</span> ·{" "}
-                {formatDate(item.date)}
-              </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="min-h-11 flex-1"
-                  onClick={() => setViewRecord(item)}
-                >
-                  <Eye aria-hidden="true" />
-                  View
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => printNow(item)}
-                >
-                  <Printer aria-hidden="true" />
-                  Print
-                </Button>
-              </div>
-            </li>
-          ))}
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Date issued</p>
+                    <p>{formatDate(item.date)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">Valid until</p>
+                    <p>{item.validUntil ? formatDate(item.validUntil) : "—"}</p>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <RowActions
+                    name={item.resident}
+                    isAdmin={isAdmin}
+                    primary={
+                      voided
+                        ? { label: "View", variant: "outline", onSelect: () => setViewRecord(item) }
+                        : pending
+                          ? {
+                              label: "Continue",
+                              onSelect: () => {
+                                setContinueTarget(item)
+                                setSelectedType(item.type)
+                                setFormValues({ ...createDefaultFormValues(item.type), ...item.fields, name: item.resident })
+                                setIsIssuanceModalOpen(true)
+                              },
+                            }
+                          : { label: "Reprint", variant: "outline", icon: <Printer aria-hidden="true" />, onSelect: () => printNow(item) }
+                    }
+                    items={[
+                      { label: "View details", onSelect: () => setViewRecord(item) },
+                      { label: "Correct details", hidden: pending || voided, onSelect: () => setPendingAction({ record: item, action: "correct" }) },
+                      { label: "Void issuance", adminOnly: true, hidden: pending || voided, destructive: true, onSelect: () => setPendingAction({ record: item, action: "void" }) },
+                      { label: "Discard draft", hidden: !pending, destructive: true, onSelect: () => setPendingAction({ record: item, action: "discard" }) },
+                    ]}
+                  />
+                </div>
+              </li>
+            )
+          })}
         </ul>
 
         {filteredIssuances.length === 0 && (
