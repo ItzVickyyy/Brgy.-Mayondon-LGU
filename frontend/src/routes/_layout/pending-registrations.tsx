@@ -173,28 +173,25 @@ function PendingRegistrations() {
                     </div>
                   </td>
                   <td className="px-4 py-3 align-middle sm:px-5">
-                    <RowActions
-                      name={row.name}
-                      isAdmin={isAdmin}
-                      primary={
-                        row.status === "Pending"
-                          ? {
-                              label: "Approve as Staff",
-                              onSelect: () =>
-                                setPendingDecision({ row, status: "Approved" }),
-                            }
-                          : undefined
-                      }
-                      items={[
-                        {
-                          label: "Reject",
-                          hidden: row.status !== "Pending",
-                          onSelect: () =>
-                            setPendingDecision({ row, status: "Rejected" }),
-                          destructive: true,
-                        },
-                      ]}
-                    />
+                    {row.status === "Pending" ? (
+                      <RowActions
+                        name={row.name}
+                        isAdmin={isAdmin}
+                        primary={{
+                          label: "Approve as Staff",
+                          onSelect: () => setPendingDecision({ row, status: "Approved" }),
+                        }}
+                        items={[
+                          {
+                            label: "Reject",
+                            onSelect: () => setPendingDecision({ row, status: "Rejected" }),
+                            destructive: true,
+                          },
+                        ]}
+                      />
+                    ) : (
+                      <span className="block text-right text-muted-foreground">—</span>
+                    )}
                   </td>
                 </tr>
               ))}
