@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { formControlClass } from "@/components/Common/formStyles"
 import { buildIsoDate, daysInMonth, monthNames, splitIsoDate } from "@/lib/issuance-format"
@@ -40,11 +40,16 @@ export function DateField({
   const [year, setYear] = useState(initial.year)
   const [month, setMonth] = useState(initial.month)
   const [day, setDay] = useState(initial.day)
+  const lastEmittedValue = useRef<string | null>(null)
   const today = localDateValue()
   const effectiveMinYear = minYear ?? 1
   const effectiveMaxYear = maxYear ?? new Date().getFullYear() + 1
 
   useEffect(() => {
+    if (lastEmittedValue.current === value) {
+      lastEmittedValue.current = null
+      return
+    }
     const parts = splitIsoDate(value)
     setYear(parts.year)
     setMonth(parts.month)
@@ -67,7 +72,9 @@ export function DateField({
     const nextIso = buildIsoDate(nextYear, nextMonth, nextDay)
     const validYear = Number(nextYear) >= effectiveMinYear && Number(nextYear) <= effectiveMaxYear
     const validFuture = !noFuture || !nextIso || nextIso <= today
-    onChange(nextIso && validYear && validFuture ? nextIso : "")
+    const emittedValue = nextIso && validYear && validFuture ? nextIso : ""
+    lastEmittedValue.current = emittedValue
+    onChange(emittedValue)
   }
 
   function chooseToday() {
@@ -127,6 +134,7 @@ export function DateField({
             inputMode="numeric"
             maxLength={4}
             value={year}
+            onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault() }}
             onChange={(event) => {
               const nextYear = event.target.value.replace(/\\D/g, "").slice(0, 4)
               const nextMonth = month
