@@ -1,12 +1,19 @@
-export type FieldType = "text" | "date" | "textarea" | "checkboxes" | "select"
+export type FieldType = "text" | "date" | "select" | "combobox" | "radio" | "checkboxes" | "multiselect" | "number" | "readonly" | "textarea"
 export type DocumentField = {
   name: string
   label: string
   type?: FieldType
   options?: string[]
+  required?: boolean
+  defaultValue?: string
+  help?: string
+  showWhen?: (values: Record<string, string>) => boolean
+  maxSelected?: number
+  span?: 1 | 2 | 3
   defaultToday?: boolean
   fullWidth?: boolean
 }
+export type DocumentSection = { id: string; title: string; description?: string; fields: DocumentField[] }
 export type IssuanceRecord = {
   id: string
   resident: string
@@ -22,28 +29,8 @@ export type IssuanceRecord = {
   fields: Record<string, string>
 }
 
-export const civilStatusOptions = [
-  "Single",
-  "Married",
-  "Legally Seperated",
-  "Widow/Widower",
-]
-export const idTypeOptions = [
-  "CTC",
-  "VIN",
-  "PASSPORT",
-  "UMID",
-  "TIN",
-  "DRIVER LICENSE",
-  "SENIOR CITIZEN",
-  "SOLO PARENT",
-  "POSTAL ID",
-  "PhilHealth",
-  "PRC ID",
-  "Nat'l ID",
-  "SSS ID",
-  "SCHOOL ID",
-]
+export const civilStatusOptions = ["Single", "Married", "Legally Separated", "Widow/Widower"]
+export const idTypeOptions = ["CTC", "Barangay ID", "VIN", "Passport", "UMID", "School ID", "Driver's License", "Senior Citizen", "Solo Parent", "Postal ID", "PWD ID", "PhilHealth ID", "National ID", "SSS ID", "TIN ID"]
 export const clearancePurposeOptions = [
   "Employment Requirement",
   "Student Permit Requirement",
@@ -53,7 +40,7 @@ export const clearancePurposeOptions = [
   "House Loan Application Requirement",
   "Franchise Requirement",
   "Internet Connection Application Requirement",
-  "Bank Requirement (Openning Bank Account)",
+  "Bank Requirement (Opening Bank Account)",
   "Driver's License Requirement",
   "Overseas Employment Requirement",
   "E-BIKE Loan Application Requirement",
@@ -79,237 +66,112 @@ export const indigencySectorOptions = [
   "STUDENT",
   "other marginalized sector",
 ]
-export const documentTypes = [
-  "Barangay ID",
-  "Barangay Clearance",
-  "Franchise Clearance",
-  "Barangay Clearance (Electrical and Water Connection)",
-  "Certificate of Indigency",
-  "First-Time Jobseekers Certification",
-  "Assistance Request Certification",
-  "Damayan",
+
+const sharedReceiptFields: DocumentField[] = [
+  { name: "idNumber", label: "Number", required: true },
+  { name: "idPlaceOfIssue", label: "Place of Issue", required: true, defaultValue: "Los Baños, Laguna" },
+  { name: "idDateOfIssue", label: "Date of Issue", type: "date", required: true },
+  { name: "officialReceiptNumber", label: "Paid under OFFICIAL RECEIPT No.", required: true, help: "Enter the receipt number, or FOC if free of charge." },
 ]
-
-export const documentFields: Record<string, DocumentField[]> = {
-  "Barangay ID": [
-    {
-      name: "idAction",
-      label: "ID Transaction",
-      type: "select",
-      options: ["New ID", "Renewal", "Replacement"],
-    },
-    { name: "name", label: "Full Name" },
-    { name: "address", label: "Complete Address", fullWidth: true },
-    { name: "date", label: "Date Issued", type: "date", defaultToday: true },
-    { name: "idNumber", label: "Barangay ID Number" },
-    { name: "validUntil", label: "Valid Until", type: "date" },
-    {
-      name: "residentType",
-      label: "Resident Type",
-      type: "select",
-      options: ["Existing resident", "New / renting resident"],
-    },
-    { name: "remarks", label: "Remarks", type: "textarea", fullWidth: true },
-  ],
-
+const ctcFields: DocumentField[] = [
+  { name: "ctcNumber", label: "CTC Number", required: true },
+  { name: "ctcPlaceOfIssue", label: "Place of Issue", required: true, defaultValue: "Los Baños, Laguna" },
+  { name: "ctcDateOfIssue", label: "Date of Issue", type: "date", required: true },
+  { name: "officialReceiptNumber", label: "Paid under OFFICIAL RECEIPT No.", required: true, help: "Enter the receipt number, or FOC if free of charge." },
+]
+const clearanceResident: DocumentField[] = [
+  { name: "name", label: "NAME", required: true },
+  { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
+  { name: "birthdate", label: "BIRTHDATE", type: "date", required: true },
+  { name: "age", label: "AGE", type: "readonly" },
+  { name: "birthplace", label: "BIRTHPLACE", required: true },
+  { name: "civilStatus", label: "CIVIL STATUS", type: "select", options: civilStatusOptions, required: true },
+]
+export const documentTypes = [
+  "Barangay Clearance",
+  "Barangay Franchise Clearance",
+  "Barangay Clearance, Electrical and Water Connection",
+  "Certificate of Indigency",
+  "Certification (assistance request)",
+]
+export const documentSections: Record<string, DocumentSection[]> = {
   "Barangay Clearance": [
-    { name: "date", label: "Date", type: "date", defaultToday: true },
-    { name: "name", label: "Name" },
-    { name: "address", label: "Address", fullWidth: true },
-    { name: "age", label: "Age" },
-    { name: "birthdate", label: "Birthdate", type: "date" },
-    { name: "birthplace", label: "Birthplace" },
-    {
-      name: "civilStatus",
-      label: "Civil Status",
-      type: "select",
-      options: civilStatusOptions,
-    },
-    {
-      name: "purpose",
-      label: "Purpose",
-      type: "select",
-      options: clearancePurposeOptions,
-      fullWidth: true,
-    },
-    { name: "remarks", label: "Remarks", type: "textarea", fullWidth: true },
-    {
-      name: "validIdPresented",
-      label: "Valid ID Presented",
-      type: "select",
-      options: idTypeOptions,
-    },
-    { name: "idNumber", label: "Number" },
-    { name: "idPlaceOfIssue", label: "Place of Issue" },
-    {
-      name: "idDateOfIssue",
-      label: "Date of Issue",
-      type: "date",
-      defaultToday: true,
-    },
-    {
-      name: "officialReceiptNumber",
-      label: "Paid under Official Receipt Number",
-    },
+    { id: "resident", title: "Resident", description: "Select a resident or enter details manually.", fields: clearanceResident },
+    { id: "details", title: "Clearance details", fields: [
+      { name: "purpose", label: "PURPOSE", type: "combobox", options: clearancePurposeOptions, required: true },
+      { name: "purposeNote", label: "Purpose note", help: "Printed on the line below PURPOSE." },
+      { name: "remarks", label: "REMARKS", defaultValue: "NO DEROGATORY RECORD ON FILE" },
+      { name: "referredBy", label: "Referred by (c/o)", type: "select", options: ["None"] },
+    ] },
+    { id: "receipt", title: "Identification & receipt", fields: [
+      { name: "validIdPresented", label: "Valid I.D. Presented", type: "select", options: idTypeOptions, required: true },
+      ...sharedReceiptFields,
+    ] },
   ],
-  "Franchise Clearance": [
-    { name: "date", label: "Date", type: "date", defaultToday: true },
-    { name: "name", label: "Name" },
-    { name: "address", label: "Address", fullWidth: true },
-    {
-      name: "tricycleAssociation",
-      label: "Tricycle Association",
-      fullWidth: true,
-    },
-    { name: "make", label: "Make" },
-    { name: "typeOfBody", label: "Type of Body" },
-    { name: "motorNumber", label: "Motor Number" },
-    { name: "color", label: "Color" },
-    { name: "plateNumber", label: "Plate Number" },
-    { name: "ctcNumber", label: "CTC Number" },
-    { name: "ctcPlaceOfIssue", label: "Place of Issue" },
-    {
-      name: "ctcDateOfIssue",
-      label: "Date of Issue",
-      type: "date",
-      defaultToday: true,
-    },
-    {
-      name: "officialReceiptNumber",
-      label: "Paid under Official Receipt Number",
-    },
+  "Barangay Franchise Clearance": [
+    { id: "resident", title: "Resident", fields: [
+      { name: "name", label: "NAME", required: true },
+      { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
+    ] },
+    { id: "details", title: "Franchise details", fields: [
+      { name: "tricycleAssociation", label: "TRICYCLE ASSOCIATION", type: "combobox", required: true },
+      { name: "make", label: "MAKE", required: true },
+      { name: "typeOfBody", label: "TYPE OF BODY", required: true, defaultValue: "TRICYCLE" },
+      { name: "motorNumber", label: "MOTOR NO", required: true },
+      { name: "color", label: "COLOR", required: true },
+      { name: "plateNumber", label: "PLATE NUMBER", required: true },
+    ] },
+    { id: "receipt", title: "CTC & receipt", fields: ctcFields },
   ],
-  "Barangay Clearance (Electrical and Water Connection)": [
-    { name: "date", label: "Date", type: "date", defaultToday: true },
-    {
-      name: "serviceType",
-      label: "Connection Service",
-      type: "checkboxes",
-      options: ["Electric", "Water"],
-      fullWidth: true,
-    },
-    { name: "name", label: "Name" },
-    { name: "address", label: "Address", fullWidth: true },
-    {
-      name: "connectionType",
-      label: "Type of Connection",
-      type: "checkboxes",
-      options: ["New", "Reconnection"],
-      fullWidth: true,
-    },
-    {
-      name: "classification",
-      label: "Classification",
-      type: "checkboxes",
-      options: ["Residential", "Commercial"],
-      fullWidth: true,
-    },
-    { name: "location", label: "Location", fullWidth: true },
-    { name: "ctcNumber", label: "CTC Number" },
-    { name: "ctcPlaceOfIssue", label: "Place of Issue" },
-    {
-      name: "ctcDateOfIssue",
-      label: "Date of Issue",
-      type: "date",
-      defaultToday: true,
-    },
-    {
-      name: "officialReceiptNumber",
-      label: "Paid under Official Receipt Number",
-    },
+  "Barangay Clearance, Electrical and Water Connection": [
+    { id: "services", title: "Connection service", fields: [
+      { name: "serviceType", label: "Service", type: "checkboxes", options: ["Electric", "Water"], required: true },
+    ] },
+    { id: "resident", title: "Resident", fields: [
+      { name: "name", label: "NAME", required: true },
+      { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
+    ] },
+    { id: "details", title: "Connection details", fields: [
+      { name: "connectionType", label: "TYPE OF CONNECTION", type: "radio", options: ["New", "Reconnection"], required: true },
+      { name: "classification", label: "CLASSIFICATION", type: "radio", options: ["Residential", "Commercial"], required: true },
+      { name: "location", label: "LOCATION", required: true, defaultValue: "Barangay Mayondon" },
+    ] },
+    { id: "receipt", title: "CTC & receipt", fields: ctcFields },
   ],
   "Certificate of Indigency": [
-    { name: "date", label: "Date", type: "date", defaultToday: true },
-    { name: "name", label: "Name" },
-    { name: "address", label: "Address", fullWidth: true },
-    { name: "age", label: "Age" },
-    {
-      name: "sector",
-      label: "Sector",
-      type: "select",
-      options: indigencySectorOptions,
-    },
-    { name: "purpose", label: "Purpose", type: "textarea", fullWidth: true },
-    {
-      name: "addressedTo",
-      label: "Addressed to the Office of",
-      fullWidth: true,
-    },
+    { id: "resident", title: "Resident", fields: [
+      { name: "name", label: "NAME", required: true },
+      { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
+      { name: "age", label: "AGE", type: "readonly" },
+      { name: "ageManual", label: "Age (if birthdate is not on record)", type: "number" },
+    ] },
+    { id: "details", title: "Indigency details", fields: [
+      { name: "sector", label: "SECTOR :", type: "multiselect", options: indigencySectorOptions, required: true, maxSelected: 2 },
+      { name: "purpose", label: "PURPOSE", type: "combobox", required: true },
+      { name: "addressedTo", label: "Addressed to the office of", required: true },
+    ] },
   ],
-  "Residency Certification": [
-    { name: "date", label: "Date", type: "date", defaultToday: true },
-    { name: "name", label: "Name" },
-    { name: "address", label: "Address", fullWidth: true },
-    { name: "birthdate", label: "Birthdate", type: "date" },
-    { name: "residencyStartDate", label: "Residency Start Date", type: "date" },
-    { name: "residencyDuration", label: "Residency Duration" },
-    { name: "purpose", label: "Purpose", fullWidth: true },
-    {
-      name: "certificationText",
-      label: "Certification Text",
-      type: "textarea",
-      fullWidth: true,
-    },
-  ],
-  "First-Time Jobseekers Certification": [
-    { name: "date", label: "Date", type: "date", defaultToday: true },
-    {
-      name: "packetParts",
-      label: "Packet Parts Requested",
-      type: "checkboxes",
-      options: [
-        "Applicant Information Sheet",
-        "Oath of Undertaking",
-        "Barangay Certification",
-      ],
-      fullWidth: true,
-    },
-    { name: "name", label: "Applicant Name" },
-    { name: "birthdate", label: "Birthdate", type: "date" },
-    { name: "age", label: "Age" },
-    { name: "address", label: "Complete Address", fullWidth: true },
-    { name: "residencyDuration", label: "Years/Months of Residency" },
-    { name: "sexGender", label: "Sex/Gender (use approved field label)" },
-    {
-      name: "civilStatus",
-      label: "Civil Status",
-      type: "select",
-      options: civilStatusOptions,
-    },
-    { name: "educationalAttainment", label: "Educational Attainment" },
-    { name: "course", label: "Course (if applicable)" },
-    {
-      name: "jobStartBeneficiary",
-      label: "JobStart Beneficiary",
-      type: "select",
-      options: ["Yes", "No"],
-    },
-    { name: "witnessName", label: "Oath Witness" },
-  ],
-  "Assistance Request Certification": [
-    { name: "date", label: "Date", type: "date", defaultToday: true },
-    { name: "name", label: "Name (Mr./Ms.)" },
-    { name: "address", label: "Address", fullWidth: true },
-    { name: "residencyDuration", label: "Years of Residency" },
-    { name: "sector", label: "Sector" },
-    {
-      name: "assistanceType",
-      label: "Assistance Type",
-      type: "select",
-      options: ["Financial", "Medical", "Burial"],
-    },
-    {
-      name: "recipientChoice",
-      label: "Recipient",
-      type: "select",
-      options: ["Self", "Relationship / Other Recipient"],
-    },
-    { name: "recipientRelationship", label: "Relationship (if applicable)" },
-    { name: "underName", label: "Under the Name of" },
-    { name: "kagawadSignatoryNote", label: "Signatory Note", fullWidth: true },
+  "Certification (assistance request)": [
+    { id: "resident", title: "Resident", fields: [
+      { name: "name", label: "Mr./Ms.", required: true },
+      { name: "address", label: "Resident of", required: true, help: "Street and purok only. Mayondon, Los Baños, Laguna is pre-printed." },
+      { name: "residencyDuration", label: "For a period of years", type: "number", required: true },
+    ] },
+    { id: "details", title: "Assistance details", fields: [
+      { name: "sector", label: "Member of the sector", type: "select", options: indigencySectorOptions, required: true },
+      { name: "assistanceType", label: "Assistance requested", type: "radio", options: ["Financial", "Medical", "Burial"], required: true },
+      { name: "recipientChoice", label: "For", type: "radio", options: ["Oneself", "His or her"], required: true },
+      { name: "recipientRelationship", label: "Relationship", showWhen: (values) => values.recipientChoice === "His or her", required: true },
+      { name: "underName", label: "Under the name of", required: true },
+    ] },
   ],
 }
-
+export const documentFields: Record<string, DocumentField[]> = Object.fromEntries(
+  Object.entries(documentSections).map(([type, sections]) => [
+    type,
+    [{ name: "date", label: "Date", type: "date", required: true, defaultToday: true }, ...sections.flatMap((section) => section.fields)],
+  ]),
+)
 export const sampleIssuances: IssuanceRecord[] = [
   {
     id: "ISS-001",
