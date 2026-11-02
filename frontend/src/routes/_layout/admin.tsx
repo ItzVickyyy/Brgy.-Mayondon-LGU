@@ -69,18 +69,26 @@ function Admin() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             User Accounts
           </h1>
-          <p className="text-muted-foreground">
+          <p className="mt-2 text-sm text-muted-foreground">
             Manage system users and their access roles.
           </p>
         </div>
         <AddUser />
       </div>
-      <UsersTable />
+      <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <div className="border-b p-4 sm:p-5">
+          <h2 className="font-semibold tracking-tight">User Accounts List</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Manage system user access, roles, and account status.
+          </p>
+        </div>
+        <UsersTable />
+      </section>
     </div>
   )
 }
