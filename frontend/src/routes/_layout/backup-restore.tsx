@@ -7,10 +7,15 @@ import {
   HardDriveDownload,
   RotateCcw,
   ShieldCheck,
+  X,
 } from "lucide-react"
 import { useState } from "react"
 
 import { NoPermission } from "@/components/Common/NoPermission"
+import { formControlClass } from "@/components/Common/formStyles"
+import { statusStyles } from "@/components/Common/statusStyles"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
@@ -64,21 +69,23 @@ function BackupRestore() {
       {notice ? (
         <div
           role="status"
-          className="rounded-lg border bg-muted/40 p-3 text-sm"
+          className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm"
         >
-          {notice}
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+          <p className="flex-1">{notice}</p>
+          <Button variant="ghost" size="icon" className="size-8" onClick={() => setNotice("")} aria-label="Dismiss message"><X aria-hidden="true" /></Button>
         </div>
       ) : null}
 
       <div className="grid gap-4 md:grid-cols-2">
-        <section className="rounded-xl border bg-card p-5">
+        <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2.5">
               <DatabaseBackup className="size-5 text-primary" />
             </div>
             <div>
               <h2 className="font-semibold">Create a Backup</h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Manual database backup
               </p>
             </div>
@@ -101,24 +108,20 @@ function BackupRestore() {
               <span className="font-medium">Oct 28, 2026 · 9:00 AM</span>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => setNotice("")}
-            className="mt-5 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            <HardDriveDownload className="size-4" />
+          <Button className="mt-5 w-full" onClick={() => setNotice("")}>
+            <HardDriveDownload aria-hidden="true" />
             Create Backup
-          </button>
+          </Button>
         </section>
 
-        <section className="rounded-xl border bg-card p-5">
+        <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2.5">
               <Clock3 className="size-5 text-primary" />
             </div>
             <div>
               <h2 className="font-semibold">Backup Schedule</h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 Set a recurring backup schedule
               </p>
             </div>
@@ -127,7 +130,7 @@ function BackupRestore() {
             <label className="flex items-center justify-between gap-3 text-sm">
               <span>Automatic backup</span>
               <select
-                className="min-h-11 rounded-md border bg-background px-2"
+                className={formControlClass}
                 defaultValue="daily"
               >
                 <option value="disabled">Disabled</option>
@@ -156,18 +159,12 @@ function BackupRestore() {
               </select>
             </label>
           </div>
-          <button
-            type="button"
-            onClick={() => setNotice("")}
-            className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-md border px-4 text-sm font-medium hover:bg-muted"
-          >
-            Save Schedule
-          </button>
+          <Button variant="outline" className="mt-5 w-full" onClick={() => setNotice("")}>Save Schedule</Button>
         </section>
       </div>
 
-      <section className="rounded-xl border bg-card">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b p-5">
+      <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4 sm:p-5">
           <div>
             <h2 className="font-semibold">Backup History</h2>
             <p className="mt-1 text-sm text-muted-foreground">
@@ -176,31 +173,28 @@ function BackupRestore() {
           </div>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[620px] text-left text-base">
-            <thead className="bg-muted/40 text-muted-foreground">
+          <table className="w-full min-w-[620px] text-left text-sm">
+            <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                <th className="px-5 py-3 font-medium">Backup file</th>
-                <th className="px-5 py-3 font-medium">Created</th>
-                <th className="px-5 py-3 font-medium">Size</th>
-                <th className="px-5 py-3 font-medium">Validation</th>
+                <th className="px-4 py-3 align-middle font-medium sm:px-5">Backup file</th>
+                <th className="px-4 py-3 align-middle font-medium sm:px-5">Created</th>
+                <th className="px-4 py-3 align-middle font-medium sm:px-5">Size</th>
+                <th className="px-4 py-3 align-middle font-medium sm:px-5">Validation</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y">
               {sampleBackups.map((backup) => (
-                <tr key={backup.name} className="border-t">
-                  <td className="px-5 py-3">
+                <tr key={backup.name} className="transition-colors hover:bg-muted/30">
+                  <td className="px-4 py-3 align-middle sm:px-5">
                     <span className="inline-flex items-center gap-2">
                       <Archive className="size-4 text-muted-foreground" />
                       {backup.name}
                     </span>
                   </td>
-                  <td className="px-5 py-3">{backup.date}</td>
-                  <td className="px-5 py-3">{backup.size}</td>
-                  <td className="px-5 py-3">
-                    <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400">
-                      <CheckCircle2 className="size-4" />
-                      {backup.status}
-                    </span>
+                  <td className="px-4 py-3 align-middle sm:px-5">{backup.date}</td>
+                  <td className="px-4 py-3 align-middle sm:px-5">{backup.size}</td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    <Badge variant="outline" className={statusStyles[backup.status]}><CheckCircle2 className="size-4" aria-hidden="true" />{backup.status}</Badge>
                   </td>
                 </tr>
               ))}
@@ -233,7 +227,7 @@ function BackupRestore() {
                 setConfirmRestore(false)
                 setRestoreConfirmation("")
               }}
-              className="min-h-11 rounded-md border bg-background px-3 font-normal"
+              className={`${formControlClass} font-normal`}
             >
               {sampleBackups.map((backup) => (
                 <option key={backup.name} value={backup.name}>
@@ -242,14 +236,14 @@ function BackupRestore() {
               ))}
             </select>
           </label>
-          <button
-            type="button"
+          <Button
+            variant="outline"
+            className="border-destructive/50 text-destructive hover:bg-destructive/5"
             onClick={() => setConfirmRestore((value) => !value)}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-destructive/50 px-4 text-sm font-medium text-destructive hover:bg-destructive/5"
           >
-            <RotateCcw className="size-4" />
+            <RotateCcw aria-hidden="true" />
             {confirmRestore ? "Cancel Restore" : "Prepare Restore"}
-          </button>
+          </Button>
         </div>
         {confirmRestore ? (
           <div className="mt-4 rounded-lg border border-destructive/40 bg-destructive/5 p-4">
@@ -269,22 +263,22 @@ function BackupRestore() {
                 onChange={(event) => setRestoreConfirmation(event.target.value)}
                 placeholder="RESTORE"
                 autoComplete="off"
-                className="mt-2 h-11 w-full rounded-md border bg-background px-3 font-normal outline-none focus-visible:ring-2 focus-visible:ring-ring sm:max-w-xs"
+                className={`${formControlClass} mt-2 sm:max-w-xs`}
               />
             </label>
-            <button
-              type="button"
+            <Button
+              variant="destructive"
+              className="mt-4"
               disabled={restoreConfirmation !== "RESTORE"}
               onClick={() => {
                 setNotice("Restore request confirmed.")
                 setConfirmRestore(false)
                 setRestoreConfirmation("")
               }}
-              className="mt-4 inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-destructive px-4 text-sm font-semibold text-destructive-foreground hover:bg-destructive/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              <ShieldCheck className="size-4" />
+              <ShieldCheck aria-hidden="true" />
               Confirm Restore
-            </button>
+            </Button>
           </div>
         ) : null}
       </section>
