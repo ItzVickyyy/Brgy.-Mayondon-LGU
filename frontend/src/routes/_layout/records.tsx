@@ -268,7 +268,7 @@ function RecordsManagement() {
       )}
 
       {view === "import" && isAdmin && (
-        <section className="rounded-xl border bg-card p-5 shadow-sm">
+        <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
             <span className="rounded-lg bg-primary/10 p-2.5 text-primary"><FileUp className="size-5" aria-hidden="true" /></span>
             <div>
