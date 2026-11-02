@@ -68,7 +68,7 @@ export function getPrintRows(type: string, values: Record<string, string>, curre
 
 export function getMissingFields(type: string, values: Record<string, string>, fields: DocumentField[]): Array<{ name: string; label: string }> {
   const missing = fields
-    .filter((field) => field.required && (!field.showWhen || field.showWhen(values)) && !values[field.name]?.trim())
+    .filter((field) => field.name !== "date" && field.required && (!field.showWhen || field.showWhen(values)) && !values[field.name]?.trim())
     .map((field) => ({ name: field.name, label: field.label }))
   if (!values.date?.trim() && !missing.some((field) => field.name === "date")) missing.push({ name: "date", label: "Date on document" })
   if (type === "Barangay Clearance, Electrical and Water Connection" && !values.serviceType?.trim() && !missing.some((field) => field.name === "serviceType")) {
