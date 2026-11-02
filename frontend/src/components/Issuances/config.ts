@@ -155,7 +155,7 @@ export const documentSections: Record<string, DocumentSection[]> = {
       { name: "name", label: "Name as printed", required: true },
       { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
       { name: "age", label: "AGE", type: "readonly" },
-      { name: "ageManual", label: "Age (if birthdate is not on record)", type: "number" },
+      { name: "ageManual", label: "Age (if birthdate is not on record)", type: "number", showWhen: (values) => !values.birthdate },
     ] },
     { id: "details", title: "Indigency details", fields: [
       { name: "sector", label: "SECTOR :", type: "multiselect", options: indigencySectorOptions, required: true, maxSelected: 2 },
