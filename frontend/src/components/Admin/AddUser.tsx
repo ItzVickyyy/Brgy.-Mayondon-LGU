@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { type UserCreate, UsersService } from "@/client"
+import { formControlClass } from "@/components/Common/formStyles"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -96,7 +97,7 @@ const AddUser = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="my-4">
+        <Button>
           <Plus className="mr-2" />
           Add User
         </Button>
@@ -197,7 +198,7 @@ const AddUser = () => {
                     <FormLabel>Role</FormLabel>
                     <FormControl>
                       <select
-                        className="flex h-11 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className={formControlClass}
                         value={field.value ? "admin" : "staff"}
                         onChange={(event) =>
                           field.onChange(event.target.value === "admin")
