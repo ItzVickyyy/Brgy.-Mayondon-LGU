@@ -2,6 +2,7 @@ import type { ColumnDef } from "@tanstack/react-table"
 
 import type { UserPublic } from "@/client"
 import type { DataTableFeatures } from "@/components/Common/DataTable"
+import { statusStyles } from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { UserActionsMenu } from "./UserActionsMenu"
@@ -43,7 +44,7 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
     id: "role",
     header: "Role",
     cell: ({ row }) => (
-      <Badge variant={row.original.is_superuser ? "default" : "secondary"}>
+      <Badge variant="outline" className={row.original.is_superuser ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-muted text-muted-foreground"}>
         {row.original.is_superuser ? "System Administrator" : "Staff"}
       </Badge>
     ),
@@ -52,17 +53,9 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
     accessorKey: "is_active",
     header: "Status",
     cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <span
-          className={cn(
-            "size-2 rounded-full",
-            row.original.is_active ? "bg-green-500" : "bg-gray-400",
-          )}
-        />
-        <span className={row.original.is_active ? "" : "text-muted-foreground"}>
-          {row.original.is_active ? "Active" : "Inactive"}
-        </span>
-      </div>
+      <Badge variant="outline" className={statusStyles[row.original.is_active ? "Active" : "Inactive"]}>
+        {row.original.is_active ? "Active" : "Inactive"}
+      </Badge>
     ),
   },
   {
