@@ -12,7 +12,13 @@ export type IssuanceRecord = {
   resident: string
   type: string
   date: string
-  status: "Issued" | "Pending"
+  status: "Issued" | "Pending" | "Voided"
+  purpose?: string
+  validUntil?: string
+  voidReason?: string
+  correctionReason?: string
+  issuedBy?: string
+  orNumber?: string
   fields: Record<string, string>
 }
 
@@ -311,6 +317,9 @@ export const sampleIssuances: IssuanceRecord[] = [
     type: "Barangay Clearance",
     date: "2026-10-23",
     status: "Issued",
+    purpose: "Employment Requirement",
+    issuedBy: "staff",
+    orNumber: "OR-2026-001",
     fields: {},
   },
   {
@@ -319,6 +328,9 @@ export const sampleIssuances: IssuanceRecord[] = [
     type: "Franchise Clearance",
     date: "2026-10-22",
     status: "Issued",
+    purpose: "Franchise Requirement",
+    issuedBy: "staff",
+    orNumber: "OR-2026-002",
     fields: {},
   },
   {
@@ -326,7 +338,11 @@ export const sampleIssuances: IssuanceRecord[] = [
     resident: "Resident Three",
     type: "Barangay Clearance (Electrical and Water Connection)",
     date: "2026-10-22",
-    status: "Issued",
+    status: "Voided",
+    purpose: "Connection application",
+    issuedBy: "admin",
+    orNumber: "OR-2026-003",
+    voidReason: "Incorrect connection type selected",
     fields: {},
   },
   {
@@ -334,7 +350,8 @@ export const sampleIssuances: IssuanceRecord[] = [
     resident: "Resident Four",
     type: "Certificate of Indigency",
     date: "2026-10-21",
-    status: "Issued",
+    status: "Pending",
+    purpose: "Medical assistance",
     fields: {},
   },
 ]
