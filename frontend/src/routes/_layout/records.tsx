@@ -1,7 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router"
 import { Archive, CheckCircle2, CreditCard, FileUp, Search, Upload, UserRound, Users, X } from "lucide-react"
 import { useMemo, useState } from "react"
+import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { RowActions } from "@/components/Common/RowActions"
 import { StatCard } from "@/components/Common/StatCard"
 import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
@@ -29,6 +31,11 @@ const inputClass = formControlClass
 function RecordsManagement() {
   const [view, setView] = useState<View>("residents")
   const [search, setSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState<"Active" | "Archived" | "all">("Active")
+  const [residentTypeFilter, setResidentTypeFilter] = useState("all")
+  const [residents, setResidents] = useState(sampleResidents)
+  const [archiveTarget, setArchiveTarget] = useState<ResidentRecord | null>(null)
+  const [restoreTarget, setRestoreTarget] = useState<ResidentRecord | null>(null)
   const [notice, setNotice] = useState("")
   const [selectedFile, setSelectedFile] = useState("")
   const [importStep, setImportStep] = useState(0)
@@ -40,18 +47,18 @@ function RecordsManagement() {
 
   const filteredResidents = useMemo(
     () =>
-      sampleResidents.filter((resident) =>
-        [
-          resident.id,
-          resident.name,
-          resident.address,
-          resident.residentType,
-          resident.idNumber,
-          resident.registration,
-          resident.status,
-        ].some((value) => value.toLowerCase().includes(search.toLowerCase())),
-      ),
-    [search],
+      residents
+        .filter((resident) => {
+          const query = search.trim().toLowerCase()
+          const matchesSearch = [resident.name, resident.address, resident.idNumber].some((value) =>
+            value.toLowerCase().includes(query),
+          )
+          return matchesSearch &&
+            (statusFilter === "all" || resident.status === statusFilter) &&
+            (residentTypeFilter === "all" || resident.residentType === residentTypeFilter)
+        })
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [residents, residentTypeFilter, search, statusFilter],
   )
 
   const tabs: { id: View; label: string }[] = [
