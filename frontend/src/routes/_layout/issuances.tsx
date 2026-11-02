@@ -91,6 +91,16 @@ function getPreselectedResident() {
 function IssuancesManagement() {
   const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(() => Boolean(getPreselectedResident()))
   const [selectedType, setSelectedType] = useState(documentTypes[0])
+  const [residentQuery, setResidentQuery] = useState("")
+  const [selectedResidentId, setSelectedResidentId] = useState("")
+  const [manualEntry, setManualEntry] = useState(false)
+  const [activeResidentMatch, setActiveResidentMatch] = useState(0)
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+  const [formErrorSummary, setFormErrorSummary] = useState<string[]>([])
+  const [confirmFormAction, setConfirmFormAction] = useState<"clear" | "discard" | null>(null)
+  const [lostDetailsNotice, setLostDetailsNotice] = useState("")
+  const [usedAssociations, setUsedAssociations] = useState<string[]>([])
+  const [usedIndigencyPurposes, setUsedIndigencyPurposes] = useState<string[]>([])
   const [search, setSearch] = useState("")
   const [historyType, setHistoryType] = useState("All document types")
   const [historyStatus, setHistoryStatus] = useState("all")
@@ -111,6 +121,7 @@ function IssuancesManagement() {
   const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
   const [viewRecord, setViewRecord] = useState<IssuanceRecord | null>(null)
   const [notice, setNotice] = useState("")
+  const firstInvalidRef = useRef<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null>(null)
 
   const fields = documentFields[selectedType] ?? []
   const currentName = formValues.name?.trim() || "Name not entered"
