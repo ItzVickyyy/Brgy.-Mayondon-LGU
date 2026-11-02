@@ -15,6 +15,7 @@ import {
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_layout/records")({
   component: RecordsManagement,
