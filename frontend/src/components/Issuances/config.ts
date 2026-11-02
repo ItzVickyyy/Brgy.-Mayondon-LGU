@@ -113,7 +113,10 @@ export const documentSections: Record<string, DocumentSection[]> = {
   ],
   "Barangay Franchise Clearance": [
     { id: "resident", title: "Resident", fields: [
-      { name: "name", label: "NAME", required: true },
+      { name: "firstName", label: "Given names" },
+      { name: "middleName", label: "Middle name" },
+      { name: "lastName", label: "Surname" },
+      { name: "name", label: "Name as printed", required: true },
       { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
     ] },
     { id: "details", title: "Franchise details", fields: [
@@ -131,7 +134,10 @@ export const documentSections: Record<string, DocumentSection[]> = {
       { name: "serviceType", label: "Service", type: "checkboxes", options: ["Electric", "Water"], required: true },
     ] },
     { id: "resident", title: "Resident", fields: [
-      { name: "name", label: "NAME", required: true },
+      { name: "firstName", label: "Given names" },
+      { name: "middleName", label: "Middle name" },
+      { name: "lastName", label: "Surname" },
+      { name: "name", label: "Name as printed", required: true },
       { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
     ] },
     { id: "details", title: "Connection details", fields: [
@@ -143,7 +149,10 @@ export const documentSections: Record<string, DocumentSection[]> = {
   ],
   "Certificate of Indigency": [
     { id: "resident", title: "Resident", fields: [
-      { name: "name", label: "NAME", required: true },
+      { name: "firstName", label: "Given names" },
+      { name: "middleName", label: "Middle name" },
+      { name: "lastName", label: "Surname" },
+      { name: "name", label: "Name as printed", required: true },
       { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
       { name: "age", label: "AGE", type: "readonly" },
       { name: "ageManual", label: "Age (if birthdate is not on record)", type: "number" },
