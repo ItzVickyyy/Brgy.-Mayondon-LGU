@@ -93,6 +93,7 @@ export function DateField({
           <label htmlFor={id} className="sr-only">Month</label>
           <select
             id={id}
+            required={required}
             value={month}
             onChange={(event) => {
               const nextMonth = event.target.value
