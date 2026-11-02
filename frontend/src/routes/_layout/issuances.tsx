@@ -183,6 +183,8 @@ function IssuancesManagement() {
         [name]: nextValue,
         ...(name === "birthdate" ? { age: calculateAge(nextValue, previous.date || localDateValue()) } : {}),
         ...(name === "date" ? { age: calculateAge(previous.birthdate || "", nextValue) } : {}),
+        ...(name === "recipientChoice" && nextValue === "Oneself" ? { underName: previous.name ?? "" } : {}),
+        ...(name === "recipientChoice" && nextValue === "His or her" ? { underName: "" } : {}),
       }
       if (["firstName", "middleName", "lastName"].includes(name)) {
         next.name = formatPrintedName(
@@ -230,7 +232,7 @@ function IssuancesManagement() {
       birthdate: resident.birthdate,
       birthplace: resident.birthplace,
       civilStatus: resident.civilStatus,
-      sector: resident.sectors.join("||"),
+      sector: selectedType === "Certification (assistance request)" ? resident.sectors[0] ?? "" : resident.sectors.join("||"),
       residencyDuration: resident.residentSince ? String(Math.max(0, new Date(`${previous.date || localDateValue()}T00:00:00`).getFullYear() - resident.residentSince)) : "",
       age: calculateAge(resident.birthdate, previous.date || localDateValue()),
       photoUrl: resident.photoUrl ?? "",
@@ -343,7 +345,7 @@ function IssuancesManagement() {
   function renderField(field: (typeof allFormFields)[number]) {
     if (field.showWhen && !field.showWhen(formValues)) return null
     const value = field.name === "age"
-      ? calculateAge(formValues.birthdate ?? "", formValues.date || localDateValue()) || (selectedType === "Certificate of Indigency" ? formValues.ageManual ?? "" : "")
+      ? formValues.birthdate ? calculateAge(formValues.birthdate, formValues.date || localDateValue()) : (selectedType === "Certificate of Indigency" ? formValues.ageManual ?? "" : "")
       : formValues[field.name] ?? ""
     const error = validationErrors[field.name]
     const fieldId = `field-${field.name}`
@@ -376,7 +378,7 @@ function IssuancesManagement() {
         ) : field.type === "combobox" ? (
           <><input id={fieldId} value={value} onChange={(event) => updateField(field.name, event.target.value)} list={`list-${field.name}`} className={cn(inputClassName, error && "border-destructive")} aria-invalid={Boolean(error)} /><datalist id={`list-${field.name}`}>{[...(field.options ?? []), ...options].map((option) => <option key={option} value={option} />)}</datalist></>
         ) : field.type === "readonly" ? (
-          <input id={fieldId} value={value} readOnly className={cn(inputClassName, "bg-muted/50")} />
+          <input id={fieldId} value={value} readOnly placeholder={field.name === "age" ? (formValues.birthdate ? "Unable to calculate age" : "Enter birthdate") : undefined} className={cn(inputClassName, "bg-muted/50")} />
         ) : field.type === "textarea" ? (
           <textarea id={fieldId} value={value} onChange={(event) => updateField(field.name, event.target.value)} className={cn(inputClassName, "h-auto py-2", error && "border-destructive")} aria-invalid={Boolean(error)} rows={2} />
         ) : (
