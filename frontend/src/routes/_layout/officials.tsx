@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+import { initialOfficials, type OfficialRecord } from "@/components/Officials/officials-sample-data"
 import { Search, UserRound, UserRoundPlus } from "lucide-react"
 import { useMemo, useState } from "react"
 
@@ -25,24 +26,6 @@ export const Route = createFileRoute("/_layout/officials")({
   component: OfficialsManagement,
   head: () => ({ meta: [{ title: pageTitle("Officials") }] }),
 })
-
-type OfficialStatus = "Current" | "Former"
-type OfficialRecord = {
-  id: string
-  name: string
-  position: string
-  termStart: string
-  termEnd: string
-  status: OfficialStatus
-}
-
-const initialOfficials: OfficialRecord[] = [
-  { id: "OFF-001", name: "Barangay Captain", position: "Punong Barangay", termStart: "2023-11-01", termEnd: "2026-11-30", status: "Current" },
-  { id: "OFF-002", name: "Barangay Kagawad 1", position: "Barangay Kagawad", termStart: "2023-11-01", termEnd: "2026-11-30", status: "Current" },
-  { id: "OFF-003", name: "Barangay Secretary", position: "Barangay Secretary", termStart: "2023-11-01", termEnd: "2026-11-30", status: "Current" },
-  { id: "OFF-004", name: "Barangay Treasurer", position: "Barangay Treasurer", termStart: "2023-11-01", termEnd: "2026-11-30", status: "Current" },
-  { id: "OFF-005", name: "Former Kagawad", position: "Barangay Kagawad", termStart: "2020-11-01", termEnd: "2023-10-31", status: "Former" },
-]
 
 const positionRank: Record<string, number> = {
   "Punong Barangay": 0,
