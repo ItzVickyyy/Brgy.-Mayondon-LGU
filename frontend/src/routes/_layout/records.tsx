@@ -1,7 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { FileUp, Search, Upload, UserRound, Users } from "lucide-react"
+import { Archive, CheckCircle2, CreditCard, FileUp, Search, Upload, UserRound, Users, X } from "lucide-react"
 import { useMemo, useState } from "react"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { StatCard } from "@/components/Common/StatCard"
+import { formControlClass } from "@/components/Common/formStyles"
+import { statusStyles } from "@/components/Common/statusStyles"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { ResidentProfileDialog } from "@/components/Records/ResidentProfileDialog"
 import {
   type ResidentRecord,
@@ -18,8 +23,7 @@ export const Route = createFileRoute("/_layout/records")({
 
 type View = "residents" | "family-sector" | "import"
 
-const inputClass =
-  "min-h-11 w-full rounded-md border bg-background px-3 text-base outline-none focus-visible:ring-2 focus-visible:ring-ring"
+const inputClass = formControlClass
 
 function RecordsManagement() {
   const [view, setView] = useState<View>("residents")
@@ -67,13 +71,10 @@ function RecordsManagement() {
             details, and existing Barangay ID references.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setNotice("Resident record form opened.")}
-          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          <UserRound className="size-4" aria-hidden="true" /> Add Resident
-        </button>
+        <Button onClick={() => setNotice("Resident record form opened.")}>
+          <UserRound aria-hidden="true" />
+          Add Resident
+        </Button>
       </div>
 
       <div
@@ -101,7 +102,7 @@ function RecordsManagement() {
       {notice && (
         <div
           role="status"
-          className="rounded-lg border bg-muted/30 p-3 text-sm"
+          className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm"
         >
           {notice}
         </div>
@@ -109,36 +110,16 @@ function RecordsManagement() {
 
       {view === "residents" && (
         <>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <article className="rounded-xl border bg-card p-4">
-              <p className="text-sm text-muted-foreground">Resident Records</p>
-              <p className="mt-2 text-2xl font-semibold">4</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Resident records in this view
-              </p>
-            </article>
-            <article className="rounded-xl border bg-card p-4">
-              <p className="text-sm text-muted-foreground">
-                ID and Registration Details
-              </p>
-              <p className="mt-2 text-2xl font-semibold">Included</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Resident registration and ID details
-              </p>
-            </article>
-            <article className="rounded-xl border bg-card p-4">
-              <p className="text-sm text-muted-foreground">Record Removal</p>
-              <p className="mt-2 text-2xl font-semibold">Archive</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Prefer inactive status over permanent deletion
-              </p>
-            </article>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <StatCard icon={Users} label="Resident Records" value="4" description="Resident records in this view" />
+            <StatCard icon={CreditCard} label="ID and Registration Details" value="Included" description="Resident registration and ID details" />
+            <StatCard icon={Archive} label="Record Removal" value="Archive" description="Prefer inactive status over permanent deletion" />
           </div>
 
           <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-            <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 border-b p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
               <div>
-                <h2 className="font-semibold">Resident List</h2>
+                <h2 className="font-semibold tracking-tight">Resident List</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Resident records
                 </p>
@@ -157,8 +138,8 @@ function RecordsManagement() {
               </label>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[850px] text-left text-base">
-                <thead className="bg-muted/50 text-sm uppercase tracking-wide text-muted-foreground">
+              <table className="w-full min-w-[850px] text-left text-sm">
+                <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     {[
                       "Resident Reference",
@@ -170,7 +151,7 @@ function RecordsManagement() {
                       "Record Status",
                       "Action",
                     ].map((label) => (
-                      <th key={label} className="px-4 py-3 font-medium">
+                      <th key={label} className="px-4 py-3 align-middle font-medium sm:px-5">
                         {label}
                       </th>
                     ))}
@@ -178,29 +159,27 @@ function RecordsManagement() {
                 </thead>
                 <tbody className="divide-y">
                   {filteredResidents.map((resident) => (
-                    <tr key={resident.id} className="hover:bg-muted/20">
+                    <tr key={resident.id} className="transition-colors hover:bg-muted/30">
                       <td className="px-4 py-3 font-medium">{resident.id}</td>
-                      <td className="px-4 py-3">{resident.name}</td>
-                      <td className="px-4 py-3">{resident.address}</td>
-                      <td className="px-4 py-3">{resident.residentType}</td>
-                      <td className="px-4 py-3">{resident.idNumber}</td>
-                      <td className="px-4 py-3">{resident.registration}</td>
-                      <td className="px-4 py-3">
-                        <span className="rounded-full border px-2 py-1 text-xs">
-                          {resident.status}
-                        </span>
+                      <td className="px-4 py-3 align-middle sm:px-5">{resident.name}</td>
+                      <td className="px-4 py-3 align-middle sm:px-5">{resident.address}</td>
+                      <td className="px-4 py-3 align-middle sm:px-5">{resident.residentType}</td>
+                      <td className="px-4 py-3 align-middle sm:px-5">{resident.idNumber}</td>
+                      <td className="px-4 py-3 align-middle sm:px-5">{resident.registration}</td>
+                      <td className="px-4 py-3 align-middle sm:px-5">
+                        <Badge variant="outline" className={statusStyles[resident.status]}>{resident.status}</Badge>
                       </td>
-                      <td className="px-4 py-3">
-                        <button
-                          type="button"
+                      <td className="px-4 py-3 align-middle sm:px-5">
+                        <Button
+                          variant="link"
+                          className="min-h-11 px-0 font-semibold"
                           onClick={() => {
                             setSelectedResident(resident)
                             setProfileTab("Details")
                           }}
-                          className="inline-flex min-h-11 items-center font-semibold text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         >
                           View profile
-                        </button>
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -218,11 +197,11 @@ function RecordsManagement() {
       )}
 
       {view === "family-sector" && (
-        <section className="rounded-xl border bg-card p-5 shadow-sm">
+        <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
-            <Users className="mt-0.5 size-5 text-primary" aria-hidden="true" />
+            <span className="rounded-lg bg-primary/10 p-2.5 text-primary"><Users className="size-5" aria-hidden="true" /></span>
             <div>
-              <h2 className="font-semibold">
+              <h2 className="font-semibold tracking-tight">
                 Family, Beneficiary, and Marginalized-Sector Details
               </h2>
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -268,13 +247,13 @@ function RecordsManagement() {
                 <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">
                   {item.description}
                 </p>
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
+                  className="mt-4 self-start"
                   onClick={() => setNotice(`${item.action} screen selected.`)}
-                  className="mt-4 inline-flex min-h-11 items-center self-start rounded-md border px-3 text-sm font-medium hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {item.action}
-                </button>
+                </Button>
               </article>
             ))}
           </div>
@@ -284,7 +263,7 @@ function RecordsManagement() {
       {view === "import" && isAdmin && (
         <section className="rounded-xl border bg-card p-5 shadow-sm">
           <div className="flex items-start gap-3">
-            <FileUp className="mt-0.5 size-5 text-primary" aria-hidden="true" />
+            <span className="rounded-lg bg-primary/10 p-2.5 text-primary"><FileUp className="size-5" aria-hidden="true" /></span>
             <div>
               <h2 className="font-semibold">Import Existing Masterlist</h2>
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -354,7 +333,7 @@ function RecordsManagement() {
                     className="flex flex-col gap-2 text-sm font-medium"
                   >
                     {field}
-                    <select className="h-11 rounded-md border bg-background px-3 font-normal">
+                    <select className={cn(inputClass, "font-normal")}>
                       <option>Choose source column</option>
                       <option>Name</option>
                       <option>Address</option>
@@ -375,8 +354,8 @@ function RecordsManagement() {
                   confirming.
                 </p>
               </div>
-              <table className="w-full min-w-[560px] text-left text-base">
-                <thead className="bg-muted/40">
+              <table className="w-full min-w-[560px] text-left text-sm">
+                <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     {["Field", "Source column", "Validation"].map((label) => (
                       <th key={label} className="px-4 py-3 font-medium">
@@ -392,9 +371,9 @@ function RecordsManagement() {
                     ["Resident type", "Resident Type", "Check allowed values"],
                     ["Barangay ID number", "ID Number", "Check duplicates"],
                   ].map((row) => (
-                    <tr key={row[0]} className="border-t">
+                    <tr key={row[0]} className="transition-colors hover:bg-muted/30">
                       <td className="px-4 py-3 font-medium">{row[0]}</td>
-                      <td className="px-4 py-3">{row[1]}</td>
+                      <td className="px-4 py-3 align-middle sm:px-5">{row[1]}</td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {row[2]}
                       </td>
@@ -412,7 +391,7 @@ function RecordsManagement() {
                 ["Skipped", "Pending"],
                 ["Failed", "Pending"],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-xl border p-4">
+                <div key={label} className="rounded-xl border bg-card p-4">
                   <p className="text-sm text-muted-foreground">{label}</p>
                   <p className="mt-2 text-xl font-semibold">{value}</p>
                 </div>
