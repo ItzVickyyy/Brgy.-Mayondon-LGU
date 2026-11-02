@@ -449,28 +449,30 @@ function IssuancesManagement() {
       <div key={field.name} className={wrapperClass} id={`wrap-${field.name}`}>
         <label htmlFor={fieldId}>{field.label}{field.required ? <span className="text-destructive"> *</span> : null}</label>
         {field.type === "radio" || field.type === "checkboxes" || field.type === "multiselect" ? (
-          <fieldset className="min-w-0"><legend className="sr-only">{field.label}</legend><div className="flex flex-wrap gap-2">
-            {(field.options ?? []).map((option) => {
-              const multi = field.type !== "radio"
-              const selected = multi ? value.split("||").filter(Boolean).includes(option) : value === option
-              const selectedValues = value.split("||").filter(Boolean)
-              const limitReached = field.type === "multiselect" && Boolean(field.maxSelected) && selectedValues.length >= (field.maxSelected ?? 0)
-              const optionDisabled = Boolean(multi && limitReached && !selected)
-              return <label key={option} className={cn("inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm font-normal focus-within:ring-[3px] focus-within:ring-ring/50", selected ? "border-primary bg-primary/10" : "bg-background hover:bg-muted", optionDisabled && "cursor-not-allowed opacity-50")}>
-                <input id={field.options?.[0] === option ? fieldId : undefined} type={multi ? "checkbox" : "radio"} name={field.name} checked={selected} disabled={optionDisabled} aria-disabled={optionDisabled} onChange={(event) => {
-                  if (!multi) updateField(field.name, option)
-                  else {
-                    const values = value.split("||").filter(Boolean)
-                    const next = event.target.checked
-                      ? values.length < (field.maxSelected ?? 99) ? [...values, option] : values
-                      : values.filter((item) => item !== option)
-                    updateField(field.name, next.join("||"))
-                  }
-                }} className="size-4 accent-primary" />{option}
-              </label>
-            })}
-          </div></fieldset>
-          {field.type === "multiselect" && field.maxSelected ? <p className="text-xs font-normal text-muted-foreground">{value.split("||").filter(Boolean).length} of {field.maxSelected} selected</p> : null}
+          <>
+            <fieldset className="min-w-0"><legend className="sr-only">{field.label}</legend><div className="flex flex-wrap gap-2">
+              {(field.options ?? []).map((option) => {
+                const multi = field.type !== "radio"
+                const selected = multi ? value.split("||").filter(Boolean).includes(option) : value === option
+                const selectedValues = value.split("||").filter(Boolean)
+                const limitReached = field.type === "multiselect" && Boolean(field.maxSelected) && selectedValues.length >= (field.maxSelected ?? 0)
+                const optionDisabled = Boolean(multi && limitReached && !selected)
+                return <label key={option} className={cn("inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm font-normal focus-within:ring-[3px] focus-within:ring-ring/50", selected ? "border-primary bg-primary/10" : "bg-background hover:bg-muted", optionDisabled && "cursor-not-allowed opacity-50")}>
+                  <input id={field.options?.[0] === option ? fieldId : undefined} type={multi ? "checkbox" : "radio"} name={field.name} checked={selected} disabled={optionDisabled} aria-disabled={optionDisabled} onChange={(event) => {
+                    if (!multi) updateField(field.name, option)
+                    else {
+                      const values = value.split("||").filter(Boolean)
+                      const next = event.target.checked
+                        ? values.length < (field.maxSelected ?? 99) ? [...values, option] : values
+                        : values.filter((item) => item !== option)
+                      updateField(field.name, next.join("||"))
+                    }
+                  }} className="size-4 accent-primary" />{option}
+                </label>
+              })}
+            </div></fieldset>
+            {field.type === "multiselect" && field.maxSelected ? <p className="text-xs font-normal text-muted-foreground">{value.split("||").filter(Boolean).length} of {field.maxSelected} selected</p> : null}
+          </>
         ) : field.type === "select" ? (
           <select id={fieldId} value={value} onChange={(event) => updateField(field.name, event.target.value)} className={cn(inputClassName, error && "border-destructive")} aria-invalid={Boolean(error)}><option value="">Select {field.label.toLowerCase()}</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select>
         ) : field.type === "combobox" ? (
