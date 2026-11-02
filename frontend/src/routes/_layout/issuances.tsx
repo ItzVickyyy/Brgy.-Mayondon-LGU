@@ -694,6 +694,7 @@ function IssuancesManagement() {
                       {section.fields.map(renderField)}
                     </FormSection>
                   ))}
+                </div>
                 <div className="min-w-0">
                   {(() => {
                     const missing = getMissingFields(selectedType, formValues, allFormFields)
