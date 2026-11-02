@@ -42,11 +42,15 @@ export type DataTableFeatures = typeof dataTableFeatures
 interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<DataTableFeatures, TData>[]
   data: TData[]
+  emptyTitle?: string
+  emptyDescription?: string
 }
 
 export function DataTable<TData extends RowData>({
   columns,
   data,
+  emptyTitle = "No results found",
+  emptyDescription = "There are no records to display.",
 }: DataTableProps<TData>) {
   const table = useTable({
     features: dataTableFeatures,
@@ -90,7 +94,7 @@ export function DataTable<TData extends RowData>({
         </TableBody>
       </Table>
       {table.getRowModel().rows.length === 0 ? (
-        <EmptyState title="No results found" description="There are no user accounts to display." />
+        <EmptyState title={emptyTitle} description={emptyDescription} />
       ) : null}
 
       {data.length > 0 && (
