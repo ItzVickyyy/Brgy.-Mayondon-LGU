@@ -44,3 +44,41 @@ export function getDateParts(value: string): { day: string; month: string } {
     month: date.toLocaleDateString("en-US", { month: "long" }),
   }
 }
+
+export const monthNames = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+]
+
+export function daysInMonth(year: number, month: number): number {
+  if (!Number.isInteger(year) || !Number.isInteger(month) || month < 1 || month > 12) return 0
+  return new Date(year, month, 0).getDate()
+}
+
+export function buildIsoDate(year: string, month: string, day: string): string {
+  if (!/^\\d{4}$/.test(year) || !/^\\d{1,2}$/.test(month) || !/^\\d{1,2}$/.test(day)) return ""
+  const numericYear = Number(year)
+  const numericMonth = Number(month)
+  const numericDay = Number(day)
+  if (numericYear < 1 || numericMonth < 1 || numericMonth > 12) return ""
+  if (numericDay < 1 || numericDay > daysInMonth(numericYear, numericMonth)) return ""
+  return `${year}-${String(numericMonth).padStart(2, "0")}-${String(numericDay).padStart(2, "0")}`
+}
+
+export function splitIsoDate(value: string): { year: string; month: string; day: string } {
+  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(value)
+  if (!match || buildIsoDate(match[1], match[2], match[3]) !== value) {
+    return { year: "", month: "", day: "" }
+  }
+  return { year: match[1], month: match[2], day: match[3] }
+}
