@@ -15,7 +15,7 @@ export type UserTableData = UserPublic & {
 export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
   {
     accessorKey: "full_name",
-    header: "Full Name",
+    header: "Name",
     cell: ({ row }) => {
       const fullName = row.original.full_name
       return (
@@ -36,7 +36,7 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
   },
   {
     accessorKey: "email",
-    header: "Email",
+    header: "Email / Username",
     cell: ({ row }) => (
       <span className="text-muted-foreground">{row.original.email}</span>
     ),
