@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { EllipsisVertical, UserRoundX, UserRoundCheck } from "lucide-react"
+import { EllipsisVertical, UserRoundCheck, UserRoundX } from "lucide-react"
 import { useState } from "react"
 
 import { type UserPublic, UsersService } from "@/client"
@@ -39,7 +39,11 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
         body: { is_active: active },
       }),
     onSuccess: (_result, variables) => {
-      showSuccessToast(variables.active ? "User account reactivated" : "User account deactivated")
+      showSuccessToast(
+        variables.active
+          ? "User account reactivated"
+          : "User account deactivated",
+      )
       setPendingActive(null)
       setOpen(false)
     },
@@ -53,28 +57,43 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
 
   return (
     <>
-      <DropdownMenu open={open} onOpenChange={setOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon" aria-label={`More actions for ${user.full_name || user.email}`}>
-            <EllipsisVertical aria-hidden="true" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <EditUser
-            user={user}
-            protectRoleAndStatus={user.isLastActiveAdmin}
-            onSuccess={() => setOpen(false)}
-          />
-          <DropdownMenuItem
-            disabled={user.is_active && user.isLastActiveAdmin}
-            title={user.is_active && user.isLastActiveAdmin ? "Cannot deactivate the last active System Administrator" : undefined}
-            onSelect={() => setPendingActive(!user.is_active)}
-          >
-            {user.is_active ? <UserRoundX aria-hidden="true" /> : <UserRoundCheck aria-hidden="true" />}
-            {user.is_active ? "Deactivate" : "Reactivate"}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <div className="flex items-center justify-end gap-2">
+        <EditUser
+          user={user}
+          asPrimaryButton
+          protectRoleAndStatus={user.isLastActiveAdmin}
+          onSuccess={() => setOpen(false)}
+        />
+        <DropdownMenu open={open} onOpenChange={setOpen}>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              aria-label={`More actions for ${user.full_name || user.email}`}
+            >
+              <EllipsisVertical aria-hidden="true" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem
+              disabled={user.is_active && user.isLastActiveAdmin}
+              title={
+                user.is_active && user.isLastActiveAdmin
+                  ? "Cannot deactivate the last active System Administrator"
+                  : undefined
+              }
+              onSelect={() => setPendingActive(!user.is_active)}
+            >
+              {user.is_active ? (
+                <UserRoundX aria-hidden="true" />
+              ) : (
+                <UserRoundCheck aria-hidden="true" />
+              )}
+              {user.is_active ? "Deactivate" : "Reactivate"}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
 
       <ConfirmDialog
         open={pendingActive !== null}
