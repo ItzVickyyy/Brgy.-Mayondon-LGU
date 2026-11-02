@@ -152,6 +152,8 @@ function Reports() {
               <p className="mt-3 font-medium">Report preview area</p>
               <p className="mt-1 text-sm text-muted-foreground">Results for the selected report will appear here.</p>
             </div>
+          ) : period === "week" ? (
+            <EmptyState title="No activity in this period" description="No sample report records fall within the selected week." />
           ) : report === "issuances" ? (
             <div className="overflow-x-auto">
               <h3 className="mb-3 font-semibold tracking-tight">Issuances by document type · {periodLabel[period]}</h3>
