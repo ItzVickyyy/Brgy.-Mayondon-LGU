@@ -52,13 +52,15 @@ function Reports() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
           Management Reports
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Review document issuance and resident-record activity.
-        </p>
+          </p>
+        </div>
       </div>
       {notice ? (
         <div role="status" className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
