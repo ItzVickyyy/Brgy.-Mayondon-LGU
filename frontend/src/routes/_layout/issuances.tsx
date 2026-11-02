@@ -285,7 +285,7 @@ function IssuancesManagement() {
       ...(previous.recipientChoice === "Oneself" ? { underName: name } : {}),
     }))
     setSelectedResidentId(resident.id)
-    setShowNameParts(false)
+    
     setResidentQuery("")
     setManualEntry(false)
     setValidationErrors({})
@@ -295,7 +295,7 @@ function IssuancesManagement() {
   function startManualEntry() {
     setDateFieldResetKey((key) => key + 1)
     setSelectedResidentId("")
-    setShowNameParts(false)
+    
     setResidentQuery("")
     setManualEntry(true)
     setFormValues((previous) => ({
@@ -457,7 +457,7 @@ function IssuancesManagement() {
               const limitReached = field.type === "multiselect" && Boolean(field.maxSelected) && selectedValues.length >= (field.maxSelected ?? 0)
               const optionDisabled = Boolean(multi && limitReached && !selected)
               return <label key={option} className={cn("inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm font-normal focus-within:ring-[3px] focus-within:ring-ring/50", selected ? "border-primary bg-primary/10" : "bg-background hover:bg-muted", optionDisabled && "cursor-not-allowed opacity-50")}>
-                <input type={multi ? "checkbox" : "radio"} name={field.name} checked={selected} disabled={optionDisabled} aria-disabled={optionDisabled} onChange={(event) => {
+                <input id={field.options?.[0] === option ? fieldId : undefined} type={multi ? "checkbox" : "radio"} name={field.name} checked={selected} disabled={optionDisabled} aria-disabled={optionDisabled} onChange={(event) => {
                   if (!multi) updateField(field.name, option)
                   else {
                     const values = value.split("||").filter(Boolean)
