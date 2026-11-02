@@ -41,7 +41,7 @@ export function PrintSummaryPanel({ type, values, currentDate, fields }: PrintSu
           </ul>
         </>
       ) : (
-        <p className={cn("flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold", statusStyles.Issued)}>
+        <p className={cn("flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold", statusStyles.Issued)}>
           <CheckCircle2 aria-hidden="true" className="size-4 shrink-0" />Ready to issue
         </p>
       )}
