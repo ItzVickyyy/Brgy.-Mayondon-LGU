@@ -86,9 +86,7 @@ export function DataTable<TData extends RowData>({
                 ))}
               </TableRow>
             ))
-          ) : (
-            
-          )}
+          ) : null}
         </TableBody>
       </Table>
       {table.getRowModel().rows.length === 0 ? (
@@ -161,7 +159,7 @@ export function DataTable<TData extends RowData>({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className="size-11 p-0"
                 onClick={() => table.previousPage()}
                 disabled={!table.getCanPreviousPage()}
               >
