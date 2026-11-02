@@ -97,7 +97,7 @@ const AddUser = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button>
+        <Button className="min-h-11">
           <Plus className="mr-2" />
           Add User
         </Button>
@@ -232,11 +232,11 @@ const AddUser = () => {
 
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline" disabled={mutation.isPending}>
+                <Button variant="outline" className="min-h-11" disabled={mutation.isPending}>
                   Cancel
                 </Button>
               </DialogClose>
-              <LoadingButton type="submit" loading={mutation.isPending}>
+              <LoadingButton className="min-h-11" type="submit" loading={mutation.isPending}>
                 Save
               </LoadingButton>
             </DialogFooter>
