@@ -66,7 +66,7 @@ export function daysInMonth(year: number, month: number): number {
 }
 
 export function buildIsoDate(year: string, month: string, day: string): string {
-  if (!/^\\d{4}$/.test(year) || !/^\\d{1,2}$/.test(month) || !/^\\d{1,2}$/.test(day)) return ""
+  if (!/^\d{4}$/.test(year) || !/^\d{1,2}$/.test(month) || !/^\d{1,2}$/.test(day)) return ""
   const numericYear = Number(year)
   const numericMonth = Number(month)
   const numericDay = Number(day)
@@ -76,7 +76,7 @@ export function buildIsoDate(year: string, month: string, day: string): string {
 }
 
 export function splitIsoDate(value: string): { year: string; month: string; day: string } {
-  const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(value)
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value)
   if (!match || buildIsoDate(match[1], match[2], match[3]) !== value) {
     return { year: "", month: "", day: "" }
   }
