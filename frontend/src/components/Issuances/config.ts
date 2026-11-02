@@ -97,6 +97,16 @@ export const documentTypes = [
   "Certificate of Indigency",
   "Certification (assistance request)",
 ]
+export const historyDocumentTypes = [
+  "Barangay ID",
+  "Barangay Clearance",
+  "Franchise Clearance",
+  "Barangay Clearance (Electrical and Water Connection)",
+  "Certificate of Indigency",
+  "First-Time Jobseekers Certification",
+  "Assistance Request Certification",
+  "Damayan",
+]
 export const documentSections: Record<string, DocumentSection[]> = {
   "Barangay Clearance": [
     { id: "resident", title: "Resident", description: "Select a resident or enter details manually.", fields: clearanceResident },
