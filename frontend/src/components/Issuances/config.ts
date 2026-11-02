@@ -405,6 +405,18 @@ export const provisionalDocumentFields: Record<string, DocumentField[]> = {
     { name: "underName", label: "Under the Name of" },
     { name: "kagawadSignatoryNote", label: "Signatory Note", fullWidth: true },
   ],
+  "Damayan": [
+    { name: "date", label: "Date", type: "date", defaultToday: true },
+    { name: "name", label: "Name (Mr./Ms.)" },
+    { name: "address", label: "Address", fullWidth: true },
+    { name: "residencyDuration", label: "Years of Residency" },
+    { name: "sector", label: "Sector" },
+    { name: "assistanceType", label: "Assistance Type", type: "select", options: ["Financial", "Medical", "Burial"] },
+    { name: "recipientChoice", label: "Recipient", type: "select", options: ["Self", "Relationship / Other Recipient"] },
+    { name: "recipientRelationship", label: "Relationship (if applicable)" },
+    { name: "underName", label: "Under the Name of" },
+    { name: "kagawadSignatoryNote", label: "Signatory Note", fullWidth: true },
+  ],
 }
 
 
