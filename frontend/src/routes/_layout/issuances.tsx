@@ -186,6 +186,7 @@ function IssuancesManagement() {
       .slice(0, 6)
   }, [residentQuery, selectedResidentId, manualEntry])
 
+  const selectedResident = sampleResidents.find((resident) => resident.id === selectedResidentId)
   const allFormFields = documentSections[selectedType]?.flatMap((section) => section.fields) ?? []
   const defaultsForDirtyCheck = createDefaultFormValues(selectedType)
   const isDirty = Object.entries(formValues).some(([key, value]) => value.trim() !== (defaultsForDirtyCheck[key] ?? "").trim())
