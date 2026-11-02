@@ -205,7 +205,11 @@ function IssuancesManagement() {
       setIsIssuanceModalOpen(false)
       return
     }
-    const nextId = `ISS-${String(allRecords.length + 1).padStart(4, "0")}`
+    const nextSequence = allRecords.reduce((max, item) => {
+      const sequence = Number(item.id.match(/\d+$/)?.[0] ?? 0)
+      return Math.max(max, sequence)
+    }, 0) + 1
+    const nextId = `ISS-${String(nextSequence).padStart(3, "0")}`
     const record: IssuanceRecord = {
       id: nextId,
       resident: currentName,
