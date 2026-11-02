@@ -85,7 +85,7 @@ const sampleBackups: BackupRecord[] = [
 function BackupRestore() {
   const { user } = useAuth()
   const [notice, setNotice] = useState("")
-  const [backups, setBackups] = useState(sampleBackups)
+  const backups = sampleBackups
   const [confirmRestore, setConfirmRestore] = useState(false)
   const [selectedBackup, setSelectedBackup] = useState(sampleBackups[0].name)
   const [restoreConfirmation, setRestoreConfirmation] = useState("")
