@@ -101,6 +101,8 @@ function IssuancesManagement() {
   const [historyRecords, setHistoryRecords] = useState<IssuanceRecord[]>(sampleIssuances)
   const [pendingAction, setPendingAction] = useState<{ record: IssuanceRecord; action: "void" | "correct" | "discard" } | null>(null)
   const [correctionReason, setCorrectionReason] = useState("")
+  const [correctionTarget, setCorrectionTarget] = useState<IssuanceRecord | null>(null)
+  const [continueTarget, setContinueTarget] = useState<IssuanceRecord | null>(null)
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
   const [formValues, setFormValues] = useState<Record<string, string>>(() =>
@@ -184,18 +186,39 @@ function IssuancesManagement() {
       setNotice("Enter the resident's name before saving the issuance.")
       return
     }
+    if (continueTarget) {
+      setHistoryRecords((previous) =>
+        previous.map((item) =>
+          item.id === continueTarget.id
+            ? { ...item, resident: currentName, date: currentDate, status: "Issued", purpose: formValues.purpose || item.purpose, validUntil: formValues.validUntil || item.validUntil, fields: { ...formValues } }
+            : item,
+        ),
+      )
+      setNotice(`${continueTarget.id} was continued and marked as issued.`)
+      setContinueTarget(null)
+      setIsIssuanceModalOpen(false)
+      return
+    }
+    const nextId = `ISS-${String(allRecords.length + 1).padStart(4, "0")}`
     const record: IssuanceRecord = {
-      id: `ISS-${String(drafts.length + 1).padStart(4, "0")}`,
+      id: nextId,
       resident: currentName,
       type: selectedType,
       date: currentDate,
       status: "Issued",
+      purpose: formValues.purpose,
+      validUntil: formValues.validUntil,
+      correctionReason: correctionTarget ? correctionReason : undefined,
       fields: { ...formValues },
     }
     setDrafts((previous) => [record, ...previous])
     setNotice(
-      `${record.id} was recorded as issued. You can now print the record.`,
+      correctionTarget
+        ? `${record.id} was created as a corrected record. The original ${correctionTarget.id} remains in history.`
+        : `${record.id} was recorded as issued. You can now print the record.`,
     )
+    setCorrectionTarget(null)
+    setCorrectionReason("")
     setIsIssuanceModalOpen(false)
   }
 
