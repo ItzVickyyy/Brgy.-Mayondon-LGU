@@ -181,7 +181,7 @@ function OfficialsManagement() {
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
                 {["Name", "Position", "Term", "Status", "Actions"].map((label) => (
-                  <th key={label} className="px-4 py-3 align-middle font-medium sm:px-5">{label}</th>
+                  <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 align-middle font-medium sm:px-5"}>{label}</th>
                 ))}
               </tr>
             </thead>
