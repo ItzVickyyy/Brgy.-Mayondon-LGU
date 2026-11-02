@@ -160,7 +160,7 @@ export const documentSections: Record<string, DocumentSection[]> = {
     { id: "details", title: "Indigency details", fields: [
       { name: "sector", label: "SECTOR :", type: "multiselect", options: indigencySectorOptions, required: true, maxSelected: 2 },
       { name: "purpose", label: "PURPOSE", type: "combobox", required: true },
-      { name: "addressedTo", label: "Addressed to the office of", required: true },
+      { name: "addressedTo", label: "Office", required: true },
     ] },
   ],
   "Certification (assistance request)": [
