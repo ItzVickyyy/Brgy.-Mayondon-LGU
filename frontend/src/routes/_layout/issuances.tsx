@@ -63,23 +63,12 @@ function localDateValue() {
 function createDefaultFormValues(type: string) {
   const today = localDateValue()
   return Object.fromEntries(
-    (documentFields[type] ?? [])
-      .filter((field) => field.defaultToday)
-      .map((field) => [field.name, today]),
+    (documentFields[type] ?? []).flatMap((field) => {
+      if (field.defaultToday) return [[field.name, today]]
+      if (field.defaultValue) return [[field.name, field.defaultValue]]
+      return []
+    }),
   ) as Record<string, string>
-}
-
-function calculateAge(birthdate: string) {
-  if (!birthdate) return ""
-  const birth = new Date(`${birthdate}T00:00:00`)
-  if (Number.isNaN(birth.getTime())) return ""
-  const today = new Date()
-  let age = today.getFullYear() - birth.getFullYear()
-  const birthdayHasNotOccurred =
-    today.getMonth() < birth.getMonth() ||
-    (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate())
-  if (birthdayHasNotOccurred) age -= 1
-  return age >= 0 ? String(age) : ""
 }
 
 function formatDate(value: string) {
