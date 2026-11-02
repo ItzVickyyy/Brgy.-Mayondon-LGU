@@ -80,7 +80,10 @@ const ctcFields: DocumentField[] = [
   { name: "officialReceiptNumber", label: "Paid under OFFICIAL RECEIPT No.", required: true, help: "Enter the receipt number, or FOC if free of charge." },
 ]
 const clearanceResident: DocumentField[] = [
-  { name: "name", label: "NAME", required: true },
+  { name: "firstName", label: "Given names" },
+      { name: "middleName", label: "Middle name" },
+      { name: "lastName", label: "Surname" },
+      { name: "name", label: "Name as printed", required: true },
   { name: "address", label: "ADDRESS", required: true, help: "Street and purok only. Do not add Mayondon, Los Baños." },
   { name: "birthdate", label: "BIRTHDATE", type: "date", required: true },
   { name: "age", label: "AGE", type: "readonly" },
@@ -101,7 +104,7 @@ export const documentSections: Record<string, DocumentSection[]> = {
       { name: "purpose", label: "PURPOSE", type: "combobox", options: clearancePurposeOptions, required: true },
       { name: "purposeNote", label: "Purpose note", help: "Printed on the line below PURPOSE." },
       { name: "remarks", label: "REMARKS", defaultValue: "NO DEROGATORY RECORD ON FILE" },
-      { name: "referredBy", label: "Referred by (c/o)", type: "select", options: ["None"] },
+      { name: "referredBy", label: "Referred by (c/o)", type: "select", options: ["None", "c/o Kap. Barangay Captain", "c/o Kag. Barangay Kagawad 1"] },
     ] },
     { id: "receipt", title: "Identification & receipt", fields: [
       { name: "validIdPresented", label: "Valid I.D. Presented", type: "select", options: idTypeOptions, required: true },
@@ -153,6 +156,9 @@ export const documentSections: Record<string, DocumentSection[]> = {
   ],
   "Certification (assistance request)": [
     { id: "resident", title: "Resident", fields: [
+      { name: "firstName", label: "Given names" },
+      { name: "middleName", label: "Middle name" },
+      { name: "lastName", label: "Surname" },
       { name: "name", label: "Mr./Ms.", required: true },
       { name: "address", label: "Resident of", required: true, help: "Street and purok only. Mayondon, Los Baños, Laguna is pre-printed." },
       { name: "residencyDuration", label: "For a period of years", type: "number", required: true },
