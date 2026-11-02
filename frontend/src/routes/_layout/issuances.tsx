@@ -12,7 +12,7 @@ import {
   Search,
   X,
 } from "lucide-react"
-import { useMemo, useState } from "react"
+import { Fragment, useMemo, useState } from "react"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { RowActions } from "@/components/Common/RowActions"
@@ -101,7 +101,6 @@ function IssuancesManagement() {
   const [residentQuery, setResidentQuery] = useState("")
   const [selectedResidentId, setSelectedResidentId] = useState(() => initialResident?.id ?? "")
   const [manualEntry, setManualEntry] = useState(false)
-  const [showNameParts, setShowNameParts] = useState(false)
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [formErrorSummary, setFormErrorSummary] = useState<string[]>([])
@@ -239,7 +238,6 @@ function IssuancesManagement() {
       ? formatPrintedName(formValues.firstName ?? "", formValues.middleName ?? "", formValues.lastName ?? "", value)
       : formValues.name ?? ""
     setSelectedType(value)
-    setShowNameParts(false)
     setFormValues({
       ...defaults,
       ...preserved,
@@ -437,18 +435,24 @@ function IssuancesManagement() {
             {(field.options ?? []).map((option) => {
               const multi = field.type !== "radio"
               const selected = multi ? value.split("||").filter(Boolean).includes(option) : value === option
-              return <label key={option} className={cn("inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm font-normal focus-within:ring-[3px] focus-within:ring-ring/50", selected ? "border-primary bg-primary/10" : "bg-background hover:bg-muted")}>
-                <input type={multi ? "checkbox" : "radio"} name={field.name} checked={selected} onChange={(event) => {
+              const selectedValues = value.split("||").filter(Boolean)
+              const limitReached = field.type === "multiselect" && Boolean(field.maxSelected) && selectedValues.length >= (field.maxSelected ?? 0)
+              const optionDisabled = Boolean(multi && limitReached && !selected)
+              return <label key={option} className={cn("inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm font-normal focus-within:ring-[3px] focus-within:ring-ring/50", selected ? "border-primary bg-primary/10" : "bg-background hover:bg-muted", optionDisabled && "cursor-not-allowed opacity-50")}>
+                <input type={multi ? "checkbox" : "radio"} name={field.name} checked={selected} disabled={optionDisabled} aria-disabled={optionDisabled} onChange={(event) => {
                   if (!multi) updateField(field.name, option)
                   else {
                     const values = value.split("||").filter(Boolean)
-                    const next = event.target.checked ? [...values, option].slice(-(field.maxSelected ?? 99)) : values.filter((item) => item !== option)
+                    const next = event.target.checked
+                      ? values.length < (field.maxSelected ?? 99) ? [...values, option] : values
+                      : values.filter((item) => item !== option)
                     updateField(field.name, next.join("||"))
                   }
                 }} className="size-4 accent-primary" />{option}
               </label>
             })}
           </div></fieldset>
+          {field.type === "multiselect" && field.maxSelected ? <p className="text-xs font-normal text-muted-foreground">{value.split("||").filter(Boolean).length} of {field.maxSelected} selected</p> : null}
         ) : field.type === "select" ? (
           <select id={fieldId} value={value} onChange={(event) => updateField(field.name, event.target.value)} className={cn(inputClassName, error && "border-destructive")} aria-invalid={Boolean(error)}><option value="">Select {field.label.toLowerCase()}</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select>
         ) : field.type === "combobox" ? (
@@ -612,7 +616,7 @@ function IssuancesManagement() {
                           )) : <p className="px-3 py-4 text-sm text-muted-foreground">No match. Enter details manually.</p>}
                         </div>
                       ) : null}
-                      {selectedResidentId ? <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"><span className="min-w-0"><strong>{sampleResidents.find((resident) => resident.id === selectedResidentId)?.name ?? "Selected resident"}</strong><span className="ml-2 font-mono text-xs text-muted-foreground">{selectedResidentId}</span><span className="mt-1 block text-xs text-muted-foreground">{sampleResidents.find((resident) => resident.id === selectedResidentId)?.address ?? ""}</span></span><Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={() => { setSelectedResidentId(""); setResidentQuery(""); setManualEntry(false); setShowNameParts(false) }}>Change</Button></div> : null}
+                      {selectedResidentId ? <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"><span className="min-w-0"><strong>{sampleResidents.find((resident) => resident.id === selectedResidentId)?.name ?? "Selected resident"}</strong><span className="ml-2 font-mono text-xs text-muted-foreground">{selectedResidentId}</span><span className="mt-1 block text-xs text-muted-foreground">{sampleResidents.find((resident) => resident.id === selectedResidentId)?.address ?? ""}</span></span><Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={() => { setSelectedResidentId(""); setResidentQuery(""); setManualEntry(false) }}>Change</Button></div> : null}
                       {!manualEntry && !selectedResidentId ? <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm"><button type="button" className="min-h-11 text-primary underline underline-offset-4" onClick={startManualEntry}>Resident not found? Enter details manually</button><button type="button" className="min-h-11 text-muted-foreground underline underline-offset-4" onClick={() => setNotice("Add to Resident Records is not connected yet. Open Resident Records to add a record.")}>Add to Resident Records</button></div> : null}
                       <p className="mt-2 text-xs text-muted-foreground">Changes here apply to this document only. To change the resident's record, use Resident Records.</p>
                     </div>
@@ -641,6 +645,11 @@ function IssuancesManagement() {
                       const value = formValues[field.name] ?? ""
                       return value.trim() !== (field.defaultValue ?? "").trim() || Boolean(validationErrors[field.name])
                     })
+                    const advancedSummary = [
+                      formValues.purposeNote?.trim() ? "Purpose note edited" : "",
+                      formValues.remarks?.trim() && formValues.remarks !== "NO DEROGATORY RECORD ON FILE" ? "Remarks edited" : "",
+                      formValues.referredBy?.trim() && formValues.referredBy !== "None" ? formValues.referredBy : "",
+                    ].filter(Boolean).join(" · ")
                     const showAdvanced = selectedType === "Barangay Clearance" && section.id === "details" && (
                       advancedHasValues || formValues.purpose === "Employment Requirement/First Time Jobseeker"
                     )
@@ -649,23 +658,19 @@ function IssuancesManagement() {
                         {section.id === "details" && selectedType === "Barangay Franchise Clearance" ? (
                           <>
                             {regularFields.map((field, index) => (
-                              <>{index === 1 ? <p key="vehicle-heading" className="md:col-span-2 text-xs font-medium text-muted-foreground">Vehicle</p> : null}{renderField(field)}</>
+                              <Fragment key={field.name}>
+                                {index === 1 ? <p className="md:col-span-2 text-xs font-medium text-muted-foreground">Vehicle</p> : null}
+                                {renderField(field)}
+                              </Fragment>
                             ))}
                           </>
                         ) : regularFields.map(renderField)}
                         {advancedFields.length > 0 ? (
                           <details className="md:col-span-2" open={showAdvanced || undefined}>
-                            <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-primary underline underline-offset-4">More options (optional)</summary>
-                            {!showAdvanced && <p className="pb-2 text-xs text-muted-foreground">{[
-                              formValues.purposeNote?.trim() ? "Purpose note edited" : "",
-                              formValues.remarks?.trim() && formValues.remarks !== "NO DEROGATORY RECORD ON FILE" ? "Remarks edited" : "",
-                              formValues.referredBy?.trim() && formValues.referredBy !== "None" ? `c/o ${formValues.referredBy.replace(/^c\\/o\\s*/i, "")}` : "",
-                            ].filter(Boolean).join(" · ") || "No optional values set"}</p>}
+                            <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-primary underline underline-offset-4">More options (optional){!showAdvanced && advancedSummary ? <span className="ml-2 break-words text-xs font-normal text-muted-foreground">{advancedSummary}</span> : null}</summary>
                             <div className="grid gap-4 md:grid-cols-2">{advancedFields.map(renderField)}</div>
                           </details>
                         ) : null}
-                        {section.id === "details" && selectedType === "Barangay Franchise Clearance" ? null : null}
-                        {section.id === "details" && selectedType === "Certificate of Indigency" && formValues.sector ? <p className="md:col-span-2 text-xs text-muted-foreground">{formValues.sector.split("||").filter(Boolean).length} of 2 selected</p> : null}
                       </FormSection>
                     )
                   })}
