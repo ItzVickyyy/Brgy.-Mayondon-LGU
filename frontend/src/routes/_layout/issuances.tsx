@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
 import {
+  AlertCircle,
   CalendarDays,
   CheckCircle2,
   Eraser,
@@ -11,7 +12,7 @@ import {
   Search,
   X,
 } from "lucide-react"
-import { useMemo, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { RowActions } from "@/components/Common/RowActions"
@@ -20,11 +21,14 @@ import { statusStyles } from "@/components/Common/statusStyles"
 import {
   type DocumentField,
   documentFields,
+  documentSections,
   documentTypes,
   type IssuanceRecord,
   sampleIssuances,
 } from "@/components/Issuances/config"
 import { FormSection, SummaryCard } from "@/components/Issuances/IssuanceLayout"
+import { sampleResidents } from "@/components/Records/records-sample-data"
+import { calculateAge, formatPaperDate, formatPrintedName, getDateParts } from "@/lib/issuance-format"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
