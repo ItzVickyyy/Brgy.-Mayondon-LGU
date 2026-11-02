@@ -114,7 +114,7 @@ function BarangayIdManagement() {
     const query = search.trim().toLowerCase()
     return sampleIds
       .filter((record) => {
-        const matchesSearch = [record.resident, record.idNumber, record.reference].some((value) =>
+        const matchesSearch = [record.resident, record.idNumber].some((value) =>
           value.toLowerCase().includes(query),
         )
         const matchesStatus =
