@@ -1,4 +1,4 @@
-import type { FileText } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import { StatCard } from "@/components/Common/StatCard"
 
@@ -8,7 +8,7 @@ export function SummaryCard({
   value,
   hint,
 }: {
-  icon: typeof FileText
+  icon: LucideIcon
   label: string
   value: string | number
   hint: string
