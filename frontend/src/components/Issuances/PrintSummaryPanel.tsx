@@ -17,7 +17,7 @@ export function PrintSummaryPanel({ type, values, currentDate, fields }: PrintSu
   const missing = getMissingFields(type, values, fields)
 
   return (
-    <div className="min-w-0 break-words rounded-xl border bg-card p-4 sm:p-5 lg:sticky lg:top-0">
+    <div className="min-w-0 break-words p-4 sm:p-5 lg:sticky lg:top-0">
       <h3 className="font-semibold tracking-tight">Will print</h3>
       <p className="mt-1 break-words text-sm text-muted-foreground">{type}</p>
       <p className="mt-1 text-sm font-medium">{formatPaperDate(currentDate)}</p>
