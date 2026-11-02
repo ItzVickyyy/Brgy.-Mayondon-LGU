@@ -92,6 +92,12 @@ function BackupRestore() {
 
   if (!isSystemAdministrator(user)) return <NoPermission />
 
+  const sortedBackups = [...backups].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  const latestBackup = sortedBackups[0]
+  const daysSinceLatest = latestBackup
+    ? Math.max(0, Math.floor((Date.now() - new Date(latestBackup.createdAt).getTime()) / 86400000))
+    : null
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -205,40 +211,75 @@ function BackupRestore() {
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4 sm:p-5">
           <div>
-            <h2 className="font-semibold">Backup History</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Review available backup archives.
-            </p>
+            <h2 className="font-semibold tracking-tight">Backup History</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Review available backup archives and recovery readiness.</p>
           </div>
+          {latestBackup && daysSinceLatest !== null ? (
+            <Badge variant="outline" className={daysSinceLatest > 1 ? statusStyles["Expiring soon"] : statusStyles.Verified}>
+              Last backup {daysSinceLatest === 0 ? "today" : `${daysSinceLatest} day${daysSinceLatest === 1 ? "" : "s"} ago`}
+            </Badge>
+          ) : null}
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[620px] text-left text-sm">
+          <table className="w-full min-w-[1120px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                <th className="px-4 py-3 align-middle font-medium sm:px-5">Backup file</th>
-                <th className="px-4 py-3 align-middle font-medium sm:px-5">Created</th>
-                <th className="px-4 py-3 align-middle font-medium sm:px-5">Size</th>
-                <th className="px-4 py-3 align-middle font-medium sm:px-5">Validation</th>
+                {["Backup", "Created", "Type", "Size", "Location", "Check", "Actions"].map((label) => (
+                  <th key={label} className="px-4 py-3 align-middle font-medium sm:px-5">{label}</th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y">
-              {sampleBackups.map((backup) => (
+              {sortedBackups.map((backup) => (
                 <tr key={backup.name} className="transition-colors hover:bg-muted/30">
                   <td className="px-4 py-3 align-middle sm:px-5">
-                    <span className="inline-flex items-center gap-2 font-medium">
-                      <Archive className="size-4 text-muted-foreground" />
-                      {backup.name}
-                    </span>
+                    <span className="font-mono font-medium">{backup.name}</span>
                   </td>
-                  <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">{backup.date}</td>
-                  <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">{backup.size}</td>
+                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">{backup.date}</td>
                   <td className="px-4 py-3 align-middle sm:px-5">
-                    <Badge variant="outline" className={statusStyles[backup.status]}><CheckCircle2 className="size-4" aria-hidden="true" />{backup.status}</Badge>
+                    <p>{backup.type}</p>
+                    {backup.createdBy ? <p className="mt-1 text-xs text-muted-foreground">by {backup.createdBy}</p> : null}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">{backup.size}</td>
+                  <td className="px-4 py-3 align-middle sm:px-5">{backup.location}</td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    <div className="flex flex-col items-start gap-1">
+                      <Badge variant="outline" className={statusStyles[backup.status]}>
+                        {backup.status === "Verified" ? <CheckCircle2 className="size-4" aria-hidden="true" /> : null}
+                        {backup.status}
+                      </Badge>
+                      {backup.failureReason ? <span className="max-w-52 text-xs text-muted-foreground">{backup.failureReason}</span> : null}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    <RowActions
+                      name={backup.name}
+                      isAdmin
+                      primary={backup.status === "Verified" ? {
+                        label: "Restore",
+                        variant: "outline",
+                        icon: <RotateCcw aria-hidden="true" />,
+                        onSelect: () => {
+                          setSelectedBackup(backup.name)
+                          setRestoreConfirmation("")
+                          setConfirmRestore(true)
+                        },
+                      } : undefined}
+                      items={[
+                        { label: "Verify file", hidden: backup.status === "Verified", onSelect: () => setNotice(`File verification for ${backup.name} needs the backup service integration.`) },
+                        { label: "Copy to external drive", hidden: backup.location !== "This computer only", onSelect: () => setNotice(`External-drive copy for ${backup.name} needs a configured drive destination.`) },
+                        { label: "Download copy", adminOnly: true, onSelect: () => setNotice(`Download request for ${backup.name} needs a protected backup download endpoint.`) },
+                      ]}
+                    />
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {sortedBackups.length === 0 ? <EmptyState title="No backups found" description="Create a backup to begin building recovery history." /> : null}
+        </div>
+        <div className="border-t px-4 py-3 text-xs text-muted-foreground sm:px-5">
+          Showing {sortedBackups.length} of {backups.length} backups
         </div>
       </section>
 
@@ -268,7 +309,7 @@ function BackupRestore() {
               }}
               className={`${formControlClass} font-normal`}
             >
-              {sampleBackups.map((backup) => (
+              {backups.filter((backup) => backup.status === "Verified").map((backup) => (
                 <option key={backup.name} value={backup.name}>
                   {backup.name}
                 </option>
