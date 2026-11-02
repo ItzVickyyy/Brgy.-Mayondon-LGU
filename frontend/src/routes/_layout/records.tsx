@@ -461,6 +461,34 @@ function RecordsManagement() {
         </section>
       )}
 
+      <ConfirmDialog
+        open={archiveTarget !== null}
+        onOpenChange={(open) => { if (!open) setArchiveTarget(null) }}
+        title="Archive resident record?"
+        description={archiveTarget ? `Archive ${archiveTarget.name}? The record will remain in history.` : "Confirm archive."}
+        confirmLabel="Archive record"
+        destructive
+        reason="required"
+        onConfirm={(reason) => {
+          if (!archiveTarget) return
+          setResidents((current) => current.map((resident) => resident.id === archiveTarget.id ? { ...resident, status: "Archived", archiveReason: reason } : resident))
+          setNotice(`${archiveTarget.name} was archived.`)
+          setArchiveTarget(null)
+        }}
+      />
+      <ConfirmDialog
+        open={restoreTarget !== null}
+        onOpenChange={(open) => { if (!open) setRestoreTarget(null) }}
+        title="Restore resident record?"
+        description={restoreTarget ? `Restore ${restoreTarget.name} to active records?` : "Confirm restore."}
+        confirmLabel="Restore record"
+        onConfirm={() => {
+          if (!restoreTarget) return
+          setResidents((current) => current.map((resident) => resident.id === restoreTarget.id ? { ...resident, status: "Active", archiveReason: undefined } : resident))
+          setNotice(`${restoreTarget.name} was restored.`)
+          setRestoreTarget(null)
+        }}
+      />
       <ResidentProfileDialog
         resident={selectedResident}
         onOpenChange={(open) => {
