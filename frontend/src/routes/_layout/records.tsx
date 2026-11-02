@@ -131,6 +131,7 @@ function RecordsManagement() {
                 </p>
               </div>
               <label className="relative block w-full sm:max-w-sm">
+                <span className="sr-only">Search resident records</span>
                 <Search
                   className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                   aria-hidden="true"
@@ -245,8 +246,8 @@ function RecordsManagement() {
                 className="flex min-h-36 flex-col rounded-xl border bg-background p-4 transition-colors hover:border-primary/40"
               >
                 <div className="flex items-center gap-2">
-                  <span className="rounded-lg bg-primary/10 p-2 text-primary">
-                    <item.icon className="size-4" aria-hidden="true" />
+                  <span className="rounded-lg bg-primary/10 p-2.5 text-primary">
+                    <item.icon className="size-5" aria-hidden="true" />
                   </span>
                   <h3 className="font-semibold">{item.title}</h3>
                 </div>
