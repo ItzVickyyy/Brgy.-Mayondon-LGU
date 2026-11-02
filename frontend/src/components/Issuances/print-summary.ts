@@ -4,10 +4,10 @@ import { calculateAge, formatPaperDate, getDateParts } from "@/lib/issuance-form
 export type PrintRow = { label: string; value: string }
 
 export function getPrintRows(type: string, values: Record<string, string>, currentDate: string): PrintRow[] {
-  const rows: PrintRow[] = [
+  const rows: Array<[string, string]> = [
     [type === "Certification (assistance request)" ? "Mr./Ms." : "NAME", values.name ?? ""],
     ["ADDRESS", values.address ?? ""],
-  ] as PrintRow[]
+  ]
   if (type === "Barangay Clearance") rows.push(
     ["AGE", calculateAge(values.birthdate ?? "", currentDate) ? `${calculateAge(values.birthdate ?? "", currentDate)} years old` : ""],
     ["BIRTHDATE", values.birthdate ? formatPaperDate(values.birthdate) : ""],
