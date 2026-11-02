@@ -755,7 +755,7 @@ function IssuancesManagement() {
                                   onSelect: () => {
                                     setContinueTarget(item)
                                     setSelectedType(item.type)
-                                    setFormValues({ ...createDefaultFormValues(item.type), ...item.fields, name: item.resident })
+                                    setFormValues({ ...createDefaultFormValues(item.type), ...item.fields, name: item.resident, date: item.date, purpose: item.purpose ?? item.fields.purpose ?? "", validUntil: item.validUntil ?? item.fields.validUntil ?? "" })
                                     setIsIssuanceModalOpen(true)
                                   },
                                 }
@@ -815,7 +815,7 @@ function IssuancesManagement() {
                               onSelect: () => {
                                 setContinueTarget(item)
                                 setSelectedType(item.type)
-                                setFormValues({ ...createDefaultFormValues(item.type), ...item.fields, name: item.resident })
+                                setFormValues({ ...createDefaultFormValues(item.type), ...item.fields, name: item.resident, date: item.date, purpose: item.purpose ?? item.fields.purpose ?? "", validUntil: item.validUntil ?? item.fields.validUntil ?? "" })
                                 setIsIssuanceModalOpen(true)
                               },
                             }
