@@ -12,7 +12,9 @@ import {
   X,
 } from "lucide-react"
 import { useMemo, useState } from "react"
+import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { RowActions } from "@/components/Common/RowActions"
 import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
 import {
@@ -34,6 +36,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { pageTitle } from "@/config/site"
+import useAuth from "@/hooks/useAuth"
+import { isSystemAdministrator } from "@/lib/access"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_layout/issuances")({
@@ -91,6 +95,14 @@ function IssuancesManagement() {
   const [selectedType, setSelectedType] = useState(documentTypes[0])
   const [search, setSearch] = useState("")
   const [historyType, setHistoryType] = useState("All document types")
+  const [historyStatus, setHistoryStatus] = useState("all")
+  const [startDate, setStartDate] = useState("")
+  const [endDate, setEndDate] = useState("")
+  const [historyRecords, setHistoryRecords] = useState<IssuanceRecord[]>(sampleIssuances)
+  const [pendingAction, setPendingAction] = useState<{ record: IssuanceRecord; action: "void" | "correct" | "discard" } | null>(null)
+  const [correctionReason, setCorrectionReason] = useState("")
+  const { user } = useAuth()
+  const isAdmin = isSystemAdministrator(user)
   const [formValues, setFormValues] = useState<Record<string, string>>(() =>
     createDefaultFormValues(documentTypes[0]),
   )
@@ -102,22 +114,28 @@ function IssuancesManagement() {
   const fields = documentFields[selectedType] ?? []
   const currentName = formValues.name?.trim() || "Name not entered"
   const currentDate = formValues.date || ""
-  const allRecords = useMemo(() => [...drafts, ...sampleIssuances], [drafts])
+  const allRecords = useMemo(() => [...drafts, ...historyRecords], [drafts, historyRecords])
   const filteredIssuances = useMemo(
     () =>
-      allRecords.filter((item) => {
-        const matchesSearch = [
-          item.id,
-          item.resident,
-          item.type,
-          item.date,
-          item.status,
-        ].some((value) => value.toLowerCase().includes(search.toLowerCase()))
-        const matchesType =
-          historyType === "All document types" || item.type === historyType
-        return matchesSearch && matchesType
-      }),
-    [allRecords, historyType, search],
+      allRecords
+        .filter((item) => {
+          const query = search.trim().toLowerCase()
+          const matchesSearch = [
+            item.id,
+            item.resident,
+            item.type,
+            item.date,
+            item.status,
+            item.purpose ?? "",
+          ].some((value) => value.toLowerCase().includes(query))
+          const matchesType = historyType === "All document types" || item.type === historyType
+          const matchesStatus = historyStatus === "all" || item.status === historyStatus
+          return matchesSearch && matchesType && matchesStatus &&
+            (!startDate || item.date >= startDate) &&
+            (!endDate || item.date <= endDate)
+        })
+        .sort((a, b) => b.date.localeCompare(a.date)),
+    [allRecords, endDate, historyStatus, historyType, search, startDate],
   )
 
   const issuedCount = allRecords.filter(
@@ -134,8 +152,7 @@ function IssuancesManagement() {
     return acc
   }, {})
   const topType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]
-  const hasFilters =
-    search.trim() !== "" || historyType !== "All document types"
+  const hasFilters = search.trim() !== "" || historyType !== "All document types" || historyStatus !== "all" || startDate !== "" || endDate !== ""
 
   function updateField(name: string, value: string) {
     setFormValues((previous) => ({
