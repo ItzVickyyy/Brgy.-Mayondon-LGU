@@ -548,6 +548,57 @@ function IssuancesManagement() {
         </DialogContent>
       </Dialog>
 
+      <ConfirmDialog
+        open={pendingAction !== null}
+        onOpenChange={(open) => { if (!open) setPendingAction(null) }}
+        title={
+          pendingAction?.action === "void"
+            ? "Void issuance?"
+            : pendingAction?.action === "correct"
+              ? "Correct issuance details?"
+              : "Discard draft?"
+        }
+        description={
+          pendingAction
+            ? pendingAction.action === "void"
+              ? `Void ${pendingAction.record.id}? The issued transaction will remain in history.`
+              : pendingAction.action === "correct"
+                ? `Create a corrected record based on ${pendingAction.record.id}? The original will remain in history.`
+                : `Discard the pending draft ${pendingAction.record.id}?`
+            : "Confirm this action."
+        }
+        confirmLabel={
+          pendingAction?.action === "void"
+            ? "Void issuance"
+            : pendingAction?.action === "correct"
+              ? "Continue correction"
+              : "Discard draft"
+        }
+        destructive={pendingAction?.action !== "correct"}
+        reason={pendingAction?.action === "discard" ? "none" : "required"}
+        onConfirm={(reason) => {
+          if (!pendingAction) return
+          const { record, action } = pendingAction
+          if (action === "void") {
+            const updated = { ...record, status: "Voided" as const, voidReason: reason }
+            setHistoryRecords((previous) => previous.map((item) => item.id === record.id ? updated : item))
+            setDrafts((previous) => previous.map((item) => item.id === record.id ? updated : item))
+            setNotice(`${record.id} was marked as voided.`)
+          } else if (action === "discard") {
+            setHistoryRecords((previous) => previous.filter((item) => item.id !== record.id))
+            setDrafts((previous) => previous.filter((item) => item.id !== record.id))
+            setNotice(`${record.id} draft was discarded.`)
+          } else {
+            setCorrectionTarget(record)
+            setCorrectionReason(reason)
+            setSelectedType(record.type)
+            setFormValues({ ...createDefaultFormValues(record.type), ...record.fields, name: record.resident, date: record.date })
+            setIsIssuanceModalOpen(true)
+          }
+          setPendingAction(null)
+        }}
+      />
+
       {/* History */}
       <section className="print:hidden overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-col gap-4 border-b p-4 sm:p-5">
