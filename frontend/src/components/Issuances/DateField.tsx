@@ -58,7 +58,8 @@ export function DateField({
 
   const numericYear = /^\d{4}$/.test(year) ? Number(year) : 0
   const numericMonth = Number(month)
-  const maxDay = numericYear && numericMonth ? daysInMonth(numericYear, numericMonth) : 31
+  const effectiveYear = numericYear || new Date().getFullYear()
+  const maxDay = numericMonth ? daysInMonth(effectiveYear, numericMonth) : 31
   const dayOptions = useMemo(() => Array.from({ length: maxDay }, (_, index) => String(index + 1)), [maxDay])
   const isoValue = buildIsoDate(year, month, day)
   const rangeMessage = year.length === 4 && numericYear && (numericYear < effectiveMinYear || numericYear > effectiveMaxYear)
@@ -97,7 +98,7 @@ export function DateField({
             value={month}
             onChange={(event) => {
               const nextMonth = event.target.value
-              const nextMaxDay = numericYear && nextMonth ? daysInMonth(numericYear, Number(nextMonth)) : 31
+              const nextMaxDay = nextMonth ? daysInMonth(effectiveYear, Number(nextMonth)) : 31
               const nextDay = day && Number(day) > nextMaxDay ? "" : day
               setMonth(nextMonth)
               setDay(nextDay)
@@ -139,7 +140,8 @@ export function DateField({
             onChange={(event) => {
               const nextYear = event.target.value.replace(/\D/g, "").slice(0, 4)
               const nextMonth = month
-              const nextDay = day && nextYear.length === 4 && nextMonth && Number(day) > daysInMonth(Number(nextYear), Number(nextMonth)) ? "" : day
+              const nextYearForDays = nextYear.length === 4 ? Number(nextYear) : new Date().getFullYear()
+              const nextDay = day && nextMonth && Number(day) > daysInMonth(nextYearForDays, Number(nextMonth)) ? "" : day
               setYear(nextYear)
               setDay(nextDay)
               emitDate(nextYear, nextMonth, nextDay)
