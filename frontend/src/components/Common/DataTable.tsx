@@ -14,6 +14,7 @@ import {
   ChevronsRight,
 } from "lucide-react"
 
+import { EmptyState } from "@/components/Common/FeedbackState"
 import { Button } from "@/components/ui/button"
 import {
   Select,
@@ -55,7 +56,7 @@ export function DataTable<TData extends RowData>({
 
   return (
     <div className="flex flex-col gap-4">
-      <Table>
+      <Table containerClassName="overflow-x-auto rounded-none border-0">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -86,20 +87,16 @@ export function DataTable<TData extends RowData>({
               </TableRow>
             ))
           ) : (
-            <TableRow className="hover:bg-transparent">
-              <TableCell
-                colSpan={columns.length}
-                className="h-32 text-center text-muted-foreground"
-              >
-                No results found.
-              </TableCell>
-            </TableRow>
+            
           )}
         </TableBody>
       </Table>
+      {table.getRowModel().rows.length === 0 ? (
+        <EmptyState title="No results found" description="There are no user accounts to display." />
+      ) : null}
 
       {table.getPageCount() > 1 && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 sm:p-4 border-t bg-muted/20">
+        <div className="flex flex-col gap-4 border-t bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="text-sm text-muted-foreground">
               Showing{" "}
@@ -124,7 +121,7 @@ export function DataTable<TData extends RowData>({
                   table.setPageSize(Number(value))
                 }}
               >
-                <SelectTrigger className="h-8 w-[70px]">
+                <SelectTrigger className="h-11 w-[84px]">
                   <SelectValue placeholder={table.state.pagination.pageSize} />
                 </SelectTrigger>
                 <SelectContent side="top">
@@ -154,7 +151,7 @@ export function DataTable<TData extends RowData>({
               <Button
                 variant="outline"
                 size="sm"
-                className="h-8 w-8 p-0"
+                className="size-11 p-0"
                 onClick={() => table.setPageIndex(0)}
                 disabled={!table.getCanPreviousPage()}
               >
