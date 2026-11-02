@@ -560,7 +560,7 @@ function IssuancesManagement() {
                       {residentQuery.trim() && !selectedResidentId ? (
                         <div id="resident-results" role="listbox" aria-label="Resident search results" className="mt-2 overflow-hidden rounded-xl border bg-card">
                           {residentMatches.length ? residentMatches.map((resident, index) => (
-                            <button key={resident.id} type="button" role="option" aria-selected={activeResidentMatch === index} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} className={cn("flex min-h-14 w-full flex-col items-start gap-1 border-b px-3 py-2 text-left last:border-0 hover:bg-muted/60", activeResidentMatch === index && "bg-muted")}>
+                            <button key={resident.id} type="button" role="option" aria-selected={activeResidentMatch === index} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} id={`resident-option-${resident.id}`} className={cn("flex min-h-14 w-full flex-col items-start gap-1 border-b px-3 py-2 text-left last:border-0 hover:bg-muted/60", activeResidentMatch === index && "bg-muted")}>
                               <span className="font-medium">{resident.name} <span className="font-mono text-xs text-muted-foreground">{resident.id}</span></span>
                               <span className="text-xs text-muted-foreground">{resident.address} · ID status: {resident.idStatus}</span>
                             </button>
