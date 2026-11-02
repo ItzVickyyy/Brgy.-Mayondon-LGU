@@ -9,6 +9,7 @@ import { UserActionsMenu } from "./UserActionsMenu"
 
 export type UserTableData = UserPublic & {
   isCurrentUser: boolean
+  isLastActiveAdmin: boolean
 }
 
 export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
@@ -60,7 +61,7 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
   },
   {
     id: "actions",
-    header: () => <span className="sr-only">Actions</span>,
+    header: () => <span className="block text-right">Actions</span>,
     cell: ({ row }) => (
       <div className="flex justify-end">
         <UserActionsMenu user={row.original} />
