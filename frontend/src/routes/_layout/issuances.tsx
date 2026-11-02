@@ -447,94 +447,142 @@ function IssuancesManagement() {
       </div>
 
       {/* New issuance dialog */}
-      <Dialog open={isIssuanceModalOpen} onOpenChange={(open) => { setIsIssuanceModalOpen(open); if (!open) { setContinueTarget(null); setCorrectionTarget(null); setCorrectionReason("") } }}>
-        <DialogContent className="print:hidden flex max-h-[92dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
+      <Dialog open={isIssuanceModalOpen} onOpenChange={requestCloseForm}>
+        <DialogContent className="print:hidden flex max-h-[92dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
           <DialogHeader className="border-b px-5 py-4 pr-12 sm:px-6">
             <DialogTitle className="text-lg">New Issuance</DialogTitle>
-            <DialogDescription>
-              Choose a document type, then fill in the details once. Required:
-              resident name.
-            </DialogDescription>
+            <DialogDescription>Fill in the details once, then check the print preview. Fields marked * are required to issue.</DialogDescription>
           </DialogHeader>
+          <form onSubmit={(event) => event.preventDefault()} className="flex min-h-0 flex-1 flex-col">
+            <div className="min-h-0 flex-1 overflow-y-auto bg-muted/20 px-4 py-4 sm:px-6 sm:py-5">
+              {formErrorSummary.length > 0 ? (
+                <div role="alert" className="mb-4 rounded-xl border border-destructive/40 bg-destructive/5 p-4 text-sm">
+                  <p className="font-semibold">{formErrorSummary.length} field{formErrorSummary.length === 1 ? "" : "s"} need attention</p>
+                  <ul className="mt-2 list-disc pl-5">
+                    {formErrorSummary.map((key) => {
+                      const field = allFormFields.find((item) => item.name === key)
+                      return <li key={key}><button type="button" className="min-h-8 text-left underline underline-offset-4" onClick={() => { const target = document.getElementById(`field-${key}`); target?.scrollIntoView({ behavior: "smooth", block: "center" }); target?.focus() }}>{field?.label ?? key}: {validationErrors[key]}</button></li>
+                    })}
+                  </ul>
+                </div>
+              ) : null}
+              {lostDetailsNotice ? <p role="status" className="mb-4 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-sm">{lostDetailsNotice}</p> : null}
+              <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+                <div className="min-w-0 space-y-4">
+                  <FormSection title="① DOCUMENT" description="Choose the pre-printed paper that matches the request.">
+                    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 md:col-span-2">
+                      {documentTypes.map((type) => (
+                        <label key={type} className={cn("flex min-h-16 cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm transition-colors focus-within:ring-[3px] focus-within:ring-ring/50", selectedType === type ? "border-primary bg-primary/5" : "bg-background hover:bg-muted")}>
+                          <input type="radio" name="documentType" checked={selectedType === type} onChange={() => changeDocumentType(type)} className="mt-1 size-4 accent-primary" />
+                          <span><span className="block font-medium">{type}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">{type === "Barangay Clearance" ? "Employment, school, loans, residency" : type === "Barangay Franchise Clearance" ? "Tricycle franchise details" : type === "Barangay Clearance, Electrical and Water Connection" ? "Electric or water connection" : type === "Certificate of Indigency" ? "Sector and purpose certification" : "Financial, medical, or burial assistance"}</span></span>
+                        </label>
+                      ))}
+                    </div>
+                    <div className="md:col-span-2">
+                      <label htmlFor="field-date" className={labelClassName}>Date on document <span className="text-destructive">*</span></label>
+                      <input id="field-date" type="date" value={formValues.date ?? localDateValue()} onChange={(event) => updateField("date", event.target.value)} className={inputClassName} required />
+                    </div>
+                  </FormSection>
 
-          <form
-            onSubmit={(event) => event.preventDefault()}
-            className="flex min-h-0 flex-1 flex-col"
-          >
-            <div className="flex-1 space-y-4 overflow-y-auto bg-muted/20 px-5 py-5 sm:px-6">
-              <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-                <label className={labelClassName}>
-                  <span className="text-sm font-semibold">Document type</span>
-                  <select
-                    value={selectedType}
-                    onChange={(event) => changeDocumentType(event.target.value)}
-                    className={inputClassName}
-                  >
-                    {documentTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </section>
+                  <FormSection title="② RESIDENT" description="Search the resident record or enter the details manually.">
+                    <div className="md:col-span-2">
+                      <label htmlFor="resident-search" className="mb-1.5 block text-sm font-medium">Search name or ID number</label>
+                      <div className="relative">
+                        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                        <input id="resident-search" role="combobox" aria-autocomplete="list" aria-expanded={residentMatches.length > 0} aria-controls="resident-results" value={residentQuery} onChange={(event) => { setResidentQuery(event.target.value); setActiveResidentMatch(0); setSelectedResidentId("") }} onKeyDown={(event) => {
+                          if (event.key === "ArrowDown" && residentMatches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, residentMatches.length - 1)) }
+                          if (event.key === "ArrowUp" && residentMatches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) }
+                          if (event.key === "Enter" && residentMatches[activeResidentMatch]) { event.preventDefault(); selectResident(residentMatches[activeResidentMatch]) }
+                          if (event.key === "Escape") setResidentQuery("")
+                        }} placeholder="Search name or ID number…" className={cn(inputClassName, "pl-9")} />
+                      </div>
+                      {residentQuery.trim() && !selectedResidentId && !manualEntry ? (
+                        <div id="resident-results" role="listbox" aria-label="Resident search results" className="mt-2 overflow-hidden rounded-xl border bg-card">
+                          {residentMatches.length ? residentMatches.map((resident, index) => (
+                            <button key={resident.id} type="button" role="option" aria-selected={activeResidentMatch === index} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} className={cn("flex min-h-14 w-full flex-col items-start gap-1 border-b px-3 py-2 text-left last:border-0 hover:bg-muted/60", activeResidentMatch === index && "bg-muted")}>
+                              <span className="font-medium">{resident.name} <span className="font-mono text-xs text-muted-foreground">{resident.id}</span></span>
+                              <span className="text-xs text-muted-foreground">{resident.address} · ID status: {resident.idStatus}</span>
+                            </button>
+                          )) : <p className="px-3 py-4 text-sm text-muted-foreground">No match. Enter details manually.</p>}
+                        </div>
+                      ) : null}
+                      {selectedResidentId ? <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"><span>Selected record: <strong>{selectedResidentId}</strong></span><Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={startManualEntry}>Change</Button></div> : null}
+                      {!manualEntry && !selectedResidentId ? <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm"><button type="button" className="min-h-11 text-primary underline underline-offset-4" onClick={startManualEntry}>Resident not found? Enter details manually</button><button type="button" className="min-h-11 text-muted-foreground underline underline-offset-4" onClick={() => setNotice("Add to Resident Records is not connected yet. Open Resident Records to add a record.")}>Add to Resident Records</button></div> : null}
+                      <p className="mt-2 text-xs text-muted-foreground">Changes here apply to this document only. To change the resident's record, use Resident Records.</p>
+                    </div>
+                    {(documentSections[selectedType] ?? []).find((section) => section.id === "resident")?.fields.map(renderField)}
+                  </FormSection>
 
-              <FormSection
-                title={selectedType}
-                description="Fields marked on the approved form. Date fields default to today."
-              >
-                {fields.map(renderField)}
-              </FormSection>
+                  {(documentSections[selectedType] ?? []).filter((section) => !["resident", "receipt"].includes(section.id)).map((section) => (
+                    <FormSection key={section.id} title={section.title === "Clearance details" ? "③ CLEARANCE DETAILS" : section.title === "Connection service" ? "③ DOCUMENT DETAILS" : section.title === "Franchise details" ? "③ FRANCHISE DETAILS" : section.title === "Connection details" ? "③ CONNECTION DETAILS" : section.title === "Indigency details" ? "③ INDIGENCY DETAILS" : "③ ASSISTANCE DETAILS"} description={section.description}>
+                      {section.fields.map(renderField)}
+                    </FormSection>
+                  ))}
+                  {(documentSections[selectedType] ?? []).filter((section) => section.id === "receipt").map((section) => (
+                    <FormSection key={section.id} title="④ IDENTIFICATION & RECEIPT" description="Enter the details from the CTC or identification document.">
+                      {section.fields.map(renderField)}
+                    </FormSection>
+                  ))}
+                </div>
 
-              <section className="rounded-xl border border-dashed bg-card p-4 text-sm sm:p-5">
-                <p className="text-sm font-semibold">Summary</p>
-                <dl className="mt-3 grid gap-3 sm:grid-cols-3">
-                  <div>
-                    <dt className="text-xs text-muted-foreground">Document</dt>
-                    <dd className="mt-0.5 font-medium">{selectedType}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs text-muted-foreground">Resident</dt>
-                    <dd className="mt-0.5 font-medium">{currentName}</dd>
-                  </div>
-                  <div>
-                    <dt className="text-xs text-muted-foreground">Date</dt>
-                    <dd className="mt-0.5 font-medium">
-                      {formatDate(currentDate)}
-                    </dd>
-                  </div>
-                </dl>
-              </section>
+                <aside className="min-w-0 rounded-xl border bg-card p-4 sm:p-5 lg:sticky lg:top-0">
+                  <h3 className="font-semibold tracking-tight">Will print</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{selectedType}</p>
+                  <p className="mt-1 text-sm font-medium">{formatPaperDate(currentDate)}</p>
+                  <div className="my-4 border-t" />
+                  <dl className="space-y-3 text-sm">
+                    {[
+                      ["NAME", formValues.name],
+                      ["ADDRESS", formValues.address],
+                      ...(selectedType === "Barangay Clearance" ? [["AGE", calculateAge(formValues.birthdate ?? "", currentDate) ? `${calculateAge(formValues.birthdate ?? "", currentDate)} years old` : ""] , ["BIRTHDATE", formValues.birthdate ? formatPaperDate(formValues.birthdate) : ""], ["BIRTHPLACE", formValues.birthplace], ["CIVIL STATUS", formValues.civilStatus], ["PURPOSE", formValues.purpose], ["REMARKS", formValues.remarks], ["Valid I.D. Presented", formValues.validIdPresented], ["Number", formValues.idNumber], ["Place of Issue", formValues.idPlaceOfIssue], ["Date of Issue", formValues.idDateOfIssue ? formatPaperDate(formValues.idDateOfIssue) : ""], ["Paid under OFFICIAL RECEIPT No.", formValues.officialReceiptNumber]] : []),
+                      ...(selectedType === "Barangay Franchise Clearance" ? [["TRICYCLE ASSOCIATION", formValues.tricycleAssociation], ["MAKE", formValues.make], ["TYPE OF BODY", formValues.typeOfBody], ["MOTOR NO", formValues.motorNumber], ["COLOR", formValues.color], ["PLATE NUMBER", formValues.plateNumber], ["CTC Number", formValues.ctcNumber], ["Place of Issue", formValues.ctcPlaceOfIssue], ["Date of Issue", formValues.ctcDateOfIssue ? formatPaperDate(formValues.ctcDateOfIssue) : ""], ["Paid under OFFICIAL RECEIPT No.", formValues.officialReceiptNumber]] : []),
+                      ...(selectedType === "Barangay Clearance, Electrical and Water Connection" ? [["Service", formValues.serviceType?.split("||").join(" / ")], ["TYPE OF CONNECTION", formValues.connectionType], ["CLASSIFICATION", formValues.classification], ["LOCATION", formValues.location], ["CTC Number", formValues.ctcNumber], ["Place of Issue", formValues.ctcPlaceOfIssue], ["Date of Issue", formValues.ctcDateOfIssue ? formatPaperDate(formValues.ctcDateOfIssue) : ""], ["Paid under OFFICIAL RECEIPT No.", formValues.officialReceiptNumber]] : []),
+                      ...(selectedType === "Certificate of Indigency" ? [["AGE", calculateAge(formValues.birthdate ?? "", currentDate) ? `${calculateAge(formValues.birthdate ?? "", currentDate)} years old` : formValues.ageManual], ["SECTOR :", formValues.sector?.split("||").join(" / ")], ["PURPOSE", formValues.purpose], ["Addressed to the office of", formValues.addressedTo]] : []),
+                      ...(selectedType === "Certification (assistance request)" ? [["Resident of", formValues.address], ["For a period of years", formValues.residencyDuration], ["Member of the sector", formValues.sector], ["Assistance requested", formValues.assistanceType], ["For", formValues.recipientChoice === "His or her" ? `his or her ${formValues.recipientRelationship ?? ""}` : formValues.recipientChoice], ["Under the name of", formValues.underName], ["Given this", currentDate ? `${getDateParts(currentDate).day} day of ${getDateParts(currentDate).month}` : ""]] : []),
+                    ].map(([label, rawValue]) => {
+                      const value = (rawValue ?? "").trim()
+                      return <div key={label} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-2"><dt className="text-xs font-medium text-muted-foreground">{label}</dt><dd className={cn("break-words text-right text-sm", !value && "font-medium text-amber-600")} >{value || <span className="inline-flex items-center gap-1"><AlertCircle className="size-3.5" aria-hidden="true" />Missing</span>}</dd></div>
+                    })}
+                  </dl>
+                  <div className="my-4 border-t" />
+                  <p className="text-sm font-semibold">Missing ({allFormFields.filter((field) => field.required && !field.showWhen?.(formValues) && !formValues[field.name]?.trim()).length + (currentDate ? 0 : 1)})</p>
+                  <ul className="mt-2 space-y-1 text-sm">
+                    {[...allFormFields.filter((field) => field.required && !field.showWhen?.(formValues) && !formValues[field.name]?.trim()).map((field) => ({ name: field.name, label: field.label })), ...(!currentDate ? [{ name: "date", label: "Date on document" }] : [])].map((field) => <li key={field.name}><button type="button" className="min-h-8 text-left text-amber-700 underline underline-offset-4" onClick={() => { const target = document.getElementById(`field-${field.name}`); target?.scrollIntoView({ behavior: "smooth", block: "center" }); target?.focus() }}>{field.label}</button></li>)}
+                  </ul>
+                  <p className="mt-4 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">After printing: {selectedType === "Barangay Clearance" ? "Resident signs and thumbmarks; apply the dry seal." : selectedType === "Certification (assistance request)" ? "Kagawad signs." : "Apply the dry seal."}</p>
+                </aside>
+              </div>
             </div>
-
-            <DialogFooter className="border-t bg-card px-5 py-3 sm:items-center sm:px-6">
-              <Button
-                type="button"
-                variant="ghost"
-                size="lg"
-                className="sm:mr-auto"
-                onClick={clearForm}
-              >
-                <Eraser aria-hidden="true" />
-                Clear form
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                onClick={() => printNow()}
-              >
-                <Printer aria-hidden="true" />
-                Print preview
-              </Button>
-              <Button type="button" size="lg" onClick={saveIssuance}>
-                <FileCheck2 aria-hidden="true" />
-                Save as issued
-              </Button>
+            <DialogFooter className="flex-col gap-2 border-t bg-card px-4 py-3 sm:flex-row sm:items-center sm:px-6">
+              <Button type="button" variant="ghost" size="lg" className="sm:mr-auto" onClick={clearForm}><Eraser aria-hidden="true" />Clear form</Button>
+              <Button type="button" variant="outline" size="lg" onClick={() => saveIssuance(true)}>Save as draft</Button>
+              <Button type="button" variant="outline" size="lg" onClick={() => preparePrint()}><Eye aria-hidden="true" />Print preview</Button>
+              <Button type="button" size="lg" onClick={() => saveIssuance(false)}><FileCheck2 aria-hidden="true" />Save as issued</Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={confirmFormAction !== null}
+        onOpenChange={(open) => { if (!open) setConfirmFormAction(null) }}
+        title={confirmFormAction === "clear" ? "Clear form?" : "Discard this form?"}
+        description={confirmFormAction === "clear" ? "Clear the entered values from this form?" : "Close the form and discard its unsaved entries?"}
+        confirmLabel={confirmFormAction === "clear" ? "Clear form" : "Discard form"}
+        destructive
+        onConfirm={() => {
+          if (confirmFormAction === "clear") performClearForm()
+          else {
+            setConfirmFormAction(null)
+            setIsIssuanceModalOpen(false)
+            setContinueTarget(null)
+            setCorrectionTarget(null)
+            setCorrectionReason("")
+            setValidationErrors({})
+            setFormErrorSummary([])
+          }
+        }}
+      />
 
       {/* Record details dialog */}
       <Dialog
