@@ -106,7 +106,7 @@ function OfficialsManagement() {
               {filteredOfficials.map((official) => (
                 <tr key={official.id} className="transition-colors hover:bg-muted/30">
                   <td className="px-4 py-3 align-middle font-medium sm:px-5">{official.id}</td>
-                  <td className="px-4 py-3 align-middle sm:px-5">{official.name}</td>
+                  <td className="px-4 py-3 align-middle font-medium sm:px-5">{official.name}</td>
                   <td className="px-4 py-3 align-middle sm:px-5">{official.position}</td>
                   <td className="px-4 py-3 align-middle sm:px-5">{official.term}</td>
                 </tr>
