@@ -237,7 +237,7 @@ function PendingRegistrations() {
           updateRegistrationStatus(
             pendingDecision.row.username,
             pendingDecision.status,
-            user?.username ?? user?.email ?? "admin",
+            user?.email ?? "admin",
             reason,
           )
           setPendingDecision(null)
