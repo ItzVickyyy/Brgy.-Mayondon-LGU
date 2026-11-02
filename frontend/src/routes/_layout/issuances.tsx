@@ -186,7 +186,6 @@ function IssuancesManagement() {
       .slice(0, 6)
   }, [residentQuery, selectedResidentId, manualEntry])
 
-  const selectedResident = sampleResidents.find((resident) => resident.id === selectedResidentId)
   const allFormFields = documentSections[selectedType]?.flatMap((section) => section.fields) ?? []
   const defaultsForDirtyCheck = createDefaultFormValues(selectedType)
   const isDirty = Object.entries(formValues).some(([key, value]) => value.trim() !== (defaultsForDirtyCheck[key] ?? "").trim())
@@ -195,7 +194,7 @@ function IssuancesManagement() {
     const nextValue = ["motorNumber", "plateNumber", "name"].includes(name) ? value.toUpperCase() :
       name === "officialReceiptNumber" && value.trim().toUpperCase() === "FOC" ? "FOC" : value
     setFormValues((previous) => {
-      const next = {
+      const next: Record<string, string> = {
         ...previous,
         [name]: nextValue,
         ...(name === "birthdate" ? { age: calculateAge(nextValue, previous.date || localDateValue()) } : {}),
@@ -260,6 +259,16 @@ function IssuancesManagement() {
     setManualEntry(false)
     setValidationErrors({})
     setFormErrorSummary([])
+  }
+
+  function startManualEntry() {
+    setSelectedResidentId("")
+    setResidentQuery("")
+    setManualEntry(true)
+    setFormValues((previous) => ({
+      ...createDefaultFormValues(selectedType),
+      date: previous.date || localDateValue(),
+    }))
   }
 
   function performClearForm() {
@@ -541,7 +550,7 @@ function IssuancesManagement() {
                           )) : <p className="px-3 py-4 text-sm text-muted-foreground">No match. Enter details manually.</p>}
                         </div>
                       ) : null}
-                      {selectedResidentId ? <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"><span>Selected record: <strong>{selectedResidentId}</strong></span><Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={startManualEntry}>Change</Button></div> : null}
+                      {selectedResidentId ? <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"><span>Selected record: <strong>{selectedResidentId}</strong></span><Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={() => { setSelectedResidentId(""); setResidentQuery(""); setManualEntry(false) }}>Change</Button></div> : null}
                       {!manualEntry && !selectedResidentId ? <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm"><button type="button" className="min-h-11 text-primary underline underline-offset-4" onClick={startManualEntry}>Resident not found? Enter details manually</button><button type="button" className="min-h-11 text-muted-foreground underline underline-offset-4" onClick={() => setNotice("Add to Resident Records is not connected yet. Open Resident Records to add a record.")}>Add to Resident Records</button></div> : null}
                       <p className="mt-2 text-xs text-muted-foreground">Changes here apply to this document only. To change the resident's record, use Resident Records.</p>
                     </div>
