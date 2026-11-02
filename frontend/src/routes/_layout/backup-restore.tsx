@@ -186,13 +186,13 @@ function BackupRestore() {
               {sampleBackups.map((backup) => (
                 <tr key={backup.name} className="transition-colors hover:bg-muted/30">
                   <td className="px-4 py-3 align-middle sm:px-5">
-                    <span className="inline-flex items-center gap-2">
+                    <span className="inline-flex items-center gap-2 font-medium">
                       <Archive className="size-4 text-muted-foreground" />
                       {backup.name}
                     </span>
                   </td>
-                  <td className="px-4 py-3 align-middle sm:px-5">{backup.date}</td>
-                  <td className="px-4 py-3 align-middle sm:px-5">{backup.size}</td>
+                  <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">{backup.date}</td>
+                  <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">{backup.size}</td>
                   <td className="px-4 py-3 align-middle sm:px-5">
                     <Badge variant="outline" className={statusStyles[backup.status]}><CheckCircle2 className="size-4" aria-hidden="true" />{backup.status}</Badge>
                   </td>
