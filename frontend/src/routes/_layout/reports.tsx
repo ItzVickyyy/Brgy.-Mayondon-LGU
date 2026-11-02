@@ -88,7 +88,7 @@ function Reports() {
               <option value="accounts">Account activity</option>
             </select>
           </label>
-          <label className="flex flex-col gap-2 text-base font-medium">
+          <label className="flex flex-col gap-2 text-sm font-medium">
             Reporting period
             <select
               value={period}
