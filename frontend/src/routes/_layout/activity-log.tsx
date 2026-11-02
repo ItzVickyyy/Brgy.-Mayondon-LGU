@@ -79,6 +79,15 @@ const rows: ActivityRow[] = [
     outcome: "Failed",
     reason: "Some rows could not be imported",
   },
+  {
+    timestamp: "2026-10-27T14:20:00",
+    user: "staff",
+    owner: "other",
+    action: "Access attempt denied",
+    module: "Authentication",
+    outcome: "Denied",
+    reason: "Account did not have permission for the requested action",
+  },
 ]
 
 function formatTimestamp(value: string) {
