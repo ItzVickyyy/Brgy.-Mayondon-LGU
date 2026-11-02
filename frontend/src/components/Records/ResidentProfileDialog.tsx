@@ -1,6 +1,7 @@
 import { CreditCard, FileCheck2, UserRound, Users } from "lucide-react"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 
 import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import {
@@ -59,20 +60,17 @@ export function ResidentProfileDialog({
                 "Barangay ID",
                 "Issuance History",
               ].map((tab) => (
-                <button
+                <Button
                   key={tab}
                   type="button"
                   role="tab"
+                  variant={profileTab === tab ? "default" : "ghost"}
                   aria-selected={profileTab === tab}
                   onClick={() => onProfileTabChange(tab)}
-                  className={
-                    profileTab === tab
-                      ? "min-h-11 rounded-md bg-primary px-3 text-sm font-semibold text-primary-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                      : "min-h-11 rounded-md px-3 text-sm font-semibold text-muted-foreground hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  }
+                  className="min-h-11 rounded-md px-3"
                 >
                   {tab}
-                </button>
+                </Button>
               ))}
             </div>
             {profileTab === "Details" ? (
