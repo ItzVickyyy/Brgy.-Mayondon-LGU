@@ -1,13 +1,18 @@
 import { createFileRoute } from "@tanstack/react-router"
 import {
   BarChart3,
+  CheckCircle2,
   Download,
   FileText,
   TrendingUp,
   UsersRound,
+  X,
 } from "lucide-react"
 import { useState } from "react"
 import { NoPermission } from "@/components/Common/NoPermission"
+import { StatCard } from "@/components/Common/StatCard"
+import { formControlClass } from "@/components/Common/formStyles"
+import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
@@ -56,30 +61,25 @@ function Reports() {
         </p>
       </div>
       {notice ? (
-        <p role="status" className="rounded-lg border bg-muted/40 p-3 text-sm">
-          {notice}
-        </p>
+        <div role="status" className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+          <p className="flex-1">{notice}</p>
+          <Button variant="ghost" size="icon" className="size-8" onClick={() => setNotice("")} aria-label="Dismiss message"><X aria-hidden="true" /></Button>
+        </div>
       ) : null}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {summary.map((item) => (
-          <section key={item.label} className="rounded-xl border bg-card p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{item.label}</p>
-              <item.icon className="size-5 text-primary" />
-            </div>
-            <p className="mt-3 text-3xl font-bold tabular-nums">{item.value}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{item.note}</p>
-          </section>
+          <StatCard key={item.label} icon={item.icon} label={item.label} value={item.value} description={item.note} />
         ))}
       </div>
-      <section className="rounded-xl border bg-card p-5">
-        <div className="flex flex-wrap items-end gap-3">
-          <label className="flex flex-col gap-2 text-base font-medium">
+      <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
+          <label className="flex flex-col gap-2 text-sm font-medium">
             Report type
             <select
               value={report}
               onChange={(event) => setReport(event.target.value)}
-              className="min-h-11 min-w-52 rounded-md border bg-background px-3 font-normal"
+              className={`${formControlClass} min-w-52 font-normal`}
             >
               <option value="issuances">Issuances by document type</option>
               <option value="purpose">Issuances by purpose</option>
@@ -93,7 +93,7 @@ function Reports() {
             <select
               value={period}
               onChange={(event) => setPeriod(event.target.value)}
-              className="min-h-11 min-w-40 rounded-md border bg-background px-3 font-normal"
+              className={`${formControlClass} min-w-40 font-normal`}
             >
               <option value="week">This week</option>
               <option value="month">This month</option>
@@ -101,24 +101,16 @@ function Reports() {
               <option value="year">This year</option>
             </select>
           </label>
-          <button
-            type="button"
-            onClick={() => setNotice(`Report selected: ${report}, ${period}.`)}
-            className="inline-flex min-h-11 items-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-          >
-            <BarChart3 className="size-4" />
+          <Button onClick={() => setNotice(`Report selected: ${report}, ${period}.`)}>
+            <BarChart3 aria-hidden="true" />
             Preview Report
-          </button>
-          <button
-            type="button"
-            onClick={() => setNotice("Export requested.")}
-            className="inline-flex min-h-11 items-center gap-2 rounded-md border px-4 text-sm font-medium hover:bg-muted"
-          >
-            <Download className="size-4" />
+          </Button>
+          <Button variant="outline" onClick={() => setNotice("Export requested.")}>
+            <Download aria-hidden="true" />
             Export
-          </button>
+          </Button>
         </div>
-        <div className="mt-6 rounded-lg border border-dashed p-8 text-center">
+        <div className="mt-6 rounded-xl border border-dashed p-8 text-center">
           <BarChart3 className="mx-auto size-8 text-muted-foreground" />
           <p className="mt-3 font-medium">Report preview area</p>
           <p className="mt-1 text-sm text-muted-foreground">
