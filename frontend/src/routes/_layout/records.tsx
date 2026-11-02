@@ -319,7 +319,7 @@ function RecordsManagement() {
             </label>
           ) : null}
           {importStep === 1 ? (
-            <div className="mt-4 rounded-xl border bg-card p-4">
+            <div className="mt-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
               <h3 className="font-semibold">Map spreadsheet columns</h3>
               <p className="mt-1 text-sm text-muted-foreground">
                 Match each resident field to a column in the selected
@@ -395,7 +395,7 @@ function RecordsManagement() {
                 ["Skipped", "Pending"],
                 ["Failed", "Pending"],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-xl border bg-card p-4">
+                <div key={label} className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
                   <p className="text-sm text-muted-foreground">{label}</p>
                   <p className="mt-2 text-xl font-semibold">{value}</p>
                 </div>
