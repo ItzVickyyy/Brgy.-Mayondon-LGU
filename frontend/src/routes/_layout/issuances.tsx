@@ -535,7 +535,7 @@ function IssuancesManagement() {
             aria-hidden="true"
           />
           <p className="flex-1">{notice}</p>
-          {noticePrintRecord && notice.includes(noticePrintRecord.id) ? <Button type="button" variant="outline" size="sm" onClick={() => printNow(noticePrintRecord)}><Printer aria-hidden="true" />Print</Button> : null>
+          {noticePrintRecord && notice.includes(noticePrintRecord.id) ? <Button type="button" variant="outline" size="sm" onClick={() => printNow(noticePrintRecord)}><Printer aria-hidden="true" />Print</Button> : null}
           <Button variant="ghost" size="icon" className="size-11" onClick={() => { setNotice(""); setNoticePrintRecord(null) }} aria-label="Dismiss message">
             <X aria-hidden="true" />
           </Button>
