@@ -166,87 +166,162 @@ function IssuancesManagement() {
   const topType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]
   const hasFilters = search.trim() !== "" || historyType !== "All document types" || historyStatus !== "all" || startDate !== "" || endDate !== ""
 
+  const residentMatches = useMemo(() => {
+    const query = residentQuery.trim().toLowerCase()
+    if (!query || selectedResidentId || manualEntry) return []
+    return sampleResidents.filter((resident) => resident.status === "Active")
+      .filter((resident) => [resident.name, resident.id, resident.idNumber, resident.address].some((value) => value.toLowerCase().includes(query)))
+      .slice(0, 6)
+  }, [residentQuery, selectedResidentId, manualEntry])
+
+  const allFormFields = documentSections[selectedType]?.flatMap((section) => section.fields) ?? []
+  const isDirty = Object.entries(formValues).some(([key, value]) => key !== "date" && value.trim() !== "")
+
   function updateField(name: string, value: string) {
+    const nextValue = ["motorNumber", "plateNumber"].includes(name) ? value.toUpperCase() :
+      name === "officialReceiptNumber" && value.trim().toUpperCase() === "FOC" ? "FOC" : value
     setFormValues((previous) => ({
       ...previous,
-      [name]: value,
-      ...(name === "birthdate" ? { age: calculateAge(value) } : {}),
+      [name]: nextValue,
+      ...(name === "birthdate" ? { age: calculateAge(nextValue, previous.date || localDateValue()) } : {}),
+      ...(name === "date" ? { age: calculateAge(previous.birthdate || "", nextValue) } : {}),
     }))
+    setValidationErrors((previous) => { const next = { ...previous }; delete next[name]; return next })
+    setFormErrorSummary([])
     setNotice("")
   }
 
   function changeDocumentType(value: string) {
+    const sharedKeys = ["firstName", "middleName", "lastName", "birthdate", "birthplace", "civilStatus", "address", "residentId", "photoUrl"]
+    const previousFields = documentSections[selectedType]?.flatMap((section) => section.fields) ?? []
+    const lost = previousFields.some((field) => !sharedKeys.includes(field.name) && Boolean(formValues[field.name]?.trim()))
+    const preserved = Object.fromEntries(sharedKeys.filter((key) => formValues[key]).map((key) => [key, formValues[key]]))
+    const defaults = createDefaultFormValues(value)
+    const name = formValues.firstName || formValues.lastName
+      ? formatPrintedName(formValues.firstName ?? "", formValues.middleName ?? "", formValues.lastName ?? "", value)
+      : formValues.name ?? ""
     setSelectedType(value)
+    setFormValues({ ...defaults, ...preserved, name, age: calculateAge(formValues.birthdate ?? "", defaults.date ?? localDateValue()) })
+    setValidationErrors({})
+    setFormErrorSummary([])
+    setLostDetailsNotice(lost ? `Details for ${selectedType} were cleared.` : "")
+    setPrintRecord(null)
+  }
+
+  function selectResident(resident: (typeof sampleResidents)[number]) {
+    const name = formatPrintedName(resident.firstName, resident.middleName, resident.lastName, selectedType)
     setFormValues((previous) => ({
-      ...createDefaultFormValues(value),
       ...previous,
+      residentId: resident.id,
+      firstName: resident.firstName,
+      middleName: resident.middleName,
+      lastName: resident.lastName,
+      name,
+      address: resident.address.replace(/, Mayondon.*$/i, ""),
+      birthdate: resident.birthdate,
+      birthplace: resident.birthplace,
+      civilStatus: resident.civilStatus,
+      sector: resident.sectors.join("||"),
+      residencyDuration: resident.residentSince ? String(Math.max(0, new Date().getFullYear() - resident.residentSince)) : "",
+      age: calculateAge(resident.birthdate, previous.date || localDateValue()),
+      photoUrl: resident.photoUrl ?? "",
+      ...(previous.recipientChoice === "Oneself" ? { underName: name } : {}),
     }))
-    setNotice("")
+    setSelectedResidentId(resident.id)
+    setResidentQuery("")
+    setManualEntry(false)
+    setValidationErrors({})
+    setFormErrorSummary([])
+  }
+
+  function performClearForm() {
+    setFormValues(createDefaultFormValues(selectedType))
+    setSelectedResidentId("")
+    setResidentQuery("")
+    setManualEntry(false)
+    setValidationErrors({})
+    setFormErrorSummary([])
+    setLostDetailsNotice("")
+    setConfirmFormAction(null)
     setPrintRecord(null)
   }
 
   function clearForm() {
-    setFormValues(createDefaultFormValues(selectedType))
-    setNotice("")
-    setPrintRecord(null)
+    if (isDirty) setConfirmFormAction("clear")
+    else performClearForm()
   }
 
-  function saveIssuance() {
+  function requestCloseForm(open: boolean) {
+    if (open) return setIsIssuanceModalOpen(true)
+    if (isDirty) return setConfirmFormAction("discard")
+    setIsIssuanceModalOpen(false)
+    setContinueTarget(null)
+    setCorrectionTarget(null)
+    setCorrectionReason("")
+  }
+
+  function validateIssuedForm() {
+    const errors: Record<string, string> = {}
+    for (const field of allFormFields) {
+      if (field.showWhen && !field.showWhen(formValues)) continue
+      if (field.required && !formValues[field.name]?.trim()) errors[field.name] = `${field.label} is required.`
+    }
+    if (selectedType === "Barangay Clearance, Electrical and Water Connection" && !formValues.serviceType?.trim()) errors.serviceType = "Choose at least one service."
+    if (selectedType === "Certificate of Indigency" && !formValues.birthdate?.trim() && !formValues.ageManual?.trim()) errors.ageManual = "Enter age when birthdate is unavailable."
+    for (const key of ["idDateOfIssue", "ctcDateOfIssue"]) {
+      if (formValues[key] && formValues[key] > localDateValue()) errors[key] = "Date of issue cannot be in the future."
+    }
+    setValidationErrors(errors)
+    const names = Object.keys(errors)
+    setFormErrorSummary(names)
+    if (names.length) window.setTimeout(() => {
+      const field = document.getElementById(`field-${names[0]}`)
+      field?.scrollIntoView({ behavior: "smooth", block: "center" })
+      field?.focus()
+    }, 0)
+    return names.length > 0
+  }
+
+  function saveIssuance(asDraft = false) {
     if (!formValues.name?.trim()) {
-      setNotice("Enter the resident's name before saving the issuance.")
+      setValidationErrors({ name: "Name is required." })
+      setFormErrorSummary(["name"])
+      document.getElementById("field-name")?.focus()
       return
     }
-    if (continueTarget) {
-      setHistoryRecords((previous) =>
-        previous.map((item) =>
-          item.id === continueTarget.id
-            ? { ...item, resident: currentName, date: currentDate, status: "Issued", purpose: formValues.purpose || item.purpose, validUntil: formValues.validUntil || item.validUntil, fields: { ...formValues } }
-            : item,
-        ),
-      )
+    if (!asDraft && validateIssuedForm()) return
+    if (continueTarget && !asDraft) {
+      setHistoryRecords((previous) => previous.map((item) => item.id === continueTarget.id
+        ? { ...item, resident: currentName, date: currentDate, status: "Issued", purpose: formValues.purpose || item.purpose, fields: { ...formValues } }
+        : item))
       setNotice(`${continueTarget.id} was continued and marked as issued.`)
       setContinueTarget(null)
       setIsIssuanceModalOpen(false)
       return
     }
-    const nextSequence = allRecords.reduce((max, item) => {
-      const sequence = Number(item.id.match(/\d+$/)?.[0] ?? 0)
-      return Math.max(max, sequence)
-    }, 0) + 1
-    const nextId = `ISS-${String(nextSequence).padStart(3, "0")}`
+    const sequence = allRecords.reduce((max, item) => Math.max(max, Number(item.id.match(/\\d+$/)?.[0] ?? 0)), 0) + 1
     const record: IssuanceRecord = {
-      id: nextId,
+      id: `ISS-${String(sequence).padStart(3, "0")}`,
       resident: currentName,
       type: selectedType,
-      date: currentDate,
-      status: "Issued",
+      date: currentDate || localDateValue(),
+      status: asDraft ? "Pending" : "Issued",
       purpose: formValues.purpose,
       validUntil: formValues.validUntil,
       correctionReason: correctionTarget ? correctionReason : undefined,
-      fields: { ...formValues },
+      fields: { ...formValues, officialReceiptNumber: formValues.officialReceiptNumber?.trim().toUpperCase() ?? "" },
     }
     setDrafts((previous) => [record, ...previous])
-    setNotice(
-      correctionTarget
-        ? `${record.id} was created as a corrected record. The original ${correctionTarget.id} remains in history.`
-        : `${record.id} was recorded as issued. You can now print the record.`,
-    )
+    if (selectedType === "Barangay Franchise Clearance" && formValues.tricycleAssociation?.trim()) setUsedAssociations((previous) => Array.from(new Set([...previous, formValues.tricycleAssociation.trim()])))
+    if (selectedType === "Certificate of Indigency" && formValues.purpose?.trim()) setUsedIndigencyPurposes((previous) => Array.from(new Set([...previous, formValues.purpose.trim()])))
+    setNotice(asDraft ? `${record.id} was saved as a pending draft.` : `${record.id} was recorded as issued.`)
     setCorrectionTarget(null)
     setCorrectionReason("")
     setIsIssuanceModalOpen(false)
   }
 
   function preparePrint(record?: IssuanceRecord) {
-    setPrintRecord(
-      record ?? {
-        id: "PRINT-PREVIEW",
-        resident: currentName,
-        type: selectedType,
-        date: currentDate,
-        status: "Pending",
-        fields: { ...formValues },
-      },
-    )
+    setPrintRecord(record ?? { id: "PRINT-PREVIEW", resident: currentName, type: selectedType, date: currentDate, status: "Pending", fields: { ...formValues } })
     setNotice("")
   }
 
@@ -255,98 +330,51 @@ function IssuancesManagement() {
     window.setTimeout(() => window.print(), 100)
   }
 
-  function renderField(field: DocumentField) {
-    const wide =
-      field.fullWidth ||
-      field.type === "textarea" ||
-      field.type === "checkboxes"
-    const value = formValues[field.name] ?? ""
-    const wrapperClass = cn(labelClassName, wide && "md:col-span-2")
-
-    if (field.type === "checkboxes") {
-      const checkedValues = value.split("||").filter(Boolean)
-      return (
-        <fieldset key={field.name} className={wrapperClass}>
-          <legend className="mb-1.5 text-sm font-medium">{field.label}</legend>
-          <div className="flex flex-wrap gap-2">
-            {(field.options ?? []).map((option) => {
-              const checked = checkedValues.includes(option)
-              return (
-                <label
-                  key={option}
-                  className={cn(
-                    "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-md border px-3 text-sm font-normal transition-colors has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50",
-                    checked
-                      ? "border-primary bg-primary/10 text-foreground"
-                      : "bg-background hover:bg-muted",
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={(event) => {
-                      const next = event.target.checked
-                        ? [...checkedValues, option]
-                        : checkedValues.filter((item) => item !== option)
-                      updateField(field.name, next.join("||"))
-                    }}
-                    className="size-4 rounded border-input accent-primary"
-                  />
-                  {option}
-                </label>
-              )
-            })}
-          </div>
-        </fieldset>
-      )
-    }
-
+  function renderField(field: (typeof allFormFields)[number]) {
+    if (field.showWhen && !field.showWhen(formValues)) return null
+    const value = field.name === "age"
+      ? calculateAge(formValues.birthdate ?? "", formValues.date || localDateValue()) || (selectedType === "Certificate of Indigency" ? formValues.ageManual ?? "" : "")
+      : formValues[field.name] ?? ""
+    const error = validationErrors[field.name]
+    const fieldId = `field-${field.name}`
+    const options = field.name === "tricycleAssociation" ? usedAssociations :
+      field.name === "purpose" && selectedType === "Certificate of Indigency" ? usedIndigencyPurposes :
+      field.options ?? []
+    const wrapperClass = cn(labelClassName, field.span === 3 && "md:col-span-2")
     return (
-      <div key={field.name} className={wrapperClass}>
-        <label htmlFor={`field-${field.name}`}>{field.label}</label>
-        {field.type === "select" ? (
-          <select
-            id={`field-${field.name}`}
-            value={value}
-            onChange={(event) => updateField(field.name, event.target.value)}
-            className={inputClassName}
-          >
-            <option value="">Select {field.label.toLowerCase()}</option>
-            {(field.options ?? []).map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
+      <div key={field.name} className={wrapperClass} id={`wrap-${field.name}`}>
+        <label htmlFor={fieldId}>{field.label}{field.required ? <span className="text-destructive"> *</span> : null}</label>
+        {field.type === "radio" || field.type === "checkboxes" || field.type === "multiselect" ? (
+          <fieldset className="min-w-0"><legend className="sr-only">{field.label}</legend><div className="flex flex-wrap gap-2">
+            {(field.options ?? []).map((option) => {
+              const multi = field.type !== "radio"
+              const selected = multi ? value.split("||").filter(Boolean).includes(option) : value === option
+              return <label key={option} className={cn("inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm font-normal focus-within:ring-[3px] focus-within:ring-ring/50", selected ? "border-primary bg-primary/10" : "bg-background hover:bg-muted")}>
+                <input type={multi ? "checkbox" : "radio"} name={field.name} checked={selected} onChange={(event) => {
+                  if (!multi) updateField(field.name, option)
+                  else {
+                    const values = value.split("||").filter(Boolean)
+                    const next = event.target.checked ? [...values, option].slice(-(field.maxSelected ?? 99)) : values.filter((item) => item !== option)
+                    updateField(field.name, next.join("||"))
+                  }
+                }} className="size-4 accent-primary" />{option}
+              </label>
+            })}
+          </div></fieldset>
+        ) : field.type === "select" ? (
+          <select id={fieldId} value={value} onChange={(event) => updateField(field.name, event.target.value)} className={cn(inputClassName, error && "border-destructive")} aria-invalid={Boolean(error)}><option value="">Select {field.label.toLowerCase()}</option>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select>
+        ) : field.type === "combobox" ? (
+          <><input id={fieldId} value={value} onChange={(event) => updateField(field.name, event.target.value)} list={`list-${field.name}`} className={cn(inputClassName, error && "border-destructive")} aria-invalid={Boolean(error)} /><datalist id={`list-${field.name}`}>{[...(field.options ?? []), ...options].map((option) => <option key={option} value={option} />)}</datalist></>
+        ) : field.type === "readonly" ? (
+          <input id={fieldId} value={value} readOnly className={cn(inputClassName, "bg-muted/50")} />
         ) : field.type === "textarea" ? (
-          <textarea
-            id={`field-${field.name}`}
-            value={value}
-            onChange={(event) => updateField(field.name, event.target.value)}
-            rows={3}
-            className={cn(inputClassName, "h-auto py-2")}
-            placeholder={`Enter ${field.label.toLowerCase()}`}
-          />
+          <textarea id={fieldId} value={value} onChange={(event) => updateField(field.name, event.target.value)} className={cn(inputClassName, "h-auto py-2", error && "border-destructive")} aria-invalid={Boolean(error)} rows={2} />
         ) : (
-          <input
-            id={`field-${field.name}`}
-            type={field.type ?? "text"}
-            value={value}
-            onChange={(event) => updateField(field.name, event.target.value)}
-            readOnly={field.name === "age"}
-            className={cn(
-              inputClassName,
-              field.name === "age" && "bg-muted/50",
-            )}
-            placeholder={
-              field.name === "age"
-                ? "Calculated from birthdate"
-                : field.type === "date"
-                  ? undefined
-                  : `Enter ${field.label.toLowerCase()}`
-            }
-          />
+          <input id={fieldId} type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"} value={value} onChange={(event) => updateField(field.name, event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault() }} max={field.name.toLowerCase().includes("dateofissue") ? localDateValue() : undefined} min={field.type === "number" ? "0" : undefined} className={cn(inputClassName, error && "border-destructive")} aria-invalid={Boolean(error)} />
         )}
+        {field.help ? <p className="text-xs font-normal text-muted-foreground">{field.help}</p> : null}
+        {field.name === "purpose" && selectedType === "Barangay Clearance" && formValues.purpose === "Employment Requirement/First Time Jobseeker" ? <button type="button" className="min-h-11 text-left text-xs text-primary underline underline-offset-4" onClick={() => updateField("purposeNote", "NOT APPLICABLE FOR LOAN PURPOSES")}>Use note: NOT APPLICABLE FOR LOAN PURPOSES</button> : null}
+        {error ? <p id={`${fieldId}-error`} className="text-xs font-normal text-destructive">{error}</p> : null}
       </div>
     )
   }
