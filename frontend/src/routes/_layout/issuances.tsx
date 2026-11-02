@@ -22,6 +22,7 @@ import {
   documentFields,
   documentSections,
   documentTypes,
+  historyDocumentTypes,
   type IssuanceRecord,
   sampleIssuances,
 } from "@/components/Issuances/config"
@@ -817,7 +818,7 @@ function IssuancesManagement() {
                 className={inputClassName}
               >
                 <option>All document types</option>
-                {documentTypes.map((type) => (
+                {historyDocumentTypes.map((type) => (
                   <option key={type} value={type}>
                     {type}
                   </option>
