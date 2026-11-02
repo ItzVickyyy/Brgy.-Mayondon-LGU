@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Filter, Search } from "lucide-react"
 import { useMemo, useState } from "react"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { statusStyles } from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
@@ -53,14 +54,6 @@ const rows = [
     outcome: "Completed",
   },
 ]
-
-const outcomeStyles: Record<string, string> = {
-  Success:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Completed:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  "In progress": "border-border bg-muted text-muted-foreground",
-}
 
 function ActivityLog() {
   const { user } = useAuth()
@@ -171,7 +164,7 @@ function ActivityLog() {
                     {row.module}
                   </td>
                   <td className="px-4 py-3 align-middle sm:px-5">
-                    <Badge variant="outline" className={outcomeStyles[row.outcome]}>
+                    <Badge variant="outline" className={statusStyles[row.outcome]}>
                       {row.outcome}
                     </Badge>
                   </td>
