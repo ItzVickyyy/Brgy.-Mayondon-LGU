@@ -336,14 +336,9 @@ function IssuancesManagement() {
             aria-hidden="true"
           />
           <p className="flex-1">{notice}</p>
-          <button
-            type="button"
-            onClick={() => setNotice("")}
-            aria-label="Dismiss message"
-            className="rounded-sm p-0.5 text-muted-foreground hover:text-foreground"
-          >
-            <X className="size-4" aria-hidden="true" />
-          </button>
+          <Button variant="ghost" size="icon" className="size-8" onClick={() => setNotice("")} aria-label="Dismiss message">
+            <X aria-hidden="true" />
+          </Button>
         </div>
       )}
 
