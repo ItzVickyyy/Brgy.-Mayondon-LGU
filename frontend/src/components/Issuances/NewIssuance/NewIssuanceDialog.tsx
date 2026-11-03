@@ -350,13 +350,24 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : selectedResident.emergencyContact?.phone
                 return !residentValue
               }).map((need) => {
-                const labels: Record<string, string> = { address: "Street and purok address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since year", sector: "Sector", photo: "Photo reference", emergencyContact: "Emergency contact name, address and number" }
+                const labels: Record<string, string> = { address: "Street and purok address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since year", sector: "Sector", photo: "Photo reference", emergencyContact: "Emergency contact" }
                 const key = need === "birthDate" ? "birthdate" : need === "birthPlace" ? "birthplace" : need
+                if (need === "address") return <div key={need} className="space-y-2">
+                  <p className="text-sm font-medium">{labels[need]}</p>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <label className={fieldLabelClass}>House number<input value={addressParts.houseNumber} onChange={(event) => { const next = { ...addressParts, houseNumber: event.target.value }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass} /></label>
+                    <label className={fieldLabelClass}>Street<input value={addressParts.street} onChange={(event) => { const next = { ...addressParts, street: event.target.value }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass} /></label>
+                    <label className={fieldLabelClass}>Purok<select value={addressParts.purok} onChange={(event) => { const next = { ...addressParts, purok: Number(event.target.value) }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass}>{[1, 2, 3, 4, 5, 6].map((purok) => <option key={purok} value={purok}>Purok {purok}</option>)}</select></label>
+                  </div>
+                </div>
+                if (need === "emergencyContact") return <div key={need} className="space-y-2">
+                  <p className="text-sm font-medium">{labels[need]}</p>
+                  {(["name", "address", "phone"] as const).map((part) => <label key={part} className={fieldLabelClass}>{part === "phone" ? "Contact number" : part === "name" ? "Contact name" : "Contact address"}<input value={residentUpdates.emergencyContact?.[part] ?? selectedResident.emergencyContact?.[part] ?? ""} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, emergencyContact: { name: previous.emergencyContact?.name ?? selectedResident.emergencyContact?.name ?? "", address: previous.emergencyContact?.address ?? selectedResident.emergencyContact?.address ?? "", phone: previous.emergencyContact?.phone ?? selectedResident.emergencyContact?.phone ?? "", [part]: event.target.value } } as ResidentPatch))} className={formControlClass} /></label>)}
+                </div>
                 return <label key={need} className={fieldLabelClass}>{labels[need]}
                   {need === "civilStatus" || need === "sex" || need === "sector" ? <select value={String((residentUpdates as Record<string, unknown>)[key] ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, [key]: need === "sector" ? [event.target.value] : event.target.value } as ResidentPatch))} className={formControlClass}><option value="">Select…</option>{(need === "civilStatus" ? ["Single", "Married", "Legally Separated", "Widow/Widower"] : need === "sex" ? ["Male", "Female"] : ["STUDENT", "Senior Citizens", "Person with Disabilities (PWD)", "Solo Parents"]).map((option) => <option key={option}>{option}</option>)}</select> :
-                  <input type={need === "birthDate" ? "date" : "text"} value={String((residentUpdates as Record<string, unknown>)[key] ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, [key]: need === "residentSince" && event.target.value ? Number(event.target.value) : event.target.value } as ResidentPatch))} className={formControlClass} />}
-                </label>
-              })}
+                  <input type={need === "birthDate" ? "date" : "text"} value={String((residentUpdates as Record<string, unknown>)[key === "photo" ? "photoUrl" : key] ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, [key === "photo" ? "photoUrl" : key]: need === "residentSince" && event.target.value ? Number(event.target.value) : event.target.value } as ResidentPatch))} className={formControlClass} />}
+                </label>}
               <p className="text-xs text-muted-foreground">Saved to the resident's record.</p>
             </div> : null}
           </section>
