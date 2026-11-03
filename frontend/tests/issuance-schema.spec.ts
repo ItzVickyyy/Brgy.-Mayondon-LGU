@@ -115,6 +115,6 @@ test("issued records retain an issue-time resident snapshot", async () => {
     status: "issued",
   })
   expect(record.residentSnapshot?.fullName).toBe("Fictional A. Resident")
-  expect(record.residentSnapshot?.addressLine).toBe("12, Rizal Street, Purok 1")
+  expect(record.residentSnapshot?.addressLine).toBe("12 Rizal Street, Purok 1")
   mockIssuanceStore.reset()
 })
