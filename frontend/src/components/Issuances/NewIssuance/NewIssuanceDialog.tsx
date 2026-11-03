@@ -367,7 +367,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 return <label key={need} className={fieldLabelClass}>{labels[need]}
                   {need === "civilStatus" || need === "sex" || need === "sector" ? <select value={String((residentUpdates as Record<string, unknown>)[key] ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, [key]: need === "sector" ? [event.target.value] : event.target.value } as ResidentPatch))} className={formControlClass}><option value="">Select…</option>{(need === "civilStatus" ? ["Single", "Married", "Legally Separated", "Widow/Widower"] : need === "sex" ? ["Male", "Female"] : ["STUDENT", "Senior Citizens", "Person with Disabilities (PWD)", "Solo Parents"]).map((option) => <option key={option}>{option}</option>)}</select> :
                   <input type={need === "birthDate" ? "date" : "text"} value={String((residentUpdates as Record<string, unknown>)[key === "photo" ? "photoUrl" : key] ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, [key === "photo" ? "photoUrl" : key]: need === "residentSince" && event.target.value ? Number(event.target.value) : event.target.value } as ResidentPatch))} className={formControlClass} />}
-                </label>}
+                </label>
+              })}
               <p className="text-xs text-muted-foreground">Saved to the resident's record.</p>
             </div> : null}
           </section>
