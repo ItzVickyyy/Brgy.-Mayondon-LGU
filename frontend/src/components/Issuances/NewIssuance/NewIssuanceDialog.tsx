@@ -71,6 +71,19 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     return allResidents.filter((resident) => [resident.name, resident.id, resident.idNumber, resident.address].some((value) => value.toLowerCase().includes(query))).slice(0, 6)
   }, [allResidents, residentQuery, selectedResident])
 
+  function prefillResidentSector(code: DocumentCode, resident: ResidentRecord) {
+    const sectorField = documentConfig[code].fields.find((field) => field.name === "sector")
+    if (!sectorField) {
+      setSelectedSector("")
+      form.setValue("sectors", [], { shouldDirty: false })
+      return
+    }
+    const options = sectorField.options ?? []
+    const matching = resident.sectors.filter((sector) => options.includes(sector)).slice(0, sectorField.maxSelected ?? 1)
+    setSelectedSector(sectorField.type === "multiselect" ? matching : matching[0] ?? "")
+    form.setValue("sectors", matching.map((sector) => ({ sectorId: options.indexOf(sector) + 1 })), { shouldDirty: false })
+  }
+
   function changeDocumentType(nextCode: DocumentCode) {
     const current = form.getValues()
     const detailsDirty = Object.entries(current.details as unknown as Record<string, unknown>).some(([key, value]) => {
@@ -98,6 +111,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     form.setValue("signatoryOfficialId", signatory?.id)
     form.clearErrors()
     setSelectedSector("")
+    if (selectedResident) prefillResidentSector(nextCode, selectedResident)
     setValidUntilEdited(false)
     setDuplicate(null)
     setFormError("")
@@ -110,7 +124,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     form.setValue("residentId", resident.id, { shouldDirty: true })
     setResidentUpdates({})
     setAddressParts({ houseNumber: resident.houseNumber ?? "", street: resident.street ?? "", purok: resident.purok ?? 1 })
-    setSelectedSector("")
+    prefillResidentSector(documentType, resident)
     setDuplicate(null)
     setFormError("")
   }
@@ -233,7 +247,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       setFormError("Select a resident before issuing this document.")
       return
     }
-    const projectedResident = { ...selectedResident, ...residentUpdates }
+    const projectedResident = { ...selectedResident, ...residentUpdates } as ResidentRecord
     const missingResidentFields = getMissingResidentFields(projectedResident, documentType)
     if (missingResidentFields.length) {
       setFormError("Complete the resident fields listed under Needed for this document.")
@@ -260,6 +274,12 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       const valid = await parsed
       if (!valid) {
         setFormError("Check the required fields marked above.")
+        const firstMissing = config.fields.find((field) => field.required && !fieldHasValue(field))
+        if (firstMissing) {
+          const target = document.getElementById(`issuance-${firstMissing.name}`)
+          target?.scrollIntoView({ behavior: "smooth", block: "center" })
+          target?.focus()
+        }
         setSaving(false)
         return
       }
@@ -433,7 +453,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             </div> : <div className="space-y-2">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" aria-hidden="true" />
-                <input value={residentQuery} onChange={(event) => setResidentQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "ArrowDown" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, matches.length - 1)) } if (event.key === "ArrowUp" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) } if (event.key === "Enter" && matches[activeResidentMatch]) { event.preventDefault(); selectResident(matches[activeResidentMatch]) } if (event.key === "Escape") { event.preventDefault(); setResidentQuery("") } }} placeholder="Search name or resident number…" className={cn(formControlClass, "pl-9")} aria-label="Search resident" role="combobox" aria-autocomplete="list" aria-expanded={matches.length > 0} aria-controls="issuance-resident-results" aria-activedescendant={matches[activeResidentMatch] ? `issuance-resident-option-${matches[activeResidentMatch].id}` : undefined} />
+                <input value={residentQuery} onChange={(event) => { setResidentQuery(event.target.value); setActiveResidentMatch(0) }} onKeyDown={(event) => { if (event.key === "ArrowDown" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, matches.length - 1)) } if (event.key === "ArrowUp" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) } if (event.key === "Enter" && matches[activeResidentMatch]) { event.preventDefault(); selectResident(matches[activeResidentMatch]) } if (event.key === "Escape") { event.preventDefault(); setResidentQuery("") } }} placeholder="Search name or resident number…" className={cn(formControlClass, "pl-9")} aria-label="Search resident" role="combobox" aria-autocomplete="list" aria-expanded={matches.length > 0} aria-controls="issuance-resident-results" aria-activedescendant={matches[activeResidentMatch] ? `issuance-resident-option-${matches[activeResidentMatch].id}` : undefined} />
               </div>
               {matches.length ? <div id="issuance-resident-results" role="listbox" className="overflow-hidden rounded-md border">{matches.map((resident, index) => <button type="button" key={resident.id} id={`issuance-resident-option-${resident.id}`} role="option" aria-selected={activeResidentMatch === index} disabled={resident.status === "Archived"} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} className={cn("flex min-h-12 w-full flex-col items-start border-b px-3 py-2 text-left last:border-b-0 hover:bg-muted", activeResidentMatch === index && "bg-muted", resident.status === "Archived" && "cursor-not-allowed opacity-50")}>
                 <span className="font-medium">{resident.name} <span className="text-xs text-muted-foreground">{resident.id}</span>{resident.status === "Archived" ? <span className="ml-2 text-xs text-muted-foreground">Archived</span> : null}</span>
