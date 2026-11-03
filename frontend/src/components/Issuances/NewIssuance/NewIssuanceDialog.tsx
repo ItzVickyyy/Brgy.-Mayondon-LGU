@@ -349,7 +349,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               {config.residentNeeds.filter((need) => {
                 const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : selectedResident.emergencyContact?.phone
                 return !residentValue
-              }).map((need) => {
+              }).concat(!selectedResident.address.trim() ? ["address"] : []).map((need) => {
                 const labels: Record<string, string> = { address: "Street and purok address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since year", sector: "Sector", photo: "Photo reference", emergencyContact: "Emergency contact" }
                 const key = need === "birthDate" ? "birthdate" : need === "birthPlace" ? "birthplace" : need
                 if (need === "address") return <div key={need} className="space-y-2">
