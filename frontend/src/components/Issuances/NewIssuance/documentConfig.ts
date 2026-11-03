@@ -24,6 +24,7 @@ export type DetailFieldConfig = {
   group: DetailGroup
   help?: string
   showWhen?: (values: Record<string, unknown>) => boolean
+  maxSelected?: number
 }
 
 export type DocumentConfig = {
@@ -116,7 +117,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
     hint: "Assistance, fee waiver", printMode: "overlay", validityMonths: null, onePerResident: false,
     signatoryMode: "preprinted", residentNeeds: [],
     fields: [
-      { name: "sector", label: "Sector", type: "select", required: true, options: sectorOptions, group: "main" },
+      { name: "sector", label: "Sector", type: "multiselect", required: true, options: sectorOptions, maxSelected: 2, group: "main" },
       { name: "purpose", label: "Purpose", type: "combobox", required: true, options: purposeOptions, group: "main" },
       { name: "addressedToOffice", label: "Office addressed to", type: "text", required: true, group: "main" },
     ],
