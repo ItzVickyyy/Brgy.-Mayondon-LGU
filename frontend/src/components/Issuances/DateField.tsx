@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react"
+import { CalendarDays } from "lucide-react"
 import { formControlClass } from "@/components/Common/formStyles"
 import { formatPaperDate, isoToLocalDate, localDateToIso, monthNames } from "@/lib/issuance-format"
 import { cn } from "@/lib/utils"
@@ -171,7 +171,7 @@ export function DateField({
           aria-label={`Choose ${label.toLowerCase()}`}
           className="absolute left-0 top-full z-[100] mt-2 w-[min(20rem,calc(100vw-3rem))] rounded-xl border bg-popover p-3 text-popover-foreground shadow-lg"
         >
-          <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
+          <div className="mb-3 grid grid-cols-2 gap-2">
             <select
               aria-label="Month"
               value={viewMonth}
@@ -180,15 +180,6 @@ export function DateField({
             >
               {monthNames.map((month, index) => <option key={month} value={index}>{month}</option>)}
             </select>
-            <button
-              type="button"
-              aria-label="Previous month"
-              disabled={viewYear === effectiveMinYear && viewMonth === 0}
-              onClick={() => changeMonth(viewMonth - 1)}
-              className="inline-flex size-9 items-center justify-center rounded-md border hover:bg-muted disabled:opacity-40"
-            >
-              <ChevronLeft aria-hidden="true" className="size-4" />
-            </button>
             <select
               aria-label="Year"
               value={viewYear}
