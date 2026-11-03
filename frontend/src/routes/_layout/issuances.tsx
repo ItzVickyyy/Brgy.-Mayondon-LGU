@@ -409,11 +409,6 @@ function IssuancesManagement() {
       }
       setHistoryRecords((previous) => previous.map((item) => item.id === continueTarget.id ? continuedRecord : item))
       setNotice(`${continueTarget.id} was continued and marked as issued.`)
-      try {
-        window.localStorage.removeItem(AUTO_DRAFT_KEY)
-      } catch {
-        // The issuance can still be completed if browser storage is blocked.
-      }
       setContinueTarget(null)
       setIsIssuanceModalOpen(false)
       return continuedRecord
