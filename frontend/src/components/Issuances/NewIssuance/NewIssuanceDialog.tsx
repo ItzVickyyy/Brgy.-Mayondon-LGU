@@ -566,7 +566,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             {fieldsByGroup("payment").length ? <div className="space-y-2"><p className="text-xs font-medium text-muted-foreground">Payment</p><div className="grid gap-3 sm:grid-cols-2">{fieldsByGroup("payment").map(renderField)}</div></div> : null}
             {fieldsByGroup("more").length ? <div>
               <button type="button" className="flex min-h-10 items-center gap-2 text-sm font-medium" onClick={() => setMoreOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", moreOpen && "rotate-180")} />More options (optional)</button>
-              {!moreOpen ? <p className="text-xs text-muted-foreground">{fieldsByGroup("more").map((field) => String((details as unknown as Record<string, unknown>)[field.name] ?? "")).filter(Boolean).join(" · ") || "No optional details added"}</p> : <div className="grid gap-3 sm:grid-cols-2">{fieldsByGroup("more").map(renderField)}</div>}
+              {!moreOpen ? <p className="text-xs text-muted-foreground">{fieldsByGroup("more").map((field) => previewValue(field)).filter(Boolean).join(" · ") || "No optional details added"}</p> : <div className="grid gap-3 sm:grid-cols-2">{fieldsByGroup("more").map(renderField)}</div>}
             </div> : null}
             <div>
               <button type="button" className="flex min-h-10 items-center gap-2 text-sm font-medium" onClick={() => setPreviewOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", previewOpen && "rotate-180")} />Preview of what will print</button>
