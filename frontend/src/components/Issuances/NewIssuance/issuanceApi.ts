@@ -67,6 +67,14 @@ let issuances: MockIssuance[] = []
 let streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
 let purposes = [...clearancePurposeOptions]
 let associations = ["Mayondon Tricycle Operators and Drivers Association"]
+const mockTricycles = [{
+  associationName: "Mayondon Tricycle Operators and Drivers Association",
+  make: "Sample Make",
+  bodyType: "TRICYCLE",
+  motorNumber: "MOTOR-SAMPLE-001",
+  color: "Blue",
+  plateNumber: "SYN-1001",
+}]
 
 export function getResidentAddress(resident: ResidentRecord) {
   if (resident.houseNumber || resident.street || resident.purok) return [[resident.houseNumber?.trim(), resident.street?.trim()].filter(Boolean).join(" "), resident.purok ? `Purok ${resident.purok}` : ""].filter(Boolean).join(", ")
@@ -182,7 +190,13 @@ export const issuanceApi = {
   },
 
   async getTricycles(plate = "", motor = "") {
-    return { plate, motor, match: undefined as undefined }
+    const normalizedPlate = plate.trim().toLowerCase()
+    const normalizedMotor = motor.trim().toLowerCase()
+    const match = mockTricycles.find((tricycle) =>
+      (normalizedPlate && tricycle.plateNumber.toLowerCase() === normalizedPlate) ||
+      (normalizedMotor && tricycle.motorNumber.toLowerCase() === normalizedMotor),
+    )
+    return { plate, motor, match }
   },
 
   async createIssuance(input: IssuanceInput): Promise<CreateIssuanceResult> {
