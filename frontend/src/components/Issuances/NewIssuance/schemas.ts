@@ -12,6 +12,8 @@ const identificationSchema = z.object({
 const paymentSchema = z.object({
   officialReceiptNo: z.string().trim().optional(),
   isFree: z.boolean(),
+  dateOfPayment: isoDate.optional(),
+  certifiedBy: z.string().trim().optional(),
 }).superRefine((value, context) => {
   if (!value.isFree && !value.officialReceiptNo) {
     context.addIssue({ code: "custom", path: ["officialReceiptNo"], message: "Official receipt number is required unless free of charge." })
@@ -22,8 +24,10 @@ const detailsSchemas = {
   BARANGAY_CLEARANCE: z.object({ type: z.literal("BARANGAY_CLEARANCE"), purposeNote: z.string().optional(), referredByOfficialId: z.string().optional() }),
   FRANCHISE_CLEARANCE: z.object({ type: z.literal("FRANCHISE_CLEARANCE"), associationName: nonEmpty, make: nonEmpty, bodyType: nonEmpty, motorNumber: nonEmpty, color: nonEmpty, plateNumber: nonEmpty }),
   UTILITY_CLEARANCE: z.object({ type: z.literal("UTILITY_CLEARANCE"), services: z.array(z.enum(["electric", "water"])).min(1), connectionType: z.enum(["new", "reconnection"]), classification: z.enum(["residential", "commercial"]), location: nonEmpty }),
+  BUILDING_CLEARANCE: z.object({ type: z.literal("BUILDING_CLEARANCE"), location: nonEmpty }),
   RESIDENCY: z.object({ type: z.literal("RESIDENCY") }),
-  INDIGENCY: z.object({ type: z.literal("INDIGENCY"), addressedToOffice: nonEmpty }),
+  INDIGENCY: z.object({ type: z.literal("INDIGENCY"), addressedToOffice: nonEmpty, requestedBy: z.string().optional() }),
+  PHILHEALTH_CERT: z.object({ type: z.literal("PHILHEALTH_CERT"), cardType: nonEmpty }),
   ASSISTANCE: z.object({ type: z.literal("ASSISTANCE"), assistanceType: z.enum(["financial", "medical", "burial"]), forSelf: z.boolean(), beneficiaryName: z.string().optional(), beneficiaryRelationship: z.string().optional() }),
   MARGINALIZED_SECTOR: z.object({ type: z.literal("MARGINALIZED_SECTOR"), healthCondition: nonEmpty }),
   FIRST_TIME_JOBSEEKER: z.object({ type: z.literal("FIRST_TIME_JOBSEEKER"), educationalAttainment: nonEmpty, course: nonEmpty, isJobstartBeneficiary: z.boolean(), witnessOfficialId: nonEmpty, parts: z.array(z.enum(["applicant_sheet", "oath", "certification"])).min(1) }),
@@ -34,8 +38,10 @@ export const documentDetailsSchema = z.discriminatedUnion("type", [
   detailsSchemas.BARANGAY_CLEARANCE,
   detailsSchemas.FRANCHISE_CLEARANCE,
   detailsSchemas.UTILITY_CLEARANCE,
+  detailsSchemas.BUILDING_CLEARANCE,
   detailsSchemas.RESIDENCY,
   detailsSchemas.INDIGENCY,
+  detailsSchemas.PHILHEALTH_CERT,
   detailsSchemas.ASSISTANCE,
   detailsSchemas.MARGINALIZED_SECTOR,
   detailsSchemas.FIRST_TIME_JOBSEEKER,
@@ -52,7 +58,7 @@ export type DocumentDetailsByCode = { [K in DocumentCode]: Extract<DocumentDetai
 
 const baseIssuanceSchema = z.object({
   documentType: z.enum([
-    "BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE", "RESIDENCY", "INDIGENCY",
+    "BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE", "BUILDING_CLEARANCE", "RESIDENCY", "INDIGENCY", "PHILHEALTH_CERT",
     "ASSISTANCE", "MARGINALIZED_SECTOR", "FIRST_TIME_JOBSEEKER", "BARANGAY_ID",
   ]),
   issueDate: isoDate,
@@ -87,11 +93,11 @@ const baseIssuanceSchema = z.object({
     if (["RESIDENCY", "ASSISTANCE", "MARGINALIZED_SECTOR", "FIRST_TIME_JOBSEEKER"].includes(value.documentType) && !value.signatoryOfficialId) {
       context.addIssue({ code: "custom", path: ["signatoryOfficialId"], message: "Choose a signatory." })
     }
-    const codeNeedsIdentity: DocumentCode[] = ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"]
+    const codeNeedsIdentity: DocumentCode[] = ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE", "BUILDING_CLEARANCE"]
     if (codeNeedsIdentity.includes(value.documentType as DocumentCode) && !value.identification) {
       context.addIssue({ code: "custom", path: ["identification"], message: "Proof of identity is required." })
     }
-    if (["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"].includes(value.documentType) && !value.payment) {
+    if (["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE", "BUILDING_CLEARANCE"].includes(value.documentType) && !value.payment) {
       context.addIssue({ code: "custom", path: ["payment"], message: "Payment details are required." })
     }
   }

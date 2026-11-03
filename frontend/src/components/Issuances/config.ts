@@ -34,7 +34,7 @@ export type IssuanceRecord = {
 }
 
 export const civilStatusOptions = ["Single", "Married", "Legally Separated", "Widow/Widower"]
-export const idTypeOptions = ["CTC", "Barangay ID", "VIN", "Passport", "UMID", "School ID", "Driver's License", "Senior Citizen", "Solo Parent", "Postal ID", "PWD ID", "PhilHealth ID", "National ID", "SSS ID", "TIN ID"]
+export const idTypeOptions = ["CTC", "Barangay ID", "VIN", "Passport", "UMID", "School ID", "Driver's License", "Senior Citizen", "Solo Parent", "Postal ID", "PWD ID", "PhilHealth ID", "PRC ID", "National ID", "SSS ID", "TIN ID"]
 export const clearancePurposeOptions = [
   "Employment Requirement",
   "Student Permit Requirement",
@@ -56,7 +56,40 @@ export const clearancePurposeOptions = [
   "Electric Installation Requirements",
   "Senior Citizen Requirement",
   "Application for Service/Special Permit",
+  "POSTAL ID",
+  "OJT Requirement",
+  "PESO Requirement",
+  "Firearms License",
+  "Franchise Requirement (Special Permit)",
+  "Car Loan Application Requirement",
+  "Marriage Application Requirement",
+  "E-Bike Application",
+  "LTOPF Registration",
+  "PAARU",
 ]
+/** Purposes the office types on the Certificate of Indigency (from the current Clearance Issuing sheet). */
+export const indigencyPurposeOptions = [
+  "Scholarship Requirement",
+  "Medical Assistance",
+  "Financial/Medical Assistance",
+  "Financial/Burial Assistance",
+  "Delayed Registration of Birth",
+  "PESO Requirement",
+  "PAO Requirement",
+  "BIR Tax Exemption for Scholarship Requirement",
+  "Work Requirement",
+]
+/** Offices the Certificate of Indigency is usually addressed to. Names of elected officials are not listed because they change; staff type them in the box. */
+export const addressedOfficeOptions = [
+  "CHED",
+  "DOH",
+  "DSWD - Region IV-A",
+  "PAO",
+  "RHU-II",
+  "Mental Hospital - Mandaluyong City",
+  "Laguna District Bay Laguna",
+]
+export const purposeNoteOptions = ["NOT APPLICABLE FOR LOAN PURPOSES"]
 export const indigencySectorOptions = [
   "Urban Poor",
   "Small Farmers and Rural Workers",
