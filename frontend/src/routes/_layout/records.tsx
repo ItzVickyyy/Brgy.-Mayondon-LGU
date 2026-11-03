@@ -225,7 +225,7 @@ function RecordsManagement() {
                               {
                                 label: "New issuance",
                                 hidden: archived,
-                                onSelect: () => window.location.assign(`/issuances?resident=${encodeURIComponent(resident.name)}`),
+                                onSelect: () => window.location.assign(`/issuances?resident=${encodeURIComponent(resident.id)}`),
                               },
                               {
                                 label: "Archive",
