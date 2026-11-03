@@ -16,6 +16,7 @@ type ConfirmDialogProps = {
   title: string
   description: string
   confirmLabel?: string
+  cancelLabel?: string
   destructive?: boolean
   reason?: "none" | "optional" | "required"
   onConfirm: (reasonText: string) => void
@@ -27,6 +28,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
   destructive = false,
   reason = "none",
   onConfirm,
@@ -69,7 +71,7 @@ export function ConfirmDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            Cancel
+            {cancelLabel}
           </Button>
           <Button
             type="button"

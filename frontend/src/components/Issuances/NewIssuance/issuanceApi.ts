@@ -11,6 +11,7 @@ export type QuickResidentInput = {
   lastName: string
   firstName: string
   middleName?: string
+  suffix?: string
   birthdate: string
   sex: "Male" | "Female"
   civilStatus: string
@@ -152,7 +153,7 @@ export const issuanceApi = {
 
   async createResident(input: QuickResidentInput): Promise<ResidentRecord> {
     const sequence = residents.reduce((max, resident) => Math.max(max, Number(resident.id.match(/\d+$/)?.[0] ?? 0)), 0) + 1
-    const name = [input.firstName, input.middleName?.trim(), input.lastName].filter(Boolean).join(" ")
+    const name = [input.firstName.trim(), input.middleName?.trim(), input.lastName.trim(), input.suffix?.trim()].filter(Boolean).join(" ")
     const address = [[input.houseNumber?.trim(), input.street.trim()].filter(Boolean).join(" "), `Purok ${input.purok}`, "Mayondon"].filter(Boolean).join(", ")
     const resident: ResidentRecord = {
       id: `RES-${String(sequence).padStart(4, "0")}`,
@@ -160,6 +161,7 @@ export const issuanceApi = {
       firstName: input.firstName.trim(),
       middleName: input.middleName?.trim() ?? "",
       lastName: input.lastName.trim(),
+      suffix: input.suffix?.trim() ?? "",
       birthdate: input.birthdate,
       birthplace: "",
       sex: input.sex,

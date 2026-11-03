@@ -90,6 +90,22 @@ Collected inline in step 2 only when the chosen document needs them and the reco
 | Assistance, Marginalized | `resident_sectors` |
 | ID | `photo_url`, `emergency_contact_name`, `emergency_contact_address`, `emergency_contact_phone` |
 
+## New resident (quick add in step 2)
+
+Shown when the person is not found in the search. The name is one row: First name, Middle name, Last name, Extension.
+
+| Form input | Form key | Column | Rule |
+|---|---|---|---|
+| First name | `firstName` | `first_name` | text, required |
+| Middle name | `middleName` | `middle_name` | text, optional |
+| Last name | `lastName` | `last_name` | text, required |
+| Extension | `suffix` | `suffix` | optional: `Jr.`, `Sr.`, `II`, `III`, `IV`, `V`. Blank when "None". Printed after the last name |
+| Birthdate | `birthdate` | `birthdate` | date, required (picked as month, day, year) |
+| Sex | `sex` | `sex` | `Male` or `Female` |
+| Civil status | `civilStatus` | `civil_status` | lookup |
+| House number, Street, Purok | `houseNumber`, `street`, `purok` | `house_number`, `street_id`, `purok` | required, same rule as the table above |
+| Living here since | `residentSinceYear`, `residentSinceBirth` | `resident_since_year`, `resident_since_birth` | year or "since birth" |
+
 ## Lookup tables
 
 `document_types(code, name, category, print_mode, validity_months, one_per_resident, signatory_default_position)` · `issuance_purposes` · `sectors` · `id_types` · `officials` (existing) · `tricycle_associations` · `streets`.

@@ -4,6 +4,7 @@ export type ResidentRecord = {
   firstName: string
   middleName: string
   lastName: string
+  suffix?: string
   birthdate: string
   birthplace: string
   sex: "Male" | "Female"

@@ -17,15 +17,17 @@ export function formatPrintedName(
   middleName: string,
   lastName: string,
   documentType: string,
+  suffix = "",
 ): string {
   const first = firstName.trim()
   const middle = middleName.trim()
   const last = lastName.trim()
+  const ext = suffix.trim()
   if (documentType === "Barangay Clearance") {
-    return [last ? `${last.toUpperCase()},` : "", first, middle].filter(Boolean).join(" ").toUpperCase()
+    return [last ? `${last.toUpperCase()},` : "", first, middle, ext].filter(Boolean).join(" ").toUpperCase()
   }
   const middleInitial = middle ? `${middle.replace(/\./g, "").charAt(0).toUpperCase()}.` : ""
-  return [first, middleInitial, last].filter(Boolean).join(" ").toUpperCase()
+  return [first, middleInitial, last, ext].filter(Boolean).join(" ").toUpperCase()
 }
 
 export function formatPaperDate(value: string): string {
