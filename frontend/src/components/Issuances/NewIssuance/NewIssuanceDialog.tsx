@@ -418,6 +418,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                   <label className={fieldLabelClass}>Residing since<input type="number" min="1900" max={new Date().getFullYear()} value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: event.target.value ? Number(event.target.value) : undefined }))} className={formControlClass} /></label>
                   <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceBirth: event.target.checked, residentSinceYear: undefined }))} />Since birth</label>
                 </div>
+                <datalist id="issuance-street-options">{knownStreets.map((street) => <option key={street} value={street} />)}</datalist>
                 <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setShowQuickAdd(false)}>Cancel</Button><Button type="button" onClick={() => void createResident()}>Save resident</Button></div>
               </div> : null}
             </div>}
