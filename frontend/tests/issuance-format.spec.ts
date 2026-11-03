@@ -1,6 +1,6 @@
 // Unit tests for pure issuance formatting helpers.
 import { expect, test } from "@playwright/test"
-import { calculateAge, formatPrintedName, daysInMonth, buildIsoDate, splitIsoDate, monthNames } from "../src/lib/issuance-format"
+import { calculateAge, formatPrintedName, daysInMonth, buildIsoDate, splitIsoDate, monthNames, isoToLocalDate, localDateToIso, formatPaperDate } from "../src/lib/issuance-format"
 import { documentFields, documentMeta, documentSections, documentTypes, normalizeDocumentType } from "../src/components/Issuances/config"
 import { getSignatories, getWitnesses } from "../src/components/Officials/officials-sample-data"
 import { getMissingFields } from "../src/components/Issuances/print-summary"
@@ -46,6 +46,22 @@ test.describe("full-word date helpers", () => {
   test("splits valid ISO dates into select-friendly month and day values", () => {
     expect(splitIsoDate("2026-11-02")).toEqual({ year: "2026", month: "11", day: "2" })
     expect(splitIsoDate("invalid")).toEqual({ year: "", month: "", day: "" })
+  })
+
+  test("converts ISO dates to local dates and back without changing the calendar day", () => {
+    const date = isoToLocalDate("1998-03-05")
+    expect(date).toBeInstanceOf(Date)
+    expect(date?.getFullYear()).toBe(1998)
+    expect(date?.getMonth()).toBe(2)
+    expect(date?.getDate()).toBe(5)
+    expect(date ? localDateToIso(date) : "").toBe("1998-03-05")
+    expect(isoToLocalDate("invalid")).toBeUndefined()
+    expect(localDateToIso(new Date(Number.NaN))).toBe("")
+  })
+
+  test("formats date values in full paper format", () => {
+    expect(formatPaperDate("2026-11-03")).toBe("November 3, 2026")
+    expect(formatPaperDate("1998-03-05")).toBe("March 5, 1998")
   })
 })
 
