@@ -99,7 +99,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     form.clearErrors()
     setSelectedSector("")
     setValidUntilEdited(false)
-    setAddressParts({ houseNumber: "", street: "", purok: 1 })
     setDuplicate(null)
     setFormError("")
   }
@@ -257,12 +256,25 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     }
   }
 
+  function hasTypedValues() {
+    return form.formState.isDirty || Boolean(residentQuery.trim()) || Object.keys(residentUpdates).length > 0 ||
+      (showQuickAdd && Boolean(quickAdd.firstName.trim() || quickAdd.lastName.trim() || quickAdd.birthdate || quickAdd.street.trim() || quickAdd.houseNumber.trim()))
+  }
+
+  function requestClose(nextOpen: boolean) {
+    if (!nextOpen && hasTypedValues() && !window.confirm("Discard the changes to this issuance?")) return
+    if (!nextOpen) resetDialog()
+    onOpenChange(nextOpen)
+  }
+
   function resetDialog() {
     form.reset()
     setSelectedResident(null)
     setResidentQuery("")
     setResidentUpdates({})
     setSelectedSector("")
+    setAddressParts({ houseNumber: "", street: "", purok: 1 })
+    setValidUntilEdited(false)
     setShowQuickAdd(false)
     setMoreOpen(false)
     setPreviewOpen(false)
@@ -352,7 +364,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     }).map((need) => ({ name: need, label: ({ address: "Resident address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since", sector: "Sector", photo: "Photo", emergencyContact: "Emergency contact" } as Record<string, string>)[need] ?? need })) : []),
   ]
 
-  return <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen && form.formState.isDirty && !window.confirm("Discard the changes to this issuance?")) return; if (!nextOpen) resetDialog(); onOpenChange(nextOpen) }}>
+  return <Dialog open={open} onOpenChange={requestClose}>
     <DialogContent className="flex max-h-[96dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
       <DialogHeader className="shrink-0 border-b px-5 py-4 pr-12">
         <DialogTitle>New Issuance</DialogTitle>
@@ -475,7 +487,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
           {formError ? <p role="alert" className="text-sm text-destructive">{formError}</p> : null}
         </div>
         <DialogFooter className="shrink-0 border-t px-5 py-3">
-          <Button type="button" variant="ghost" onClick={() => { if (form.formState.isDirty && !window.confirm("Discard the changes to this issuance?")) return; resetDialog(); onOpenChange(false) }}>Cancel</Button>
+          <Button type="button" variant="ghost" onClick={() => requestClose(false)}>Cancel</Button>
           <Button type="button" variant="outline" disabled={saving} onClick={() => void saveDraft()}>Save as draft</Button>
           <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Issue"}</Button>
         </DialogFooter>
