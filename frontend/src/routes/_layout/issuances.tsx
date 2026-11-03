@@ -443,9 +443,9 @@ function IssuancesManagement() {
     setNotice("")
   }
 
-  function printNow(record?: IssuanceRecord) {
-    preparePrint(record)
-    window.setTimeout(() => window.print(), 100)
+  function printNow(_record?: IssuanceRecord) {
+    setNotice("Printing is paused until paper positions are calibrated.")
+    setNoticePrintRecord(null)
   }
 
   function renderField(field: (typeof allFormFields)[number]) {
