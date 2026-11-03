@@ -30,6 +30,9 @@ export type MockIssuance = {
   issueDate: string
   status: IssuanceStatus
   payload: IssuanceInput
+  correctsIssuanceId?: string
+  correctionReason?: string
+  voidReason?: string
   residentSnapshot?: {
     fullName: string
     addressLine: string
@@ -142,7 +145,7 @@ export const issuanceApi = {
   },
 
   async getLookups(): Promise<IssuanceLookups> {
-    const { clearancePurposeOptions, indigencySectorOptions, idTypeOptions, civilStatusOptions } = await import("@/components/Issuances/config")
+    const { indigencySectorOptions, idTypeOptions, civilStatusOptions } = await import("@/components/Issuances/config")
     const { initialOfficials } = await import("@/components/Officials/officials-sample-data")
     return {
       documentTypes: Object.values(documentConfig),
@@ -231,6 +234,26 @@ export const issuanceApi = {
 
   async getIssuance(id: string) {
     return issuances.find((item) => item.id === id)
+  },
+
+  async correctIssuance(id: string, reason: string, input: IssuanceInput) {
+    const original = issuances.find((item) => item.id === id)
+    if (!original || original.status !== "issued") throw new Error("Only an issued record can be corrected.")
+    if (!reason.trim()) throw new Error("A correction reason is required.")
+    const corrected = await this.createIssuance({ ...input, status: "issued" })
+    const updated = { ...corrected, correctsIssuanceId: original.id, correctionReason: reason.trim() }
+    issuances = issuances.map((item) => item.id === corrected.id ? updated : item)
+    return updated
+  },
+
+  async voidIssuance(id: string, reason: string, role: "staff" | "admin") {
+    if (role !== "admin") throw Object.assign(new Error("Only the System Administrator can void an issuance."), { status: 403 })
+    if (!reason.trim()) throw new Error("A void reason is required.")
+    const record = issuances.find((item) => item.id === id)
+    if (!record || record.status !== "issued") throw new Error("Only an issued record can be voided.")
+    const updated = { ...record, status: "voided" as const, voidReason: reason.trim() }
+    issuances = issuances.map((item) => item.id === id ? updated : item)
+    return updated
   },
 
   async updateDraft(id: string, input: IssuanceInput) {
