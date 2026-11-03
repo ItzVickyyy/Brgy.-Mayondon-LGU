@@ -49,7 +49,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     houseNumber: "", street: "", purok: 1, residentSinceBirth: false,
   })
   const [residentUpdates, setResidentUpdates] = useState<ResidentPatch>({})
-  const [selectedSector, setSelectedSector] = useState("")
+  const [selectedSector, setSelectedSector] = useState<string | string[]>("")
   const [validUntilEdited, setValidUntilEdited] = useState(false)
   const [addressParts, setAddressParts] = useState(() => ({ houseNumber: selectedResident?.houseNumber ?? "", street: selectedResident?.street ?? "", purok: selectedResident?.purok ?? 1 }))
   const [moreOpen, setMoreOpen] = useState(false)
@@ -164,6 +164,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       } else if (field.name === "purpose") setRootField("purposeText", String(nextValue))
       else if (field.name === "referredBy") setDetail("referredByOfficialId", String(nextValue) === "None" ? undefined : String(nextValue))
       else if (field.name === "remarks") setRootField("remarks", String(nextValue))
+      else if (field.name === "sector" && field.type === "multiselect") { const values = Array.isArray(nextValue) ? nextValue as string[] : []; setSelectedSector(values); form.setValue("sectors", values.map((sector) => ({ sectorId: Math.max(1, (field.options ?? []).indexOf(sector) + 1) })), { shouldDirty: true }) }
       else if (field.name === "sector") { setSelectedSector(String(nextValue)); form.setValue("sectors", [{ sectorId: Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1) }], { shouldDirty: true }) }
       else if (field.name === "for") setDetail("forSelf", nextValue === "Myself")
       else if (field.name === "relationship") setDetail("beneficiaryRelationship", String(nextValue))
@@ -189,7 +190,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             const current = Array.isArray(value) ? value as string[] : []
             const optionValue = normalizedOptionValue(field.name, option)
             return <label key={option} className="inline-flex min-h-10 items-center gap-2 rounded-md border px-3 text-sm font-normal">
-              <input type="checkbox" checked={current.includes(optionValue)} onChange={(event) => onValueChange(event.target.checked ? [...current, optionValue] as unknown as string : current.filter((item) => item !== optionValue) as unknown as string)} />
+              <input type="checkbox" checked={current.includes(optionValue)} disabled={Boolean(field.maxSelected && current.length >= field.maxSelected && !current.includes(optionValue))} onChange={(event) => onValueChange(event.target.checked ? [...current, optionValue] as unknown as string : current.filter((item) => item !== optionValue) as unknown as string)} />
               {option}
             </label>
           })}
@@ -343,6 +344,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     { label: "Civil status", value: selectedResident?.civilStatus ?? "" },
     { label: "Date on document", value: issueDate },
     ...config.fields.map((field) => ({ label: field.label, value: previewValue(field) })),
+    ...(config.residentNeeds.includes("residentSince") ? [{ label: "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (source.residentSinceBirth || source.residentSince === 0) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return source.residentSince === undefined ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
   ]
 
   const missingPreviewLabels = [
@@ -356,7 +358,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       if (need === "birthPlace") return !residentUpdates.birthplace && !selectedResident.birthplace
       if (need === "civilStatus") return !residentUpdates.civilStatus && !selectedResident.civilStatus
       if (need === "sex") return !residentUpdates.sex && !selectedResident.sex
-      if (need === "residentSince") return !residentUpdates.residentSince && selectedResident.residentSince === undefined
+      if (need === "residentSince") return residentUpdates.residentSince === undefined && !residentUpdates.residentSinceBirth && selectedResident.residentSince === undefined && !selectedResident.residentSinceBirth
       if (need === "sector") return !residentUpdates.sectors?.length && !selectedResident.sectors.length
       if (need === "photo") return !residentUpdates.photoUrl && !selectedResident.photoUrl
       if (need === "emergencyContact") return !residentUpdates.emergencyContact?.name || !residentUpdates.emergencyContact.address || !residentUpdates.emergencyContact.phone
@@ -435,7 +437,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               </div> : null}
             </div>}
             {selectedResident && (config.residentNeeds.some((need) => {
-              const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : selectedResident.emergencyContact?.phone
+              const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSinceBirth ? "since birth" : selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : selectedResident.emergencyContact?.phone
               return !residentValue
             }) || (!selectedResident.houseNumber?.trim() || !selectedResident.street?.trim() || !selectedResident.purok)) ? <div className="mt-3 space-y-3">
               <p className="text-sm font-medium">Needed for this document</p>
@@ -445,6 +447,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               }).concat((!selectedResident.houseNumber?.trim() || !selectedResident.street?.trim() || !selectedResident.purok) ? ["address"] : []).map((need) => {
                 const labels: Record<string, string> = { address: "Street and purok address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since year", sector: "Sector", photo: "Photo reference", emergencyContact: "Emergency contact" }
                 const key = need === "birthDate" ? "birthdate" : need === "birthPlace" ? "birthplace" : need
+                if (need === "residentSince") return <div key={need} className="space-y-2">
+                  <label className={fieldLabelClass}>Residing since year<input type="number" min="1900" max={new Date().getFullYear()} value={residentUpdates.residentSinceBirth ? "" : String(residentUpdates.residentSince ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, residentSince: event.target.value ? Number(event.target.value) : undefined, residentSinceBirth: false }))} className={formControlClass} disabled={Boolean(residentUpdates.residentSinceBirth ?? selectedResident.residentSinceBirth)} /></label>
+                  <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(residentUpdates.residentSinceBirth ?? selectedResident.residentSinceBirth)} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, residentSinceBirth: event.target.checked, residentSince: event.target.checked ? 0 : undefined }))} />Since birth</label>
+                </div>
                 if (need === "address") return <div key={need} className="space-y-2">
                   <p className="text-sm font-medium">{labels[need]}</p>
                   <div className="grid gap-3 sm:grid-cols-3">
