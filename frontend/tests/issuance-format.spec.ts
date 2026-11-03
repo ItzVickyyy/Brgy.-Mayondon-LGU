@@ -1,7 +1,8 @@
 // Unit tests for pure issuance formatting helpers.
 import { expect, test } from "@playwright/test"
 import { calculateAge, formatPrintedName, daysInMonth, buildIsoDate, splitIsoDate, monthNames } from "../src/lib/issuance-format"
-import { documentFields, documentSections, normalizeDocumentType } from "../src/components/Issuances/config"
+import { documentFields, documentMeta, documentSections, documentTypes, normalizeDocumentType } from "../src/components/Issuances/config"
+import { getSignatories, getWitnesses } from "../src/components/Officials/officials-sample-data"
 import { getMissingFields } from "../src/components/Issuances/print-summary"
 
 test.describe("issuance formatting helpers", () => {
@@ -75,5 +76,39 @@ test.describe("issuance summary validation helpers", () => {
     const values = { birthdate: "2000-01-01", ageManual: "" }
     const fields = documentSections["Certificate of Indigency"].flatMap((section) => section.fields)
     expect(getMissingFields("Certificate of Indigency", values, fields).some((field) => field.name === "ageManual")).toBe(false)
+  })
+})
+
+
+test.describe("document catalog metadata", () => {
+  test("defines metadata for all eight issuance document types", () => {
+    expect(documentTypes).toHaveLength(8)
+    expect(Object.keys(documentMeta).sort()).toEqual([...documentTypes].sort())
+    expect(documentMeta["Barangay Clearance"].validity).toEqual({ months: 2 })
+    expect(documentMeta["First-Time Jobseeker Certification"].validity).toEqual({ years: 1 })
+    expect(documentMeta["First-Time Jobseeker Certification"].paper.size).toBe("legal")
+    expect(documentMeta["Marginalized Sector Certification (Pagpapatunay)"].language).toBe("fil")
+  })
+
+  test("maps older history names to the current catalog names", () => {
+    expect(normalizeDocumentType("Damayan")).toBe("Certificate of Indigency")
+    expect(normalizeDocumentType("Residency Certification")).toBe("Certification of Residency")
+    expect(normalizeDocumentType("First-Time Jobseekers Certification")).toBe("First-Time Jobseeker Certification")
+    expect(normalizeDocumentType("Marginalized Sector")).toBe("Marginalized Sector Certification (Pagpapatunay)")
+  })
+
+  test("returns current signatories with the Punong Barangay first", () => {
+    const signatories = getSignatories()
+    expect(signatories[0]?.position).toBe("Punong Barangay")
+    expect(signatories.every((official) => official.status === "Current")).toBe(true)
+    expect(signatories.some((official) => official.position === "OIC Kagawad")).toBe(true)
+  })
+
+  test("returns only current non-elected officials as witnesses", () => {
+    const witnesses = getWitnesses()
+    expect(witnesses.length).toBeGreaterThan(0)
+    expect(witnesses.every((official) => official.status === "Current" && !official.elected)).toBe(true)
+    expect(witnesses.some((official) => official.position === "Barangay Clerk")).toBe(true)
+    expect(witnesses.some((official) => official.position === "Administrative Assistant")).toBe(true)
   })
 })

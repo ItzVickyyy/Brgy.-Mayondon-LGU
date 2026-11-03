@@ -6,6 +6,8 @@ export type ResidentRecord = {
   lastName: string
   birthdate: string
   birthplace: string
+  sex: "Male" | "Female"
+  emergencyContact?: { name: string; address: string; phone: string }
   civilStatus: string
   sectors: string[]
   residentSince: number
@@ -23,6 +25,7 @@ export const sampleResidents: ResidentRecord[] = [
   {
     id: "RES-0001",
     name: "Resident One",
+    sex: "Male",
     firstName: "Fictional",
     middleName: "A.",
     lastName: "Resident",
@@ -41,6 +44,7 @@ export const sampleResidents: ResidentRecord[] = [
   {
     id: "RES-0002",
     name: "Resident Two",
+    sex: "Female",
     firstName: "Sample",
     middleName: "B.",
     lastName: "Resident",
@@ -59,6 +63,7 @@ export const sampleResidents: ResidentRecord[] = [
   {
     id: "RES-0003",
     name: "Resident Three",
+    sex: "Male",
     firstName: "Example",
     middleName: "C.",
     lastName: "Resident",
@@ -77,6 +82,7 @@ export const sampleResidents: ResidentRecord[] = [
   {
     id: "RES-0004",
     name: "Resident Four",
+    sex: "Female",
     firstName: "Mock",
     middleName: "D.",
     lastName: "Resident",

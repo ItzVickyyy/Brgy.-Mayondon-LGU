@@ -24,6 +24,7 @@ import {
   documentTypes,
   historyDocumentTypes,
   documentCardInfo,
+  documentMeta,
   normalizeDocumentType,
   type IssuanceRecord,
   sampleIssuances,
@@ -588,16 +589,25 @@ function IssuancesManagement() {
               <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
                 <div className="min-w-0 space-y-4">
                   <FormSection title="Document" step={1} description="Choose the pre-printed paper that matches the request.">
-                    <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3 md:col-span-2">
-                      {documentTypes.map((type) => {
-                        const info = documentCardInfo[type]
-                        return (
-                          <label key={type} className={cn("flex min-h-16 min-w-0 cursor-pointer items-start gap-3 rounded-xl border p-3 text-sm transition-colors focus-within:ring-[3px] focus-within:ring-ring/50", selectedType === type ? "border-primary bg-primary/5" : "bg-background hover:bg-muted")}>
-                            <input type="radio" name="documentType" checked={selectedType === type} onChange={() => changeDocumentType(type)} className="mt-1 size-4 shrink-0 accent-primary" />
-                            <span className="min-w-0 flex-1 break-words"><span className="flex items-start justify-between gap-2 font-medium">{info.name}{selectedType === type ? <Check aria-hidden="true" className="size-4 shrink-0 text-primary" /> : null}</span><span className="mt-1 block text-xs font-normal text-muted-foreground">{info.hint}</span></span>
-                          </label>
-                        )
-                      })}
+                    <div className="md:col-span-2 space-y-3">
+                      {(["Clearances", "Certifications"] as const).map((group) => (
+                        <div key={group} className="space-y-2">
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{group}</p>
+                          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
+                            {documentTypes.filter((type) => documentMeta[type]?.group === group).map((type) => {
+                              const info = documentCardInfo[type]
+                              return (
+                                <label key={type} className={cn("flex min-h-12 min-w-0 cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors focus-within:ring-[3px] focus-within:ring-ring/50", selectedType === type ? "border-primary bg-primary/5" : "bg-background hover:bg-muted")}>
+                                  <input type="radio" name="documentType" checked={selectedType === type} onChange={() => changeDocumentType(type)} className="size-4 shrink-0 accent-primary" />
+                                  <span className="min-w-0 flex-1 break-words font-medium">{info.name}</span>
+                                  {selectedType === type ? <Check aria-hidden="true" className="size-4 shrink-0 text-primary" /> : null}
+                                </label>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                      <p className="text-xs text-muted-foreground">{documentMeta[selectedType]?.hint ?? documentCardInfo[selectedType]?.hint}</p>
                     </div>
                     <div className="md:col-span-2">
                       <DateField
