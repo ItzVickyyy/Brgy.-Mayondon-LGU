@@ -145,6 +145,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         ? (payment as unknown as Record<string, unknown> | undefined)?.[field.name === "officialReceiptNo" ? "officialReceiptNo" : "isFree"]
         : field.name === "purpose" ? form.watch("purposeText")
         : field.name === "remarks" ? form.watch("remarks")
+        : field.name === "idNumber" && documentType === "BARANGAY_ID" ? selectedResident?.idNumber?.split("-").at(-1) ?? issuanceApi.getNextBarangayIdNumber()
         : field.name === "sector" ? selectedSector
         : field.name === "referredBy" ? (details as unknown as Record<string, unknown>).referredByOfficialId ?? "None"
         : field.name === "for" ? ((details as unknown as Record<string, unknown>).forSelf === false ? "Someone else" : "Myself")
@@ -197,6 +198,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         </div>
       ) : field.type === "checkbox" ? (
         <input id={fieldId} type="checkbox" checked={Boolean(value)} onChange={(event) => onValueChange(event.target.checked)} className="size-4 accent-primary" />
+      ) : field.name === "idNumber" && documentType === "BARANGAY_ID" ? (
+        <input id={fieldId} value={String(value)} readOnly className={cn(formControlClass, "bg-muted/50")} />
       ) : field.type === "textarea" ? (
         <textarea id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, "h-auto py-2")} rows={2} />
       ) : (
@@ -315,6 +318,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       value = field.name === "isFree" ? paymentValues?.isFree ? "Yes" : "No" : paymentValues?.officialReceiptNo
     } else if (field.name === "purpose") value = form.getValues("purposeText")
     else if (field.name === "remarks") value = form.getValues("remarks")
+    else if (field.name === "idNumber" && documentType === "BARANGAY_ID") value = selectedResident?.idNumber?.split("-").at(-1) ?? issuanceApi.getNextBarangayIdNumber()
     else if (field.name === "sector") value = selectedSector
     else if (field.name === "sectorIdNumber") value = form.getValues("sectors")?.[0]?.idNumber
     else if (field.name === "for") value = detailValues.forSelf === false ? "Someone else" : "Myself"
