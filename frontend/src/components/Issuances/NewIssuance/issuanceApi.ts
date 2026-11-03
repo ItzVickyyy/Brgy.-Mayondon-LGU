@@ -25,6 +25,7 @@ export type MockIssuance = {
   referenceNo: string
   documentType: DocumentCode
   residentId: string
+  residentName: string
   issueDate: string
   status: IssuanceStatus
   payload: IssuanceInput
@@ -185,6 +186,7 @@ export const issuanceApi = {
       referenceNo: `ISS-${new Date().getFullYear()}-${String(sequence).padStart(6, "0")}`,
       documentType: parsed.documentType,
       residentId: parsed.residentId,
+      residentName: [updatedResident.firstName, updatedResident.middleName, updatedResident.lastName].filter(Boolean).join(" "),
       issueDate: parsed.issueDate,
       status: parsed.status,
       payload: parsed,
