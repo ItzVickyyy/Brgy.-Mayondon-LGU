@@ -23,6 +23,17 @@ type Props = {
 const sectionClass = "space-y-3 border-b pb-5 last:border-b-0"
 const knownStreets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
 const knownAssociations = ["Mayondon Tricycle Operators and Drivers Association"]
+const printedNameType: Record<DocumentCode, string> = {
+  BARANGAY_CLEARANCE: "Barangay Clearance",
+  FRANCHISE_CLEARANCE: "Barangay Franchise Clearance",
+  UTILITY_CLEARANCE: "Barangay Clearance, Electrical and Water Connection",
+  RESIDENCY: "Certification of Residency",
+  INDIGENCY: "Certificate of Indigency",
+  ASSISTANCE: "Certification (assistance request)",
+  MARGINALIZED_SECTOR: "Marginalized Sector Certification (Pagpapatunay)",
+  FIRST_TIME_JOBSEEKER: "First-Time Jobseeker Certification",
+  BARANGAY_ID: "Barangay ID",
+}
 const fieldLabelClass = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
 
 function normalizedOptionValue(fieldName: string, option: string) {
@@ -384,7 +395,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   }
 
   const previewRows = [
-    { label: "Resident", value: selectedResident ? formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, config.name) : "" },
+    { label: "Resident", value: selectedResident ? formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, printedNameType[documentType]) : "" },
     { label: "Resident number", value: selectedResident?.id ?? "" },
     { label: "Address", value: selectedResident ? getResidentAddress(selectedResident) : "" },
     { label: "Birthdate", value: selectedResident?.birthdate ?? "" },
@@ -392,8 +403,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     { label: "Sex", value: selectedResident?.sex ?? "" },
     { label: "Civil status", value: selectedResident?.civilStatus ?? "" },
     { label: "Date on document", value: issueDate },
+    ...(config.signatoryMode === "select" ? [{ label: "Signatory", value: initialOfficials.find((official) => official.id === form.watch("signatoryOfficialId"))?.name ?? "" }] : []),
     ...config.fields.map((field) => ({ label: field.label, value: previewValue(field) })),
-    ...(config.residentNeeds.includes("residentSince") ? [{ label: "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (source.residentSinceBirth || source.residentSince === 0) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return source.residentSince === undefined ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
+    ...(config.residentNeeds.includes("residentSince") ? [{ label: documentType === "RESIDENCY" ? "Residing since" : "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (documentType === "RESIDENCY") return source.residentSinceBirth || source.residentSince === 0 ? "Since birth" : source.residentSince === undefined ? "" : String(source.residentSince); if (source.residentSinceBirth || source.residentSince === 0) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return source.residentSince === undefined ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
   ]
 
   const missingPreviewLabels = [
