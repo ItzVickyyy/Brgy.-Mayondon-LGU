@@ -147,7 +147,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
   FIRST_TIME_JOBSEEKER: {
     code: "FIRST_TIME_JOBSEEKER", name: "First-Time Jobseeker", shortName: "First-Time Jobseeker", category: "certification",
     hint: "First-time job application", printMode: "full_page", validityMonths: 12, onePerResident: true,
-    signatoryMode: "select", signatoryDefault: "Punong Barangay", residentNeeds: ["residentSince", "sex", "civilStatus"],
+    signatoryMode: "select", signatoryDefault: "Punong Barangay", residentNeeds: ["birthDate", "residentSince", "sex", "civilStatus"],
     fields: [
       { name: "educationalAttainment", label: "Educational attainment", type: "select", required: true, options: ["Elementary", "Junior High School", "Senior High School", "Vocational", "College", "Postgraduate"], group: "main" },
       { name: "course", label: "Course", type: "text", default: "N/A", group: "main" },
