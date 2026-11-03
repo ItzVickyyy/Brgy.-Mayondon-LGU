@@ -593,14 +593,15 @@ function IssuancesManagement() {
                       {(["Clearances", "Certifications"] as const).map((group) => (
                         <div key={group} className="space-y-2">
                           <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{group}</p>
-                          <div className="grid gap-2 sm:grid-cols-2 md:grid-cols-3">
+                          <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
                             {documentTypes.filter((type) => documentMeta[type]?.group === group).map((type) => {
                               const info = documentCardInfo[type]
+                              const selected = selectedType === type
                               return (
-                                <label key={type} className={cn("flex min-h-12 min-w-0 cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 text-sm transition-colors focus-within:ring-[3px] focus-within:ring-ring/50", selectedType === type ? "border-primary bg-primary/5" : "bg-background hover:bg-muted")}>
-                                  <input type="radio" name="documentType" checked={selectedType === type} onChange={() => changeDocumentType(type)} className="size-4 shrink-0 accent-primary" />
-                                  <span className="min-w-0 flex-1 break-words font-medium">{info.name}</span>
-                                  {selectedType === type ? <Check aria-hidden="true" className="size-4 shrink-0 text-primary" /> : null}
+                                <label key={type} className={cn("flex min-h-[58px] min-w-0 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-all focus-within:ring-[3px] focus-within:ring-ring/50", selected ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20" : "bg-background hover:border-muted-foreground/40 hover:bg-muted/60")}>
+                                  <input type="radio" name="documentType" checked={selected} onChange={() => changeDocumentType(type)} className="size-4 shrink-0 accent-primary" />
+                                  <span className="min-w-0 flex-1 break-words font-medium leading-snug">{info.name}</span>
+                                  {selected ? <Check aria-hidden="true" className="size-4 shrink-0 text-primary" /> : null}
                                 </label>
                               )
                             })}
