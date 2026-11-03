@@ -69,7 +69,7 @@ let purposes = [...clearancePurposeOptions]
 let associations = ["Mayondon Tricycle Operators and Drivers Association"]
 
 export function getResidentAddress(resident: ResidentRecord) {
-  if (resident.houseNumber || resident.street || resident.purok) return [resident.houseNumber?.trim(), resident.street?.trim(), resident.purok ? `Purok ${resident.purok}` : ""].filter(Boolean).join(", ")
+  if (resident.houseNumber || resident.street || resident.purok) return [[resident.houseNumber?.trim(), resident.street?.trim()].filter(Boolean).join(" "), resident.purok ? `Purok ${resident.purok}` : ""].filter(Boolean).join(", ")
   return resident.address.replace(/,\s*Mayondon.*$/i, "")
 }
 
@@ -108,7 +108,7 @@ export const issuanceApi = {
   async createResident(input: QuickResidentInput): Promise<ResidentRecord> {
     const sequence = residents.reduce((max, resident) => Math.max(max, Number(resident.id.match(/\d+$/)?.[0] ?? 0)), 0) + 1
     const name = [input.firstName, input.middleName?.trim(), input.lastName].filter(Boolean).join(" ")
-    const address = [input.houseNumber?.trim(), input.street.trim(), `Purok ${input.purok}`, "Mayondon"].filter(Boolean).join(", ")
+    const address = [[input.houseNumber?.trim(), input.street.trim()].filter(Boolean).join(" "), `Purok ${input.purok}`, "Mayondon"].filter(Boolean).join(", ")
     const resident: ResidentRecord = {
       id: `RES-${String(sequence).padStart(4, "0")}`,
       name,
