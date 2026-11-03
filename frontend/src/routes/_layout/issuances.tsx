@@ -788,7 +788,11 @@ function IssuancesManagement() {
               </div>
             </div>
             <DialogFooter className="flex-col-reverse gap-2 border-t bg-card px-4 py-3 sm:flex-row sm:items-center sm:px-6">
-              <Button type="button" variant="ghost" size="lg" className="sm:mr-auto" onClick={clearForm}><Eraser aria-hidden="true" />Clear form</Button>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground sm:mr-auto">
+                <span className={cn("size-2 rounded-full", autoSaveStatus === "saved" ? "bg-emerald-500" : "animate-pulse bg-amber-500")} />
+                {autoSaveStatus === "saved" ? "Draft saved automatically on this device" : "Saving draft…"}
+              </div>
+              <Button type="button" variant="ghost" size="lg" onClick={clearForm}><Eraser aria-hidden="true" />Clear form</Button>
               <Button type="button" variant="outline" size="lg" onClick={() => saveIssuance(true)}>Save as draft</Button>
               <Button type="button" variant="outline" size="lg" onClick={() => preparePrint()}><Eye aria-hidden="true" />Print preview</Button>
               <Button type="button" size="lg" onClick={() => saveIssuance(false)}><FileCheck2 aria-hidden="true" />Save as issued</Button>
