@@ -72,6 +72,9 @@ const baseIssuanceSchema = z.object({
     context.addIssue({ code: "custom", path: ["details", "type"], message: "Details must match the selected document type." })
   }
   if (value.status === "issued") {
+    if (["RESIDENCY", "ASSISTANCE", "MARGINALIZED_SECTOR", "FIRST_TIME_JOBSEEKER"].includes(value.documentType) && !value.signatoryOfficialId) {
+      context.addIssue({ code: "custom", path: ["signatoryOfficialId"], message: "Choose a signatory." })
+    }
     const codeNeedsIdentity: DocumentCode[] = ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"]
     if (codeNeedsIdentity.includes(value.documentType as DocumentCode) && !value.identification) {
       context.addIssue({ code: "custom", path: ["identification"], message: "Proof of identity is required." })
