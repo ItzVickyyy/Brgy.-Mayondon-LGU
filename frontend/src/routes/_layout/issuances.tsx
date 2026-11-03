@@ -351,6 +351,9 @@ function IssuancesManagement() {
       civilStatus: resident.civilStatus,
       sector: selectedType === "Certification (assistance request)" ? resident.sectors[0] ?? "" : resident.sectors.join("||"),
       age: calculateAge(resident.birthdate, formValues.date || localDateValue()),
+      photoUrl: resident.photoUrl ?? "",
+      residencyDuration: resident.residentSince ? String(Math.max(0, new Date(`${formValues.date || localDateValue()}T00:00:00`).getFullYear() - resident.residentSince)) : "",
+      ...(formValues.recipientChoice === "Oneself" ? { underName: name } : {}),
     }
     const firstEmptyRequired = allFormFields.find((field) =>
       field.required
