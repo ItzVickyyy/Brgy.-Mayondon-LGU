@@ -40,7 +40,7 @@ export function defaultIssuanceInput(residentId = ""): IssuanceInput {
     residentId,
     purposeText: "",
     remarks: "NO DEROGATORY RECORD ON FILE",
-    identification: { idTypeId: 1, idNumber: "", placeOfIssue: "Los Baños, Laguna", dateOfIssue: localIsoDate() },
+    identification: { idTypeId: 0, idNumber: "", placeOfIssue: "Los Baños, Laguna", dateOfIssue: localIsoDate() },
     payment: { officialReceiptNo: "", isFree: false },
     details: defaultDetails("BARANGAY_CLEARANCE"),
     status: "draft",
