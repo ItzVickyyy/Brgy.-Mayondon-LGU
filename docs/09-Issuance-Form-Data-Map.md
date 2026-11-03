@@ -100,11 +100,28 @@ Shown when the person is not found in the search. The name is one row: First nam
 | Middle name | `middleName` | `middle_name` | text, optional |
 | Last name | `lastName` | `last_name` | text, required |
 | Extension | `suffix` | `suffix` | optional: `Jr.`, `Sr.`, `II`, `III`, `IV`, `V`. Blank when "None". Printed after the last name |
-| Birthdate | `birthdate` | `birthdate` | date, required (picked as month, day, year) |
+| Birthdate | `birthdate` | `birthdate` | date, required. One date box that opens a calendar on the year list, or can be typed. Cannot be in the future |
+| Place of birth | `birthplace` | `birth_place` | text. Required only when the chosen document needs it (Barangay Clearance, Barangay ID). Otherwise optional and asked later if missing |
 | Sex | `sex` | `sex` | `Male` or `Female` |
 | Civil status | `civilStatus` | `civil_status` | lookup |
 | House number, Street, Purok | `houseNumber`, `street`, `purok` | `house_number`, `street_id`, `purok` | required, same rule as the table above |
 | Living here since | `residentSinceYear`, `residentSinceBirth` | `resident_since_year`, `resident_since_birth` | year or "since birth" |
+
+## Drafts and automatic saving
+
+The dialog saves a draft by itself about 1.5 seconds after the person stops typing, once a resident is chosen.
+
+| Event | What happens to the data |
+|---|---|
+| First automatic save | Creates one `issuances` row with `status = 'draft'`. The form keeps its id |
+| Later automatic saves | Update that same row. They never create a second one |
+| Automatic saves and resident edits | `residentUpdates` (the yellow box) are **not** written. They are saved only with Save draft or Issue, so half-typed text never overwrites the resident record |
+| Automatic saves and lookup lists | A draft does not add its purpose or association to `issuance_purposes` / `tricycle_associations`. Only an issued document does |
+| Issue | The draft row is deleted and the issued row is created. The reference number comes from a counter, not from the row count, so deleting a draft cannot repeat a number |
+| Discard changes | The draft row is deleted |
+| Close, keep draft | The draft row stays with `status = 'draft'` |
+
+The reference-number rule matters for the real backend: use a database sequence for `reference_no`.
 
 ## Lookup tables
 

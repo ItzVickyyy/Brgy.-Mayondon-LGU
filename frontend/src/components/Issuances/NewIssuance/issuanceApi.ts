@@ -13,6 +13,7 @@ export type QuickResidentInput = {
   middleName?: string
   suffix?: string
   birthdate: string
+  birthplace?: string
   sex: "Male" | "Female"
   civilStatus: string
   houseNumber?: string
@@ -70,6 +71,7 @@ export type CreateIssuanceResult = MockIssuance
 
 let residents = [...sampleResidents]
 let issuances: MockIssuance[] = []
+let issuanceCounter = 0
 let streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
 let purposes = [...clearancePurposeOptions]
 let associations = ["Mayondon Tricycle Operators and Drivers Association"]
@@ -163,7 +165,7 @@ export const issuanceApi = {
       lastName: input.lastName.trim(),
       suffix: input.suffix?.trim() ?? "",
       birthdate: input.birthdate,
-      birthplace: "",
+      birthplace: input.birthplace?.trim() ?? "",
       sex: input.sex,
       civilStatus: input.civilStatus,
       sectors: [],
@@ -232,8 +234,9 @@ export const issuanceApi = {
 
   async createIssuance(input: IssuanceInput): Promise<CreateIssuanceResult> {
     const parsed = input.status === "draft" ? input : issuanceInputSchema.parse(input)
-    if (parsed.purposeText?.trim() && !purposes.some((purpose) => purpose.toLowerCase() === parsed.purposeText?.trim().toLowerCase())) purposes = [...purposes, parsed.purposeText.trim()]
-    if (parsed.details.type === "FRANCHISE_CLEARANCE" && parsed.details.associationName.trim() && !associations.some((association) => association.toLowerCase() === parsed.details.associationName.trim().toLowerCase())) associations = [...associations, parsed.details.associationName.trim()]
+    // Only a finished issuance adds to the suggestion lists. Half-typed draft text must not.
+    if (parsed.status === "issued" && parsed.purposeText?.trim() && !purposes.some((purpose) => purpose.toLowerCase() === parsed.purposeText?.trim().toLowerCase())) purposes = [...purposes, parsed.purposeText.trim()]
+    if (parsed.status === "issued" && parsed.details.type === "FRANCHISE_CLEARANCE" && parsed.details.associationName.trim() && !associations.some((association) => association.toLowerCase() === parsed.details.associationName.trim().toLowerCase())) associations = [...associations, parsed.details.associationName.trim()]
     const resident = residents.find((item) => item.id === parsed.residentId)
     if (!resident) throw new Error("Select a resident record first.")
     const projectedResident = { ...resident, ...(parsed.residentUpdates as ResidentPatch | undefined) }
@@ -273,7 +276,8 @@ export const issuanceApi = {
       }
       tricycleId = tricycle?.id
     }
-    const sequence = issuances.length + 1
+    issuanceCounter += 1
+    const sequence = issuanceCounter
     const record: MockIssuance = {
       id: `mock-issuance-${sequence}`,
       referenceNo: `ISS-${new Date().getFullYear()}-${String(sequence).padStart(6, "0")}`,
@@ -336,6 +340,13 @@ export const issuanceApi = {
     return updated
   },
 
+  async deleteDraft(id: string) {
+    const existing = issuances.find((item) => item.id === id)
+    if (!existing || existing.status !== "draft") return false
+    issuances = issuances.filter((item) => item.id !== id)
+    return true
+  },
+
   async updateDraft(id: string, input: IssuanceInput) {
     const existing = issuances.find((item) => item.id === id)
     if (!existing || existing.status !== "draft") throw new Error("Only drafts can be edited.")
@@ -350,6 +361,7 @@ export const mockIssuanceStore = {
   reset() {
     residents = [...sampleResidents]
     issuances = []
+    issuanceCounter = 0
     streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
     purposes = [...clearancePurposeOptions]
     associations = ["Mayondon Tricycle Operators and Drivers Association"]

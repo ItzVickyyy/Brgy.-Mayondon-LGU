@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo, useState } from "react"
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { ChevronDown, CircleAlert, CheckCircle2, Clock, Keyboard, Printer, Search, UserRoundPlus } from "lucide-react"
 import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuanceForm"
 import { documentConfig, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
@@ -10,7 +10,9 @@ import { formControlClass } from "@/components/Common/formStyles"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { Button } from "@/components/ui/button"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
-import { BirthdateField, CheckField, ChoiceRow, ComboField, DateField, SelectField } from "./FormControls"
+import { CheckField, ChoiceRow, ComboField, SelectField } from "./FormControls"
+import { DateField } from "./DateField"
+import { popoverIsOpen } from "./popover"
 import { IssuanceSection } from "./IssuanceSection"
 import { DocumentTypePicker } from "./DocumentTypePicker"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -20,7 +22,12 @@ type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialResidentId?: string
-  onSaved: (record: MockIssuance) => void
+  /** Called for every save. `meta.auto` is true for the quiet automatic draft saves. */
+  onSaved: (record: MockIssuance, meta?: { auto: boolean }) => void
+  /** Called when a draft is deleted (discarded, or turned into an issued document). */
+  onDraftRemoved?: (id: string) => void
+  /** Called when the person asks to print an issued document. */
+  onPrint?: (record: MockIssuance) => void
 }
 
 const knownStreets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
@@ -51,7 +58,7 @@ function normalizedOptionValue(fieldName: string, option: string) {
 }
 
 const emptyQuickAdd: QuickResidentInput = {
-  lastName: "", firstName: "", middleName: "", suffix: "", birthdate: "", sex: "Male", civilStatus: "Single",
+  lastName: "", firstName: "", middleName: "", suffix: "", birthdate: "", birthplace: "", sex: "Male", civilStatus: "Single",
   houseNumber: "", street: "", purok: 1, residentSinceBirth: false,
 }
 
@@ -59,7 +66,7 @@ function getDefaultToday(value: unknown) {
   return value === "today" ? localIsoDate() : typeof value === "string" ? value : ""
 }
 
-export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSaved }: Props) {
+export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSaved, onDraftRemoved, onPrint }: Props) {
   const form = useNewIssuanceForm(initialResidentId ?? "")
   const [residents, setResidents] = useState<ResidentRecord[]>([])
   const [residentQuery, setResidentQuery] = useState("")
@@ -81,6 +88,12 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const [formError, setFormError] = useState("")
   const [discardOpen, setDiscardOpen] = useState(false)
   const [attempted, setAttempted] = useState(false)
+  const [quickAttempted, setQuickAttempted] = useState(false)
+  const [printNotice, setPrintNotice] = useState(false)
+  const [autoSave, setAutoSave] = useState<{ state: "idle" | "saving" | "saved" | "error"; at?: Date }>({ state: "idle" })
+  const draftIdRef = useRef<string | null>(null)
+  const lastSavedRef = useRef("")
+  const saveChain = useRef<Promise<unknown>>(Promise.resolve())
   const documentType = form.watch("documentType")
   const issueDate = form.watch("issueDate")
   const details = form.watch("details")
@@ -279,7 +292,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     } else if (field.type === "textarea") {
       control = <textarea id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive", "h-auto py-2")} aria-invalid={invalid} aria-describedby={describedBy} rows={2} />
     } else if (field.type === "date") {
-      control = <DateField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
+      control = <DateField id={fieldId} value={String(value)} max={field.group === "identity" ? localIsoDate() : undefined} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
     } else {
       control = <input id={fieldId} type={field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive")} aria-invalid={invalid} aria-describedby={describedBy} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} />
     }
@@ -291,6 +304,64 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     </div>
   }
 
+  // Everything that goes into a draft. Resident edits are left out of the quiet
+  // automatic saves, so half-typed text never overwrites the resident's record.
+  function draftPayload(withResidentUpdates: boolean) {
+    return {
+      ...form.getValues(),
+      residentId: selectedResident?.id ?? "",
+      ...(withResidentUpdates ? { residentUpdates } : {}),
+      status: "draft" as const,
+    }
+  }
+
+  const draftSignature = JSON.stringify([form.watch(), selectedResident?.id ?? ""])
+
+  /** Saves the draft. Saves are queued, so two saves can never overlap. */
+  function persistDraft(auto: boolean) {
+    const run = async () => {
+      if (!selectedResident) return null
+      const signature = draftSignature
+      setAutoSave((previous) => ({ ...previous, state: "saving" }))
+      try {
+        const payload = draftPayload(!auto)
+        const record = draftIdRef.current
+          ? await issuanceApi.updateDraft(draftIdRef.current, payload)
+          : await issuanceApi.createIssuance(payload)
+        draftIdRef.current = record.id
+        lastSavedRef.current = signature
+        onSaved(record, { auto })
+        setAutoSave({ state: "saved", at: new Date() })
+        return record
+      } catch (error) {
+        setAutoSave({ state: "error" })
+        if (!auto) setFormError(error instanceof Error ? error.message : "Unable to save the draft.")
+        return null
+      }
+    }
+    const next = saveChain.current.then(run, run)
+    saveChain.current = next
+    return next as Promise<MockIssuance | null>
+  }
+
+  // Save quietly a moment after the person stops typing. persistDraft reads the latest values through draftSignature.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: draftSignature already covers every form value
+  useEffect(() => {
+    if (!open || successRecord || saving || !selectedResident || !formDirty) return
+    if (draftSignature === lastSavedRef.current) return
+    const timer = window.setTimeout(() => { void persistDraft(true) }, 1500)
+    return () => window.clearTimeout(timer)
+  }, [draftSignature, open, successRecord, saving, selectedResident, formDirty])
+
+  async function removeDraft() {
+    await saveChain.current
+    const id = draftIdRef.current
+    if (!id) return
+    draftIdRef.current = null
+    await issuanceApi.deleteDraft(id)
+    onDraftRemoved?.(id)
+  }
+
   async function saveDraft() {
     if (!selectedResident) {
       setFormError("Select a resident before saving this draft.")
@@ -298,19 +369,16 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     }
     setSaving(true)
     try {
-      const payload = { ...form.getValues(), residentId: selectedResident.id, residentUpdates, status: "draft" as const }
-      const record = await issuanceApi.createIssuance(payload)
-      onSaved(record)
+      const record = await persistDraft(false)
+      if (!record) return
       onOpenChange(false)
       resetDialog()
-    } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to save the draft.")
     } finally {
       setSaving(false)
     }
   }
 
-  async function issue() {
+  async function issue(andPrint = false) {
     if (!selectedResident) {
       setFormError("Select a resident before issuing this document.")
       return
@@ -360,8 +428,12 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         return
       }
       const record = await issuanceApi.createIssuance(raw)
+      // The automatic draft is replaced by the finished document.
+      await removeDraft()
       setSuccessRecord(record)
+      setPrintNotice(false)
       onSaved(record)
+      if (andPrint) handlePrint(record)
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "Unable to issue this document.")
     } finally {
@@ -369,9 +441,14 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     }
   }
 
+  function handlePrint(record: MockIssuance) {
+    onPrint?.(record)
+    setPrintNotice(true)
+  }
+
   function hasTypedValues() {
     return formDirty || Boolean(residentQuery.trim()) || Object.keys(residentUpdates).length > 0 ||
-      (showQuickAdd && Boolean(quickAdd.firstName.trim() || quickAdd.lastName.trim() || quickAdd.birthdate || quickAdd.street.trim() || quickAdd.houseNumber.trim()))
+      (showQuickAdd && Boolean(quickAdd.firstName.trim() || quickAdd.lastName.trim() || quickAdd.birthdate || (quickAdd.birthplace ?? "").trim() || quickAdd.street.trim() || quickAdd.houseNumber.trim()))
   }
 
   function requestClose(nextOpen: boolean) {
@@ -380,7 +457,16 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     onOpenChange(nextOpen)
   }
 
-  function discardAndClose() {
+  async function discardAndClose() {
+    await removeDraft()
+    resetDialog()
+    onOpenChange(false)
+  }
+
+  /** Close now. The automatic draft stays in the list so the work is not lost. */
+  async function closeKeepingDraft() {
+    if (selectedResident && draftSignature !== lastSavedRef.current) await persistDraft(true)
+    await saveChain.current
     resetDialog()
     onOpenChange(false)
   }
@@ -402,13 +488,34 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setDuplicate(null)
     setFormError("")
     setAttempted(false)
+    setQuickAttempted(false)
+    setPrintNotice(false)
     setDiscardOpen(false)
     setQuickAdd(emptyQuickAdd)
+    draftIdRef.current = null
+    lastSavedRef.current = ""
+    saveChain.current = Promise.resolve()
+    setAutoSave({ state: "idle" })
+  }
+
+  const birthplaceRequired = config.residentNeeds.includes("birthPlace")
+  const quickMissing = {
+    firstName: !quickAdd.firstName.trim(),
+    lastName: !quickAdd.lastName.trim(),
+    birthdate: !quickAdd.birthdate,
+    birthplace: birthplaceRequired && !(quickAdd.birthplace ?? "").trim(),
+    houseNumber: !(quickAdd.houseNumber ?? "").trim(),
+    street: !quickAdd.street.trim(),
   }
 
   async function createResident() {
-    if (!quickAdd.lastName.trim() || !quickAdd.firstName.trim() || !quickAdd.birthdate || !quickAdd.street.trim() || !quickAdd.houseNumber?.trim()) {
-      setFormError("Please fill in the first name, last name, birthdate, house number and street.")
+    const firstMissing = (Object.keys(quickMissing) as (keyof typeof quickMissing)[]).find((key) => quickMissing[key])
+    if (firstMissing) {
+      setQuickAttempted(true)
+      setFormError("")
+      const target = document.getElementById(`quickadd-${firstMissing}`)
+      target?.scrollIntoView?.({ behavior: "smooth", block: "center" })
+      target?.focus()
       return
     }
     try {
@@ -417,11 +524,17 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       selectResident(resident)
       setShowQuickAdd(false)
       setQuickAdd(emptyQuickAdd)
+      setQuickAttempted(false)
       setFormError("")
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "Unable to add this resident.")
     }
   }
+
+  const quickError = (key: keyof typeof quickMissing) => quickAttempted && quickMissing[key]
+    ? <span id={`quickadd-${key}-error`} role="alert" className="text-xs font-normal text-destructive">Please fill this in.</span>
+    : null
+  const quickInvalid = (key: keyof typeof quickMissing) => quickAttempted && quickMissing[key]
 
   const needsAddress = Boolean(selectedResident) && (!selectedResident?.houseNumber?.trim() || !selectedResident?.street?.trim() || !selectedResident?.purok)
   const neededFromRecord: string[] = selectedResident
@@ -471,7 +584,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       </div>
     }
     if (need === "birthDate") {
-      return <div key={need} className={fieldLabelClass}><span>Birthdate</span><BirthdateField idPrefix="resident-missing-birthdate" firstId="resident-missing-birthDate" value={String(updates.birthdate ?? "")} onChange={(next) => patch({ birthdate: next })} /></div>
+      return <div key={need} className={fieldLabelClass}><label htmlFor="resident-missing-birthDate">Birthdate</label><DateField id="resident-missing-birthDate" value={String(updates.birthdate ?? "")} max={localIsoDate()} startView="years" showToday={false} placeholder="Choose the birthdate" onChange={(next) => patch({ birthdate: next })} /></div>
     }
     if (need === "sex") {
       return <div key={need} className={fieldLabelClass}><span id="resident-missing-sex-label">Sex</span><ChoiceRow id="resident-missing-sex" label="Sex" value={String(updates.sex ?? "")} options={["Male", "Female"]} onChange={(next) => patch({ sex: next })} /></div>
@@ -600,7 +713,15 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   }
 
   return <Dialog open={open} onOpenChange={requestClose}>
-    <DialogContent className="flex h-[96dvh] max-h-[96dvh] w-[96vw] max-w-[96vw] flex-col gap-0 overflow-hidden p-0 sm:max-w-[1400px]">
+    <DialogContent
+      className="flex h-[96dvh] max-h-[96dvh] w-[96vw] max-w-[96vw] flex-col gap-0 overflow-hidden p-0 sm:max-w-[1400px]"
+      onEscapeKeyDown={(event) => {
+        // Esc closes an open dropdown, calendar or the name search first, not the whole form.
+        const target = event.target as HTMLElement | null
+        const searching = target?.id === "issuance-resident-search" && Boolean((target as HTMLInputElement).value)
+        if (popoverIsOpen() || searching) event.preventDefault()
+      }}
+    >
       <DialogHeader className="shrink-0 border-b px-5 py-4 pr-12">
         <DialogTitle>New Issuance</DialogTitle>
         <DialogDescription>Pick the document, find the resident, fill in the details. Everything on one screen.</DialogDescription>
@@ -609,10 +730,11 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         <CheckCircle2 className="size-12 text-emerald-600" aria-hidden="true" />
         <div>
           <p className="text-lg font-semibold">Issued: {successRecord.referenceNo}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{config.name} for {selectedResident?.name ?? "the resident"} was saved. Printing remains paused until paper positions are calibrated.</p>
+          <p className="mt-1 text-sm text-muted-foreground">{config.name} for {selectedResident?.name ?? "the resident"} was saved.</p>
+          {printNotice ? <p role="status" className="mx-auto mt-3 max-w-md rounded-lg border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-sm">Printing is paused until the paper positions are calibrated. The document is saved and nothing was sent to the printer.</p> : null}
         </div>
         <div className="flex flex-wrap justify-center gap-2">
-          <Button type="button" variant="outline" disabled><Printer className="size-4" />Print</Button>
+          <Button type="button" variant="outline" onClick={() => successRecord && handlePrint(successRecord)}><Printer className="size-4" />Print</Button>
           <Button type="button" variant="outline" onClick={issueAnother}>Issue another for this resident</Button>
           <Button type="button" onClick={() => { resetDialog(); onOpenChange(false) }}>Done</Button>
         </div>
@@ -657,19 +779,20 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 {showQuickAdd ? <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
                   <div className="flex items-baseline justify-between gap-2"><p className="font-semibold">Add a new resident</p><span className="text-xs text-muted-foreground"><span className="text-destructive">*</span> must be filled in</span></div>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_7.5rem]">
-                    <label className={fieldLabelClass}><span>First name <span className="text-destructive">*</span></span><input id="quickadd-firstName" value={quickAdd.firstName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, firstName: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
+                    <label className={fieldLabelClass}><span>First name <span className="text-destructive">*</span></span><input id="quickadd-firstName" value={quickAdd.firstName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, firstName: event.target.value }))} className={cn(formControlClass, quickInvalid("firstName") && "border-destructive")} aria-invalid={quickInvalid("firstName") || undefined} autoComplete="off" />{quickError("firstName")}</label>
                     <label className={fieldLabelClass}>Middle name<input value={quickAdd.middleName ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, middleName: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
-                    <label className={fieldLabelClass}><span>Last name <span className="text-destructive">*</span></span><input value={quickAdd.lastName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, lastName: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
+                    <label className={fieldLabelClass}><span>Last name <span className="text-destructive">*</span></span><input id="quickadd-lastName" value={quickAdd.lastName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, lastName: event.target.value }))} className={cn(formControlClass, quickInvalid("lastName") && "border-destructive")} aria-invalid={quickInvalid("lastName") || undefined} autoComplete="off" />{quickError("lastName")}</label>
                     <div className={fieldLabelClass}><label htmlFor="quickadd-suffix">Extension</label><SelectField id="quickadd-suffix" value={quickAdd.suffix || "None"} onChange={(next) => setQuickAdd((previous) => ({ ...previous, suffix: next === "None" ? "" : next }))} options={nameExtensions} /></div>
                   </div>
-                  <div className="grid gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.2fr)]">
-                    <div className={fieldLabelClass}><span id="quickadd-birthdate-label">Birthdate <span className="text-destructive">*</span></span><BirthdateField idPrefix="quickadd-birthdate" value={quickAdd.birthdate} onChange={(next) => setQuickAdd((previous) => ({ ...previous, birthdate: next }))} /></div>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.1fr)]">
+                    <div className={fieldLabelClass}><label htmlFor="quickadd-birthdate">Birthdate <span className="text-destructive">*</span></label><DateField id="quickadd-birthdate" value={quickAdd.birthdate} max={localIsoDate()} startView="years" showToday={false} placeholder="Choose the birthdate" invalid={quickInvalid("birthdate")} describedBy={quickInvalid("birthdate") ? "quickadd-birthdate-error" : undefined} onChange={(next) => setQuickAdd((previous) => ({ ...previous, birthdate: next }))} />{quickError("birthdate")}</div>
+                    <label className={fieldLabelClass}><span>Place of birth{birthplaceRequired ? <span className="text-destructive"> *</span> : null}</span><input id="quickadd-birthplace" value={quickAdd.birthplace ?? ""} placeholder="Example: Los Baños, Laguna" onChange={(event) => setQuickAdd((previous) => ({ ...previous, birthplace: event.target.value }))} className={cn(formControlClass, quickInvalid("birthplace") && "border-destructive")} aria-invalid={quickInvalid("birthplace") || undefined} autoComplete="off" />{quickError("birthplace")}</label>
                     <div className={fieldLabelClass}><span id="quickadd-sex-label">Sex</span><ChoiceRow label="Sex" value={quickAdd.sex} options={["Male", "Female"]} onChange={(next) => setQuickAdd((previous) => ({ ...previous, sex: next as "Male" | "Female" }))} /></div>
                     <div className={fieldLabelClass}><label htmlFor="quickadd-civil">Civil status</label><SelectField id="quickadd-civil" value={quickAdd.civilStatus} onChange={(next) => setQuickAdd((previous) => ({ ...previous, civilStatus: next }))} options={civilStatusChoices} /></div>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)]">
-                    <label className={fieldLabelClass}><span>House number <span className="text-destructive">*</span></span><input id="quickadd-houseNumber" value={quickAdd.houseNumber ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, houseNumber: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
-                    <div className={fieldLabelClass}><label htmlFor="quickadd-street">Street <span className="text-destructive">*</span></label><ComboField id="quickadd-street" value={quickAdd.street} options={knownStreets} onChange={(next) => setQuickAdd((previous) => ({ ...previous, street: next }))} /></div>
+                    <label className={fieldLabelClass}><span>House number <span className="text-destructive">*</span></span><input id="quickadd-houseNumber" value={quickAdd.houseNumber ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, houseNumber: event.target.value }))} className={cn(formControlClass, quickInvalid("houseNumber") && "border-destructive")} aria-invalid={quickInvalid("houseNumber") || undefined} autoComplete="off" />{quickError("houseNumber")}</label>
+                    <div className={fieldLabelClass}><label htmlFor="quickadd-street">Street <span className="text-destructive">*</span></label><ComboField id="quickadd-street" value={quickAdd.street} options={knownStreets} invalid={quickInvalid("street")} describedBy={quickInvalid("street") ? "quickadd-street-error" : undefined} onChange={(next) => setQuickAdd((previous) => ({ ...previous, street: next }))} />{quickError("street")}</div>
                     <div className={fieldLabelClass}><label htmlFor="quickadd-purok">Purok</label><SelectField id="quickadd-purok" value={String(quickAdd.purok)} onChange={(next) => setQuickAdd((previous) => ({ ...previous, purok: Number(next) }))} options={purokChoices} /></div>
                   </div>
                   <div className="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
@@ -720,28 +843,40 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
           </aside>
         </div>
         <DialogFooter className="shrink-0 items-center gap-2 border-t px-5 py-3 sm:justify-between">
-          <div className="min-w-0 text-sm" aria-live="polite">
-            {remaining ? <button type="button" onClick={goToFirstMissing} className="inline-flex min-h-9 items-center gap-1.5 text-amber-700 underline-offset-4 hover:underline"><CircleAlert className="size-4" aria-hidden="true" />{remaining} {remaining === 1 ? "item" : "items"} still needed. Go to next</button> : <span className="inline-flex items-center gap-1.5 font-medium text-emerald-700"><CheckCircle2 className="size-4" aria-hidden="true" />Ready to issue</span>}
-            <span className="ml-3 hidden items-center gap-1 text-xs text-muted-foreground xl:inline-flex"><Keyboard className="size-3.5" aria-hidden="true" />Ctrl + Enter to issue</span>
+          <div className="flex min-w-0 flex-col gap-0.5 text-sm" aria-live="polite">
+            {remaining ? <button type="button" onClick={goToFirstMissing} className="inline-flex min-h-9 items-center gap-1.5 self-start text-amber-700 underline-offset-4 hover:underline"><CircleAlert className="size-4" aria-hidden="true" />{remaining} {remaining === 1 ? "item" : "items"} still needed. Go to next</button> : <span className="inline-flex min-h-9 items-center gap-1.5 font-medium text-emerald-700"><CheckCircle2 className="size-4" aria-hidden="true" />Ready to issue</span>}
+            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="autosave-status">
+              <span className={cn("size-2 rounded-full", autoSave.state === "saved" ? "bg-emerald-500" : autoSave.state === "saving" ? "animate-pulse bg-amber-500" : autoSave.state === "error" ? "bg-destructive" : "bg-muted-foreground/40")} aria-hidden="true" />
+              {autoSave.state === "saving" ? "Saving draft…" : autoSave.state === "saved" ? `Draft saved automatically at ${autoSave.at?.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}` : autoSave.state === "error" ? "The draft could not be saved. What you typed is still here." : selectedResident ? "Saves as a draft automatically while you type" : "Saves as a draft automatically once you choose a person"}
+              <span className="ml-2 hidden items-center gap-1 xl:inline-flex"><Keyboard className="size-3.5" aria-hidden="true" />Ctrl + Enter to issue</span>
+            </span>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
             <Button type="button" variant="ghost" onClick={() => requestClose(false)}>Cancel</Button>
-            <Button type="button" variant="outline" disabled={saving} onClick={() => void saveDraft()}>Save as draft</Button>
+            <Button type="button" variant="outline" disabled={saving} onClick={() => void saveDraft()}>Save draft &amp; close</Button>
+            <Button type="button" variant="outline" disabled={saving} onClick={() => void issue(true)}><Printer className="size-4" aria-hidden="true" />Issue &amp; print</Button>
             <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Issue"}</Button>
           </div>
         </DialogFooter>
       </form>}
     </DialogContent>
-    <ConfirmDialog
-      open={discardOpen}
-      onOpenChange={setDiscardOpen}
-      title="Discard the changes to this issuance?"
-      description="What you typed so far has not been saved. If you leave now, it will be lost."
-      confirmLabel="Discard changes"
-      cancelLabel="Keep editing"
-      destructive
-      onConfirm={discardAndClose}
-    />
+    <Dialog open={discardOpen} onOpenChange={setDiscardOpen}>
+      <DialogContent className="sm:max-w-md" showCloseButton={false}>
+        <DialogHeader>
+          <DialogTitle>Discard the changes to this issuance?</DialogTitle>
+          <DialogDescription>
+            {selectedResident
+              ? "A draft is saved automatically. You can keep it and finish later, or throw everything away."
+              : "What you typed so far has not been saved. If you leave now, it will be lost."}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="gap-2 sm:flex-wrap">
+          <Button type="button" variant="outline" onClick={() => setDiscardOpen(false)}>Keep editing</Button>
+          {selectedResident ? <Button type="button" variant="outline" onClick={() => void closeKeepingDraft()}>Close, keep draft</Button> : null}
+          <Button type="button" variant="destructive" onClick={() => void discardAndClose()}>Discard changes</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
     <ConfirmDialog
       open={pendingDocumentType !== null}
       onOpenChange={(nextOpen) => { if (!nextOpen) setPendingDocumentType(null) }}

@@ -1,16 +1,17 @@
-import { CalendarDays, Check, ChevronDown } from "lucide-react"
-import { type KeyboardEvent, useEffect, useId, useRef, useState } from "react"
+import { Check, ChevronDown, Search } from "lucide-react"
+import {
+  type KeyboardEvent,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react"
 import { formControlClass } from "@/components/Common/formStyles"
 import { Checkbox } from "@/components/ui/checkbox"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { formatPaperDate } from "@/lib/issuance-format"
 import { cn } from "@/lib/utils"
+import { panelClass, useClickOutside, useOpenUpward } from "./popover"
 
 export type ChoiceOption = string | { value: string; label: string }
 
@@ -19,6 +20,45 @@ function optionValue(option: ChoiceOption) {
 }
 function optionLabel(option: ChoiceOption) {
   return typeof option === "string" ? option : option.label
+}
+
+/** Lists with this many choices (or more) get a search box. */
+const SEARCH_FROM = 5
+
+/** Shows the part of a label that matches what was typed in bold. */
+function Highlight({
+  text,
+  query,
+}: {
+  text: string
+  query: string
+}): ReactNode {
+  const q = query.trim().toLowerCase()
+  const at = q ? text.toLowerCase().indexOf(q) : -1
+  if (at < 0) return text
+  return (
+    <>
+      {text.slice(0, at)}
+      <strong className="font-semibold text-foreground">
+        {text.slice(at, at + q.length)}
+      </strong>
+      {text.slice(at + q.length)}
+    </>
+  )
+}
+
+/** Matches that start with the typed text come first, then the rest. */
+function filterItems<T extends { label: string }>(items: T[], query: string) {
+  const q = query.trim().toLowerCase()
+  if (!q) return items
+  const starts: T[] = []
+  const contains: T[] = []
+  for (const item of items) {
+    const label = item.label.toLowerCase()
+    if (label.startsWith(q)) starts.push(item)
+    else if (label.includes(q)) contains.push(item)
+  }
+  return [...starts, ...contains]
 }
 
 type SelectFieldProps = {
@@ -31,9 +71,15 @@ type SelectFieldProps = {
   disabled?: boolean
   describedBy?: string
   className?: string
+  /** Force the search box on or off. By default it shows for 5 or more choices. */
+  searchable?: boolean
 }
 
-/** Styled dropdown that replaces the browser's default <select>. */
+/**
+ * Dropdown that replaces the browser's default <select>.
+ * With 5 or more choices it has a search box, so the person can type a few
+ * letters instead of scrolling.
+ */
 export function SelectField({
   id,
   value,
@@ -44,217 +90,205 @@ export function SelectField({
   disabled,
   describedBy,
   className,
+  searchable,
 }: SelectFieldProps) {
+  const items = options.map((option) => ({
+    value: optionValue(option),
+    label: optionLabel(option),
+  }))
+  const withSearch = searchable ?? items.length >= SEARCH_FROM
+  const listId = useId()
+  const wrapperRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const searchRef = useRef<HTMLInputElement>(null)
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState("")
+  const [active, setActive] = useState(0)
+  const upward = useOpenUpward(open, wrapperRef, panelRef)
+  const close = useCallback(() => setOpen(false), [])
+  useClickOutside(open, wrapperRef, close)
+
+  const shown = filterItems(items, query)
+  const selected = items.find((item) => item.value === value)
+
+  function openPanel() {
+    if (disabled) return
+    const index = items.findIndex((item) => item.value === value)
+    setQuery("")
+    setActive(Math.max(index, 0))
+    setOpen(true)
+  }
+
+  // Put the cursor where the person can act: the search box, or the list.
+  useEffect(() => {
+    if (!open) return
+    if (withSearch) searchRef.current?.focus()
+    else panelRef.current?.focus()
+  }, [open, withSearch])
+
+  // Keep the highlighted row visible while moving with the arrow keys.
+  useEffect(() => {
+    if (!open) return
+    document
+      .getElementById(`${listId}-option-${active}`)
+      ?.scrollIntoView?.({ block: "nearest" })
+  }, [open, active, listId])
+
+  function choose(next: string) {
+    onChange(next)
+    setOpen(false)
+    triggerRef.current?.focus()
+  }
+
+  function onPanelKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.key === "ArrowDown") {
+      event.preventDefault()
+      setActive((index) => Math.min(index + 1, shown.length - 1))
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault()
+      setActive((index) => Math.max(index - 1, 0))
+    } else if (event.key === "Home") {
+      event.preventDefault()
+      setActive(0)
+    } else if (event.key === "End") {
+      event.preventDefault()
+      setActive(Math.max(shown.length - 1, 0))
+    } else if (event.key === "Enter") {
+      event.preventDefault()
+      event.stopPropagation()
+      if (shown[active]) choose(shown[active].value)
+    } else if (event.key === "Escape") {
+      event.preventDefault()
+      event.stopPropagation()
+      setOpen(false)
+      triggerRef.current?.focus()
+    } else if (event.key === "Tab") {
+      setOpen(false)
+    }
+  }
+
   return (
-    <Select
-      value={value || undefined}
-      onValueChange={onChange}
-      disabled={disabled}
-    >
-      <SelectTrigger
+    <div ref={wrapperRef} className="relative min-w-0">
+      <button
+        ref={triggerRef}
         id={id}
+        type="button"
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={open ? listId : undefined}
         aria-invalid={invalid || undefined}
         aria-describedby={describedBy}
+        onClick={() => (open ? setOpen(false) : openPanel())}
+        onKeyDown={(event) => {
+          if (["ArrowDown", "ArrowUp"].includes(event.key)) {
+            event.preventDefault()
+            if (!open) openPanel()
+          }
+        }}
         className={cn(
-          "h-11 w-full bg-background text-sm data-[size=default]:h-11",
+          formControlClass,
+          "flex items-center justify-between gap-2 text-left disabled:cursor-not-allowed disabled:opacity-50",
+          invalid && "border-destructive",
           className,
         )}
       >
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent
-        position="popper"
-        sideOffset={4}
-        className="max-h-72 rounded-lg p-0.5 shadow-lg"
-      >
-        {options.map((option) => (
-          <SelectItem
-            key={optionValue(option)}
-            value={optionValue(option)}
-            className="min-h-10 rounded-md py-2 pr-9 pl-3 text-sm"
+        <span className={cn("truncate", !selected && "text-muted-foreground")}>
+          {selected?.label ?? placeholder}
+        </span>
+        <ChevronDown
+          className={cn(
+            "size-4 shrink-0 text-muted-foreground transition-transform",
+            open && "rotate-180",
+          )}
+          aria-hidden="true"
+        />
+      </button>
+      {open ? (
+        // biome-ignore lint/a11y/noStaticElementInteractions: keyboard handling for the open list
+        <div
+          ref={panelRef}
+          data-popover-open="true"
+          role="presentation"
+          tabIndex={-1}
+          onKeyDown={onPanelKeyDown}
+          className={cn(
+            panelClass,
+            "min-w-40 outline-none",
+            upward ? "bottom-full mb-1" : "top-full mt-1",
+          )}
+        >
+          {withSearch ? (
+            <div className="relative border-b p-1.5">
+              <Search
+                className="pointer-events-none absolute top-1/2 left-4 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <input
+                ref={searchRef}
+                value={query}
+                onChange={(event) => {
+                  setQuery(event.target.value)
+                  setActive(0)
+                }}
+                placeholder="Type to search…"
+                aria-label="Search the choices"
+                autoComplete="off"
+                role="combobox"
+                aria-expanded="true"
+                aria-controls={listId}
+                aria-activedescendant={
+                  shown[active] ? `${listId}-option-${active}` : undefined
+                }
+                className="h-9 w-full rounded-md border border-input bg-background pr-2 pl-8 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              />
+            </div>
+          ) : null}
+          <div
+            id={listId}
+            role="listbox"
+            className="max-h-64 overflow-y-auto p-0.5"
           >
-            {optionLabel(option)}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  )
-}
-
-type DateFieldProps = {
-  id?: string
-  value: string
-  onChange: (value: string) => void
-  invalid?: boolean
-  describedBy?: string
-  min?: string
-  max?: string
-  placeholder?: string
-}
-
-/** Shows the date as "November 3, 2026". The browser's calendar opens when it is clicked. */
-export function DateField({
-  id,
-  value,
-  onChange,
-  invalid,
-  describedBy,
-  min,
-  max,
-  placeholder = "Choose a date",
-}: DateFieldProps) {
-  const isoValue = /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : ""
-  const display = isoValue ? formatPaperDate(isoValue) : ""
-  function openPicker(input: HTMLInputElement) {
-    try {
-      input.showPicker?.()
-    } catch {
-      // Some browsers only allow the picker from a direct click. Typing still works.
-    }
-  }
-  return (
-    <span
-      className={cn(
-        formControlClass,
-        "relative flex items-center justify-between gap-2 has-[:focus-visible]:border-ring has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50",
-        invalid && "border-destructive",
-      )}
-    >
-      <span className={cn("truncate", !display && "text-muted-foreground")}>
-        {display || placeholder}
-      </span>
-      <CalendarDays
-        className="size-4 shrink-0 text-muted-foreground"
-        aria-hidden="true"
-      />
-      <input
-        id={id}
-        type="date"
-        value={isoValue}
-        min={min}
-        max={max}
-        aria-invalid={invalid || undefined}
-        aria-describedby={describedBy}
-        onChange={(event) => onChange(event.target.value)}
-        onClick={(event) => openPicker(event.currentTarget)}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault()
-            openPicker(event.currentTarget)
-          }
-        }}
-        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-      />
-    </span>
-  )
-}
-
-const monthNames = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-]
-
-type BirthdateFieldProps = {
-  value: string
-  onChange: (value: string) => void
-  idPrefix?: string
-  /** Id for the first control, so "Missing" links can focus it. */
-  firstId?: string
-}
-
-function daysIn(month: number, year: number) {
-  if (!month) return 31
-  return new Date(year || 2000, month, 0).getDate()
-}
-
-/** Month, day and year in one row. Easier than a calendar for dates many years back. */
-export function BirthdateField({
-  value,
-  onChange,
-  idPrefix = "birthdate",
-  firstId,
-}: BirthdateFieldProps) {
-  const [yy = "", mm = "", dd = ""] = value ? value.split("-") : []
-  const [parts, setParts] = useState({
-    year: yy,
-    month: mm ? String(Number(mm)) : "",
-    day: dd ? String(Number(dd)) : "",
-  })
-
-  // Keep in step when the value is changed from outside (for example after a reset).
-  useEffect(() => {
-    if (!value) return
-    const [y = "", m = "", d = ""] = value.split("-")
-    setParts({ year: y, month: String(Number(m)), day: String(Number(d)) })
-  }, [value])
-  useEffect(() => {
-    if (!value) setParts({ year: "", month: "", day: "" })
-  }, [value])
-
-  function commit(next: { year: string; month: string; day: string }) {
-    setParts(next)
-    const year = Number(next.year)
-    const month = Number(next.month)
-    const day = Number(next.day)
-    if (
-      next.year.length === 4 &&
-      year >= 1900 &&
-      month &&
-      day &&
-      day <= daysIn(month, year)
-    ) {
-      onChange(
-        `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`,
-      )
-    } else if (value) {
-      onChange("")
-    }
-  }
-
-  const dayCount = daysIn(Number(parts.month), Number(parts.year))
-  return (
-    <div className="grid grid-cols-[minmax(0,1.6fr)_minmax(0,0.9fr)_minmax(0,1fr)] gap-2">
-      <SelectField
-        id={firstId ?? `${idPrefix}-month`}
-        value={parts.month}
-        onChange={(month) => commit({ ...parts, month })}
-        options={monthNames.map((name, index) => ({
-          value: String(index + 1),
-          label: name,
-        }))}
-        placeholder="Month"
-      />
-      <SelectField
-        id={`${idPrefix}-day`}
-        value={parts.day}
-        onChange={(day) => commit({ ...parts, day })}
-        options={Array.from({ length: dayCount }, (_, index) =>
-          String(index + 1),
-        )}
-        placeholder="Day"
-      />
-      <input
-        id={`${idPrefix}-year`}
-        inputMode="numeric"
-        maxLength={4}
-        placeholder="Year"
-        aria-label="Year"
-        value={parts.year}
-        onChange={(event) =>
-          commit({ ...parts, year: event.target.value.replace(/\D/g, "") })
-        }
-        className={formControlClass}
-      />
+            {shown.length ? (
+              shown.map((item, index) => (
+                <div
+                  key={item.value}
+                  id={`${listId}-option-${index}`}
+                  role="option"
+                  tabIndex={-1}
+                  aria-selected={item.value === value}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onMouseEnter={() => setActive(index)}
+                  onClick={() => choose(item.value)}
+                  onKeyDown={() => undefined}
+                  className={cn(
+                    "flex min-h-10 cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-sm",
+                    index === active && "bg-accent text-accent-foreground",
+                    item.value === value && "font-medium",
+                  )}
+                >
+                  <span>
+                    <Highlight text={item.label} query={query} />
+                  </span>
+                  {item.value === value ? (
+                    <Check className="size-4 shrink-0" aria-hidden="true" />
+                  ) : null}
+                </div>
+              ))
+            ) : (
+              <p className="px-3 py-3 text-sm text-muted-foreground">
+                Nothing matches “{query.trim()}”.
+              </p>
+            )}
+          </div>
+          {withSearch && !query.trim() && shown.length > 8 ? (
+            <p className="border-t px-3 py-1.5 text-xs text-muted-foreground">
+              {shown.length} choices. Type to narrow them down.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -281,24 +315,29 @@ export function ComboField({
 }: ComboFieldProps) {
   const listId = useId()
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const [active, setActive] = useState(0)
+  const upward = useOpenUpward(open, wrapperRef, panelRef)
+  const close = useCallback(() => setOpen(false), [])
+  useClickOutside(open, wrapperRef, close)
 
   const query = value.trim().toLowerCase()
   const exact = options.some((option) => option.toLowerCase() === query)
   const shown =
     !query || exact
-      ? options
-      : options.filter((option) => option.toLowerCase().includes(query))
+      ? [...options]
+      : filterItems(
+          options.map((label) => ({ label })),
+          query,
+        ).map((item) => item.label)
 
   useEffect(() => {
     if (!open) return
-    function close(event: MouseEvent) {
-      if (!wrapperRef.current?.contains(event.target as Node)) setOpen(false)
-    }
-    document.addEventListener("mousedown", close)
-    return () => document.removeEventListener("mousedown", close)
-  }, [open])
+    document
+      .getElementById(`${listId}-option-${active}`)
+      ?.scrollIntoView?.({ block: "nearest" })
+  }, [open, active, listId])
 
   function pick(option: string) {
     onChange(option)
@@ -321,6 +360,8 @@ export function ComboField({
       event.preventDefault()
       event.stopPropagation()
       setOpen(false)
+    } else if (event.key === "Tab") {
+      setOpen(false)
     }
   }
 
@@ -338,6 +379,7 @@ export function ComboField({
         aria-invalid={invalid || undefined}
         aria-describedby={describedBy}
         onFocus={() => setOpen(true)}
+        onClick={() => setOpen(true)}
         onChange={(event) => {
           onChange(event.target.value)
           setActive(0)
@@ -364,29 +406,42 @@ export function ComboField({
       </button>
       {open && shown.length ? (
         <div
-          id={listId}
-          role="listbox"
-          className="absolute z-30 mt-1 max-h-60 w-full overflow-y-auto rounded-lg border bg-popover p-0.5 text-popover-foreground shadow-lg"
+          ref={panelRef}
+          data-popover-open="true"
+          className={cn(
+            panelClass,
+            "w-full",
+            upward ? "bottom-full mb-1" : "top-full mt-1",
+          )}
         >
-          {shown.map((option, index) => (
-            <div
-              key={option}
-              role="option"
-              tabIndex={-1}
-              aria-selected={option === value}
-              onMouseDown={(event) => event.preventDefault()}
-              onMouseEnter={() => setActive(index)}
-              onClick={() => pick(option)}
-              onKeyDown={() => undefined}
-              className={cn(
-                "flex min-h-10 cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-sm",
-                index === active && "bg-accent text-accent-foreground",
-              )}
-            >
-              <span>{option}</span>
-              {option === value ? <Check className="size-4" /> : null}
-            </div>
-          ))}
+          <div
+            id={listId}
+            role="listbox"
+            className="max-h-60 overflow-y-auto p-0.5"
+          >
+            {shown.map((option, index) => (
+              <div
+                key={option}
+                id={`${listId}-option-${index}`}
+                role="option"
+                tabIndex={-1}
+                aria-selected={option === value}
+                onMouseDown={(event) => event.preventDefault()}
+                onMouseEnter={() => setActive(index)}
+                onClick={() => pick(option)}
+                onKeyDown={() => undefined}
+                className={cn(
+                  "flex min-h-10 cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-sm",
+                  index === active && "bg-accent text-accent-foreground",
+                )}
+              >
+                <span>
+                  <Highlight text={option} query={exact ? "" : value} />
+                </span>
+                {option === value ? <Check className="size-4" /> : null}
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
     </div>

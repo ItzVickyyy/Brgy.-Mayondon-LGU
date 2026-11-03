@@ -778,7 +778,9 @@ function IssuancesManagement() {
         open={isSimplifiedDialogOpen}
         onOpenChange={setIsSimplifiedDialogOpen}
         initialResidentId={getPreselectedResident()}
-        onSaved={(record) => {
+        onDraftRemoved={(id) => setDrafts((previous) => previous.filter((draft) => draft.fields.mockIssuanceId !== id))}
+        onPrint={() => printNow()}
+        onSaved={(record, meta) => {
           const resident = issuanceApi.getResident(record.residentId)
           const type = documentConfig[record.documentType].name
           const status = record.status === "draft" ? "Pending" : "Issued"
@@ -797,8 +799,13 @@ function IssuancesManagement() {
             issuedBy: record.status === "issued" ? "staff" : undefined,
             fields,
           }
-          if (record.status === "draft") setDrafts((previous) => [historyRecord, ...previous])
-          else setHistoryRecords((previous) => [historyRecord, ...previous])
+          if (record.status === "draft") {
+            // Automatic saves update the same draft again and again, so replace it instead of adding a copy.
+            setDrafts((previous) => previous.some((draft) => draft.fields.mockIssuanceId === record.id)
+              ? previous.map((draft) => draft.fields.mockIssuanceId === record.id ? historyRecord : draft)
+              : [historyRecord, ...previous])
+          } else setHistoryRecords((previous) => [historyRecord, ...previous])
+          if (meta?.auto) return
           setNotice(record.status === "draft" ? `${record.referenceNo} was saved as a draft.` : `${record.referenceNo} was recorded as issued. Printing remains paused.`)
           setNoticePrintRecord(null)
         }}
