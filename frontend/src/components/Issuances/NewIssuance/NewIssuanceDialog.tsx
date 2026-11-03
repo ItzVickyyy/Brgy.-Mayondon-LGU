@@ -78,7 +78,13 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     }) || Boolean(current.purposeText?.trim()) || Boolean(current.identification?.idNumber?.trim()) || Boolean(current.payment?.officialReceiptNo?.trim())
     if (detailsDirty && !window.confirm("Changing the document type will clear its details. Continue?")) return
     form.setValue("documentType", nextCode, { shouldDirty: true })
-    const nextDetails = defaultDetails(nextCode)\n    if (nextCode === "BARANGAY_ID" && nextDetails.type === "BARANGAY_ID") {\n      const baseDate = new Date(`${current.issueDate}T00:00:00`)\n      baseDate.setFullYear(baseDate.getFullYear() + 1)\n      nextDetails.validUntil = localIsoDate(baseDate)\n    }\n    form.setValue("details", nextDetails, { shouldDirty: true })
+    const nextDetails = defaultDetails(nextCode)
+    if (nextCode === "BARANGAY_ID" && nextDetails.type === "BARANGAY_ID") {
+      const baseDate = new Date(`${current.issueDate}T00:00:00`)
+      baseDate.setFullYear(baseDate.getFullYear() + 1)
+      nextDetails.validUntil = localIsoDate(baseDate)
+    }
+    form.setValue("details", nextDetails, { shouldDirty: true })
     form.setValue("purposeText", "")
     form.setValue("remarks", nextCode === "BARANGAY_CLEARANCE" ? "NO DEROGATORY RECORD ON FILE" : "")
     form.setValue("identification", nextCode === "BARANGAY_CLEARANCE" || nextCode === "FRANCHISE_CLEARANCE" || nextCode === "UTILITY_CLEARANCE"
