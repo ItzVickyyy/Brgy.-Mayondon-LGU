@@ -36,6 +36,8 @@ const printedNameType: Record<DocumentCode, string> = {
   BARANGAY_CLEARANCE: "Barangay Clearance",
   FRANCHISE_CLEARANCE: "Barangay Franchise Clearance",
   UTILITY_CLEARANCE: "Barangay Clearance, Electrical and Water Connection",
+  BUILDING_CLEARANCE: "Building Clearance",
+  PHILHEALTH_CERT: "PhilHealth Certification",
   RESIDENCY: "Certification of Residency",
   INDIGENCY: "Certificate of Indigency",
   ASSISTANCE: "Certification (assistance request)",
@@ -43,6 +45,10 @@ const printedNameType: Record<DocumentCode, string> = {
   FIRST_TIME_JOBSEEKER: "First-Time Jobseeker Certification",
   BARANGAY_ID: "Barangay ID",
 }
+const stampDocuments: DocumentCode[] = ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"]
+const identityDocuments: DocumentCode[] = [...stampDocuments, "BUILDING_CLEARANCE"]
+type PaymentKey = "officialReceiptNo" | "isFree" | "dateOfPayment" | "certifiedBy"
+const paymentKeyOf = (fieldName: string): PaymentKey => (fieldName === "isFree" || fieldName === "dateOfPayment" || fieldName === "certifiedBy" ? fieldName : "officialReceiptNo")
 const nameExtensions = ["None", "Jr.", "Sr.", "II", "III", "IV", "V"]
 const civilStatusChoices = ["Single", "Married", "Legally Separated", "Widow/Widower"]
 const purokChoices = [1, 2, 3, 4, 5, 6].map((purok) => ({ value: String(purok), label: `Purok ${purok}` }))
@@ -144,11 +150,12 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     form.setValue("details", nextDetails, { shouldDirty: true })
     form.setValue("purposeText", "")
     form.setValue("remarks", nextCode === "BARANGAY_CLEARANCE" ? "NO DEROGATORY RECORD ON FILE" : "")
-    form.setValue("identification", nextCode === "BARANGAY_CLEARANCE" || nextCode === "FRANCHISE_CLEARANCE" || nextCode === "UTILITY_CLEARANCE"
+    form.setValue("identification", identityDocuments.includes(nextCode)
       ? { idTypeId: nextCode === "BARANGAY_CLEARANCE" ? 0 : 1, idNumber: "", placeOfIssue: "Los Baños, Laguna", dateOfIssue: localIsoDate() }
       : undefined)
-    form.setValue("payment", ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"].includes(nextCode)
-      ? { officialReceiptNo: "", isFree: false } : undefined)
+    form.setValue("payment", stampDocuments.includes(nextCode)
+      ? { officialReceiptNo: "", isFree: false, dateOfPayment: localIsoDate(), certifiedBy: "" }
+      : identityDocuments.includes(nextCode) ? { officialReceiptNo: "", isFree: false } : undefined)
     const signatoryDefault = documentConfig[nextCode].signatoryDefault
     const signatory = signatoryDefault ? initialOfficials.find((official) => official.status === "Current" && official.position === signatoryDefault) : undefined
     form.setValue("signatoryOfficialId", signatory?.id)
@@ -188,7 +195,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     form.setValue("identification", { ...current, [name]: value } as never, { shouldDirty: true })
   }
 
-  function setPayment(name: "officialReceiptNo" | "isFree", value: string | boolean) {
+  function setPayment(name: PaymentKey, value: string | boolean) {
     const current = form.getValues("payment") ?? { officialReceiptNo: "", isFree: false }
     const next = { ...current, [name]: value }
     if (name === "isFree" && value === true) next.officialReceiptNo = "FOC"
@@ -209,7 +216,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       return readErrorMessage((errors.identification as Record<string, unknown> | undefined)?.[key])
     }
     if (field.group === "payment") {
-      const key = field.name === "isFree" ? "isFree" : "officialReceiptNo"
+      const key = paymentKeyOf(field.name)
       return readErrorMessage((errors.payment as Record<string, unknown> | undefined)?.[key])
     }
     if (field.name === "purpose") return readErrorMessage(errors.purposeText)
@@ -224,7 +231,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     const fieldValue = field.group === "identity"
       ? (identification as unknown as Record<string, unknown> | undefined)?.[field.name === "idType" ? "idTypeId" : field.name === "idNumber" ? "idNumber" : field.name === "idPlaceOfIssue" ? "placeOfIssue" : "dateOfIssue"]
       : field.group === "payment"
-        ? (payment as unknown as Record<string, unknown> | undefined)?.[field.name === "officialReceiptNo" ? "officialReceiptNo" : "isFree"]
+        ? (payment as unknown as Record<string, unknown> | undefined)?.[paymentKeyOf(field.name)]
         : field.name === "purpose" ? form.watch("purposeText")
         : field.name === "remarks" ? form.watch("remarks")
         : field.name === "idNumber" && documentType === "BARANGAY_ID" ? selectedResident?.idNumber?.split("-").at(-1) ?? issuanceApi.getNextBarangayIdNumber()
@@ -245,7 +252,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         else if (field.name === "idPlaceOfIssue") setIdentity("placeOfIssue", String(nextValue))
         else setIdentity("dateOfIssue", String(nextValue))
       } else if (field.group === "payment") {
-        setPayment(field.name === "isFree" ? "isFree" : "officialReceiptNo", nextValue)
+        setPayment(paymentKeyOf(field.name), nextValue)
       } else if (field.name === "purpose") setRootField("purposeText", String(nextValue))
       else if (field.name === "referredBy") setDetail("referredByOfficialId", String(nextValue) === "None" ? undefined : String(nextValue))
       else if (field.name === "remarks") setRootField("remarks", String(nextValue))
@@ -292,7 +299,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     } else if (field.type === "textarea") {
       control = <textarea id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive", "h-auto py-2")} aria-invalid={invalid} aria-describedby={describedBy} rows={2} />
     } else if (field.type === "date") {
-      control = <DateField id={fieldId} value={String(value)} max={field.group === "identity" ? localIsoDate() : undefined} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
+      control = <DateField id={fieldId} value={String(value)} max={field.group === "identity" || field.group === "payment" ? localIsoDate() : undefined} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
     } else {
       control = <input id={fieldId} type={field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive")} aria-invalid={invalid} aria-describedby={describedBy} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} />
     }
@@ -612,7 +619,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       if (field.name === "idType") value = field.options?.[Number(value ?? 0) - 1] ?? ""
     } else if (field.group === "payment") {
       const paymentValues = payment as unknown as Record<string, unknown> | undefined
-      value = field.name === "isFree" ? paymentValues?.isFree ? "Yes" : "No" : paymentValues?.officialReceiptNo
+      value = field.name === "isFree" ? paymentValues?.isFree ? "Yes" : "No" : paymentValues?.[paymentKeyOf(field.name)]
     } else if (field.name === "purpose") value = form.getValues("purposeText")
     else if (field.name === "remarks") value = form.getValues("remarks")
     else if (field.name === "idNumber" && documentType === "BARANGAY_ID") value = selectedResident?.idNumber?.split("-").at(-1) ?? issuanceApi.getNextBarangayIdNumber()

@@ -1,11 +1,13 @@
-import { clearancePurposeOptions, civilStatusOptions, idTypeOptions, indigencySectorOptions } from "@/components/Issuances/config"
+import { addressedOfficeOptions, clearancePurposeOptions, civilStatusOptions, idTypeOptions, indigencyPurposeOptions, indigencySectorOptions, purposeNoteOptions } from "@/components/Issuances/config"
 
 export type DocumentCode =
   | "BARANGAY_CLEARANCE"
   | "FRANCHISE_CLEARANCE"
   | "UTILITY_CLEARANCE"
+  | "BUILDING_CLEARANCE"
   | "RESIDENCY"
   | "INDIGENCY"
+  | "PHILHEALTH_CERT"
   | "ASSISTANCE"
   | "MARGINALIZED_SECTOR"
   | "FIRST_TIME_JOBSEEKER"
@@ -44,6 +46,7 @@ export type DocumentConfig = {
 
 const purposeOptions = clearancePurposeOptions
 const sectorOptions = indigencySectorOptions
+const indigencyPurposes = Array.from(new Set([...indigencyPurposeOptions, ...purposeOptions]))
 const idOptions = Array.from(new Set(["CTC", ...idTypeOptions]))
 const issuePlace = "Los Baños, Laguna"
 
@@ -63,6 +66,12 @@ const paymentFields: DetailFieldConfig[] = [
   { name: "officialReceiptNo", label: "Official receipt no.", type: "text", required: true, group: "payment" },
   { name: "isFree", label: "Free of charge", type: "checkbox", default: false, group: "payment" },
 ]
+// The "DOCUMENTARY STAMP TAX PAID" box printed on clearances also shows the payment date and who certified it.
+const stampFields: DetailFieldConfig[] = [
+  ...paymentFields,
+  { name: "dateOfPayment", label: "Date of payment", type: "date", default: "today", group: "payment" },
+  { name: "certifiedBy", label: "Certified by (initials)", type: "text", group: "payment", help: "Printed in the stamp box." },
+]
 
 export const documentConfig: Record<DocumentCode, DocumentConfig> = {
   BARANGAY_CLEARANCE: {
@@ -71,8 +80,8 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
     signatoryMode: "preprinted", residentNeeds: ["birthDate", "birthPlace", "civilStatus"],
     fields: [
       { name: "purpose", label: "Purpose", type: "select", required: true, options: purposeOptions, group: "main" },
-      ...identityFields, ...paymentFields,
-      { name: "purposeNote", label: "Purpose note", type: "text", group: "more" },
+      ...identityFields, ...stampFields,
+      { name: "purposeNote", label: "Purpose note", type: "combobox", options: purposeNoteOptions, group: "more" },
       { name: "remarks", label: "Remarks", type: "text", default: "NO DEROGATORY RECORD ON FILE", group: "more" },
       { name: "referredBy", label: "Referred by (c/o)", type: "select", options: ["None", "Punong Barangay", "Barangay Kagawad", "SK Chairperson"], default: "None", group: "more" },
     ],
@@ -87,7 +96,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
       { name: "motorNumber", label: "Motor no.", type: "text", required: true, group: "main" },
       { name: "color", label: "Color", type: "text", required: true, group: "main" },
       { name: "plateNumber", label: "Plate no.", type: "text", required: true, group: "main" },
-      ...ctcFields, ...paymentFields,
+      ...ctcFields, ...stampFields,
     ],
   },
   UTILITY_CLEARANCE: {
@@ -98,7 +107,15 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
       { name: "connectionType", label: "Type of connection", type: "radio", required: true, options: ["New", "Reconnection"], group: "main" },
       { name: "classification", label: "Classification", type: "radio", required: true, options: ["Residential", "Commercial"], group: "main" },
       { name: "location", label: "Location", type: "text", required: true, default: "Barangay Mayondon", group: "main" },
-      ...ctcFields, ...paymentFields,
+      ...ctcFields, ...stampFields,
+    ],
+  },
+  BUILDING_CLEARANCE: {
+    code: "BUILDING_CLEARANCE", name: "Building Clearance", shortName: "Building Clearance", category: "clearance",
+    hint: "Building / construction", printMode: "overlay", validityMonths: null, onePerResident: false,
+    signatoryMode: "preprinted", residentNeeds: [], fields: [
+      { name: "location", label: "Location", type: "text", required: true, default: "Barangay Mayondon", group: "main" },
+      ...identityFields, ...paymentFields,
     ],
   },
   RESIDENCY: {
@@ -118,8 +135,17 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
     signatoryMode: "preprinted", residentNeeds: ["birthDate"],
     fields: [
       { name: "sector", label: "Sector", type: "multiselect", required: true, options: sectorOptions, maxSelected: 2, group: "main" },
-      { name: "purpose", label: "Purpose", type: "combobox", required: true, options: purposeOptions, group: "main" },
-      { name: "addressedToOffice", label: "Office addressed to", type: "text", required: true, group: "main" },
+      { name: "purpose", label: "Purpose", type: "combobox", required: true, options: indigencyPurposes, group: "main" },
+      { name: "addressedToOffice", label: "Office addressed to", type: "combobox", required: true, options: addressedOfficeOptions, group: "main" },
+      { name: "requestedBy", label: "Requested by", type: "text", group: "more", help: "Only if someone other than the resident asked for it. Printed after \"Requested by:\"." },
+    ],
+  },
+  PHILHEALTH_CERT: {
+    code: "PHILHEALTH_CERT", name: "PhilHealth Certification", shortName: "PhilHealth", category: "certification",
+    hint: "PhilHealth blue card", printMode: "overlay", validityMonths: null, onePerResident: false,
+    signatoryMode: "preprinted", residentNeeds: ["birthDate"],
+    fields: [
+      { name: "cardType", label: "Card", type: "combobox", required: true, options: ["BLUE CARD"], group: "main" },
     ],
   },
   ASSISTANCE: {

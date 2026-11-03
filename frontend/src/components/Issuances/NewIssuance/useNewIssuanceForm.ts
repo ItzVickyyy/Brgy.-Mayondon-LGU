@@ -15,10 +15,14 @@ export function defaultDetails(code: DocumentCode): DocumentDetails {
       return { type: code, associationName: "", make: "", bodyType: "TRICYCLE", motorNumber: "", color: "", plateNumber: "" }
     case "UTILITY_CLEARANCE":
       return { type: code, services: [], connectionType: "new", classification: "residential", location: "Barangay Mayondon" }
+    case "BUILDING_CLEARANCE":
+      return { type: code, location: "Barangay Mayondon" }
     case "RESIDENCY":
       return { type: code }
     case "INDIGENCY":
       return { type: code, addressedToOffice: "" }
+    case "PHILHEALTH_CERT":
+      return { type: code, cardType: "BLUE CARD" }
     case "ASSISTANCE":
       return { type: code, assistanceType: "financial", forSelf: true }
     case "MARGINALIZED_SECTOR":
@@ -41,7 +45,7 @@ export function defaultIssuanceInput(residentId = ""): IssuanceInput {
     purposeText: "",
     remarks: "NO DEROGATORY RECORD ON FILE",
     identification: { idTypeId: 0, idNumber: "", placeOfIssue: "Los Baños, Laguna", dateOfIssue: localIsoDate() },
-    payment: { officialReceiptNo: "", isFree: false },
+    payment: { officialReceiptNo: "", isFree: false, dateOfPayment: localIsoDate(), certifiedBy: "" },
     details: defaultDetails("BARANGAY_CLEARANCE"),
     status: "draft",
   }
