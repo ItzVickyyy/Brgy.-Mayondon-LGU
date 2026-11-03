@@ -434,18 +434,24 @@ function IssuancesManagement() {
     return names.length > 0
   }
 
-  function saveIssuance(asDraft = false) {
+  function saveIssuance(asDraft = false): IssuanceRecord | null {
     if (!formValues.name?.trim()) {
       setValidationErrors({ name: "Name is required." })
       setFormErrorSummary(["name"])
       document.getElementById("field-name")?.focus()
-      return
+      return null
     }
-    if (!asDraft && validateIssuedForm()) return
+    if (!asDraft && validateIssuedForm()) return null
     if (continueTarget && !asDraft) {
-      setHistoryRecords((previous) => previous.map((item) => item.id === continueTarget.id
-        ? { ...item, resident: currentName, date: currentDate, status: "Issued", purpose: formValues.purpose || item.purpose, fields: { ...formValues } }
-        : item))
+      const continuedRecord: IssuanceRecord = {
+        ...continueTarget,
+        resident: currentName,
+        date: currentDate,
+        status: "Issued",
+        purpose: formValues.purpose || continueTarget.purpose,
+        fields: { ...formValues },
+      }
+      setHistoryRecords((previous) => previous.map((item) => item.id === continueTarget.id ? continuedRecord : item))
       setNotice(`${continueTarget.id} was continued and marked as issued.`)
       try {
         window.localStorage.removeItem(AUTO_DRAFT_KEY)
@@ -454,7 +460,7 @@ function IssuancesManagement() {
       }
       setContinueTarget(null)
       setIsIssuanceModalOpen(false)
-      return
+      return continuedRecord
     }
     const sequence = allRecords.reduce((max, item) => Math.max(max, Number(item.id.match(/\\d+$/)?.[0] ?? 0)), 0) + 1
     const record: IssuanceRecord = {
@@ -481,6 +487,7 @@ function IssuancesManagement() {
     setCorrectionTarget(null)
     setCorrectionReason("")
     setIsIssuanceModalOpen(false)
+    return record
   }
 
   function preparePrint(record?: IssuanceRecord) {
