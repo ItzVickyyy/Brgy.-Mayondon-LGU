@@ -94,7 +94,7 @@ function missingFields(resident: ResidentRecord, code: DocumentCode): string[] {
     if (field === "birthPlace") return !resident.birthplace
     if (field === "sex") return !resident.sex
     if (field === "civilStatus") return !resident.civilStatus
-    if (field === "residentSince") return resident.residentSince === undefined && !resident.residentSinceBirth
+    if (field === "residentSince") return !resident.residentSinceBirth && !resident.residentSince
     if (field === "sector") return !resident.sectors?.length
     if (field === "photo") return !resident.photoUrl
     if (field === "emergencyContact") return !resident.emergencyContact?.name || !resident.emergencyContact.address || !resident.emergencyContact.phone
@@ -240,7 +240,7 @@ export const issuanceApi = {
           sex: updatedResident.sex,
           civilStatus: updatedResident.civilStatus,
           residentSinceYear: updatedResident.residentSinceBirth ? undefined : updatedResident.residentSince || undefined,
-          residentSinceBirth: Boolean(updatedResident.residentSinceBirth || updatedResident.residentSince === 0),
+          residentSinceBirth: Boolean(updatedResident.residentSinceBirth),
         },
         issuedAt: new Date().toISOString(),
       } : {}),
