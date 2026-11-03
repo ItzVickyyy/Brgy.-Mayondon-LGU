@@ -34,15 +34,15 @@ const items: NavigationItem[] = [
     section: "Workspace",
   },
   {
-    icon: Users,
-    title: "Resident Records",
-    path: "/records",
-    section: "Records and Documents",
-  },
-  {
     icon: FileCheck2,
     title: "Issuance Management",
     path: "/issuances",
+    section: "Records and Documents",
+  },
+  {
+    icon: Users,
+    title: "Resident Records",
+    path: "/records",
     section: "Records and Documents",
   },
   {
