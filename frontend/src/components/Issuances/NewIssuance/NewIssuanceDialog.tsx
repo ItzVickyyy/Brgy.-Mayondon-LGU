@@ -172,8 +172,31 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     form.setValue("payment", next as never, { shouldDirty: true })
   }
 
+  function readErrorMessage(node: unknown): string {
+    if (typeof node !== "object" || node === null || !("message" in node)) return ""
+    const message = (node as { message?: unknown }).message
+    return typeof message === "string" ? message : ""
+  }
+
+  function getFieldError(field: DetailFieldConfig): string {
+    const errors = form.formState.errors as unknown as Record<string, unknown>
+    if (field.group === "identity") {
+      const key = field.name === "idType" ? "idTypeId" : field.name === "idNumber" ? "idNumber" : field.name === "idPlaceOfIssue" ? "placeOfIssue" : "dateOfIssue"
+      return readErrorMessage((errors.identification as Record<string, unknown> | undefined)?.[key])
+    }
+    if (field.group === "payment") {
+      const key = field.name === "isFree" ? "isFree" : "officialReceiptNo"
+      return readErrorMessage((errors.payment as Record<string, unknown> | undefined)?.[key])
+    }
+    if (field.name === "purpose") return readErrorMessage(errors.purposeText)
+    if (field.name === "sector") return readErrorMessage(errors.sectors)
+    const key = field.name === "relationship" ? "beneficiaryRelationship" : field.name === "referredBy" ? "referredByOfficialId" : field.name
+    return readErrorMessage((errors.details as Record<string, unknown> | undefined)?.[key])
+  }
+
   function renderField(field: DetailFieldConfig) {
     const fieldId = `issuance-${field.name}`
+    const fieldError = getFieldError(field)
     const fieldValue = field.group === "identity"
       ? (identification as unknown as Record<string, unknown> | undefined)?.[field.name === "idType" ? "idTypeId" : field.name === "idNumber" ? "idNumber" : field.name === "idPlaceOfIssue" ? "placeOfIssue" : "dateOfIssue"]
       : field.group === "payment"
@@ -215,8 +238,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     const fieldOptions = field.name === "associationName" ? knownAssociations : field.name === "referredBy" ? ["None", ...initialOfficials.filter((official) => official.status === "Current").map((official) => official.name)] : field.name === "witnessOfficialId" ? initialOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
     return <label key={field.name} htmlFor={fieldId} className={fieldLabelClass}>
       <span>{field.label}{field.required ? <span className="text-destructive"> *</span> : null}</span>
-      {field.type === "combobox" ? <><input id={fieldId} list={`issuance-options-${field.name}`} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={formControlClass} required={field.required} /><datalist id={`issuance-options-${field.name}`}>{fieldOptions.map((option) => <option key={option} value={option} />)}</datalist></> : field.type === "select" || field.type === "radio" ? (
-        <select id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, "bg-background")} required={field.required}>
+      {field.type === "combobox" ? <><input id={fieldId} list={`issuance-options-${field.name}`} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, fieldError && "border-destructive")} aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} required={field.required} /><datalist id={`issuance-options-${field.name}`}>{fieldOptions.map((option) => <option key={option} value={option} />)}</datalist></> : field.type === "select" || field.type === "radio" ? (
+        <select id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, fieldError && "border-destructive", "bg-background")} aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} required={field.required}>
           <option value="">Select…</option>
           {fieldOptions.map((option) => <option key={option} value={normalizedOptionValue(field.name, option)}>{option}</option>)}
         </select>
@@ -226,20 +249,21 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             const current = Array.isArray(value) ? value as string[] : []
             const optionValue = normalizedOptionValue(field.name, option)
             return <label key={option} className="inline-flex min-h-10 items-center gap-2 rounded-md border px-3 text-sm font-normal">
-              <input type="checkbox" checked={current.includes(optionValue)} disabled={Boolean(field.maxSelected && current.length >= field.maxSelected && !current.includes(optionValue))} id={option === field.options?.[0] ? fieldId : undefined} onChange={(event) => onValueChange(event.target.checked ? [...current, optionValue] as unknown as string : current.filter((item) => item !== optionValue) as unknown as string)} />
+              <input type="checkbox" checked={current.includes(optionValue)} disabled={Boolean(field.maxSelected && current.length >= field.maxSelected && !current.includes(optionValue))} id={option === field.options?.[0] ? fieldId : undefined} aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} onChange={(event) => onValueChange(event.target.checked ? [...current, optionValue] as unknown as string : current.filter((item) => item !== optionValue) as unknown as string)} />
               {option}
             </label>
           })}
         </div>
       ) : field.type === "checkbox" ? (
-        <input id={fieldId} type="checkbox" checked={Boolean(value)} onChange={(event) => onValueChange(event.target.checked)} className="size-4 accent-primary" />
+        <input id={fieldId} type="checkbox" checked={Boolean(value)} onChange={(event) => onValueChange(event.target.checked)} className="size-4 accent-primary" aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} />
       ) : field.name === "idNumber" && documentType === "BARANGAY_ID" ? (
         <input id={fieldId} value={String(value)} readOnly className={cn(formControlClass, "bg-muted/50")} />
       ) : field.type === "textarea" ? (
-        <textarea id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, "h-auto py-2")} rows={2} />
+        <textarea id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, fieldError && "border-destructive", "h-auto py-2")} aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} rows={2} />
       ) : (
-        <input id={fieldId} type={field.type === "date" ? "date" : field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={formControlClass} required={field.required} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} />
+        <input id={fieldId} type={field.type === "date" ? "date" : field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, fieldError && "border-destructive")} aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} required={field.required} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} />
       )}
+      {fieldError ? <span id={`${fieldId}-error`} className="text-xs font-normal text-destructive" role="alert">{fieldError}</span> : null}
       {field.help ? <span className="text-xs font-normal text-muted-foreground">{field.help}</span> : null}
     </label>
   }
