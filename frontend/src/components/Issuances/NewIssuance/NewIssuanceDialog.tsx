@@ -41,6 +41,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const form = useNewIssuanceForm(initialResidentId ?? "")
   const [residents, setResidents] = useState<ResidentRecord[]>([])
   const [residentQuery, setResidentQuery] = useState("")
+  const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [selectedResident, setSelectedResident] = useState<ResidentRecord | null>(() => sampleResidents.find((resident) => resident.id === initialResidentId || resident.name === initialResidentId) ?? null)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [quickAdd, setQuickAdd] = useState<QuickResidentInput>({
@@ -88,7 +89,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     form.setValue("purposeText", "")
     form.setValue("remarks", nextCode === "BARANGAY_CLEARANCE" ? "NO DEROGATORY RECORD ON FILE" : "")
     form.setValue("identification", nextCode === "BARANGAY_CLEARANCE" || nextCode === "FRANCHISE_CLEARANCE" || nextCode === "UTILITY_CLEARANCE"
-      ? { idTypeId: nextCode === "BARANGAY_CLEARANCE" ? 2 : 1, idNumber: "", placeOfIssue: "Los Baños, Laguna", dateOfIssue: localIsoDate() }
+      ? { idTypeId: nextCode === "BARANGAY_CLEARANCE" ? 0 : 1, idNumber: "", placeOfIssue: "Los Baños, Laguna", dateOfIssue: localIsoDate() }
       : undefined)
     form.setValue("payment", ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"].includes(nextCode)
       ? { officialReceiptNo: "", isFree: false } : undefined)
@@ -172,7 +173,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         setDetail(field.name, Array.isArray(nextValue) ? nextValue : String(nextValue).toLowerCase())
       } else if (field.name === "sectorIdNumber") {
         form.setValue("sectors", [{ sectorId: form.getValues("sectors")?.[0]?.sectorId ?? 1, idNumber: String(nextValue) }], { shouldDirty: true })
-      } else setDetail(field.name, nextValue)
+      } else if (field.name === "validUntil") { setValidUntilEdited(true); setDetail(field.name, nextValue) }
+      else setDetail(field.name, nextValue)
     }
     const fieldOptions = field.name === "associationName" ? knownAssociations : field.name === "referredBy" ? ["None", ...initialOfficials.filter((official) => official.status === "Current").map((official) => official.name)] : field.name === "witnessOfficialId" ? initialOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
     return <label key={field.name} htmlFor={fieldId} className={fieldLabelClass}>
@@ -400,9 +402,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             </div> : <div className="space-y-2">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" aria-hidden="true" />
-                <input value={residentQuery} onChange={(event) => setResidentQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && matches[0]) { event.preventDefault(); selectResident(matches[0]) } if (event.key === "Escape") setResidentQuery("") }} placeholder="Search name or resident number…" className={cn(formControlClass, "pl-9")} aria-label="Search resident" />
+                <input value={residentQuery} onChange={(event) => setResidentQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "ArrowDown" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, matches.length - 1)) } if (event.key === "ArrowUp" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) } if (event.key === "Enter" && matches[activeResidentMatch]) { event.preventDefault(); selectResident(matches[activeResidentMatch]) } if (event.key === "Escape") { event.preventDefault(); setResidentQuery("") } }} placeholder="Search name or resident number…" className={cn(formControlClass, "pl-9")} aria-label="Search resident" role="combobox" aria-autocomplete="list" aria-expanded={matches.length > 0} aria-controls="issuance-resident-results" aria-activedescendant={matches[activeResidentMatch] ? `issuance-resident-option-${matches[activeResidentMatch].id}` : undefined} />
               </div>
-              {matches.length ? <div className="overflow-hidden rounded-md border">{matches.map((resident) => <button type="button" key={resident.id} disabled={resident.status === "Archived"} onClick={() => selectResident(resident)} className={cn("flex min-h-12 w-full flex-col items-start border-b px-3 py-2 text-left last:border-b-0 hover:bg-muted", resident.status === "Archived" && "cursor-not-allowed opacity-50")}>
+              {matches.length ? <div id="issuance-resident-results" role="listbox" className="overflow-hidden rounded-md border">{matches.map((resident, index) => <button type="button" key={resident.id} id={`issuance-resident-option-${resident.id}`} role="option" aria-selected={activeResidentMatch === index} disabled={resident.status === "Archived"} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} className={cn("flex min-h-12 w-full flex-col items-start border-b px-3 py-2 text-left last:border-b-0 hover:bg-muted", activeResidentMatch === index && "bg-muted", resident.status === "Archived" && "cursor-not-allowed opacity-50")}>
                 <span className="font-medium">{resident.name} <span className="text-xs text-muted-foreground">{resident.id}</span>{resident.status === "Archived" ? <span className="ml-2 text-xs text-muted-foreground">Archived</span> : null}</span>
                 <span className="text-xs text-muted-foreground">{getResidentAddress(resident)}</span>
               </button>)}</div> : residentQuery.trim() ? <p className="text-sm text-muted-foreground">No matching active resident.</p> : null}
@@ -427,15 +429,15 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               {config.residentNeeds.filter((need) => {
                 const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : selectedResident.emergencyContact?.phone
                 return !residentValue
-              }).concat(!selectedResident.address.trim() ? ["address"] : []).map((need) => {
+              }).concat((!selectedResident.houseNumber?.trim() || !selectedResident.street?.trim() || !selectedResident.purok) ? ["address"] : []).map((need) => {
                 const labels: Record<string, string> = { address: "Street and purok address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since year", sector: "Sector", photo: "Photo reference", emergencyContact: "Emergency contact" }
                 const key = need === "birthDate" ? "birthdate" : need === "birthPlace" ? "birthplace" : need
                 if (need === "address") return <div key={need} className="space-y-2">
                   <p className="text-sm font-medium">{labels[need]}</p>
                   <div className="grid gap-3 sm:grid-cols-3">
                     <label className={fieldLabelClass}>House number<input value={addressParts.houseNumber} onChange={(event) => { const next = { ...addressParts, houseNumber: event.target.value }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, houseNumber: next.houseNumber, street: next.street, purok: next.purok, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`, "Mayondon"].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass} /></label>
-                    <label className={fieldLabelClass}>Street<input value={addressParts.street} onChange={(event) => { const next = { ...addressParts, street: event.target.value }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass} /></label>
-                    <label className={fieldLabelClass}>Purok<select value={addressParts.purok} onChange={(event) => { const next = { ...addressParts, purok: Number(event.target.value) }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass}>{[1, 2, 3, 4, 5, 6].map((purok) => <option key={purok} value={purok}>Purok {purok}</option>)}</select></label>
+                    <label className={fieldLabelClass}>Street<input value={addressParts.street} onChange={(event) => { const next = { ...addressParts, street: event.target.value }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, houseNumber: next.houseNumber, street: next.street, purok: next.purok, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`, "Mayondon"].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass} /></label>
+                    <label className={fieldLabelClass}>Purok<select value={addressParts.purok} onChange={(event) => { const next = { ...addressParts, purok: Number(event.target.value) }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, houseNumber: next.houseNumber, street: next.street, purok: next.purok, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`, "Mayondon"].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass}>{[1, 2, 3, 4, 5, 6].map((purok) => <option key={purok} value={purok}>Purok {purok}</option>)}</select></label>
                   </div>
                 </div>
                 if (need === "emergencyContact") return <div key={need} className="space-y-2">
