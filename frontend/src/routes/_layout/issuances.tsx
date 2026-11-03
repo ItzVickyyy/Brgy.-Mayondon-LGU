@@ -98,7 +98,7 @@ function getPreselectedResident() {
 function IssuancesManagement() {
   const initialResident = sampleResidents.find((resident) => resident.name === getPreselectedResident() || resident.id === getPreselectedResident())
   const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(() => Boolean(getPreselectedResident()))
-  const [selectedType, setSelectedType] = useState(documentTypes[0])
+  const [selectedType, setSelectedType] = useState<string>(documentTypes[0])
   const [residentQuery, setResidentQuery] = useState("")
   const [selectedResidentId, setSelectedResidentId] = useState(() => initialResident?.id ?? "")
   const [manualEntry, setManualEntry] = useState(false)
