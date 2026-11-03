@@ -1,7 +1,7 @@
 import { sampleResidents, type ResidentRecord } from "@/components/Records/records-sample-data"
 import { clearancePurposeOptions } from "@/components/Issuances/config"
 import { documentConfig, type DocumentCode } from "./documentConfig"
-import { issuanceInputSchema, type IssuanceInput } from "./schemas"
+import { issuanceInputSchema, type DocumentDetails, type IssuanceInput } from "./schemas"
 
 export type ResidentPatch = Partial<Pick<ResidentRecord,
   | "birthdate" | "birthplace" | "sex" | "civilStatus" | "sectors" | "residentSince" | "residentSinceBirth"
@@ -21,15 +21,20 @@ export type QuickResidentInput = {
   residentSinceBirth: boolean
 }
 export type IssuanceStatus = "draft" | "issued" | "voided"
+type StoredDocumentDetails = Exclude<DocumentDetails, { type: "FIRST_TIME_JOBSEEKER" }> | Omit<Extract<DocumentDetails, { type: "FIRST_TIME_JOBSEEKER" }>, "parts">
+type StoredIssuancePayload = Omit<IssuanceInput, "residentUpdates" | "purposeText" | "details"> & {
+  purposeId?: number
+  details: StoredDocumentDetails
+}
+
 export type MockIssuance = {
   id: string
   referenceNo: string
   documentType: DocumentCode
   residentId: string
-  residentName: string
   issueDate: string
   status: IssuanceStatus
-  payload: IssuanceInput
+  payload: StoredIssuancePayload
   correctsIssuanceId?: string
   correctionReason?: string
   voidReason?: string
@@ -76,6 +81,17 @@ const mockTricycles = [{
   plateNumber: "SYN-1001",
 }]
 
+function toStoredPayload(input: IssuanceInput): StoredIssuancePayload {
+  const { residentUpdates: _residentUpdates, purposeText, details, ...base } = input
+  const purposeId = input.purposeId ?? (purposeText?.trim() ? purposes.findIndex((purpose) => purpose.toLowerCase() === purposeText.trim().toLowerCase()) + 1 : undefined)
+  let storedDetails: StoredDocumentDetails = details
+  if (details.type === "FIRST_TIME_JOBSEEKER") {
+    const { parts: _parts, ...jobseekerDetails } = details
+    storedDetails = jobseekerDetails
+  }
+  return { ...base, purposeId: purposeId && purposeId > 0 ? purposeId : undefined, details: storedDetails }
+}
+
 export function getResidentAddress(resident: ResidentRecord) {
   if (resident.houseNumber || resident.street || resident.purok) return [[resident.houseNumber?.trim(), resident.street?.trim()].filter(Boolean).join(" "), resident.purok ? `Purok ${resident.purok}` : ""].filter(Boolean).join(", ")
   return resident.address.replace(/,\s*Mayondon.*$/i, "")
@@ -113,6 +129,14 @@ export const issuanceApi = {
       return Number.isFinite(suffix) ? Math.max(highest, suffix) : highest
     }, 0)
     return String(max + 1).padStart(4, "0")
+  },
+
+  getResident(id: string) {
+    return residents.find((resident) => resident.id === id)
+  },
+
+  getPurposeLabel(id?: number) {
+    return id ? purposes[id - 1] : undefined
   },
 
   async searchResidents(query = ""): Promise<ResidentRecord[]> {
@@ -227,10 +251,9 @@ export const issuanceApi = {
       referenceNo: `ISS-${new Date().getFullYear()}-${String(sequence).padStart(6, "0")}`,
       documentType: parsed.documentType,
       residentId: parsed.residentId,
-      residentName: [updatedResident.firstName, updatedResident.middleName, updatedResident.lastName].filter(Boolean).join(" "),
       issueDate: parsed.issueDate,
       status: parsed.status,
-      payload: parsed,
+      payload: toStoredPayload(parsed),
       ...(parsed.status === "issued" ? {
         residentSnapshot: {
           fullName: [updatedResident.firstName, updatedResident.middleName, updatedResident.lastName].filter(Boolean).join(" "),
@@ -289,7 +312,7 @@ export const issuanceApi = {
     const existing = issuances.find((item) => item.id === id)
     if (!existing || existing.status !== "draft") throw new Error("Only drafts can be edited.")
     const parsed = issuanceInputSchema.parse({ ...input, status: "draft" })
-    const updated = { ...existing, payload: parsed, issueDate: parsed.issueDate, documentType: parsed.documentType, residentId: parsed.residentId }
+    const updated = { ...existing, payload: toStoredPayload(parsed), issueDate: parsed.issueDate, documentType: parsed.documentType, residentId: parsed.residentId }
     issuances = issuances.map((item) => item.id === id ? updated : item)
     return updated
   },
