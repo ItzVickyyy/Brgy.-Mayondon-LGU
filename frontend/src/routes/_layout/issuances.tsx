@@ -543,7 +543,7 @@ function IssuancesManagement() {
     <div className="flex flex-col gap-6">
       <style>
         {
-          "@media print { body * { visibility: hidden !important; } #issuance-print, #issuance-print * { visibility: visible !important; } #issuance-print { display: block !important; position: fixed; inset: 0; width: 100%; padding: 24px; color: #111 !important; background: white !important; } }"
+          "@media print { body * { visibility: hidden !important; } }"
         }
       </style>
 
