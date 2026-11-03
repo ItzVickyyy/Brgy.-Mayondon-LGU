@@ -3,7 +3,7 @@ import { CalendarDays, Check, ChevronDown, Search, UserRoundPlus } from "lucide-
 import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuanceForm"
 import { documentConfig, documentConfigList, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
 import { issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
-import type { ResidentRecord } from "@/components/Records/records-sample-data"
+import { sampleResidents, type ResidentRecord } from "@/components/Records/records-sample-data"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { formControlClass } from "@/components/Common/formStyles"
 import { Button } from "@/components/ui/button"
@@ -48,7 +48,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const identification = form.watch("identification")
   const payment = form.watch("payment")
   const config = documentConfig[documentType]
-  const allResidents = useMemo(() => [...residents], [residents])
+  const allResidents = useMemo(() => [...sampleResidents, ...residents], [residents])
   const matches = useMemo(() => {
     const query = residentQuery.trim().toLowerCase()
     if (!query || selectedResident) return []
@@ -303,8 +303,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" aria-hidden="true" />
                 <input value={residentQuery} onChange={(event) => setResidentQuery(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter" && matches[0]) { event.preventDefault(); selectResident(matches[0]) } if (event.key === "Escape") setResidentQuery("") }} placeholder="Search name or resident number…" className={cn(formControlClass, "pl-9")} aria-label="Search resident" />
               </div>
-              {matches.length ? <div className="overflow-hidden rounded-md border">{matches.map((resident) => <button type="button" key={resident.id} onClick={() => selectResident(resident)} className="flex min-h-12 w-full flex-col items-start border-b px-3 py-2 text-left last:border-b-0 hover:bg-muted">
-                <span className="font-medium">{resident.name} <span className="text-xs text-muted-foreground">{resident.id}</span></span>
+              {matches.length ? <div className="overflow-hidden rounded-md border">{matches.map((resident) => <button type="button" key={resident.id} disabled={resident.status === "Archived"} onClick={() => selectResident(resident)} className={cn("flex min-h-12 w-full flex-col items-start border-b px-3 py-2 text-left last:border-b-0 hover:bg-muted", resident.status === "Archived" && "cursor-not-allowed opacity-50")}>
+                <span className="font-medium">{resident.name} <span className="text-xs text-muted-foreground">{resident.id}</span>{resident.status === "Archived" ? <span className="ml-2 text-xs text-muted-foreground">Archived</span> : null}</span>
                 <span className="text-xs text-muted-foreground">{resident.address}</span>
               </button>)}</div> : residentQuery.trim() ? <p className="text-sm text-muted-foreground">No matching active resident.</p> : null}
               <button type="button" className="inline-flex min-h-9 items-center gap-1 text-sm text-primary underline underline-offset-4" onClick={() => setShowQuickAdd((value) => !value)}><UserRoundPlus className="size-4" />Resident not found? Add new resident</button>
