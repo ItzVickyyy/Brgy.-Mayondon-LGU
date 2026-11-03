@@ -43,6 +43,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   })
   const [residentUpdates, setResidentUpdates] = useState<ResidentPatch>({})
   const [selectedSector, setSelectedSector] = useState("")
+  const [addressParts, setAddressParts] = useState({ houseNumber: "", street: "", purok: 1 })
   const [moreOpen, setMoreOpen] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -80,6 +81,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       ? { officialReceiptNo: "", isFree: false } : undefined)
     form.clearErrors()
     setSelectedSector("")
+    setAddressParts({ houseNumber: "", street: "", purok: 1 })
     setDuplicate(null)
     setFormError("")
   }
