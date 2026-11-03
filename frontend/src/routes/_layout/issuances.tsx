@@ -786,12 +786,12 @@ function IssuancesManagement() {
           if (record.payload.details.type === "BARANGAY_ID") fields.validUntil = record.payload.details.validUntil
           const historyRecord: IssuanceRecord = {
             id: record.referenceNo,
-            resident: record.residentSnapshot?.fullName ?? resident?.name ?? "Selected resident",
+            resident: record.residentSnapshot?.fullName ?? record.residentName ?? resident?.name ?? "Selected resident",
             type,
             date: record.issueDate,
             status,
             purpose,
-            validUntil: record.payload.details.type === "BARANGAY_ID" ? record.payload.details.validUntil : undefined,
+            validUntil: record.payload.details.type === "BARANGAY_ID" ? record.payload.details.validUntil : documentConfig[record.documentType].validityMonths ? (() => { const date = new Date(`${record.issueDate}T00:00:00`); date.setMonth(date.getMonth() + (documentConfig[record.documentType].validityMonths ?? 0)); return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}` })() : undefined,
             orNumber: record.payload.payment?.officialReceiptNo,
             issuedBy: record.status === "issued" ? "staff" : undefined,
             fields,
