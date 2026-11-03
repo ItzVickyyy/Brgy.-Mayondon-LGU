@@ -172,6 +172,24 @@ function IssuancesManagement() {
     }
   })
   const [drafts, setDrafts] = useState<IssuanceRecord[]>([])
+  const [autoSaveStatus, setAutoSaveStatus] = useState<"saved" | "saving">("saved")
+  useEffect(() => {
+    setAutoSaveStatus("saving")
+    const timeout = window.setTimeout(() => {
+      try {
+        window.localStorage.setItem(AUTO_DRAFT_KEY, JSON.stringify({
+          selectedType,
+          formValues,
+          selectedResidentId,
+          manualEntry,
+        } satisfies AutoSavedIssuanceDraft))
+        setAutoSaveStatus("saved")
+      } catch {
+        setAutoSaveStatus("saving")
+      }
+    }, 400)
+    return () => window.clearTimeout(timeout)
+  }, [formValues, manualEntry, selectedResidentId, selectedType])
   const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
   const [viewRecord, setViewRecord] = useState<IssuanceRecord | null>(null)
   const [notice, setNotice] = useState("")
