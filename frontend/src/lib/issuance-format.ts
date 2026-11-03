@@ -82,3 +82,15 @@ export function splitIsoDate(value: string): { year: string; month: string; day:
   }
   return { year: match[1], month: String(Number(match[2])), day: String(Number(match[3])) }
 }
+
+export function isoToLocalDate(value: string): Date | undefined {
+  if (!value) return undefined
+  const parts = splitIsoDate(value)
+  if (!parts.year || !parts.month || !parts.day) return undefined
+  return new Date(Number(parts.year), Number(parts.month) - 1, Number(parts.day))
+}
+
+export function localDateToIso(date: Date): string {
+  if (Number.isNaN(date.getTime())) return ""
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+}
