@@ -753,16 +753,7 @@ function IssuancesManagement() {
                     {((documentSections[selectedType] ?? []).find((section) => section.id === "resident")?.fields ?? []).map((field) => {
                       if (selectedResidentId && ["firstName", "middleName", "lastName"].includes(field.name)) return null
                       if (selectedResidentId && field.name === "name") {
-                        const parts = ((documentSections[selectedType] ?? []).find((section) => section.id === "resident")?.fields ?? []).filter((part) => ["firstName", "middleName", "lastName"].includes(part.name))
-                        return (
-                          <div key={field.name} className="md:col-span-2">
-                            {renderField(field)}
-                            <details className="mt-1">
-                              <summary className="min-h-11 cursor-pointer py-2 text-sm text-primary underline underline-offset-4">Edit name parts</summary>
-                              <div className="grid gap-4 md:grid-cols-2">{parts.map(renderField)}</div>
-                            </details>
-                          </div>
-                        )
+                        return <div key={field.name} className="md:col-span-2">{renderField(field)}</div>
                       }
                       return renderField(field)
                     })}
