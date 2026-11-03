@@ -20,6 +20,8 @@ type Props = {
 }
 
 const sectionClass = "space-y-3 border-b pb-5 last:border-b-0"
+const knownStreets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
+const knownAssociations = ["Mayondon Tricycle Operators and Drivers Association"]
 const fieldLabelClass = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
 
 function normalizedOptionValue(fieldName: string, option: string) {
@@ -47,6 +49,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   })
   const [residentUpdates, setResidentUpdates] = useState<ResidentPatch>({})
   const [selectedSector, setSelectedSector] = useState("")
+  const [validUntilEdited, setValidUntilEdited] = useState(false)
   const [addressParts, setAddressParts] = useState(() => ({ houseNumber: selectedResident?.houseNumber ?? "", street: selectedResident?.street ?? "", purok: selectedResident?.purok ?? 1 }))
   const [moreOpen, setMoreOpen] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
@@ -75,7 +78,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     }) || Boolean(current.purposeText?.trim()) || Boolean(current.identification?.idNumber?.trim()) || Boolean(current.payment?.officialReceiptNo?.trim())
     if (detailsDirty && !window.confirm("Changing the document type will clear its details. Continue?")) return
     form.setValue("documentType", nextCode, { shouldDirty: true })
-    form.setValue("details", defaultDetails(nextCode), { shouldDirty: true })
+    const nextDetails = defaultDetails(nextCode)\n    if (nextCode === "BARANGAY_ID" && nextDetails.type === "BARANGAY_ID") {\n      const baseDate = new Date(`${current.issueDate}T00:00:00`)\n      baseDate.setFullYear(baseDate.getFullYear() + 1)\n      nextDetails.validUntil = localIsoDate(baseDate)\n    }\n    form.setValue("details", nextDetails, { shouldDirty: true })
     form.setValue("purposeText", "")
     form.setValue("remarks", nextCode === "BARANGAY_CLEARANCE" ? "NO DEROGATORY RECORD ON FILE" : "")
     form.setValue("identification", nextCode === "BARANGAY_CLEARANCE" || nextCode === "FRANCHISE_CLEARANCE" || nextCode === "UTILITY_CLEARANCE"
@@ -88,6 +91,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     form.setValue("signatoryOfficialId", signatory?.id)
     form.clearErrors()
     setSelectedSector("")
+    setValidUntilEdited(false)
     setAddressParts({ houseNumber: "", street: "", purok: 1 })
     setDuplicate(null)
     setFormError("")
@@ -164,10 +168,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         form.setValue("sectors", [{ sectorId: form.getValues("sectors")?.[0]?.sectorId ?? 1, idNumber: String(nextValue) }], { shouldDirty: true })
       } else setDetail(field.name, nextValue)
     }
-    const fieldOptions = field.name === "referredBy" ? ["None", ...initialOfficials.filter((official) => official.status === "Current").map((official) => official.name)] : field.name === "witnessOfficialId" ? initialOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
+    const fieldOptions = field.name === "associationName" ? knownAssociations : field.name === "referredBy" ? ["None", ...initialOfficials.filter((official) => official.status === "Current").map((official) => official.name)] : field.name === "witnessOfficialId" ? initialOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
     return <label key={field.name} htmlFor={fieldId} className={fieldLabelClass}>
       <span>{field.label}{field.required ? <span className="text-destructive"> *</span> : null}</span>
-      {field.type === "select" || field.type === "combobox" || field.type === "radio" ? (
+      {field.type === "combobox" ? <><input id={fieldId} list={`issuance-options-${field.name}`} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={formControlClass} required={field.required} /><datalist id={`issuance-options-${field.name}`}>{fieldOptions.map((option) => <option key={option} value={option} />)}</datalist></> : field.type === "select" || field.type === "radio" ? (
         <select id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, "bg-background")} required={field.required}>
           <option value="">Select…</option>
           {fieldOptions.map((option) => <option key={option} value={normalizedOptionValue(field.name, option)}>{option}</option>)}
@@ -368,7 +372,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               </label>
               <label className={fieldLabelClass}>Date on document
                 <span className="relative">
-                  <input type="date" value={issueDate} onChange={(event) => form.setValue("issueDate", event.target.value, { shouldDirty: true })} className={formControlClass} required />
+                  <input type="date" value={issueDate} onChange={(event) => { const nextDate = event.target.value; form.setValue("issueDate", nextDate, { shouldDirty: true }); if (documentType === "BARANGAY_ID" && !validUntilEdited && nextDate) { const validDate = new Date(`${nextDate}T00:00:00`); validDate.setFullYear(validDate.getFullYear() + 1); setDetail("validUntil", localIsoDate(validDate)) } }} className={formControlClass} required />
                   <CalendarDays className="pointer-events-none absolute right-3 top-3 size-4 text-muted-foreground" aria-hidden="true" />
                 </span>
               </label>
@@ -399,7 +403,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               <button type="button" className="inline-flex min-h-9 items-center gap-1 text-sm text-primary underline underline-offset-4" onClick={() => setShowQuickAdd((value) => !value)}><UserRoundPlus className="size-4" />Resident not found? Add new resident</button>
               {showQuickAdd ? <div className="space-y-3 rounded-md border p-3">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {([["firstName", "Given names"], ["middleName", "Middle name"], ["lastName", "Surname"], ["birthdate", "Birthdate"], ["houseNumber", "House number"], ["street", "Street"]] as const).map(([key, label]) => <label key={key} className={fieldLabelClass}>{label}<input type={key === "birthdate" ? "date" : "text"} value={quickAdd[key] ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, [key]: event.target.value }))} className={formControlClass} required={["firstName", "lastName", "birthdate"].includes(key)} /></label>)}
+                  {([["firstName", "Given names"], ["middleName", "Middle name"], ["lastName", "Surname"], ["birthdate", "Birthdate"], ["houseNumber", "House number"], ["street", "Street"]] as const).map(([key, label]) => <label key={key} className={fieldLabelClass}>{label}<input type={key === "birthdate" ? "date" : "text"} list={key === "street" ? "issuance-street-options" : undefined} value={quickAdd[key] ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, [key]: event.target.value }))} className={formControlClass} required={["firstName", "lastName", "birthdate"].includes(key)} /></label>)}
                   <label className={fieldLabelClass}>Sex<select value={quickAdd.sex} onChange={(event) => setQuickAdd((previous) => ({ ...previous, sex: event.target.value as "Male" | "Female" }))} className={formControlClass}><option>Male</option><option>Female</option></select></label>
                   <label className={fieldLabelClass}>Civil status<select value={quickAdd.civilStatus} onChange={(event) => setQuickAdd((previous) => ({ ...previous, civilStatus: event.target.value }))} className={formControlClass}><option>Single</option><option>Married</option><option>Legally Separated</option><option>Widow/Widower</option></select></label>
                   <label className={fieldLabelClass}>Purok<select value={quickAdd.purok} onChange={(event) => setQuickAdd((previous) => ({ ...previous, purok: Number(event.target.value) }))} className={formControlClass}>{[1, 2, 3, 4, 5, 6].map((purok) => <option key={purok} value={purok}>Purok {purok}</option>)}</select></label>
