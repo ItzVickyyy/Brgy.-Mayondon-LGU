@@ -181,14 +181,17 @@ export const issuanceApi = {
     const parsed = input.status === "draft" ? input : issuanceInputSchema.parse(input)
     if (parsed.purposeText?.trim() && !purposes.some((purpose) => purpose.toLowerCase() === parsed.purposeText?.trim().toLowerCase())) purposes = [...purposes, parsed.purposeText.trim()]
     if (parsed.details.type === "FRANCHISE_CLEARANCE" && parsed.details.associationName.trim() && !associations.some((association) => association.toLowerCase() === parsed.details.associationName.trim().toLowerCase())) associations = [...associations, parsed.details.associationName.trim()]
+    const resident = residents.find((item) => item.id === parsed.residentId)
+    if (!resident) throw new Error("Select a resident record first.")
+    const projectedResident = { ...resident, ...(parsed.residentUpdates as ResidentPatch | undefined) }
     if (parsed.status === "issued") {
       const check = await this.checkIssuance(parsed.residentId, parsed.documentType)
       if (check.existingIssued) {
         throw Object.assign(new Error(`An issued ${documentConfig[parsed.documentType].shortName} already exists: ${check.existingIssued.referenceNo} (${check.existingIssued.issueDate}).`), { status: 409, existing: check.existingIssued })
       }
+      const missing = missingFields(projectedResident, parsed.documentType)
+      if (missing.length) throw new Error(`Complete the resident record fields needed for this document: ${missing.join(", ")}.`)
     }
-    const resident = residents.find((item) => item.id === parsed.residentId)
-    if (!resident) throw new Error("Select a resident record first.")
     if (parsed.residentUpdates) {
       await this.updateResident(resident.id, parsed.residentUpdates as ResidentPatch)
     }
