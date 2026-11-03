@@ -21,7 +21,7 @@ export type QuickResidentInput = {
   residentSinceBirth: boolean
 }
 export type IssuanceStatus = "draft" | "issued" | "voided"
-type StoredDocumentDetails = Exclude<DocumentDetails, { type: "FIRST_TIME_JOBSEEKER" }> | Omit<Extract<DocumentDetails, { type: "FIRST_TIME_JOBSEEKER" }>, "parts">
+type StoredDocumentDetails = Exclude<DocumentDetails, { type: "FIRST_TIME_JOBSEEKER" | "FRANCHISE_CLEARANCE" }> | { type: "FRANCHISE_CLEARANCE"; tricycleId?: string } | Omit<Extract<DocumentDetails, { type: "FIRST_TIME_JOBSEEKER" }>, "parts">
 type StoredIssuancePayload = Omit<IssuanceInput, "residentUpdates" | "purposeText" | "details"> & {
   purposeId?: number
   details: StoredDocumentDetails
@@ -72,8 +72,9 @@ let issuances: MockIssuance[] = []
 let streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
 let purposes = [...clearancePurposeOptions]
 let associations = ["Mayondon Tricycle Operators and Drivers Association"]
-const mockTricycles = [{
-  associationName: "Mayondon Tricycle Operators and Drivers Association",
+let mockTricycles = [{
+  id: "TRI-0001",
+  associationId: 1,
   make: "Sample Make",
   bodyType: "TRICYCLE",
   motorNumber: "MOTOR-SAMPLE-001",
@@ -81,11 +82,13 @@ const mockTricycles = [{
   plateNumber: "SYN-1001",
 }]
 
-function toStoredPayload(input: IssuanceInput): StoredIssuancePayload {
+function toStoredPayload(input: IssuanceInput, tricycleId?: string): StoredIssuancePayload {
   const { residentUpdates: _residentUpdates, purposeText, details, ...base } = input
   const purposeId = input.purposeId ?? (purposeText?.trim() ? purposes.findIndex((purpose) => purpose.toLowerCase() === purposeText.trim().toLowerCase()) + 1 : undefined)
   let storedDetails: StoredDocumentDetails = details
-  if (details.type === "FIRST_TIME_JOBSEEKER") {
+  if (details.type === "FRANCHISE_CLEARANCE") {
+    storedDetails = { type: "FRANCHISE_CLEARANCE", tricycleId }
+  } else if (details.type === "FIRST_TIME_JOBSEEKER") {
     const { parts: _parts, ...jobseekerDetails } = details
     storedDetails = jobseekerDetails
   }
@@ -220,7 +223,7 @@ export const issuanceApi = {
       (normalizedPlate && tricycle.plateNumber.toLowerCase() === normalizedPlate) ||
       (normalizedMotor && tricycle.motorNumber.toLowerCase() === normalizedMotor),
     )
-    return { plate, motor, match }
+    return { plate, motor, match: match ? { ...match, associationName: associations[match.associationId - 1] ?? "" } : undefined }
   },
 
   async createIssuance(input: IssuanceInput): Promise<CreateIssuanceResult> {
@@ -253,7 +256,7 @@ export const issuanceApi = {
       residentId: parsed.residentId,
       issueDate: parsed.issueDate,
       status: parsed.status,
-      payload: toStoredPayload(parsed),
+      payload: toStoredPayload(parsed, tricycleId),
       ...(parsed.status === "issued" ? {
         residentSnapshot: {
           fullName: [updatedResident.firstName, updatedResident.middleName, updatedResident.lastName].filter(Boolean).join(" "),
@@ -325,6 +328,15 @@ export const mockIssuanceStore = {
     streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
     purposes = [...clearancePurposeOptions]
     associations = ["Mayondon Tricycle Operators and Drivers Association"]
+    mockTricycles = [{
+      id: "TRI-0001",
+      associationId: 1,
+      make: "Sample Make",
+      bodyType: "TRICYCLE",
+      motorNumber: "MOTOR-SAMPLE-001",
+      color: "Blue",
+      plateNumber: "SYN-1001",
+    }]
   },
   addStreet(name: string) {
     const normalized = name.trim()
