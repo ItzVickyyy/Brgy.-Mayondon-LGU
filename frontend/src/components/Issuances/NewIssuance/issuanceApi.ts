@@ -63,7 +63,8 @@ let issuances: MockIssuance[] = []
 let streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
 let associations = ["Mayondon Tricycle Operators and Drivers Association"]
 
-function residentAddress(resident: ResidentRecord) {
+export function getResidentAddress(resident: ResidentRecord) {
+  if (resident.houseNumber || resident.street || resident.purok) return [resident.houseNumber?.trim(), resident.street?.trim(), resident.purok ? `Purok ${resident.purok}` : ""].filter(Boolean).join(", ")
   return resident.address.replace(/,\s*Mayondon.*$/i, "")
 }
 
@@ -75,7 +76,7 @@ function snapshotAddress(resident: ResidentRecord) {
 function missingFields(resident: ResidentRecord, code: DocumentCode): string[] {
   const needs = ["address", ...documentConfig[code].residentNeeds]
   return needs.filter((field) => {
-    if (field === "address") return !resident.address.trim()
+    if (field === "address") return !resident.houseNumber?.trim() || !resident.street?.trim() || !resident.purok
     if (field === "birthDate") return !resident.birthdate
     if (field === "birthPlace") return !resident.birthplace
     if (field === "sex") return !resident.sex
