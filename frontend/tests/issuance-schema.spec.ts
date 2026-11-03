@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 import { documentDetailsSchema, documentDetailSchemas } from "@/components/Issuances/NewIssuance/schemas"
-import { getMissingResidentFields } from "@/components/Issuances/NewIssuance/issuanceApi"
+import { getMissingResidentFields, issuanceApi, mockIssuanceStore } from "@/components/Issuances/NewIssuance/issuanceApi"
 import type { DocumentCode } from "@/components/Issuances/NewIssuance/documentConfig"
 import type { ResidentRecord } from "@/components/Records/records-sample-data"
 
@@ -75,4 +75,46 @@ test("missing resident fields reports only fields required by the selected docum
     "civilStatus",
   ])
   expect(getMissingResidentFields(resident, "FRANCHISE_CLEARANCE")).toEqual(["address"])
+})
+
+
+test("First-Time Jobseeker is limited to one issued record per resident", async () => {
+  mockIssuanceStore.reset()
+  const input = {
+    documentType: "FIRST_TIME_JOBSEEKER" as const,
+    issueDate: "2026-11-03",
+    residentId: "RES-0001",
+    signatoryOfficialId: "OFF-001",
+    details: {
+      type: "FIRST_TIME_JOBSEEKER" as const,
+      educationalAttainment: "College",
+      course: "N/A",
+      isJobstartBeneficiary: false,
+      witnessOfficialId: "OFF-006",
+      parts: ["applicant_sheet", "oath", "certification"] as ("applicant_sheet" | "oath" | "certification")[],
+    },
+    status: "issued" as const,
+  }
+
+  const first = await issuanceApi.createIssuance(input)
+  expect(first.status).toBe("issued")
+  await expect(issuanceApi.createIssuance(input)).rejects.toMatchObject({ status: 409 })
+  mockIssuanceStore.reset()
+})
+
+test("issued records retain an issue-time resident snapshot", async () => {
+  mockIssuanceStore.reset()
+  const record = await issuanceApi.createIssuance({
+    documentType: "BARANGAY_CLEARANCE",
+    issueDate: "2026-11-03",
+    residentId: "RES-0001",
+    purposeText: "Employment Requirement",
+    identification: { idTypeId: 2, idNumber: "SYNTHETIC-ID-001", placeOfIssue: "Los Baños, Laguna", dateOfIssue: "2026-11-03" },
+    payment: { officialReceiptNo: "FOC", isFree: true },
+    details: { type: "BARANGAY_CLEARANCE" },
+    status: "issued",
+  })
+  expect(record.residentSnapshot?.fullName).toBe("Fictional A. Resident")
+  expect(record.residentSnapshot?.addressLine).toBe("12, Rizal Street, Purok 1")
+  mockIssuanceStore.reset()
 })
