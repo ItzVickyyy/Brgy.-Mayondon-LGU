@@ -4,7 +4,7 @@ import { issuanceInputSchema, type IssuanceInput } from "./schemas"
 
 export type ResidentPatch = Partial<Pick<ResidentRecord,
   | "birthdate" | "birthplace" | "sex" | "civilStatus" | "sectors" | "residentSince"
-  | "address" | "photoUrl" | "emergencyContact"
+  | "address" | "houseNumber" | "street" | "purok" | "photoUrl" | "emergencyContact"
 >>
 export type QuickResidentInput = {
   lastName: string
@@ -68,7 +68,7 @@ function residentAddress(resident: ResidentRecord) {
 }
 
 function snapshotAddress(resident: ResidentRecord) {
-  const address = residentAddress(resident)
+  const address = getResidentAddress(resident)
   return address.includes(",") ? address : address
 }
 
@@ -116,6 +116,9 @@ export const issuanceApi = {
       sectors: [],
       residentSince: input.residentSinceBirth ? 0 : input.residentSinceYear ?? 0,
       address,
+      houseNumber: input.houseNumber?.trim() ?? "",
+      street: input.street.trim(),
+      purok: input.purok,
       residentType: "Existing resident",
       idNumber: "",
       idStatus: "None",
