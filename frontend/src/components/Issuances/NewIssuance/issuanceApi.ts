@@ -156,7 +156,7 @@ export const issuanceApi = {
   async updateResident(id: string, patch: ResidentPatch): Promise<ResidentRecord> {
     const current = residents.find((resident) => resident.id === id)
     if (!current) throw new Error("Resident record was not found.")
-    const updated = { ...current, ...patch, name: [patch.firstName ?? current.firstName, patch.middleName ?? current.middleName, patch.lastName ?? current.lastName].filter(Boolean).join(" ") }
+    const updated = { ...current, ...patch }
     residents = residents.map((resident) => resident.id === id ? updated : resident)
     return updated
   },
