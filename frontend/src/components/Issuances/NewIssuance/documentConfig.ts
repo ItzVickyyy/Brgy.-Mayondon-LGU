@@ -115,7 +115,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
   INDIGENCY: {
     code: "INDIGENCY", name: "Certificate of Indigency", shortName: "Indigency", category: "certification",
     hint: "Assistance, fee waiver", printMode: "overlay", validityMonths: null, onePerResident: false,
-    signatoryMode: "preprinted", residentNeeds: [],
+    signatoryMode: "preprinted", residentNeeds: ["birthDate"],
     fields: [
       { name: "sector", label: "Sector", type: "multiselect", required: true, options: sectorOptions, maxSelected: 2, group: "main" },
       { name: "purpose", label: "Purpose", type: "combobox", required: true, options: purposeOptions, group: "main" },
