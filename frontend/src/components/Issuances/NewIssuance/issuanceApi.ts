@@ -5,7 +5,7 @@ import { issuanceInputSchema, type IssuanceInput } from "./schemas"
 
 export type ResidentPatch = Partial<Pick<ResidentRecord,
   | "birthdate" | "birthplace" | "sex" | "civilStatus" | "sectors" | "residentSince" | "residentSinceBirth"
-  | "address" | "houseNumber" | "street" | "purok" | "photoUrl" | "emergencyContact"
+  | "address" | "houseNumber" | "street" | "purok" | "idNumber" | "photoUrl" | "emergencyContact"
 >>
 export type QuickResidentInput = {
   lastName: string
@@ -99,6 +99,14 @@ export function getMissingResidentFields(resident: ResidentRecord, code: Documen
 }
 
 export const issuanceApi = {
+  getNextBarangayIdNumber() {
+    const max = residents.reduce((highest, resident) => {
+      const suffix = Number(resident.idNumber.split("-").at(-1) ?? 0)
+      return Number.isFinite(suffix) ? Math.max(highest, suffix) : highest
+    }, 0)
+    return String(max + 1).padStart(4, "0")
+  },
+
   async searchResidents(query = ""): Promise<ResidentRecord[]> {
     const q = query.trim().toLowerCase()
     return residents.filter((resident) => resident.status === "Active")
@@ -195,7 +203,10 @@ export const issuanceApi = {
     if (parsed.residentUpdates) {
       await this.updateResident(resident.id, parsed.residentUpdates as ResidentPatch)
     }
-    const updatedResident = residents.find((item) => item.id === parsed.residentId) ?? resident
+    let updatedResident = residents.find((item) => item.id === parsed.residentId) ?? resident
+    if (parsed.status === "issued" && parsed.documentType === "BARANGAY_ID" && !updatedResident.idNumber) {
+      updatedResident = await this.updateResident(updatedResident.id, { idNumber: `18-128-3597-${this.getNextBarangayIdNumber()}` })
+    }
     const sequence = issuances.length + 1
     const record: MockIssuance = {
       id: `mock-issuance-${sequence}`,
