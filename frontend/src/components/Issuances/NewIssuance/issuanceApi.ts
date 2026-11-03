@@ -85,12 +85,14 @@ let mockTricycles = [{
 function toStoredPayload(input: IssuanceInput, tricycleId?: string): StoredIssuancePayload {
   const { residentUpdates: _residentUpdates, purposeText, details, ...base } = input
   const purposeId = input.purposeId ?? (purposeText?.trim() ? purposes.findIndex((purpose) => purpose.toLowerCase() === purposeText.trim().toLowerCase()) + 1 : undefined)
-  let storedDetails: StoredDocumentDetails = details
+  let storedDetails: StoredDocumentDetails
   if (details.type === "FRANCHISE_CLEARANCE") {
     storedDetails = { type: "FRANCHISE_CLEARANCE", tricycleId }
   } else if (details.type === "FIRST_TIME_JOBSEEKER") {
     const { parts: _parts, ...jobseekerDetails } = details
     storedDetails = jobseekerDetails
+  } else {
+    storedDetails = details
   }
   return { ...base, purposeId: purposeId && purposeId > 0 ? purposeId : undefined, details: storedDetails }
 }
