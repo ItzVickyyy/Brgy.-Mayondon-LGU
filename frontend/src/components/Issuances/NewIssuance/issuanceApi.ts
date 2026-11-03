@@ -165,7 +165,7 @@ export const issuanceApi = {
   },
 
   async createIssuance(input: IssuanceInput): Promise<CreateIssuanceResult> {
-    const parsed = issuanceInputSchema.parse(input)
+    const parsed = input.status === "draft" ? input : issuanceInputSchema.parse(input)
     if (parsed.status === "issued") {
       const check = await this.checkIssuance(parsed.residentId, parsed.documentType)
       if (check.existingIssued) {
