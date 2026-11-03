@@ -779,15 +779,15 @@ function IssuancesManagement() {
         onOpenChange={setIsSimplifiedDialogOpen}
         initialResidentId={getPreselectedResident()}
         onSaved={(record) => {
-          const resident = sampleResidents.find((item) => item.id === record.residentId)
+          const resident = issuanceApi.getResident(record.residentId)
           const type = documentConfig[record.documentType].name
           const status = record.status === "draft" ? "Pending" : "Issued"
-          const purpose = record.payload.purposeText ?? ""
+          const purpose = issuanceApi.getPurposeLabel(record.payload.purposeId) ?? ""
           const fields: Record<string, string> = { purpose, mockIssuanceId: record.id }
           if (record.payload.details.type === "BARANGAY_ID") fields.validUntil = record.payload.details.validUntil
           const historyRecord: IssuanceRecord = {
             id: record.referenceNo,
-            resident: record.residentSnapshot?.fullName ?? record.residentName ?? resident?.name ?? "Selected resident",
+            resident: record.residentSnapshot?.fullName ?? resident?.name ?? "Selected resident",
             type,
             date: record.issueDate,
             status,
