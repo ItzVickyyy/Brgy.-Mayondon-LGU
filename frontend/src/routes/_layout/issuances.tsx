@@ -90,12 +90,40 @@ function formatDate(value: string) {
       })
 }
 
+type AutoSavedIssuanceDraft = {
+  selectedType: string
+  formValues: Record<string, string>
+  selectedResidentId: string
+  manualEntry: boolean
+}
+
+const AUTO_DRAFT_KEY = "mayondon-issuance-auto-draft-v1"
+
+function readAutoSavedDraft(): AutoSavedIssuanceDraft | null {
+  if (typeof window === "undefined") return null
+  try {
+    const stored = window.localStorage.getItem(AUTO_DRAFT_KEY)
+    if (!stored) return null
+    const parsed = JSON.parse(stored) as Partial<AutoSavedIssuanceDraft>
+    if (!parsed.formValues || typeof parsed.formValues !== "object") return null
+    return {
+      selectedType: documentTypes.includes(parsed.selectedType ?? "") ? parsed.selectedType! : documentTypes[0],
+      formValues: parsed.formValues,
+      selectedResidentId: parsed.selectedResidentId ?? "",
+      manualEntry: parsed.manualEntry ?? false,
+    }
+  } catch {
+    return null
+  }
+}
+
 function getPreselectedResident() {
   if (typeof window === "undefined") return ""
   return new URLSearchParams(window.location.search).get("resident") ?? ""
 }
 
 function IssuancesManagement() {
+  const initialAutoDraft = readAutoSavedDraft()
   const initialResident = sampleResidents.find((resident) => resident.name === getPreselectedResident() || resident.id === getPreselectedResident())
   const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(() => Boolean(getPreselectedResident()))
   const [selectedType, setSelectedType] = useState<string>(documentTypes[0])
