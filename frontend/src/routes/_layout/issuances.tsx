@@ -719,8 +719,7 @@ function IssuancesManagement() {
                         error={validationErrors.date}
                         minYear={new Date().getFullYear() - 1}
                         maxYear={new Date().getFullYear() + 1}
-                        showToday
-                        singleInput
+
                       />
                     </div>
                   </FormSection>
