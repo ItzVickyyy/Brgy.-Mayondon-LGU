@@ -4,6 +4,7 @@ import { calculateAge, formatPrintedName, daysInMonth, buildIsoDate, splitIsoDat
 import { documentFields, documentMeta, documentSections, documentTypes, normalizeDocumentType } from "../src/components/Issuances/config"
 import { getSignatories, getWitnesses } from "../src/components/Officials/officials-sample-data"
 import { getMissingFields } from "../src/components/Issuances/print-summary"
+import { documentConfig, documentConfigList } from "../src/components/Issuances/NewIssuance/documentConfig"
 
 test.describe("issuance formatting helpers", () => {
   test("calculates age before and after a birthday", () => {
@@ -97,9 +98,15 @@ test.describe("issuance summary validation helpers", () => {
 
 
 test.describe("document catalog metadata", () => {
-  test("defines metadata for all eight issuance document types", () => {
+  test("defines metadata for all nine issuance document types", () => {
+    expect(documentConfigList).toHaveLength(9)
+    expect(Object.keys(documentConfig)).toHaveLength(9)
     expect(documentTypes).toHaveLength(8)
     expect(Object.keys(documentMeta).sort()).toEqual([...documentTypes].sort())
+    expect(documentConfig.BARANGAY_ID.category).toBe("id")
+    expect(documentConfig.BARANGAY_ID.signatoryMode).toBe("none")
+    expect(documentConfig.BARANGAY_CLEARANCE.validityMonths).toBe(2)
+    expect(documentConfig.FIRST_TIME_JOBSEEKER.validityMonths).toBe(12)
     expect(documentMeta["Barangay Clearance"].validity).toEqual({ months: 2 })
     expect(documentMeta["First-Time Jobseeker Certification"].validity).toEqual({ years: 1 })
     expect(documentMeta["First-Time Jobseeker Certification"].paper.size).toBe("legal")
