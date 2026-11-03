@@ -13,6 +13,9 @@ export type ResidentRecord = {
   residentSince: number
   photoUrl?: string
   address: string
+  houseNumber?: string
+  street?: string
+  purok?: number
   residentType: string
   idNumber: string
   idStatus: "Valid" | "Expiring soon" | "Expired" | "None"
@@ -34,7 +37,10 @@ export const sampleResidents: ResidentRecord[] = [
     civilStatus: "Single",
     sectors: ["STUDENT"],
     residentSince: 2008,
-    address: "Purok 1, Mayondon",
+    address: "12 Rizal Street, Purok 1, Mayondon",
+    houseNumber: "12",
+    street: "Rizal Street",
+    purok: 1,
     residentType: "Existing resident",
     idNumber: "18-128-3597-0001",
     idStatus: "Valid",
@@ -53,7 +59,10 @@ export const sampleResidents: ResidentRecord[] = [
     civilStatus: "Married",
     sectors: ["STUDENT"],
     residentSince: 2005,
-    address: "Purok 2, Mayondon",
+    address: "8 Mabini Street, Purok 2, Mayondon",
+    houseNumber: "8",
+    street: "Mabini Street",
+    purok: 2,
     residentType: "New / renting resident",
     idNumber: "18-128-3597-0002",
     idStatus: "Expiring soon",
@@ -72,7 +81,10 @@ export const sampleResidents: ResidentRecord[] = [
     civilStatus: "Single",
     sectors: ["STUDENT"],
     residentSince: 2020,
-    address: "Purok 3, Mayondon",
+    address: "23 Bonifacio Street, Purok 3, Mayondon",
+    houseNumber: "23",
+    street: "Bonifacio Street",
+    purok: 3,
     residentType: "Existing resident",
     idNumber: "18-128-3597-0003",
     idStatus: "Expired",
@@ -91,7 +103,10 @@ export const sampleResidents: ResidentRecord[] = [
     civilStatus: "Widow/Widower",
     sectors: ["STUDENT"],
     residentSince: 1999,
-    address: "Purok 4, Mayondon",
+    address: "4 Rizal Street, Purok 4, Mayondon",
+    houseNumber: "4",
+    street: "Rizal Street",
+    purok: 4,
     residentType: "Existing resident",
     idNumber: "18-128-3597-0004",
     idStatus: "None",
