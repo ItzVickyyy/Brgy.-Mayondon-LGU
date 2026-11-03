@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react"
-import { CalendarDays, ChevronDown, Search, UserRoundPlus } from "lucide-react"
+import { CalendarDays, ChevronDown, CircleAlert, CheckCircle2, Clock, Keyboard, Printer, Search, UserRoundPlus } from "lucide-react"
 import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuanceForm"
-import { documentConfig, documentConfigList, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
+import { documentConfig, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
 import { getMissingResidentFields, getResidentAddress, issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
 import { sampleResidents, type ResidentRecord } from "@/components/Records/records-sample-data"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
@@ -10,6 +10,8 @@ import { formControlClass } from "@/components/Common/formStyles"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { Button } from "@/components/ui/button"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
+import { IssuanceSection } from "./IssuanceSection"
+import { DocumentTypePicker } from "./DocumentTypePicker"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
@@ -20,7 +22,6 @@ type Props = {
   onSaved: (record: MockIssuance) => void
 }
 
-const sectionClass = "space-y-3 border-b pb-5 last:border-b-0"
 const knownStreets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
 const knownAssociations = ["Mayondon Tricycle Operators and Drivers Association"]
 const printedNameType: Record<DocumentCode, string> = {
@@ -210,7 +211,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         : field.name === "relationship" ? (details as unknown as Record<string, unknown>).beneficiaryRelationship
         : field.name === "sectorIdNumber" ? form.watch("sectors")?.[0]?.idNumber ?? ""
         : (details as unknown as Record<string, unknown>)[field.name]
-    const value = fieldValue ?? getDefaultToday(field.default)
+    // idTypeId is stored as a number (lookup id) but the <select> options are ID names, so translate it back for display.
+    const idTypeLabel = field.group === "identity" && field.name === "idType" ? (field.options ?? [])[Number(fieldValue ?? 0) - 1] ?? "" : undefined
+    const value = idTypeLabel ?? fieldValue ?? getDefaultToday(field.default)
     if (field.showWhen && !field.showWhen({ ...(details as unknown as Record<string, unknown>), for: (details as unknown as Record<string, unknown>).forSelf === false ? "Someone else" : "Myself" })) return null
     const onValueChange = (nextValue: string | boolean) => {
       if (field.group === "identity") {
@@ -320,7 +323,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       const valid = await parsed
       if (!valid) {
         setFormError("Check the required fields marked above.")
-        const firstMissing = config.fields.find((field) => field.required && !fieldHasValue(field))
+        const firstMissing = config.fields.find((field) => fieldVisible(field) && field.required && !fieldHasValue(field))
         if (firstMissing) {
           const target = document.getElementById(`issuance-${firstMissing.name}`)
           target?.scrollIntoView({ behavior: "smooth", block: "center" })
@@ -412,6 +415,12 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     return value == null ? "" : String(value)
   }
 
+  function fieldVisible(field: DetailFieldConfig): boolean {
+    if (!field.showWhen) return true
+    const values = details as unknown as Record<string, unknown>
+    return field.showWhen({ ...values, for: values.forSelf === false ? "Someone else" : "Myself" })
+  }
+
   function fieldHasValue(field: DetailFieldConfig): boolean {
     const value = previewValue(field)
     if (field.name === "isJobstartBeneficiary") return true
@@ -419,7 +428,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     return value.trim().length > 0
   }
 
-  const previewRows = [
+  const previewRowsRaw = [
     { label: "Resident", value: selectedResident ? formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, printedNameType[documentType]) : "" },
     { label: "Resident number", value: selectedResident?.id ?? "" },
     { label: "Address", value: selectedResident ? getResidentAddress(selectedResident) : "" },
@@ -433,12 +442,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     ...(config.residentNeeds.includes("residentSince") ? [{ label: documentType === "RESIDENCY" ? "Residing since" : "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (documentType === "RESIDENCY") return source.residentSinceBirth || source.residentSince === 0 ? "Since birth" : source.residentSince === undefined ? "" : String(source.residentSince); if (source.residentSinceBirth) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return !source.residentSince ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
   ]
 
-  const missingPreviewLabels = [
-    ...(!selectedResident ? [{ name: "resident-search", label: "Resident record" }] : []),
-    ...config.fields.filter((field) => field.required && !fieldHasValue(field)).map((field) => ({ name: field.name, label: field.label })),
-    ...(!issueDate ? [{ name: "date", label: "Date on document" }] : []),
-    ...(config.signatoryMode === "select" && !form.watch("signatoryOfficialId") ? [{ name: "signatoryOfficialId", label: "Signatory" }] : []),
-    ...(selectedResident ? getMissingResidentFields(selectedResident, documentType).filter((need) => {
+  const previewRows = Array.from(new Map(previewRowsRaw.map((row) => [row.label, row])).values())
+
+  const residentMissingLabels: { name: string; label: string }[] = (selectedResident ? getMissingResidentFields(selectedResident, documentType).filter((need) => {
       if (need === "address") return !residentUpdates.address && (!selectedResident.houseNumber?.trim() || !selectedResident.street?.trim() || !selectedResident.purok)
       if (need === "birthDate") return !residentUpdates.birthdate && !selectedResident.birthdate
       if (need === "birthPlace") return !residentUpdates.birthplace && !selectedResident.birthplace
@@ -449,47 +455,89 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       if (need === "photo") return !residentUpdates.photoUrl && !selectedResident.photoUrl
       if (need === "emergencyContact") return !residentUpdates.emergencyContact?.name || !residentUpdates.emergencyContact.address || !residentUpdates.emergencyContact.phone
       return false
-    }).map((need) => ({ name: need, label: ({ address: "Resident address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since", sector: "Sector", photo: "Photo", emergencyContact: "Emergency contact" } as Record<string, string>)[need] ?? need })) : []),
+    }).map((need) => ({ name: need, label: ({ address: "Resident address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since", sector: "Sector", photo: "Photo", emergencyContact: "Emergency contact" } as Record<string, string>)[need] ?? need })) : [])
+
+  const missingPreviewLabels = [
+    ...(!selectedResident ? [{ name: "resident-search", label: "Resident record" }] : []),
+    ...config.fields.filter((field) => fieldVisible(field) && field.required && !fieldHasValue(field)).map((field) => ({ name: field.name, label: field.label })),
+    ...(!issueDate ? [{ name: "date", label: "Date on document" }] : []),
+    ...(config.signatoryMode === "select" && !form.watch("signatoryOfficialId") ? [{ name: "signatoryOfficialId", label: "Signatory" }] : []),
+    ...residentMissingLabels,
   ]
 
+
+  // "residentSince" is a resident-record value (asked under step 2 only when missing), so it is not asked a second time here.
+  const detailFields = fieldsByGroup("main").filter((field) => fieldVisible(field) && field.name !== "residentSince")
+  const requirementFields = [...fieldsByGroup("identity"), ...fieldsByGroup("payment")].filter(fieldVisible)
+  const hasRequirements = requirementFields.length > 0
+  const signatoryMissing = config.signatoryMode === "select" && !form.watch("signatoryOfficialId")
+  const detailsDone = !signatoryMissing && detailFields.every((field) => !field.required || fieldHasValue(field))
+  const requirementsDone = requirementFields.every((field) => !field.required || fieldHasValue(field))
+  const residentDone = Boolean(selectedResident) && residentMissingLabels.length === 0
+  const remaining = missingPreviewLabels.length
+
+  function goToFirstMissing() {
+    const candidates: string[] = []
+    if (!selectedResident) candidates.push("issuance-resident-search")
+    for (const item of residentMissingLabels) candidates.push(item.name === "address" ? "resident-missing-address-houseNumber" : `resident-missing-${item.name}`)
+    if (!issueDate) candidates.push("issuance-date")
+    if (signatoryMissing) candidates.push("issuance-signatoryOfficialId")
+    for (const field of config.fields) if (fieldVisible(field) && field.required && !fieldHasValue(field)) candidates.push(`issuance-${field.name}`)
+    for (const id of candidates) {
+      const target = document.getElementById(id)
+      if (target) { target.scrollIntoView({ behavior: "smooth", block: "center" }); target.focus(); return }
+    }
+  }
+
+  function issueAnother() {
+    const keep = successRecord ? allResidents.find((resident) => resident.id === successRecord.residentId) : undefined
+    resetDialog()
+    if (!keep) return
+    // After a reset the form is back on the default document, so keep only the resident (no sector prefill from the previous type).
+    setSelectedResident(keep)
+    form.setValue("residentId", keep.id, { shouldDirty: false })
+    setAddressParts({ houseNumber: keep.houseNumber ?? "", street: keep.street ?? "", purok: keep.purok ?? 1 })
+  }
+
   return <Dialog open={open} onOpenChange={requestClose}>
-    <DialogContent className="flex max-h-[96dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-2xl">
+    <DialogContent className="flex h-[94dvh] max-h-[94dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
       <DialogHeader className="shrink-0 border-b px-5 py-4 pr-12">
         <DialogTitle>New Issuance</DialogTitle>
-        <DialogDescription>Complete the document details. Printing is currently paused.</DialogDescription>
+        <DialogDescription>Pick the document, find the resident, fill in the details. Everything on one screen.</DialogDescription>
       </DialogHeader>
-      {successRecord ? <div className="space-y-4 overflow-y-auto p-5" role="status">
-        <p className="font-semibold">Saved as issued: {successRecord.referenceNo}</p>
-        <p className="text-sm text-muted-foreground">The issuance record was saved. Printing remains paused until paper positions are calibrated.</p>
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" disabled>Print</Button>
+      {successRecord ? <div className="flex flex-1 flex-col items-center justify-center gap-4 overflow-y-auto p-8 text-center" role="status">
+        <CheckCircle2 className="size-12 text-emerald-600" aria-hidden="true" />
+        <div>
+          <p className="text-lg font-semibold">Issued: {successRecord.referenceNo}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{config.name} for {selectedResident?.name ?? "the resident"} was saved. Printing remains paused until paper positions are calibrated.</p>
+        </div>
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button type="button" variant="outline" disabled><Printer className="size-4" />Print</Button>
+          <Button type="button" variant="outline" onClick={issueAnother}>Issue another for this resident</Button>
           <Button type="button" onClick={() => { resetDialog(); onOpenChange(false) }}>Done</Button>
         </div>
-      </div> : <form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => { event.preventDefault(); void issue() }}>
-        <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-4">
-          <section className={sectionClass}>
-            <h3 className="text-sm font-semibold">Document</h3>
-            <div className="grid gap-3 sm:grid-cols-2">
-              <label className={fieldLabelClass}>Type of document
-                <select value={documentType} onChange={(event) => changeDocumentType(event.target.value as DocumentCode)} className={cn(formControlClass, "bg-background")}>
-                  {(["clearance", "certification", "id"] as const).map((category) => <optgroup key={category} label={category === "id" ? "ID" : category === "clearance" ? "Clearances" : "Certifications"}>
-                    {documentConfigList.filter((item) => item.category === category).map((item) => <option key={item.code} value={item.code}>{item.shortName}</option>)}
-                  </optgroup>)}
-                </select>
-                <span className="text-xs font-normal text-muted-foreground">{config.hint}</span>
-              </label>
-              <label className={fieldLabelClass}>Date on document
-                <span className="relative">
-                  <input type="date" value={issueDate} onChange={(event) => { const nextDate = event.target.value; form.setValue("issueDate", nextDate, { shouldDirty: true }); if (documentType === "BARANGAY_ID" && !validUntilEdited && nextDate) { const validDate = new Date(`${nextDate}T00:00:00`); validDate.setFullYear(validDate.getFullYear() + 1); setDetail("validUntil", localIsoDate(validDate)) } }} className={formControlClass} required />
-                  <CalendarDays className="pointer-events-none absolute right-3 top-3 size-4 text-muted-foreground" aria-hidden="true" />
-                </span>
-              </label>
-            </div>
-          </section>
+      </div> : <form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => { event.preventDefault(); void issue() }} onKeyDown={(event) => { if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); void issue() } }}>
+        <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div className="min-h-0 space-y-4 overflow-y-auto bg-muted/30 px-4 py-4 sm:px-5">
+            <IssuanceSection id="issuance-step-document" step={1} title="What are you issuing?" description="Click a document. The form below adapts to it." done>
+              <DocumentTypePicker value={documentType} onChange={changeDocumentType} />
+              <div className="grid gap-3 border-t pt-4 sm:grid-cols-[220px_1fr] sm:items-end">
+                <label className={fieldLabelClass}>Date on document
+                  <span className="relative">
+                    <input id="issuance-date" type="date" value={issueDate} onChange={(event) => { const nextDate = event.target.value; form.setValue("issueDate", nextDate, { shouldDirty: true }); if (documentType === "BARANGAY_ID" && !validUntilEdited && nextDate) { const validDate = new Date(`${nextDate}T00:00:00`); validDate.setFullYear(validDate.getFullYear() + 1); setDetail("validUntil", localIsoDate(validDate)) } }} className={formControlClass} required />
+                    <CalendarDays className="pointer-events-none absolute right-3 top-3.5 size-4 text-muted-foreground" aria-hidden="true" />
+                  </span>
+                </label>
+                <p className="flex flex-wrap items-center gap-x-4 gap-y-1 pb-2 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1"><Printer className="size-3.5" aria-hidden="true" />{config.printMode === "overlay" ? "Prints on the pre-printed form" : "Prints as a full page"}</span>
+                  {config.validityMonths ? <span className="inline-flex items-center gap-1"><Clock className="size-3.5" aria-hidden="true" />Valid for {config.validityMonths === 12 ? "1 year" : `${config.validityMonths} months`}</span> : null}
+                  {config.onePerResident ? <span>One per resident</span> : null}
+                </p>
+              </div>
+            </IssuanceSection>
 
-          <section className={sectionClass}>
-            <h3 className="text-sm font-semibold">Resident</h3>
-            {selectedResident ? <div className="rounded-md border p-3">
+            <IssuanceSection id="issuance-step-resident" step={2} title="Who is it for?" description="Search by name or resident number. Missing record details are filled in right here." done={residentDone}>
+              {selectedResident ? <div className="rounded-md border p-3">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="font-medium">{formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, config.name)}</p>
@@ -502,7 +550,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             </div> : <div className="space-y-2">
               <div className="relative">
                 <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" aria-hidden="true" />
-                <input value={residentQuery} onChange={(event) => { setResidentQuery(event.target.value); setActiveResidentMatch(0) }} onKeyDown={(event) => { if (event.key === "ArrowDown" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, matches.length - 1)) } if (event.key === "ArrowUp" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) } if (event.key === "Enter" && matches[activeResidentMatch]) { event.preventDefault(); selectResident(matches[activeResidentMatch]) } if (event.key === "Escape") { event.preventDefault(); setResidentQuery("") } }} placeholder="Search name or resident number…" className={cn(formControlClass, "pl-9")} aria-label="Search resident" role="combobox" aria-autocomplete="list" aria-expanded={matches.length > 0} aria-controls="issuance-resident-results" aria-activedescendant={matches[activeResidentMatch] ? `issuance-resident-option-${matches[activeResidentMatch].id}` : undefined} />
+                <input id="issuance-resident-search" value={residentQuery} onChange={(event) => { setResidentQuery(event.target.value); setActiveResidentMatch(0) }} onKeyDown={(event) => { if (event.key === "ArrowDown" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, matches.length - 1)) } if (event.key === "ArrowUp" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) } if (event.key === "Enter" && matches[activeResidentMatch]) { event.preventDefault(); selectResident(matches[activeResidentMatch]) } if (event.key === "Escape") { event.preventDefault(); setResidentQuery("") } }} placeholder="Search name or resident number…" className={cn(formControlClass, "pl-9")} aria-label="Search resident" role="combobox" aria-autocomplete="list" aria-expanded={matches.length > 0} aria-controls="issuance-resident-results" aria-activedescendant={matches[activeResidentMatch] ? `issuance-resident-option-${matches[activeResidentMatch].id}` : undefined} />
               </div>
               {matches.length ? <div id="issuance-resident-results" role="listbox" className="overflow-hidden rounded-md border">{matches.map((resident, index) => <button type="button" key={resident.id} id={`issuance-resident-option-${resident.id}`} role="option" aria-selected={activeResidentMatch === index} disabled={resident.status === "Archived"} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} className={cn("flex min-h-12 w-full flex-col items-start border-b px-3 py-2 text-left last:border-b-0 hover:bg-muted", activeResidentMatch === index && "bg-muted", resident.status === "Archived" && "cursor-not-allowed opacity-50")}>
                 <span className="font-medium">{resident.name} <span className="text-xs text-muted-foreground">{resident.id}</span>{resident.status === "Archived" ? <span className="ml-2 text-xs text-muted-foreground">Archived</span> : null}</span>
@@ -522,7 +570,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setShowQuickAdd(false)}>Cancel</Button><Button type="button" onClick={() => void createResident()}>Save resident</Button></div>
               </div> : null}
             </div>}
-            {selectedResident && (config.residentNeeds.some((need) => {
+              {selectedResident && (config.residentNeeds.some((need) => {
               const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSinceBirth ? "since birth" : selectedResident.residentSinceBirth ? "since birth" : selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : need === "emergencyContact" ? selectedResident.emergencyContact?.name && selectedResident.emergencyContact?.address && selectedResident.emergencyContact?.phone : undefined
               return !residentValue
             }) || (!selectedResident.houseNumber?.trim() || !selectedResident.street?.trim() || !selectedResident.purok)) ? <div className="mt-3 space-y-3">
@@ -556,32 +604,45 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               })}
               <p className="text-xs text-muted-foreground">Saved to the resident's record.</p>
             </div> : null}
-          </section>
+            </IssuanceSection>
 
-          <section className={sectionClass}>
-            <h3 className="text-sm font-semibold">Details</h3>
-            <p className="text-xs text-muted-foreground">* required</p>
-            {fieldsByGroup("main").length ? <div className="grid gap-3 sm:grid-cols-2">{fieldsByGroup("main").map(renderField)}</div> : null}
-            {config.signatoryMode === "select" ? <label className={fieldLabelClass}>Signatory <span className="text-destructive">*</span><select value={form.watch("signatoryOfficialId") ?? ""} onChange={(event) => form.setValue("signatoryOfficialId", event.target.value, { shouldDirty: true })} className={cn(formControlClass, readErrorMessage(form.formState.errors.signatoryOfficialId) && "border-destructive", "bg-background")} aria-invalid={Boolean(readErrorMessage(form.formState.errors.signatoryOfficialId))} aria-describedby={readErrorMessage(form.formState.errors.signatoryOfficialId) ? "issuance-signatory-error" : undefined} required><option value="">Select official…</option>{initialOfficials.filter((official) => official.status === "Current" && ["Punong Barangay", "Barangay Kagawad", "Barangay Clerk", "Administrative Assistant", "SK Chairperson", "OIC Kagawad"].includes(official.position)).map((official) => <option key={official.id} value={official.id}>{official.name} · {official.position}</option>)}</select>{readErrorMessage(form.formState.errors.signatoryOfficialId) ? <span id="issuance-signatory-error" role="alert" className="text-xs font-normal text-destructive">{readErrorMessage(form.formState.errors.signatoryOfficialId)}</span> : null}</label> : null}
-            {fieldsByGroup("identity").length ? <div className="space-y-2"><p className="text-xs font-medium text-muted-foreground">Proof of identity</p><div className="grid gap-3 sm:grid-cols-2">{fieldsByGroup("identity").map(renderField)}</div></div> : null}
-            {fieldsByGroup("payment").length ? <div className="space-y-2"><p className="text-xs font-medium text-muted-foreground">Payment</p><div className="grid gap-3 sm:grid-cols-2">{fieldsByGroup("payment").map(renderField)}</div></div> : null}
-            {fieldsByGroup("more").length ? <div>
-              <button type="button" className="flex min-h-10 items-center gap-2 text-sm font-medium" onClick={() => setMoreOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", moreOpen && "rotate-180")} />More options (optional)</button>
-              {!moreOpen ? <p className="text-xs text-muted-foreground">{fieldsByGroup("more").map((field) => previewValue(field)).filter(Boolean).join(" · ") || "No optional details added"}</p> : <div className="grid gap-3 sm:grid-cols-2">{fieldsByGroup("more").map(renderField)}</div>}
-            </div> : null}
-            <div>
-              <button type="button" className="flex min-h-10 items-center gap-2 text-sm font-medium" onClick={() => setPreviewOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", previewOpen && "rotate-180")} />Preview of what will print</button>
-              {previewOpen ? <PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={missingPreviewLabels} printingPaused /> : null}
+            <IssuanceSection id="issuance-step-details" step={3} title="Document details" description="Only the fields this document needs. Red asterisk means required." done={detailsDone}>
+              {detailFields.length ? <div className="grid gap-4 sm:grid-cols-2">{detailFields.map(renderField)}</div> : <p className="text-sm text-muted-foreground">This document needs no extra details.</p>}
+              {config.signatoryMode === "select" ? <label className={fieldLabelClass}>Signatory <span className="text-destructive">*</span><select id="issuance-signatoryOfficialId" value={form.watch("signatoryOfficialId") ?? ""} onChange={(event) => form.setValue("signatoryOfficialId", event.target.value, { shouldDirty: true })} className={cn(formControlClass, readErrorMessage(form.formState.errors.signatoryOfficialId) && "border-destructive", "bg-background")} aria-invalid={Boolean(readErrorMessage(form.formState.errors.signatoryOfficialId))} aria-describedby={readErrorMessage(form.formState.errors.signatoryOfficialId) ? "issuance-signatory-error" : undefined} required><option value="">Select official…</option>{initialOfficials.filter((official) => official.status === "Current" && ["Punong Barangay", "Barangay Kagawad", "Barangay Clerk", "Administrative Assistant", "SK Chairperson", "OIC Kagawad"].includes(official.position)).map((official) => <option key={official.id} value={official.id}>{official.name} · {official.position}</option>)}</select>{readErrorMessage(form.formState.errors.signatoryOfficialId) ? <span id="issuance-signatory-error" role="alert" className="text-xs font-normal text-destructive">{readErrorMessage(form.formState.errors.signatoryOfficialId)}</span> : null}</label> : null}
+              {fieldsByGroup("more").length ? <div className="rounded-lg border border-dashed p-3">
+                <button type="button" className="flex min-h-9 w-full items-center gap-2 text-sm font-medium" aria-expanded={moreOpen} onClick={() => setMoreOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", moreOpen && "rotate-180")} />Optional extras</button>
+                {!moreOpen ? <p className="mt-1 text-xs text-muted-foreground">{fieldsByGroup("more").map((field) => previewValue(field)).filter(Boolean).join(" · ") || "Nothing added. Defaults are fine for most requests."}</p> : <div className="mt-3 grid gap-4 sm:grid-cols-2">{fieldsByGroup("more").map(renderField)}</div>}
+              </div> : null}
+              {details.type === "FIRST_TIME_JOBSEEKER" && details.isJobstartBeneficiary ? <p className="text-sm text-muted-foreground">JobStart beneficiary selected. The Punong Barangay will determine eligibility.</p> : null}
+            </IssuanceSection>
+
+            {hasRequirements ? <IssuanceSection id="issuance-step-requirements" step={4} title={fieldsByGroup("payment").length ? "ID presented & payment" : "ID presented"} description="Copy these from the resident's ID and the official receipt." done={requirementsDone}>
+              {fieldsByGroup("identity").length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Proof of identity</p><div className="grid gap-4 sm:grid-cols-2">{fieldsByGroup("identity").map(renderField)}</div></div> : null}
+              {fieldsByGroup("payment").length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Payment</p><div className="grid items-end gap-4 sm:grid-cols-2">{fieldsByGroup("payment").map(renderField)}</div></div> : null}
+            </IssuanceSection> : null}
+
+            {duplicate ? <p role="alert" className="rounded-md border border-destructive/40 bg-background p-3 text-sm">An issued First-Time Jobseeker certificate already exists: {duplicate.referenceNo}, dated {duplicate.issueDate}. An administrator must void it before another can be issued.</p> : null}
+            {formError ? <p role="alert" className="rounded-md border border-destructive/40 bg-background p-3 text-sm text-destructive">{formError}</p> : null}
+
+            <div className="lg:hidden">
+              <button type="button" className="flex min-h-10 items-center gap-2 text-sm font-medium" aria-expanded={previewOpen} onClick={() => setPreviewOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", previewOpen && "rotate-180")} />Preview of what will print</button>
+              {previewOpen ? <div className="mt-2 rounded-xl border bg-card"><PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={missingPreviewLabels} printingPaused /></div> : null}
             </div>
-          </section>
-          {duplicate ? <p role="alert" className="rounded-md border border-destructive/40 p-3 text-sm">An issued First-Time Jobseeker certificate already exists: {duplicate.referenceNo}, dated {duplicate.issueDate}. An administrator must void it before another can be issued.</p> : null}
-          {details.type === "FIRST_TIME_JOBSEEKER" && details.isJobstartBeneficiary ? <p className="text-sm text-muted-foreground">JobStart beneficiary selected. The Punong Barangay will determine eligibility.</p> : null}
-          {formError ? <p role="alert" className="text-sm text-destructive">{formError}</p> : null}
+          </div>
+          <aside aria-label="Preview of what will print" className="hidden min-h-0 overflow-y-auto border-l bg-card lg:block">
+            <PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={missingPreviewLabels} printingPaused />
+          </aside>
         </div>
-        <DialogFooter className="shrink-0 border-t px-5 py-3">
-          <Button type="button" variant="ghost" onClick={() => requestClose(false)}>Cancel</Button>
-          <Button type="button" variant="outline" disabled={saving} onClick={() => void saveDraft()}>Save as draft</Button>
-          <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Issue"}</Button>
+        <DialogFooter className="shrink-0 items-center gap-2 border-t px-5 py-3 sm:justify-between">
+          <div className="min-w-0 text-sm" aria-live="polite">
+            {remaining ? <button type="button" onClick={goToFirstMissing} className="inline-flex min-h-9 items-center gap-1.5 text-amber-700 underline-offset-4 hover:underline"><CircleAlert className="size-4" aria-hidden="true" />{remaining} {remaining === 1 ? "item" : "items"} still needed. Go to next</button> : <span className="inline-flex items-center gap-1.5 font-medium text-emerald-700"><CheckCircle2 className="size-4" aria-hidden="true" />Ready to issue</span>}
+            <span className="ml-3 hidden items-center gap-1 text-xs text-muted-foreground xl:inline-flex"><Keyboard className="size-3.5" aria-hidden="true" />Ctrl + Enter to issue</span>
+          </div>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button type="button" variant="ghost" onClick={() => requestClose(false)}>Cancel</Button>
+            <Button type="button" variant="outline" disabled={saving} onClick={() => void saveDraft()}>Save as draft</Button>
+            <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Issue"}</Button>
+          </div>
         </DialogFooter>
       </form>}
     </DialogContent>
