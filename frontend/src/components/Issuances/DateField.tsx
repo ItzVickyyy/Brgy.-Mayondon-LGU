@@ -220,7 +220,7 @@ export function DateField({
                   aria-label={date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
                   onClick={() => chooseDate(date)}
                   className={cn(
-                    "size-9 rounded-md text-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-30",
+                    "h-11 w-full rounded-md text-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-30",
                     selected && "bg-primary text-primary-foreground hover:bg-primary/90",
                     isToday && !selected && "border border-primary/50 font-semibold",
                   )}
