@@ -55,6 +55,7 @@ export function DateField({
   const [open, setOpen] = useState(false)
   const [viewYear, setViewYear] = useState(initialViewDate.getFullYear())
   const [viewMonth, setViewMonth] = useState(initialViewDate.getMonth())
+  const [popoverPosition, setPopoverPosition] = useState({ top: 0, left: 0, width: 320 })
   const triggerRef = useRef<HTMLButtonElement>(null)
   const popoverRef = useRef<HTMLDivElement>(null)
   const yearOptions = useMemo(
@@ -110,6 +111,15 @@ export function DateField({
     const nextDate = selectedDate ?? initialViewDate
     setViewYear(nextDate.getFullYear())
     setViewMonth(nextDate.getMonth())
+    if (!open && triggerRef.current) {
+      const bounds = triggerRef.current.getBoundingClientRect()
+      const width = Math.min(320, window.innerWidth - 32)
+      setPopoverPosition({
+        top: bounds.bottom + 8,
+        left: Math.max(16, Math.min(bounds.left, window.innerWidth - width - 16)),
+        width,
+      })
+    }
     setOpen((previous) => !previous)
   }
 
@@ -169,7 +179,8 @@ export function DateField({
           id={`${id}-calendar`}
           role="dialog"
           aria-label={`Choose ${label.toLowerCase()}`}
-          className="absolute left-0 top-full z-[100] mt-2 w-[min(20rem,calc(100vw-3rem))] rounded-xl border bg-popover p-3 text-popover-foreground shadow-lg"
+          style={{ position: "fixed", top: popoverPosition.top, left: popoverPosition.left, width: popoverPosition.width }}
+          className="z-[100] rounded-xl border bg-popover p-3 text-popover-foreground shadow-lg"
         >
           <div className="mb-3 grid grid-cols-2 gap-2">
             <select
