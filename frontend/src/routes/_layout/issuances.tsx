@@ -34,6 +34,7 @@ import { DateField } from "@/components/Issuances/DateField"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
 import { NewIssuanceDialog } from "@/components/Issuances/NewIssuance/NewIssuanceDialog"
 import { documentConfig } from "@/components/Issuances/NewIssuance/documentConfig"
+import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { getMissingFields } from "@/components/Issuances/print-summary"
 import { sampleResidents } from "@/components/Records/records-sample-data"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
@@ -782,7 +783,7 @@ function IssuancesManagement() {
           const type = documentConfig[record.documentType].name
           const status = record.status === "draft" ? "Pending" : "Issued"
           const purpose = record.payload.purposeText ?? ""
-          const fields: Record<string, string> = { purpose }
+          const fields: Record<string, string> = { purpose, mockIssuanceId: record.id }
           if (record.payload.details.type === "BARANGAY_ID") fields.validUntil = record.payload.details.validUntil
           const historyRecord: IssuanceRecord = {
             id: record.referenceNo,
@@ -936,6 +937,7 @@ function IssuancesManagement() {
           if (!pendingAction) return
           const { record, action } = pendingAction
           if (action === "void") {
+            if (record.fields.mockIssuanceId) void issuanceApi.voidIssuance(record.fields.mockIssuanceId, reason, isAdmin ? "admin" : "staff").catch((error) => setNotice(error instanceof Error ? error.message : "Unable to void the issuance."))
             const updated = { ...record, status: "Voided" as const, voidReason: reason }
             setHistoryRecords((previous) => previous.map((item) => item.id === record.id ? updated : item))
             setDrafts((previous) => previous.map((item) => item.id === record.id ? updated : item))
