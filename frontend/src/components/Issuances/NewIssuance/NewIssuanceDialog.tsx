@@ -7,6 +7,7 @@ import { sampleResidents, type ResidentRecord } from "@/components/Records/recor
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { formControlClass } from "@/components/Common/formStyles"
+import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { Button } from "@/components/ui/button"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -50,6 +51,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   })
   const [residentUpdates, setResidentUpdates] = useState<ResidentPatch>({})
   const [selectedSector, setSelectedSector] = useState<string | string[]>("")
+  const [sectorManuallySelected, setSectorManuallySelected] = useState(false)
+  const [pendingDocumentType, setPendingDocumentType] = useState<DocumentCode | null>(null)
   const [validUntilEdited, setValidUntilEdited] = useState(false)
   const [addressParts, setAddressParts] = useState(() => ({ houseNumber: selectedResident?.houseNumber ?? "", street: selectedResident?.street ?? "", purok: selectedResident?.purok ?? 1 }))
   const [moreOpen, setMoreOpen] = useState(false)
@@ -89,8 +92,13 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     const detailsDirty = Object.entries(current.details as unknown as Record<string, unknown>).some(([key, value]) => {
       const defaults = defaultDetails(current.documentType) as unknown as Record<string, unknown>
       return JSON.stringify(value) !== JSON.stringify(defaults[key])
-    }) || Boolean(current.purposeText?.trim()) || Boolean(current.identification?.idNumber?.trim()) || Boolean(current.payment?.officialReceiptNo?.trim())
-    if (detailsDirty && !window.confirm("Changing the document type will clear its details. Continue?")) return
+    }) || Boolean(current.purposeText?.trim()) || Boolean(current.identification?.idNumber?.trim()) || Boolean(current.payment?.officialReceiptNo?.trim()) || sectorManuallySelected
+    if (detailsDirty) { setPendingDocumentType(nextCode); return }
+    applyDocumentType(nextCode)
+  }
+
+  function applyDocumentType(nextCode: DocumentCode) {
+    const current = form.getValues()
     form.setValue("documentType", nextCode, { shouldDirty: true })
     const nextDetails = defaultDetails(nextCode)
     if (nextCode === "BARANGAY_ID" && nextDetails.type === "BARANGAY_ID") {
@@ -111,6 +119,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     form.setValue("signatoryOfficialId", signatory?.id)
     form.clearErrors()
     setSelectedSector("")
+    setSectorManuallySelected(false)
     if (selectedResident) prefillResidentSector(nextCode, selectedResident)
     setValidUntilEdited(false)
     setDuplicate(null)
@@ -125,6 +134,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setResidentUpdates({})
     setAddressParts({ houseNumber: resident.houseNumber ?? "", street: resident.street ?? "", purok: resident.purok ?? 1 })
     prefillResidentSector(documentType, resident)
+    setSectorManuallySelected(false)
     setDuplicate(null)
     setFormError("")
   }
@@ -179,8 +189,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       } else if (field.name === "purpose") setRootField("purposeText", String(nextValue))
       else if (field.name === "referredBy") setDetail("referredByOfficialId", String(nextValue) === "None" ? undefined : String(nextValue))
       else if (field.name === "remarks") setRootField("remarks", String(nextValue))
-      else if (field.name === "sector" && field.type === "multiselect") { const values = Array.isArray(nextValue) ? nextValue as string[] : []; setSelectedSector(values); form.setValue("sectors", values.map((sector) => ({ sectorId: Math.max(1, (field.options ?? []).indexOf(sector) + 1) })), { shouldDirty: true }) }
-      else if (field.name === "sector") { setSelectedSector(String(nextValue)); form.setValue("sectors", [{ sectorId: Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1) }], { shouldDirty: true }) }
+      else if (field.name === "sector" && field.type === "multiselect") { const values = Array.isArray(nextValue) ? nextValue as string[] : []; setSectorManuallySelected(true); setSelectedSector(values); form.setValue("sectors", values.map((sector) => ({ sectorId: Math.max(1, (field.options ?? []).indexOf(sector) + 1) })), { shouldDirty: true }) }
+      else if (field.name === "sector") { setSectorManuallySelected(true); setSelectedSector(String(nextValue)); form.setValue("sectors", [{ sectorId: Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1) }], { shouldDirty: true }) }
       else if (field.name === "for") setDetail("forSelf", nextValue === "Myself")
       else if (field.name === "relationship") setDetail("beneficiaryRelationship", String(nextValue))
       else if (field.name === "isJobstartBeneficiary") setDetail(field.name, nextValue === "true")
@@ -310,6 +320,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setResidentQuery("")
     setResidentUpdates({})
     setSelectedSector("")
+    setSectorManuallySelected(false)
+    setPendingDocumentType(null)
     setAddressParts({ houseNumber: "", street: "", purok: 1 })
     setValidUntilEdited(false)
     setShowQuickAdd(false)
@@ -536,5 +548,16 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         </DialogFooter>
       </form>}
     </DialogContent>
+    <ConfirmDialog
+      open={pendingDocumentType !== null}
+      onOpenChange={(nextOpen) => { if (!nextOpen) setPendingDocumentType(null) }}
+      title="Change document type?"
+      description="Details entered for the current document will be cleared. The resident and document date will stay."
+      confirmLabel="Change document"
+      onConfirm={() => {
+        if (pendingDocumentType) applyDocumentType(pendingDocumentType)
+        setPendingDocumentType(null)
+      }}
+    />
   </Dialog>
 }
