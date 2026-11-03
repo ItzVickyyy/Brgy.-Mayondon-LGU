@@ -2,7 +2,7 @@ import { useMemo, useState } from "react"
 import { CalendarDays, ChevronDown, Search, UserRoundPlus } from "lucide-react"
 import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuanceForm"
 import { documentConfig, documentConfigList, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
-import { issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
+import { getResidentAddress, issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
 import { sampleResidents, type ResidentRecord } from "@/components/Records/records-sample-data"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
@@ -46,7 +46,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   })
   const [residentUpdates, setResidentUpdates] = useState<ResidentPatch>({})
   const [selectedSector, setSelectedSector] = useState("")
-  const [addressParts, setAddressParts] = useState({ houseNumber: "", street: "", purok: 1 })
+  const [addressParts, setAddressParts] = useState(() => ({ houseNumber: selectedResident?.houseNumber ?? "", street: selectedResident?.street ?? "", purok: selectedResident?.purok ?? 1 }))
   const [moreOpen, setMoreOpen] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -98,6 +98,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setResidentQuery("")
     form.setValue("residentId", resident.id, { shouldDirty: true })
     setResidentUpdates({})
+    setAddressParts({ houseNumber: resident.houseNumber ?? "", street: resident.street ?? "", purok: resident.purok ?? 1 })
     setSelectedSector("")
     setDuplicate(null)
     setFormError("")
@@ -276,7 +277,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const fieldsByGroup = (group: DetailFieldConfig["group"]) => config.fields.filter((field) => field.group === group)
   const previewRows = [
     ["Resident", selectedResident ? formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, config.name) : ""],
-    ["Address", selectedResident?.address ?? ""],
+    ["Address", selectedResident ? getResidentAddress(selectedResident) : ""],
     ["Date", issueDate],
     ["Purpose", form.watch("purposeText") ?? ""],
   ]
@@ -323,7 +324,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 <div className="min-w-0">
                   <p className="font-medium">{formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, config.name)}</p>
                   <p className="text-xs text-muted-foreground">{selectedResident.id}</p>
-                  <p className="mt-1 text-sm">{selectedResident.address}</p>
+                  <p className="mt-1 text-sm">{getResidentAddress(selectedResident)}</p>
                   <p className="mt-1 text-sm text-muted-foreground">{selectedResident.birthdate ? `${calculateAge(selectedResident.birthdate, issueDate)} years old` : "Birthdate not recorded"} · {selectedResident.civilStatus || "Civil status not recorded"}</p>
                 </div>
                 <Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); form.setValue("residentId", ""); setResidentQuery("") }}>Change</Button>
@@ -335,7 +336,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               </div>
               {matches.length ? <div className="overflow-hidden rounded-md border">{matches.map((resident) => <button type="button" key={resident.id} disabled={resident.status === "Archived"} onClick={() => selectResident(resident)} className={cn("flex min-h-12 w-full flex-col items-start border-b px-3 py-2 text-left last:border-b-0 hover:bg-muted", resident.status === "Archived" && "cursor-not-allowed opacity-50")}>
                 <span className="font-medium">{resident.name} <span className="text-xs text-muted-foreground">{resident.id}</span>{resident.status === "Archived" ? <span className="ml-2 text-xs text-muted-foreground">Archived</span> : null}</span>
-                <span className="text-xs text-muted-foreground">{resident.address}</span>
+                <span className="text-xs text-muted-foreground">{getResidentAddress(resident)}</span>
               </button>)}</div> : residentQuery.trim() ? <p className="text-sm text-muted-foreground">No matching active resident.</p> : null}
               <button type="button" className="inline-flex min-h-9 items-center gap-1 text-sm text-primary underline underline-offset-4" onClick={() => setShowQuickAdd((value) => !value)}><UserRoundPlus className="size-4" />Resident not found? Add new resident</button>
               {showQuickAdd ? <div className="space-y-3 rounded-md border p-3">
@@ -353,7 +354,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             {selectedResident && (config.residentNeeds.some((need) => {
               const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : selectedResident.emergencyContact?.phone
               return !residentValue
-            }) || !selectedResident.address.trim()) ? <div className="mt-3 space-y-3">
+            }) || (!selectedResident.houseNumber?.trim() || !selectedResident.street?.trim() || !selectedResident.purok)) ? <div className="mt-3 space-y-3">
               <p className="text-sm font-medium">Needed for this document</p>
               {config.residentNeeds.filter((need) => {
                 const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : selectedResident.emergencyContact?.phone
@@ -364,7 +365,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 if (need === "address") return <div key={need} className="space-y-2">
                   <p className="text-sm font-medium">{labels[need]}</p>
                   <div className="grid gap-3 sm:grid-cols-3">
-                    <label className={fieldLabelClass}>House number<input value={addressParts.houseNumber} onChange={(event) => { const next = { ...addressParts, houseNumber: event.target.value }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass} /></label>
+                    <label className={fieldLabelClass}>House number<input value={addressParts.houseNumber} onChange={(event) => { const next = { ...addressParts, houseNumber: event.target.value }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, houseNumber: next.houseNumber, street: next.street, purok: next.purok, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`, "Mayondon"].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass} /></label>
                     <label className={fieldLabelClass}>Street<input value={addressParts.street} onChange={(event) => { const next = { ...addressParts, street: event.target.value }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass} /></label>
                     <label className={fieldLabelClass}>Purok<select value={addressParts.purok} onChange={(event) => { const next = { ...addressParts, purok: Number(event.target.value) }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, address: [next.houseNumber.trim(), next.street.trim(), `Purok ${next.purok}`].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass}>{[1, 2, 3, 4, 5, 6].map((purok) => <option key={purok} value={purok}>Purok {purok}</option>)}</select></label>
                   </div>
