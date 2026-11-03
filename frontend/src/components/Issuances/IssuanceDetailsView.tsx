@@ -157,7 +157,10 @@ export function IssuanceDetailsView({ record }: { record: IssuanceRecord }) {
         {record.status === "Pending" ? <span className="text-xs text-muted-foreground">Draft, not yet issued</span> : null}
       </div>
       <Section step={1} title="Document"><Rows rows={documentRows} /></Section>
-      <Section step={2} title="Resident"><Rows rows={residentRows} /></Section>
+      <Section step={2} title="Resident">
+        <Rows rows={residentRows} />
+        {snapshot?.photoUrl ? <img src={snapshot.photoUrl} alt="Resident photo" className="mt-2 h-28 w-[84px] rounded-md border bg-white object-cover" /> : null}
+      </Section>
       {issuance && config ? (
         <>
           {detailRows.some((row) => row.value.trim()) ? <Section step={3} title="Document details"><Rows rows={detailRows} /></Section> : null}

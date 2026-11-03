@@ -12,6 +12,7 @@ Last updated: November 1, 2026
 |---|---|
 | `Barangay ID Layout.pub` | Existing ID front/back layout |
 | `Certification.xlsx`, `Clearance Issuing.xls` | Current issuance workflow and possible tracking fields. Do not import real rows into sample data |
+| `Barangay Clearance.docx` and the other blank form copies | Blank copies are kept in [`reference/document-templates/`](reference/document-templates/README.md). Blank forms only, no real data |
 | `Residency.docx` | Residency certification wording. May contain sensitive narratives; do not reuse as defaults |
 | `First-Time Jobseekers.docx` | Applicant information sheet, oath of undertaking and barangay certification. Use the structure only |
 

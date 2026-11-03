@@ -47,6 +47,7 @@ export type MockIssuance = {
     birthPlace?: string
     sex?: string
     civilStatus?: string
+    photoUrl?: string
     residentSinceYear?: number
     residentSinceBirth: boolean
   }
@@ -294,6 +295,7 @@ export const issuanceApi = {
           birthPlace: updatedResident.birthplace || undefined,
           sex: updatedResident.sex,
           civilStatus: updatedResident.civilStatus,
+          photoUrl: updatedResident.photoUrl || undefined,
           residentSinceYear: updatedResident.residentSinceBirth ? undefined : updatedResident.residentSince || undefined,
           residentSinceBirth: Boolean(updatedResident.residentSinceBirth),
         },

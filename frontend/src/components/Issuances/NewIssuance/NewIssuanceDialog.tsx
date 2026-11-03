@@ -15,6 +15,7 @@ import { DateField } from "./DateField"
 import { popoverIsOpen } from "./popover"
 import { IssuanceSection } from "./IssuanceSection"
 import { DocumentTypePicker } from "./DocumentTypePicker"
+import { PhotoCapture } from "./PhotoCapture"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
@@ -602,8 +603,11 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       const current = need === "sector" ? (residentUpdates.sectors?.[0] ?? "") : String(updates[key] ?? "")
       return <div key={need} className={fieldLabelClass}><label htmlFor={`resident-missing-${need}`}>{need === "civilStatus" ? "Civil status" : "Sector"}</label><SelectField id={`resident-missing-${need}`} value={current} options={choices} onChange={(next) => patch({ [key]: need === "sector" ? [next] : next })} /></div>
     }
-    const key = need === "birthPlace" ? "birthplace" : need === "photo" ? "photoUrl" : need
-    const label = need === "birthPlace" ? "Place of birth" : need === "photo" ? "Photo reference" : need
+    if (need === "photo") {
+      return <div key={need} className={fieldLabelClass}><span id="resident-missing-photo-label">Photo <span className="text-destructive">*</span></span><PhotoCapture id="resident-missing-photo" value={String(updates.photoUrl ?? selectedResident.photoUrl ?? "")} onChange={(photoUrl) => patch({ photoUrl })} /></div>
+    }
+    const key = need === "birthPlace" ? "birthplace" : need
+    const label = need === "birthPlace" ? "Place of birth" : need
     return <label key={need} className={fieldLabelClass}>{label}<input id={`resident-missing-${need}`} value={String(updates[key] ?? "")} onChange={(event) => patch({ [key]: event.target.value })} className={formControlClass} autoComplete="off" /></label>
   }
 
@@ -815,6 +819,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                   <p className="text-sm text-muted-foreground">Please fill them in. They will be saved to {selectedResident.firstName}'s record.</p>
                 </div>
                 {neededFromRecord.map(renderResidentNeed)}
+              </div> : null}
+              {selectedResident && config.residentNeeds.includes("photo") && selectedResident.photoUrl && !neededFromRecord.includes("photo") ? <div className={fieldLabelClass}>
+                <span>Photo on record</span>
+                <PhotoCapture id="resident-photo" value={String(residentUpdates.photoUrl ?? selectedResident.photoUrl)} onChange={(photoUrl) => setResidentUpdates((previous) => ({ ...previous, photoUrl } as ResidentPatch))} />
               </div> : null}
             </IssuanceSection>
 
