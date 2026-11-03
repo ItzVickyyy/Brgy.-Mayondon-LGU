@@ -179,7 +179,7 @@ The backup script creates a timestamped PostgreSQL custom-format dump in `backup
 ## 9. Offline limitations to resolve
 
 - **Password recovery and account setup by email** depend on SMTP and will not work offline **(D-12)**.
-- **ID photo background removal:** the client uses an online service today. Replace it with an approved local tool or a manual process; **never upload resident photos to an external service** **(D-18)**.
+- **ID photo background removal:** the client uses an online service today. Replace it with an approved local tool or a manual process; **never upload resident photos to an external service** **(D-18)**. The prototype removes the background in the browser with the MediaPipe selfie-segmentation files served from our own server (`/vision/selfie-segmentation/`, copied from `node_modules` by `vite.config.ts`). The camera needs `localhost` or https: plain `http://<LAN address>` blocks it.
 - **External resources:** verify fonts, icons and scripts load offline (the packaged frontend uses local assets and same-origin calls).
 - **API docs page:** the custom `/docs` endpoint uses CDN-hosted Swagger UI assets and may not render offline. **Decision (Nov 1, 2026, D-37):** staff do not need it offline, so leave it as is; package the assets only if wanted for a demo.
 - **Updates and dependencies:** download and test before taking the host offline; never rely on live package downloads at the barangay.
