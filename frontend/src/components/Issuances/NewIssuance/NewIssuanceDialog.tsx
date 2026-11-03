@@ -20,6 +20,13 @@ type Props = {
 const sectionClass = "space-y-3 border-b pb-5 last:border-b-0"
 const fieldLabelClass = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
 
+function normalizedOptionValue(fieldName: string, option: string) {
+  if (fieldName === "services" || fieldName === "connectionType" || fieldName === "classification" || fieldName === "assistanceType" || fieldName === "transactionType") return option.toLowerCase()
+  if (fieldName === "isJobstartBeneficiary") return option === "Yes" ? "true" : "false"
+  if (fieldName === "parts") return ({ "Applicant sheet": "applicant_sheet", Oath: "oath", Certification: "certification" } as Record<string, string>)[option] ?? option
+  return option
+}
+
 function getDefaultToday(value: unknown) {
   return value === "today" ? localIsoDate() : typeof value === "string" ? value : ""
 }
@@ -28,7 +35,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const form = useNewIssuanceForm(initialResidentId ?? "")
   const [residents, setResidents] = useState<ResidentRecord[]>([])
   const [residentQuery, setResidentQuery] = useState("")
-  const [selectedResident, setSelectedResident] = useState<ResidentRecord | null>(null)
+  const [selectedResident, setSelectedResident] = useState<ResidentRecord | null>(() => sampleResidents.find((resident) => resident.id === initialResidentId || resident.name === initialResidentId) ?? null)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [quickAdd, setQuickAdd] = useState<QuickResidentInput>({
     lastName: "", firstName: "", middleName: "", birthdate: "", sex: "Male", civilStatus: "Single",
@@ -133,21 +140,28 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       } else if (field.name === "purpose") setRootField("purposeText", String(nextValue))
       else if (field.name === "remarks") setRootField("remarks", String(nextValue))
       else if (field.name === "sector") form.setValue("sectors", [{ sectorId: Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1 }], { shouldDirty: true })
-      else setDetail(field.name, nextValue)
+      else if (field.name === "for") setDetail("forSelf", nextValue === "Myself")
+      else if (field.name === "relationship") setDetail("beneficiaryRelationship", String(nextValue))
+      else if (field.name === "isJobstartBeneficiary") setDetail(field.name, nextValue === "true")
+      else if (["services", "connectionType", "classification", "assistanceType", "transactionType"].includes(field.name)) {
+        setDetail(field.name, Array.isArray(nextValue) ? nextValue : String(nextValue).toLowerCase())
+      } else if (field.name === "sectorIdNumber") {
+        form.setValue("sectors", [{ sectorId: form.getValues("sectors")?.[0]?.sectorId ?? 1, idNumber: String(nextValue) }], { shouldDirty: true })
+      } else setDetail(field.name, nextValue)
     }
     return <label key={field.name} htmlFor={fieldId} className={fieldLabelClass}>
       <span>{field.label}{field.required ? <span className="text-destructive"> *</span> : null}</span>
       {field.type === "select" || field.type === "combobox" || field.type === "radio" ? (
         <select id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, "bg-background")} required={field.required}>
           <option value="">Select…</option>
-          {(field.options ?? []).map((option) => <option key={option} value={option}>{option}</option>)}
+          {(field.options ?? []).map((option) => <option key={option} value={normalizedOptionValue(field.name, option)}>{option}</option>)}
         </select>
       ) : field.type === "multiselect" ? (
         <div className="flex flex-wrap gap-2">
           {(field.options ?? []).map((option) => {
             const current = Array.isArray(value) ? value as string[] : []
             return <label key={option} className="inline-flex min-h-10 items-center gap-2 rounded-md border px-3 text-sm font-normal">
-              <input type="checkbox" checked={current.includes(option)} onChange={(event) => onValueChange(event.target.checked ? [...current, option] as unknown as string : current.filter((item) => item !== option) as unknown as string)} />
+              <input type="checkbox" checked={current.includes(optionValue)} onChange={(event) => onValueChange(event.target.checked ? [...current, optionValue] as unknown as string : current.filter((item) => item !== optionValue) as unknown as string)} />
               {option}
             </label>
           })}
