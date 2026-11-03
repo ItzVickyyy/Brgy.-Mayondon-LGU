@@ -829,7 +829,8 @@ function IssuancesManagement() {
               <Button type="button" variant="ghost" size="lg" onClick={clearForm}><Eraser aria-hidden="true" />Clear form</Button>
               <Button type="button" variant="outline" size="lg" onClick={() => saveIssuance(true)}>Save as draft</Button>
               <Button type="button" variant="outline" size="lg" onClick={() => preparePrint()}><Eye aria-hidden="true" />Print preview</Button>
-              <Button type="button" size="lg" onClick={() => saveIssuance(false)}><FileCheck2 aria-hidden="true" />Save as issued</Button>
+              <Button type="button" variant="outline" size="lg" onClick={() => saveIssuance(false)}><FileCheck2 aria-hidden="true" />Save as issued</Button>
+              <Button type="button" size="lg" onClick={() => { const record = saveIssuance(false); if (record) printNow(record) }}><Printer aria-hidden="true" />Save &amp; print</Button>
             </DialogFooter>
           </form>
         </DialogContent>
