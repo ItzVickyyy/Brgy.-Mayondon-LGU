@@ -2,12 +2,13 @@ import { useMemo, useState } from "react"
 import { CalendarDays, ChevronDown, Search, UserRoundPlus } from "lucide-react"
 import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuanceForm"
 import { documentConfig, documentConfigList, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
-import { getResidentAddress, issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
+import { getMissingResidentFields, getResidentAddress, issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
 import { sampleResidents, type ResidentRecord } from "@/components/Records/records-sample-data"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { formControlClass } from "@/components/Common/formStyles"
 import { Button } from "@/components/ui/button"
+import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
@@ -275,11 +276,68 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   }
 
   const fieldsByGroup = (group: DetailFieldConfig["group"]) => config.fields.filter((field) => field.group === group)
+
+  function previewValue(field: DetailFieldConfig): string {
+    const detailValues = details as unknown as Record<string, unknown>
+    let value: unknown
+    if (field.group === "identity") {
+      const identityValues = identification as unknown as Record<string, unknown> | undefined
+      const key = field.name === "idType" ? "idTypeId" : field.name === "idNumber" ? "idNumber" : field.name === "idPlaceOfIssue" ? "placeOfIssue" : "dateOfIssue"
+      value = identityValues?.[key]
+      if (field.name === "idType") value = field.options?.[Number(value ?? 0) - 1] ?? ""
+    } else if (field.group === "payment") {
+      const paymentValues = payment as unknown as Record<string, unknown> | undefined
+      value = field.name === "isFree" ? paymentValues?.isFree ? "Yes" : "No" : paymentValues?.officialReceiptNo
+    } else if (field.name === "purpose") value = form.getValues("purposeText")
+    else if (field.name === "remarks") value = form.getValues("remarks")
+    else if (field.name === "sector") value = selectedSector
+    else if (field.name === "sectorIdNumber") value = form.getValues("sectors")?.[0]?.idNumber
+    else if (field.name === "for") value = detailValues.forSelf === false ? "Someone else" : "Myself"
+    else if (field.name === "relationship") value = detailValues.beneficiaryRelationship
+    else if (field.name === "referredBy") value = initialOfficials.find((official) => official.id === detailValues.referredByOfficialId)?.name
+    else if (field.name === "witnessOfficialId") value = initialOfficials.find((official) => official.id === detailValues.witnessOfficialId)?.name
+    else value = detailValues[field.name]
+    if (Array.isArray(value)) return value.join(", ")
+    if (typeof value === "boolean") return value ? "Yes" : "No"
+    return value == null ? "" : String(value)
+  }
+
+  function fieldHasValue(field: DetailFieldConfig): boolean {
+    const value = previewValue(field)
+    if (field.name === "isJobstartBeneficiary") return true
+    if (field.name === "officialReceiptNo" && payment?.isFree) return true
+    return value.trim().length > 0
+  }
+
   const previewRows = [
-    ["Resident", selectedResident ? formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, config.name) : ""],
-    ["Address", selectedResident ? getResidentAddress(selectedResident) : ""],
-    ["Date", issueDate],
-    ["Purpose", form.watch("purposeText") ?? ""],
+    { label: "Resident", value: selectedResident ? formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, config.name) : "" },
+    { label: "Resident number", value: selectedResident?.id ?? "" },
+    { label: "Address", value: selectedResident ? getResidentAddress(selectedResident) : "" },
+    { label: "Birthdate", value: selectedResident?.birthdate ?? "" },
+    { label: "Birthplace", value: selectedResident?.birthplace ?? "" },
+    { label: "Sex", value: selectedResident?.sex ?? "" },
+    { label: "Civil status", value: selectedResident?.civilStatus ?? "" },
+    { label: "Date on document", value: issueDate },
+    ...config.fields.map((field) => ({ label: field.label, value: previewValue(field) })),
+  ]
+
+  const missingPreviewLabels = [
+    ...(!selectedResident ? [{ name: "resident-search", label: "Resident record" }] : []),
+    ...config.fields.filter((field) => field.required && !fieldHasValue(field)).map((field) => ({ name: field.name, label: field.label })),
+    ...(!issueDate ? [{ name: "date", label: "Date on document" }] : []),
+    ...(config.signatoryMode === "select" && !form.watch("signatoryOfficialId") ? [{ name: "signatoryOfficialId", label: "Signatory" }] : []),
+    ...(selectedResident ? getMissingResidentFields(selectedResident, documentType).filter((need) => {
+      if (need === "address") return !residentUpdates.address && (!selectedResident.houseNumber?.trim() || !selectedResident.street?.trim() || !selectedResident.purok)
+      if (need === "birthDate") return !residentUpdates.birthdate && !selectedResident.birthdate
+      if (need === "birthPlace") return !residentUpdates.birthplace && !selectedResident.birthplace
+      if (need === "civilStatus") return !residentUpdates.civilStatus && !selectedResident.civilStatus
+      if (need === "sex") return !residentUpdates.sex && !selectedResident.sex
+      if (need === "residentSince") return !residentUpdates.residentSince && selectedResident.residentSince === undefined
+      if (need === "sector") return !residentUpdates.sectors?.length && !selectedResident.sectors.length
+      if (need === "photo") return !residentUpdates.photoUrl && !selectedResident.photoUrl
+      if (need === "emergencyContact") return !residentUpdates.emergencyContact?.name || !residentUpdates.emergencyContact.address || !residentUpdates.emergencyContact.phone
+      return false
+    }).map((need) => ({ name: need, label: ({ address: "Resident address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since", sector: "Sector", photo: "Photo", emergencyContact: "Emergency contact" } as Record<string, string>)[need] ?? need })) : []),
   ]
 
   return <Dialog open={open} onOpenChange={(nextOpen) => { if (!nextOpen && form.formState.isDirty && !window.confirm("Discard the changes to this issuance?")) return; if (!nextOpen) resetDialog(); onOpenChange(nextOpen) }}>
@@ -396,7 +454,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             </div> : null}
             <div>
               <button type="button" className="flex min-h-10 items-center gap-2 text-sm font-medium" onClick={() => setPreviewOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", previewOpen && "rotate-180")} />Preview of what will print</button>
-              {previewOpen ? <div className="space-y-2 rounded-md border p-3 text-sm">{previewRows.map(([label, value]) => <div key={label} className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] gap-2"><span className="text-muted-foreground">{label}</span><span className="break-words text-right">{value || "Missing"}</span></div>)}<p className="border-t pt-2 text-xs text-muted-foreground">Preview only. Printing is paused pending paper calibration.</p></div> : null}
+              {previewOpen ? <PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={missingPreviewLabels} printingPaused /> : null}
             </div>
           </section>
           {duplicate ? <p role="alert" className="rounded-md border border-destructive/40 p-3 text-sm">An issued First-Time Jobseeker certificate already exists: {duplicate.referenceNo}, dated {duplicate.issueDate}. An administrator must void it before another can be issued.</p> : null}
