@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Button } from "@/components/ui/button"
+import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react"
 import { formControlClass } from "@/components/Common/formStyles"
-import { buildIsoDate, daysInMonth, monthNames, splitIsoDate } from "@/lib/issuance-format"
+import { formatPaperDate, isoToLocalDate, localDateToIso, monthNames } from "@/lib/issuance-format"
 import { cn } from "@/lib/utils"
 
 type DateFieldProps = {
@@ -15,13 +15,20 @@ type DateFieldProps = {
   minYear?: number
   maxYear?: number
   noFuture?: boolean
-  showToday?: boolean
-  singleInput?: boolean
 }
 
 function localDateValue() {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+  return localDateToIso(new Date())
+}
+
+function dateAtMonth(year: number, month: number) {
+  return new Date(year, month, 1)
+}
+
+function isSameDay(left: Date, right: Date) {
+  return left.getFullYear() === right.getFullYear()
+    && left.getMonth() === right.getMonth()
+    && left.getDate() === right.getDate()
 }
 
 export function DateField({
@@ -35,145 +42,202 @@ export function DateField({
   minYear,
   maxYear,
   noFuture = false,
-  showToday = false,
-  singleInput = false,
 }: DateFieldProps) {
-  const initial = splitIsoDate(value)
-  const [year, setYear] = useState(initial.year)
-  const [month, setMonth] = useState(initial.month)
-  const [day, setDay] = useState(initial.day)
-  const lastEmittedValue = useRef<string | null>(null)
   const today = localDateValue()
+  const todayDate = isoToLocalDate(today) ?? new Date()
+  const selectedDate = isoToLocalDate(value)
+  const isBirthdate = label.toLowerCase().includes("birthdate")
   const effectiveMinYear = minYear ?? 1
-  const effectiveMaxYear = maxYear ?? new Date().getFullYear() + 1
-
-  useEffect(() => {
-    if (lastEmittedValue.current === value) {
-      lastEmittedValue.current = null
-      return
-    }
-    const parts = splitIsoDate(value)
-    setYear(parts.year)
-    setMonth(parts.month)
-    setDay(parts.day)
-  }, [value])
-
-  const numericYear = /^\d{4}$/.test(year) ? Number(year) : 0
-  const numericMonth = Number(month)
-  const effectiveYear = numericYear || new Date().getFullYear()
-  const maxDay = numericMonth ? daysInMonth(effectiveYear, numericMonth) : 31
-  const dayOptions = useMemo(() => Array.from({ length: maxDay }, (_, index) => String(index + 1)), [maxDay])
-  const isoValue = buildIsoDate(year, month, day)
-  const rangeMessage = year.length === 4 && numericYear && (numericYear < effectiveMinYear || numericYear > effectiveMaxYear)
+  const effectiveMaxYear = Math.min(maxYear ?? todayDate.getFullYear() + 1, noFuture ? todayDate.getFullYear() : Number.MAX_SAFE_INTEGER)
+  const initialViewDate = selectedDate ?? (isBirthdate
+    ? new Date(todayDate.getFullYear() - 30, todayDate.getMonth(), todayDate.getDate())
+    : todayDate)
+  const [open, setOpen] = useState(false)
+  const [viewYear, setViewYear] = useState(initialViewDate.getFullYear())
+  const [viewMonth, setViewMonth] = useState(initialViewDate.getMonth())
+  const triggerRef = useRef<HTMLButtonElement>(null)
+  const popoverRef = useRef<HTMLDivElement>(null)
+  const yearOptions = useMemo(
+    () => Array.from({ length: Math.max(1, effectiveMaxYear - effectiveMinYear + 1) }, (_, index) => effectiveMinYear + index),
+    [effectiveMinYear, effectiveMaxYear],
+  )
+  const firstWeekday = new Date(viewYear, viewMonth, 1).getDay()
+  const daysInCurrentMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
+  const calendarDays = [
+    ...Array.from({ length: firstWeekday }, () => null),
+    ...Array.from({ length: daysInCurrentMonth }, (_, index) => index + 1),
+  ]
+  const minDate = `${String(effectiveMinYear).padStart(4, "0")}-01-01`
+  const maxDate = noFuture
+    ? today
+    : `${String(effectiveMaxYear).padStart(4, "0")}-12-31`
+  const rangeMessage = selectedDate && (selectedDate.getFullYear() < effectiveMinYear || selectedDate.getFullYear() > effectiveMaxYear)
     ? `Year must be between ${effectiveMinYear} and ${effectiveMaxYear}.`
     : ""
-  const futureMessage = noFuture && isoValue && isoValue > today ? "Date cannot be in the future." : ""
+  const futureMessage = noFuture && value && value > today ? "Date cannot be in the future." : ""
   const invalidMessage = rangeMessage || futureMessage
-  const describedBy = [error ? `${id}-error` : "", help ? `${id}-help` : "", invalidMessage ? `${id}-range-error` : ""].filter(Boolean).join(" ") || undefined
+  const describedBy = [
+    error ? `${id}-error` : "",
+    help ? `${id}-help` : "",
+    invalidMessage ? `${id}-range-error` : "",
+  ].filter(Boolean).join(" ") || undefined
 
-  function emitDate(nextYear: string, nextMonth: string, nextDay: string) {
-    const nextIso = buildIsoDate(nextYear, nextMonth, nextDay)
-    const validYear = Number(nextYear) >= effectiveMinYear && Number(nextYear) <= effectiveMaxYear
-    const validFuture = !noFuture || !nextIso || nextIso <= today
-    const emittedValue = nextIso && validYear && validFuture ? nextIso : ""
-    lastEmittedValue.current = emittedValue
-    onChange(emittedValue)
+  useEffect(() => {
+    if (!open) return
+    function handlePointerDown(event: PointerEvent) {
+      const target = event.target
+      if (!(target instanceof Node)) return
+      if (popoverRef.current?.contains(target) || triggerRef.current?.contains(target)) return
+      setOpen(false)
+    }
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        event.preventDefault()
+        event.stopPropagation()
+        setOpen(false)
+        triggerRef.current?.focus()
+      }
+    }
+    document.addEventListener("pointerdown", handlePointerDown)
+    document.addEventListener("keydown", handleKeyDown, true)
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown)
+      document.removeEventListener("keydown", handleKeyDown, true)
+    }
+  }, [open])
+
+  function openCalendar() {
+    const nextDate = selectedDate ?? initialViewDate
+    setViewYear(nextDate.getFullYear())
+    setViewMonth(nextDate.getMonth())
+    setOpen((previous) => !previous)
+  }
+
+  function chooseDate(date: Date) {
+    const nextValue = localDateToIso(date)
+    if (nextValue < minDate || nextValue > maxDate) return
+    onChange(nextValue)
+    setOpen(false)
+    triggerRef.current?.focus()
+  }
+
+  function changeMonth(nextMonth: number) {
+    const nextDate = dateAtMonth(viewYear, nextMonth)
+    setViewYear(nextDate.getFullYear())
+    setViewMonth(nextDate.getMonth())
   }
 
   function chooseToday() {
-    const parts = splitIsoDate(today)
-    setYear(parts.year)
-    setMonth(parts.month)
-    setDay(parts.day)
+    if (today < minDate || today > maxDate) return
     onChange(today)
+    setViewYear(todayDate.getFullYear())
+    setViewMonth(todayDate.getMonth())
+    setOpen(false)
+    triggerRef.current?.focus()
   }
 
+  const showTodayLink = id === "field-date" || label.toLowerCase() === "date on document"
+
   return (
-    <fieldset className="min-w-0 space-y-1.5">
-      <legend className="text-sm font-medium">{label}{required ? <span className="text-destructive"> *</span> : null}</legend>
-      {singleInput ? (
-        <input
-          id={id}
-          type="date"
-          required={required}
-          min={minYear ? `${minYear}-01-01` : undefined}
-          max={maxYear ? `${maxYear}-12-31` : undefined}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          className={cn(formControlClass, "w-full", (error || invalidMessage) && "border-destructive")}
-          aria-invalid={Boolean(error || invalidMessage)}
-          aria-describedby={describedBy}
-        />
-      ) : (
-        <div className="grid min-w-0 grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)_minmax(0,1fr)] gap-2">
-          <div className="min-w-0">
-            <label htmlFor={id} className="sr-only">Month</label>
+    <div className="relative min-w-0 space-y-1.5">
+      <label htmlFor={id} className="block text-sm font-medium">
+        {label}{required ? <span className="text-destructive"> *</span> : null}
+      </label>
+      <button
+        ref={triggerRef}
+        id={id}
+        type="button"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        aria-controls={open ? `${id}-calendar` : undefined}
+        aria-invalid={Boolean(error || invalidMessage)}
+        aria-describedby={describedBy}
+        onClick={openCalendar}
+        className={cn(
+          formControlClass,
+          "flex w-full items-center justify-between gap-2 text-left",
+          (error || invalidMessage) && "border-destructive",
+          !value && "text-muted-foreground",
+        )}
+      >
+        <span className="truncate">{value ? formatPaperDate(value) : isBirthdate ? "Select birthdate" : "Select date"}</span>
+        <CalendarDays aria-hidden="true" className="size-4 shrink-0 text-muted-foreground" />
+      </button>
+      {open ? (
+        <div
+          ref={popoverRef}
+          id={`${id}-calendar`}
+          role="dialog"
+          aria-label={`Choose ${label.toLowerCase()}`}
+          className="absolute left-0 top-full z-[100] mt-2 w-[min(20rem,calc(100vw-3rem))] rounded-xl border bg-popover p-3 text-popover-foreground shadow-lg"
+        >
+          <div className="mb-3 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2">
             <select
-              id={id}
-              required={required}
-              value={month}
-              onChange={(event) => {
-                const nextMonth = event.target.value
-                const nextMaxDay = nextMonth ? daysInMonth(effectiveYear, Number(nextMonth)) : 31
-                const nextDay = day && Number(day) > nextMaxDay ? "" : day
-                setMonth(nextMonth)
-                setDay(nextDay)
-                emitDate(year, nextMonth, nextDay)
-              }}
-              className={cn(formControlClass, "min-w-0 px-2", (error || invalidMessage) && "border-destructive")}
-              aria-invalid={Boolean(error || invalidMessage)}
-              aria-describedby={describedBy}
+              aria-label="Month"
+              value={viewMonth}
+              onChange={(event) => changeMonth(Number(event.target.value))}
+              className="h-9 min-w-0 rounded-md border bg-background px-2 text-sm"
             >
-              <option value="">Month</option>
-              {monthNames.map((name, index) => <option key={name} value={String(index + 1)}>{name}</option>)}
+              {monthNames.map((month, index) => <option key={month} value={index}>{month}</option>)}
+            </select>
+            <button
+              type="button"
+              aria-label="Previous month"
+              disabled={viewYear === effectiveMinYear && viewMonth === 0}
+              onClick={() => changeMonth(viewMonth - 1)}
+              className="inline-flex size-9 items-center justify-center rounded-md border hover:bg-muted disabled:opacity-40"
+            >
+              <ChevronLeft aria-hidden="true" className="size-4" />
+            </button>
+            <select
+              aria-label="Year"
+              value={viewYear}
+              onChange={(event) => setViewYear(Number(event.target.value))}
+              className="h-9 min-w-0 rounded-md border bg-background px-2 text-sm"
+            >
+              {yearOptions.map((year) => <option key={year} value={year}>{year}</option>)}
             </select>
           </div>
-          <div className="min-w-0">
-            <label htmlFor={`${id}-day`} className="sr-only">Day</label>
-            <select
-              id={`${id}-day`}
-              value={day}
-              onChange={(event) => {
-                setDay(event.target.value)
-                emitDate(year, month, event.target.value)
-              }}
-              className={cn(formControlClass, "min-w-0 px-2", (error || invalidMessage) && "border-destructive")}
-              aria-invalid={Boolean(error || invalidMessage)}
-              aria-describedby={describedBy}
-            >
-              <option value="">Day</option>
-              {dayOptions.map((number) => <option key={number} value={number}>{number}</option>)}
-            </select>
+          <div className="mb-1 grid grid-cols-7 text-center text-xs font-medium text-muted-foreground">
+            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => <span key={day} className="py-1">{day}</span>)}
           </div>
-          <div className="min-w-0">
-            <label htmlFor={`${id}-year`} className="sr-only">Year</label>
-            <input
-              id={`${id}-year`}
-              inputMode="numeric"
-              maxLength={4}
-              value={year}
-              onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault() }}
-              onChange={(event) => {
-                const nextYear = event.target.value.replace(/\D/g, "").slice(0, 4)
-                const nextMonth = month
-                const nextYearForDays = nextYear.length === 4 ? Number(nextYear) : new Date().getFullYear()
-                const nextDay = day && nextMonth && Number(day) > daysInMonth(nextYearForDays, Number(nextMonth)) ? "" : day
-                setYear(nextYear)
-                setDay(nextDay)
-                emitDate(nextYear, nextMonth, nextDay)
-              }}
-              placeholder="Year"
-              className={cn(formControlClass, "min-w-0 px-2", (error || invalidMessage) && "border-destructive")}
-              aria-invalid={Boolean(error || invalidMessage)}
-              aria-describedby={describedBy}
-            />
+          <div className="grid grid-cols-7 gap-1">
+            {calendarDays.map((day, index) => {
+              if (day === null) return <span key={`empty-${index}`} aria-hidden="true" />
+              const date = new Date(viewYear, viewMonth, day)
+              const iso = localDateToIso(date)
+              const disabled = iso < minDate || iso > maxDate
+              const selected = selectedDate ? isSameDay(date, selectedDate) : false
+              const isToday = isSameDay(date, todayDate)
+              return (
+                <button
+                  key={day}
+                  type="button"
+                  disabled={disabled}
+                  aria-pressed={selected}
+                  aria-label={date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+                  onClick={() => chooseDate(date)}
+                  className={cn(
+                    "size-9 rounded-md text-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-30",
+                    selected && "bg-primary text-primary-foreground hover:bg-primary/90",
+                    isToday && !selected && "border border-primary/50 font-semibold",
+                  )}
+                >
+                  {day}
+                </button>
+              )
+            })}
           </div>
+          {showTodayLink ? (
+            <div className="mt-3 flex justify-end border-t pt-2">
+              <button type="button" onClick={chooseToday} className="min-h-9 px-2 text-sm font-medium text-primary underline underline-offset-4">Today</button>
+            </div>
+          ) : null}
         </div>
-      )}
-      {showToday ? <Button type="button" variant="ghost" size="sm" className="min-h-11 px-2" onClick={chooseToday}>Today</Button> : null}
+      ) : null}
       {help ? <p id={`${id}-help`} className="text-xs font-normal text-muted-foreground">{help}</p> : null}
       {error ? <p id={`${id}-error`} className="text-xs font-normal text-destructive">{error}</p> : null}
       {invalidMessage ? <p id={`${id}-range-error`} className="text-xs font-normal text-destructive">{invalidMessage}</p> : null}
-    </fieldset>
+    </div>
   )
 }
