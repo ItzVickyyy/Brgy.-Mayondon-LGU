@@ -429,7 +429,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     { label: "Date on document", value: issueDate },
     ...(config.signatoryMode === "select" ? [{ label: "Signatory", value: initialOfficials.find((official) => official.id === form.watch("signatoryOfficialId"))?.name ?? "" }] : []),
     ...config.fields.map((field) => ({ label: field.label, value: previewValue(field) })),
-    ...(config.residentNeeds.includes("residentSince") ? [{ label: documentType === "RESIDENCY" ? "Residing since" : "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (documentType === "RESIDENCY") return source.residentSinceBirth || source.residentSince === 0 ? "Since birth" : source.residentSince === undefined ? "" : String(source.residentSince); if (source.residentSinceBirth || source.residentSince === 0) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return source.residentSince === undefined ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
+    ...(config.residentNeeds.includes("residentSince") ? [{ label: documentType === "RESIDENCY" ? "Residing since" : "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (documentType === "RESIDENCY") return source.residentSinceBirth || source.residentSince === 0 ? "Since birth" : source.residentSince === undefined ? "" : String(source.residentSince); if (source.residentSinceBirth) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return !source.residentSince ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
   ]
 
   const missingPreviewLabels = [
@@ -443,7 +443,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       if (need === "birthPlace") return !residentUpdates.birthplace && !selectedResident.birthplace
       if (need === "civilStatus") return !residentUpdates.civilStatus && !selectedResident.civilStatus
       if (need === "sex") return !residentUpdates.sex && !selectedResident.sex
-      if (need === "residentSince") return residentUpdates.residentSince === undefined && !residentUpdates.residentSinceBirth && selectedResident.residentSince === undefined && !selectedResident.residentSinceBirth
+      if (need === "residentSince") return !residentUpdates.residentSince && !residentUpdates.residentSinceBirth && !selectedResident.residentSince && !selectedResident.residentSinceBirth
       if (need === "sector") return !residentUpdates.sectors?.length && !selectedResident.sectors.length
       if (need === "photo") return !residentUpdates.photoUrl && !selectedResident.photoUrl
       if (need === "emergencyContact") return !residentUpdates.emergencyContact?.name || !residentUpdates.emergencyContact.address || !residentUpdates.emergencyContact.phone
