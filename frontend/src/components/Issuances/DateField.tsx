@@ -187,7 +187,7 @@ export function DateField({
               aria-label="Month"
               value={viewMonth}
               onChange={(event) => changeMonth(Number(event.target.value))}
-              className="h-9 min-w-0 rounded-md border bg-background px-2 text-sm"
+              className="h-11 min-w-0 rounded-md border bg-background px-2 text-sm"
             >
               {monthNames.map((month, index) => <option key={month} value={index}>{month}</option>)}
             </select>
@@ -195,7 +195,7 @@ export function DateField({
               aria-label="Year"
               value={viewYear}
               onChange={(event) => setViewYear(Number(event.target.value))}
-              className="h-9 min-w-0 rounded-md border bg-background px-2 text-sm"
+              className="h-11 min-w-0 rounded-md border bg-background px-2 text-sm"
             >
               {yearOptions.map((year) => <option key={year} value={year}>{year}</option>)}
             </select>
@@ -232,7 +232,7 @@ export function DateField({
           </div>
           {showTodayLink ? (
             <div className="mt-3 flex justify-end border-t pt-2">
-              <button type="button" onClick={chooseToday} className="min-h-9 px-2 text-sm font-medium text-primary underline underline-offset-4">Today</button>
+              <button type="button" onClick={chooseToday} className="min-h-11 px-2 text-sm font-medium text-primary underline underline-offset-4">Today</button>
             </div>
           ) : null}
         </div>
