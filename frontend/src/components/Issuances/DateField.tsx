@@ -16,6 +16,7 @@ type DateFieldProps = {
   maxYear?: number
   noFuture?: boolean
   showToday?: boolean
+  singleInput?: boolean
 }
 
 function localDateValue() {
@@ -35,6 +36,7 @@ export function DateField({
   maxYear,
   noFuture = false,
   showToday = false,
+  singleInput = false,
 }: DateFieldProps) {
   const initial = splitIsoDate(value)
   const [year, setYear] = useState(initial.year)
@@ -89,6 +91,20 @@ export function DateField({
   return (
     <fieldset className="min-w-0 space-y-1.5">
       <legend className="text-sm font-medium">{label}{required ? <span className="text-destructive"> *</span> : null}</legend>
+      {singleInput ? (
+        <input
+          id={id}
+          type="date"
+          required={required}
+          min={minYear ? `${minYear}-01-01` : undefined}
+          max={maxYear ? `${maxYear}-12-31` : undefined}
+          value={value}
+          onChange={(event) => onChange(event.target.value)}
+          className={cn(formControlClass, "w-full", (error || invalidMessage) && "border-destructive")}
+          aria-invalid={Boolean(error || invalidMessage)}
+          aria-describedby={describedBy}
+        />
+      ) : (
       <div className="grid min-w-0 grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)_minmax(0,1fr)] gap-2">
         <div className="min-w-0">
           <label htmlFor={id} className="sr-only">Month</label>
@@ -153,6 +169,7 @@ export function DateField({
           />
         </div>
       </div>
+      )}
       {showToday ? <Button type="button" variant="ghost" size="sm" className="min-h-11 px-2" onClick={chooseToday}>Today</Button> : null}
       {help ? <p id={`${id}-help`} className="text-xs font-normal text-muted-foreground">{help}</p> : null}
       {error ? <p id={`${id}-error`} className="text-xs font-normal text-destructive">{error}</p> : null}
