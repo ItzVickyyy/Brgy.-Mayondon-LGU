@@ -356,6 +356,11 @@ function IssuancesManagement() {
     setDateFieldResetKey((key) => key + 1)
     setClearanceAdvancedOpen(false)
     setFormValues(createDefaultFormValues(selectedType))
+    try {
+      window.localStorage.removeItem(AUTO_DRAFT_KEY)
+    } catch {
+      // Keep the clear action available if browser storage is blocked.
+    }
     setSelectedResidentId("")
     setResidentQuery("")
     setManualEntry(false)
@@ -373,7 +378,6 @@ function IssuancesManagement() {
 
   function requestCloseForm(open: boolean) {
     if (open) return setIsIssuanceModalOpen(true)
-    if (isDirty) return setConfirmFormAction("discard")
     setIsIssuanceModalOpen(false)
     setContinueTarget(null)
     setCorrectionTarget(null)
@@ -416,6 +420,11 @@ function IssuancesManagement() {
         ? { ...item, resident: currentName, date: currentDate, status: "Issued", purpose: formValues.purpose || item.purpose, fields: { ...formValues } }
         : item))
       setNotice(`${continueTarget.id} was continued and marked as issued.`)
+      try {
+        window.localStorage.removeItem(AUTO_DRAFT_KEY)
+      } catch {
+        // The issuance can still be completed if browser storage is blocked.
+      }
       setContinueTarget(null)
       setIsIssuanceModalOpen(false)
       return
@@ -433,6 +442,11 @@ function IssuancesManagement() {
       fields: { ...formValues, officialReceiptNumber: formValues.officialReceiptNumber?.trim().toUpperCase() === "FOC" ? "FOC" : formValues.officialReceiptNumber?.trim() ?? "" },
     }
     setDrafts((previous) => [record, ...previous])
+    try {
+      window.localStorage.removeItem(AUTO_DRAFT_KEY)
+    } catch {
+      // The issuance can still be completed if browser storage is blocked.
+    }
     if (selectedType === "Barangay Franchise Clearance" && formValues.tricycleAssociation?.trim()) setUsedAssociations((previous) => Array.from(new Set([...previous, formValues.tricycleAssociation.trim()])))
     if (selectedType === "Certificate of Indigency" && formValues.purpose?.trim()) setUsedIndigencyPurposes((previous) => Array.from(new Set([...previous, formValues.purpose.trim()])))
     setNotice(asDraft ? `${record.id} was saved as a pending draft.` : `${record.id} was recorded as issued.`)
