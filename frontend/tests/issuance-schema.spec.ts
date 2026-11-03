@@ -118,3 +118,39 @@ test("issued records retain an issue-time resident snapshot", async () => {
   expect(record.residentSnapshot?.addressLine).toBe("12 Rizal Street, Purok 1")
   mockIssuanceStore.reset()
 })
+
+
+test("history lists redact sensitive health conditions while authorized detail remains available", async () => {
+  mockIssuanceStore.reset()
+  const record = await issuanceApi.createIssuance({
+    documentType: "MARGINALIZED_SECTOR",
+    issueDate: "2026-11-03",
+    residentId: "RES-0001",
+    signatoryOfficialId: "OFF-002",
+    sectors: [{ sectorId: 5, idNumber: "SYNTHETIC-SECTOR-ID" }],
+    details: { type: "MARGINALIZED_SECTOR", healthCondition: "Fictional sensitive test value" },
+    status: "issued",
+  })
+  const list = await issuanceApi.listIssuances()
+  expect(list[0]?.payload.details).toEqual({ type: "MARGINALIZED_SECTOR", healthCondition: "[restricted]" })
+  expect((await issuanceApi.getIssuance(record.id))?.payload.details).toEqual({ type: "MARGINALIZED_SECTOR", healthCondition: "Fictional sensitive test value" })
+  mockIssuanceStore.reset()
+})
+
+test("mock void is admin-only and requires a reason", async () => {
+  mockIssuanceStore.reset()
+  const record = await issuanceApi.createIssuance({
+    documentType: "BARANGAY_CLEARANCE",
+    issueDate: "2026-11-03",
+    residentId: "RES-0001",
+    purposeText: "Employment Requirement",
+    identification: { idTypeId: 2, idNumber: "SYNTHETIC-ID-002", placeOfIssue: "Los Baños, Laguna", dateOfIssue: "2026-11-03" },
+    payment: { officialReceiptNo: "FOC", isFree: true },
+    details: { type: "BARANGAY_CLEARANCE" },
+    status: "issued",
+  })
+  await expect(issuanceApi.voidIssuance(record.id, "Not authorized", "staff")).rejects.toMatchObject({ status: 403 })
+  await expect(issuanceApi.voidIssuance(record.id, "", "admin")).rejects.toThrow("A void reason is required.")
+  await expect(issuanceApi.voidIssuance(record.id, "Synthetic correction reason", "admin")).resolves.toMatchObject({ status: "voided" })
+  mockIssuanceStore.reset()
+})
