@@ -42,6 +42,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     houseNumber: "", street: "", purok: 1, residentSinceBirth: false,
   })
   const [residentUpdates, setResidentUpdates] = useState<ResidentPatch>({})
+  const [selectedSector, setSelectedSector] = useState("")
   const [moreOpen, setMoreOpen] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -90,6 +91,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setResidentQuery("")
     form.setValue("residentId", resident.id, { shouldDirty: true })
     setResidentUpdates({})
+    setSelectedSector("")
     setDuplicate(null)
     setFormError("")
   }
@@ -125,7 +127,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         ? (payment as unknown as Record<string, unknown> | undefined)?.[field.name === "officialReceiptNo" ? "officialReceiptNo" : "isFree"]
         : field.name === "purpose" ? form.watch("purposeText")
         : field.name === "remarks" ? form.watch("remarks")
-        : field.name === "sector" ? form.watch("sectors")?.[0]?.sectorId?.toString() ?? ""
+        : field.name === "sector" ? selectedSector
         : (details as unknown as Record<string, unknown>)[field.name]
     const value = fieldValue ?? getDefaultToday(field.default)
     if (field.showWhen && !field.showWhen({ ...(details as unknown as Record<string, unknown>), for: (details as unknown as Record<string, unknown>).for })) return null
@@ -139,7 +141,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         setPayment(field.name === "isFree" ? "isFree" : "officialReceiptNo", nextValue)
       } else if (field.name === "purpose") setRootField("purposeText", String(nextValue))
       else if (field.name === "remarks") setRootField("remarks", String(nextValue))
-      else if (field.name === "sector") form.setValue("sectors", [{ sectorId: Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1 }], { shouldDirty: true })
+      else if (field.name === "sector") { setSelectedSector(String(nextValue)); form.setValue("sectors", [{ sectorId: Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1 }], { shouldDirty: true }) }
       else if (field.name === "for") setDetail("forSelf", nextValue === "Myself")
       else if (field.name === "relationship") setDetail("beneficiaryRelationship", String(nextValue))
       else if (field.name === "isJobstartBeneficiary") setDetail(field.name, nextValue === "true")
@@ -343,11 +345,11 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : selectedResident.emergencyContact?.phone
                 return !residentValue
               }).map((need) => {
-                const labels: Record<string, string> = { birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since year", sector: "Sector", photo: "Photo reference", emergencyContact: "Emergency contact name, address and number" }
+                const labels: Record<string, string> = { address: "Street and purok address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since year", sector: "Sector", photo: "Photo reference", emergencyContact: "Emergency contact name, address and number" }
                 const key = need === "birthDate" ? "birthdate" : need === "birthPlace" ? "birthplace" : need
                 return <label key={need} className={fieldLabelClass}>{labels[need]}
                   {need === "civilStatus" || need === "sex" || need === "sector" ? <select value={String((residentUpdates as Record<string, unknown>)[key] ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, [key]: need === "sector" ? [event.target.value] : event.target.value } as ResidentPatch))} className={formControlClass}><option value="">Select…</option>{(need === "civilStatus" ? ["Single", "Married", "Legally Separated", "Widow/Widower"] : need === "sex" ? ["Male", "Female"] : ["STUDENT", "Senior Citizens", "Person with Disabilities (PWD)", "Solo Parents"]).map((option) => <option key={option}>{option}</option>)}</select> :
-                  <input type={need === "birthDate" ? "date" : "text"} value={String((residentUpdates as Record<string, unknown>)[key] ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, [key]: event.target.value } as ResidentPatch))} className={formControlClass} />}
+                  <input type={need === "birthDate" ? "date" : "text"} value={String((residentUpdates as Record<string, unknown>)[key] ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, [key]: need === "residentSince" && event.target.value ? Number(event.target.value) : event.target.value } as ResidentPatch))} className={formControlClass} />}
                 </label>
               })}
               <p className="text-xs text-muted-foreground">Saved to the resident's record.</p>
