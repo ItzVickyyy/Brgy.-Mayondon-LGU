@@ -72,6 +72,9 @@ const baseIssuanceSchema = z.object({
     context.addIssue({ code: "custom", path: ["details", "type"], message: "Details must match the selected document type." })
   }
   if (value.status === "issued") {
+    if (["BARANGAY_CLEARANCE", "RESIDENCY", "INDIGENCY"].includes(value.documentType) && !value.purposeText?.trim()) {
+      context.addIssue({ code: "custom", path: ["purposeText"], message: "Purpose is required." })
+    }
     if (["INDIGENCY", "ASSISTANCE", "MARGINALIZED_SECTOR"].includes(value.documentType) && !value.sectors?.length) {
       context.addIssue({ code: "custom", path: ["sectors"], message: "Choose a sector." })
     }
