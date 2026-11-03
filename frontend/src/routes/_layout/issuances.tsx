@@ -32,6 +32,8 @@ import {
 import { FormSection, SummaryCard } from "@/components/Issuances/IssuanceLayout"
 import { DateField } from "@/components/Issuances/DateField"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
+import { NewIssuanceDialog } from "@/components/Issuances/NewIssuance/NewIssuanceDialog"
+import { documentConfig } from "@/components/Issuances/NewIssuance/documentConfig"
 import { getMissingFields } from "@/components/Issuances/print-summary"
 import { sampleResidents } from "@/components/Records/records-sample-data"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
@@ -90,46 +92,19 @@ function formatDate(value: string) {
       })
 }
 
-type AutoSavedIssuanceDraft = {
-  selectedType: string
-  formValues: Record<string, string>
-  selectedResidentId: string
-  manualEntry: boolean
-}
-
-const AUTO_DRAFT_KEY = "mayondon-issuance-auto-draft-v1"
-
-function readAutoSavedDraft(): AutoSavedIssuanceDraft | null {
-  if (typeof window === "undefined") return null
-  try {
-    const stored = window.localStorage.getItem(AUTO_DRAFT_KEY)
-    if (!stored) return null
-    const parsed = JSON.parse(stored) as Partial<AutoSavedIssuanceDraft>
-    if (!parsed.formValues || typeof parsed.formValues !== "object") return null
-    return {
-      selectedType: (documentTypes as readonly string[]).includes(parsed.selectedType ?? "") ? parsed.selectedType! : documentTypes[0],
-      formValues: parsed.formValues,
-      selectedResidentId: parsed.selectedResidentId ?? "",
-      manualEntry: parsed.manualEntry ?? false,
-    }
-  } catch {
-    return null
-  }
-}
-
 function getPreselectedResident() {
   if (typeof window === "undefined") return ""
   return new URLSearchParams(window.location.search).get("resident") ?? ""
 }
 
 function IssuancesManagement() {
-  const initialAutoDraft = readAutoSavedDraft()
   const initialResident = sampleResidents.find((resident) => resident.name === getPreselectedResident() || resident.id === getPreselectedResident())
-  const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(() => Boolean(getPreselectedResident()))
-  const [selectedType, setSelectedType] = useState<string>(() => initialAutoDraft?.selectedType ?? documentTypes[0])
+  const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(false)
+  const [isSimplifiedDialogOpen, setIsSimplifiedDialogOpen] = useState(() => Boolean(getPreselectedResident()))
+  const [selectedType, setSelectedType] = useState<string>(documentTypes[0])
   const [residentQuery, setResidentQuery] = useState("")
-  const [selectedResidentId, setSelectedResidentId] = useState(() => initialAutoDraft?.selectedResidentId ?? initialResident?.id ?? "")
-  const [manualEntry, setManualEntry] = useState(() => initialAutoDraft?.manualEntry ?? false)
+  const [selectedResidentId, setSelectedResidentId] = useState(() => initialResident?.id ?? "")
+  const [manualEntry, setManualEntry] = useState(false)
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [formErrorSummary, setFormErrorSummary] = useState<string[]>([])
@@ -152,7 +127,6 @@ function IssuancesManagement() {
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
   const [formValues, setFormValues] = useState<Record<string, string>>(() => {
-    if (initialAutoDraft) return initialAutoDraft.formValues
     const defaults = createDefaultFormValues(documentTypes[0])
     if (!initialResident) return { ...defaults, ...(getPreselectedResident() ? { name: getPreselectedResident() } : {}) }
     const name = formatPrintedName(initialResident.firstName, initialResident.middleName, initialResident.lastName, documentTypes[0])
@@ -172,25 +146,8 @@ function IssuancesManagement() {
     }
   })
   const [drafts, setDrafts] = useState<IssuanceRecord[]>([])
-  const [autoSaveStatus, setAutoSaveStatus] = useState<"saved" | "saving">("saved")
-  useEffect(() => {
-    setAutoSaveStatus("saving")
-    const timeout = window.setTimeout(() => {
-      try {
-        window.localStorage.setItem(AUTO_DRAFT_KEY, JSON.stringify({
-          selectedType,
-          formValues,
-          selectedResidentId,
-          manualEntry,
-        } satisfies AutoSavedIssuanceDraft))
-        setAutoSaveStatus("saved")
-      } catch {
-        setAutoSaveStatus("saving")
-      }
-    }, 400)
-    return () => window.clearTimeout(timeout)
-  }, [formValues, manualEntry, selectedResidentId, selectedType])
-  const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
+  const autoSaveStatus = "saved" as const
+    const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
   const [viewRecord, setViewRecord] = useState<IssuanceRecord | null>(null)
   const [notice, setNotice] = useState("")
   const [noticePrintRecord, setNoticePrintRecord] = useState<IssuanceRecord | null>(null)
@@ -617,7 +574,7 @@ function IssuancesManagement() {
         <Button
           size="default"
           className="min-h-11 w-full sm:w-auto"
-          onClick={() => setIsIssuanceModalOpen(true)}
+          onClick={() => setIsSimplifiedDialogOpen(true)}
         >
           <Plus aria-hidden="true" />
           New Issuance
@@ -828,6 +785,36 @@ function IssuancesManagement() {
           </form>
         </DialogContent>
       </Dialog>
+
+      <NewIssuanceDialog
+        open={isSimplifiedDialogOpen}
+        onOpenChange={setIsSimplifiedDialogOpen}
+        initialResidentId={getPreselectedResident()}
+        onSaved={(record) => {
+          const resident = sampleResidents.find((item) => item.id === record.residentId)
+          const type = documentConfig[record.documentType].name
+          const status = record.status === "draft" ? "Pending" : "Issued"
+          const purpose = record.payload.purposeText ?? ""
+          const fields: Record<string, string> = { purpose }
+          if (record.payload.details.type === "BARANGAY_ID") fields.validUntil = record.payload.details.validUntil
+          const historyRecord: IssuanceRecord = {
+            id: record.referenceNo,
+            resident: record.residentSnapshot?.fullName ?? resident?.name ?? "Selected resident",
+            type,
+            date: record.issueDate,
+            status,
+            purpose,
+            validUntil: record.payload.details.type === "BARANGAY_ID" ? record.payload.details.validUntil : undefined,
+            orNumber: record.payload.payment?.officialReceiptNo,
+            issuedBy: record.status === "issued" ? "staff" : undefined,
+            fields,
+          }
+          if (record.status === "draft") setDrafts((previous) => [historyRecord, ...previous])
+          else setHistoryRecords((previous) => [historyRecord, ...previous])
+          setNotice(record.status === "draft" ? `${record.referenceNo} was saved as a draft.` : `${record.referenceNo} was recorded as issued. Printing remains paused.`)
+          setNoticePrintRecord(null)
+        }}
+      />
 
       <ConfirmDialog
         open={confirmFormAction !== null}
