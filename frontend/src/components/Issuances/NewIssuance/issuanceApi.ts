@@ -311,7 +311,7 @@ export const issuanceApi = {
   async updateDraft(id: string, input: IssuanceInput) {
     const existing = issuances.find((item) => item.id === id)
     if (!existing || existing.status !== "draft") throw new Error("Only drafts can be edited.")
-    const parsed = issuanceInputSchema.parse({ ...input, status: "draft" })
+    const parsed = { ...input, status: "draft" as const }
     const updated = { ...existing, payload: toStoredPayload(parsed), issueDate: parsed.issueDate, documentType: parsed.documentType, residentId: parsed.residentId }
     issuances = issuances.map((item) => item.id === id ? updated : item)
     return updated
