@@ -1,4 +1,5 @@
 import { sampleResidents, type ResidentRecord } from "@/components/Records/records-sample-data"
+import { clearancePurposeOptions } from "@/components/Issuances/config"
 import { documentConfig, type DocumentCode } from "./documentConfig"
 import { issuanceInputSchema, type IssuanceInput } from "./schemas"
 
@@ -61,6 +62,7 @@ export type CreateIssuanceResult = MockIssuance
 let residents = [...sampleResidents]
 let issuances: MockIssuance[] = []
 let streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
+let purposes = [...clearancePurposeOptions]
 let associations = ["Mayondon Tricycle Operators and Drivers Association"]
 
 export function getResidentAddress(resident: ResidentRecord) {
@@ -127,6 +129,7 @@ export const issuanceApi = {
       status: "Active",
     }
     residents = [...residents, resident]
+    if (input.street.trim() && !streets.some((street) => street.toLowerCase() === input.street.trim().toLowerCase())) streets = [...streets, input.street.trim()]
     return resident
   },
 
@@ -143,7 +146,7 @@ export const issuanceApi = {
     const { initialOfficials } = await import("@/components/Officials/officials-sample-data")
     return {
       documentTypes: Object.values(documentConfig),
-      purposes: [...clearancePurposeOptions],
+      purposes: [...purposes],
       sectors: [...indigencySectorOptions],
       idTypes: [...new Set(["CTC", ...idTypeOptions])],
       puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5", "Purok 6"],
@@ -172,6 +175,8 @@ export const issuanceApi = {
 
   async createIssuance(input: IssuanceInput): Promise<CreateIssuanceResult> {
     const parsed = input.status === "draft" ? input : issuanceInputSchema.parse(input)
+    if (parsed.purposeText?.trim() && !purposes.some((purpose) => purpose.toLowerCase() === parsed.purposeText?.trim().toLowerCase())) purposes = [...purposes, parsed.purposeText.trim()]
+    if (parsed.details.type === "FRANCHISE_CLEARANCE" && parsed.details.associationName.trim() && !associations.some((association) => association.toLowerCase() === parsed.details.associationName.trim().toLowerCase())) associations = [...associations, parsed.details.associationName.trim()]
     if (parsed.status === "issued") {
       const check = await this.checkIssuance(parsed.residentId, parsed.documentType)
       if (check.existingIssued) {
@@ -243,6 +248,7 @@ export const mockIssuanceStore = {
     residents = [...sampleResidents]
     issuances = []
     streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
+    purposes = [...clearancePurposeOptions]
     associations = ["Mayondon Tricycle Operators and Drivers Association"]
   },
   addStreet(name: string) {
