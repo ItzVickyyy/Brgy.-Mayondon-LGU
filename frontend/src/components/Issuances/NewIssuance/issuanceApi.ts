@@ -79,7 +79,7 @@ function missingFields(resident: ResidentRecord, code: DocumentCode): string[] {
     if (field === "birthPlace") return !resident.birthplace
     if (field === "sex") return !resident.sex
     if (field === "civilStatus") return !resident.civilStatus
-    if (field === "residentSince") return !resident.residentSince
+    if (field === "residentSince") return resident.residentSince === undefined
     if (field === "sector") return !resident.sectors?.length
     if (field === "photo") return !resident.photoUrl
     if (field === "emergencyContact") return !resident.emergencyContact?.name || !resident.emergencyContact.address || !resident.emergencyContact.phone
