@@ -24,10 +24,7 @@ const detailsSchemas = {
   UTILITY_CLEARANCE: z.object({ type: z.literal("UTILITY_CLEARANCE"), services: z.array(z.enum(["electric", "water"])).min(1), connectionType: z.enum(["new", "reconnection"]), classification: z.enum(["residential", "commercial"]), location: nonEmpty }),
   RESIDENCY: z.object({ type: z.literal("RESIDENCY") }),
   INDIGENCY: z.object({ type: z.literal("INDIGENCY"), addressedToOffice: nonEmpty }),
-  ASSISTANCE: z.object({ type: z.literal("ASSISTANCE"), assistanceType: z.enum(["financial", "medical", "burial"]), forSelf: z.boolean(), beneficiaryName: z.string().optional(), beneficiaryRelationship: z.string().optional() }).superRefine((value, context) => {
-    if (!value.forSelf && !value.beneficiaryName?.trim()) context.addIssue({ code: "custom", path: ["beneficiaryName"], message: "Name is required when assistance is for someone else." })
-    if (!value.forSelf && !value.beneficiaryRelationship?.trim()) context.addIssue({ code: "custom", path: ["beneficiaryRelationship"], message: "Relationship is required when assistance is for someone else." })
-  }),
+  ASSISTANCE: z.object({ type: z.literal("ASSISTANCE"), assistanceType: z.enum(["financial", "medical", "burial"]), forSelf: z.boolean(), beneficiaryName: z.string().optional(), beneficiaryRelationship: z.string().optional() }),
   MARGINALIZED_SECTOR: z.object({ type: z.literal("MARGINALIZED_SECTOR"), healthCondition: nonEmpty }),
   FIRST_TIME_JOBSEEKER: z.object({ type: z.literal("FIRST_TIME_JOBSEEKER"), educationalAttainment: nonEmpty, course: nonEmpty, isJobstartBeneficiary: z.boolean(), witnessOfficialId: nonEmpty, parts: z.array(z.enum(["applicant_sheet", "oath", "certification"])).min(1) }),
   BARANGAY_ID: z.object({ type: z.literal("BARANGAY_ID"), transactionType: z.enum(["new", "renewal", "replacement"]), validUntil: isoDate }),
@@ -43,7 +40,12 @@ export const documentDetailsSchema = z.discriminatedUnion("type", [
   detailsSchemas.MARGINALIZED_SECTOR,
   detailsSchemas.FIRST_TIME_JOBSEEKER,
   detailsSchemas.BARANGAY_ID,
-])
+]).superRefine((value, context) => {
+  if (value.type === "ASSISTANCE" && !value.forSelf) {
+    if (!value.beneficiaryName?.trim()) context.addIssue({ code: "custom", path: ["beneficiaryName"], message: "Name is required when assistance is for someone else." })
+    if (!value.beneficiaryRelationship?.trim()) context.addIssue({ code: "custom", path: ["beneficiaryRelationship"], message: "Relationship is required when assistance is for someone else." })
+  }
+})
 
 export type DocumentDetails = z.infer<typeof documentDetailsSchema>
 export type DocumentDetailsByCode = { [K in DocumentCode]: Extract<DocumentDetails, { type: K }> }
