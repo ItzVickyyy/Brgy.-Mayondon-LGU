@@ -28,6 +28,9 @@ export type IssuanceRecord = {
   issuedBy?: string
   orNumber?: string
   fields: Record<string, string>
+  witness?: string
+  signedBy?: string
+  sensitive?: boolean
 }
 
 export const civilStatusOptions = ["Single", "Married", "Legally Separated", "Widow/Widower"]
@@ -95,32 +98,176 @@ export const documentTypes = [
   "Barangay Clearance",
   "Barangay Franchise Clearance",
   "Barangay Clearance, Electrical and Water Connection",
+  "Certification of Residency",
   "Certificate of Indigency",
   "Certification (assistance request)",
-]
+  "Marginalized Sector Certification (Pagpapatunay)",
+  "First-Time Jobseeker Certification",
+] as const
+
+export type DocumentType = (typeof documentTypes)[number]
+export type DocumentGroup = "Clearances" | "Certifications"
+export type DocumentMeta = {
+  shortName: string
+  group: DocumentGroup
+  language: "en" | "fil"
+  paper: { size: "letter" | "legal" | "a4"; orientation: "portrait" }
+  printMode: "values-only" | "full-page"
+  validity: { months?: number; years?: number } | null
+  signatory: "preprinted" | "select"
+  onePerResident: boolean
+  hasReceiptStamp: boolean
+  hint: string
+}
+
 export const documentCardInfo: Record<string, { name: string; hint: string }> = {
   "Barangay Clearance": { name: "Barangay Clearance", hint: "Jobs, school, loans" },
   "Barangay Franchise Clearance": { name: "Franchise Clearance", hint: "Tricycle franchise" },
   "Barangay Clearance, Electrical and Water Connection": { name: "Electrical & Water", hint: "Utility connection" },
+  "Certification of Residency": { name: "Residency", hint: "Proof of residence" },
   "Certificate of Indigency": { name: "Certificate of Indigency", hint: "Assistance, fee waiver" },
   "Certification (assistance request)": { name: "Assistance Certification", hint: "Financial, medical, burial" },
+  "Marginalized Sector Certification (Pagpapatunay)": { name: "Marginalized Sector", hint: "Filipino sector certification" },
+  "First-Time Jobseeker Certification": { name: "First-Time Jobseeker", hint: "First-time job application" },
 }
+
+export const documentMeta: Record<string, DocumentMeta> = {
+  "Barangay Clearance": {
+    shortName: "Barangay Clearance",
+    group: "Clearances",
+    language: "en",
+    paper: { size: "letter", orientation: "portrait" },
+    printMode: "values-only",
+    validity: { months: 2 },
+    signatory: "preprinted",
+    onePerResident: false,
+    hasReceiptStamp: true,
+    hint: "Jobs, school, loans",
+  },
+  "Barangay Franchise Clearance": {
+    shortName: "Franchise Clearance",
+    group: "Clearances",
+    language: "en",
+    paper: { size: "letter", orientation: "portrait" },
+    printMode: "values-only",
+    validity: null,
+    signatory: "preprinted",
+    onePerResident: false,
+    hasReceiptStamp: true,
+    hint: "Tricycle franchise",
+  },
+  "Barangay Clearance, Electrical and Water Connection": {
+    shortName: "Electrical & Water",
+    group: "Clearances",
+    language: "en",
+    paper: { size: "letter", orientation: "portrait" },
+    printMode: "values-only",
+    validity: null,
+    signatory: "preprinted",
+    onePerResident: false,
+    hasReceiptStamp: true,
+    hint: "Utility connection",
+  },
+  "Certification of Residency": {
+    shortName: "Residency",
+    group: "Certifications",
+    language: "en",
+    paper: { size: "letter", orientation: "portrait" },
+    printMode: "full-page",
+    validity: null,
+    signatory: "select",
+    onePerResident: false,
+    hasReceiptStamp: false,
+    hint: "Proof of residence",
+  },
+  "Certificate of Indigency": {
+    shortName: "Certificate of Indigency",
+    group: "Certifications",
+    language: "en",
+    paper: { size: "letter", orientation: "portrait" },
+    printMode: "values-only",
+    validity: null,
+    signatory: "preprinted",
+    onePerResident: false,
+    hasReceiptStamp: false,
+    hint: "Assistance, fee waiver",
+  },
+  "Certification (assistance request)": {
+    shortName: "Assistance Certification",
+    group: "Certifications",
+    language: "en",
+    paper: { size: "letter", orientation: "portrait" },
+    printMode: "values-only",
+    validity: null,
+    signatory: "preprinted",
+    onePerResident: false,
+    hasReceiptStamp: false,
+    hint: "Financial, medical, burial",
+  },
+  "Marginalized Sector Certification (Pagpapatunay)": {
+    shortName: "Marginalized Sector",
+    group: "Certifications",
+    language: "fil",
+    paper: { size: "letter", orientation: "portrait" },
+    printMode: "full-page",
+    validity: null,
+    signatory: "select",
+    onePerResident: false,
+    hasReceiptStamp: false,
+    hint: "Filipino sector certification",
+  },
+  "First-Time Jobseeker Certification": {
+    shortName: "First-Time Jobseeker",
+    group: "Certifications",
+    language: "en",
+    paper: { size: "legal", orientation: "portrait" },
+    printMode: "full-page",
+    validity: { years: 1 },
+    signatory: "select",
+    onePerResident: true,
+    hasReceiptStamp: false,
+    hint: "First-time job application",
+  },
+}
+
 export const historyDocumentTypes = [
   "Barangay ID",
   "Barangay Clearance",
   "Franchise Clearance",
   "Barangay Clearance (Electrical and Water Connection)",
+  "Certification of Residency",
   "Certificate of Indigency",
-  "First-Time Jobseekers Certification",
-  "Assistance Request Certification",
-  "Damayan",
+  "Certification (assistance request)",
+  "Marginalized Sector Certification (Pagpapatunay)",
+  "First-Time Jobseeker Certification",
 ]
+
+const documentTypeAliases: Record<string, string> = {
+  "barangay id": "Barangay ID",
+  "barangay clearance": "Barangay Clearance",
+  "franchise clearance": "Barangay Franchise Clearance",
+  "barangay franchise clearance": "Barangay Franchise Clearance",
+  "barangay clearance (electrical and water connection)": "Barangay Clearance, Electrical and Water Connection",
+  "barangay clearance, electrical and water connection": "Barangay Clearance, Electrical and Water Connection",
+  "electrical & water": "Barangay Clearance, Electrical and Water Connection",
+  "certificate of indigency": "Certificate of Indigency",
+  damayan: "Certificate of Indigency",
+  "assistance request certification": "Certification (assistance request)",
+  "assistance certification": "Certification (assistance request)",
+  "certification (assistance request)": "Certification (assistance request)",
+  "residency certification": "Certification of Residency",
+  "certification of residency": "Certification of Residency",
+  "marginalized sector": "Marginalized Sector Certification (Pagpapatunay)",
+  "marginalized sector certification": "Marginalized Sector Certification (Pagpapatunay)",
+  "marginalized sector certification (pagpapatunay)": "Marginalized Sector Certification (Pagpapatunay)",
+  pagpapatunay: "Marginalized Sector Certification (Pagpapatunay)",
+  "first-time jobseekers certification": "First-Time Jobseeker Certification",
+  "first-time jobseeker certification": "First-Time Jobseeker Certification",
+}
+
 export function normalizeDocumentType(value: string): string {
   const normalized = value.trim().toLowerCase()
-  if (["franchise clearance", "barangay franchise clearance"].includes(normalized)) return "franchise-clearance"
-  if (["barangay clearance (electrical and water connection)", "barangay clearance, electrical and water connection", "electrical & water"].includes(normalized)) return "electrical-water-clearance"
-  if (["assistance request certification", "certification (assistance request)", "assistance certification"].includes(normalized)) return "assistance-certification"
-  return normalized
+  return documentTypeAliases[normalized] ?? normalized
 }
 
 export const documentSections: Record<string, DocumentSection[]> = {
@@ -206,9 +353,12 @@ export const documentSections: Record<string, DocumentSection[]> = {
   ],
 }
 export const documentFields: Record<string, DocumentField[]> = Object.fromEntries(
-  Object.entries(documentSections).map(([type, sections]) => [
+  documentTypes.map((type) => [
     type,
-    [{ name: "date", label: "Date", type: "date", required: true, defaultToday: true }, ...sections.flatMap((section) => section.fields)],
+    [
+      { name: "date", label: "Date", type: "date", required: true, defaultToday: true },
+      ...(documentSections[type] ?? []).flatMap((section) => section.fields),
+    ],
   ]),
 )
 export const provisionalDocumentFields: Record<string, DocumentField[]> = {

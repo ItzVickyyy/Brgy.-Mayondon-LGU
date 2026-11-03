@@ -22,6 +22,12 @@ import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 
+const electedPositions = new Set(["Punong Barangay", "Barangay Kagawad", "SK Chairperson"])
+
+function isElectedPosition(value: string) {
+  return electedPositions.has(value)
+}
+
 export const Route = createFileRoute("/_layout/officials")({
   component: OfficialsManagement,
   head: () => ({ meta: [{ title: pageTitle("Officials") }] }),
@@ -33,6 +39,9 @@ const positionRank: Record<string, number> = {
   "SK Chairperson": 2,
   "Barangay Secretary": 3,
   "Barangay Treasurer": 4,
+  "OIC Kagawad": 2,
+  "Barangay Clerk": 5,
+  "Administrative Assistant": 6,
 }
 
 function formatTermDate(value: string) {
@@ -97,7 +106,7 @@ function OfficialsManagement() {
     if (editingOfficial) {
       setOfficials((current) => current.map((official) =>
         official.id === editingOfficial.id
-          ? { ...official, name: name.trim(), position, termStart, termEnd }
+          ? { ...official, name: name.trim(), position, termStart, termEnd, elected: isElectedPosition(position) }
           : official,
       ))
     } else {
@@ -110,6 +119,7 @@ function OfficialsManagement() {
           termStart,
           termEnd,
           status: "Current",
+          elected: isElectedPosition(position),
         },
       ])
     }
@@ -219,7 +229,7 @@ function OfficialsManagement() {
             <label className="flex flex-col gap-2 text-sm font-medium">
               Position
               <select value={position} onChange={(event) => setPosition(event.target.value)} className={formControlClass}>
-                {["Punong Barangay", "Barangay Kagawad", "SK Chairperson", "Barangay Secretary", "Barangay Treasurer"].map((item) => <option key={item}>{item}</option>)}
+                {["Punong Barangay", "Barangay Kagawad", "SK Chairperson", "OIC Kagawad", "Barangay Secretary", "Barangay Treasurer", "Barangay Clerk", "Administrative Assistant"].map((item) => <option key={item}>{item}</option>)}
               </select>
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium">
