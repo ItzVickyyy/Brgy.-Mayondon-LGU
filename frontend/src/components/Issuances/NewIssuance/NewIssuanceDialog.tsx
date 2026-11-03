@@ -315,6 +315,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         return
       }
       const raw = { ...form.getValues(), residentId: selectedResident.id, residentUpdates, status: "issued" as const }
+      form.setValue("status", "issued", { shouldDirty: false })
       const parsed = form.trigger()
       const valid = await parsed
       if (!valid) {
