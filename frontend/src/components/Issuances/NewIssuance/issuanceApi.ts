@@ -72,8 +72,9 @@ function snapshotAddress(resident: ResidentRecord) {
 }
 
 function missingFields(resident: ResidentRecord, code: DocumentCode): string[] {
-  const needs = documentConfig[code].residentNeeds
+  const needs = ["address", ...documentConfig[code].residentNeeds]
   return needs.filter((field) => {
+    if (field === "address") return !resident.address.trim()
     if (field === "birthDate") return !resident.birthdate
     if (field === "birthPlace") return !resident.birthplace
     if (field === "sex") return !resident.sex
