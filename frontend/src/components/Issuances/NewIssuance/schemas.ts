@@ -72,6 +72,15 @@ const baseIssuanceSchema = z.object({
     context.addIssue({ code: "custom", path: ["details", "type"], message: "Details must match the selected document type." })
   }
   if (value.status === "issued") {
+    if (["INDIGENCY", "ASSISTANCE", "MARGINALIZED_SECTOR"].includes(value.documentType) && !value.sectors?.length) {
+      context.addIssue({ code: "custom", path: ["sectors"], message: "Choose a sector." })
+    }
+    if (value.documentType === "INDIGENCY" && (value.sectors?.length ?? 0) > 2) {
+      context.addIssue({ code: "custom", path: ["sectors"], message: "Choose no more than two sectors." })
+    }
+    if (["ASSISTANCE", "MARGINALIZED_SECTOR"].includes(value.documentType) && (value.sectors?.length ?? 0) !== 1) {
+      context.addIssue({ code: "custom", path: ["sectors"], message: "Choose exactly one sector." })
+    }
     if (["RESIDENCY", "ASSISTANCE", "MARGINALIZED_SECTOR", "FIRST_TIME_JOBSEEKER"].includes(value.documentType) && !value.signatoryOfficialId) {
       context.addIssue({ code: "custom", path: ["signatoryOfficialId"], message: "Choose a signatory." })
     }
