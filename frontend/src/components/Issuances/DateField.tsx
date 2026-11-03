@@ -105,70 +105,70 @@ export function DateField({
           aria-describedby={describedBy}
         />
       ) : (
-      <div className="grid min-w-0 grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)_minmax(0,1fr)] gap-2">
-        <div className="min-w-0">
-          <label htmlFor={id} className="sr-only">Month</label>
-          <select
-            id={id}
-            required={required}
-            value={month}
-            onChange={(event) => {
-              const nextMonth = event.target.value
-              const nextMaxDay = nextMonth ? daysInMonth(effectiveYear, Number(nextMonth)) : 31
-              const nextDay = day && Number(day) > nextMaxDay ? "" : day
-              setMonth(nextMonth)
-              setDay(nextDay)
-              emitDate(year, nextMonth, nextDay)
-            }}
-            className={cn(formControlClass, "min-w-0 px-2", (error || invalidMessage) && "border-destructive")}
-            aria-invalid={Boolean(error || invalidMessage)}
-            aria-describedby={describedBy}
-          >
-            <option value="">Month</option>
-            {monthNames.map((name, index) => <option key={name} value={String(index + 1)}>{name}</option>)}
-          </select>
+        <div className="grid min-w-0 grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)_minmax(0,1fr)] gap-2">
+          <div className="min-w-0">
+            <label htmlFor={id} className="sr-only">Month</label>
+            <select
+              id={id}
+              required={required}
+              value={month}
+              onChange={(event) => {
+                const nextMonth = event.target.value
+                const nextMaxDay = nextMonth ? daysInMonth(effectiveYear, Number(nextMonth)) : 31
+                const nextDay = day && Number(day) > nextMaxDay ? "" : day
+                setMonth(nextMonth)
+                setDay(nextDay)
+                emitDate(year, nextMonth, nextDay)
+              }}
+              className={cn(formControlClass, "min-w-0 px-2", (error || invalidMessage) && "border-destructive")}
+              aria-invalid={Boolean(error || invalidMessage)}
+              aria-describedby={describedBy}
+            >
+              <option value="">Month</option>
+              {monthNames.map((name, index) => <option key={name} value={String(index + 1)}>{name}</option>)}
+            </select>
+          </div>
+          <div className="min-w-0">
+            <label htmlFor={`${id}-day`} className="sr-only">Day</label>
+            <select
+              id={`${id}-day`}
+              value={day}
+              onChange={(event) => {
+                setDay(event.target.value)
+                emitDate(year, month, event.target.value)
+              }}
+              className={cn(formControlClass, "min-w-0 px-2", (error || invalidMessage) && "border-destructive")}
+              aria-invalid={Boolean(error || invalidMessage)}
+              aria-describedby={describedBy}
+            >
+              <option value="">Day</option>
+              {dayOptions.map((number) => <option key={number} value={number}>{number}</option>)}
+            </select>
+          </div>
+          <div className="min-w-0">
+            <label htmlFor={`${id}-year`} className="sr-only">Year</label>
+            <input
+              id={`${id}-year`}
+              inputMode="numeric"
+              maxLength={4}
+              value={year}
+              onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault() }}
+              onChange={(event) => {
+                const nextYear = event.target.value.replace(/\D/g, "").slice(0, 4)
+                const nextMonth = month
+                const nextYearForDays = nextYear.length === 4 ? Number(nextYear) : new Date().getFullYear()
+                const nextDay = day && nextMonth && Number(day) > daysInMonth(nextYearForDays, Number(nextMonth)) ? "" : day
+                setYear(nextYear)
+                setDay(nextDay)
+                emitDate(nextYear, nextMonth, nextDay)
+              }}
+              placeholder="Year"
+              className={cn(formControlClass, "min-w-0 px-2", (error || invalidMessage) && "border-destructive")}
+              aria-invalid={Boolean(error || invalidMessage)}
+              aria-describedby={describedBy}
+            />
+          </div>
         </div>
-        <div className="min-w-0">
-          <label htmlFor={`${id}-day`} className="sr-only">Day</label>
-          <select
-            id={`${id}-day`}
-            value={day}
-            onChange={(event) => {
-              setDay(event.target.value)
-              emitDate(year, month, event.target.value)
-            }}
-            className={cn(formControlClass, "min-w-0 px-2", (error || invalidMessage) && "border-destructive")}
-            aria-invalid={Boolean(error || invalidMessage)}
-            aria-describedby={describedBy}
-          >
-            <option value="">Day</option>
-            {dayOptions.map((number) => <option key={number} value={number}>{number}</option>)}
-          </select>
-        </div>
-        <div className="min-w-0">
-          <label htmlFor={`${id}-year`} className="sr-only">Year</label>
-          <input
-            id={`${id}-year`}
-            inputMode="numeric"
-            maxLength={4}
-            value={year}
-            onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault() }}
-            onChange={(event) => {
-              const nextYear = event.target.value.replace(/\D/g, "").slice(0, 4)
-              const nextMonth = month
-              const nextYearForDays = nextYear.length === 4 ? Number(nextYear) : new Date().getFullYear()
-              const nextDay = day && nextMonth && Number(day) > daysInMonth(nextYearForDays, Number(nextMonth)) ? "" : day
-              setYear(nextYear)
-              setDay(nextDay)
-              emitDate(nextYear, nextMonth, nextDay)
-            }}
-            placeholder="Year"
-            className={cn(formControlClass, "min-w-0 px-2", (error || invalidMessage) && "border-destructive")}
-            aria-invalid={Boolean(error || invalidMessage)}
-            aria-describedby={describedBy}
-          />
-        </div>
-      </div>
       )}
       {showToday ? <Button type="button" variant="ghost" size="sm" className="min-h-11 px-2" onClick={chooseToday}>Today</Button> : null}
       {help ? <p id={`${id}-help`} className="text-xs font-normal text-muted-foreground">{help}</p> : null}
