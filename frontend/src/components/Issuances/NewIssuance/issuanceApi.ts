@@ -248,6 +248,27 @@ export const issuanceApi = {
     if (parsed.status === "issued" && parsed.documentType === "BARANGAY_ID" && !updatedResident.idNumber) {
       updatedResident = await this.updateResident(updatedResident.id, { idNumber: `18-128-3597-${this.getNextBarangayIdNumber()}` })
     }
+    let tricycleId: string | undefined
+    if (parsed.details.type === "FRANCHISE_CLEARANCE") {
+      let tricycle = mockTricycles.find((item) =>
+        item.plateNumber.toLowerCase() === parsed.details.plateNumber.trim().toLowerCase() ||
+        item.motorNumber.toLowerCase() === parsed.details.motorNumber.trim().toLowerCase(),
+      )
+      if (!tricycle && parsed.status === "issued") {
+        const associationIndex = associations.findIndex((association) => association.toLowerCase() === parsed.details.associationName.trim().toLowerCase())
+        tricycle = {
+          id: `TRI-${String(mockTricycles.length + 1).padStart(4, "0")}`,
+          associationId: associationIndex + 1,
+          make: parsed.details.make,
+          bodyType: parsed.details.bodyType,
+          motorNumber: parsed.details.motorNumber,
+          color: parsed.details.color,
+          plateNumber: parsed.details.plateNumber,
+        }
+        mockTricycles = [...mockTricycles, tricycle]
+      }
+      tricycleId = tricycle?.id
+    }
     const sequence = issuances.length + 1
     const record: MockIssuance = {
       id: `mock-issuance-${sequence}`,
