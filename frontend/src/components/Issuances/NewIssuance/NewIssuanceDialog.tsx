@@ -4,6 +4,7 @@ import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuan
 import { documentConfig, documentConfigList, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
 import { issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
 import { sampleResidents, type ResidentRecord } from "@/components/Records/records-sample-data"
+import { initialOfficials } from "@/components/Officials/officials-sample-data"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { formControlClass } from "@/components/Common/formStyles"
 import { Button } from "@/components/ui/button"
@@ -21,6 +22,8 @@ const sectionClass = "space-y-3 border-b pb-5 last:border-b-0"
 const fieldLabelClass = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
 
 function normalizedOptionValue(fieldName: string, option: string) {
+  if (fieldName === "referredBy" && option !== "None") return initialOfficials.find((official) => official.status === "Current" && official.name === option)?.id ?? option
+  if (fieldName === "witnessOfficialId") return initialOfficials.find((official) => official.status === "Current" && official.name === option)?.id ?? option
   if (fieldName === "services" || fieldName === "connectionType" || fieldName === "classification" || fieldName === "assistanceType" || fieldName === "transactionType") return option.toLowerCase()
   if (fieldName === "isJobstartBeneficiary") return option === "Yes" ? "true" : "false"
   if (fieldName === "parts") return ({ "Applicant sheet": "applicant_sheet", Oath: "oath", Certification: "certification" } as Record<string, string>)[option] ?? option
@@ -79,6 +82,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       : undefined)
     form.setValue("payment", ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"].includes(nextCode)
       ? { officialReceiptNo: "", isFree: false } : undefined)
+    const signatoryDefault = documentConfig[nextCode].signatoryDefault
+    const signatory = signatoryDefault ? initialOfficials.find((official) => official.status === "Current" && official.position === signatoryDefault) : undefined
+    form.setValue("signatoryOfficialId", signatory?.id)
     form.clearErrors()
     setSelectedSector("")
     setAddressParts({ houseNumber: "", street: "", purok: 1 })
@@ -128,6 +134,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         : field.name === "purpose" ? form.watch("purposeText")
         : field.name === "remarks" ? form.watch("remarks")
         : field.name === "sector" ? selectedSector
+        : field.name === "referredBy" ? (details as unknown as Record<string, unknown>).referredByOfficialId ?? "None"
         : field.name === "for" ? ((details as unknown as Record<string, unknown>).forSelf === false ? "Someone else" : "Myself")
         : field.name === "relationship" ? (details as unknown as Record<string, unknown>).beneficiaryRelationship
         : field.name === "sectorIdNumber" ? form.watch("sectors")?.[0]?.idNumber ?? ""
@@ -143,6 +150,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       } else if (field.group === "payment") {
         setPayment(field.name === "isFree" ? "isFree" : "officialReceiptNo", nextValue)
       } else if (field.name === "purpose") setRootField("purposeText", String(nextValue))
+      else if (field.name === "referredBy") setDetail("referredByOfficialId", String(nextValue) === "None" ? undefined : String(nextValue))
       else if (field.name === "remarks") setRootField("remarks", String(nextValue))
       else if (field.name === "sector") { setSelectedSector(String(nextValue)); form.setValue("sectors", [{ sectorId: Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1) }], { shouldDirty: true }) }
       else if (field.name === "for") setDetail("forSelf", nextValue === "Myself")
@@ -154,12 +162,13 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         form.setValue("sectors", [{ sectorId: form.getValues("sectors")?.[0]?.sectorId ?? 1, idNumber: String(nextValue) }], { shouldDirty: true })
       } else setDetail(field.name, nextValue)
     }
+    const fieldOptions = field.name === "referredBy" ? ["None", ...initialOfficials.filter((official) => official.status === "Current").map((official) => official.name)] : field.name === "witnessOfficialId" ? initialOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
     return <label key={field.name} htmlFor={fieldId} className={fieldLabelClass}>
       <span>{field.label}{field.required ? <span className="text-destructive"> *</span> : null}</span>
       {field.type === "select" || field.type === "combobox" || field.type === "radio" ? (
         <select id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, "bg-background")} required={field.required}>
           <option value="">Select…</option>
-          {(field.options ?? []).map((option) => <option key={option} value={normalizedOptionValue(field.name, option)}>{option}</option>)}
+          {fieldOptions.map((option) => <option key={option} value={normalizedOptionValue(field.name, option)}>{option}</option>)}
         </select>
       ) : field.type === "multiselect" ? (
         <div className="flex flex-wrap gap-2">
@@ -377,6 +386,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             <h3 className="text-sm font-semibold">Details</h3>
             <p className="text-xs text-muted-foreground">* required</p>
             {fieldsByGroup("main").length ? <div className="grid gap-3 sm:grid-cols-2">{fieldsByGroup("main").map(renderField)}</div> : null}
+            {config.signatoryMode === "select" ? <label className={fieldLabelClass}>Signatory <span className="text-destructive">*</span><select value={form.watch("signatoryOfficialId") ?? ""} onChange={(event) => form.setValue("signatoryOfficialId", event.target.value, { shouldDirty: true })} className={cn(formControlClass, "bg-background")} required><option value="">Select official…</option>{initialOfficials.filter((official) => official.status === "Current" && ["Punong Barangay", "Barangay Kagawad", "Barangay Clerk", "Administrative Assistant", "SK Chairperson", "OIC Kagawad"].includes(official.position)).map((official) => <option key={official.id} value={official.id}>{official.name} · {official.position}</option>)}</select></label> : null}
             {fieldsByGroup("identity").length ? <div className="space-y-2"><p className="text-xs font-medium text-muted-foreground">Proof of identity</p><div className="grid gap-3 sm:grid-cols-2">{fieldsByGroup("identity").map(renderField)}</div></div> : null}
             {fieldsByGroup("payment").length ? <div className="space-y-2"><p className="text-xs font-medium text-muted-foreground">Payment</p><div className="grid gap-3 sm:grid-cols-2">{fieldsByGroup("payment").map(renderField)}</div></div> : null}
             {fieldsByGroup("more").length ? <div>
