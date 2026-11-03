@@ -333,11 +333,38 @@ function IssuancesManagement() {
       ...(previous.recipientChoice === "Oneself" ? { underName: name } : {}),
     }))
     setSelectedResidentId(resident.id)
-    
     setResidentQuery("")
     setManualEntry(false)
     setValidationErrors({})
     setFormErrorSummary([])
+
+    const nextValues = {
+      ...formValues,
+      residentId: resident.id,
+      firstName: resident.firstName,
+      middleName: resident.middleName,
+      lastName: resident.lastName,
+      name,
+      address: resident.address.replace(/, Mayondon.*$/i, ""),
+      birthdate: resident.birthdate,
+      birthplace: resident.birthplace,
+      civilStatus: resident.civilStatus,
+      sector: selectedType === "Certification (assistance request)" ? resident.sectors[0] ?? "" : resident.sectors.join("||"),
+      age: calculateAge(resident.birthdate, formValues.date || localDateValue()),
+    }
+    const firstEmptyRequired = allFormFields.find((field) =>
+      field.required
+      && (!field.showWhen || field.showWhen(nextValues))
+      && !nextValues[field.name]?.trim()
+      && !["firstName", "middleName", "lastName"].includes(field.name),
+    )
+    if (firstEmptyRequired) {
+      window.setTimeout(() => {
+        const target = document.getElementById("field-" + firstEmptyRequired.name)
+        target?.scrollIntoView({ behavior: "smooth", block: "center" })
+        target?.focus()
+      }, 0)
+    }
   }
 
   function startManualEntry() {
