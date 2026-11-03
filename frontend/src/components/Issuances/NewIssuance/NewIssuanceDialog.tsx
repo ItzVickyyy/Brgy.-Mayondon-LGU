@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react"
-import { CalendarDays, ChevronDown, CircleAlert, CheckCircle2, Clock, Keyboard, Printer, Search, UserRoundPlus } from "lucide-react"
+import { type ReactNode, useMemo, useState } from "react"
+import { ChevronDown, CircleAlert, CheckCircle2, Clock, Keyboard, Printer, Search, UserRoundPlus } from "lucide-react"
 import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuanceForm"
 import { documentConfig, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
 import { getMissingResidentFields, getResidentAddress, issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
@@ -10,6 +10,7 @@ import { formControlClass } from "@/components/Common/formStyles"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { Button } from "@/components/ui/button"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
+import { BirthdateField, CheckField, ChoiceRow, ComboField, DateField, SelectField } from "./FormControls"
 import { IssuanceSection } from "./IssuanceSection"
 import { DocumentTypePicker } from "./DocumentTypePicker"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -35,6 +36,9 @@ const printedNameType: Record<DocumentCode, string> = {
   FIRST_TIME_JOBSEEKER: "First-Time Jobseeker Certification",
   BARANGAY_ID: "Barangay ID",
 }
+const nameExtensions = ["None", "Jr.", "Sr.", "II", "III", "IV", "V"]
+const civilStatusChoices = ["Single", "Married", "Legally Separated", "Widow/Widower"]
+const purokChoices = [1, 2, 3, 4, 5, 6].map((purok) => ({ value: String(purok), label: `Purok ${purok}` }))
 const fieldLabelClass = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
 
 function normalizedOptionValue(fieldName: string, option: string) {
@@ -44,6 +48,11 @@ function normalizedOptionValue(fieldName: string, option: string) {
   if (fieldName === "isJobstartBeneficiary") return option === "Yes" ? "true" : "false"
   if (fieldName === "parts") return ({ "Applicant sheet": "applicant_sheet", Oath: "oath", Certification: "certification" } as Record<string, string>)[option] ?? option
   return option
+}
+
+const emptyQuickAdd: QuickResidentInput = {
+  lastName: "", firstName: "", middleName: "", suffix: "", birthdate: "", sex: "Male", civilStatus: "Single",
+  houseNumber: "", street: "", purok: 1, residentSinceBirth: false,
 }
 
 function getDefaultToday(value: unknown) {
@@ -57,10 +66,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [selectedResident, setSelectedResident] = useState<ResidentRecord | null>(() => sampleResidents.find((resident) => resident.id === initialResidentId || resident.name === initialResidentId) ?? null)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
-  const [quickAdd, setQuickAdd] = useState<QuickResidentInput>({
-    lastName: "", firstName: "", middleName: "", birthdate: "", sex: "Male", civilStatus: "Single",
-    houseNumber: "", street: "", purok: 1, residentSinceBirth: false,
-  })
+  const [quickAdd, setQuickAdd] = useState<QuickResidentInput>(emptyQuickAdd)
   const [residentUpdates, setResidentUpdates] = useState<ResidentPatch>({})
   const [selectedSector, setSelectedSector] = useState<string | string[]>("")
   const [sectorManuallySelected, setSectorManuallySelected] = useState(false)
@@ -73,12 +79,16 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const [successRecord, setSuccessRecord] = useState<MockIssuance | null>(null)
   const [duplicate, setDuplicate] = useState<{ referenceNo: string; issueDate: string } | null>(null)
   const [formError, setFormError] = useState("")
+  const [discardOpen, setDiscardOpen] = useState(false)
+  const [attempted, setAttempted] = useState(false)
   const documentType = form.watch("documentType")
   const issueDate = form.watch("issueDate")
   const details = form.watch("details")
   const identification = form.watch("identification")
   const payment = form.watch("payment")
   const config = documentConfig[documentType]
+  // Read during render so react-hook-form keeps isDirty up to date for the discard prompt.
+  const formDirty = form.formState.isDirty
   const allResidents = useMemo(() => [...sampleResidents, ...residents], [residents])
   const matches = useMemo(() => {
     const query = residentQuery.trim().toLowerCase()
@@ -239,36 +249,46 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       else setDetail(field.name, nextValue)
     }
     const fieldOptions = field.name === "associationName" ? knownAssociations : field.name === "referredBy" ? ["None", ...initialOfficials.filter((official) => official.status === "Current").map((official) => official.name)] : field.name === "witnessOfficialId" ? initialOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
-    return <label key={field.name} htmlFor={fieldId} className={fieldLabelClass}>
-      <span>{field.label}{field.required ? <span className="text-destructive"> *</span> : null}</span>
-      {field.type === "combobox" ? <><input id={fieldId} list={`issuance-options-${field.name}`} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, fieldError && "border-destructive")} aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} required={field.required} /><datalist id={`issuance-options-${field.name}`}>{fieldOptions.map((option) => <option key={option} value={option} />)}</datalist></> : field.type === "select" || field.type === "radio" ? (
-        <select id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, fieldError && "border-destructive", "bg-background")} aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} required={field.required}>
-          <option value="">Select…</option>
-          {fieldOptions.map((option) => <option key={option} value={normalizedOptionValue(field.name, option)}>{option}</option>)}
-        </select>
-      ) : field.type === "multiselect" ? (
-        <div className="flex flex-wrap gap-2">
-          {(field.options ?? []).map((option) => {
-            const current = Array.isArray(value) ? value as string[] : []
-            const optionValue = normalizedOptionValue(field.name, option)
-            return <label key={option} className="inline-flex min-h-10 items-center gap-2 rounded-md border px-3 text-sm font-normal">
-              <input type="checkbox" checked={current.includes(optionValue)} disabled={Boolean(field.maxSelected && current.length >= field.maxSelected && !current.includes(optionValue))} id={option === field.options?.[0] ? fieldId : undefined} aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} onChange={(event) => onValueChange(event.target.checked ? [...current, optionValue] as unknown as string : current.filter((item) => item !== optionValue) as unknown as string)} />
-              {option}
-            </label>
-          })}
-        </div>
-      ) : field.type === "checkbox" ? (
-        <input id={fieldId} type="checkbox" checked={Boolean(value)} onChange={(event) => onValueChange(event.target.checked)} className="size-4 accent-primary" aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} />
-      ) : field.name === "idNumber" && documentType === "BARANGAY_ID" ? (
-        <input id={fieldId} value={String(value)} readOnly className={cn(formControlClass, "bg-muted/50")} />
-      ) : field.type === "textarea" ? (
-        <textarea id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, fieldError && "border-destructive", "h-auto py-2")} aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} rows={2} />
-      ) : (
-        <input id={fieldId} type={field.type === "date" ? "date" : field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, fieldError && "border-destructive")} aria-invalid={Boolean(fieldError)} aria-describedby={fieldError ? `${fieldId}-error` : undefined} required={field.required} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} />
-      )}
-      {fieldError ? <span id={`${fieldId}-error`} className="text-xs font-normal text-destructive" role="alert">{fieldError}</span> : null}
+    const missingNow = attempted && Boolean(field.required) && !fieldHasValue(field)
+    const invalid = Boolean(fieldError) || missingNow
+    const describedBy = fieldError || missingNow ? `${fieldId}-error` : undefined
+    const labelText = <>{field.label}{field.required ? <span className="text-destructive"> *</span> : null}</>
+    const message = fieldError || (missingNow ? "Please fill this in." : "")
+    const messageNode = message ? <span id={`${fieldId}-error`} className="text-xs font-normal text-destructive" role="alert">{message}</span> : null
+    if (field.type === "checkbox") {
+      return <div key={field.name} className="flex min-h-11 items-center">
+        <CheckField id={fieldId} checked={Boolean(value)} onChange={(checked) => onValueChange(checked)} label={field.label} invalid={invalid} describedBy={describedBy} />
+      </div>
+    }
+    let control: ReactNode
+    if (field.type === "combobox") {
+      control = <ComboField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} options={fieldOptions} invalid={invalid} describedBy={describedBy} />
+    } else if (field.type === "select" || field.type === "radio") {
+      control = <SelectField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} options={fieldOptions.map((option) => ({ value: normalizedOptionValue(field.name, option), label: option }))} invalid={invalid} describedBy={describedBy} />
+    } else if (field.type === "multiselect") {
+      const current = Array.isArray(value) ? value as string[] : []
+      control = <fieldset aria-labelledby={`${fieldId}-label`} className="m-0 flex min-w-0 flex-wrap gap-2 border-0 p-0">
+        {(field.options ?? []).map((option) => {
+          const optionKey = normalizedOptionValue(field.name, option)
+          const checked = current.includes(optionKey)
+          return <CheckField key={option} variant="box" id={option === field.options?.[0] ? fieldId : undefined} label={option} checked={checked} disabled={Boolean(field.maxSelected && current.length >= field.maxSelected && !checked)} invalid={invalid} describedBy={describedBy} onChange={(next) => onValueChange(next ? [...current, optionKey] as unknown as string : current.filter((item) => item !== optionKey) as unknown as string)} />
+        })}
+      </fieldset>
+    } else if (field.name === "idNumber" && documentType === "BARANGAY_ID") {
+      control = <input id={fieldId} value={String(value)} readOnly className={cn(formControlClass, "bg-muted/50")} />
+    } else if (field.type === "textarea") {
+      control = <textarea id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive", "h-auto py-2")} aria-invalid={invalid} aria-describedby={describedBy} rows={2} />
+    } else if (field.type === "date") {
+      control = <DateField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
+    } else {
+      control = <input id={fieldId} type={field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive")} aria-invalid={invalid} aria-describedby={describedBy} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} />
+    }
+    return <div key={field.name} className={fieldLabelClass}>
+      {field.type === "multiselect" ? <span id={`${fieldId}-label`}>{labelText}</span> : <label htmlFor={fieldId}>{labelText}</label>}
+      {control}
+      {messageNode}
       {field.help ? <span className="text-xs font-normal text-muted-foreground">{field.help}</span> : null}
-    </label>
+    </div>
   }
 
   async function saveDraft() {
@@ -298,7 +318,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     const projectedResident = { ...selectedResident, ...residentUpdates } as ResidentRecord
     const missingResidentFields = getMissingResidentFields(projectedResident, documentType)
     if (missingResidentFields.length) {
-      setFormError("Complete the resident fields listed under Needed for this document.")
+      setAttempted(true)
+      setFormError("Please fill in the missing details in the yellow box under Who is it for?")
       const firstMissing = missingResidentFields[0]
       window.setTimeout(() => {
         const targetId = firstMissing === "address" ? "resident-missing-address-houseNumber" : `resident-missing-${firstMissing}`
@@ -306,6 +327,12 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         target?.scrollIntoView({ behavior: "smooth", block: "center" })
         target?.focus()
       }, 0)
+      return
+    }
+    if (missingPreviewLabels.length) {
+      setAttempted(true)
+      setFormError(`Almost there. ${missingPreviewLabels.length === 1 ? "One item is" : `${missingPreviewLabels.length} items are`} still needed. We will take you to the first one.`)
+      goToFirstMissing()
       return
     }
     setSaving(true)
@@ -343,14 +370,19 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   }
 
   function hasTypedValues() {
-    return form.formState.isDirty || Boolean(residentQuery.trim()) || Object.keys(residentUpdates).length > 0 ||
+    return formDirty || Boolean(residentQuery.trim()) || Object.keys(residentUpdates).length > 0 ||
       (showQuickAdd && Boolean(quickAdd.firstName.trim() || quickAdd.lastName.trim() || quickAdd.birthdate || quickAdd.street.trim() || quickAdd.houseNumber.trim()))
   }
 
   function requestClose(nextOpen: boolean) {
-    if (!nextOpen && hasTypedValues() && !window.confirm("Discard the changes to this issuance?")) return
+    if (!nextOpen && !successRecord && hasTypedValues()) { setDiscardOpen(true); return }
     if (!nextOpen) resetDialog()
     onOpenChange(nextOpen)
+  }
+
+  function discardAndClose() {
+    resetDialog()
+    onOpenChange(false)
   }
 
   function resetDialog() {
@@ -369,11 +401,14 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setSuccessRecord(null)
     setDuplicate(null)
     setFormError("")
+    setAttempted(false)
+    setDiscardOpen(false)
+    setQuickAdd(emptyQuickAdd)
   }
 
   async function createResident() {
-    if (!quickAdd.lastName.trim() || !quickAdd.firstName.trim() || !quickAdd.birthdate || !quickAdd.purok) {
-      setFormError("Surname, given names, birthdate, sex, and purok are required.")
+    if (!quickAdd.lastName.trim() || !quickAdd.firstName.trim() || !quickAdd.birthdate || !quickAdd.street.trim() || !quickAdd.houseNumber?.trim()) {
+      setFormError("Please fill in the first name, last name, birthdate, house number and street.")
       return
     }
     try {
@@ -381,10 +416,75 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       setResidents((previous) => [...previous, resident])
       selectResident(resident)
       setShowQuickAdd(false)
+      setQuickAdd(emptyQuickAdd)
       setFormError("")
     } catch (error) {
       setFormError(error instanceof Error ? error.message : "Unable to add this resident.")
     }
+  }
+
+  const needsAddress = Boolean(selectedResident) && (!selectedResident?.houseNumber?.trim() || !selectedResident?.street?.trim() || !selectedResident?.purok)
+  const neededFromRecord: string[] = selectedResident
+    ? Array.from(new Set([
+        ...config.residentNeeds.filter((need) => {
+          const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSinceBirth || selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : need === "emergencyContact" ? selectedResident.emergencyContact?.name && selectedResident.emergencyContact?.address && selectedResident.emergencyContact?.phone : undefined
+          return !residentValue
+        }),
+        ...(needsAddress ? ["address"] : []),
+      ]))
+    : []
+
+  function updateAddress(patch: Partial<typeof addressParts>) {
+    const next = { ...addressParts, ...patch }
+    setAddressParts(next)
+    setResidentUpdates((previous) => ({ ...previous, houseNumber: next.houseNumber, street: next.street, purok: next.purok, address: [[next.houseNumber.trim(), next.street.trim()].filter(Boolean).join(" "), `Purok ${next.purok}`, "Mayondon"].filter(Boolean).join(", ") } as ResidentPatch))
+  }
+
+  function renderResidentNeed(need: string) {
+    if (!selectedResident) return null
+    const patch = (values: Record<string, unknown>) => setResidentUpdates((previous) => ({ ...previous, ...values } as ResidentPatch))
+    const updates = residentUpdates as Record<string, unknown>
+    if (need === "residentSince") {
+      const sinceBirth = Boolean(residentUpdates.residentSinceBirth ?? selectedResident.residentSinceBirth)
+      return <div key={need} className="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+        <label className={fieldLabelClass}>Living here since (year)<input id="resident-missing-residentSince" type="number" min="1900" max={new Date().getFullYear()} placeholder="Example: 2005" value={sinceBirth ? "" : String(residentUpdates.residentSince ?? "")} onChange={(event) => patch({ residentSince: event.target.value ? Number(event.target.value) : undefined, residentSinceBirth: false })} className={formControlClass} disabled={sinceBirth} /></label>
+        <CheckField label="Lived here since birth" checked={sinceBirth} onChange={(checked) => patch({ residentSinceBirth: checked, residentSince: checked ? 0 : undefined })} />
+      </div>
+    }
+    if (need === "address") {
+      return <div key={need} className="space-y-2">
+        <p className="text-sm font-medium">Home address</p>
+        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)]">
+          <label className={fieldLabelClass}>House number<input id="resident-missing-address-houseNumber" value={addressParts.houseNumber} onChange={(event) => updateAddress({ houseNumber: event.target.value })} className={formControlClass} autoComplete="off" /></label>
+          <div className={fieldLabelClass}><label htmlFor="resident-missing-address-street">Street</label><ComboField id="resident-missing-address-street" value={addressParts.street} options={knownStreets} onChange={(next) => updateAddress({ street: next })} /></div>
+          <div className={fieldLabelClass}><label htmlFor="resident-missing-address-purok">Purok</label><SelectField id="resident-missing-address-purok" value={String(addressParts.purok)} options={purokChoices} onChange={(next) => updateAddress({ purok: Number(next) })} /></div>
+        </div>
+      </div>
+    }
+    if (need === "emergencyContact") {
+      const current = { name: "", address: "", phone: "", ...selectedResident.emergencyContact, ...residentUpdates.emergencyContact }
+      return <div key={need} className="space-y-2">
+        <p className="text-sm font-medium">Person to contact in an emergency</p>
+        <div className="grid gap-3 sm:grid-cols-3">
+          {(["name", "address", "phone"] as const).map((part) => <label key={part} className={fieldLabelClass}>{part === "phone" ? "Contact number" : part === "name" ? "Full name" : "Address"}<input id={part === "name" ? "resident-missing-emergencyContact" : undefined} value={current[part]} onChange={(event) => patch({ emergencyContact: { ...current, [part]: event.target.value } })} className={formControlClass} autoComplete="off" /></label>)}
+        </div>
+      </div>
+    }
+    if (need === "birthDate") {
+      return <div key={need} className={fieldLabelClass}><span>Birthdate</span><BirthdateField idPrefix="resident-missing-birthdate" firstId="resident-missing-birthDate" value={String(updates.birthdate ?? "")} onChange={(next) => patch({ birthdate: next })} /></div>
+    }
+    if (need === "sex") {
+      return <div key={need} className={fieldLabelClass}><span id="resident-missing-sex-label">Sex</span><ChoiceRow id="resident-missing-sex" label="Sex" value={String(updates.sex ?? "")} options={["Male", "Female"]} onChange={(next) => patch({ sex: next })} /></div>
+    }
+    if (need === "civilStatus" || need === "sector") {
+      const key = need
+      const choices = need === "civilStatus" ? civilStatusChoices : ["STUDENT", "Senior Citizens", "Person with Disabilities (PWD)", "Solo Parents"]
+      const current = need === "sector" ? (residentUpdates.sectors?.[0] ?? "") : String(updates[key] ?? "")
+      return <div key={need} className={fieldLabelClass}><label htmlFor={`resident-missing-${need}`}>{need === "civilStatus" ? "Civil status" : "Sector"}</label><SelectField id={`resident-missing-${need}`} value={current} options={choices} onChange={(next) => patch({ [key]: need === "sector" ? [next] : next })} /></div>
+    }
+    const key = need === "birthPlace" ? "birthplace" : need === "photo" ? "photoUrl" : need
+    const label = need === "birthPlace" ? "Place of birth" : need === "photo" ? "Photo reference" : need
+    return <label key={need} className={fieldLabelClass}>{label}<input id={`resident-missing-${need}`} value={String(updates[key] ?? "")} onChange={(event) => patch({ [key]: event.target.value })} className={formControlClass} autoComplete="off" /></label>
   }
 
   const fieldsByGroup = (group: DetailFieldConfig["group"]) => config.fields.filter((field) => field.group === group)
@@ -429,7 +529,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   }
 
   const previewRowsRaw = [
-    { label: "Resident", value: selectedResident ? formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, printedNameType[documentType]) : "" },
+    { label: "Resident", value: selectedResident ? formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, printedNameType[documentType], selectedResident.suffix) : "" },
     { label: "Resident number", value: selectedResident?.id ?? "" },
     { label: "Address", value: selectedResident ? getResidentAddress(selectedResident) : "" },
     { label: "Birthdate", value: selectedResident?.birthdate ?? "" },
@@ -500,7 +600,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   }
 
   return <Dialog open={open} onOpenChange={requestClose}>
-    <DialogContent className="flex h-[94dvh] max-h-[94dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-5xl">
+    <DialogContent className="flex h-[96dvh] max-h-[96dvh] w-[96vw] max-w-[96vw] flex-col gap-0 overflow-hidden p-0 sm:max-w-[1400px]">
       <DialogHeader className="shrink-0 border-b px-5 py-4 pr-12">
         <DialogTitle>New Issuance</DialogTitle>
         <DialogDescription>Pick the document, find the resident, fill in the details. Everything on one screen.</DialogDescription>
@@ -516,19 +616,16 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
           <Button type="button" variant="outline" onClick={issueAnother}>Issue another for this resident</Button>
           <Button type="button" onClick={() => { resetDialog(); onOpenChange(false) }}>Done</Button>
         </div>
-      </div> : <form className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => { event.preventDefault(); void issue() }} onKeyDown={(event) => { if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); void issue() } }}>
-        <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_340px]">
+      </div> : <form noValidate className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => { event.preventDefault(); void issue() }} onKeyDown={(event) => { if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); void issue() } }}>
+        <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_380px]">
           <div className="min-h-0 space-y-4 overflow-y-auto bg-muted/30 px-4 py-4 sm:px-5">
-            <IssuanceSection id="issuance-step-document" step={1} title="What are you issuing?" description="Click a document. The form below adapts to it." done>
+            <IssuanceSection id="issuance-step-document" step={1} title="What are you issuing?" done>
               <DocumentTypePicker value={documentType} onChange={changeDocumentType} />
-              <div className="grid gap-3 border-t pt-4 sm:grid-cols-[220px_1fr] sm:items-end">
-                <label className={fieldLabelClass}>Date on document
-                  <span className="relative">
-                    <input id="issuance-date" type="date" value={issueDate} onChange={(event) => { const nextDate = event.target.value; form.setValue("issueDate", nextDate, { shouldDirty: true }); if (documentType === "BARANGAY_ID" && !validUntilEdited && nextDate) { const validDate = new Date(`${nextDate}T00:00:00`); validDate.setFullYear(validDate.getFullYear() + 1); setDetail("validUntil", localIsoDate(validDate)) } }} className={formControlClass} required />
-                    <CalendarDays className="pointer-events-none absolute right-3 top-3.5 size-4 text-muted-foreground" aria-hidden="true" />
-                  </span>
-                </label>
-                <p className="flex flex-wrap items-center gap-x-4 gap-y-1 pb-2 text-xs text-muted-foreground">
+              <div className="flex flex-wrap items-end gap-x-6 gap-y-2 border-t pt-4">
+                <div className={cn(fieldLabelClass, "w-full sm:w-64")}><label htmlFor="issuance-date">Date on document</label>
+                  <DateField id="issuance-date" value={issueDate} onChange={(nextDate) => { form.setValue("issueDate", nextDate, { shouldDirty: true }); if (documentType === "BARANGAY_ID" && !validUntilEdited && nextDate) { const validDate = new Date(`${nextDate}T00:00:00`); validDate.setFullYear(validDate.getFullYear() + 1); setDetail("validUntil", localIsoDate(validDate)) } }} />
+                </div>
+                <p className="flex flex-wrap items-center gap-x-4 gap-y-1 pb-3 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><Printer className="size-3.5" aria-hidden="true" />{config.printMode === "overlay" ? "Prints on the pre-printed form" : "Prints as a full page"}</span>
                   {config.validityMonths ? <span className="inline-flex items-center gap-1"><Clock className="size-3.5" aria-hidden="true" />Valid for {config.validityMonths === 12 ? "1 year" : `${config.validityMonths} months`}</span> : null}
                   {config.onePerResident ? <span>One per resident</span> : null}
@@ -536,79 +633,68 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               </div>
             </IssuanceSection>
 
-            <IssuanceSection id="issuance-step-resident" step={2} title="Who is it for?" description="Search by name or resident number. Missing record details are filled in right here." done={residentDone}>
-              {selectedResident ? <div className="rounded-md border p-3">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-medium">{formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, config.name)}</p>
-                  <p className="text-xs text-muted-foreground">{selectedResident.id}</p>
-                  <p className="mt-1 text-sm">{getResidentAddress(selectedResident)}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{selectedResident.birthdate ? `${calculateAge(selectedResident.birthdate, issueDate)} years old` : "Birthdate not recorded"} · {selectedResident.civilStatus || "Civil status not recorded"}</p>
-                </div>
-                <Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); form.setValue("residentId", ""); setResidentQuery("") }}>Change</Button>
-              </div>
-            </div> : <div className="space-y-2">
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted-foreground" aria-hidden="true" />
-                <input id="issuance-resident-search" value={residentQuery} onChange={(event) => { setResidentQuery(event.target.value); setActiveResidentMatch(0) }} onKeyDown={(event) => { if (event.key === "ArrowDown" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, matches.length - 1)) } if (event.key === "ArrowUp" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) } if (event.key === "Enter" && matches[activeResidentMatch]) { event.preventDefault(); selectResident(matches[activeResidentMatch]) } if (event.key === "Escape") { event.preventDefault(); setResidentQuery("") } }} placeholder="Search name or resident number…" className={cn(formControlClass, "pl-9")} aria-label="Search resident" role="combobox" aria-autocomplete="list" aria-expanded={matches.length > 0} aria-controls="issuance-resident-results" aria-activedescendant={matches[activeResidentMatch] ? `issuance-resident-option-${matches[activeResidentMatch].id}` : undefined} />
-              </div>
-              {matches.length ? <div id="issuance-resident-results" role="listbox" className="overflow-hidden rounded-md border">{matches.map((resident, index) => <button type="button" key={resident.id} id={`issuance-resident-option-${resident.id}`} role="option" aria-selected={activeResidentMatch === index} disabled={resident.status === "Archived"} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} className={cn("flex min-h-12 w-full flex-col items-start border-b px-3 py-2 text-left last:border-b-0 hover:bg-muted", activeResidentMatch === index && "bg-muted", resident.status === "Archived" && "cursor-not-allowed opacity-50")}>
-                <span className="font-medium">{resident.name} <span className="text-xs text-muted-foreground">{resident.id}</span>{resident.status === "Archived" ? <span className="ml-2 text-xs text-muted-foreground">Archived</span> : null}</span>
-                <span className="text-xs text-muted-foreground">{getResidentAddress(resident)}</span>
-              </button>)}</div> : residentQuery.trim() ? <p className="text-sm text-muted-foreground">No matching active resident.</p> : null}
-              <button type="button" className="inline-flex min-h-9 items-center gap-1 text-sm text-primary underline underline-offset-4" onClick={() => setShowQuickAdd((value) => !value)}><UserRoundPlus className="size-4" />Resident not found? Add new resident</button>
-              {showQuickAdd ? <div className="space-y-3 rounded-md border p-3">
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {([["firstName", "Given names"], ["middleName", "Middle name"], ["lastName", "Surname"], ["birthdate", "Birthdate"], ["houseNumber", "House number"], ["street", "Street"]] as const).map(([key, label]) => <label key={key} className={fieldLabelClass}>{label}<input type={key === "birthdate" ? "date" : "text"} list={key === "street" ? "issuance-street-options" : undefined} value={quickAdd[key] ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, [key]: event.target.value }))} className={formControlClass} required={["firstName", "lastName", "birthdate"].includes(key)} /></label>)}
-                  <label className={fieldLabelClass}>Sex<select value={quickAdd.sex} onChange={(event) => setQuickAdd((previous) => ({ ...previous, sex: event.target.value as "Male" | "Female" }))} className={formControlClass}><option>Male</option><option>Female</option></select></label>
-                  <label className={fieldLabelClass}>Civil status<select value={quickAdd.civilStatus} onChange={(event) => setQuickAdd((previous) => ({ ...previous, civilStatus: event.target.value }))} className={formControlClass}><option>Single</option><option>Married</option><option>Legally Separated</option><option>Widow/Widower</option></select></label>
-                  <label className={fieldLabelClass}>Purok<select value={quickAdd.purok} onChange={(event) => setQuickAdd((previous) => ({ ...previous, purok: Number(event.target.value) }))} className={formControlClass}>{[1, 2, 3, 4, 5, 6].map((purok) => <option key={purok} value={purok}>Purok {purok}</option>)}</select></label>
-                  <label className={fieldLabelClass}>Residing since<input type="number" min="1900" max={new Date().getFullYear()} value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: event.target.value ? Number(event.target.value) : undefined }))} className={formControlClass} /></label>
-                  <label className="flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" checked={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceBirth: event.target.checked, residentSinceYear: undefined }))} />Since birth</label>
-                </div>
-                <datalist id="issuance-street-options">{knownStreets.map((street) => <option key={street} value={street} />)}</datalist>
-                <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setShowQuickAdd(false)}>Cancel</Button><Button type="button" onClick={() => void createResident()}>Save resident</Button></div>
-              </div> : null}
-            </div>}
-              {selectedResident && (config.residentNeeds.some((need) => {
-              const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSinceBirth ? "since birth" : selectedResident.residentSinceBirth ? "since birth" : selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : need === "emergencyContact" ? selectedResident.emergencyContact?.name && selectedResident.emergencyContact?.address && selectedResident.emergencyContact?.phone : undefined
-              return !residentValue
-            }) || (!selectedResident.houseNumber?.trim() || !selectedResident.street?.trim() || !selectedResident.purok)) ? <div className="mt-3 space-y-3">
-              <p className="text-sm font-medium">Needed for this document</p>
-              {config.residentNeeds.filter((need) => {
-                const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : need === "emergencyContact" ? selectedResident.emergencyContact?.name && selectedResident.emergencyContact?.address && selectedResident.emergencyContact?.phone : undefined
-                return !residentValue
-              }).concat((!selectedResident.houseNumber?.trim() || !selectedResident.street?.trim() || !selectedResident.purok) ? ["address"] : []).map((need) => {
-                const labels: Record<string, string> = { address: "Street and purok address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since year", sector: "Sector", photo: "Photo reference", emergencyContact: "Emergency contact" }
-                const key = need === "birthDate" ? "birthdate" : need === "birthPlace" ? "birthplace" : need
-                if (need === "residentSince") return <div key={need} className="space-y-2">
-                  <label className={fieldLabelClass}>Residing since year<input id="resident-missing-residentSince" type="number" min="1900" max={new Date().getFullYear()} value={residentUpdates.residentSinceBirth ? "" : String(residentUpdates.residentSince ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, residentSince: event.target.value ? Number(event.target.value) : undefined, residentSinceBirth: false }))} className={formControlClass} disabled={Boolean(residentUpdates.residentSinceBirth ?? selectedResident.residentSinceBirth)} /></label>
-                  <label className="flex min-h-10 items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(residentUpdates.residentSinceBirth ?? selectedResident.residentSinceBirth)} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, residentSinceBirth: event.target.checked, residentSince: event.target.checked ? 0 : undefined }))} />Since birth</label>
-                </div>
-                if (need === "address") return <div key={need} className="space-y-2">
-                  <p className="text-sm font-medium">{labels[need]}</p>
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <label className={fieldLabelClass}>House number<input id="resident-missing-address-houseNumber" value={addressParts.houseNumber} onChange={(event) => { const next = { ...addressParts, houseNumber: event.target.value }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, houseNumber: next.houseNumber, street: next.street, purok: next.purok, address: [[next.houseNumber.trim(), next.street.trim()].filter(Boolean).join(" "), `Purok ${next.purok}`, "Mayondon"].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass} /></label>
-                    <label className={fieldLabelClass}>Street<input id="resident-missing-address-street" value={addressParts.street} onChange={(event) => { const next = { ...addressParts, street: event.target.value }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, houseNumber: next.houseNumber, street: next.street, purok: next.purok, address: [[next.houseNumber.trim(), next.street.trim()].filter(Boolean).join(" "), `Purok ${next.purok}`, "Mayondon"].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass} /></label>
-                    <label className={fieldLabelClass}>Purok<select id="resident-missing-address-purok" value={addressParts.purok} onChange={(event) => { const next = { ...addressParts, purok: Number(event.target.value) }; setAddressParts(next); setResidentUpdates((previous) => ({ ...previous, houseNumber: next.houseNumber, street: next.street, purok: next.purok, address: [[next.houseNumber.trim(), next.street.trim()].filter(Boolean).join(" "), `Purok ${next.purok}`, "Mayondon"].filter(Boolean).join(", ") } as ResidentPatch)) }} className={formControlClass}>{[1, 2, 3, 4, 5, 6].map((purok) => <option key={purok} value={purok}>Purok {purok}</option>)}</select></label>
+            <IssuanceSection id="issuance-step-resident" step={2} title="Who is it for?" description={selectedResident ? "You can choose someone else if this is the wrong person." : "Type the person's name, then click it in the list."} done={residentDone}>
+              {selectedResident ? <div className="flex items-start justify-between gap-3 rounded-lg border border-emerald-600/40 bg-emerald-500/5 p-4">
+                <div className="flex min-w-0 items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600" aria-hidden="true" />
+                  <div className="min-w-0">
+                    <p className="text-base font-semibold">{selectedResident.name}</p>
+                    <p className="mt-0.5 text-sm">{getResidentAddress(selectedResident)}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? `${calculateAge(selectedResident.birthdate, issueDate)} years old` : "Birthdate not recorded"} · {selectedResident.civilStatus || "Civil status not recorded"} · {selectedResident.id}</p>
                   </div>
                 </div>
-                if (need === "emergencyContact") return <div key={need} className="space-y-2">
-                  <p className="text-sm font-medium">{labels[need]}</p>
-                  {(["name", "address", "phone"] as const).map((part) => <label key={part} className={fieldLabelClass}>{part === "phone" ? "Contact number" : part === "name" ? "Contact name" : "Contact address"}<input id={part === "name" ? "resident-missing-emergencyContact" : undefined} value={residentUpdates.emergencyContact?.[part] ?? selectedResident.emergencyContact?.[part] ?? ""} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, emergencyContact: { name: previous.emergencyContact?.name ?? selectedResident.emergencyContact?.name ?? "", address: previous.emergencyContact?.address ?? selectedResident.emergencyContact?.address ?? "", phone: previous.emergencyContact?.phone ?? selectedResident.emergencyContact?.phone ?? "", [part]: event.target.value } } as ResidentPatch))} className={formControlClass} /></label>)}
+                <Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); form.setValue("residentId", ""); setResidentQuery("") }}>Choose someone else</Button>
+              </div> : <div className="space-y-3">
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3.5 top-3.5 size-5 text-muted-foreground" aria-hidden="true" />
+                  <input id="issuance-resident-search" value={residentQuery} onChange={(event) => { setResidentQuery(event.target.value); setActiveResidentMatch(0) }} onKeyDown={(event) => { if (event.key === "ArrowDown" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, matches.length - 1)) } if (event.key === "ArrowUp" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) } if (event.key === "Enter" && matches[activeResidentMatch]) { event.preventDefault(); selectResident(matches[activeResidentMatch]) } if (event.key === "Escape" && residentQuery) { event.preventDefault(); event.stopPropagation(); setResidentQuery("") } }} placeholder="Type the person's name…" autoComplete="off" className={cn(formControlClass, "h-12 pl-11 text-base")} aria-label="Search resident" role="combobox" aria-autocomplete="list" aria-expanded={matches.length > 0} aria-controls="issuance-resident-results" aria-activedescendant={matches[activeResidentMatch] ? `issuance-resident-option-${matches[activeResidentMatch].id}` : undefined} />
                 </div>
-                return <label key={need} className={fieldLabelClass}>{labels[need]}
-                  {need === "civilStatus" || need === "sex" || need === "sector" ? <select value={String((residentUpdates as Record<string, unknown>)[key] ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, [key]: need === "sector" ? [event.target.value] : event.target.value } as ResidentPatch))} className={formControlClass}><option value="">Select…</option>{(need === "civilStatus" ? ["Single", "Married", "Legally Separated", "Widow/Widower"] : need === "sex" ? ["Male", "Female"] : ["STUDENT", "Senior Citizens", "Person with Disabilities (PWD)", "Solo Parents"]).map((option) => <option key={option}>{option}</option>)}</select> :
-                  <input id={`resident-missing-${need}`} type={need === "birthDate" ? "date" : "text"} value={String((residentUpdates as Record<string, unknown>)[key === "photo" ? "photoUrl" : key] ?? "")} onChange={(event) => setResidentUpdates((previous) => ({ ...previous, [key === "photo" ? "photoUrl" : key]: need === "residentSince" && event.target.value ? Number(event.target.value) : event.target.value } as ResidentPatch))} className={formControlClass} />}
-                </label>
-              })}
-              <p className="text-xs text-muted-foreground">Saved to the resident's record.</p>
-            </div> : null}
+                {matches.length ? <div id="issuance-resident-results" role="listbox" className="overflow-hidden rounded-lg border shadow-xs">{matches.map((resident, index) => <button type="button" key={resident.id} id={`issuance-resident-option-${resident.id}`} role="option" aria-selected={activeResidentMatch === index} disabled={resident.status === "Archived"} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} className={cn("flex min-h-14 w-full flex-col items-start justify-center border-b px-4 py-2 text-left last:border-b-0 hover:bg-muted", activeResidentMatch === index && "bg-muted", resident.status === "Archived" && "cursor-not-allowed opacity-50")}>
+                  <span className="text-base font-medium">{resident.name}{resident.status === "Archived" ? <span className="ml-2 text-xs font-normal text-muted-foreground">Archived</span> : null}</span>
+                  <span className="text-sm text-muted-foreground">{getResidentAddress(resident)}</span>
+                </button>)}</div> : residentQuery.trim() ? <p className="rounded-lg border border-dashed p-4 text-sm">No one found with that name. Check the spelling, or add them as a new resident.</p> : null}
+                {!showQuickAdd ? <Button type="button" variant="outline" onClick={() => setShowQuickAdd(true)}><UserRoundPlus className="size-4" aria-hidden="true" />Not on the list? Add a new resident</Button> : null}
+                {showQuickAdd ? <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
+                  <div className="flex items-baseline justify-between gap-2"><p className="font-semibold">Add a new resident</p><span className="text-xs text-muted-foreground"><span className="text-destructive">*</span> must be filled in</span></div>
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_7.5rem]">
+                    <label className={fieldLabelClass}><span>First name <span className="text-destructive">*</span></span><input id="quickadd-firstName" value={quickAdd.firstName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, firstName: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
+                    <label className={fieldLabelClass}>Middle name<input value={quickAdd.middleName ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, middleName: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
+                    <label className={fieldLabelClass}><span>Last name <span className="text-destructive">*</span></span><input value={quickAdd.lastName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, lastName: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
+                    <div className={fieldLabelClass}><label htmlFor="quickadd-suffix">Extension</label><SelectField id="quickadd-suffix" value={quickAdd.suffix || "None"} onChange={(next) => setQuickAdd((previous) => ({ ...previous, suffix: next === "None" ? "" : next }))} options={nameExtensions} /></div>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1.2fr)]">
+                    <div className={fieldLabelClass}><span id="quickadd-birthdate-label">Birthdate <span className="text-destructive">*</span></span><BirthdateField idPrefix="quickadd-birthdate" value={quickAdd.birthdate} onChange={(next) => setQuickAdd((previous) => ({ ...previous, birthdate: next }))} /></div>
+                    <div className={fieldLabelClass}><span id="quickadd-sex-label">Sex</span><ChoiceRow label="Sex" value={quickAdd.sex} options={["Male", "Female"]} onChange={(next) => setQuickAdd((previous) => ({ ...previous, sex: next as "Male" | "Female" }))} /></div>
+                    <div className={fieldLabelClass}><label htmlFor="quickadd-civil">Civil status</label><SelectField id="quickadd-civil" value={quickAdd.civilStatus} onChange={(next) => setQuickAdd((previous) => ({ ...previous, civilStatus: next }))} options={civilStatusChoices} /></div>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)]">
+                    <label className={fieldLabelClass}><span>House number <span className="text-destructive">*</span></span><input id="quickadd-houseNumber" value={quickAdd.houseNumber ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, houseNumber: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
+                    <div className={fieldLabelClass}><label htmlFor="quickadd-street">Street <span className="text-destructive">*</span></label><ComboField id="quickadd-street" value={quickAdd.street} options={knownStreets} onChange={(next) => setQuickAdd((previous) => ({ ...previous, street: next }))} /></div>
+                    <div className={fieldLabelClass}><label htmlFor="quickadd-purok">Purok</label><SelectField id="quickadd-purok" value={String(quickAdd.purok)} onChange={(next) => setQuickAdd((previous) => ({ ...previous, purok: Number(next) }))} options={purokChoices} /></div>
+                  </div>
+                  <div className="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
+                    <label className={fieldLabelClass}>Living here since (year)<input type="number" min="1900" max={new Date().getFullYear()} placeholder="Example: 2005" value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: event.target.value ? Number(event.target.value) : undefined }))} className={formControlClass} /></label>
+                    <CheckField label="Lived here since birth" checked={quickAdd.residentSinceBirth} onChange={(checked) => setQuickAdd((previous) => ({ ...previous, residentSinceBirth: checked, residentSinceYear: undefined }))} />
+                  </div>
+                  <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setShowQuickAdd(false)}>Cancel</Button><Button type="button" onClick={() => void createResident()}>Save and select</Button></div>
+                </div> : null}
+              </div>}
+              {selectedResident && neededFromRecord.length ? <div className="space-y-4 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4">
+                <div>
+                  <p className="font-semibold">A few details are missing</p>
+                  <p className="text-sm text-muted-foreground">Please fill them in. They will be saved to {selectedResident.firstName}'s record.</p>
+                </div>
+                {neededFromRecord.map(renderResidentNeed)}
+              </div> : null}
             </IssuanceSection>
 
             <IssuanceSection id="issuance-step-details" step={3} title="Document details" description="Only the fields this document needs. Red asterisk means required." done={detailsDone}>
               {detailFields.length ? <div className="grid gap-4 sm:grid-cols-2">{detailFields.map(renderField)}</div> : <p className="text-sm text-muted-foreground">This document needs no extra details.</p>}
-              {config.signatoryMode === "select" ? <label className={fieldLabelClass}>Signatory <span className="text-destructive">*</span><select id="issuance-signatoryOfficialId" value={form.watch("signatoryOfficialId") ?? ""} onChange={(event) => form.setValue("signatoryOfficialId", event.target.value, { shouldDirty: true })} className={cn(formControlClass, readErrorMessage(form.formState.errors.signatoryOfficialId) && "border-destructive", "bg-background")} aria-invalid={Boolean(readErrorMessage(form.formState.errors.signatoryOfficialId))} aria-describedby={readErrorMessage(form.formState.errors.signatoryOfficialId) ? "issuance-signatory-error" : undefined} required><option value="">Select official…</option>{initialOfficials.filter((official) => official.status === "Current" && ["Punong Barangay", "Barangay Kagawad", "Barangay Clerk", "Administrative Assistant", "SK Chairperson", "OIC Kagawad"].includes(official.position)).map((official) => <option key={official.id} value={official.id}>{official.name} · {official.position}</option>)}</select>{readErrorMessage(form.formState.errors.signatoryOfficialId) ? <span id="issuance-signatory-error" role="alert" className="text-xs font-normal text-destructive">{readErrorMessage(form.formState.errors.signatoryOfficialId)}</span> : null}</label> : null}
+              {config.signatoryMode === "select" ? <div className={fieldLabelClass}>
+                <label htmlFor="issuance-signatoryOfficialId">Signatory <span className="text-destructive">*</span></label>
+                <SelectField id="issuance-signatoryOfficialId" value={form.watch("signatoryOfficialId") ?? ""} onChange={(next) => form.setValue("signatoryOfficialId", next, { shouldDirty: true })} placeholder="Choose an official…" invalid={Boolean(readErrorMessage(form.formState.errors.signatoryOfficialId)) || (attempted && signatoryMissing)} describedBy={readErrorMessage(form.formState.errors.signatoryOfficialId) ? "issuance-signatory-error" : undefined} options={initialOfficials.filter((official) => official.status === "Current" && ["Punong Barangay", "Barangay Kagawad", "Barangay Clerk", "Administrative Assistant", "SK Chairperson", "OIC Kagawad"].includes(official.position)).map((official) => ({ value: official.id, label: `${official.name} · ${official.position}` }))} />
+                {readErrorMessage(form.formState.errors.signatoryOfficialId) ? <span id="issuance-signatory-error" role="alert" className="text-xs font-normal text-destructive">{readErrorMessage(form.formState.errors.signatoryOfficialId)}</span> : attempted && signatoryMissing ? <span role="alert" className="text-xs font-normal text-destructive">Please choose who signs this document.</span> : null}
+              </div> : null}
               {fieldsByGroup("more").length ? <div className="rounded-lg border border-dashed p-3">
                 <button type="button" className="flex min-h-9 w-full items-center gap-2 text-sm font-medium" aria-expanded={moreOpen} onClick={() => setMoreOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", moreOpen && "rotate-180")} />Optional extras</button>
                 {!moreOpen ? <p className="mt-1 text-xs text-muted-foreground">{fieldsByGroup("more").map((field) => previewValue(field)).filter(Boolean).join(" · ") || "Nothing added. Defaults are fine for most requests."}</p> : <div className="mt-3 grid gap-4 sm:grid-cols-2">{fieldsByGroup("more").map(renderField)}</div>}
@@ -646,6 +732,16 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         </DialogFooter>
       </form>}
     </DialogContent>
+    <ConfirmDialog
+      open={discardOpen}
+      onOpenChange={setDiscardOpen}
+      title="Discard the changes to this issuance?"
+      description="What you typed so far has not been saved. If you leave now, it will be lost."
+      confirmLabel="Discard changes"
+      cancelLabel="Keep editing"
+      destructive
+      onConfirm={discardAndClose}
+    />
     <ConfirmDialog
       open={pendingDocumentType !== null}
       onOpenChange={(nextOpen) => { if (!nextOpen) setPendingDocumentType(null) }}
