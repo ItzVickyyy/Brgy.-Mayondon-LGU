@@ -10,7 +10,8 @@ export type ResidentRecord = {
   emergencyContact?: { name: string; address: string; phone: string }
   civilStatus: string
   sectors: string[]
-  residentSince: number
+  residentSince: number | undefined
+  residentSinceBirth?: boolean
   photoUrl?: string
   address: string
   houseNumber?: string
