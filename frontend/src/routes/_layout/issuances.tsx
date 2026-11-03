@@ -107,7 +107,7 @@ function readAutoSavedDraft(): AutoSavedIssuanceDraft | null {
     const parsed = JSON.parse(stored) as Partial<AutoSavedIssuanceDraft>
     if (!parsed.formValues || typeof parsed.formValues !== "object") return null
     return {
-      selectedType: documentTypes.includes(parsed.selectedType ?? "") ? parsed.selectedType! : documentTypes[0],
+      selectedType: (documentTypes as readonly string[]).includes(parsed.selectedType ?? "") ? parsed.selectedType! : documentTypes[0],
       formValues: parsed.formValues,
       selectedResidentId: parsed.selectedResidentId ?? "",
       manualEntry: parsed.manualEntry ?? false,
