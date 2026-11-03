@@ -126,10 +126,10 @@ function IssuancesManagement() {
   const initialAutoDraft = readAutoSavedDraft()
   const initialResident = sampleResidents.find((resident) => resident.name === getPreselectedResident() || resident.id === getPreselectedResident())
   const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(() => Boolean(getPreselectedResident()))
-  const [selectedType, setSelectedType] = useState<string>(documentTypes[0])
+  const [selectedType, setSelectedType] = useState<string>(() => initialAutoDraft?.selectedType ?? documentTypes[0])
   const [residentQuery, setResidentQuery] = useState("")
-  const [selectedResidentId, setSelectedResidentId] = useState(() => initialResident?.id ?? "")
-  const [manualEntry, setManualEntry] = useState(false)
+  const [selectedResidentId, setSelectedResidentId] = useState(() => initialAutoDraft?.selectedResidentId ?? initialResident?.id ?? "")
+  const [manualEntry, setManualEntry] = useState(() => initialAutoDraft?.manualEntry ?? false)
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [formErrorSummary, setFormErrorSummary] = useState<string[]>([])
@@ -152,6 +152,7 @@ function IssuancesManagement() {
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
   const [formValues, setFormValues] = useState<Record<string, string>>(() => {
+    if (initialAutoDraft) return initialAutoDraft.formValues
     const defaults = createDefaultFormValues(documentTypes[0])
     if (!initialResident) return { ...defaults, ...(getPreselectedResident() ? { name: getPreselectedResident() } : {}) }
     const name = formatPrintedName(initialResident.firstName, initialResident.middleName, initialResident.lastName, documentTypes[0])
