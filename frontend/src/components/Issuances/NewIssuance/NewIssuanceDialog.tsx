@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { CalendarDays, Check, ChevronDown, Search, UserRoundPlus } from "lucide-react"
+import { CalendarDays, ChevronDown, Search, UserRoundPlus } from "lucide-react"
 import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuanceForm"
 import { documentConfig, documentConfigList, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
 import { issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
@@ -49,7 +49,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const [successRecord, setSuccessRecord] = useState<MockIssuance | null>(null)
   const [duplicate, setDuplicate] = useState<{ referenceNo: string; issueDate: string } | null>(null)
   const [formError, setFormError] = useState("")
-  const [freeOfCharge, setFreeOfCharge] = useState(false)
   const documentType = form.watch("documentType")
   const issueDate = form.watch("issueDate")
   const details = form.watch("details")
@@ -80,7 +79,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     form.setValue("payment", ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"].includes(nextCode)
       ? { officialReceiptNo: "", isFree: false } : undefined)
     form.clearErrors()
-    setFreeOfCharge(false)
+    setSelectedSector("")
     setDuplicate(null)
     setFormError("")
   }
@@ -116,7 +115,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     if (name === "isFree" && value === true) next.officialReceiptNo = "FOC"
     if (name === "isFree" && value === false && next.officialReceiptNo === "FOC") next.officialReceiptNo = ""
     form.setValue("payment", next as never, { shouldDirty: true })
-    setFreeOfCharge(Boolean(next.isFree))
   }
 
   function renderField(field: DetailFieldConfig) {
@@ -128,9 +126,12 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         : field.name === "purpose" ? form.watch("purposeText")
         : field.name === "remarks" ? form.watch("remarks")
         : field.name === "sector" ? selectedSector
+        : field.name === "for" ? ((details as unknown as Record<string, unknown>).forSelf === false ? "Someone else" : "Myself")
+        : field.name === "relationship" ? (details as unknown as Record<string, unknown>).beneficiaryRelationship
+        : field.name === "sectorIdNumber" ? form.watch("sectors")?.[0]?.idNumber ?? ""
         : (details as unknown as Record<string, unknown>)[field.name]
     const value = fieldValue ?? getDefaultToday(field.default)
-    if (field.showWhen && !field.showWhen({ ...(details as unknown as Record<string, unknown>), for: (details as unknown as Record<string, unknown>).for })) return null
+    if (field.showWhen && !field.showWhen({ ...(details as unknown as Record<string, unknown>), for: (details as unknown as Record<string, unknown>).forSelf === false ? "Someone else" : "Myself" })) return null
     const onValueChange = (nextValue: string | boolean) => {
       if (field.group === "identity") {
         if (field.name === "idType") setIdentity("idTypeId", Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1))
@@ -141,7 +142,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         setPayment(field.name === "isFree" ? "isFree" : "officialReceiptNo", nextValue)
       } else if (field.name === "purpose") setRootField("purposeText", String(nextValue))
       else if (field.name === "remarks") setRootField("remarks", String(nextValue))
-      else if (field.name === "sector") { setSelectedSector(String(nextValue)); form.setValue("sectors", [{ sectorId: Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1 }], { shouldDirty: true }) }
+      else if (field.name === "sector") { setSelectedSector(String(nextValue)); form.setValue("sectors", [{ sectorId: Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1) }], { shouldDirty: true }) }
       else if (field.name === "for") setDetail("forSelf", nextValue === "Myself")
       else if (field.name === "relationship") setDetail("beneficiaryRelationship", String(nextValue))
       else if (field.name === "isJobstartBeneficiary") setDetail(field.name, nextValue === "true")
@@ -162,6 +163,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         <div className="flex flex-wrap gap-2">
           {(field.options ?? []).map((option) => {
             const current = Array.isArray(value) ? value as string[] : []
+            const optionValue = normalizedOptionValue(field.name, option)
             return <label key={option} className="inline-flex min-h-10 items-center gap-2 rounded-md border px-3 text-sm font-normal">
               <input type="checkbox" checked={current.includes(optionValue)} onChange={(event) => onValueChange(event.target.checked ? [...current, optionValue] as unknown as string : current.filter((item) => item !== optionValue) as unknown as string)} />
               {option}
@@ -173,7 +175,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       ) : field.type === "textarea" ? (
         <textarea id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, "h-auto py-2")} rows={2} />
       ) : (
-        <input id={fieldId} type={field.type === "date" ? "date" : field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={formControlClass} required={field.required} />
+        <input id={fieldId} type={field.type === "date" ? "date" : field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={formControlClass} required={field.required} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} />
       )}
       {field.help ? <span className="text-xs font-normal text-muted-foreground">{field.help}</span> : null}
     </label>
@@ -235,6 +237,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setSelectedResident(null)
     setResidentQuery("")
     setResidentUpdates({})
+    setSelectedSector("")
     setShowQuickAdd(false)
     setMoreOpen(false)
     setPreviewOpen(false)
@@ -336,10 +339,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setShowQuickAdd(false)}>Cancel</Button><Button type="button" onClick={() => void createResident()}>Save resident</Button></div>
               </div> : null}
             </div>}
-            {selectedResident && config.residentNeeds.some((need) => {
+            {selectedResident && (config.residentNeeds.some((need) => {
               const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : selectedResident.emergencyContact?.phone
               return !residentValue
-            }) ? <div className="mt-3 space-y-3">
+            }) || !selectedResident.address.trim()) ? <div className="mt-3 space-y-3">
               <p className="text-sm font-medium">Needed for this document</p>
               {config.residentNeeds.filter((need) => {
                 const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : selectedResident.emergencyContact?.phone
