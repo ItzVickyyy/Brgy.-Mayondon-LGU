@@ -101,6 +101,13 @@ const rows: ActivityRow[] = [
   },
 ]
 
+const filterLabelClass = "flex min-w-0 flex-col gap-1.5 text-xs font-medium text-muted-foreground"
+
+/** Shows account roles as "Admin" and "Staff" instead of the stored lowercase value. */
+function formatRole(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
 function formatTimestamp(value: string) {
   const date = new Date(value)
   const datePart = date.toLocaleDateString("en-US", {
@@ -199,19 +206,21 @@ function ActivityLog() {
               Review who did what, when, and whether the action succeeded.
             </p>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            <label className="relative block min-w-0 flex-1 sm:max-w-sm">
-              <span className="sr-only">Search activity</span>
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search action, record, or module"
-                className={`${formControlClass} pl-9`}
-              />
+          <div className={`grid gap-3 sm:grid-cols-2 ${isAdmin ? "xl:grid-cols-[2fr_repeat(5,minmax(0,1fr))]" : "xl:grid-cols-[2fr_repeat(4,minmax(0,1fr))]"}`}>
+            <label className={`${filterLabelClass} sm:col-span-2 xl:col-span-1`}>
+              <span>Search</span>
+              <span className="relative block">
+                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search action, record, or module"
+                  className={`${formControlClass} pl-9`}
+                />
+              </span>
             </label>
-            <label className="sm:w-52">
-              <span className="sr-only">Filter by module</span>
+            <label className={filterLabelClass}>
+              <span>Module</span>
               <select value={moduleFilter} onChange={(event) => setModuleFilter(event.target.value)} className={formControlClass}>
                 <option value="all">All modules</option>
                 <option>Resident Records</option>
@@ -222,8 +231,8 @@ function ActivityLog() {
                 <option>Authentication</option>
               </select>
             </label>
-            <label className="sm:w-44">
-              <span className="sr-only">Filter by outcome</span>
+            <label className={filterLabelClass}>
+              <span>Outcome</span>
               <select value={outcomeFilter} onChange={(event) => setOutcomeFilter(event.target.value)} className={formControlClass}>
                 <option value="all">All outcomes</option>
                 <option>Success</option>
@@ -232,19 +241,19 @@ function ActivityLog() {
               </select>
             </label>
             {isAdmin ? (
-              <label className="sm:w-44">
-                <span className="sr-only">Filter by user</span>
+              <label className={filterLabelClass}>
+                <span>User</span>
                 <select value={userFilter} onChange={(event) => setUserFilter(event.target.value)} className={formControlClass}>
                   <option value="all">All users</option>
-                  {[...new Set(rows.map((row) => row.user))].sort().map((name) => <option key={name}>{name}</option>)}
+                  {[...new Set(rows.map((row) => row.user))].sort().map((name) => <option key={name} value={name}>{formatRole(name)}</option>)}
                 </select>
               </label>
             ) : null}
-            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs text-muted-foreground sm:max-w-44">
+            <label className={filterLabelClass}>
               <span>From</span>
               <input aria-label="Start date" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className={formControlClass} />
             </label>
-            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs text-muted-foreground sm:max-w-44">
+            <label className={filterLabelClass}>
               <span>To</span>
               <input aria-label="End date" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className={formControlClass} />
             </label>
@@ -264,7 +273,7 @@ function ActivityLog() {
               {visibleRows.map((row) => (
                 <tr key={row.timestamp + row.action} className="transition-colors hover:bg-muted/30">
                   <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">{formatTimestamp(row.timestamp)}</td>
-                  {isAdmin ? <td className="px-4 py-3 align-middle font-medium sm:px-5">{row.user}</td> : null}
+                  {isAdmin ? <td className="px-4 py-3 align-middle font-medium sm:px-5">{formatRole(row.user)}</td> : null}
                   <td className="px-4 py-3 align-middle sm:px-5">
                     <p className="font-medium">{row.action}</p>
                     {row.reason ? <p className="mt-1 max-w-xs text-xs text-muted-foreground">{row.reason}</p> : null}

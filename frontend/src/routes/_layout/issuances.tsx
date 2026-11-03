@@ -8,6 +8,7 @@ import {
   FileCheck2,
   FileText,
   Plus,
+  Pencil,
   Printer,
   Search,
   X,
@@ -30,6 +31,7 @@ import {
   sampleIssuances,
 } from "@/components/Issuances/config"
 import { FormSection, SummaryCard } from "@/components/Issuances/IssuanceLayout"
+import { IssuanceDetailsView } from "@/components/Issuances/IssuanceDetailsView"
 import { DateField } from "@/components/Issuances/DateField"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
 import { NewIssuanceDialog } from "@/components/Issuances/NewIssuance/NewIssuanceDialog"
@@ -38,7 +40,7 @@ import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { getMissingFields } from "@/components/Issuances/print-summary"
 import { sampleResidents } from "@/components/Records/records-sample-data"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
-import { calculateAge, formatPaperDate, formatPrintedName } from "@/lib/issuance-format"
+import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -61,6 +63,7 @@ export const Route = createFileRoute("/_layout/issuances")({
 
 const inputClassName = formControlClass
 const labelClassName = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
+const filterLabelClass = "flex min-w-0 flex-col gap-1.5 text-xs font-medium text-muted-foreground"
 
 function localDateValue() {
   const now = new Date()
@@ -837,74 +840,38 @@ function IssuancesManagement() {
         open={viewRecord !== null}
         onOpenChange={(open) => !open && setViewRecord(null)}
       >
-        <DialogContent className="print:hidden sm:max-w-lg">
+        <DialogContent className="print:hidden max-h-[90vh] overflow-y-auto sm:max-w-2xl">
           {viewRecord && (
             <>
               <DialogHeader>
-                <DialogTitle>{viewRecord.id}</DialogTitle>
-                <DialogDescription>{viewRecord.type}</DialogDescription>
+                <DialogTitle>{viewRecord.type}</DialogTitle>
+                <DialogDescription>
+                  {viewRecord.id} · {viewRecord.resident}
+                </DialogDescription>
               </DialogHeader>
-              <dl className="grid gap-3 text-sm sm:grid-cols-2">
-                <div>
-                  <dt className="text-xs text-muted-foreground">Resident</dt>
-                  <dd className="mt-0.5 font-medium">{viewRecord.resident}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Date</dt>
-                  <dd className="mt-0.5 font-medium">
-                    {formatPaperDate(viewRecord.date)}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Purpose</dt>
-                  <dd className="mt-0.5 font-medium">{viewRecord.purpose || viewRecord.fields.purpose || "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Valid until</dt>
-                  <dd className="mt-0.5 font-medium">{viewRecord.validUntil ? formatPaperDate(viewRecord.validUntil) : "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Issued by</dt>
-                  <dd className="mt-0.5 font-medium">{viewRecord.issuedBy || "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">OR number</dt>
-                  <dd className="mt-0.5 font-medium">{viewRecord.orNumber || "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Correction reason</dt>
-                  <dd className="mt-0.5 font-medium">{viewRecord.correctionReason || "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Void reason</dt>
-                  <dd className="mt-0.5 font-medium">{viewRecord.voidReason || "—"}</dd>
-                </div>
-                <div>
-                  <dt className="text-xs text-muted-foreground">Status</dt>
-                  <dd className="mt-1">
-                    <Badge
-                      variant="outline"
-                      className={statusStyles[viewRecord.status]}
-                    >
-                      {viewRecord.status}
-                    </Badge>
-                  </dd>
-                </div>
-              </dl>
-              {Object.keys(viewRecord.fields).length === 0 && (
-                <p className="rounded-md bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
-                  Record details are unavailable.
-                </p>
-              )}
+              <IssuanceDetailsView record={viewRecord} />
               <DialogFooter>
                 <Button variant="outline" onClick={() => setViewRecord(null)}>
                   Close
                 </Button>
                 {viewRecord.status === "Issued" ? (
-                  <Button onClick={() => printNow(viewRecord)}>
-                    <Printer aria-hidden="true" />
-                    Reprint
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const record = viewRecord
+                        setViewRecord(null)
+                        setPendingAction({ record, action: "correct" })
+                      }}
+                    >
+                      <Pencil aria-hidden="true" />
+                      Edit
+                    </Button>
+                    <Button onClick={() => printNow(viewRecord)}>
+                      <Printer aria-hidden="true" />
+                      Reprint
+                    </Button>
+                  </>
                 ) : null}
               </DialogFooter>
             </>
@@ -919,7 +886,7 @@ function IssuancesManagement() {
           pendingAction?.action === "void"
             ? "Void issuance?"
             : pendingAction?.action === "correct"
-              ? "Correct issuance details?"
+              ? "Edit this issuance?"
               : "Discard draft?"
         }
         description={
@@ -927,7 +894,7 @@ function IssuancesManagement() {
             ? pendingAction.action === "void"
               ? `Void ${pendingAction.record.id}? The issued transaction will remain in history.`
               : pendingAction.action === "correct"
-                ? `Create a corrected record based on ${pendingAction.record.id}? The original will remain in history.`
+                ? `Edit ${pendingAction.record.id}? Your changes are saved as a new record and the original stays in history. A reason is required.`
                 : `Discard the pending draft ${pendingAction.record.id}?`
             : "Confirm this action."
         }
@@ -935,7 +902,7 @@ function IssuancesManagement() {
           pendingAction?.action === "void"
             ? "Void issuance"
             : pendingAction?.action === "correct"
-              ? "Continue correction"
+              ? "Continue to edit"
               : "Discard draft"
         }
         destructive={pendingAction?.action !== "correct"}
@@ -993,22 +960,24 @@ function IssuancesManagement() {
               </Button>
             )}
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <label className="relative block min-w-0 flex-1">
-              <span className="sr-only">Search issuance history</span>
-              <Search
-                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                aria-hidden="true"
-              />
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search by reference, resident, type, or date"
-                className={cn(inputClassName, "pl-9")}
-              />
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[2fr_1.4fr_1fr_1fr_1fr]">
+            <label className={`${filterLabelClass} sm:col-span-2 xl:col-span-1`}>
+              <span>Search</span>
+              <span className="relative block">
+                <Search
+                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden="true"
+                />
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search by reference, resident, type, or date"
+                  className={cn(inputClassName, "pl-9")}
+                />
+              </span>
             </label>
-            <label className="sm:w-72">
-              <span className="sr-only">Filter by document type</span>
+            <label className={filterLabelClass}>
+              <span>Document type</span>
               <select
                 value={historyType}
                 onChange={(event) => setHistoryType(event.target.value)}
@@ -1022,8 +991,8 @@ function IssuancesManagement() {
                 ))}
               </select>
             </label>
-            <label className="sm:w-44">
-              <span className="sr-only">Filter by status</span>
+            <label className={filterLabelClass}>
+              <span>Status</span>
               <select value={historyStatus} onChange={(event) => setHistoryStatus(event.target.value)} className={inputClassName}>
                 <option value="all">All statuses</option>
                 <option>Issued</option>
@@ -1031,11 +1000,11 @@ function IssuancesManagement() {
                 <option>Voided</option>
               </select>
             </label>
-            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs text-muted-foreground sm:max-w-44">
+            <label className={filterLabelClass}>
               <span>From</span>
               <input aria-label="Issued from date" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className={inputClassName} />
             </label>
-            <label className="flex min-w-0 flex-1 flex-col gap-1 text-xs text-muted-foreground sm:max-w-44">
+            <label className={filterLabelClass}>
               <span>To</span>
               <input aria-label="Issued to date" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className={inputClassName} />
             </label>
@@ -1098,7 +1067,7 @@ function IssuancesManagement() {
                         }
                         items={[
                           { label: "View details", onSelect: () => setViewRecord(item) },
-                          { label: "Correct details", hidden: pending || voided, onSelect: () => setPendingAction({ record: item, action: "correct" }) },
+                          { label: "Edit", hidden: pending || voided, onSelect: () => setPendingAction({ record: item, action: "correct" }) },
                           { label: "Void issuance", adminOnly: true, hidden: pending || voided, destructive: true, onSelect: () => setPendingAction({ record: item, action: "void" }) },
                           { label: "Discard draft", hidden: !pending, destructive: true, onSelect: () => setPendingAction({ record: item, action: "discard" }) },
                         ]}
@@ -1158,7 +1127,7 @@ function IssuancesManagement() {
                     }
                     items={[
                       { label: "View details", onSelect: () => setViewRecord(item) },
-                      { label: "Correct details", hidden: pending || voided, onSelect: () => setPendingAction({ record: item, action: "correct" }) },
+                      { label: "Edit", hidden: pending || voided, onSelect: () => setPendingAction({ record: item, action: "correct" }) },
                       { label: "Void issuance", adminOnly: true, hidden: pending || voided, destructive: true, onSelect: () => setPendingAction({ record: item, action: "void" }) },
                       { label: "Discard draft", hidden: !pending, destructive: true, onSelect: () => setPendingAction({ record: item, action: "discard" }) },
                     ]}
