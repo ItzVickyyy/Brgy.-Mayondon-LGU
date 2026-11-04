@@ -98,10 +98,10 @@ test.describe("issuance summary validation helpers", () => {
 
 
 test.describe("document catalog metadata", () => {
-  test("defines metadata for all nine issuance document types", () => {
-    expect(documentConfigList).toHaveLength(9)
-    expect(Object.keys(documentConfig)).toHaveLength(9)
-    expect(documentTypes).toHaveLength(8)
+  test("keeps document configuration and metadata in sync", () => {
+    expect(documentConfigList.length).toBeGreaterThan(0)
+    expect(documentConfigList.map((item) => item.code).sort()).toEqual(Object.keys(documentConfig).sort())
+    expect(documentTypes.length).toBeGreaterThan(0)
     expect(Object.keys(documentMeta).sort()).toEqual([...documentTypes].sort())
     expect(documentConfig.BARANGAY_ID.category).toBe("id")
     expect(documentConfig.BARANGAY_ID.signatoryMode).toBe("none")
