@@ -864,7 +864,16 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             </IssuanceSection> : null}
 
             <IssuanceSection id="issuance-step-details" step={detailsStep} title="Document details" description="Only the fields this document needs. Red asterisk means required." done={detailsDone}>
-              {detailFields.length ? <div className="grid gap-4 sm:grid-cols-2">{detailFields.map(renderField)}</div> : <p className="text-sm text-muted-foreground">This document needs no extra details.</p>}
+              {detailFields.length ? documentType === "INDIGENCY" ? (
+                <div className="grid items-start gap-5 sm:grid-cols-2">
+                  <div className="flex min-w-0 flex-col gap-5">
+                    {detailFields.filter((field) => field.name === "sector" || field.name === "purpose").map(renderField)}
+                  </div>
+                  <div className="flex min-w-0 flex-col gap-5">
+                    {detailFields.filter((field) => field.name === "addressedToOffice").map(renderField)}
+                  </div>
+                </div>
+              ) : <div className="grid items-start gap-4 sm:grid-cols-2">{detailFields.map(renderField)}</div> : <p className="text-sm text-muted-foreground">This document needs no extra details.</p>}
               {config.signatoryMode === "select" ? <div className={fieldLabelClass}>
                 <label htmlFor="issuance-signatoryOfficialId">Signatory {availableSignatories.length > 0 ? <span className="text-destructive">*</span> : null}</label>
                 {availableSignatories.length > 0 ? <SelectField id="issuance-signatoryOfficialId" value={form.watch("signatoryOfficialId") ?? ""} onChange={(next) => form.setValue("signatoryOfficialId", next, { shouldDirty: true })} placeholder="Choose an official…" invalid={Boolean(readErrorMessage(form.formState.errors.signatoryOfficialId)) || (attempted && signatoryMissing)} describedBy={readErrorMessage(form.formState.errors.signatoryOfficialId) ? "issuance-signatory-error" : undefined} options={availableSignatories.map((official) => ({ value: official.id, label: `${official.name} · ${official.position}` }))} /> : <p className="rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">No officials are configured. The signature line will be left blank.</p>}
