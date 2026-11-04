@@ -95,6 +95,7 @@ test("missing resident fields reports only fields required by the selected docum
     "birthDate",
     "birthPlace",
     "civilStatus",
+    "photo",
   ])
   expect(getMissingResidentFields(resident, "FRANCHISE_CLEARANCE")).toEqual(["address"])
 })
