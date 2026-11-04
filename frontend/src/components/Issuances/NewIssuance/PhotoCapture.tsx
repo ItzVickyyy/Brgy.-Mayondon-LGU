@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { Camera, CircleAlert, ImageOff, LoaderCircle, RefreshCw, UserRound } from "lucide-react"
+import { Camera, ImageOff, LoaderCircle, RefreshCw, UserRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { canvasToPhotoUrl, cropToPortrait, PHOTO_HEIGHT, PHOTO_WIDTH, removeBackground } from "@/lib/photo-background"
 
-type Phase = "camera" | "working" | "review"
+type Phase = "camera" | "working"
+
+type PhotoVersions = {
+  cutout: string
+  original: string
+}
 
 type PhotoCaptureProps = {
   id?: string
@@ -17,6 +22,38 @@ type PhotoCaptureProps = {
 export function PhotoCapture({ id, value, onChange }: PhotoCaptureProps) {
   const [open, setOpen] = useState(false)
   const [fallbackNotice, setFallbackNotice] = useState(false)
+  const [photoVersions, setPhotoVersions] = useState<PhotoVersions | null>(null)
+  const [keepOriginal, setKeepOriginal] = useState(false)
+  const lastManagedValue = useRef(value)
+
+  useEffect(() => {
+    if (value === lastManagedValue.current) return
+    lastManagedValue.current = value
+    setPhotoVersions(null)
+    setKeepOriginal(false)
+    setFallbackNotice(false)
+  }, [value])
+
+  function applyPhoto(photoUrl: string) {
+    lastManagedValue.current = photoUrl
+    onChange(photoUrl)
+  }
+
+  function handleUse({ cutout, original, removalFailed }: PhotoVersions & { removalFailed: boolean }) {
+    setPhotoVersions({ cutout, original })
+    setKeepOriginal(false)
+    setFallbackNotice(removalFailed)
+    applyPhoto(removalFailed ? original : cutout)
+    setOpen(false)
+  }
+
+  function handleKeepOriginal(checked: boolean) {
+    if (!photoVersions?.cutout) return
+    setKeepOriginal(checked)
+    setFallbackNotice(false)
+    applyPhoto(checked ? photoVersions.original : photoVersions.cutout)
+  }
+
   return (
     <div className="flex items-center gap-4">
       <div className="flex h-28 w-[84px] shrink-0 items-center justify-center overflow-hidden rounded-md border bg-white">
@@ -27,8 +64,19 @@ export function PhotoCapture({ id, value, onChange }: PhotoCaptureProps) {
           <Camera className="size-4" aria-hidden="true" />{value ? "Retake photo" : "Take photo"}
         </Button>
         <p className="text-xs text-muted-foreground">{fallbackNotice ? "Background could not be removed. Using the original photo." : value ? "Photo ready. Retake it if needed." : "Use the camera to capture the resident’s photo."}</p>
+        {photoVersions?.cutout ? (
+          <label className="flex min-h-11 cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+            <input
+              type="checkbox"
+              checked={keepOriginal}
+              onChange={(event) => handleKeepOriginal(event.target.checked)}
+              className="size-4 shrink-0 accent-primary"
+            />
+            <span>The cut-out looks wrong. Keep the original background.</span>
+          </label>
+        ) : null}
       </div>
-      <PhotoCaptureDialog open={open} onOpenChange={setOpen} onUse={(photoUrl, usedOriginal = false) => { onChange(photoUrl); setFallbackNotice(usedOriginal); setOpen(false) }} />
+      <PhotoCaptureDialog open={open} onOpenChange={setOpen} onUse={handleUse} />
     </div>
   )
 }
@@ -44,7 +92,7 @@ function cameraErrorMessage(error: unknown) {
   return "The camera could not be started. Please try again."
 }
 
-function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOpenChange: (open: boolean) => void; onUse: (photoUrl: string, usedOriginal?: boolean) => void }) {
+function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOpenChange: (open: boolean) => void; onUse: (photos: PhotoVersions & { removalFailed: boolean }) => void }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const [phase, setPhase] = useState<Phase>("camera")
@@ -54,9 +102,6 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
   const [attempt, setAttempt] = useState(0)
   const [cameraReady, setCameraReady] = useState(false)
   const [cameraError, setCameraError] = useState("")
-  const [removalError, setRemovalError] = useState("")
-  const [cutout, setCutout] = useState<string>("")
-  const [original, setOriginal] = useState<string>("")
 
   const stopCamera = useCallback(() => {
     for (const track of streamRef.current?.getTracks() ?? []) track.stop()
@@ -99,9 +144,7 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
   useEffect(() => {
     if (!open) return
     setPhase("camera")
-    setCutout("")
-    setOriginal("")
-    setRemovalError("")
+    setCameraError("")
   }, [open])
 
   async function takePhoto() {
@@ -110,30 +153,15 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
     const portrait = cropToPortrait(video)
     stopCamera()
     const originalUrl = canvasToPhotoUrl(portrait, false)
-    setOriginal(originalUrl)
-    setRemovalError("")
     setPhase("working")
     try {
       const removed = await removeBackground(portrait)
       const cutoutUrl = canvasToPhotoUrl(removed, true)
-      setCutout(cutoutUrl)
-      onUse(cutoutUrl, false)
-    } catch (error) {
-      setCutout("")
-      setRemovalError(error instanceof Error ? error.message : "The background could not be removed.")
-      onUse(originalUrl, true)
+      onUse({ cutout: cutoutUrl, original: originalUrl, removalFailed: false })
+    } catch {
+      onUse({ cutout: "", original: originalUrl, removalFailed: true })
     }
-    setPhase("review")
   }
-
-  function retake() {
-    setCutout("")
-    setOriginal("")
-    setRemovalError("")
-    setPhase("camera")
-  }
-
-  const chosen = cutout || original
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -141,7 +169,7 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
         <DialogHeader>
           <DialogTitle>Take a photo</DialogTitle>
           <DialogDescription>
-            {phase === "camera" ? "Ask the resident to face the camera with the head and shoulders inside the frame." : phase === "working" ? "Removing the background. This stays on this computer." : "The photo is applied automatically when processing finishes."}
+            {phase === "camera" ? "Ask the resident to face the camera with the head and shoulders inside the frame." : "Removing the background. This stays on this computer."}
           </DialogDescription>
         </DialogHeader>
 
@@ -155,13 +183,8 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
                 {!cameraReady && !cameraError ? <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm text-white" role="status"><LoaderCircle className="size-4 animate-spin" aria-hidden="true" />Starting the camera…</div> : null}
                 {cameraError ? <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center text-sm text-white"><ImageOff className="size-6" aria-hidden="true" />{cameraError}</div> : null}
               </>
-            ) : phase === "working" ? (
-              <div className="relative size-full">
-                {original ? <img src={original} alt="" className="size-full object-cover opacity-40" /> : null}
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-white" role="status"><LoaderCircle className="size-6 animate-spin" aria-hidden="true" />Removing background…<span className="px-6 text-center text-xs text-white/80">The first photo of the day can take a few seconds.</span></div>
-              </div>
             ) : (
-              <div className="size-full bg-white">{chosen ? <img src={chosen} alt="Preview, head and shoulders" className="size-full object-cover" /> : null}</div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-white" role="status"><LoaderCircle className="size-6 animate-spin" aria-hidden="true" />Removing background…<span className="px-6 text-center text-xs text-white/80">The first photo of the day can take a few seconds.</span></div>
             )}
           </div>
         </div>
@@ -174,13 +197,11 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
           </label>
         ) : null}
 
-        {phase === "review" && removalError ? <p role="status" className="flex items-start gap-2 rounded-md border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-sm"><CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />{removalError} The original photo was applied. You can retake it if needed.</p> : null}
-
         <DialogFooter className="gap-2 sm:justify-between">
           {phase === "camera" ? <>
             <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
             {cameraError ? <Button type="button" onClick={() => setAttempt((count) => count + 1)}><RefreshCw className="size-4" aria-hidden="true" />Try again</Button> : <Button type="button" onClick={() => void takePhoto()} disabled={!cameraReady}><Camera className="size-4" aria-hidden="true" />Take photo</Button>}
-          </> : phase === "working" ? <span className="text-sm text-muted-foreground">Applying photo…</span> : <Button type="button" variant="outline" onClick={retake}><RefreshCw className="size-4" aria-hidden="true" />Retake</Button>}
+          </> : <span className="text-sm text-muted-foreground">Applying photo…</span>}
         </DialogFooter>
       </DialogContent>
     </Dialog>
