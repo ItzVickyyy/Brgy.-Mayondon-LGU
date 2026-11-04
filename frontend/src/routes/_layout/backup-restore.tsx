@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 
+import { EmptyState } from "@/components/Common/FeedbackState"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { RowActions } from "@/components/Common/RowActions"
 import { TablePagination, usePagination } from "@/components/Common/TablePagination"
