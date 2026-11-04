@@ -21,7 +21,7 @@ const codes = Object.keys(validDetails) as DocumentCode[]
 async function seedResident() {
   return issuanceApi.createResident({
     firstName: "Fictional",
-    middleName: "A",
+    middleName: "A.",
     lastName: "Resident",
     birthdate: "1990-01-01",
     birthplace: "Los Baños, Laguna",
