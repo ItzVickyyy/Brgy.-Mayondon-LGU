@@ -14,6 +14,7 @@ import { useMemo, useState } from "react"
 
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { TablePagination, usePagination } from "@/components/Common/TablePagination"
 import { RowActions } from "@/components/Common/RowActions"
 import { StatCard } from "@/components/Common/StatCard"
 import { formControlClass } from "@/components/Common/formStyles"
@@ -89,6 +90,7 @@ function BarangayIdManagement() {
       })
       .sort((a, b) => a.expiresOn.localeCompare(b.expiresOn))
   }, [registrationFilter, search, statusFilter])
+  const idPagination = usePagination(filteredIds, 10, search + "|" + statusFilter + "|" + registrationFilter)
 
   const showActionNotice = (action: string, record: BarangayIdRecord) => {
     setNotice(`${action} selected for ${record.resident}.`)
@@ -175,7 +177,7 @@ function BarangayIdManagement() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {filteredIds.map((record) => {
+              {idPagination.paginatedItems.map((record) => {
                 const archived = record.status === "Archived"
                 const primaryAction = record.status === "Valid"
                   ? {
@@ -225,9 +227,7 @@ function BarangayIdManagement() {
           </table>
           {filteredIds.length === 0 ? <EmptyState title="No ID records match your search" description="Try a different resident, ID number, registration state, or status." /> : null}
         </div>
-        <div className="border-t px-4 py-3 text-xs text-muted-foreground sm:px-5">
-          Showing {filteredIds.length} of {sampleIds.length} records
-        </div>
+        <TablePagination start={idPagination.start} end={idPagination.end} total={idPagination.total} pageIndex={idPagination.pageIndex} pageCount={idPagination.pageCount} onPageChange={idPagination.setPageIndex} />
       </section>
 
       <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
