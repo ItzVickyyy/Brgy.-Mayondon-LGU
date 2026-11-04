@@ -157,7 +157,6 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
     signatoryMode: "select", signatoryDefault: "Barangay Kagawad", residentNeeds: ["sector"],
     fields: [
       { name: "sector", label: "Sector", type: "select", required: true, options: sectorOptions, group: "main" },
-      { name: "sectorIdNumber", label: "Sector ID number", type: "text", group: "main" },
       { name: "healthCondition", label: "Health condition", type: "textarea", required: true, group: "main" },
     ],
   },
