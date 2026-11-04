@@ -39,6 +39,7 @@ import { documentConfig } from "@/components/Issuances/NewIssuance/documentConfi
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { getMissingFields } from "@/components/Issuances/print-summary"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
+import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -105,6 +106,7 @@ function IssuancesManagement() {
   const [isSimplifiedDialogOpen, setIsSimplifiedDialogOpen] = useState(() => Boolean(getPreselectedResident()))
   const [selectedType, setSelectedType] = useState<string>(documentTypes[0])
   const [residentQuery, setResidentQuery] = useState("")
+  const [residentMatches, setResidentMatches] = useState<ResidentRecord[]>([])
   const [selectedResidentId, setSelectedResidentId] = useState("")
   const [manualEntry, setManualEntry] = useState(false)
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
@@ -181,9 +183,16 @@ function IssuancesManagement() {
   const topType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]
   const hasFilters = search.trim() !== "" || historyType !== "All document types" || historyStatus !== "all" || startDate !== "" || endDate !== ""
 
-  const residentMatches = useMemo(() => {
-    if (!residentQuery.trim() || selectedResidentId) return []
-    return []
+  useEffect(() => {
+    let active = true
+    if (!residentQuery.trim() || selectedResidentId || manualEntry) {
+      setResidentMatches([])
+      return () => { active = false }
+    }
+    void issuanceApi.searchResidents(residentQuery)
+      .then((matches) => { if (active) setResidentMatches(matches) })
+      .catch(() => { if (active) setResidentMatches([]) })
+    return () => { active = false }
   }, [residentQuery, selectedResidentId, manualEntry])
 
   const allFormFields = documentSections[selectedType]?.flatMap((section) => section.fields) ?? []
@@ -253,7 +262,7 @@ function IssuancesManagement() {
     setPrintRecord(null)
   }
 
-  function selectResident(resident: import("@/components/Records/records-sample-data").ResidentRecord) {
+  function selectResident(resident: ResidentRecord) {
     const name = formatPrintedName(resident.firstName, resident.middleName, resident.lastName, selectedType)
     setFormValues((previous) => ({
       ...previous,
