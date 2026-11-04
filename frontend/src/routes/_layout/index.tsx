@@ -32,12 +32,12 @@ const documentsByPeriod: Record<Period, number> = {
   overall: 0,
 }
 
-const monthlyIssuances = []
+const monthlyIssuances: { month: string; count: number }[] = []
 
-const documentTypes = []
+const documentTypes: { name: string; count: number }[] = []
 
-const staffActivities = []
-const adminActivities = []
+const staffActivities: { title: string; detail: string; time: string }[] = []
+const adminActivities: { title: string; detail: string; time: string }[] = []
 
 function SummaryCard({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: typeof Users }) {
   return (
@@ -154,7 +154,7 @@ function Dashboard() {
                 <span className="inline-flex min-h-8 items-center self-start rounded-full border px-3 text-xs font-semibold sm:self-center">{item.status}</span>
               </div>
             ))}
-            {true ? <p className="py-3 text-sm text-muted-foreground">No records are expiring soon.</p> : null}
+            <p className="py-3 text-sm text-muted-foreground">No records are expiring soon.</p>
           </div>
           <Link to="/issuances" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary hover:underline">Open issuance history</Link>
         </article>
