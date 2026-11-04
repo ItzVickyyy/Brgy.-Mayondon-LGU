@@ -13,24 +13,7 @@ export type Registration = {
   rejectionReason?: string
 }
 
-// Fictional examples for layout review only. These decisions are not saved.
-let registrations: Registration[] = [
-  {
-    name: "Staff Applicant 1",
-    username: "staff.applicant1",
-    position: "Barangay Clerk",
-    submitted: "Oct 28, 2026",
-    status: "Pending",
-  },
-  {
-    name: "Staff Applicant 2",
-    username: "staff.applicant2",
-    position: "Records Assistant",
-    submitted: "Oct 27, 2026",
-    status: "Pending",
-  },
-]
-
+let registrations: Registration[] = []
 const listeners = new Set<() => void>()
 
 function notify() {
