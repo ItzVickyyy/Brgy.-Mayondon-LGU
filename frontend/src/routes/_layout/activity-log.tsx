@@ -112,7 +112,6 @@ function ActivityLog() {
   }, [endDate, isAdmin, moduleFilter, outcomeFilter, search, startDate, userFilter])
   const activityPagination = usePagination(visibleRows, 10, search + "|" + moduleFilter + "|" + outcomeFilter + "|" + userFilter + "|" + startDate + "|" + endDate)
 
-  const totalRows = rows.filter((row) => isAdmin || row.owner === "current").length
 
   return (
     <div className="flex flex-col gap-6">
