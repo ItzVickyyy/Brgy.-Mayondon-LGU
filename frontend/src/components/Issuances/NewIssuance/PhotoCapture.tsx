@@ -177,8 +177,8 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
           <div className="relative overflow-hidden rounded-md border bg-neutral-900" style={{ aspectRatio: `${PHOTO_WIDTH} / ${PHOTO_HEIGHT}` }}>
             {phase === "camera" ? (
               <>
-                {/* Keep the preview in the same non-mirrored orientation as the captured image and printed photo. */}
-                <video ref={videoRef} playsInline muted aria-label="Camera preview" className="size-full object-cover" />
+                {/* Mirror the live preview so the resident sees a familiar front-camera view. The saved photo remains in its natural orientation. */}
+                <video ref={videoRef} playsInline muted aria-label="Camera preview" className="size-full -scale-x-100 object-cover" />
                 {cameraReady ? <div className="pointer-events-none absolute left-1/2 top-[10%] h-[54%] w-[58%] -translate-x-1/2 rounded-[50%] border-2 border-dashed border-white/70" aria-hidden="true" /> : null}
                 {!cameraReady && !cameraError ? <div className="absolute inset-0 flex items-center justify-center gap-2 text-sm text-white" role="status"><LoaderCircle className="size-4 animate-spin" aria-hidden="true" />Starting the camera…</div> : null}
                 {cameraError ? <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-4 text-center text-sm text-white"><ImageOff className="size-6" aria-hidden="true" />{cameraError}</div> : null}
