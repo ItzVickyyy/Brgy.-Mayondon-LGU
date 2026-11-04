@@ -126,7 +126,7 @@ export function getMissingResidentFields(resident: ResidentRecord, code: Documen
 export const issuanceApi = {
   getNextBarangayIdNumber() {
     const max = residents.reduce((highest, resident) => {
-      const suffix = Number(resident.idNumber.split("-").at(-1) ?? 0)
+      const suffix = Number(resident.idNumber.split("-").slice(-1)[0] ?? 0)
       return Number.isFinite(suffix) ? Math.max(highest, suffix) : highest
     }, 0)
     return String(max + 1).padStart(4, "0")
@@ -229,7 +229,8 @@ export const issuanceApi = {
     const parsed = input.status === "draft" ? input : issuanceInputSchema.parse(input)
     // Only a finished issuance adds to the suggestion lists. Half-typed draft text must not.
     if (parsed.status === "issued" && parsed.purposeText?.trim() && !purposes.some((purpose) => purpose.toLowerCase() === parsed.purposeText?.trim().toLowerCase())) purposes = [...purposes, parsed.purposeText.trim()]
-    if (parsed.status === "issued" && parsed.details.type === "FRANCHISE_CLEARANCE" && parsed.details.associationName.trim() && !associations.some((association) => association.toLowerCase() === parsed.details.associationName.trim().toLowerCase())) associations = [...associations, parsed.details.associationName.trim()]
+    const franchiseDetails = parsed.details.type === "FRANCHISE_CLEARANCE" ? parsed.details : undefined
+    if (parsed.status === "issued" && franchiseDetails?.associationName.trim() && !associations.some((association) => association.toLowerCase() === franchiseDetails.associationName.trim().toLowerCase())) associations = [...associations, franchiseDetails.associationName.trim()]
     const resident = residents.find((item) => item.id === parsed.residentId)
     if (!resident) throw new Error("Select a resident record first.")
     const projectedResident = { ...resident, ...(parsed.residentUpdates as ResidentPatch | undefined) }
@@ -249,21 +250,21 @@ export const issuanceApi = {
       updatedResident = await this.updateResident(updatedResident.id, { idNumber: `18-128-3597-${this.getNextBarangayIdNumber()}` })
     }
     let tricycleId: string | undefined
-    if (parsed.details.type === "FRANCHISE_CLEARANCE") {
+    if (franchiseDetails) {
       let tricycle = mockTricycles.find((item) =>
-        item.plateNumber.toLowerCase() === parsed.details.plateNumber.trim().toLowerCase() ||
-        item.motorNumber.toLowerCase() === parsed.details.motorNumber.trim().toLowerCase(),
+        item.plateNumber.toLowerCase() === franchiseDetails.plateNumber.trim().toLowerCase() ||
+        item.motorNumber.toLowerCase() === franchiseDetails.motorNumber.trim().toLowerCase(),
       )
       if (!tricycle && parsed.status === "issued") {
-        const associationIndex = associations.findIndex((association) => association.toLowerCase() === parsed.details.associationName.trim().toLowerCase())
+        const associationIndex = associations.findIndex((association) => association.toLowerCase() === franchiseDetails.associationName.trim().toLowerCase())
         tricycle = {
           id: `TRI-${String(mockTricycles.length + 1).padStart(4, "0")}`,
           associationId: associationIndex + 1,
-          make: parsed.details.make,
-          bodyType: parsed.details.bodyType,
-          motorNumber: parsed.details.motorNumber,
-          color: parsed.details.color,
-          plateNumber: parsed.details.plateNumber,
+          make: franchiseDetails.make,
+          bodyType: franchiseDetails.bodyType,
+          motorNumber: franchiseDetails.motorNumber,
+          color: franchiseDetails.color,
+          plateNumber: franchiseDetails.plateNumber,
         }
         mockTricycles = [...mockTricycles, tricycle]
       }
