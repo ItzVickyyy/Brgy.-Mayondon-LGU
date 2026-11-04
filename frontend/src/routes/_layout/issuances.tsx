@@ -102,7 +102,7 @@ function getPreselectedResident() {
 }
 
 function IssuancesManagement() {
-  const initialResident = sampleResidents.find((resident) => resident.name === getPreselectedResident() || resident.id === getPreselectedResident())
+  const initialResident = undefined
   const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(false)
   const [isSimplifiedDialogOpen, setIsSimplifiedDialogOpen] = useState(() => Boolean(getPreselectedResident()))
   const [selectedType, setSelectedType] = useState<string>(documentTypes[0])
@@ -123,7 +123,7 @@ function IssuancesManagement() {
   const [historyStatus, setHistoryStatus] = useState("all")
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
-  const [historyRecords, setHistoryRecords] = useState<IssuanceRecord[]>(sampleIssuances)
+  const [historyRecords, setHistoryRecords] = useState<IssuanceRecord[]>([])
   const [pendingAction, setPendingAction] = useState<{ record: IssuanceRecord; action: "void" | "correct" | "discard" } | null>(null)
   const [correctionReason, setCorrectionReason] = useState("")
   const [correctionTarget, setCorrectionTarget] = useState<IssuanceRecord | null>(null)
@@ -200,7 +200,7 @@ function IssuancesManagement() {
   const residentMatches = useMemo(() => {
     const query = residentQuery.trim().toLowerCase()
     if (!query || selectedResidentId) return []
-    return sampleResidents.filter((resident) => resident.status === "Active")
+    return []
       .filter((resident) => [resident.name, resident.id, resident.idNumber, resident.address].some((value) => value.toLowerCase().includes(query)))
       .slice(0, 6)
   }, [residentQuery, selectedResidentId, manualEntry])
@@ -255,7 +255,7 @@ function IssuancesManagement() {
     const lost = previousFields.some((field) => !sharedKeys.includes(field.name) && field.name !== "date" && Boolean(formValues[field.name]?.trim()) && formValues[field.name] !== (field.defaultValue ?? ""))
     const preserved = Object.fromEntries(sharedKeys.filter((key) => formValues[key]).map((key) => [key, formValues[key]]))
     const defaults = createDefaultFormValues(value)
-    const residentRecord = sampleResidents.find((resident) => resident.id === selectedResidentId)
+    const residentRecord = undefined
     const name = formValues.firstName || formValues.lastName
       ? formatPrintedName(formValues.firstName ?? "", formValues.middleName ?? "", formValues.lastName ?? "", value)
       : formValues.name ?? ""
@@ -274,7 +274,7 @@ function IssuancesManagement() {
     setPrintRecord(null)
   }
 
-  function selectResident(resident: (typeof sampleResidents)[number]) {
+  function selectResident(resident: import("@/components/Records/records-sample-data").ResidentRecord) {
     const name = formatPrintedName(resident.firstName, resident.middleName, resident.lastName, selectedType)
     setFormValues((previous) => ({
       ...previous,
@@ -694,7 +694,7 @@ function IssuancesManagement() {
                           )) : <p className="px-3 py-4 text-sm text-muted-foreground">No match. Enter details manually.</p>}
                         </div>
                       ) : null}
-                      {selectedResidentId ? <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"><span className="min-w-0"><strong>{sampleResidents.find((resident) => resident.id === selectedResidentId)?.name ?? "Selected resident"}</strong><span className="ml-2 font-mono text-xs text-muted-foreground">{selectedResidentId}</span><span className="mt-1 block text-xs text-muted-foreground">{sampleResidents.find((resident) => resident.id === selectedResidentId)?.address ?? ""}</span></span><Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={() => { setSelectedResidentId(""); setResidentQuery(""); setManualEntry(false) }}>Change</Button></div> : null}
+                      {selectedResidentId ? <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"><span className="min-w-0"><strong>{selectedResidentId || "Selected resident"}</strong><span className="ml-2 font-mono text-xs text-muted-foreground">{selectedResidentId}</span> </span><Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={() => { setSelectedResidentId(""); setResidentQuery(""); setManualEntry(false) }}>Change</Button></div> : null}
                       {!manualEntry && !selectedResidentId ? <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm"><button type="button" className="min-h-11 text-primary underline underline-offset-4" onClick={startManualEntry}>Resident not found? Enter details manually</button><button type="button" className="min-h-11 text-muted-foreground underline underline-offset-4" onClick={() => setNotice("Add to Resident Records is not connected yet. Open Resident Records to add a record.")}>Add to Resident Records</button></div> : null}
                       <p className="mt-2 text-xs text-muted-foreground">Changes here apply to this document only. To change the resident's record, use Resident Records.</p>
                     </div>
