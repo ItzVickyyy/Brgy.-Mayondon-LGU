@@ -23,41 +23,21 @@ const periodLabels: Record<Period, string> = {
 }
 
 const documentsByPeriod: Record<Period, number> = {
-  today: 12,
-  week: 68,
-  month: 214,
-  "3months": 592,
-  "6months": 1087,
-  year: 1924,
-  overall: 8421,
+  today: 0,
+  week: 0,
+  month: 0,
+  "3months": 0,
+  "6months": 0,
+  year: 0,
+  overall: 0,
 }
 
-const monthlyIssuances = [
-  { month: "May", count: 138 },
-  { month: "Jun", count: 162 },
-  { month: "Jul", count: 149 },
-  { month: "Aug", count: 188 },
-  { month: "Sep", count: 176 },
-  { month: "Oct", count: 214 },
-]
+const monthlyIssuances = []
 
-const documentTypes = [
-  { name: "Barangay Clearance", count: 74 },
-  { name: "Certificate of Residency", count: 48 },
-  { name: "Certificate of Indigency", count: 36 },
-  { name: "Barangay ID", count: 29 },
-  { name: "Other Documents", count: 27 },
-]
+const documentTypes = []
 
-const staffActivities = [
-  { title: "Barangay Clearance issued", detail: "Record #0001", time: "Today, 10:42 AM" },
-  { title: "Resident record updated", detail: "Record #0002", time: "Today, 9:18 AM" },
-  { title: "Barangay ID renewed", detail: "Record #0003", time: "Yesterday, 3:26 PM" },
-]
-const adminActivities = [
-  ...staffActivities,
-  { title: "Staff account status reviewed", detail: "Account #0004", time: "Yesterday, 1:05 PM" },
-]
+const staffActivities = []
+const adminActivities = []
 
 function SummaryCard({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: typeof Users }) {
   return (
