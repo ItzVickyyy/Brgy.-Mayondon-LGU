@@ -1,4 +1,4 @@
-import { sampleResidents, type ResidentRecord } from "@/components/Records/records-sample-data"
+import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import { clearancePurposeOptions } from "@/components/Issuances/config"
 import { documentConfig, type DocumentCode } from "./documentConfig"
 import { issuanceInputSchema, type DocumentDetails, type IssuanceInput } from "./schemas"
@@ -70,7 +70,7 @@ export type IssuanceCheck = {
 }
 export type CreateIssuanceResult = MockIssuance
 
-let residents = [...sampleResidents]
+let residents: ResidentRecord[] = []
 let issuances: MockIssuance[] = []
 let issuanceCounter = 0
 let streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
@@ -361,7 +361,7 @@ export const issuanceApi = {
 
 export const mockIssuanceStore = {
   reset() {
-    residents = [...sampleResidents]
+    residents = []
     issuances = []
     issuanceCounter = 0
     streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
