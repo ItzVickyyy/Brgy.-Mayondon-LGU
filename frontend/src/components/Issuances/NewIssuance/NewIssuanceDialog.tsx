@@ -48,6 +48,7 @@ const printedNameType: Record<DocumentCode, string> = {
 }
 const stampDocuments: DocumentCode[] = ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"]
 const identityDocuments: DocumentCode[] = [...stampDocuments, "BUILDING_CLEARANCE"]
+const availableSignatories = initialOfficials.filter((official) => official.status === "Current" && ["Punong Barangay", "Barangay Kagawad", "Barangay Clerk", "Administrative Assistant", "SK Chairperson", "OIC Kagawad"].includes(official.position))
 type PaymentKey = "officialReceiptNo" | "isFree" | "dateOfPayment" | "certifiedBy"
 const paymentKeyOf = (fieldName: string): PaymentKey => (fieldName === "isFree" || fieldName === "dateOfPayment" || fieldName === "certifiedBy" ? fieldName : "officialReceiptNo")
 const nameExtensions = ["None", "Jr.", "Sr.", "II", "III", "IV", "V"]
@@ -662,7 +663,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     { label: "Civil status", value: selectedResident?.civilStatus ?? "" },
     ...(needsPhoto ? [{ label: "Photo", value: selectedResident && (residentUpdates.photoUrl || selectedResident.photoUrl) ? "Taken" : "" }] : []),
     { label: "Date on document", value: issueDate },
-    ...(config.signatoryMode === "select" ? [{ label: "Signatory", value: initialOfficials.find((official) => official.id === form.watch("signatoryOfficialId"))?.name ?? "" }] : []),
+    ...(config.signatoryMode === "select" ? [{ label: "Signatory", value: initialOfficials.find((official) => official.id === form.watch("signatoryOfficialId"))?.name ?? "________________________" }] : []),
     ...config.fields.map((field) => ({ label: field.label, value: previewValue(field) })),
     ...(config.residentNeeds.includes("residentSince") ? [{ label: documentType === "RESIDENCY" ? "Residing since" : "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (documentType === "RESIDENCY") return source.residentSinceBirth || source.residentSince === 0 ? "Since birth" : source.residentSince === undefined ? "" : String(source.residentSince); if (source.residentSinceBirth) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return !source.residentSince ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
   ]
@@ -686,7 +687,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     ...(!selectedResident ? [{ name: "resident-search", label: "Resident record" }] : []),
     ...config.fields.filter((field) => fieldVisible(field) && field.required && !fieldHasValue(field)).map((field) => ({ name: field.name, label: field.label })),
     ...(!issueDate ? [{ name: "date", label: "Date on document" }] : []),
-    ...(config.signatoryMode === "select" && !form.watch("signatoryOfficialId") ? [{ name: "signatoryOfficialId", label: "Signatory" }] : []),
+    ...(config.signatoryMode === "select" && availableSignatories.length > 0 && !form.watch("signatoryOfficialId") ? [{ name: "signatoryOfficialId", label: "Signatory" }] : []),
     ...residentMissingLabels,
   ]
 
@@ -695,7 +696,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const detailFields = fieldsByGroup("main").filter((field) => fieldVisible(field) && field.name !== "residentSince")
   const requirementFields = [...fieldsByGroup("identity"), ...fieldsByGroup("payment")].filter(fieldVisible)
   const hasRequirements = requirementFields.length > 0
-  const signatoryMissing = config.signatoryMode === "select" && !form.watch("signatoryOfficialId")
+  const signatoryMissing = config.signatoryMode === "select" && availableSignatories.length > 0 && !form.watch("signatoryOfficialId")
   const detailsDone = !signatoryMissing && detailFields.every((field) => !field.required || fieldHasValue(field))
   const requirementsDone = requirementFields.every((field) => !field.required || fieldHasValue(field))
   const residentDone = Boolean(selectedResident) && residentMissingLabels.every((item) => item.name === "photo")
