@@ -204,14 +204,14 @@ function Reports() {
               <p className="mt-1 text-sm text-muted-foreground">Results for the selected report will appear here.</p>
             </div>
           ) : period === "week" ? (
-            <EmptyState title="No activity in this period" description="No sample report records fall within the selected week." />
+            <EmptyState title="No activity in this period" description="No records fall within the selected week." />
           ) : report === "issuances" ? (
             <div className="overflow-x-auto">
               <h3 className="mb-3 font-semibold tracking-tight">Issuances by document type · {periodLabel[period]}</h3>
               <table className="w-full min-w-[760px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr>{["Document type", "Issued", "Voided", "Share", "vs previous period"].map((label) => <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 font-medium sm:px-5"}>{label}</th>)}</tr></thead>
                 <tbody className="divide-y">{documentTypeRows.map((row) => <tr key={row.document} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-medium sm:px-5">{row.document}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.issued}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.voided}</td><td className="px-4 py-3 sm:px-5">{row.share}</td><td className="px-4 py-3 sm:px-5">{row.change}</td></tr>)}</tbody>
-                <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5">Total</td><td className="px-4 py-3 sm:px-5">128</td><td className="px-4 py-3 sm:px-5">4</td><td className="px-4 py-3 sm:px-5">100%</td><td className="px-4 py-3 sm:px-5">+12%</td></tr></tfoot>
+                <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5">Total</td><td className="px-4 py-3 sm:px-5">{documentTypeRows.reduce((total, row) => total + row.issued, 0)}</td><td className="px-4 py-3 sm:px-5">{documentTypeRows.reduce((total, row) => total + row.voided, 0)}</td><td className="px-4 py-3 sm:px-5">—</td><td className="px-4 py-3 sm:px-5">—</td></tr></tfoot>
               </table>
             </div>
           ) : report === "purpose" ? (
@@ -220,7 +220,7 @@ function Reports() {
               <table className="w-full min-w-[560px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr>{["Purpose", "Issued", "Share"].map((label) => <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 font-medium sm:px-5"}>{label}</th>)}</tr></thead>
                 <tbody className="divide-y">{purposeRows.slice().sort((a, b) => b.issued - a.issued).map((row) => <tr key={row.purpose} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-medium sm:px-5">{row.purpose}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.issued}</td><td className="px-4 py-3 sm:px-5">{row.share}</td></tr>)}</tbody>
-                <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5">Total</td><td className="px-4 py-3 sm:px-5">128</td><td className="px-4 py-3 sm:px-5">100%</td></tr></tfoot>
+                <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5">Total</td><td className="px-4 py-3 sm:px-5">{purposeRows.reduce((total, row) => total + row.issued, 0)}</td><td className="px-4 py-3 sm:px-5">—</td></tr></tfoot>
               </table>
             </div>
           ) : report === "expiry" ? (
@@ -238,7 +238,7 @@ function Reports() {
               <table className="w-full min-w-[1000px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr>{["Date", "File", "Imported by", "Imported", "Updated", "Skipped", "Failed", "Actions"].map((label) => <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 font-medium sm:px-5"}>{label}</th>)}</tr></thead>
                 <tbody className="divide-y">{importRows.map((row) => <tr key={row.file} className="transition-colors hover:bg-muted/30"><td className="whitespace-nowrap px-4 py-3 sm:px-5">{row.date}</td><td className="px-4 py-3 font-mono sm:px-5">{row.file}</td><td className="px-4 py-3 sm:px-5">{row.importedBy}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.imported}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.updated}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.skipped}</td><td className={`px-4 py-3 tabular-nums sm:px-5 ${row.failed > 0 ? "font-semibold text-destructive" : ""}`}>{row.failed}</td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" onClick={() => setImportResultsOpen(true)}>View results</Button></td></tr>)}</tbody>
-                <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5" colSpan={3}>Total</td><td className="px-4 py-3 sm:px-5">246</td><td className="px-4 py-3 sm:px-5">12</td><td className="px-4 py-3 sm:px-5">3</td><td className="px-4 py-3 sm:px-5">2</td><td className="px-4 py-3 sm:px-5">—</td></tr></tfoot>
+                <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5" colSpan={3}>Total</td><td className="px-4 py-3 sm:px-5">{importRows.reduce((total, row) => total + row.imported, 0)}</td><td className="px-4 py-3 sm:px-5">{importRows.reduce((total, row) => total + row.updated, 0)}</td><td className="px-4 py-3 sm:px-5">{importRows.reduce((total, row) => total + row.skipped, 0)}</td><td className="px-4 py-3 sm:px-5">{importRows.reduce((total, row) => total + row.failed, 0)}</td><td className="px-4 py-3 sm:px-5">—</td></tr></tfoot>
               </table>
             </div>
           ) : (
@@ -247,7 +247,7 @@ function Reports() {
               <table className="w-full min-w-[1000px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr>{["User", "Role", "Sign-ins", "Documents issued", "Records added / edited", "Last activity", "Actions"].map((label) => <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 font-medium sm:px-5"}>{label}</th>)}</tr></thead>
                 <tbody className="divide-y">{accountActivityRows.map((row) => <tr key={row.user} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-semibold sm:px-5">{row.user}</td><td className="px-4 py-3 sm:px-5"><Badge variant="outline" className={row.role === "System Administrator" ? "border-primary/30 bg-primary/10 text-primary" : statusStyles.Inactive}>{row.role}</Badge></td><td className="px-4 py-3 tabular-nums sm:px-5">{row.signIns}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.documents}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.records}</td><td className="px-4 py-3 sm:px-5">{row.lastActivity}</td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" asChild><a href={`/activity-log?user=${encodeURIComponent(row.user)}&period=${period}`}>View in Activity Log</a></Button></td></tr>)}</tbody>
-                <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5" colSpan={2}>Total</td><td className="px-4 py-3 sm:px-5">42</td><td className="px-4 py-3 sm:px-5">80</td><td className="px-4 py-3 sm:px-5">20</td><td className="px-4 py-3 sm:px-5">—</td><td className="px-4 py-3 sm:px-5">—</td></tr></tfoot>
+                <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5" colSpan={2}>Total</td><td className="px-4 py-3 sm:px-5">{accountActivityRows.reduce((total, row) => total + row.signIns, 0)}</td><td className="px-4 py-3 sm:px-5">{accountActivityRows.reduce((total, row) => total + row.documents, 0)}</td><td className="px-4 py-3 sm:px-5">{accountActivityRows.reduce((total, row) => total + row.records, 0)}</td><td className="px-4 py-3 sm:px-5">—</td><td className="px-4 py-3 sm:px-5">—</td></tr></tfoot>
               </table>
             </div>
           )}
@@ -258,12 +258,12 @@ function Reports() {
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>Masterlist import results</DialogTitle>
-            <DialogDescription>Fictional sample validation failures from the selected import.</DialogDescription>
+            <DialogDescription>Validation issues found during the selected import.</DialogDescription>
           </DialogHeader>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr><th className="px-4 py-3 font-medium">Row</th><th className="px-4 py-3 font-medium">Issue</th></tr></thead>
-              <tbody className="divide-y"><tr><td className="px-4 py-3">18</td><td className="px-4 py-3">Missing required resident name</td></tr><tr><td className="px-4 py-3">93</td><td className="px-4 py-3">Duplicate ID number</td></tr></tbody>
+              <tbody className="divide-y"><tr><td className="px-4 py-3 text-muted-foreground" colSpan={2}>No import results are available.</td></tr></tbody>
             </table>
           </div>
           <DialogFooter><Button variant="outline" onClick={() => setImportResultsOpen(false)}>Close</Button></DialogFooter>
