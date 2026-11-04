@@ -28,7 +28,6 @@ import {
   documentMeta,
   normalizeDocumentType,
   type IssuanceRecord,
-  sampleIssuances,
 } from "@/components/Issuances/config"
 import { FormSection, SummaryCard } from "@/components/Issuances/IssuanceLayout"
 import { IssuanceDetailsView } from "@/components/Issuances/IssuanceDetailsView"
@@ -38,7 +37,6 @@ import { NewIssuanceDialog } from "@/components/Issuances/NewIssuance/NewIssuanc
 import { documentConfig } from "@/components/Issuances/NewIssuance/documentConfig"
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { getMissingFields } from "@/components/Issuances/print-summary"
-import { sampleResidents } from "@/components/Records/records-sample-data"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { Badge } from "@/components/ui/badge"
@@ -132,22 +130,7 @@ function IssuancesManagement() {
   const isAdmin = isSystemAdministrator(user)
   const [formValues, setFormValues] = useState<Record<string, string>>(() => {
     const defaults = createDefaultFormValues(documentTypes[0])
-    if (!initialResident) return { ...defaults, ...(getPreselectedResident() ? { name: getPreselectedResident() } : {}) }
-    const name = formatPrintedName(initialResident.firstName, initialResident.middleName, initialResident.lastName, documentTypes[0])
-    return {
-      ...defaults,
-      residentId: initialResident.id,
-      firstName: initialResident.firstName,
-      middleName: initialResident.middleName,
-      lastName: initialResident.lastName,
-      name,
-      address: initialResident.address.replace(/, Mayondon.*$/i, ""),
-      birthdate: initialResident.birthdate,
-      birthplace: initialResident.birthplace,
-      civilStatus: initialResident.civilStatus,
-      sector: initialResident.sectors.join("||"),
-      age: calculateAge(initialResident.birthdate, defaults.date || localDateValue()),
-    }
+    return { ...defaults, ...(getPreselectedResident() ? { name: getPreselectedResident() } : {}) }
   })
   const [drafts, setDrafts] = useState<IssuanceRecord[]>([])
   const autoSaveStatus = "saved" as const
