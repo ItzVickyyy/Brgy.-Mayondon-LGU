@@ -7,22 +7,8 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table"
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react"
-
 import { EmptyState } from "@/components/Common/FeedbackState"
-import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { TablePagination } from "@/components/Common/TablePagination"
 import {
   Table,
   TableBody,
@@ -56,6 +42,7 @@ export function DataTable<TData extends RowData>({
     features: dataTableFeatures,
     data,
     columns,
+    initialState: { pagination: { pageSize: 10 } },
   })
 
   return (
@@ -97,70 +84,16 @@ export function DataTable<TData extends RowData>({
         <EmptyState title={emptyTitle} description={emptyDescription} />
       ) : null}
 
-      {data.length > 0 && (
-        <div className="flex flex-col gap-4 border-t bg-muted/20 p-4 sm:p-5">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="text-sm text-muted-foreground">
-              Showing{" "}
-              {table.state.pagination.pageIndex * table.state.pagination.pageSize + 1}{" "}
-              to{" "}
-              {Math.min(
-                (table.state.pagination.pageIndex + 1) * table.state.pagination.pageSize,
-                data.length,
-              )}{" "}
-              of <span className="font-medium text-foreground">{data.length}</span> entries
-            </div>
-            {table.getPageCount() > 1 ? (
-              <div className="flex items-center gap-x-2">
-                <p className="text-sm text-muted-foreground">Rows per page</p>
-                <Select
-                  value={`${table.state.pagination.pageSize}`}
-                  onValueChange={(value) => table.setPageSize(Number(value))}
-                >
-                  <SelectTrigger className="h-11 w-[84px]">
-                    <SelectValue placeholder={table.state.pagination.pageSize} />
-                  </SelectTrigger>
-                  <SelectContent side="top">
-                    {[5, 10, 25, 50].map((pageSize) => (
-                      <SelectItem key={pageSize} value={`${pageSize}`}>
-                        {pageSize}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            ) : null}
-          </div>
-          {table.getPageCount() > 1 ? (
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-x-1 text-sm text-muted-foreground">
-                <span>Page</span>
-                <span className="font-medium text-foreground">{table.state.pagination.pageIndex + 1}</span>
-                <span>of</span>
-                <span className="font-medium text-foreground">{table.getPageCount()}</span>
-              </div>
-              <div className="flex items-center gap-x-1">
-                <Button variant="outline" size="sm" className="size-11 p-0" onClick={() => table.setPageIndex(0)} disabled={!table.getCanPreviousPage()}>
-                  <span className="sr-only">Go to first page</span>
-                  <ChevronsLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" className="size-11 p-0" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>
-                  <span className="sr-only">Go to previous page</span>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" className="size-11 p-0" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
-                  <span className="sr-only">Go to next page</span>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="sm" className="size-11 p-0" onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={!table.getCanNextPage()}>
-                  <span className="sr-only">Go to last page</span>
-                  <ChevronsRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          ) : null}
-        </div>
-      )}
+      {data.length > 0 ? (
+        <TablePagination
+          start={table.state.pagination.pageIndex * table.state.pagination.pageSize + 1}
+          end={Math.min((table.state.pagination.pageIndex + 1) * table.state.pagination.pageSize, data.length)}
+          total={data.length}
+          pageIndex={table.state.pagination.pageIndex}
+          pageCount={table.getPageCount()}
+          onPageChange={table.setPageIndex}
+        />
+      ) : null}
     </div>
   )
 }
