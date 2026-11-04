@@ -40,47 +40,7 @@ type BackupRecord = {
   failureReason?: string
 }
 
-const sampleBackups: BackupRecord[] = [
-  {
-    name: "mayondon-db-20261028-090000.dump",
-    createdAt: "2026-10-28T09:00:00",
-    date: "Oct 28, 2026 · 9:00 AM",
-    type: "Scheduled",
-    size: "4.8 MB",
-    location: "This computer only",
-    status: "Verified",
-  },
-  {
-    name: "mayondon-db-20261027-170000.dump",
-    createdAt: "2026-10-27T17:00:00",
-    date: "Oct 27, 2026 · 5:00 PM",
-    type: "Manual",
-    createdBy: "admin",
-    size: "4.6 MB",
-    location: "External drive",
-    status: "Verified",
-  },
-  {
-    name: "mayondon-db-20261026-170000.dump",
-    createdAt: "2026-10-26T17:00:00",
-    date: "Oct 26, 2026 · 5:00 PM",
-    type: "Scheduled",
-    size: "4.5 MB",
-    location: "External drive",
-    status: "Failed",
-    failureReason: "Archive checksum did not match",
-  },
-  {
-    name: "mayondon-db-20261025-170000.dump",
-    createdAt: "2026-10-25T17:00:00",
-    date: "Oct 25, 2026 · 5:00 PM",
-    type: "Manual",
-    createdBy: "staff",
-    size: "4.4 MB",
-    location: "This computer only",
-    status: "Not checked",
-  },
-]
+const sampleBackups: BackupRecord[] = []
 
 function BackupRestore() {
   const { user } = useAuth()
