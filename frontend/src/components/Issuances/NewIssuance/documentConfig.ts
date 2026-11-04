@@ -1,4 +1,4 @@
-import { addressedOfficeOptions, clearancePurposeOptions, civilStatusOptions, idTypeOptions, indigencyPurposeOptions, indigencySectorOptions, purposeNoteOptions } from "@/components/Issuances/config"
+import { addressedOfficeOptions, clearancePurposeOptions, idTypeOptions, indigencyPurposeOptions, indigencySectorOptions, purposeNoteOptions } from "@/components/Issuances/config"
 
 export type DocumentCode =
   | "BARANGAY_CLEARANCE"
