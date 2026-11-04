@@ -42,7 +42,7 @@ export function DataTable<TData extends RowData>({
     features: dataTableFeatures,
     data,
     columns,
-    initialState: { pagination: { pageSize: 10 } },
+    initialState: { pagination: { pageIndex: 0, pageSize: 10 } },
   })
 
   return (
