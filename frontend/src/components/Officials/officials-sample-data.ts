@@ -19,16 +19,7 @@ export type OfficialRecord = {
   elected: boolean
 }
 
-export const initialOfficials: OfficialRecord[] = [
-  { id: "OFF-001", name: "Barangay Captain", position: "Punong Barangay", termStart: "2023-11-01", termEnd: "2026-11-30", status: "Current", elected: true },
-  { id: "OFF-002", name: "Barangay Kagawad 1", position: "Barangay Kagawad", termStart: "2023-11-01", termEnd: "2026-11-30", status: "Current", elected: true },
-  { id: "OFF-003", name: "Barangay Secretary", position: "Barangay Secretary", termStart: "2023-11-01", termEnd: "2026-11-30", status: "Current", elected: false },
-  { id: "OFF-004", name: "Barangay Treasurer", position: "Barangay Treasurer", termStart: "2023-11-01", termEnd: "2026-11-30", status: "Current", elected: false },
-  { id: "OFF-005", name: "Former Kagawad", position: "Barangay Kagawad", termStart: "2020-11-01", termEnd: "2023-10-31", status: "Former", elected: true },
-  { id: "OFF-006", name: "Barangay Clerk", position: "Barangay Clerk", termStart: "2023-11-01", termEnd: "2026-11-30", status: "Current", elected: false },
-  { id: "OFF-007", name: "Administrative Assistant", position: "Administrative Assistant", termStart: "2023-11-01", termEnd: "2026-11-30", status: "Current", elected: false },
-  { id: "OFF-008", name: "OIC Kagawad", position: "OIC Kagawad", termStart: "2023-11-01", termEnd: "2026-11-30", status: "Current", elected: false },
-]
+export const initialOfficials: OfficialRecord[] = []
 
 export function getSignatories(): OfficialRecord[] {
   const rank: Record<string, number> = {
