@@ -16,6 +16,7 @@ import {
 import { Fragment, useEffect, useMemo, useState } from "react"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { TablePagination, usePagination } from "@/components/Common/TablePagination"
 import { RowActions } from "@/components/Common/RowActions"
 import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
@@ -163,6 +164,7 @@ function IssuancesManagement() {
         .sort((a, b) => b.date.localeCompare(a.date)),
     [allRecords, endDate, historyStatus, historyType, search, startDate],
   )
+  const issuancePagination = usePagination(filteredIssuances, 10, search + "|" + historyType + "|" + historyStatus + "|" + startDate + "|" + endDate)
 
   const issuedCount = allRecords.filter(
     (item) => item.status === "Issued",
@@ -921,8 +923,7 @@ function IssuancesManagement() {
             <div>
               <h2 className="font-semibold tracking-tight">Issuance History</h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Showing {filteredIssuances.length} of {allRecords.length}{" "}
-                records
+                Showing {issuancePagination.start}–{issuancePagination.end} of {issuancePagination.total} records
               </p>
             </div>
             {hasFilters && (
@@ -1005,7 +1006,7 @@ function IssuancesManagement() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {filteredIssuances.map((item) => {
+              {issuancePagination.paginatedItems.map((item) => {
                 const pending = item.status === "Pending"
                 const voided = item.status === "Voided"
                 const expired = Boolean(item.validUntil && item.validUntil < localDateValue())
@@ -1120,6 +1121,7 @@ function IssuancesManagement() {
             )
           })}
         </ul>
+        <TablePagination start={issuancePagination.start} end={issuancePagination.end} total={issuancePagination.total} pageIndex={issuancePagination.pageIndex} pageCount={issuancePagination.pageCount} onPageChange={issuancePagination.setPageIndex} />
 
         {filteredIssuances.length === 0 && (
           <EmptyState
