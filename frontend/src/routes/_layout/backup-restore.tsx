@@ -281,6 +281,7 @@ function BackupRestore() {
           <Button
             variant="outline"
             className="min-h-11 border-destructive/50 text-destructive hover:bg-destructive/5"
+            disabled={sortedBackups.length === 0}
             onClick={() => setConfirmRestore((value) => !value)}
           >
             <RotateCcw aria-hidden="true" />
