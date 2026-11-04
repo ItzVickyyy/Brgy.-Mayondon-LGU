@@ -34,12 +34,27 @@ Goal: make printing work from `docs/reference/document-templates/*.docx` (typed-
   - Type-checked against stubbed UI components and the unit tests pass, but the upload flow was **not run in a real browser** (none in the sandbox). Step 7 (or the client) should try: a JPG, a PNG, a phone photo with EXIF rotation, a HEIC file (expect the error message), and confirm the cut-out looks right and the photo appears on the clearance overlay.
   - Run the new unit test with: `FIRST_SUPERUSER=a@b.c FIRST_SUPERUSER_PASSWORD=x bunx playwright test tests/photo-upload.spec.ts --project=chromium --no-deps`
 
+## Round 7: verification and documentation (PARTLY DONE)
+
+- Confirmed on `draft/admin-portal` that all required round 1–6 implementation files exist: `templates.ts`, `buildPrintData.ts`, `overlayLayout.ts`, `calibration.ts`, `overlayStyles.ts`, `loadPrintData.ts`, `PrintOverlay.tsx`, `CalibrationSheet.tsx`, `CalibrationPanel.tsx`, `usePrintIssuance.tsx`, `photo-upload.ts`, and the Upload photo control in `PhotoCapture.tsx`.
+- Updated `docs/04-Documents-and-Printing.md` section 6 to remove the obsolete paused-printing status, list the six available template IDs, describe the Issuances page's **Printing setup** calibration screen, and list unsupported documents: Residency, First-Time Jobseekers, PhilHealth, Barangay ID front and back.
+- Updated `docs/reference/document-templates/README.md` to list the seven Word documents and identify which forms map to print templates. Flagged `Barangay_Certification_of_Residency.docx` because it contains real names. Per instruction, that file was not edited or deleted.
+- Verification limitation: the execution environment could not resolve `github.com`, so the repository could not be cloned locally. No `bun install`, build, TypeScript check, Playwright tests, Chromium/LibreOffice rendering, PDF compositing, real Issuances-page print-media check, or browser photo-removal test was run. No coordinates were changed because they could not be visually checked. Treat implementation and visual verification as **not verified**, not as passing.
+- Human follow-up required:
+  1. From a working checkout of `draft/admin-portal`, run `cd frontend && bun install`, `bun run build`, `bunx tsc -p tsconfig.build.json --noEmit`, then the five print/photo Playwright specs listed in the Round 7 task.
+  2. If Chromium and LibreOffice are installed, render the six template overlays using synthetic data, compare them against the first page(s) of the source forms, and adjust only verified coordinate errors. Do not convert the Residency document because it can produce hundreds of pages.
+  3. Check the real Issuances page under print media to confirm the overlay is visible rather than blank.
+  4. In local `bun run dev`, confirm the model assets load from `/vision/selfie-segmentation/`, `removeBackground` returns a PNG with transparent pixels, and the cut-out aligns in the clearance photo box at 84 × 81 pt, x=401, y=339.
+  5. On the target printer, use Letter paper, 100% / actual-size scaling, and turn browser headers/footers off. Use **Printing setup** to calibrate each applicable form on plain paper before official stock.
+  6. Test photo upload with a synthetic JPG, PNG, phone photo with EXIF rotation, and HEIC file. JPG/PNG/phone photo should process; unsupported or unreadable HEIC should show an error and preserve the current photo.
+  7. Before client use, confirm all fields align on physical forms and keep all real resident data and photos out of the repository.
+
 ## Next rounds (one small step each; mark done here)
 2. (DONE) `frontend/src/lib/print/buildPrintData.ts`: `MockIssuance` (+ resident) -> `{ templateId, values: Record<string,string>, photoUrl? }`. Name formats via `formatPrintedName`, age via `calculateAge`, dates via `formatPaperDate`, sectors joined with " / " and `sectorLine` = "SECTOR : ...". Unit-test it (Playwright test without browser pages, like `tests/issuance-format.spec.ts`).
 3. (DONE) `frontend/src/components/Issuances/PrintOverlay.tsx`: renders absolutely positioned text/marks/photo from a template (pt units, `@page { size: letter; margin: 0 }`, `@media print` hides everything else, `print-color-adjust: exact`, photo `object-fit: cover`). Shrink-to-fit when `w` is set. Apply per-template offsets (step 4).
 4. (DONE) Calibration: per-template X/Y offsets in localStorage + a "Calibration sheet" button printing grid + field outlines on plain paper (docs/04 section 7).
 5. (DONE) Wire it: replace `printNow` in `issuances.tsx` (and the Reprint actions) to build data and call `window.print()`; remove the "paused" notices in `PrintSummaryPanel`/`NewIssuanceDialog`.
 6. (DONE) Photo: add "Upload photo" to `PhotoCapture.tsx` (file input -> image -> `cropToPortrait` -> `removeBackground`, keep the existing "keep original" fallback).
-7. Verify: Playwright `page.pdf()` of each overlay, composite over the LibreOffice render of the .docx, view it, fix coordinates. Update docs/04 section 6 and the README in document-templates.
+7. (PARTLY DONE) Updated docs/04 section 6 and the README in document-templates. Browser/build/test/render checks and coordinate verification remain unverified because GitHub was unreachable from the execution environment; see Round 7 above.
 
 Check: `cd frontend && bun install && bunx tsc -p tsconfig.build.json --noEmit` (run `bun run build` once first to generate routeTree).
