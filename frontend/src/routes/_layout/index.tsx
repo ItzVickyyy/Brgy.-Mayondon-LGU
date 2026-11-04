@@ -116,6 +116,7 @@ function Dashboard() {
                 <span className="pb-2 text-xs text-muted-foreground">{item.month}</span>
               </div>
             ))}
+            {visibleMonths.length === 0 ? <p className="w-full self-center text-center text-sm text-muted-foreground">No issuance history yet.</p> : null}
           </div>
           <p className="mt-3 text-xs text-muted-foreground">Historical records are needed to report population or issuance trends accurately.</p>
         </article>
@@ -134,6 +135,7 @@ function Dashboard() {
                 </div>
               </div>
             ))}
+            {visibleDocumentTypes.length === 0 ? <p className="text-sm text-muted-foreground">No issuance records yet.</p> : null}
           </div>
           <div className="mt-5 flex items-center justify-between border-t pt-4 text-sm">
             <span className="text-muted-foreground">Total</span>
@@ -152,6 +154,7 @@ function Dashboard() {
                 <span className="inline-flex min-h-8 items-center self-start rounded-full border px-3 text-xs font-semibold sm:self-center">{item.status}</span>
               </div>
             ))}
+            {true ? <p className="py-3 text-sm text-muted-foreground">No records are expiring soon.</p> : null}
           </div>
           <Link to="/issuances" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary hover:underline">Open issuance history</Link>
         </article>
@@ -190,6 +193,7 @@ function Dashboard() {
               <span className="shrink-0 text-xs text-muted-foreground">{activity.time}</span>
             </div>
           ))}
+          {(isAdmin ? adminActivities : staffActivities).length === 0 ? <p className="py-3 text-sm text-muted-foreground">No activity recorded yet.</p> : null}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">Activity history appears here as actions are recorded.</p>
       </section>
