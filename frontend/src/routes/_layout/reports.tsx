@@ -34,39 +34,17 @@ export const Route = createFileRoute("/_layout/reports")({
   head: () => ({ meta: [{ title: pageTitle("Management Reports") }] }),
 })
 
-const summary = [
-  { label: "Documents issued", value: "128", note: "Total records", icon: FileText },
-  { label: "Resident records", value: "1,284", note: "Total records", icon: UsersRound },
-  { label: "Monthly change", value: "+12%", note: "Compared with previous period", icon: TrendingUp },
-]
+const summary = []
 
-const documentTypeRows = [
-  { document: "Barangay Clearance", issued: 42, voided: 2, share: "32.8%", change: "+12%" },
-  { document: "Certificate of Indigency", issued: 28, voided: 1, share: "21.9%", change: "+4%" },
-  { document: "Barangay ID", issued: 36, voided: 0, share: "28.1%", change: "+8%" },
-  { document: "Other documents", issued: 22, voided: 1, share: "17.2%", change: "—" },
-]
+const documentTypeRows = []
 
-const purposeRows = [
-  { purpose: "Employment Requirement", issued: 38, share: "29.7%" },
-  { purpose: "Proof of Residency", issued: 27, share: "21.1%" },
-  { purpose: "Medical assistance", issued: 22, share: "17.2%" },
-  { purpose: "Other purposes", issued: 41, share: "32.0%" },
-]
+const purposeRows = []
 
-const expiringRows = [
-  { resident: "Resident Two", record: "Barangay ID", reference: "18-128-3597-0002", expires: "2026-11-20", days: 18, status: "Expiring soon", href: "/barangay-ids" },
-  { resident: "Resident Three", record: "Barangay Clearance", reference: "ISS-003", expires: "2026-10-20", days: -13, status: "Expired", href: "/issuances" },
-]
+const expiringRows = []
 
-const importRows = [
-  { date: "Oct 20, 2026 · 2:15 PM", file: "mayondon-resident-masterlist.xlsx", importedBy: "admin", imported: 246, updated: 12, skipped: 3, failed: 2 },
-]
+const importRows = []
 
-const accountActivityRows = [
-  { user: "admin", role: "System Administrator", signIns: 24, documents: 48, records: 12, lastActivity: "Oct 28, 2026" },
-  { user: "staff", role: "Staff", signIns: 18, documents: 32, records: 8, lastActivity: "Oct 28, 2026" },
-]
+const accountActivityRows = []
 
 function formatReportDate(value: string) {
   const parsed = new Date(`${value}T00:00:00`)
