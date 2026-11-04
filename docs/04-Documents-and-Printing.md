@@ -4,7 +4,7 @@ Which documents the system produces, the fields each needs, and how printing ont
 
 **Status:** working design reference based on the shared templates and hard-copy specifications. **Not client approval.** Use synthetic data only. Do not copy real rows, names, addresses, ID numbers or incident narratives from the source workbooks and documents into the repository. Undecided items are tagged `(D-xx)`; see [08-Open-Decisions.md](08-Open-Decisions.md).
 
-Last updated: November 1, 2026
+Last updated: November 5, 2026
 
 ## 1. Source files and what they inform
 
@@ -101,18 +101,26 @@ The file holds an applicant information sheet, oath of undertaking and barangay 
 
 Document type, purpose, issue date, resident reference, unique issuance reference, ID/CTC presented where applicable, official receipt number (or a non-applicable value), issuing staff account, status, correction reason where required, and expiry date **only where an approved rule exists**. Not every field applies to every document **(D-14)**.
 
-## 6. Prototype behavior (current)
+## 6. Prototype behavior and printing (current)
 
-The Issuance Management prototype covers four types — Barangay Clearance, Franchise Clearance, Electrical/Water Clearance, Certificate of Indigency:
+Printing is implemented as a transparent typed-value overlay on the matching pre-printed paper. The system does not print the form's fixed text, labels, logos, watermarks, signatures, dry-seal labels or footers. Thumbmark and resident-signature areas remain blank. Use synthetic data for development and demonstrations.
 
-- The selected type controls the fields shown.
-- Date and Date of Issue default to today's local date when a form opens, when the type changes and on Clear Form. Birthdate stays blank.
-- Dropdowns for Civil Status, Valid ID Presented and Sector; checkbox groups for Electric/Water, New/Reconnection, Residential/Commercial.
-- The form can be cleared; a draft can be added to an in-memory history that can be searched and filtered by document type.
-- **Printing is paused** until form-specific overlay positions are calibrated.
-- Required fields and validation rules are **not confirmed**; the prototype assumes no eligibility rules.
+Six print templates are currently defined in `frontend/src/lib/print/templates.ts`:
 
-The Damayan form, ID front/back, Residency and First-Time Jobseekers are not yet in the prototype's form set.
+| Template | Source form | Print template |
+|---|---|---|
+| Barangay Clearance | `Barangay_Clearance.docx` | `clearance` |
+| Barangay Franchise Clearance | `Barangay_Franchise_Clearance.docx` | `franchise` |
+| Clearance — Electrical and Water Connection | `Barangay_Clearance_Electrical_and_Water.docx` | `utility` |
+| Certificate of Indigency | `Barangay_Certification_of_Indigency.docx` | `indigency` |
+| Certification of Marginalized Sector | `Barangay_Certification_of_Marginalized_Sector.docx` | `marginalized` |
+| Certification for assistance request | Page 2 of `Barangay_Certification_of_Marginalized_Sector.docx` | `assistance` |
+
+The Issuances page has a **Printing setup** screen for selecting a template, saving per-template X/Y calibration offsets, printing a calibration sheet and resetting offsets. Offsets are stored in browser local storage. The default positions are estimates and still require visual comparison and real-paper calibration.
+
+The following documents have **no print template** yet: Residency, First-Time Jobseekers, PhilHealth, Barangay ID front and Barangay ID back. Confirm the intended output and approved source format before adding templates.
+
+Required fields and validation rules remain **unconfirmed**. Do not treat the presence of a source form as client approval.
 
 ## 7. Print-template requirements
 
