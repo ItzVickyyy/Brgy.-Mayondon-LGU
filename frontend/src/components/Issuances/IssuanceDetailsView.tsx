@@ -122,7 +122,7 @@ export function IssuanceDetailsView({ record }: { record: IssuanceRecord }) {
   const fields = config?.fields ?? []
   const detailRows: Row[] = issuance ? fields.filter((field) => field.group === "main" || field.group === "more").map((field) => ({ label: field.label, value: readField(field, issuance, record) })) : []
   const requirementRows: Row[] = issuance ? fields.filter((field) => field.group === "identity" || field.group === "payment").map((field) => ({ label: field.label, value: readField(field, issuance, record) })) : []
-  const signatory = issuance && config?.signatoryMode === "select" ? officialName(issuance.payload.signatoryOfficialId) : ""
+  const signatory = issuance && config?.signatoryMode === "select" ? officialName(issuance.payload.signatoryOfficialId) || "________________________" : ""
   const hasRequirements = fields.some((field) => field.group === "identity" || field.group === "payment")
 
   const documentRows: Row[] = [
