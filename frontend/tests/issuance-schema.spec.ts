@@ -19,7 +19,7 @@ const validDetails = {
 const codes = Object.keys(validDetails) as DocumentCode[]
 
 async function seedResident() {
-  return issuanceApi.createResident({
+  const resident = await issuanceApi.createResident({
     firstName: "Fictional",
     middleName: "A.",
     lastName: "Resident",
@@ -33,6 +33,11 @@ async function seedResident() {
     residentSinceYear: 2010,
     residentSinceBirth: false,
   })
+  await issuanceApi.updateResident(resident.id, {
+    photoUrl: "data:image/jpeg;base64,dGVzdA==",
+    sectors: ["Senior Citizen"],
+  })
+  return resident
 }
 
 for (const code of codes) {
