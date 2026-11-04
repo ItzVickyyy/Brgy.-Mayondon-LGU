@@ -95,6 +95,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const [discardOpen, setDiscardOpen] = useState(false)
   const [attempted, setAttempted] = useState(false)
   const [quickAttempted, setQuickAttempted] = useState(false)
+  const [editingResident, setEditingResident] = useState(false)
   const [printNotice, setPrintNotice] = useState(false)
   const [autoSave, setAutoSave] = useState<{ state: "idle" | "saving" | "saved" | "error"; at?: Date }>({ state: "idle" })
   const draftIdRef = useRef<string | null>(null)
@@ -171,6 +172,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   function selectResident(resident: ResidentRecord) {
     if (resident.status === "Archived") return
     setSelectedResident(resident)
+    setEditingResident(false)
     setResidentQuery("")
     form.setValue("residentId", resident.id, { shouldDirty: true })
     setResidentUpdates({})
@@ -482,6 +484,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   function resetDialog() {
     form.reset()
     setSelectedResident(null)
+    setEditingResident(false)
     setResidentQuery("")
     setResidentUpdates({})
     setSelectedSector("")
@@ -496,6 +499,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setFormError("")
     setAttempted(false)
     setQuickAttempted(false)
+    setEditingResident(false)
     setPrintNotice(false)
     setDiscardOpen(false)
     setQuickAdd(emptyQuickAdd)
@@ -508,7 +512,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const birthplaceRequired = config.residentNeeds.includes("birthPlace")
   const sexRequired = config.residentNeeds.includes("sex")
   function quickAddHasValues() {
-    return Boolean(quickAdd.firstName.trim() || quickAdd.middleName?.trim() || quickAdd.lastName.trim() || quickAdd.suffix?.trim() || quickAdd.birthdate || (quickAdd.birthplace ?? "").trim() || quickAdd.sex || quickAdd.civilStatus !== "Single" || (quickAdd.houseNumber ?? "").trim() || quickAdd.street.trim() || quickAdd.purok !== 1 || quickAdd.residentSinceYear != null || quickAdd.residentSinceBirth)
+    return Boolean(quickAdd.firstName.trim() || quickAdd.middleName?.trim() || quickAdd.lastName.trim() || quickAdd.suffix?.trim() || quickAdd.birthdate || (quickAdd.birthplace ?? "").trim() || quickAdd.sex || quickAdd.photoUrl || quickAdd.civilStatus !== "Single" || (quickAdd.houseNumber ?? "").trim() || quickAdd.street.trim() || quickAdd.purok !== 1 || quickAdd.residentSinceYear != null || quickAdd.residentSinceBirth)
   }
   const quickMissing = {
     firstName: !quickAdd.firstName.trim(),
@@ -531,14 +535,24 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       return
     }
     try {
-      const resident = await issuanceApi.createResident(quickAdd)
-      setResidents((previous) => [...previous, resident])
-      selectResident(resident)
+      if (editingResident && selectedResident) {
+        const name = [quickAdd.firstName.trim(), quickAdd.middleName?.trim(), quickAdd.lastName.trim(), quickAdd.suffix?.trim()].filter(Boolean).join(" ")
+        const address = [[quickAdd.houseNumber?.trim(), quickAdd.street.trim()].filter(Boolean).join(" "), `Purok ${quickAdd.purok}`, "Mayondon"].filter(Boolean).join(", ")
+        const resident = await issuanceApi.updateResident(selectedResident.id, { name, firstName: quickAdd.firstName.trim(), middleName: quickAdd.middleName?.trim() ?? "", lastName: quickAdd.lastName.trim(), suffix: quickAdd.suffix?.trim() ?? "", birthdate: quickAdd.birthdate, birthplace: quickAdd.birthplace?.trim() ?? "", sex: quickAdd.sex, civilStatus: quickAdd.civilStatus, houseNumber: quickAdd.houseNumber?.trim() ?? "", street: quickAdd.street.trim(), purok: quickAdd.purok, address, residentSince: quickAdd.residentSinceBirth ? 0 : quickAdd.residentSinceYear, residentSinceBirth: quickAdd.residentSinceBirth, photoUrl: quickAdd.photoUrl })
+        setResidents((previous) => previous.map((item) => item.id === resident.id ? resident : item))
+        setSelectedResident(resident)
+        setResidentUpdates((previous) => ({ ...previous, photoUrl: undefined }))
+        setEditingResident(false)
+      } else {
+        const resident = await issuanceApi.createResident(quickAdd)
+        setResidents((previous) => [...previous, resident])
+        selectResident(resident)
+      }
       setQuickAdd(emptyQuickAdd)
       setQuickAttempted(false)
       setFormError("")
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to add this resident.")
+      setFormError(error instanceof Error ? error.message : editingResident ? "Unable to update this resident." : "Unable to add this resident.")
     }
   }
 
@@ -701,7 +715,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const detailsDone = !signatoryMissing && detailFields.every((field) => !field.required || fieldHasValue(field))
   const requirementsDone = requirementFields.every((field) => !field.required || fieldHasValue(field))
   const residentDone = Boolean(selectedResident) && residentMissingLabels.every((item) => item.name === "photo")
-  const currentPhoto = String(residentUpdates.photoUrl ?? selectedResident?.photoUrl ?? "")
+  const currentPhoto = String(selectedResident && !editingResident ? residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" : quickAdd.photoUrl ?? "")
   const photoDone = Boolean(currentPhoto)
   const detailsStep = needsPhoto ? 4 : 3
   const requirementsStep = detailsStep + 1
@@ -773,8 +787,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               </div>
             </IssuanceSection>
 
-            <IssuanceSection id="issuance-step-resident" step={2} title="Who is it for?" description={selectedResident ? "You can choose someone else if this is the wrong person." : "Type the person's name and select them from the list, or fill in the form below if they are not listed."} done={residentDone}>
-              {selectedResident ? <div className="flex items-start justify-between gap-3 rounded-lg border border-emerald-600/40 bg-emerald-500/5 p-4">
+            <IssuanceSection id="issuance-step-resident" step={2} title="Who is it for?" description={selectedResident && !editingResident ? "You can edit this resident or choose someone else." : editingResident ? "Update this resident's information, then save your changes." : "Type the person's name and select them from the list, or fill in the form below if they are not listed."} done={residentDone}>
+              {selectedResident && !editingResident ? <div className="flex items-start justify-between gap-3 rounded-lg border border-emerald-600/40 bg-emerald-500/5 p-4">
                 <div className="flex min-w-0 items-start gap-3">
                   <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600" aria-hidden="true" />
                   <div className="min-w-0">
@@ -783,7 +797,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                     <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? `${calculateAge(selectedResident.birthdate, issueDate)} years old` : "Birthdate not recorded"} · {selectedResident.civilStatus || "Civil status not recorded"} · {selectedResident.id}</p>
                   </div>
                 </div>
-                <Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); form.setValue("residentId", ""); setResidentQuery(""); setQuickAdd(emptyQuickAdd); setQuickAttempted(false) }}>Choose someone else</Button>
+                <div className="flex shrink-0 flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>Edit resident</Button><Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); setEditingResident(false); form.setValue("residentId", ""); setResidentQuery(""); setQuickAdd(emptyQuickAdd); setQuickAttempted(false) }}>Choose someone else</Button></div>
               </div> : <div className="space-y-3">
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3.5 top-3.5 size-5 text-muted-foreground" aria-hidden="true" />
@@ -794,7 +808,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                   <span className="text-sm text-muted-foreground">{getResidentAddress(resident)}</span>
                 </button>)}</div> : residentQuery.trim() ? <p className="rounded-lg border border-dashed p-4 text-sm">No one found with that name. Check the spelling, or add them as a new resident in the form below.</p> : null}
                 <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
-                  <div className="flex items-baseline justify-between gap-2"><p className="font-semibold">Add a new resident</p><span className="text-xs text-muted-foreground"><span className="text-destructive">*</span> must be filled in</span></div>
+                  <div className="flex items-baseline justify-between gap-2"><p className="font-semibold">{editingResident ? "Edit resident details" : "Add a new resident"}</p><span className="text-xs text-muted-foreground"><span className="text-destructive">*</span> must be filled in</span></div>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_7.5rem]">
                     <label className={fieldLabelClass}><span>First name <span className="text-destructive">*</span></span><input id="quickadd-firstName" value={quickAdd.firstName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, firstName: event.target.value }))} className={cn(formControlClass, quickInvalid("firstName") && "border-destructive")} aria-invalid={quickInvalid("firstName") || undefined} autoComplete="off" />{quickError("firstName")}</label>
                     <label className={fieldLabelClass}>Middle name<input value={quickAdd.middleName ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, middleName: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
@@ -816,7 +830,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                     <label className={fieldLabelClass}>Living here since (year)<input type="number" min="1900" max={new Date().getFullYear()} placeholder="Example: 2005" value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: event.target.value ? Number(event.target.value) : undefined }))} className={formControlClass} /></label>
                     <CheckField label="Lived here since birth" checked={quickAdd.residentSinceBirth} onChange={(checked) => setQuickAdd((previous) => ({ ...previous, residentSinceBirth: checked, residentSinceYear: undefined }))} />
                   </div>
-                  <div className="flex justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues()} onClick={() => { setQuickAdd(emptyQuickAdd); setQuickAttempted(false) }}>Clear</Button><Button type="button" onClick={() => void createResident()}>Save and select</Button></div>
+                  <div className="flex justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues()} onClick={() => { if (editingResident && selectedResident) { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }) } else setQuickAdd(emptyQuickAdd); setQuickAttempted(false) }}>Clear</Button><Button type="button" onClick={() => void createResident()}>{editingResident ? "Save changes" : "Save and select"}</Button></div>
                 </div>
               </div>}
               {selectedResident && neededFromRecord.length ? <div className="space-y-4 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4">
@@ -829,12 +843,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             </IssuanceSection>
 
             {needsPhoto ? <IssuanceSection id="issuance-step-photo" step={3} title="Photo" description="Capture the resident’s photo. It will appear in the photo box automatically." done={photoDone}>
-              {selectedResident
-                ? <div className={fieldLabelClass}>
-                    <span id="resident-missing-photo-label">Resident's photo <span className="text-destructive">*</span></span>
-                    <PhotoCapture id="resident-missing-photo" value={currentPhoto} onChange={(photoUrl) => setResidentUpdates((previous) => ({ ...previous, photoUrl } as ResidentPatch))} />
-                  </div>
-                : <p className="text-sm text-muted-foreground">Choose who it is for above, then take their photo here.</p>}
+              <div className={fieldLabelClass}>
+                <span id="resident-missing-photo-label">Resident's photo <span className="text-destructive">*</span></span>
+                <PhotoCapture id="resident-missing-photo" value={currentPhoto} onChange={(photoUrl) => selectedResident && !editingResident ? setResidentUpdates((previous) => ({ ...previous, photoUrl } as ResidentPatch)) : setQuickAdd((previous) => ({ ...previous, photoUrl }))} />
+              </div>
             </IssuanceSection> : null}
 
             <IssuanceSection id="issuance-step-details" step={detailsStep} title="Document details" description="Only the fields this document needs. Red asterisk means required." done={detailsDone}>
@@ -861,11 +873,11 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
 
             <div className="lg:hidden">
               <button type="button" className="flex min-h-10 items-center gap-2 text-sm font-medium" aria-expanded={previewOpen} onClick={() => setPreviewOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", previewOpen && "rotate-180")} />Preview of what will print</button>
-              {previewOpen ? <div className="mt-2 rounded-xl border bg-card"><PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={missingPreviewLabels} printingPaused /></div> : null}
+              {previewOpen ? <div className="mt-2 rounded-xl border bg-card"><PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={attempted ? missingPreviewLabels : []} showMissing={attempted} printingPaused /></div> : null}
             </div>
           </div>
           <aside aria-label="Preview of what will print" className="hidden min-h-0 overflow-y-auto border-l bg-card lg:block">
-            <PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={missingPreviewLabels} printingPaused />
+            <PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={attempted ? missingPreviewLabels : []} showMissing={attempted} printingPaused />
           </aside>
         </div>
         <DialogFooter className="shrink-0 items-center gap-2 border-t px-5 py-3 sm:justify-between">
@@ -896,10 +908,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               : "What you typed so far has not been saved. If you leave now, it will be lost."}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="gap-2 sm:flex-wrap">
-          <Button type="button" variant="outline" onClick={() => setDiscardOpen(false)}>Keep editing</Button>
-          {selectedResident ? <Button type="button" variant="outline" onClick={() => void closeKeepingDraft()}>Close, keep draft</Button> : null}
-          <Button type="button" variant="destructive" onClick={() => void discardAndClose()}>Discard changes</Button>
+        <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:flex-nowrap sm:justify-end">
+          <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => setDiscardOpen(false)}>Keep editing</Button>
+          {selectedResident ? <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => void closeKeepingDraft()}>Close, keep draft</Button> : null}
+          <Button type="button" variant="destructive" className="w-full sm:w-auto" onClick={() => void discardAndClose()}>Discard changes</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
