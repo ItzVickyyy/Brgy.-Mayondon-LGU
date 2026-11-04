@@ -865,13 +865,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
 
             <IssuanceSection id="issuance-step-details" step={detailsStep} title="Document details" description="Only the fields this document needs. Red asterisk means required." done={detailsDone}>
               {detailFields.length ? documentType === "INDIGENCY" ? (
-                <div className="grid items-start gap-5 sm:grid-cols-2">
-                  <div className="flex min-w-0 flex-col gap-5">
-                    {detailFields.filter((field) => field.name === "sector" || field.name === "purpose").map(renderField)}
-                  </div>
-                  <div className="flex min-w-0 flex-col gap-5">
-                    {detailFields.filter((field) => field.name === "addressedToOffice").map(renderField)}
-                  </div>
+                <div className="grid items-start gap-x-4 gap-y-3 sm:grid-cols-2">
+                  {detailFields.filter((field) => field.name === "sector").map((field) => <div key={field.name} className="sm:col-span-2">{renderField(field)}</div>)}
+                  {detailFields.filter((field) => field.name === "purpose" || field.name === "addressedToOffice").map(renderField)}
                 </div>
               ) : <div className="grid items-start gap-4 sm:grid-cols-2">{detailFields.map(renderField)}</div> : <p className="text-sm text-muted-foreground">This document needs no extra details.</p>}
               {config.signatoryMode === "select" ? <div className={fieldLabelClass}>
