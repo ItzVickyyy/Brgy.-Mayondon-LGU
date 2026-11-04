@@ -203,7 +203,7 @@ function IssuancesManagement() {
       setClearanceAdvancedOpen(false)
       return
     }
-    const advancedValues = ["purposeNote", "referredBy"].some((key) => Boolean(formValues[key]?.trim()))
+    const advancedValues = ["purposeNote", "referredBy"].some((key) => Boolean((formValues as Record<string, string>)[key]?.trim()))
       || Boolean(formValues.remarks?.trim() && formValues.remarks !== "NO DEROGATORY RECORD ON FILE")
       || Boolean(validationErrors.purposeNote || validationErrors.remarks || validationErrors.referredBy)
       || formValues.purpose === "Employment Requirement/First Time Jobseeker"
@@ -242,8 +242,8 @@ function IssuancesManagement() {
   function changeDocumentType(value: string) {
     const sharedKeys = ["firstName", "middleName", "lastName", "name", "birthdate", "age", "birthplace", "civilStatus", "address", "residentId", "photoUrl", "date"]
     const previousFields = documentSections[selectedType]?.flatMap((section) => section.fields) ?? []
-    const lost = previousFields.some((field) => !sharedKeys.includes(field.name) && field.name !== "date" && Boolean(formValues[field.name]?.trim()) && formValues[field.name] !== (field.defaultValue ?? ""))
-    const preserved = Object.fromEntries(sharedKeys.filter((key) => formValues[key]).map((key) => [key, formValues[key]]))
+    const lost = previousFields.some((field) => !sharedKeys.includes(field.name) && field.name !== "date" && Boolean((formValues as Record<string, string>)[field.name]?.trim()) && (formValues as Record<string, string>)[field.name] !== (field.defaultValue ?? ""))
+    const preserved = Object.fromEntries(sharedKeys.filter((key) => (formValues as Record<string, string>)[key]).map((key) => [key, (formValues as Record<string, string>)[key]]))
     const defaults = createDefaultFormValues(value)
     const name = formValues.firstName || formValues.lastName
       ? formatPrintedName(formValues.firstName ?? "", formValues.middleName ?? "", formValues.lastName ?? "", value)
@@ -364,12 +364,12 @@ function IssuancesManagement() {
     if (!formValues.date?.trim()) errors.date = "Date on document is required."
     for (const field of allFormFields) {
       if (field.showWhen && !field.showWhen(formValues)) continue
-      if (field.required && !formValues[field.name]?.trim()) errors[field.name] = `${field.label} is required.`
+      if (field.required && !(formValues as Record<string, string>)[field.name]?.trim()) errors[field.name] = `${field.label} is required.`
     }
     if (selectedType === "Barangay Clearance, Electrical and Water Connection" && !formValues.serviceType?.trim()) errors.serviceType = "Choose at least one service."
     if (selectedType === "Certificate of Indigency" && !formValues.birthdate?.trim() && !formValues.ageManual?.trim()) errors.ageManual = "Enter age when birthdate is unavailable."
     for (const key of ["idDateOfIssue", "ctcDateOfIssue"]) {
-      if (formValues[key] && formValues[key] > localDateValue()) errors[key] = "Date of issue cannot be in the future."
+      if ((formValues as Record<string, string>)[key] && (formValues as Record<string, string>)[key] > localDateValue()) errors[key] = "Date of issue cannot be in the future."
     }
     setValidationErrors(errors)
     const names = Object.keys(errors)
