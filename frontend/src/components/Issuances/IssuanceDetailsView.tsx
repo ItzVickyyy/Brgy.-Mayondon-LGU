@@ -159,7 +159,7 @@ export function IssuanceDetailsView({ record }: { record: IssuanceRecord }) {
       <Section step={1} title="Document"><Rows rows={documentRows} /></Section>
       <Section step={2} title="Resident">
         <Rows rows={residentRows} />
-        {snapshot?.photoUrl ? <img src={snapshot.photoUrl} alt="Resident photo" className="mt-2 h-28 w-[84px] rounded-md border bg-white object-cover" /> : null}
+        {snapshot?.photoUrl ? <img src={snapshot.photoUrl} alt="Resident portrait" className="mt-2 h-28 w-[84px] rounded-md border bg-white object-cover" /> : null}
       </Section>
       {issuance && config ? (
         <>
