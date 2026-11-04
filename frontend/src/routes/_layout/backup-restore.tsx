@@ -52,14 +52,14 @@ function BackupRestore() {
   const [selectedBackup, setSelectedBackup] = useState("")
   const [restoreConfirmation, setRestoreConfirmation] = useState("")
 
-  if (!isSystemAdministrator(user)) return <NoPermission />
-
   const sortedBackups = [...backups].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
   const backupPagination = usePagination(sortedBackups, 10, backups.length)
   const latestBackup = sortedBackups[0]
   const daysSinceLatest = latestBackup
     ? Math.max(0, Math.floor((Date.now() - new Date(latestBackup.createdAt).getTime()) / 86400000))
     : null
+
+  if (!isSystemAdministrator(user)) return <NoPermission />
 
   return (
     <div className="flex flex-col gap-6">
