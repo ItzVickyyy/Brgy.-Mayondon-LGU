@@ -101,12 +101,11 @@ function getPreselectedResident() {
 }
 
 function IssuancesManagement() {
-  const initialResident = undefined
-  const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(false)
+    const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(false)
   const [isSimplifiedDialogOpen, setIsSimplifiedDialogOpen] = useState(() => Boolean(getPreselectedResident()))
   const [selectedType, setSelectedType] = useState<string>(documentTypes[0])
   const [residentQuery, setResidentQuery] = useState("")
-  const [selectedResidentId, setSelectedResidentId] = useState(() => initialResident?.id ?? "")
+  const [selectedResidentId, setSelectedResidentId] = useState("")
   const [manualEntry, setManualEntry] = useState(false)
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
@@ -183,11 +182,8 @@ function IssuancesManagement() {
   const hasFilters = search.trim() !== "" || historyType !== "All document types" || historyStatus !== "all" || startDate !== "" || endDate !== ""
 
   const residentMatches = useMemo(() => {
-    const query = residentQuery.trim().toLowerCase()
-    if (!query || selectedResidentId) return []
+    if (!residentQuery.trim() || selectedResidentId) return []
     return []
-      .filter((resident) => [resident.name, resident.id, resident.idNumber, resident.address].some((value) => value.toLowerCase().includes(query)))
-      .slice(0, 6)
   }, [residentQuery, selectedResidentId, manualEntry])
 
   const allFormFields = documentSections[selectedType]?.flatMap((section) => section.fields) ?? []
@@ -240,7 +236,6 @@ function IssuancesManagement() {
     const lost = previousFields.some((field) => !sharedKeys.includes(field.name) && field.name !== "date" && Boolean(formValues[field.name]?.trim()) && formValues[field.name] !== (field.defaultValue ?? ""))
     const preserved = Object.fromEntries(sharedKeys.filter((key) => formValues[key]).map((key) => [key, formValues[key]]))
     const defaults = createDefaultFormValues(value)
-    const residentRecord = undefined
     const name = formValues.firstName || formValues.lastName
       ? formatPrintedName(formValues.firstName ?? "", formValues.middleName ?? "", formValues.lastName ?? "", value)
       : formValues.name ?? ""
@@ -251,7 +246,6 @@ function IssuancesManagement() {
       ...preserved,
       name,
       age: calculateAge(formValues.birthdate ?? "", formValues.date ?? defaults.date ?? localDateValue()),
-      ...(residentRecord ? { sector: value === "Certification (assistance request)" ? residentRecord.sectors[0] ?? "" : residentRecord.sectors.slice(0, 2).join("||") } : {}),
     })
     setValidationErrors({})
     setFormErrorSummary([])
@@ -1066,7 +1060,7 @@ function IssuancesManagement() {
 
         {/* Mobile cards */}
         <ul className="divide-y md:hidden">
-          {filteredIssuances.map((item) => {
+          {issuancePagination.paginatedItems.map((item) => {
             const pending = item.status === "Pending"
             const voided = item.status === "Voided"
             return (
