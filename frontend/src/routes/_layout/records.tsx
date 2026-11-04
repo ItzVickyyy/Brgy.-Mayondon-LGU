@@ -3,6 +3,7 @@ import { Archive, CheckCircle2, CreditCard, FileUp, Search, Upload, UserRound, U
 import { useMemo, useState } from "react"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { TablePagination, usePagination } from "@/components/Common/TablePagination"
 import { RowActions } from "@/components/Common/RowActions"
 import { StatCard } from "@/components/Common/StatCard"
 import { formControlClass } from "@/components/Common/formStyles"
@@ -61,6 +62,7 @@ function RecordsManagement() {
         .sort((a, b) => a.name.localeCompare(b.name)),
     [residents, residentTypeFilter, search, statusFilter],
   )
+  const residentPagination = usePagination(filteredResidents, 10, search + "|" + statusFilter + "|" + residentTypeFilter)
 
   const tabs: { id: View; label: string }[] = [
     { id: "residents", label: "Residents" },
@@ -176,7 +178,7 @@ function RecordsManagement() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {filteredResidents.map((resident) => {
+                  {residentPagination.paginatedItems.map((resident) => {
                     const birthdate = new Date(`${resident.birthdate}T00:00:00`)
                     const formattedBirthdate = birthdate.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
                     const today = new Date()
@@ -250,9 +252,7 @@ function RecordsManagement() {
               </table>
               {filteredResidents.length === 0 ? <EmptyState title="No matching residents" description="Try a different name, address, ID number, or filter." /> : null}
             </div>
-            <div className="border-t px-4 py-3 text-xs text-muted-foreground sm:px-5">
-              Showing {filteredResidents.length} of {residents.length} residents
-            </div>
+            <TablePagination start={residentPagination.start} end={residentPagination.end} total={residentPagination.total} pageIndex={residentPagination.pageIndex} pageCount={residentPagination.pageCount} onPageChange={residentPagination.setPageIndex} />
           </section>
         </>
       )}
