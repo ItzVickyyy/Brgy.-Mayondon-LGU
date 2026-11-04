@@ -4,7 +4,7 @@ import { documentConfig, type DocumentCode } from "./documentConfig"
 import { issuanceInputSchema, type DocumentDetails, type IssuanceInput } from "./schemas"
 
 export type ResidentPatch = Partial<Pick<ResidentRecord,
-  | "birthdate" | "birthplace" | "sex" | "civilStatus" | "sectors" | "residentSince" | "residentSinceBirth"
+  | "name" | "firstName" | "middleName" | "lastName" | "suffix" | "birthdate" | "birthplace" | "sex" | "civilStatus" | "sectors" | "residentSince" | "residentSinceBirth"
   | "address" | "houseNumber" | "street" | "purok" | "idNumber" | "photoUrl" | "emergencyContact"
 >>
 export type QuickResidentInput = {
@@ -21,6 +21,7 @@ export type QuickResidentInput = {
   purok: number
   residentSinceYear?: number
   residentSinceBirth: boolean
+  photoUrl?: string
 }
 export type IssuanceStatus = "draft" | "issued" | "voided"
 type StoredDocumentDetails = Exclude<DocumentDetails, { type: "FIRST_TIME_JOBSEEKER" | "FRANCHISE_CLEARANCE" }> | { type: "FRANCHISE_CLEARANCE"; tricycleId?: string } | Omit<Extract<DocumentDetails, { type: "FIRST_TIME_JOBSEEKER" }>, "parts">
@@ -164,6 +165,7 @@ export const issuanceApi = {
       sectors: [],
       residentSince: input.residentSinceBirth ? 0 : input.residentSinceYear,
       residentSinceBirth: input.residentSinceBirth,
+      photoUrl: input.photoUrl,
       address,
       houseNumber: input.houseNumber?.trim() ?? "",
       street: input.street.trim(),
