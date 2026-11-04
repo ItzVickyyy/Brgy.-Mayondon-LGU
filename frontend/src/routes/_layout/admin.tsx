@@ -58,8 +58,9 @@ function UsersTable() {
     .map((user: UserPublic) => ({
       ...user,
       isCurrentUser: currentUser?.id === user.id,
-      isLastActiveAdmin:
+      isLastActiveAdmin: Boolean(
         user.is_superuser && user.is_active && activeAdminCount <= 1,
+      ),
     }))
     .sort(
       (a, b) =>
