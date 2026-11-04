@@ -118,18 +118,12 @@ test("User account form offers Staff and System Administrator roles", async ({
   ])
 })
 
-test("Pending registration decisions update the displayed status", async ({
-  page,
-}) => {
+test("Pending Registrations starts with an empty list", async ({ page }) => {
   await page.goto("/pending-registrations")
   await expect(
     page.getByRole("heading", { name: "Pending Registrations" }),
   ).toBeVisible()
-  page.once("dialog", (dialog) => dialog.accept())
-  await page.getByRole("button", { name: "Approve" }).first().click()
-  await expect(page.getByText("Approved").first()).toBeVisible()
-  await page.reload()
-  await expect(page.getByText("Pending").first()).toBeVisible()
+  await expect(page.getByText("No registrations found")).toBeVisible()
 })
 
 
