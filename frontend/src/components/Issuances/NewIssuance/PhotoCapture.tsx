@@ -130,7 +130,6 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
     setCutout("")
     setOriginal("")
     setRemovalError("")
-    setUseOriginal(false)
     setPhase("camera")
   }
 
