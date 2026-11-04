@@ -120,18 +120,13 @@ test.describe("document catalog metadata", () => {
     expect(normalizeDocumentType("Marginalized Sector")).toBe("Marginalized Sector Certification (Pagpapatunay)")
   })
 
-  test("returns current signatories with the Punong Barangay first", () => {
+  test("returns no signatories until officials are configured", () => {
     const signatories = getSignatories()
-    expect(signatories[0]?.position).toBe("Punong Barangay")
-    expect(signatories.every((official) => official.status === "Current")).toBe(true)
-    expect(signatories.some((official) => official.position === "OIC Kagawad")).toBe(true)
+    expect(signatories).toEqual([])
   })
 
-  test("returns only current non-elected officials as witnesses", () => {
+  test("returns no witnesses until officials are configured", () => {
     const witnesses = getWitnesses()
-    expect(witnesses.length).toBeGreaterThan(0)
-    expect(witnesses.every((official) => official.status === "Current" && !official.elected)).toBe(true)
-    expect(witnesses.some((official) => official.position === "Barangay Clerk")).toBe(true)
-    expect(witnesses.some((official) => official.position === "Administrative Assistant")).toBe(true)
+    expect(witnesses).toEqual([])
   })
 })
