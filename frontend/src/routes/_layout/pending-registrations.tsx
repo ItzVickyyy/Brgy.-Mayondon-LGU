@@ -4,6 +4,7 @@ import { useMemo, useState } from "react"
 
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { TablePagination, usePagination } from "@/components/Common/TablePagination"
 import { formControlClass } from "@/components/Common/formStyles"
 import { RowActions } from "@/components/Common/RowActions"
 import { statusStyles } from "@/components/Common/statusStyles"
@@ -60,6 +61,7 @@ function PendingRegistrations() {
         return new Date(a.submitted).getTime() - new Date(b.submitted).getTime()
       })
   }, [registrations, search, statusFilter])
+  const registrationPagination = usePagination(visibleRegistrations, 10, search + "|" + statusFilter)
 
   const isAdmin = isSystemAdministrator(user)
   if (!isAdmin) return <NoPermission />
@@ -144,7 +146,7 @@ function PendingRegistrations() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {visibleRegistrations.map((row) => (
+              {registrationPagination.paginatedItems.map((row) => (
                 <tr key={row.username} className="transition-colors hover:bg-muted/30">
                   <td className="px-4 py-3 align-middle sm:px-5">
                     <div className="flex items-start gap-2">
@@ -204,9 +206,7 @@ function PendingRegistrations() {
             />
           ) : null}
         </div>
-        <div className="border-t px-4 py-3 text-xs text-muted-foreground sm:px-5">
-          Showing {visibleRegistrations.length} of {registrations.length} registrations
-        </div>
+        <TablePagination start={registrationPagination.start} end={registrationPagination.end} total={registrationPagination.total} pageIndex={registrationPagination.pageIndex} pageCount={registrationPagination.pageCount} onPageChange={registrationPagination.setPageIndex} />
       </section>
 
       <ConfirmDialog
