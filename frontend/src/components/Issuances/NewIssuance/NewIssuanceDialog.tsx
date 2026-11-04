@@ -3,7 +3,7 @@ import { ChevronDown, CircleAlert, CheckCircle2, Clock, Keyboard, Printer, Searc
 import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuanceForm"
 import { documentConfig, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
 import { getMissingResidentFields, getResidentAddress, issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
-import { sampleResidents, type ResidentRecord } from "@/components/Records/records-sample-data"
+import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { formControlClass } from "@/components/Common/formStyles"
