@@ -1,17 +1,21 @@
 # Document templates (reference only)
 
-Blank Word copies of the barangay's printed forms. They show the wording and layout that the print overlay must line up with (see [04-Documents-and-Printing.md](../../04-Documents-and-Printing.md)). **The system does not read these files.** It prints typed values only, onto the pre-printed paper.
+Word copies of the barangay's document forms are references for the typed-value overlay (see [04-Documents-and-Printing.md](../../04-Documents-and-Printing.md)). The system does not read these files. It prints typed values only, onto matching pre-printed paper.
 
-| File | Photo box |
-|---|---|
-| `Barangay_Clearance.docx` | Yes (photo and right thumbmark) |
-| `Barangay_Clearance_Electrical_and_Water.docx` | No |
-| `Barangay_Franchise_Clearance.docx` | No |
-| `Barangay_Certification_of_Indigency.docx` | No |
+| File | Print template | Photo box |
+|---|---|---|
+| `Barangay_Clearance.docx` | Yes — `clearance` | Yes (resident photo; thumbmark area stays blank) |
+| `Barangay_Clearance_Electrical_and_Water.docx` | Yes — `utility` | No |
+| `Barangay_Franchise_Clearance.docx` | Yes — `franchise` | No |
+| `Barangay_Certification_of_Indigency.docx` | Yes — `indigency` | No |
+| `Barangay_Certification_of_Marginalized_Sector.docx` | Yes — `marginalized` on page 1 and `assistance` on page 2 | No |
+| `Barangay_Certification_of_Residency.docx` | No | Not applicable |
+| `First-Time_Jobseekers.docx` | No | Not applicable |
 
-## Rules
+## Privacy and printing rules
 
-- **Blank forms only.** Never add a filled-in copy, a real name, an ID number, a signature image or a resident photo (see the privacy rule in 04).
-- The big watermark image inside each file was shrunk from about 8.5 MB to under 1 MB. Keep files small.
-- **Not added yet:** Residency, Marginalized Sector and First-Time Jobseekers. The client copies contain real names, signatures and a real photo. Add them only after they are scrubbed into blank forms.
-- The Barangay ID layout (`.pub`) is not stored here either. Only a photo-free reference image is safe to add.
+- **Privacy warning:** `Barangay_Certification_of_Residency.docx` contains real names and violates the repository's synthetic-data-only rule. It is flagged here for remediation, but has intentionally **not** been edited or deleted as instructed. Do not use it in screenshots, demos, print comparisons or sample data. Ask the repository owner/client to provide a scrubbed blank copy before using it as a reference.
+- Use synthetic data only. Never commit real names, ID numbers, resident photos, signature images or filled-in forms.
+- The system prints typed values only. Do not print labels, logos, watermarks, fixed paragraphs, signatures, dry-seal labels or footers. Keep thumbmark and resident-signature areas blank.
+- The files are reference documents. The print overlay does not parse or import their contents.
+- The Barangay ID layout (`.pub`) is not listed as a Word file and has no print template. ID front and back remain unsupported.
