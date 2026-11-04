@@ -14,7 +14,7 @@ export type QuickResidentInput = {
   suffix?: string
   birthdate: string
   birthplace?: string
-  sex: "Male" | "Female"
+  sex: "Male" | "Female" | ""
   civilStatus: string
   houseNumber?: string
   street: string
