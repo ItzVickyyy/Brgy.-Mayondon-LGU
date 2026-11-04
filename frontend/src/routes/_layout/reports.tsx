@@ -35,7 +35,7 @@ const documentTypeRows: { document: string; issued: number; voided: number; shar
 
 const purposeRows: { purpose: string; issued: number; share: string }[] = []
 
-const expiringRows: { resident: string; record: string; reference: string; expires: string; days: number; status: string; href: string }[] = []
+const expiringRows: { resident: string; record: string; reference: string; expires: string; days: number; status: "Expiring soon" | "Expired"; href: string }[] = []
 
 const importRows: { date: string; file: string; importedBy: string; imported: number; updated: number; skipped: number; failed: number }[] = []
 
