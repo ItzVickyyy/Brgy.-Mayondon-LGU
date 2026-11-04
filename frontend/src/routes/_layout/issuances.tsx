@@ -102,7 +102,7 @@ function getPreselectedResident() {
 }
 
 function IssuancesManagement() {
-    const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(false)
+  const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(false)
   const [isSimplifiedDialogOpen, setIsSimplifiedDialogOpen] = useState(() => Boolean(getPreselectedResident()))
   const [selectedType, setSelectedType] = useState<string>(documentTypes[0])
   const [residentQuery, setResidentQuery] = useState("")
@@ -136,7 +136,7 @@ function IssuancesManagement() {
   })
   const [drafts, setDrafts] = useState<IssuanceRecord[]>([])
   const autoSaveStatus = "saved" as const
-    const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
+  const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
   const [viewRecord, setViewRecord] = useState<IssuanceRecord | null>(null)
   const [notice, setNotice] = useState("")
   const [noticePrintRecord, setNoticePrintRecord] = useState<IssuanceRecord | null>(null)
