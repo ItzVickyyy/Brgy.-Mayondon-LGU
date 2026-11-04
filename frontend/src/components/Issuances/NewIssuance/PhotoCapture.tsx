@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react"
-import { Camera, ImageOff, LoaderCircle, RefreshCw, UserRound } from "lucide-react"
+import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react"
+import { Camera, ImageOff, LoaderCircle, RefreshCw, Upload, UserRound } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { canvasToPhotoUrl, cropToPortrait, PHOTO_HEIGHT, PHOTO_WIDTH, removeBackground } from "@/lib/photo-background"
+import { PHOTO_UPLOAD_ACCEPT, PHOTO_UPLOAD_OPEN_ERROR, validatePhotoFile } from "@/lib/photo-upload"
 
 type Phase = "camera" | "working"
 
@@ -18,12 +19,42 @@ type PhotoCaptureProps = {
   onChange: (photoUrl: string) => void
 }
 
-/** A photo box with a button that opens the camera. Used where a document needs the resident's picture. */
+type PhotoResult = PhotoVersions & { removalFailed: boolean }
+
+/** Makes the original and the cut-out from a portrait crop. If the background cannot be removed, only the original is kept. */
+async function makePhotoVersions(portrait: HTMLCanvasElement): Promise<PhotoResult> {
+  const original = canvasToPhotoUrl(portrait, false)
+  try {
+    const removed = await removeBackground(portrait)
+    return { cutout: canvasToPhotoUrl(removed, true), original, removalFailed: false }
+  } catch {
+    return { cutout: "", original, removalFailed: true }
+  }
+}
+
+/** Opens a chosen picture file as an image. The browser applies the photo's rotation (EXIF) when it is drawn. */
+async function loadImageFile(file: File): Promise<HTMLImageElement> {
+  const url = URL.createObjectURL(file)
+  try {
+    const image = new Image()
+    image.src = url
+    await image.decode()
+    if (!image.naturalWidth || !image.naturalHeight) throw new Error("empty image")
+    return image
+  } finally {
+    URL.revokeObjectURL(url)
+  }
+}
+
+/** A photo box with buttons to take a photo with the camera or upload a picture file. Used where a document needs the resident's picture. */
 export function PhotoCapture({ id, value, onChange }: PhotoCaptureProps) {
   const [open, setOpen] = useState(false)
   const [fallbackNotice, setFallbackNotice] = useState(false)
   const [photoVersions, setPhotoVersions] = useState<PhotoVersions | null>(null)
   const [keepOriginal, setKeepOriginal] = useState(false)
+  const [processing, setProcessing] = useState(false)
+  const [uploadError, setUploadError] = useState("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const lastManagedValue = useRef(value)
 
   useEffect(() => {
@@ -32,6 +63,7 @@ export function PhotoCapture({ id, value, onChange }: PhotoCaptureProps) {
     setPhotoVersions(null)
     setKeepOriginal(false)
     setFallbackNotice(false)
+    setUploadError("")
   }, [value])
 
   function applyPhoto(photoUrl: string) {
@@ -39,9 +71,10 @@ export function PhotoCapture({ id, value, onChange }: PhotoCaptureProps) {
     onChange(photoUrl)
   }
 
-  function handleUse({ cutout, original, removalFailed }: PhotoVersions & { removalFailed: boolean }) {
+  function handleUse({ cutout, original, removalFailed }: PhotoResult) {
     setPhotoVersions({ cutout, original })
     setKeepOriginal(false)
+    setUploadError("")
     setFallbackNotice(removalFailed)
     applyPhoto(removalFailed ? original : cutout)
     setOpen(false)
@@ -54,16 +87,50 @@ export function PhotoCapture({ id, value, onChange }: PhotoCaptureProps) {
     applyPhoto(checked ? photoVersions.original : photoVersions.cutout)
   }
 
+  async function handleFileChosen(event: ChangeEvent<HTMLInputElement>) {
+    const input = event.target
+    const file = input.files?.[0]
+    input.value = "" // so choosing the same file again still counts as a change
+    if (!file) return
+    const problem = validatePhotoFile(file)
+    if (problem) { setUploadError(problem); return }
+    setUploadError("")
+    setProcessing(true)
+    try {
+      const image = await loadImageFile(file)
+      handleUse(await makePhotoVersions(cropToPortrait(image)))
+    } catch {
+      setUploadError(PHOTO_UPLOAD_OPEN_ERROR)
+    } finally {
+      setProcessing(false)
+    }
+  }
+
+  const hint = processing
+    ? "Removing the background. This stays on this computer."
+    : fallbackNotice
+      ? "Background could not be removed. Using the original photo."
+      : value
+        ? "Photo ready. Retake or upload another if needed."
+        : "Use the camera or upload a picture of the resident’s face."
+
   return (
     <div className="flex items-center gap-4">
       <div className="flex h-28 w-[84px] shrink-0 items-center justify-center overflow-hidden rounded-md border bg-white">
         {value ? <img src={value} alt="Resident, head and shoulders" className="size-full object-cover" /> : <UserRound className="size-8 text-muted-foreground/50" aria-hidden="true" />}
       </div>
       <div className="flex min-w-0 flex-col items-start gap-1.5">
-        <Button id={id} type="button" variant={value ? "outline" : "default"} onClick={() => setOpen(true)}>
-          <Camera className="size-4" aria-hidden="true" />{value ? "Retake photo" : "Take photo"}
-        </Button>
-        <p className="text-xs text-muted-foreground">{fallbackNotice ? "Background could not be removed. Using the original photo." : value ? "Photo ready. Retake it if needed." : "Use the camera to capture the resident’s photo."}</p>
+        <div className="flex flex-wrap gap-2">
+          <Button id={id} type="button" variant={value ? "outline" : "default"} onClick={() => setOpen(true)} disabled={processing}>
+            <Camera className="size-4" aria-hidden="true" />{value ? "Retake photo" : "Take photo"}
+          </Button>
+          <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()} disabled={processing}>
+            {processing ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <Upload className="size-4" aria-hidden="true" />}Upload photo
+          </Button>
+          <input ref={fileInputRef} type="file" accept={PHOTO_UPLOAD_ACCEPT} onChange={(event) => void handleFileChosen(event)} className="hidden" aria-label="Choose a picture file" tabIndex={-1} />
+        </div>
+        <p className="text-xs text-muted-foreground" role={processing ? "status" : undefined}>{hint}</p>
+        {uploadError ? <p className="text-xs text-destructive" role="alert">{uploadError}</p> : null}
         {photoVersions?.cutout ? (
           <label className="flex min-h-11 cursor-pointer items-center gap-2 text-xs text-muted-foreground">
             <input
@@ -92,7 +159,7 @@ function cameraErrorMessage(error: unknown) {
   return "The camera could not be started. Please try again."
 }
 
-function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOpenChange: (open: boolean) => void; onUse: (photos: PhotoVersions & { removalFailed: boolean }) => void }) {
+function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOpenChange: (open: boolean) => void; onUse: (photos: PhotoResult) => void }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const [phase, setPhase] = useState<Phase>("camera")
@@ -152,15 +219,8 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
     if (!video?.videoWidth) return
     const portrait = cropToPortrait(video)
     stopCamera()
-    const originalUrl = canvasToPhotoUrl(portrait, false)
     setPhase("working")
-    try {
-      const removed = await removeBackground(portrait)
-      const cutoutUrl = canvasToPhotoUrl(removed, true)
-      onUse({ cutout: cutoutUrl, original: originalUrl, removalFailed: false })
-    } catch {
-      onUse({ cutout: "", original: originalUrl, removalFailed: true })
-    }
+    onUse(await makePhotoVersions(portrait))
   }
 
   return (

@@ -227,6 +227,12 @@ export const issuanceApi = {
     return { plate, motor, match: match ? { ...match, associationName: associations[match.associationId - 1] ?? "" } : undefined }
   },
 
+  /** Looks up a tricycle by the id stored on a franchise issuance (needed to print it). */
+  async getTricycle(id?: string) {
+    const match = id ? mockTricycles.find((tricycle) => tricycle.id === id) : undefined
+    return match ? { ...match, associationName: associations[match.associationId - 1] ?? "" } : undefined
+  },
+
   async createIssuance(input: IssuanceInput): Promise<CreateIssuanceResult> {
     const parsed = input.status === "draft" ? input : issuanceInputSchema.parse(input)
     // Only a finished issuance adds to the suggestion lists. Half-typed draft text must not.

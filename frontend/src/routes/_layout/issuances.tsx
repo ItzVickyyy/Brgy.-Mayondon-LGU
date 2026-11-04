@@ -11,6 +11,7 @@ import {
   Pencil,
   Printer,
   Search,
+  Settings2,
   X,
 } from "lucide-react"
 import { Fragment, useEffect, useMemo, useState } from "react"
@@ -33,7 +34,9 @@ import {
 import { FormSection, SummaryCard } from "@/components/Issuances/IssuanceLayout"
 import { IssuanceDetailsView } from "@/components/Issuances/IssuanceDetailsView"
 import { DateField } from "@/components/Issuances/DateField"
+import { CalibrationPanel } from "@/components/Issuances/CalibrationPanel"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
+import { usePrintIssuance } from "@/components/Issuances/usePrintIssuance"
 import { NewIssuanceDialog } from "@/components/Issuances/NewIssuance/NewIssuanceDialog"
 import { documentConfig } from "@/components/Issuances/NewIssuance/documentConfig"
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
@@ -137,6 +140,8 @@ function IssuancesManagement() {
   const [drafts, setDrafts] = useState<IssuanceRecord[]>([])
   const autoSaveStatus = "saved" as const
   const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
+  const [printSetupOpen, setPrintSetupOpen] = useState(false)
+  const { print: printStoredIssuance, overlay: printOverlay } = usePrintIssuance()
   const [viewRecord, setViewRecord] = useState<IssuanceRecord | null>(null)
   const [notice, setNotice] = useState("")
   const [noticePrintRecord, setNoticePrintRecord] = useState<IssuanceRecord | null>(null)
@@ -435,9 +440,15 @@ function IssuancesManagement() {
     setNotice("")
   }
 
-  function printNow(_record?: IssuanceRecord) {
-    setNotice("Printing is paused until paper positions are calibrated.")
+  /** Prints a history record on the pre-printed form. Only records saved by the New Issuance flow carry a stored id. */
+  async function printNow(record?: IssuanceRecord) {
     setNoticePrintRecord(null)
+    const storedId = record?.fields.mockIssuanceId
+    if (!storedId) {
+      setNotice("This record was made with the old form and has no saved print data. Use New Issuance to issue it again.")
+      return
+    }
+    setNotice(await printStoredIssuance(storedId))
   }
 
   function renderField(field: (typeof allFormFields)[number]) {
@@ -550,14 +561,20 @@ function IssuancesManagement() {
             past issuances.
           </p>
         </div>
-        <Button
-          size="default"
-          className="min-h-11 w-full sm:w-auto"
-          onClick={() => setIsSimplifiedDialogOpen(true)}
-        >
-          <Plus aria-hidden="true" />
-          New Issuance
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button type="button" variant="outline" className="min-h-11 w-full sm:w-auto" onClick={() => setPrintSetupOpen(true)}>
+            <Settings2 aria-hidden="true" />
+            Printing setup
+          </Button>
+          <Button
+            size="default"
+            className="min-h-11 w-full sm:w-auto"
+            onClick={() => setIsSimplifiedDialogOpen(true)}
+          >
+            <Plus aria-hidden="true" />
+            New Issuance
+          </Button>
+        </div>
       </header>
 
       {notice && (
@@ -770,7 +787,7 @@ function IssuancesManagement() {
         onOpenChange={setIsSimplifiedDialogOpen}
         initialResidentId={getPreselectedResident()}
         onDraftRemoved={(id) => setDrafts((previous) => previous.filter((draft) => draft.fields.mockIssuanceId !== id))}
-        onPrint={() => printNow()}
+        onPrint={(record) => printStoredIssuance(record.id)}
         onSaved={(record, meta) => {
           const resident = issuanceApi.getResident(record.residentId)
           const type = documentConfig[record.documentType].name
@@ -797,7 +814,7 @@ function IssuancesManagement() {
               : [historyRecord, ...previous])
           } else setHistoryRecords((previous) => [historyRecord, ...previous])
           if (meta?.auto) return
-          setNotice(record.status === "draft" ? `${record.referenceNo} was saved as a draft.` : `${record.referenceNo} was recorded as issued. Printing remains paused.`)
+          setNotice(record.status === "draft" ? `${record.referenceNo} was saved as a draft.` : `${record.referenceNo} was recorded as issued.`)
           setNoticePrintRecord(null)
         }}
       />
@@ -1131,6 +1148,17 @@ function IssuancesManagement() {
           />
         )}
       </section>
+
+      <Dialog open={printSetupOpen} onOpenChange={setPrintSetupOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Printing setup</DialogTitle>
+            <DialogDescription>Line the typed text up with the pre-printed forms. Saved on this computer only.</DialogDescription>
+          </DialogHeader>
+          <CalibrationPanel />
+        </DialogContent>
+      </Dialog>
+      {printOverlay}
 
       <section
         id="issuance-print"

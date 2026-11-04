@@ -50,7 +50,7 @@ export function PrintSummaryPanel({ type, values, currentDate, fields, structure
       ) : showMissing ? (
         printingPaused ? <p className="text-sm text-muted-foreground">All required fields are complete.</p> : <p className={cn("flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold", statusStyles.Issued)}><CheckCircle2 aria-hidden="true" className="size-4 shrink-0" />Ready to issue</p>
       ) : null}
-      <p className="mt-4 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">{printingPaused ? "Preview only. Printing is paused until paper positions are calibrated." : `After printing: ${type === "Barangay Clearance" ? "Resident signs and thumbmarks; apply the dry seal." : type === "Certification (assistance request)" ? "Kagawad signs." : "Apply the dry seal."}`}</p>
+      <p className="mt-4 rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">{printingPaused ? "Preview only. The document prints after it is issued." : `After printing: ${type === "Barangay Clearance" ? "Resident signs and thumbmarks; apply the dry seal." : type === "Certification (assistance request)" ? "Kagawad signs." : "Apply the dry seal."}`}</p>
     </div>
   )
 }
