@@ -47,7 +47,7 @@ function BackupRestore() {
   const [notice, setNotice] = useState("")
   const backups = sampleBackups
   const [confirmRestore, setConfirmRestore] = useState(false)
-  const [selectedBackup, setSelectedBackup] = useState(sampleBackups[0].name)
+  const [selectedBackup, setSelectedBackup] = useState("")
   const [restoreConfirmation, setRestoreConfirmation] = useState("")
 
   if (!isSystemAdministrator(user)) return <NoPermission />
@@ -110,7 +110,7 @@ function BackupRestore() {
             </div>
             <div className="flex justify-between gap-4">
               <span className="text-muted-foreground">Last backup</span>
-              <span className="font-medium">Oct 28, 2026 · 9:00 AM</span>
+              <span className="font-medium">{latestBackup?.date ?? "No backups yet"}</span>
             </div>
           </div>
           <Button className="mt-5 min-h-11 w-full" onClick={() => setNotice("")}>
@@ -175,7 +175,7 @@ function BackupRestore() {
             <p className="mt-1 text-sm text-muted-foreground">Review available backup archives and recovery readiness.</p>
           </div>
           {latestBackup && daysSinceLatest !== null ? (
-            <Badge variant="outline" className={daysSinceLatest > 1 ? statusStyles["Expiring soon"] : statusStyles.Verified}>
+            <Badge variant="outline" className={(daysSinceLatest ?? 0) > 1 ? statusStyles["Expiring soon"] : statusStyles.Verified}>
               Last backup {daysSinceLatest === 0 ? "today" : `${daysSinceLatest} day${daysSinceLatest === 1 ? "" : "s"} ago`}
             </Badge>
           ) : null}
@@ -262,6 +262,7 @@ function BackupRestore() {
             Backup archive
             <select
               value={selectedBackup}
+              disabled={sortedBackups.length === 0}
               onChange={(event) => {
                 setSelectedBackup(event.target.value)
                 setConfirmRestore(false)
@@ -309,7 +310,7 @@ function BackupRestore() {
             <Button
               variant="destructive"
               className="mt-4 min-h-11"
-              disabled={restoreConfirmation !== "RESTORE"}
+              disabled={!selectedBackup || !sortedBackups.some((backup) => backup.name === selectedBackup) || restoreConfirmation !== "RESTORE"}
               onClick={() => {
                 setNotice("Restore request confirmed.")
                 setConfirmRestore(false)
