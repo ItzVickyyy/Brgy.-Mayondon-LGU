@@ -121,9 +121,6 @@ function UsersTable() {
           </select>
         </label>
       </div>
-      <div className="px-4 text-xs text-muted-foreground sm:px-5">
-        Showing {visibleData.length} of {tableData.length} accounts
-      </div>
       <DataTable
         columns={columns}
         data={visibleData}
