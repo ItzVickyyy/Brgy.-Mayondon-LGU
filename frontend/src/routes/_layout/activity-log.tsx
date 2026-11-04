@@ -28,78 +28,7 @@ type ActivityRow = {
   outcome: ActivityOutcome
 }
 
-const rows: ActivityRow[] = [
-  {
-    timestamp: "2026-10-28T10:42:00",
-    user: "admin",
-    owner: "other",
-    action: "Updated resident details",
-    reason: "Corrected address after resident verification",
-    module: "Resident Records",
-    recordReference: "RES-0001",
-    recordHref: "/records",
-    outcome: "Success",
-  },
-  {
-    timestamp: "2026-10-28T09:55:00",
-    user: "staff",
-    owner: "current",
-    action: "Prepared document request",
-    module: "Issuances",
-    recordReference: "ISS-0004",
-    recordHref: "/issuances",
-    outcome: "Success",
-  },
-  {
-    timestamp: "2026-10-28T08:04:00",
-    user: "staff",
-    owner: "current",
-    action: "Signed in to the system",
-    module: "Authentication",
-    outcome: "Success",
-  },
-  {
-    timestamp: "2026-10-27T16:10:00",
-    user: "admin",
-    owner: "other",
-    action: "Changed user account status",
-    module: "User Accounts",
-    recordReference: "USR-0002",
-    recordHref: "/admin",
-    outcome: "Success",
-  },
-  {
-    timestamp: "2026-10-27T15:48:00",
-    user: "admin",
-    owner: "other",
-    action: "Voided issuance",
-    reason: "Incorrect connection type selected",
-    module: "Issuances",
-    recordReference: "ISS-003",
-    recordHref: "/issuances",
-    outcome: "Success",
-  },
-  {
-    timestamp: "2026-10-27T15:32:00",
-    user: "staff",
-    owner: "current",
-    action: "Imported masterlist",
-    module: "Resident Records",
-    recordReference: "IMP-2026-10-27",
-    recordHref: "/records",
-    outcome: "Failed",
-    reason: "Some rows could not be imported",
-  },
-  {
-    timestamp: "2026-10-27T14:20:00",
-    user: "staff",
-    owner: "other",
-    action: "Access attempt denied",
-    module: "Authentication",
-    outcome: "Denied",
-    reason: "Account did not have permission for the requested action",
-  },
-]
+const rows: ActivityRow[] = []
 
 const filterLabelClass = "flex min-w-0 flex-col gap-1.5 text-xs font-medium text-muted-foreground"
 
