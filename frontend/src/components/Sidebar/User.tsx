@@ -4,7 +4,6 @@ import {
   Info,
   Languages,
   LogOut,
-  Settings,
   UserRound,
 } from "lucide-react"
 import { useState } from "react"
@@ -13,7 +12,6 @@ import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -29,7 +27,6 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useSidebar } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
-import { type Theme, useTheme } from "@/components/theme-provider"
 
 export function User({
   user,
@@ -39,10 +36,8 @@ export function User({
   compact?: boolean
 }) {
   const { logout } = useAuth()
-  const { setTheme, theme } = useTheme()
   const { isMobile, setOpenMobile } = useSidebar()
   const [accountOpen, setAccountOpen] = useState(false)
-  const [userSettingsOpen, setUserSettingsOpen] = useState(false)
   const [selectedLanguage, setSelectedLanguage] = useState<
     "English" | "Filipino"
   >("English")
@@ -112,10 +107,6 @@ export function User({
               <UserRound className="size-4" />
               My Account
             </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => setUserSettingsOpen(true)}>
-              <Settings className="size-4" />
-              User Settings
-            </DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger className="gap-2 data-[state=open]:text-foreground">
                 <Languages className="size-4 text-muted-foreground" />
@@ -184,37 +175,6 @@ export function User({
         onOpenChange={setAccountOpen}
         user={user}
       />
-      <Dialog open={userSettingsOpen} onOpenChange={setUserSettingsOpen}>
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
-          <DialogHeader>
-            <DialogTitle>User Settings</DialogTitle>
-            <DialogDescription>
-              Choose how the application appears on this device.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="mt-4 rounded-lg border p-4">
-            <label
-              htmlFor="user-settings-theme"
-              className="mb-2 block text-sm font-medium"
-            >
-              Appearance
-            </label>
-            <select
-              id="user-settings-theme"
-              value={theme}
-              onChange={(event) => setTheme(event.target.value as Theme)}
-              className="min-h-11 w-full rounded-md border bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-              <option value="system">System</option>
-            </select>
-            <p className="mt-2 text-sm text-muted-foreground">
-              System follows your device's appearance preference.
-            </p>
-          </div>
-        </DialogContent>
-      </Dialog>
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
