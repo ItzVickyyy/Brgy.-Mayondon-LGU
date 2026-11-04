@@ -127,7 +127,7 @@ function RecordsManagement() {
       {view === "residents" && (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard icon={Users} label="Resident Records" value="4" description="Resident records in this view" />
+            <StatCard icon={Users} label="Resident Records" value={String(residents.length)} description="Resident records in this view" />
             <StatCard icon={CreditCard} label="ID and Registration Details" value="Included" description="Resident registration and ID details" />
             <StatCard icon={Archive} label="Record Removal" value="Archive" description="Prefer inactive status over permanent deletion" />
           </div>
