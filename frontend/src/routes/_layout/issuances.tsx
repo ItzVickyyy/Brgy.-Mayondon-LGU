@@ -925,9 +925,7 @@ function IssuancesManagement() {
           <div className="flex items-center justify-between gap-3">
             <div>
               <h2 className="font-semibold tracking-tight">Issuance History</h2>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Showing {issuancePagination.start}–{issuancePagination.end} of {issuancePagination.total} records
-              </p>
+              <p className="mt-1 text-sm text-muted-foreground">Search and filter issuance records.</p>
             </div>
             {hasFilters && (
               <Button
