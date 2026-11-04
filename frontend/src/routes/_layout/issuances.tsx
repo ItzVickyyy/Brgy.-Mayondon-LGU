@@ -601,7 +601,7 @@ function IssuancesManagement() {
 
       {/* New issuance dialog */}
       <Dialog open={isIssuanceModalOpen} onOpenChange={requestCloseForm}>
-        <DialogContent className="print:hidden flex max-h-[96dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-7xl" onOpenAutoFocus={(event) => { event.preventDefault(); document.getElementById(initialResident ? "field-purpose" : "resident-search")?.focus() }}>
+        <DialogContent className="print:hidden flex max-h-[96dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-7xl" onOpenAutoFocus={(event) => { event.preventDefault(); document.getElementById("resident-search")?.focus() }}>
           <DialogHeader className="border-b px-5 py-4 pr-12 sm:px-6">
             <DialogTitle className="text-lg">New Issuance</DialogTitle>
             <DialogDescription>Fill in the details once, then check the print preview. Fields marked * are required to issue.</DialogDescription>
