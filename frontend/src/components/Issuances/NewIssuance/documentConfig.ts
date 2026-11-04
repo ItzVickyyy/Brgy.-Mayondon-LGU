@@ -4,7 +4,6 @@ export type DocumentCode =
   | "BARANGAY_CLEARANCE"
   | "FRANCHISE_CLEARANCE"
   | "UTILITY_CLEARANCE"
-  | "BUILDING_CLEARANCE"
   | "RESIDENCY"
   | "INDIGENCY"
   | "PHILHEALTH_CERT"
@@ -108,14 +107,6 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
       { name: "classification", label: "Classification", type: "radio", required: true, options: ["Residential", "Commercial"], group: "main" },
       { name: "location", label: "Location", type: "text", required: true, default: "Barangay Mayondon", group: "main" },
       ...ctcFields, ...stampFields,
-    ],
-  },
-  BUILDING_CLEARANCE: {
-    code: "BUILDING_CLEARANCE", name: "Building Clearance", shortName: "Building Clearance", category: "clearance",
-    hint: "Building / construction", printMode: "overlay", validityMonths: null, onePerResident: false,
-    signatoryMode: "preprinted", residentNeeds: [], fields: [
-      { name: "location", label: "Location", type: "text", required: true, default: "Barangay Mayondon", group: "main" },
-      ...identityFields, ...paymentFields,
     ],
   },
   RESIDENCY: {

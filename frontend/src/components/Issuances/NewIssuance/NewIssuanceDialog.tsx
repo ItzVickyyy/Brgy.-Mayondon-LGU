@@ -37,7 +37,6 @@ const printedNameType: Record<DocumentCode, string> = {
   BARANGAY_CLEARANCE: "Barangay Clearance",
   FRANCHISE_CLEARANCE: "Barangay Franchise Clearance",
   UTILITY_CLEARANCE: "Barangay Clearance, Electrical and Water Connection",
-  BUILDING_CLEARANCE: "Building Clearance",
   PHILHEALTH_CERT: "PhilHealth Certification",
   RESIDENCY: "Certification of Residency",
   INDIGENCY: "Certificate of Indigency",
@@ -47,7 +46,7 @@ const printedNameType: Record<DocumentCode, string> = {
   BARANGAY_ID: "Barangay ID",
 }
 const stampDocuments: DocumentCode[] = ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"]
-const identityDocuments: DocumentCode[] = [...stampDocuments, "BUILDING_CLEARANCE"]
+const identityDocuments: DocumentCode[] = stampDocuments
 const availableSignatories = initialOfficials.filter((official) => official.status === "Current" && ["Punong Barangay", "Barangay Kagawad", "Barangay Clerk", "Administrative Assistant", "SK Chairperson", "OIC Kagawad"].includes(official.position))
 type PaymentKey = "officialReceiptNo" | "isFree" | "dateOfPayment" | "certifiedBy"
 const paymentKeyOf = (fieldName: string): PaymentKey => (fieldName === "isFree" || fieldName === "dateOfPayment" || fieldName === "certifiedBy" ? fieldName : "officialReceiptNo")

@@ -15,8 +15,6 @@ export function defaultDetails(code: DocumentCode): DocumentDetails {
       return { type: code, associationName: "", make: "", bodyType: "TRICYCLE", motorNumber: "", color: "", plateNumber: "" }
     case "UTILITY_CLEARANCE":
       return { type: code, services: [], connectionType: "new", classification: "residential", location: "Barangay Mayondon" }
-    case "BUILDING_CLEARANCE":
-      return { type: code, location: "Barangay Mayondon" }
     case "RESIDENCY":
       return { type: code }
     case "INDIGENCY":

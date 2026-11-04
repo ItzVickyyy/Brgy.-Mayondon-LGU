@@ -23,7 +23,7 @@ export function formatPrintedName(
   const middle = middleName.trim()
   const last = lastName.trim()
   const ext = suffix.trim()
-  if (documentType === "Barangay Clearance" || documentType === "Building Clearance") {
+  if (documentType === "Barangay Clearance") {
     return [last ? `${last.toUpperCase()},` : "", first, middle, ext].filter(Boolean).join(" ").toUpperCase()
   }
   const middleInitial = middle ? `${middle.replace(/\./g, "").charAt(0).toUpperCase()}.` : ""

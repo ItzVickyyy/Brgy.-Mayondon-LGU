@@ -26,7 +26,6 @@ const detailsSchemas = {
   BARANGAY_CLEARANCE: z.object({ type: z.literal("BARANGAY_CLEARANCE"), purposeNote: z.string().optional(), referredByOfficialId: z.string().optional() }),
   FRANCHISE_CLEARANCE: z.object({ type: z.literal("FRANCHISE_CLEARANCE"), associationName: nonEmpty, make: nonEmpty, bodyType: nonEmpty, motorNumber: nonEmpty, color: nonEmpty, plateNumber: nonEmpty }),
   UTILITY_CLEARANCE: z.object({ type: z.literal("UTILITY_CLEARANCE"), services: z.array(z.enum(["electric", "water"])).min(1), connectionType: z.enum(["new", "reconnection"]), classification: z.enum(["residential", "commercial"]), location: nonEmpty }),
-  BUILDING_CLEARANCE: z.object({ type: z.literal("BUILDING_CLEARANCE"), location: nonEmpty }),
   RESIDENCY: z.object({ type: z.literal("RESIDENCY") }),
   INDIGENCY: z.object({ type: z.literal("INDIGENCY"), addressedToOffice: nonEmpty, requestedBy: z.string().optional() }),
   PHILHEALTH_CERT: z.object({ type: z.literal("PHILHEALTH_CERT"), cardType: nonEmpty }),
@@ -40,7 +39,6 @@ export const documentDetailsSchema = z.discriminatedUnion("type", [
   detailsSchemas.BARANGAY_CLEARANCE,
   detailsSchemas.FRANCHISE_CLEARANCE,
   detailsSchemas.UTILITY_CLEARANCE,
-  detailsSchemas.BUILDING_CLEARANCE,
   detailsSchemas.RESIDENCY,
   detailsSchemas.INDIGENCY,
   detailsSchemas.PHILHEALTH_CERT,
@@ -60,7 +58,7 @@ export type DocumentDetailsByCode = { [K in DocumentCode]: Extract<DocumentDetai
 
 const baseIssuanceSchema = z.object({
   documentType: z.enum([
-    "BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE", "BUILDING_CLEARANCE", "RESIDENCY", "INDIGENCY", "PHILHEALTH_CERT",
+    "BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE", "RESIDENCY", "INDIGENCY", "PHILHEALTH_CERT",
     "ASSISTANCE", "MARGINALIZED_SECTOR", "FIRST_TIME_JOBSEEKER", "BARANGAY_ID",
   ]),
   issueDate: isoDate,
@@ -95,11 +93,11 @@ const baseIssuanceSchema = z.object({
     if (hasAvailableSignatory && ["RESIDENCY", "ASSISTANCE", "MARGINALIZED_SECTOR", "FIRST_TIME_JOBSEEKER"].includes(value.documentType) && !value.signatoryOfficialId) {
       context.addIssue({ code: "custom", path: ["signatoryOfficialId"], message: "Choose a signatory." })
     }
-    const codeNeedsIdentity: DocumentCode[] = ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE", "BUILDING_CLEARANCE"]
+    const codeNeedsIdentity: DocumentCode[] = ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"]
     if (codeNeedsIdentity.includes(value.documentType as DocumentCode) && !value.identification) {
       context.addIssue({ code: "custom", path: ["identification"], message: "Proof of identity is required." })
     }
-    if (["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE", "BUILDING_CLEARANCE"].includes(value.documentType) && !value.payment) {
+    if (["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"].includes(value.documentType) && !value.payment) {
       context.addIssue({ code: "custom", path: ["payment"], message: "Payment details are required." })
     }
   }
