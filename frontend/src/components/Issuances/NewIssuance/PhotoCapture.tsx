@@ -142,7 +142,7 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
         <DialogHeader>
           <DialogTitle>Take a photo</DialogTitle>
           <DialogDescription>
-            {phase === "camera" ? "Ask the resident to face the camera with the head and shoulders inside the frame." : phase === "working" ? "Removing the background. This stays on this computer." : "Check the photo. It will be placed in the photo box of the document."}
+            {phase === "camera" ? "Ask the resident to face the camera with the head and shoulders inside the frame." : phase === "working" ? "Removing the background. This stays on this computer." : "The photo is applied automatically when processing finishes."}
           </DialogDescription>
         </DialogHeader>
 
