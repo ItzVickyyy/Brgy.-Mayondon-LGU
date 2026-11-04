@@ -17,35 +17,34 @@ test("Issuances Management page is accessible", async ({ page }) => {
   ).toBeVisible()
 })
 
-test("Records Management page displays sample resident records", async ({
+test("Records Management page starts with an empty resident list", async ({
   page,
 }) => {
   await page.goto("/records")
   await expect(
     page.getByRole("heading", { name: "Resident Records" }),
   ).toBeVisible()
-  await expect(page.getByText("Resident One")).toBeVisible()
+  await expect(page.getByText("No matching residents")).toBeVisible()
 
-  const search = page.getByPlaceholder("Search name, address, ID, or status...")
+  const search = page.getByPlaceholder("Search name, address, or ID number...")
   await search.fill("Resident One")
-  await expect(page.getByText("Resident One")).toBeVisible()
-  await expect(page.getByText("Resident Two")).not.toBeVisible()
+  await expect(page.getByText("No matching residents")).toBeVisible()
 })
 
 test("Records Management search filters results", async ({ page }) => {
   await page.goto("/records")
   await page
-    .getByPlaceholder("Search name, address, ID, or status...")
+    .getByPlaceholder("Search name, address, or ID number...")
     .fill("no-record-matches-this")
   await expect(page.getByText("Resident One")).not.toBeVisible()
 })
 
-test("Officials page displays sample officials", async ({ page }) => {
+test("Officials page starts with an empty officials list", async ({ page }) => {
   await page.goto("/officials")
   await expect(
     page.getByRole("heading", { name: "Officials", exact: true }),
   ).toBeVisible()
-  await expect(page.getByText("Barangay Captain")).toBeVisible()
+  await expect(page.getByText("No matching officials")).toBeVisible()
 })
 
 test("Officials search filters results", async ({ page }) => {
@@ -73,7 +72,7 @@ test("Barangay IDs route displays the ID management page", async ({
   await expect(
     page.getByRole("heading", { name: "Barangay ID Management" }),
   ).toBeVisible()
-  await expect(page.getByText("Resident One")).toBeVisible()
+  await expect(page.getByText("No ID records match your search")).toBeVisible()
 })
 
 test("Request Access presents the staff access form", async ({
