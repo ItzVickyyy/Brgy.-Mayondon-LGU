@@ -444,7 +444,7 @@ function IssuancesManagement() {
     if (field.showWhen && !field.showWhen(formValues)) return null
     const value = field.name === "age"
       ? formValues.birthdate ? calculateAge(formValues.birthdate, formValues.date || localDateValue()) : (selectedType === "Certificate of Indigency" ? formValues.ageManual ?? "" : "")
-      : formValues[field.name] ?? ""
+      : (formValues as Record<string, string>)[field.name] ?? ""
     const error = validationErrors[field.name]
     const fieldId = `field-${field.name}`
     const options = field.name === "referredBy"
