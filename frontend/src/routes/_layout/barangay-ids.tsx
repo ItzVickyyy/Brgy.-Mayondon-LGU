@@ -41,44 +41,7 @@ type BarangayIdRecord = {
   photoAvailable: boolean
 }
 
-const sampleIds: BarangayIdRecord[] = [
-  {
-    reference: "ID-0001",
-    resident: "Resident One",
-    idNumber: "18-128-3597-0001",
-    registrationStatus: "Registered",
-    expiresOn: "2027-01-15",
-    status: "Valid",
-    photoAvailable: true,
-  },
-  {
-    reference: "ID-0002",
-    resident: "Resident Two",
-    idNumber: "18-128-3597-0002",
-    registrationStatus: "Unregistered",
-    expiresOn: "2026-11-20",
-    status: "Expiring soon",
-    photoAvailable: false,
-  },
-  {
-    reference: "ID-0003",
-    resident: "Resident Three",
-    idNumber: "18-128-3597-0003",
-    registrationStatus: "Registered",
-    expiresOn: "2025-08-01",
-    status: "Expired",
-    photoAvailable: true,
-  },
-  {
-    reference: "ID-0004",
-    resident: "Resident Four",
-    idNumber: "18-128-3597-0004",
-    registrationStatus: "Unregistered",
-    expiresOn: "2026-03-12",
-    status: "Archived",
-    photoAvailable: true,
-  },
-]
+const sampleIds: BarangayIdRecord[] = []
 
 function formatDate(value: string) {
   const parsed = new Date(`${value}T00:00:00`)
