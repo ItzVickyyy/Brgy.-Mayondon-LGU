@@ -78,7 +78,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const [residents, setResidents] = useState<ResidentRecord[]>([])
   const [residentQuery, setResidentQuery] = useState("")
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
-  const [selectedResident, setSelectedResident] = useState<ResidentRecord | null>(() => sampleResidents.find((resident) => resident.id === initialResidentId || resident.name === initialResidentId) ?? null)
+  const [selectedResident, setSelectedResident] = useState<ResidentRecord | null>(null)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [quickAdd, setQuickAdd] = useState<QuickResidentInput>(emptyQuickAdd)
   const [residentUpdates, setResidentUpdates] = useState<ResidentPatch>({})
@@ -109,7 +109,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const config = documentConfig[documentType]
   // Read during render so react-hook-form keeps isDirty up to date for the discard prompt.
   const formDirty = form.formState.isDirty
-  const allResidents = useMemo(() => [...sampleResidents, ...residents], [residents])
+  const allResidents = useMemo(() => residents, [residents])
   const matches = useMemo(() => {
     const query = residentQuery.trim().toLowerCase()
     if (!query || selectedResident) return []
@@ -827,7 +827,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               </div> : null}
             </IssuanceSection>
 
-            {needsPhoto ? <IssuanceSection id="issuance-step-photo" step={3} title="Photo" description="This document needs the resident's picture. Take it now with the camera." done={photoDone}>
+            {needsPhoto ? <IssuanceSection id="issuance-step-photo" step={3} title="Photo" description="Capture the resident’s photo. It will appear in the photo box automatically." done={photoDone}>
               {selectedResident
                 ? <div className={fieldLabelClass}>
                     <span id="resident-missing-photo-label">Resident's photo <span className="text-destructive">*</span></span>
