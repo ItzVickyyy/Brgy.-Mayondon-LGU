@@ -13,6 +13,7 @@ import { useState } from "react"
 
 import { NoPermission } from "@/components/Common/NoPermission"
 import { RowActions } from "@/components/Common/RowActions"
+import { TablePagination, usePagination } from "@/components/Common/TablePagination"
 import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
@@ -53,6 +54,7 @@ function BackupRestore() {
   if (!isSystemAdministrator(user)) return <NoPermission />
 
   const sortedBackups = [...backups].sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+  const backupPagination = usePagination(sortedBackups, 10, backups.length)
   const latestBackup = sortedBackups[0]
   const daysSinceLatest = latestBackup
     ? Math.max(0, Math.floor((Date.now() - new Date(latestBackup.createdAt).getTime()) / 86400000))
@@ -190,7 +192,7 @@ function BackupRestore() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {sortedBackups.map((backup) => (
+              {backupPagination.paginatedItems.map((backup) => (
                 <tr key={backup.name} className="transition-colors hover:bg-muted/30">
                   <td className="px-4 py-3 align-middle sm:px-5">
                     <span className="font-mono font-medium">{backup.name}</span>
@@ -238,9 +240,7 @@ function BackupRestore() {
           </table>
           {sortedBackups.length === 0 ? <EmptyState title="No backups found" description="Create a backup to begin building recovery history." /> : null}
         </div>
-        <div className="border-t px-4 py-3 text-xs text-muted-foreground sm:px-5">
-          Showing {sortedBackups.length} of {backups.length} backups
-        </div>
+        <TablePagination start={backupPagination.start} end={backupPagination.end} total={backupPagination.total} pageIndex={backupPagination.pageIndex} pageCount={backupPagination.pageCount} onPageChange={backupPagination.setPageIndex} />
       </section>
 
       <section className="rounded-xl border border-destructive/30 bg-card p-4 shadow-sm sm:p-5">
