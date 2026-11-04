@@ -3,6 +3,7 @@ import { Search } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { TablePagination, usePagination } from "@/components/Common/TablePagination"
 import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
@@ -109,6 +110,7 @@ function ActivityLog() {
       })
       .sort((a, b) => b.timestamp.localeCompare(a.timestamp))
   }, [endDate, isAdmin, moduleFilter, outcomeFilter, search, startDate, userFilter])
+  const activityPagination = usePagination(visibleRows, 10, search + "|" + moduleFilter + "|" + outcomeFilter + "|" + userFilter + "|" + startDate + "|" + endDate)
 
   const totalRows = rows.filter((row) => isAdmin || row.owner === "current").length
 
@@ -199,7 +201,7 @@ function ActivityLog() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {visibleRows.map((row) => (
+              {activityPagination.paginatedItems.map((row) => (
                 <tr key={row.timestamp + row.action} className="transition-colors hover:bg-muted/30">
                   <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">{formatTimestamp(row.timestamp)}</td>
                   {isAdmin ? <td className="px-4 py-3 align-middle font-medium sm:px-5">{formatRole(row.user)}</td> : null}
@@ -224,9 +226,7 @@ function ActivityLog() {
           </table>
           {visibleRows.length === 0 ? <EmptyState title="No matching activity" description="Try a different search term or filter." /> : null}
         </div>
-        <div className="border-t px-4 py-3 text-xs text-muted-foreground sm:px-5">
-          Showing {visibleRows.length} of {totalRows} entries
-        </div>
+        <TablePagination start={activityPagination.start} end={activityPagination.end} total={activityPagination.total} pageIndex={activityPagination.pageIndex} pageCount={activityPagination.pageCount} onPageChange={activityPagination.setPageIndex} />
       </section>
     </div>
   )
