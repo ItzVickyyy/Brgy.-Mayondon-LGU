@@ -541,7 +541,21 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         const resident = await issuanceApi.updateResident(selectedResident.id, { name, firstName: quickAdd.firstName.trim(), middleName: quickAdd.middleName?.trim() ?? "", lastName: quickAdd.lastName.trim(), suffix: quickAdd.suffix?.trim() ?? "", birthdate: quickAdd.birthdate, birthplace: quickAdd.birthplace?.trim() ?? "", sex: quickAdd.sex, civilStatus: quickAdd.civilStatus, houseNumber: quickAdd.houseNumber?.trim() ?? "", street: quickAdd.street.trim(), purok: quickAdd.purok, address, residentSince: quickAdd.residentSinceBirth ? 0 : quickAdd.residentSinceYear, residentSinceBirth: quickAdd.residentSinceBirth, photoUrl: quickAdd.photoUrl })
         setResidents((previous) => previous.map((item) => item.id === resident.id ? resident : item))
         setSelectedResident(resident)
-        setResidentUpdates((previous) => ({ ...previous, photoUrl: undefined }))
+        setResidentUpdates((previous) => {
+          const next = { ...previous }
+          delete next.birthdate
+          delete next.birthplace
+          delete next.sex
+          delete next.civilStatus
+          delete next.houseNumber
+          delete next.street
+          delete next.purok
+          delete next.address
+          delete next.residentSince
+          delete next.residentSinceBirth
+          delete next.photoUrl
+          return next
+        })
         setEditingResident(false)
       } else {
         const resident = await issuanceApi.createResident(quickAdd)
@@ -830,7 +844,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                     <label className={fieldLabelClass}>Living here since (year)<input type="number" min="1900" max={new Date().getFullYear()} placeholder="Example: 2005" value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: event.target.value ? Number(event.target.value) : undefined }))} className={formControlClass} /></label>
                     <CheckField label="Lived here since birth" checked={quickAdd.residentSinceBirth} onChange={(checked) => setQuickAdd((previous) => ({ ...previous, residentSinceBirth: checked, residentSinceYear: undefined }))} />
                   </div>
-                  <div className="flex justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues()} onClick={() => { if (editingResident && selectedResident) { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }) } else setQuickAdd(emptyQuickAdd); setQuickAttempted(false) }}>Clear</Button><Button type="button" onClick={() => void createResident()}>{editingResident ? "Save changes" : "Save and select"}</Button></div>
+                  <div className="flex justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues()} onClick={() => { if (editingResident && selectedResident) { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }) } else setQuickAdd(emptyQuickAdd); setQuickAttempted(false) }}>{editingResident ? "Reset changes" : "Clear"}</Button><Button type="button" onClick={() => void createResident()}>{editingResident ? "Save changes" : "Save and select"}</Button></div>
                 </div>
               </div>}
               {selectedResident && neededFromRecord.length ? <div className="space-y-4 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4">
