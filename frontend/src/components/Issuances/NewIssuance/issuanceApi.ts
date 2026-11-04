@@ -76,15 +76,7 @@ let issuanceCounter = 0
 let streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
 let purposes = [...clearancePurposeOptions]
 let associations = ["Mayondon Tricycle Operators and Drivers Association"]
-let mockTricycles = [{
-  id: "TRI-0001",
-  associationId: 1,
-  make: "Sample Make",
-  bodyType: "TRICYCLE",
-  motorNumber: "MOTOR-SAMPLE-001",
-  color: "Blue",
-  plateNumber: "SYN-1001",
-}]
+let mockTricycles: { id: string; associationId: number; make: string; bodyType: string; motorNumber: string; color: string; plateNumber: string }[] = []
 
 function toStoredPayload(input: IssuanceInput, tricycleId?: string): StoredIssuancePayload {
   const { residentUpdates: _residentUpdates, purposeText, details, ...base } = input
@@ -367,15 +359,7 @@ export const mockIssuanceStore = {
     streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
     purposes = [...clearancePurposeOptions]
     associations = ["Mayondon Tricycle Operators and Drivers Association"]
-    mockTricycles = [{
-      id: "TRI-0001",
-      associationId: 1,
-      make: "Sample Make",
-      bodyType: "TRICYCLE",
-      motorNumber: "MOTOR-SAMPLE-001",
-      color: "Blue",
-      plateNumber: "SYN-1001",
-    }]
+    mockTricycles = []
   },
   addStreet(name: string) {
     const normalized = name.trim()
