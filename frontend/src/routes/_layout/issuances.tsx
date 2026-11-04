@@ -307,7 +307,7 @@ function IssuancesManagement() {
     const firstEmptyRequired = allFormFields.find((field) =>
       field.required
       && (!field.showWhen || field.showWhen(nextValues))
-      && !nextValues[field.name]?.trim()
+      && !(nextValues as Record<string, string>)[field.name]?.trim()
       && !["firstName", "middleName", "lastName"].includes(field.name),
     )
     if (firstEmptyRequired) {
