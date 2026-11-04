@@ -395,7 +395,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     const missingResidentFields = getMissingResidentFields(projectedResident, documentType)
     if (missingResidentFields.length) {
       setAttempted(true)
-      setFormError("Please fill in the missing details in the yellow box under Who is it for?")
+      const onlyPhoto = missingResidentFields.every((need) => need === "photo")
+      setFormError(onlyPhoto ? "Please take the resident's photo first. It is in the Photo step." : "Please fill in the missing details in the yellow box under Who is it for?")
       const firstMissing = missingResidentFields[0]
       window.setTimeout(() => {
         const targetId = firstMissing === "address" ? "resident-missing-address-houseNumber" : `resident-missing-${firstMissing}`
@@ -545,9 +546,11 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const quickInvalid = (key: keyof typeof quickMissing) => quickAttempted && quickMissing[key]
 
   const needsAddress = Boolean(selectedResident) && (!selectedResident?.houseNumber?.trim() || !selectedResident?.street?.trim() || !selectedResident?.purok)
+  // The photo has its own step (see "Photo" below), so it is never listed in the yellow "details are missing" box.
+  const needsPhoto = config.residentNeeds.includes("photo")
   const neededFromRecord: string[] = selectedResident
     ? Array.from(new Set([
-        ...config.residentNeeds.filter((need) => {
+        ...config.residentNeeds.filter((need) => need !== "photo").filter((need) => {
           const residentValue = need === "birthDate" ? selectedResident.birthdate : need === "birthPlace" ? selectedResident.birthplace : need === "civilStatus" ? selectedResident.civilStatus : need === "sex" ? selectedResident.sex : need === "residentSince" ? selectedResident.residentSinceBirth || selectedResident.residentSince : need === "sector" ? selectedResident.sectors.length : need === "photo" ? selectedResident.photoUrl : need === "emergencyContact" ? selectedResident.emergencyContact?.name && selectedResident.emergencyContact?.address && selectedResident.emergencyContact?.phone : undefined
           return !residentValue
         }),
@@ -603,9 +606,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       const current = need === "sector" ? (residentUpdates.sectors?.[0] ?? "") : String(updates[key] ?? "")
       return <div key={need} className={fieldLabelClass}><label htmlFor={`resident-missing-${need}`}>{need === "civilStatus" ? "Civil status" : "Sector"}</label><SelectField id={`resident-missing-${need}`} value={current} options={choices} onChange={(next) => patch({ [key]: need === "sector" ? [next] : next })} /></div>
     }
-    if (need === "photo") {
-      return <div key={need} className={fieldLabelClass}><span id="resident-missing-photo-label">Photo <span className="text-destructive">*</span></span><PhotoCapture id="resident-missing-photo" value={String(updates.photoUrl ?? selectedResident.photoUrl ?? "")} onChange={(photoUrl) => patch({ photoUrl })} /></div>
-    }
     const key = need === "birthPlace" ? "birthplace" : need
     const label = need === "birthPlace" ? "Place of birth" : need
     return <label key={need} className={fieldLabelClass}>{label}<input id={`resident-missing-${need}`} value={String(updates[key] ?? "")} onChange={(event) => patch({ [key]: event.target.value })} className={formControlClass} autoComplete="off" /></label>
@@ -660,6 +660,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     { label: "Birthplace", value: selectedResident?.birthplace ?? "" },
     { label: "Sex", value: selectedResident?.sex ?? "" },
     { label: "Civil status", value: selectedResident?.civilStatus ?? "" },
+    ...(needsPhoto ? [{ label: "Photo", value: selectedResident && (residentUpdates.photoUrl || selectedResident.photoUrl) ? "Taken" : "" }] : []),
     { label: "Date on document", value: issueDate },
     ...(config.signatoryMode === "select" ? [{ label: "Signatory", value: initialOfficials.find((official) => official.id === form.watch("signatoryOfficialId"))?.name ?? "" }] : []),
     ...config.fields.map((field) => ({ label: field.label, value: previewValue(field) })),
@@ -697,7 +698,11 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const signatoryMissing = config.signatoryMode === "select" && !form.watch("signatoryOfficialId")
   const detailsDone = !signatoryMissing && detailFields.every((field) => !field.required || fieldHasValue(field))
   const requirementsDone = requirementFields.every((field) => !field.required || fieldHasValue(field))
-  const residentDone = Boolean(selectedResident) && residentMissingLabels.length === 0
+  const residentDone = Boolean(selectedResident) && residentMissingLabels.every((item) => item.name === "photo")
+  const currentPhoto = String(residentUpdates.photoUrl ?? selectedResident?.photoUrl ?? "")
+  const photoDone = Boolean(currentPhoto)
+  const detailsStep = needsPhoto ? 4 : 3
+  const requirementsStep = detailsStep + 1
   const remaining = missingPreviewLabels.length
 
   function goToFirstMissing() {
@@ -820,13 +825,18 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 </div>
                 {neededFromRecord.map(renderResidentNeed)}
               </div> : null}
-              {selectedResident && config.residentNeeds.includes("photo") && selectedResident.photoUrl && !neededFromRecord.includes("photo") ? <div className={fieldLabelClass}>
-                <span>Photo on record</span>
-                <PhotoCapture id="resident-photo" value={String(residentUpdates.photoUrl ?? selectedResident.photoUrl)} onChange={(photoUrl) => setResidentUpdates((previous) => ({ ...previous, photoUrl } as ResidentPatch))} />
-              </div> : null}
             </IssuanceSection>
 
-            <IssuanceSection id="issuance-step-details" step={3} title="Document details" description="Only the fields this document needs. Red asterisk means required." done={detailsDone}>
+            {needsPhoto ? <IssuanceSection id="issuance-step-photo" step={3} title="Photo" description="This document needs the resident's picture. Take it now with the camera." done={photoDone}>
+              {selectedResident
+                ? <div className={fieldLabelClass}>
+                    <span id="resident-missing-photo-label">Resident's photo <span className="text-destructive">*</span></span>
+                    <PhotoCapture id="resident-missing-photo" value={currentPhoto} onChange={(photoUrl) => setResidentUpdates((previous) => ({ ...previous, photoUrl } as ResidentPatch))} />
+                  </div>
+                : <p className="text-sm text-muted-foreground">Choose who it is for above, then take their photo here.</p>}
+            </IssuanceSection> : null}
+
+            <IssuanceSection id="issuance-step-details" step={detailsStep} title="Document details" description="Only the fields this document needs. Red asterisk means required." done={detailsDone}>
               {detailFields.length ? <div className="grid gap-4 sm:grid-cols-2">{detailFields.map(renderField)}</div> : <p className="text-sm text-muted-foreground">This document needs no extra details.</p>}
               {config.signatoryMode === "select" ? <div className={fieldLabelClass}>
                 <label htmlFor="issuance-signatoryOfficialId">Signatory <span className="text-destructive">*</span></label>
@@ -840,7 +850,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               {details.type === "FIRST_TIME_JOBSEEKER" && details.isJobstartBeneficiary ? <p className="text-sm text-muted-foreground">JobStart beneficiary selected. The Punong Barangay will determine eligibility.</p> : null}
             </IssuanceSection>
 
-            {hasRequirements ? <IssuanceSection id="issuance-step-requirements" step={4} title={fieldsByGroup("payment").length ? "ID presented & payment" : "ID presented"} description="Copy these from the resident's ID and the official receipt." done={requirementsDone}>
+            {hasRequirements ? <IssuanceSection id="issuance-step-requirements" step={requirementsStep} title={fieldsByGroup("payment").length ? "ID presented & payment" : "ID presented"} description="Copy these from the resident's ID and the official receipt." done={requirementsDone}>
               {fieldsByGroup("identity").length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Proof of identity</p><div className="grid gap-4 sm:grid-cols-2">{fieldsByGroup("identity").map(renderField)}</div></div> : null}
               {fieldsByGroup("payment").length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Payment</p><div className="grid items-end gap-4 sm:grid-cols-2">{fieldsByGroup("payment").map(renderField)}</div></div> : null}
             </IssuanceSection> : null}
