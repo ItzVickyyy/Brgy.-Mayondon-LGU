@@ -93,31 +93,31 @@ function Reports() {
     if (report === "issuances") {
       csvRows = [
         ["Document type", "Issued", "Voided", "Share", "vs previous period"],
-        ...documentTypePagination.paginatedItems.map((row) => [row.document, row.issued, row.voided, row.share, row.change]),
+        ...documentTypeRows.map((row) => [row.document, row.issued, row.voided, row.share, row.change]),
         ["Total", documentTypeRows.reduce((total, row) => total + row.issued, 0), documentTypeRows.reduce((total, row) => total + row.voided, 0), "", ""],
       ]
     } else if (report === "purpose") {
       csvRows = [
         ["Purpose", "Issued", "Share"],
-        ...purposePagination.paginatedItems.map((row) => [row.purpose, row.issued, row.share]),
+        ...purposeRows.map((row) => [row.purpose, row.issued, row.share]),
         ["Total", purposeRows.reduce((total, row) => total + row.issued, 0), ""],
       ]
     } else if (report === "expiry") {
       csvRows = [
         ["Resident", "Record", "Reference", "Expires", "Status"],
-        ...expiringPagination.paginatedItems.map((row) => [row.resident, row.record, row.reference, formatReportDate(row.expires), row.status]),
+        ...expiringRows.map((row) => [row.resident, row.record, row.reference, formatReportDate(row.expires), row.status]),
         ["Total", expiringRows.length, "records", "", ""],
       ]
     } else if (report === "imports") {
       csvRows = [
         ["Date", "File", "Imported by", "Imported", "Updated", "Skipped", "Failed"],
-        ...importPagination.paginatedItems.map((row) => [row.date, row.file, row.importedBy, row.imported, row.updated, row.skipped, row.failed]),
+        ...importRows.map((row) => [row.date, row.file, row.importedBy, row.imported, row.updated, row.skipped, row.failed]),
         ["Total", "", "", importRows.reduce((total, row) => total + row.imported, 0), importRows.reduce((total, row) => total + row.updated, 0), importRows.reduce((total, row) => total + row.skipped, 0), importRows.reduce((total, row) => total + row.failed, 0)],
       ]
     } else {
       csvRows = [
         ["User", "Role", "Sign-ins", "Documents issued", "Records added / edited", "Last activity"],
-        ...accountPagination.paginatedItems.map((row) => [row.user, row.role, row.signIns, row.documents, row.records, row.lastActivity]),
+        ...accountActivityRows.map((row) => [row.user, row.role, row.signIns, row.documents, row.records, row.lastActivity]),
         ["Total", "", accountActivityRows.reduce((total, row) => total + row.signIns, 0), accountActivityRows.reduce((total, row) => total + row.documents, 0), accountActivityRows.reduce((total, row) => total + row.records, 0), ""],
       ]
     }
@@ -211,10 +211,10 @@ function Reports() {
               <h3 className="mb-3 font-semibold tracking-tight">Issuances by document type · {periodLabel[period]}</h3>
               <table className="w-full min-w-[760px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr>{["Document type", "Issued", "Voided", "Share", "vs previous period"].map((label) => <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 font-medium sm:px-5"}>{label}</th>)}</tr></thead>
-                <tbody className="divide-y">{documentTypeRows.map((row) => <tr key={row.document} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-medium sm:px-5">{row.document}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.issued}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.voided}</td><td className="px-4 py-3 sm:px-5">{row.share}</td><td className="px-4 py-3 sm:px-5">{row.change}</td></tr>)}</tbody>
+                <tbody className="divide-y">{documentTypePagination.paginatedItems.map((row) => <tr key={row.document} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-medium sm:px-5">{row.document}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.issued}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.voided}</td><td className="px-4 py-3 sm:px-5">{row.share}</td><td className="px-4 py-3 sm:px-5">{row.change}</td></tr>)}</tbody>
                 <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5">Total</td><td className="px-4 py-3 sm:px-5">{documentTypeRows.reduce((total, row) => total + row.issued, 0)}</td><td className="px-4 py-3 sm:px-5">{documentTypeRows.reduce((total, row) => total + row.voided, 0)}</td><td className="px-4 py-3 sm:px-5">—</td><td className="px-4 py-3 sm:px-5">—</td></tr></tfoot>
               </table>
-              {documentTypeRows.length === 0 ? <EmptyState title="No document-type data" description="No issuance records are available for this report." / : null}
+              {documentTypeRows.length === 0 ? <EmptyState title="No document-type data" description="No issuance records are available for this report." /> : null}
               <TablePagination start={documentTypePagination.start} end={documentTypePagination.end} total={documentTypePagination.total} pageIndex={documentTypePagination.pageIndex} pageCount={documentTypePagination.pageCount} onPageChange={documentTypePagination.setPageIndex} />
             </div>
           ) : report === "purpose" ? (
@@ -222,10 +222,10 @@ function Reports() {
               <h3 className="mb-3 font-semibold tracking-tight">Issuances by purpose · {periodLabel[period]}</h3>
               <table className="w-full min-w-[560px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr>{["Purpose", "Issued", "Share"].map((label) => <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 font-medium sm:px-5"}>{label}</th>)}</tr></thead>
-                <tbody className="divide-y">{purposeRows.slice().sort((a, b) => b.issued - a.issued).map((row) => <tr key={row.purpose} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-medium sm:px-5">{row.purpose}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.issued}</td><td className="px-4 py-3 sm:px-5">{row.share}</td></tr>)}</tbody>
+                <tbody className="divide-y">{purposePagination.paginatedItems.map((row) => <tr key={row.purpose} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-medium sm:px-5">{row.purpose}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.issued}</td><td className="px-4 py-3 sm:px-5">{row.share}</td></tr>)}</tbody>
                 <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5">Total</td><td className="px-4 py-3 sm:px-5">{purposeRows.reduce((total, row) => total + row.issued, 0)}</td><td className="px-4 py-3 sm:px-5">—</td></tr></tfoot>
               </table>
-              {purposeRows.length === 0 ? <EmptyState title="No purpose data" description="No issuance purposes are available for this report." / : null}
+              {purposeRows.length === 0 ? <EmptyState title="No purpose data" description="No issuance purposes are available for this report." /> : null}
               <TablePagination start={purposePagination.start} end={purposePagination.end} total={purposePagination.total} pageIndex={purposePagination.pageIndex} pageCount={purposePagination.pageCount} onPageChange={purposePagination.setPageIndex} />
             </div>
           ) : report === "expiry" ? (
@@ -233,10 +233,10 @@ function Reports() {
               <h3 className="mb-3 font-semibold tracking-tight">Expiring records · {periodLabel[period]}</h3>
               <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr>{["Resident", "Record", "Reference", "Expires", "Status", "Actions"].map((label) => <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 font-medium sm:px-5"}>{label}</th>)}</tr></thead>
-                <tbody className="divide-y">{expiringRows.map((row) => <tr key={row.reference} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-semibold sm:px-5">{row.resident}</td><td className="px-4 py-3 sm:px-5">{row.record}</td><td className="px-4 py-3 font-mono sm:px-5">{row.reference}</td><td className="px-4 py-3 sm:px-5"><p>{formatReportDate(row.expires)}</p><p className="mt-1 text-xs text-muted-foreground">{row.days >= 0 ? `in ${row.days} days` : `expired ${Math.abs(row.days)} days ago`}</p></td><td className="px-4 py-3 sm:px-5"><Badge variant="outline" className={statusStyles[row.status]}>{row.status}</Badge></td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" asChild><a href={row.href}>Open record</a></Button></td></tr>)}</tbody>
+                <tbody className="divide-y">{expiringPagination.paginatedItems.map((row) => <tr key={row.reference} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-semibold sm:px-5">{row.resident}</td><td className="px-4 py-3 sm:px-5">{row.record}</td><td className="px-4 py-3 font-mono sm:px-5">{row.reference}</td><td className="px-4 py-3 sm:px-5"><p>{formatReportDate(row.expires)}</p><p className="mt-1 text-xs text-muted-foreground">{row.days >= 0 ? `in ${row.days} days` : `expired ${Math.abs(row.days)} days ago`}</p></td><td className="px-4 py-3 sm:px-5"><Badge variant="outline" className={statusStyles[row.status]}>{row.status}</Badge></td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" asChild><a href={row.href}>Open record</a></Button></td></tr>)}</tbody>
                 <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5" colSpan={6}>Total: {expiringRows.length} records</td></tr></tfoot>
               </table>
-              {expiringRows.length === 0 ? <EmptyState title="No expiring records" description="There are no records to display for this report." / : null}
+              {expiringRows.length === 0 ? <EmptyState title="No expiring records" description="There are no records to display for this report." /> : null}
               <TablePagination start={expiringPagination.start} end={expiringPagination.end} total={expiringPagination.total} pageIndex={expiringPagination.pageIndex} pageCount={expiringPagination.pageCount} onPageChange={expiringPagination.setPageIndex} />
             </div>
           ) : report === "imports" ? (
@@ -244,10 +244,10 @@ function Reports() {
               <h3 className="mb-3 font-semibold tracking-tight">Masterlist import summary · {periodLabel[period]}</h3>
               <table className="w-full min-w-[1000px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr>{["Date", "File", "Imported by", "Imported", "Updated", "Skipped", "Failed", "Actions"].map((label) => <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 font-medium sm:px-5"}>{label}</th>)}</tr></thead>
-                <tbody className="divide-y">{importRows.map((row) => <tr key={row.file} className="transition-colors hover:bg-muted/30"><td className="whitespace-nowrap px-4 py-3 sm:px-5">{row.date}</td><td className="px-4 py-3 font-mono sm:px-5">{row.file}</td><td className="px-4 py-3 sm:px-5">{row.importedBy}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.imported}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.updated}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.skipped}</td><td className={`px-4 py-3 tabular-nums sm:px-5 ${row.failed > 0 ? "font-semibold text-destructive" : ""}`}>{row.failed}</td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" onClick={() => setImportResultsOpen(true)}>View results</Button></td></tr>)}</tbody>
+                <tbody className="divide-y">{importPagination.paginatedItems.map((row) => <tr key={row.file} className="transition-colors hover:bg-muted/30"><td className="whitespace-nowrap px-4 py-3 sm:px-5">{row.date}</td><td className="px-4 py-3 font-mono sm:px-5">{row.file}</td><td className="px-4 py-3 sm:px-5">{row.importedBy}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.imported}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.updated}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.skipped}</td><td className={`px-4 py-3 tabular-nums sm:px-5 ${row.failed > 0 ? "font-semibold text-destructive" : ""}`}>{row.failed}</td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" onClick={() => setImportResultsOpen(true)}>View results</Button></td></tr>)}</tbody>
                 <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5" colSpan={3}>Total</td><td className="px-4 py-3 sm:px-5">{importRows.reduce((total, row) => total + row.imported, 0)}</td><td className="px-4 py-3 sm:px-5">{importRows.reduce((total, row) => total + row.updated, 0)}</td><td className="px-4 py-3 sm:px-5">{importRows.reduce((total, row) => total + row.skipped, 0)}</td><td className="px-4 py-3 sm:px-5">{importRows.reduce((total, row) => total + row.failed, 0)}</td><td className="px-4 py-3 sm:px-5">—</td></tr></tfoot>
               </table>
-              {importRows.length === 0 ? <EmptyState title="No import history" description="Import records will appear here when available." / : null}
+              {importRows.length === 0 ? <EmptyState title="No import history" description="Import records will appear here when available." /> : null}
               <TablePagination start={importPagination.start} end={importPagination.end} total={importPagination.total} pageIndex={importPagination.pageIndex} pageCount={importPagination.pageCount} onPageChange={importPagination.setPageIndex} />
             </div>
           ) : (
@@ -255,10 +255,10 @@ function Reports() {
               <h3 className="mb-3 font-semibold tracking-tight">Account activity · {periodLabel[period]}</h3>
               <table className="w-full min-w-[1000px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr>{["User", "Role", "Sign-ins", "Documents issued", "Records added / edited", "Last activity", "Actions"].map((label) => <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 font-medium sm:px-5"}>{label}</th>)}</tr></thead>
-                <tbody className="divide-y">{accountActivityRows.map((row) => <tr key={row.user} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-semibold sm:px-5">{row.user}</td><td className="px-4 py-3 sm:px-5"><Badge variant="outline" className={row.role === "System Administrator" ? "border-primary/30 bg-primary/10 text-primary" : statusStyles.Inactive}>{row.role}</Badge></td><td className="px-4 py-3 tabular-nums sm:px-5">{row.signIns}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.documents}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.records}</td><td className="px-4 py-3 sm:px-5">{row.lastActivity}</td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" asChild><a href={`/activity-log?user=${encodeURIComponent(row.user)}&period=${period}`}>View in Activity Log</a></Button></td></tr>)}</tbody>
+                <tbody className="divide-y">{accountPagination.paginatedItems.map((row) => <tr key={row.user} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-semibold sm:px-5">{row.user}</td><td className="px-4 py-3 sm:px-5"><Badge variant="outline" className={row.role === "System Administrator" ? "border-primary/30 bg-primary/10 text-primary" : statusStyles.Inactive}>{row.role}</Badge></td><td className="px-4 py-3 tabular-nums sm:px-5">{row.signIns}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.documents}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.records}</td><td className="px-4 py-3 sm:px-5">{row.lastActivity}</td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" asChild><a href={`/activity-log?user=${encodeURIComponent(row.user)}&period=${period}`}>View in Activity Log</a></Button></td></tr>)}</tbody>
                 <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5" colSpan={2}>Total</td><td className="px-4 py-3 sm:px-5">{accountActivityRows.reduce((total, row) => total + row.signIns, 0)}</td><td className="px-4 py-3 sm:px-5">{accountActivityRows.reduce((total, row) => total + row.documents, 0)}</td><td className="px-4 py-3 sm:px-5">{accountActivityRows.reduce((total, row) => total + row.records, 0)}</td><td className="px-4 py-3 sm:px-5">—</td><td className="px-4 py-3 sm:px-5">—</td></tr></tfoot>
               </table>
-              {accountActivityRows.length === 0 ? <EmptyState title="No account activity" description="Account activity will appear here when records are available." / : null}
+              {accountActivityRows.length === 0 ? <EmptyState title="No account activity" description="Account activity will appear here when records are available." /> : null}
               <TablePagination start={accountPagination.start} end={accountPagination.end} total={accountPagination.total} pageIndex={accountPagination.pageIndex} pageCount={accountPagination.pageCount} onPageChange={accountPagination.setPageIndex} />
             </div>
           )}
