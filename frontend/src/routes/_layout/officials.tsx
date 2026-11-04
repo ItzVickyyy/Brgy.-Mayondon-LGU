@@ -4,6 +4,7 @@ import { Search, UserRound, UserRoundPlus } from "lucide-react"
 import { useMemo, useState } from "react"
 
 import { EmptyState } from "@/components/Common/FeedbackState"
+import { TablePagination, usePagination } from "@/components/Common/TablePagination"
 import { formControlClass } from "@/components/Common/formStyles"
 import { RowActions } from "@/components/Common/RowActions"
 import { statusStyles } from "@/components/Common/statusStyles"
@@ -80,6 +81,7 @@ function OfficialsManagement() {
         a.name.localeCompare(b.name),
       )
   }, [officials, search, statusFilter])
+  const officialPagination = usePagination(filteredOfficials, 10, search + "|" + statusFilter)
 
   if (!isSystemAdministrator(user)) return <NoPermission />
 
@@ -179,7 +181,7 @@ function OfficialsManagement() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {filteredOfficials.map((official) => (
+              {officialPagination.paginatedItems.map((official) => (
                 <tr key={official.id} className={`transition-colors hover:bg-muted/30 ${official.status === "Former" ? "opacity-70" : ""}`}>
                   <td className="px-4 py-3 align-middle sm:px-5">
                     <p className="font-semibold">{official.name}</p>
@@ -210,9 +212,7 @@ function OfficialsManagement() {
           </table>
           {filteredOfficials.length === 0 ? <EmptyState title="No matching officials" description="Try a different name, position, or status." /> : null}
         </div>
-        <div className="border-t px-4 py-3 text-xs text-muted-foreground sm:px-5">
-          Showing {filteredOfficials.length} of {officials.length} records
-        </div>
+        <TablePagination start={officialPagination.start} end={officialPagination.end} total={officialPagination.total} pageIndex={officialPagination.pageIndex} pageCount={officialPagination.pageCount} onPageChange={officialPagination.setPageIndex} />
       </section>
 
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
