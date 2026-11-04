@@ -75,10 +75,10 @@ function Dashboard() {
     if (period === "6months") return monthlyIssuances.slice(-6)
     return monthlyIssuances
   }, [period])
-  const maxMonthly = Math.max(...visibleMonths.map((item) => item.count))
+  const maxMonthly = Math.max(1, ...visibleMonths.map((item) => item.count))
   const baseTypeTotal = useMemo(() => documentTypes.reduce((sum, item) => sum + item.count, 0), [])
   const totalByType = documentsByPeriod[period]
-  const visibleDocumentTypes = useMemo(() => documentTypes.map((item) => ({ ...item, count: Math.round((item.count / baseTypeTotal) * totalByType) })), [baseTypeTotal, totalByType])
+  const visibleDocumentTypes = useMemo(() => baseTypeTotal > 0 ? documentTypes.map((item) => ({ ...item, count: Math.round((item.count / baseTypeTotal) * totalByType) })) : [], [baseTypeTotal, totalByType])
 
   return (
     <div className="flex flex-col gap-6">
@@ -97,10 +97,10 @@ function Dashboard() {
       </div>
 
       <section aria-label="Summary statistics" className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <SummaryCard title="Documents Issued This Month" value="214" description="Total this month" icon={FileCheck2} />
-        <SummaryCard title="Clearances Expiring in 30 Days" value="8" description="Due within 30 days" icon={Clock3} />
-        <SummaryCard title="Barangay IDs Expiring in 30 Days" value="12" description="Due within 30 days" icon={IdCard} />
-        <SummaryCard title={isAdmin ? "Pending Registrations" : "Pending Document Requests"} value={isAdmin ? "2" : "6"} description="Awaiting review" icon={Users} />
+        <SummaryCard title="Documents Issued This Month" value="0" description="Total this month" icon={FileCheck2} />
+        <SummaryCard title="Clearances Expiring in 30 Days" value="0" description="Due within 30 days" icon={Clock3} />
+        <SummaryCard title="Barangay IDs Expiring in 30 Days" value="0" description="Due within 30 days" icon={IdCard} />
+        <SummaryCard title={isAdmin ? "Pending Registrations" : "Pending Document Requests"} value="0" description="Awaiting review" icon={Users} />
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
@@ -130,7 +130,7 @@ function Dashboard() {
                   <span className="shrink-0 tabular-nums text-muted-foreground">{item.count}</span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${(item.count / totalByType) * 100}%` }} />
+                  <div className="h-full rounded-full bg-primary" style={{ width: `${totalByType > 0 ? (item.count / totalByType) * 100 : 0}%` }} />
                 </div>
               </div>
             ))}
@@ -146,11 +146,7 @@ function Dashboard() {
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col items-start gap-2"><SectionHeading title="Expiring IDs and Clearances" description="Records that may need attention soon" /></div>
           <div className="mt-4 divide-y">
-            {[
-              { name: "Barangay ID · Resident Two", date: "Nov 20, 2026", status: "Expiring soon" },
-              { name: "Barangay Clearance · Resident Four", date: "Nov 24, 2026", status: "Review date" },
-              { name: "Barangay ID · Resident Three", date: "Dec 02, 2026", status: "Upcoming" },
-            ].map((item) => (
+            {([] as { name: string; date: string; status: string }[]).map((item) => (
               <div key={item.name} className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <div><p className="font-medium">{item.name}</p><p className="mt-1 text-sm text-muted-foreground">Expiry date: {item.date}</p></div>
                 <span className="inline-flex min-h-8 items-center self-start rounded-full border px-3 text-xs font-semibold sm:self-center">{item.status}</span>
