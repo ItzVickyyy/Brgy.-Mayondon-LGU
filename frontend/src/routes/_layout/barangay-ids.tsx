@@ -125,10 +125,10 @@ function BarangayIdManagement() {
       ) : null}
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Barangay ID summary">
-        <StatCard icon={CreditCard} label="Valid IDs" value="1" description="Current records" />
-        <StatCard icon={Clock3} label="Expiring IDs" value="1" description="Approaching expiry" />
-        <StatCard icon={CalendarClock} label="Expired IDs" value="1" description="Requires review" />
-        <StatCard icon={Archive} label="Archived Records" value="1" description="Archived records" />
+        <StatCard icon={CreditCard} label="Valid IDs" value={String(sampleIds.filter((record) => record.status === "Valid").length)} description="Current records" />
+        <StatCard icon={Clock3} label="Expiring IDs" value={String(sampleIds.filter((record) => record.status === "Expiring soon").length)} description="Approaching expiry" />
+        <StatCard icon={CalendarClock} label="Expired IDs" value={String(sampleIds.filter((record) => record.status === "Expired").length)} description="Requires review" />
+        <StatCard icon={Archive} label="Archived Records" value={String(sampleIds.filter((record) => record.status === "Archived").length)} description="Archived records" />
       </section>
 
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
