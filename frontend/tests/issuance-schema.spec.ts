@@ -18,6 +18,23 @@ const validDetails = {
 
 const codes = Object.keys(validDetails) as DocumentCode[]
 
+async function seedResident() {
+  return issuanceApi.createResident({
+    firstName: "Fictional",
+    middleName: "A",
+    lastName: "Resident",
+    birthdate: "1990-01-01",
+    birthplace: "Los Baños, Laguna",
+    sex: "Female",
+    civilStatus: "Single",
+    houseNumber: "12",
+    street: "Rizal Street",
+    purok: 1,
+    residentSinceYear: 2010,
+    residentSinceBirth: false,
+  })
+}
+
 for (const code of codes) {
   test(`${code} accepts a valid detail payload`, () => {
     expect(documentDetailSchemas[code].safeParse(validDetails[code]).success).toBe(true)
@@ -80,6 +97,7 @@ test("missing resident fields reports only fields required by the selected docum
 
 test("First-Time Jobseeker is limited to one issued record per resident", async () => {
   mockIssuanceStore.reset()
+  await seedResident()
   const input = {
     documentType: "FIRST_TIME_JOBSEEKER" as const,
     issueDate: "2026-11-03",
@@ -104,6 +122,7 @@ test("First-Time Jobseeker is limited to one issued record per resident", async 
 
 test("issued records retain an issue-time resident snapshot", async () => {
   mockIssuanceStore.reset()
+  await seedResident()
   const record = await issuanceApi.createIssuance({
     documentType: "BARANGAY_CLEARANCE",
     issueDate: "2026-11-03",
@@ -122,6 +141,7 @@ test("issued records retain an issue-time resident snapshot", async () => {
 
 test("history lists redact sensitive health conditions while authorized detail remains available", async () => {
   mockIssuanceStore.reset()
+  await seedResident()
   const record = await issuanceApi.createIssuance({
     documentType: "MARGINALIZED_SECTOR",
     issueDate: "2026-11-03",
@@ -139,6 +159,7 @@ test("history lists redact sensitive health conditions while authorized detail r
 
 test("mock void is admin-only and requires a reason", async () => {
   mockIssuanceStore.reset()
+  await seedResident()
   const record = await issuanceApi.createIssuance({
     documentType: "BARANGAY_CLEARANCE",
     issueDate: "2026-11-03",
