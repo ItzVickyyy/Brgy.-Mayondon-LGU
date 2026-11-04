@@ -28,7 +28,7 @@ type Props = {
   /** Called when a draft is deleted (discarded, or turned into an issued document). */
   onDraftRemoved?: (id: string) => void
   /** Called when the person asks to print an issued document. */
-  onPrint?: (record: MockIssuance) => void
+  onPrint?: (record: MockIssuance) => Promise<string | void> | string | void
 }
 
 const knownStreets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
@@ -96,7 +96,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const [attempted, setAttempted] = useState(false)
   const [quickAttempted, setQuickAttempted] = useState(false)
   const [editingResident, setEditingResident] = useState(false)
-  const [printNotice, setPrintNotice] = useState(false)
+  const [printNotice, setPrintNotice] = useState("")
   const [autoSave, setAutoSave] = useState<{ state: "idle" | "saving" | "saved" | "error"; at?: Date }>({ state: "idle" })
   const draftIdRef = useRef<string | null>(null)
   const lastSavedRef = useRef("")
@@ -441,7 +441,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       // The automatic draft is replaced by the finished document.
       await removeDraft()
       setSuccessRecord(record)
-      setPrintNotice(false)
+      setPrintNotice("")
       onSaved(record)
       if (andPrint) handlePrint(record)
     } catch (error) {
@@ -451,9 +451,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     }
   }
 
-  function handlePrint(record: MockIssuance) {
-    onPrint?.(record)
-    setPrintNotice(true)
+  async function handlePrint(record: MockIssuance) {
+    setPrintNotice("")
+    const message = await onPrint?.(record)
+    setPrintNotice(message || "")
   }
 
   function hasTypedValues() {
@@ -500,7 +501,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setAttempted(false)
     setQuickAttempted(false)
     setEditingResident(false)
-    setPrintNotice(false)
+    setPrintNotice("")
     setDiscardOpen(false)
     setQuickAdd(emptyQuickAdd)
     draftIdRef.current = null
@@ -777,7 +778,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         <div>
           <p className="text-lg font-semibold">Issued: {successRecord.referenceNo}</p>
           <p className="mt-1 text-sm text-muted-foreground">{config.name} for {selectedResident?.name ?? "the resident"} was saved.</p>
-          {printNotice ? <p role="status" className="mx-auto mt-3 max-w-md rounded-lg border border-amber-500/40 bg-amber-500/5 px-3 py-2 text-sm">Printing is paused until the paper positions are calibrated. The document is saved and nothing was sent to the printer.</p> : null}
+          {printNotice ? <p role="status" className="mx-auto mt-3 max-w-md rounded-lg border bg-muted/50 px-3 py-2 text-sm">{printNotice}</p> : null}
         </div>
         <div className="flex flex-wrap justify-center gap-2">
           <Button type="button" variant="outline" onClick={() => successRecord && handlePrint(successRecord)}><Printer className="size-4" />Print</Button>
