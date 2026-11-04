@@ -457,7 +457,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
 
   function hasTypedValues() {
     return formDirty || Boolean(residentQuery.trim()) || Object.keys(residentUpdates).length > 0 ||
-      (showQuickAdd && Boolean(quickAdd.firstName.trim() || quickAdd.lastName.trim() || quickAdd.birthdate || (quickAdd.birthplace ?? "").trim() || quickAdd.street.trim() || quickAdd.houseNumber.trim()))
+      (showQuickAdd && Boolean(quickAdd.firstName.trim() || quickAdd.lastName.trim() || quickAdd.birthdate || (quickAdd.birthplace ?? "").trim() || quickAdd.street.trim() || (quickAdd.houseNumber ?? "").trim()))
   }
 
   function requestClose(nextOpen: boolean) {
