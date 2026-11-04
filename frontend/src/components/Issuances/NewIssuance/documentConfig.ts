@@ -134,7 +134,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
   PHILHEALTH_CERT: {
     code: "PHILHEALTH_CERT", name: "PhilHealth Certification", shortName: "PhilHealth", category: "certification",
     hint: "PhilHealth blue card", printMode: "overlay", validityMonths: null, onePerResident: false,
-    signatoryMode: "preprinted", residentNeeds: ["birthDate"],
+    signatoryMode: "preprinted", residentNeeds: ["birthDate", "sex"],
     fields: [
       { name: "cardType", label: "Card", type: "combobox", required: true, options: ["BLUE CARD"], group: "main" },
     ],

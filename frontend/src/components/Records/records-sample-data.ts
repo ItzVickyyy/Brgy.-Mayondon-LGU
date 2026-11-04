@@ -7,7 +7,7 @@ export type ResidentRecord = {
   suffix?: string
   birthdate: string
   birthplace: string
-  sex: "Male" | "Female"
+  sex: "Male" | "Female" | ""
   emergencyContact?: { name: string; address: string; phone: string }
   civilStatus: string
   sectors: string[]

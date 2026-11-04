@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
-import { ChevronDown, CircleAlert, CheckCircle2, Clock, Keyboard, Printer, Search, UserRoundPlus } from "lucide-react"
+import { ChevronDown, CircleAlert, CheckCircle2, Clock, Keyboard, Printer, Search } from "lucide-react"
 import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuanceForm"
 import { documentConfig, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
 import { getMissingResidentFields, getResidentAddress, issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
@@ -65,7 +65,7 @@ function normalizedOptionValue(fieldName: string, option: string) {
 }
 
 const emptyQuickAdd: QuickResidentInput = {
-  lastName: "", firstName: "", middleName: "", suffix: "", birthdate: "", birthplace: "", sex: "Male", civilStatus: "Single",
+  lastName: "", firstName: "", middleName: "", suffix: "", birthdate: "", birthplace: "", sex: "", civilStatus: "Single",
   houseNumber: "", street: "", purok: 1, residentSinceBirth: false,
 }
 
@@ -79,7 +79,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const [residentQuery, setResidentQuery] = useState("")
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [selectedResident, setSelectedResident] = useState<ResidentRecord | null>(null)
-  const [showQuickAdd, setShowQuickAdd] = useState(false)
   const [quickAdd, setQuickAdd] = useState<QuickResidentInput>(emptyQuickAdd)
   const [residentUpdates, setResidentUpdates] = useState<ResidentPatch>({})
   const [selectedSector, setSelectedSector] = useState<string | string[]>("")
@@ -457,7 +456,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
 
   function hasTypedValues() {
     return formDirty || Boolean(residentQuery.trim()) || Object.keys(residentUpdates).length > 0 ||
-      (showQuickAdd && Boolean(quickAdd.firstName.trim() || quickAdd.lastName.trim() || quickAdd.birthdate || (quickAdd.birthplace ?? "").trim() || quickAdd.street.trim() || (quickAdd.houseNumber ?? "").trim()))
+      quickAddHasValues()
   }
 
   function requestClose(nextOpen: boolean) {
@@ -490,7 +489,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setPendingDocumentType(null)
     setAddressParts({ houseNumber: "", street: "", purok: 1 })
     setValidUntilEdited(false)
-    setShowQuickAdd(false)
     setMoreOpen(false)
     setPreviewOpen(false)
     setSuccessRecord(null)
@@ -508,11 +506,16 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   }
 
   const birthplaceRequired = config.residentNeeds.includes("birthPlace")
+  const sexRequired = config.residentNeeds.includes("sex")
+  function quickAddHasValues() {
+    return Boolean(quickAdd.firstName.trim() || quickAdd.middleName?.trim() || quickAdd.lastName.trim() || quickAdd.suffix?.trim() || quickAdd.birthdate || (quickAdd.birthplace ?? "").trim() || quickAdd.sex || quickAdd.civilStatus !== "Single" || (quickAdd.houseNumber ?? "").trim() || quickAdd.street.trim() || quickAdd.purok !== 1 || quickAdd.residentSinceYear != null || quickAdd.residentSinceBirth)
+  }
   const quickMissing = {
     firstName: !quickAdd.firstName.trim(),
     lastName: !quickAdd.lastName.trim(),
     birthdate: !quickAdd.birthdate,
     birthplace: birthplaceRequired && !(quickAdd.birthplace ?? "").trim(),
+    sex: sexRequired && !quickAdd.sex,
     houseNumber: !(quickAdd.houseNumber ?? "").trim(),
     street: !quickAdd.street.trim(),
   }
@@ -531,7 +534,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       const resident = await issuanceApi.createResident(quickAdd)
       setResidents((previous) => [...previous, resident])
       selectResident(resident)
-      setShowQuickAdd(false)
       setQuickAdd(emptyQuickAdd)
       setQuickAttempted(false)
       setFormError("")
@@ -771,7 +773,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
               </div>
             </IssuanceSection>
 
-            <IssuanceSection id="issuance-step-resident" step={2} title="Who is it for?" description={selectedResident ? "You can choose someone else if this is the wrong person." : "Type the person's name, then click it in the list."} done={residentDone}>
+            <IssuanceSection id="issuance-step-resident" step={2} title="Who is it for?" description={selectedResident ? "You can choose someone else if this is the wrong person." : "Type the person's name and select them from the list, or fill in the form below if they are not listed."} done={residentDone}>
               {selectedResident ? <div className="flex items-start justify-between gap-3 rounded-lg border border-emerald-600/40 bg-emerald-500/5 p-4">
                 <div className="flex min-w-0 items-start gap-3">
                   <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600" aria-hidden="true" />
@@ -781,7 +783,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                     <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? `${calculateAge(selectedResident.birthdate, issueDate)} years old` : "Birthdate not recorded"} · {selectedResident.civilStatus || "Civil status not recorded"} · {selectedResident.id}</p>
                   </div>
                 </div>
-                <Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); form.setValue("residentId", ""); setResidentQuery("") }}>Choose someone else</Button>
+                <Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); form.setValue("residentId", ""); setResidentQuery(""); setQuickAdd(emptyQuickAdd); setQuickAttempted(false) }}>Choose someone else</Button>
               </div> : <div className="space-y-3">
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3.5 top-3.5 size-5 text-muted-foreground" aria-hidden="true" />
@@ -790,9 +792,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 {matches.length ? <div id="issuance-resident-results" role="listbox" className="overflow-hidden rounded-lg border shadow-xs">{matches.map((resident, index) => <button type="button" key={resident.id} id={`issuance-resident-option-${resident.id}`} role="option" aria-selected={activeResidentMatch === index} disabled={resident.status === "Archived"} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} className={cn("flex min-h-14 w-full flex-col items-start justify-center border-b px-4 py-2 text-left last:border-b-0 hover:bg-muted", activeResidentMatch === index && "bg-muted", resident.status === "Archived" && "cursor-not-allowed opacity-50")}>
                   <span className="text-base font-medium">{resident.name}{resident.status === "Archived" ? <span className="ml-2 text-xs font-normal text-muted-foreground">Archived</span> : null}</span>
                   <span className="text-sm text-muted-foreground">{getResidentAddress(resident)}</span>
-                </button>)}</div> : residentQuery.trim() ? <p className="rounded-lg border border-dashed p-4 text-sm">No one found with that name. Check the spelling, or add them as a new resident.</p> : null}
-                {!showQuickAdd ? <Button type="button" variant="outline" onClick={() => setShowQuickAdd(true)}><UserRoundPlus className="size-4" aria-hidden="true" />Not on the list? Add a new resident</Button> : null}
-                {showQuickAdd ? <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
+                </button>)}</div> : residentQuery.trim() ? <p className="rounded-lg border border-dashed p-4 text-sm">No one found with that name. Check the spelling, or add them as a new resident in the form below.</p> : null}
+                <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
                   <div className="flex items-baseline justify-between gap-2"><p className="font-semibold">Add a new resident</p><span className="text-xs text-muted-foreground"><span className="text-destructive">*</span> must be filled in</span></div>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_7.5rem]">
                     <label className={fieldLabelClass}><span>First name <span className="text-destructive">*</span></span><input id="quickadd-firstName" value={quickAdd.firstName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, firstName: event.target.value }))} className={cn(formControlClass, quickInvalid("firstName") && "border-destructive")} aria-invalid={quickInvalid("firstName") || undefined} autoComplete="off" />{quickError("firstName")}</label>
@@ -803,7 +804,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.1fr)]">
                     <div className={fieldLabelClass}><label htmlFor="quickadd-birthdate">Birthdate <span className="text-destructive">*</span></label><DateField id="quickadd-birthdate" value={quickAdd.birthdate} max={localIsoDate()} startView="years" showToday={false} placeholder="Choose the birthdate" invalid={quickInvalid("birthdate")} describedBy={quickInvalid("birthdate") ? "quickadd-birthdate-error" : undefined} onChange={(next) => setQuickAdd((previous) => ({ ...previous, birthdate: next }))} />{quickError("birthdate")}</div>
                     <label className={fieldLabelClass}><span>Place of birth{birthplaceRequired ? <span className="text-destructive"> *</span> : null}</span><input id="quickadd-birthplace" value={quickAdd.birthplace ?? ""} placeholder="Example: Los Baños, Laguna" onChange={(event) => setQuickAdd((previous) => ({ ...previous, birthplace: event.target.value }))} className={cn(formControlClass, quickInvalid("birthplace") && "border-destructive")} aria-invalid={quickInvalid("birthplace") || undefined} autoComplete="off" />{quickError("birthplace")}</label>
-                    <div className={fieldLabelClass}><span id="quickadd-sex-label">Sex</span><ChoiceRow label="Sex" value={quickAdd.sex} options={["Male", "Female"]} onChange={(next) => setQuickAdd((previous) => ({ ...previous, sex: next as "Male" | "Female" }))} /></div>
+                    <div className={fieldLabelClass}><span id="quickadd-sex-label">Sex{sexRequired ? <span className="text-destructive"> *</span> : null}</span><ChoiceRow id="quickadd-sex" label="Sex" value={quickAdd.sex} options={["Male", "Female"]} onChange={(next) => setQuickAdd((previous) => ({ ...previous, sex: next as "Male" | "Female" | "" }))} />{quickError("sex")}</div>
                     <div className={fieldLabelClass}><label htmlFor="quickadd-civil">Civil status</label><SelectField id="quickadd-civil" value={quickAdd.civilStatus} onChange={(next) => setQuickAdd((previous) => ({ ...previous, civilStatus: next }))} options={civilStatusChoices} /></div>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)]">
@@ -815,8 +816,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                     <label className={fieldLabelClass}>Living here since (year)<input type="number" min="1900" max={new Date().getFullYear()} placeholder="Example: 2005" value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: event.target.value ? Number(event.target.value) : undefined }))} className={formControlClass} /></label>
                     <CheckField label="Lived here since birth" checked={quickAdd.residentSinceBirth} onChange={(checked) => setQuickAdd((previous) => ({ ...previous, residentSinceBirth: checked, residentSinceYear: undefined }))} />
                   </div>
-                  <div className="flex justify-end gap-2"><Button type="button" variant="ghost" onClick={() => setShowQuickAdd(false)}>Cancel</Button><Button type="button" onClick={() => void createResident()}>Save and select</Button></div>
-                </div> : null}
+                  <div className="flex justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues()} onClick={() => { setQuickAdd(emptyQuickAdd); setQuickAttempted(false) }}>Clear</Button><Button type="button" onClick={() => void createResident()}>Save and select</Button></div>
+                </div>
               </div>}
               {selectedResident && neededFromRecord.length ? <div className="space-y-4 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4">
                 <div>
