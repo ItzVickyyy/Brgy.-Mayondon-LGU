@@ -15,12 +15,13 @@ export function usePagination<T>(items: T[], pageSize = 10, resetKey?: string | 
     setPageIndex((current) => Math.min(current, pageCount - 1))
   }, [pageCount])
 
-  const startIndex = pageIndex * pageSize
+  const effectivePageIndex = Math.min(pageIndex, pageCount - 1)
+  const startIndex = effectivePageIndex * pageSize
   const paginatedItems = items.slice(startIndex, startIndex + pageSize)
 
   return {
     paginatedItems,
-    pageIndex,
+    pageIndex: effectivePageIndex,
     pageCount,
     setPageIndex,
     start: items.length ? startIndex + 1 : 0,
