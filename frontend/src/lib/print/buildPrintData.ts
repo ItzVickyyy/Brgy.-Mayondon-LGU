@@ -1,5 +1,5 @@
 /**
- * Turns a saved issuance into the values a print overlay template needs (round 2 of docs/HANDOFF-printing.md).
+ * Turns a saved issuance into the values a print overlay template needs (see docs/04-Documents-and-Printing.md section 6).
  * Pure functions only: no DOM, no network. Keys match `PrintFieldBox.key` / `PrintMarkBox.key` in templates.ts.
  */
 import type { MockIssuance } from "@/components/Issuances/NewIssuance/issuanceApi"

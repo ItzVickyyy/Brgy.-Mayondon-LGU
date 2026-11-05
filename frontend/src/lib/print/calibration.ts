@@ -1,5 +1,5 @@
 /**
- * Calibration support (round 4 of docs/HANDOFF-printing.md, docs/04 section 7): per-template X/Y offsets saved in
+ * Calibration support (docs/04-Documents-and-Printing.md sections 6 and 7): per-template X/Y offsets saved in
  * localStorage, and the layout of a plain-paper calibration sheet (grid, scale bar, field outlines). Pure apart from the
  * two storage helpers, which never throw.
  */

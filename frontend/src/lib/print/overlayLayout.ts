@@ -1,5 +1,5 @@
 /**
- * Pure layout step for the print overlay (round 3 of docs/HANDOFF-printing.md): template + values -> positioned items.
+ * Pure layout step for the print overlay (see docs/04-Documents-and-Printing.md section 7): template + values -> positioned items.
  * No DOM, so it is unit tested. All positions are PostScript points from the top-left of the Letter page.
  */
 import type { PrintData } from "./buildPrintData"
