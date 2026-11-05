@@ -60,6 +60,7 @@ Last updated: November 5, 2026
 | D-45 | **"Print" on an ID row:** should it reprint an existing ID, or start a new issuance as it does now (it opens New Issuance for the ID type)? | Keep starting a new issuance until D-44 is settled | Client / Team | Test | Open |
 | D-46 | **Real barangay contact email.** `frontend/src/config/barangay-profile.ts` holds `barangay.mayondon@example.com` with a "TODO confirm with barangay" comment. No example addresses may appear in placeholders (see [10](10-Decisions-Already-Made.md)). | Ask the barangay for the official address | Client | V1 | Open |
 | D-47 | **Client-approved dark/light palette.** Dark mode was changed in Nov 2026 (new `brand` token, lighter dark `primary`) for contrast, not from a client brief; not checked in a real browser in both modes. Related to D-28. | Show both modes to the client and record the answer in [03](03-Design-and-UI.md) section 5 | Client | Test | Open |
+| D-48 | **Resident type values.** The prototype's resident record has a `resident_type` field, but no document lists its allowed values or says what the office uses it for. Needed to decide whether the column stays and what it is constrained to. | Ask the office what categories their masterlist uses | Client | Test | Open |
 
 ## D. Deployment, backup and operations
 
@@ -125,6 +126,10 @@ Answers to items above, recorded when made. Decision maker is the project team u
 ### Nov 5, 2026 - design and scope changes by the project owner
 
 These were made in code on `draft/admin-portal` and are recorded as settled in [10-Decisions-Already-Made.md](10-Decisions-Already-Made.md). They answer no numbered question above, but they change the rows noted: PhilHealth Certification removed (touches D-13); Purpose note and Referred by (c/o) removed from the form and print (touches D-14 and D-23); Barangay IDs merged into Records Management and issued through Issuance Management (touches D-18); dark-mode `brand` token added (opens D-47). New open questions: D-43 to D-47.
+
+### Nov 5, 2026 - database design gaps settled by the project owner
+
+Photo storage, ID number history, health-condition access, date and time zone handling, derived values, account deletion and the audit table design are settled in [09](09-Issuance-Form-Data-Map.md) and listed as items 20 to 25 in [10](10-Decisions-Already-Made.md). They narrow D-24, D-26 and D-39 (design chosen, nothing built) and do not close them. New open question: D-48. D-43 (ID numbering rule) still decides how the next ID number is assigned.
 
 ### D-06 follow-up (proposed, not yet decided)
 
