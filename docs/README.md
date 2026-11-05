@@ -13,6 +13,7 @@ Everything the team needs to know about the project lives in this folder, groupe
 | [07-Developer-Guide.md](07-Developer-Guide.md) | Roles, branching, reviews, testing, migrations, local startup | Before development or a pull request |
 | [08-Open-Decisions.md](08-Open-Decisions.md) | **Every undecided, vague or contradictory item**, with owner and deadline | After client or instructor discussions |
 | [09-Issuance-Form-Data-Map.md](09-Issuance-Form-Data-Map.md) | Every New Issuance input mapped to a proposed table and column | When the issuance form or schema changes |
+| [10-Decisions-Already-Made.md](10-Decisions-Already-Made.md) | Things the owner already removed, changed or settled, and legacy code to leave alone | **First, before changing anything**; especially for AI assistants |
 
 **Precedence if documents conflict:** the instructor's *Final Project Guide* → the signed Creative Brief (client scope) → these documents.
 
@@ -20,7 +21,7 @@ Everything the team needs to know about the project lives in this folder, groupe
 
 ## Using an AI assistant
 
-1. Open a new chat and paste `01-Project-and-Schedule.md`; add `02-Requirements-and-Scope.md` for client scope, `06-Architecture-and-Deployment.md` for technical work, or `07-Developer-Guide.md` for workflow.
+1. **Read `10-Decisions-Already-Made.md` first** and do not revert anything it lists. Then open a new chat and paste `01-Project-and-Schedule.md`; add `02-Requirements-and-Scope.md` for client scope, `06-Architecture-and-Deployment.md` for technical work, or `07-Developer-Guide.md` for workflow.
 2. Say your milestone and role, e.g. *"I'm Jean (frontend), Week 15: help me connect the resident list to the API."*
 3. For code questions paste the relevant file or error. Treat answers as suggestions and check them against the Guide and the client-approved requirements.
 4. Never paste passwords, `.env` contents, secrets or real resident data.

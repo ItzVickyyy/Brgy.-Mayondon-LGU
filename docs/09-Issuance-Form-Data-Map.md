@@ -68,12 +68,12 @@ Source: the stamp box and receipt cells of the office's current *Clearance Issui
 
 | Table | Form input → column |
 |---|---|
-| `issuance_barangay_clearance` | Purpose note → `purpose_note`; Referred by (c/o) → `referred_by_official_id` (FK `officials`, null = none) |
+| `issuance_barangay_clearance` | **No form inputs.** Purpose note (`purpose_note`) and Referred by (c/o) (`referred_by_official_id`) were **removed from the New Issuance form and the print overlay**. Do not recreate the inputs or add the columns back. Remarks stays on the core table |
 | `issuance_franchise` | Tricycle association / make / body / motor no. / color / plate no. → **`tricycle_id`** (FK `tricycles`). The form still shows the 6 inputs; on issue the API finds a tricycle by plate or motor number, or creates one, so a tricycle is stored once and reused. `tricycles(association_id, make, body_type, motor_number, color, plate_number)`; unique on plate and on motor number |
 | `issuance_utility` | Service → `has_electric`, `has_water` (bools, at least one); Type of connection → `connection_type` (`new` or `reconnection`); Classification → `classification` (`residential` or `commercial`); Location → `location` |
 | `issuance_indigency` | Office addressed to → `addressed_to_office`; Requested by → `requested_by` (optional, only when someone other than the resident asked; the old "Damayan" sheet printed "Requested by:"). Sectors and purpose are on the core tables |
 | `issuance_building` | Location → `location` (default `Barangay Mayondon`). Identification and payment use the shared tables. **Open:** the sheet has a few unlabeled check marks that are not captured yet |
-| `issuance_philhealth` | Card → `card_type` (default `BLUE CARD`). The resident's age is printed from the birthdate |
+| `issuance_philhealth` | **Removed.** PhilHealth Certification is no longer a document type, so this table is not needed |
 | `issuance_assistance` | Assistance requested → `assistance_type` (`financial`, `medical`, `burial`); For → `for_self` (bool); Name → `beneficiary_name`; Relationship → `beneficiary_relationship` (both required when `for_self` is false) |
 | `issuance_marginalized_sector` | Health condition → `health_condition`. **Sensitive:** restricted read access (the list API already masks it as `[restricted]`) |
 | `issuance_first_time_jobseeker` | Educational attainment → `educational_attainment`; Course → `course` (default `N/A`); JobStart beneficiary → `is_jobstart_beneficiary` (bool); Witness → `witness_official_id` (FK `officials`). "Parts to print" is a print-time choice and is **not stored**. Rule: one issued row per resident, enforced with a partial unique index on `(resident_id)` where `status = 'issued'` |
@@ -131,7 +131,7 @@ The reference-number rule matters for the real backend: use a database sequence 
 
 ## Lookup tables
 
-Suggestion lists seeded from the office's workbook: Barangay Clearance purposes (30), Certificate of Indigency purposes (9), offices addressed to (7, no names of elected officials because they change), purpose note (`NOT APPLICABLE FOR LOAN PURPOSES`) and ID types (now includes `PRC ID`). Purposes typed by staff are remembered once a document is issued; offices are not yet.
+Suggestion lists seeded from the office's workbook: Barangay Clearance purposes (30), Certificate of Indigency purposes (9), offices addressed to (7, no names of elected officials because they change) and ID types (now includes `PRC ID`). Purposes typed by staff are remembered once a document is issued; offices are not yet.
 
 `document_types(code, name, category, print_mode, validity_months, one_per_resident, signatory_default_position)` · `issuance_purposes` · `sectors` · `id_types` · `officials` (existing) · `tricycle_associations` · `streets`.
 

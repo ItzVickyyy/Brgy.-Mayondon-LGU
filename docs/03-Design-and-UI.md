@@ -4,7 +4,7 @@ Site map, navigation, page layouts, visual style and the state of the Admin port
 
 **Status:** design draft for group review and client validation — **not client-approved**. The prototype lives on `draft/admin-portal` and uses **fictional data**. A screen existing is not evidence that the feature works. Undecided items are tagged `(D-xx)`; see [08-Open-Decisions.md](08-Open-Decisions.md).
 
-Last updated: November 1, 2026
+Last updated: November 5, 2026
 
 ## 1. Design basis
 
@@ -19,11 +19,13 @@ flowchart TD
     C --> D["Pending / Rejected Status Messages"]
     B --> E["Dashboard"]
 
-    E --> F["Resident Records"]
-    F --> F1["Resident List and Search"]
+    E --> F["Records Management"]
+    F --> F1["Residents tab: list and search"]
     F1 --> F2["Resident Profile"]
-    F2 --> F3["Family / Beneficiary / Sector Details"]
-    F1 --> F4["Import Masterlist"]
+    F --> F5["Barangay IDs tab: ID list, status, Print / Renew"]
+    F --> F3["Family and Sector Details tab"]
+    F --> F4["Import Masterlist tab (admin only)"]
+    F5 -.->|"opens New Issuance, ID type"| G
 
     E --> G["Document Management"]
     G --> G1["Document Requests"]
@@ -33,12 +35,6 @@ flowchart TD
     G --> G5["Issuance History"]
     G5 --> G6["Issuance Details"]
     G6 --> G7["Correction with Reason"]
-
-    E --> H["Barangay ID Management"]
-    H --> H1["ID List and Search"]
-    H1 --> H2["ID Details"]
-    H2 --> H3["Create / Renew ID"]
-    H3 --> H4["Generate and Print ID"]
 
     E --> I["My Account"]
     I --> I1["My Account"]
@@ -62,7 +58,7 @@ This is the proposed information architecture, not a statement that every page e
 ## 3. Navigation
 
 **Workspace:** Dashboard · Activity Log
-**Records and Documents:** Resident Records · Issuance Management · Barangay IDs
+**Records and Documents:** Records Management · Issuance Management
 **User menu:** My Account (account information, Change Password) · User Settings (appearance preferences)
 **Administration — System Administrator only (proposed):** Officials · User Accounts · Pending Registrations · Management Reports · Backup and Restore
 
@@ -72,22 +68,24 @@ Staff see only their own activity; administrators see everyone's with filters. A
 
 ### Dashboard
 - Page title and short description of the system's purpose.
-- Summary cards: document issuances; clearances nearing expiry; Barangay IDs nearing expiry; a role-specific pending-queue card. Use real database values only once connected, and never present invented figures as barangay statistics. Keep the existing issuance-over-time and issuance-by-document-type charts.
-- Quick links to Resident Records, Document Requests, Issuance History, Barangay IDs.
+- Summary Statistics: documents issued this month; clearances expiring in 30 days; Barangay IDs expiring in 30 days; a role-specific pending card (Pending Registrations for Admin, Pending Document Requests for Staff). Values read 0 until real data exists. Use real database values only once connected, and never present invented figures as barangay statistics. Keep the existing issuance-over-time and issuance-by-document-type charts.
+- **Quick Actions** sit directly under Summary Statistics (horizontal row on wide screens, stacked on small ones; no subtitle, short cards): Find a resident (`/records`), Create an issuance (`/issuances`), Review issuance history (`/issuances`), View dashboard activity (`/activity-log`). Cards use the theme colour only, with a stronger tint, border and icon chip; **do not add per-card colours** (see [10-Decisions-Already-Made.md](10-Decisions-Already-Made.md)).
 - Recent activity: own actions for Staff; system-wide for Admin if approved.
 - *Superseded:* earlier population / household / registered-voter / demographics cards were removed because they are outside the brief. Do not reintroduce unsupported population/voter management unless the client confirms it **(D-21)**.
 
-### Resident Records
-Heading, search and clear primary actions; search by identifiers the client confirms; responsive table or mobile card list; resident profile (personal details, family/beneficiary/sector information, ID information, issuance history); import flow with file selection, preview, validation errors, duplicate detection and a summary of imported/updated/skipped/failed rows; **archive/inactive status instead of permanent deletion** **(D-19, D-20, D-26)**.
+### Records Management
+One page at `/records` (heading "Records Management") with four tabs: **Residents**, **Barangay IDs**, **Family & Sector Details** and **Import Masterlist** (admin only). `?view=barangay-ids` opens the ID tab. The old `/barangay-ids` route only redirects to `/records?view=barangay-ids`; it is not a page.
+
+- **Residents:** heading, search and clear primary actions; search by identifiers the client confirms (an ID number still matches); responsive table or mobile card list; the table shows an **ID status badge only**, not the ID number. A "Residents with Valid ID" stat card sits above it. Resident profile (personal details, family/beneficiary/sector information, ID information, issuance history). **Archive/inactive status instead of permanent deletion** **(D-19, D-20, D-26)**.
+- **Barangay IDs** (`components/Records/BarangayIdsView.tsx`): searchable list with validity and registration status. There is **no "Create Barangay ID" button**: IDs are issued in Issuance Management. A row's **Print** and **Renew** open `/issuances?resident=<residentId>&type=BARANGAY_ID`; New Issuance preselects the resident and type, and the page removes those two query values when the dialog closes. "Print" currently starts a new ID issuance because there is no ID card layout file yet **(D-44, D-45)**. Validity rules: one year, six months for new/renting residents (final rule unconfirmed **(D-18)**). Do not assume photo background removal works offline until a local solution is verified.
+- **Import Masterlist:** file selection, preview, validation errors, duplicate detection and a summary of imported/updated/skipped/failed rows (planned; see section 6).
+- The former "ID Validity and Registration" notes box was removed. Do not bring it back.
 
 ### Document Management
 - Keep requests separate from issued-document history.
 - Workflow: select the **resident first**, then document type and purpose, then show only the fields that document needs. Reuse saved resident details.
 - Printing follows the pre-printed-paper overlay rule ([04-Documents-and-Printing.md](04-Documents-and-Printing.md)).
 - Issuance history preserves the original; corrections need a reason and an audit entry, never silent overwrite or delete.
-
-### Barangay ID Management
-Searchable list; preserve existing numbering; show validity and registration status; support one-year validity and six-month validity for new/renting residents (final rule unconfirmed **(D-18)**); photo upload and print layout. Do not assume photo background removal works offline until a local solution is verified.
 
 ### Officials (proposed, admin-only)
 Separate from login accounts. Proposed fields: full name, position, term start/end, active/inactive, optional photo. Prefer archive/inactive for former officials. Adding an official must never create a login account. Not in the brief **(D-23)**.
@@ -99,7 +97,7 @@ Admin creates active Staff accounts directly. Staff self-registration creates a 
 Shared page. Staff see own activity; Admin searches and filters across users. Capture actor, action, module, record reference, timestamp, outcome and reason where required. Never log passwords, tokens or unnecessary resident data. Ordinary users cannot edit or delete audit history **(D-24)**.
 
 ### Reports, settings, backup
-Reports: issuances by date/type/purpose, expiring records, imports, corrections, account activity — confirm needs with the client **(D-21)**. User preferences stay in User Settings; **where the purpose list is maintained is undecided** since System Settings was removed **(D-22)**. Backup and Restore is Admin-only with clear confirmation before destructive restore and a recorded outcome **(D-35)**.
+Reports: the top of the page always shows three summary cards (Documents Issued, Records Expiring, Masterlist Imports) that read 0 until report data exists; there is no "No report data yet" message there. Planned content: issuances by date/type/purpose, expiring records, imports, corrections, account activity — confirm needs with the client **(D-21)**. User preferences stay in User Settings; **where the purpose list is maintained is undecided** since System Settings was removed **(D-22)**. Backup and Restore is Admin-only with clear confirmation before destructive restore and a recorded outcome **(D-35)**.
 
 ## 5. Visual direction and style guide
 
@@ -112,7 +110,8 @@ Reports: issuances by date/type/purpose, expiring records, imports, corrections,
 | Background | `#FFFFFF` | `#0A0A0A` | Page surface |
 | Foreground | `#0A0A0A` | `#FAFAFA` | Main text |
 | Card | `#FFFFFF` | `#343434` | Cards and panels |
-| Primary | `#0C2F52` | `#1D3F63` | Primary actions, key accents |
+| Primary | `#0C2F52` | `#1D4F82` | Solid fills with white text: buttons, selected chips |
+| Brand | `#0C2F52` | `#79B5F8` | Blue **text, icons, tints, borders, rings** (`text-brand`, `bg-brand/10`, `border-brand`, `ring-brand`) |
 | Primary foreground | `#FAFAFA` | `#FAFAFA` | Text/icons on primary |
 | Secondary / muted | `#F5F5F5` | `#262626` | Quiet surfaces |
 | Muted foreground | `#737373` | `#A1A1A1` | Supporting text |
@@ -121,7 +120,7 @@ Reports: issuances by date/type/purpose, expiring records, imports, corrections,
 | Focus ring | `#A1A1A1` | `#737373` | Keyboard focus |
 | Sidebar | `#FAFAFA` | `#343434` | Navigation surface |
 
-Base radius `0.625rem`. These describe the **current implementation, not client-approved brand specs**.
+Base radius `0.625rem`. The sidebar primary stays at its earlier values. These describe the **current implementation, not client-approved brand specs**.
 
 **Typography and spacing**
 - The stylesheet defines no custom font; the brief suggests Arial. Pick one and apply it consistently **(D-28)**.
@@ -137,7 +136,9 @@ Base radius `0.625rem`. These describe the **current implementation, not client-
 - Wrap wide tables in horizontal scroll or use a mobile card layout.
 - No sample-data badges or prototype banners in the UI (team decision, Nov 1, 2026); keep all demo data fictional.
 - Verify WCAG AA contrast on actual rendered text before calling the design accessibility-checked. Token names are not proof.
-- Do not change global tokens unless there is a real contrast or consistency issue, reviewed across light and dark themes.
+- Do not change global tokens unless there is a real contrast or consistency issue, reviewed across light and dark themes. **This was done once (Nov 2026):** in dark mode the old primary (`oklch(0.36 0.075 252)`) had nearly the same lightness as the background, so blue text, icons, tints and bars disappeared (about 1.65:1 on a card). A `--brand` token was added (`--color-brand` in Tailwind). Light-mode brand equals the old primary; dark-mode brand is `oklch(0.76 0.115 252)` (about 8.4:1 on a card). Dark `--primary` was raised to `oklch(0.42 0.1 252)`. Amber and emerald status text got lighter `dark:` shades.
+- **Colour rule:** use `text-brand` / `bg-brand/N` / `border-brand` for blue text, icons and tints. Use `bg-primary text-primary-foreground` only for solid fills with white text. Do not use `text-primary` for text.
+- The dark/light palette is still not client-approved **(D-47)**, and the result has not been checked in a real browser in both modes.
 
 **Assets:** logo path in app config `/assets/images/Barangay%20Mayondon%20Logo.png`. Confirm exact brand colors, typography, print styling, status colors and logo clear-space with the client **(D-28)**.
 
@@ -145,7 +146,7 @@ Base radius `0.625rem`. These describe the **current implementation, not client-
 
 ## 6. Admin portal prototype — what exists
 
-Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Management, Issuance Management, Barangay IDs (`/barangay-ids`), Officials, User Management, Activity Log (`/activity-log`), Pending Registrations (`/pending-registrations`), Reports (`/reports`) and Backup and Restore (`/backup-restore`), plus Request Access and Pending Approval screens. The former separate My Activity route and the unused Items route were removed.
+Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Management, Issuance Management, Officials, User Management, Activity Log (`/activity-log`), Pending Registrations (`/pending-registrations`), Reports (`/reports`) and Backup and Restore (`/backup-restore`), plus Request Access and Pending Approval screens. Records Management (`/records`) holds both resident and Barangay ID records; `/barangay-ids` only redirects to it. The former separate My Activity route and the unused Items route were removed.
 
 **Everything below is prototype-only:**
 
@@ -153,7 +154,7 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 - Records and Officials show sample rows and do not create, update or delete database records.
 - Issuance drafts live in browser memory for the page session only; refreshing clears them. They are not official issuances and are not connected to a database or API.
 - The Document Management resident selector uses hard-coded sample residents; purposes are hard-coded.
-- **Printing is intentionally paused.** The generic print action no longer opens the browser print dialog because it would print labels/logos that conflict with the pre-printed workflow.
+- **Printing is implemented for six templates** (Clearance, Franchise, Electrical/Water, Indigency, Marginalized Sector, Assistance certification) as typed values on pre-printed forms, with a Printing setup dialog for calibration. Residency, First-Time Jobseekers and Barangay ID have no template. Details: [04-Documents-and-Printing.md](04-Documents-and-Printing.md) and [HANDOFF-printing.md](HANDOFF-printing.md). Not yet verified on a real printer.
 - Masterlist import shows a file-selection area and planned validation summary; parsing, mapping, preview, duplicate detection and import are not implemented.
 - Request Access / Pending Approval / Pending Registrations do not submit, save, approve, reject or create accounts. Sidebar pending counts are fictional.
 - The account form maps **System Administrator → `is_superuser = true`** and **Staff → `is_superuser = false`**. No separate backend role enum exists, and `is_active` cannot represent pending/rejected.
@@ -172,10 +173,10 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 | Resident records: add, edit, search | List/profile draft with sample rows | Create/edit/profile actions and persistence; confirm search fields |
 | Family, beneficiary, sector details | Draft tab | Confirm real fields and sector categories against the masterlists |
 | Import masterlists | Draft file area and validation summary | Parsing, mapping, preview, validation, duplicates, import |
-| Resident and Barangay ID records | `/barangay-ids` with search, status filter, issue/expiry dates, Create/Details/Renew/Print placeholders | Connect to residents; numbering; expiry calculation; photo handling; physical print layout |
+| Resident and Barangay ID records | Records Management: Barangay IDs tab with search, status filter, issue/expiry dates; Print/Renew open New Issuance for the ID type; no Create button | Connect to residents; numbering **(D-43)**; expiry calculation; photo handling; approved ID card layout **(D-44)** |
 | Document request entry and editable purposes | Resident-first selector; purposes hard-coded | Connect to saved residents; maintainable purposes; persist requests |
 | Separate issuance history with issue/expiry | Session-only history, no expiry shown | Persistent records, expiry where applicable, details, corrections preserving the original |
-| Auto-filled printing on existing formats | Printing paused | Per-document overlay templates calibrated on real paper/printer |
+| Auto-filled printing on existing formats | Overlay printing implemented for six templates; calibration dialog | Calibrate on real paper/printer; templates for Residency, Jobseeker and Barangay ID |
 | Scheduled and manual backup/restore | Concept screen exists; no automation | Wire to approved scripts; define schedule/destination; test restore |
 | Fully offline LAN use | Deployment foundation exists | Test host startup, other-PC access, printers, firewall, recovery offline |
 | Public features excluded | Welcome page still has placeholder content | Remove public/announcement direction; go to staff login (D-27, decided Nov 1; code change pending) |
