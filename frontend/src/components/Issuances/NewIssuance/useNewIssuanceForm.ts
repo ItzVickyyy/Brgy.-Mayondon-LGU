@@ -19,8 +19,6 @@ export function defaultDetails(code: DocumentCode): DocumentDetails {
       return { type: code }
     case "INDIGENCY":
       return { type: code, addressedToOffice: "" }
-    case "PHILHEALTH_CERT":
-      return { type: code, cardType: "BLUE CARD" }
     case "ASSISTANCE":
       return { type: code, assistanceType: "financial", forSelf: true }
     case "MARGINALIZED_SECTOR":

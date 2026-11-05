@@ -28,7 +28,6 @@ const detailsSchemas = {
   UTILITY_CLEARANCE: z.object({ type: z.literal("UTILITY_CLEARANCE"), services: z.array(z.enum(["electric", "water"])).min(1), connectionType: z.enum(["new", "reconnection"]), classification: z.enum(["residential", "commercial"]), location: nonEmpty }),
   RESIDENCY: z.object({ type: z.literal("RESIDENCY") }),
   INDIGENCY: z.object({ type: z.literal("INDIGENCY"), addressedToOffice: nonEmpty, requestedBy: z.string().optional() }),
-  PHILHEALTH_CERT: z.object({ type: z.literal("PHILHEALTH_CERT"), cardType: nonEmpty }),
   ASSISTANCE: z.object({ type: z.literal("ASSISTANCE"), assistanceType: z.enum(["financial", "medical", "burial"]), forSelf: z.boolean(), beneficiaryName: z.string().optional(), beneficiaryRelationship: z.string().optional() }),
   MARGINALIZED_SECTOR: z.object({ type: z.literal("MARGINALIZED_SECTOR"), healthCondition: nonEmpty }),
   FIRST_TIME_JOBSEEKER: z.object({ type: z.literal("FIRST_TIME_JOBSEEKER"), educationalAttainment: nonEmpty, course: nonEmpty, isJobstartBeneficiary: z.boolean(), witnessOfficialId: nonEmpty, parts: z.array(z.enum(["applicant_sheet", "oath", "certification"])).min(1) }),
@@ -41,7 +40,6 @@ export const documentDetailsSchema = z.discriminatedUnion("type", [
   detailsSchemas.UTILITY_CLEARANCE,
   detailsSchemas.RESIDENCY,
   detailsSchemas.INDIGENCY,
-  detailsSchemas.PHILHEALTH_CERT,
   detailsSchemas.ASSISTANCE,
   detailsSchemas.MARGINALIZED_SECTOR,
   detailsSchemas.FIRST_TIME_JOBSEEKER,
@@ -58,7 +56,7 @@ export type DocumentDetailsByCode = { [K in DocumentCode]: Extract<DocumentDetai
 
 const baseIssuanceSchema = z.object({
   documentType: z.enum([
-    "BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE", "RESIDENCY", "INDIGENCY", "PHILHEALTH_CERT",
+    "BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE", "RESIDENCY", "INDIGENCY",
     "ASSISTANCE", "MARGINALIZED_SECTOR", "FIRST_TIME_JOBSEEKER", "BARANGAY_ID",
   ]),
   issueDate: isoDate,

@@ -6,7 +6,6 @@ export type DocumentCode =
   | "UTILITY_CLEARANCE"
   | "RESIDENCY"
   | "INDIGENCY"
-  | "PHILHEALTH_CERT"
   | "ASSISTANCE"
   | "MARGINALIZED_SECTOR"
   | "FIRST_TIME_JOBSEEKER"
@@ -127,14 +126,6 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
       { name: "purpose", label: "Purpose", type: "combobox", required: true, options: indigencyPurposes, group: "main" },
       { name: "addressedToOffice", label: "Office addressed to", type: "combobox", required: true, options: addressedOfficeOptions, group: "main" },
       { name: "requestedBy", label: "Requested by", type: "text", group: "main", help: "Only if someone other than the resident asked for it. Printed after \"Requested by:\"." },
-    ],
-  },
-  PHILHEALTH_CERT: {
-    code: "PHILHEALTH_CERT", name: "PhilHealth Certification", shortName: "PhilHealth", category: "certification",
-    hint: "PhilHealth blue card", printMode: "overlay", validityMonths: null, onePerResident: false,
-    signatoryMode: "preprinted", residentNeeds: ["birthDate", "sex"],
-    fields: [
-      { name: "cardType", label: "Card", type: "combobox", required: true, options: ["BLUE CARD"], group: "main" },
     ],
   },
   ASSISTANCE: {

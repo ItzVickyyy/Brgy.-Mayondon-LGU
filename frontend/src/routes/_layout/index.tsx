@@ -41,13 +41,13 @@ const adminActivities: { title: string; detail: string; time: string }[] = []
 
 function SummaryCard({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: typeof Users }) {
   return (
-    <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+    <article className="rounded-xl border border-primary/25 bg-primary/5 p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">{value}</p>
         </div>
-        <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
+        <div className="rounded-lg bg-primary/15 p-2.5 text-primary">
           <Icon className="size-5" aria-hidden="true" />
         </div>
       </div>
@@ -105,17 +105,17 @@ function Dashboard() {
 
       <section aria-label="Quick actions">
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <SectionHeading title="Quick Actions" description="Common tasks for the barangay office" />
-          <div className="mt-4 flex flex-col gap-3 lg:flex-row">
+          <SectionHeading title="Quick Actions" />
+          <div className="mt-3 flex flex-col gap-3 lg:flex-row">
             {[
               { title: "Find a resident", description: "Search resident and ID records", to: "/records", icon: Users },
               { title: "Create an issuance", description: "Start a new document request", to: "/issuances", icon: FileCheck2 },
               { title: "Review issuance history", description: "Find previous document records", to: "/issuances", icon: CalendarDays },
               { title: "View dashboard activity", description: "Review recent office actions", to: "/activity-log", icon: Activity },
             ].map((item) => (
-              <Link key={item.title} to={item.to} className="group flex min-h-24 items-start gap-3 rounded-xl border p-4 lg:flex-1 transition-colors hover:border-primary/40 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <span className="rounded-lg bg-primary/10 p-2 text-primary"><item.icon className="size-5" aria-hidden="true" /></span>
-                <span><span className="block font-semibold group-hover:text-primary">{item.title}</span><span className="mt-1 block text-sm leading-5 text-muted-foreground">{item.description}</span></span>
+              <Link key={item.title} to={item.to} className="group flex min-h-16 items-center gap-3 rounded-xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-1">
+                <span className="rounded-lg bg-primary/15 p-2 text-primary"><item.icon className="size-5" aria-hidden="true" /></span>
+                <span><span className="block font-semibold group-hover:text-primary">{item.title}</span><span className="block text-sm leading-5 text-muted-foreground">{item.description}</span></span>
               </Link>
             ))}
           </div>
