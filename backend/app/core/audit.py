@@ -3,8 +3,14 @@
 import json
 import logging
 from datetime import UTC, datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
+
+if TYPE_CHECKING:
+    from sqlmodel import Session
+
+    from app.models import User
+    from app.models_foundation import AuditLog
 
 logger = logging.getLogger("app.audit")
 
@@ -26,3 +32,44 @@ def record_admin_action(
         "target_id": str(target_id),
     }
     logger.info(json.dumps(event, separators=(",", ":")))
+
+
+def record_audit_event(
+    session: Session,
+    *,
+    action: str,
+    actor: User | None = None,
+    outcome: str = "success",
+    module: str | None = None,
+    record_type: str | None = None,
+    record_id: UUID | str | int | None = None,
+    reason: str | None = None,
+    details: dict[str, Any] | None = None,
+    commit: bool = False,
+) -> AuditLog:
+    """Add a row to the append-only ``audit_log`` table.
+
+    By default the row is only added to the session, so it is saved in the same
+    transaction as the change it records. Pass ``commit=True`` for denied or
+    failed attempts, where the main transaction is rolled back.
+    Never put passwords, tokens, health conditions or unneeded personal data
+    in ``details``.
+    """
+    from app.models_foundation import AuditLog
+
+    entry = AuditLog(
+        actor_user_id=actor.id if actor else None,
+        actor_email=actor.email if actor else None,
+        action=action,
+        outcome=outcome,
+        module=module,
+        record_type=record_type,
+        record_id=None if record_id is None else str(record_id),
+        reason=reason,
+        details=details,
+    )
+    session.add(entry)
+    if commit:
+        session.commit()
+        session.refresh(entry)
+    return entry

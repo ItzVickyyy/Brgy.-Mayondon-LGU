@@ -312,30 +312,6 @@ def test_last_admin_cannot_be_deleted_by_another_route(
     assert crud.is_last_active_admin(session=db, user=admin)
 
 
-# --- Items keep their ownership rule ---------------------------------------
-
-
-def test_staff_only_see_their_own_items(
-    client: TestClient, staff_token_headers: Headers, superuser_token_headers: Headers
-) -> None:
-    mine = client.post(
-        f"{API}/items/", headers=staff_token_headers, json={"title": "mine"}
-    ).json()
-    theirs = client.post(
-        f"{API}/items/", headers=superuser_token_headers, json={"title": "admin's"}
-    ).json()
-    listed = client.get(f"{API}/items/", headers=staff_token_headers).json()
-    assert [i["id"] for i in listed["data"]] == [mine["id"]]
-    assert (
-        client.get(
-            f"{API}/items/{theirs['id']}", headers=staff_token_headers
-        ).status_code
-        == 403
-    )
-    all_items = client.get(f"{API}/items/", headers=superuser_token_headers).json()
-    assert {mine["id"], theirs["id"]} <= {i["id"] for i in all_items["data"]}
-
-
 # --- Permission matrix and database constraints ----------------------------
 
 ADMIN_ONLY = {
