@@ -24,14 +24,14 @@ const name = { firstName: "Juan", middleName: "Santos", lastName: "Dela Cruz" }
 test.describe("buildPrintData", () => {
   test("clearance uses LAST, FIRST format, age and photo", () => {
     const data = buildPrintData(make("BARANGAY_CLEARANCE", {
-      purposeId: 1, remarks: "NO DEROGATORY RECORD ON FILE", details: { type: "BARANGAY_CLEARANCE", purposeNote: "Job" },
+      purposeId: 1, remarks: "NO DEROGATORY RECORD ON FILE", details: { type: "BARANGAY_CLEARANCE" },
       identification: { idTypeId: 2, idNumber: "N01", placeOfIssue: "Manila", dateOfIssue: "2024-01-05" },
       payment: { isFree: false, officialReceiptNo: "OR-9" },
     }), lookups, name)!
     expect(data.templateId).toBe("clearance")
     expect(data.values).toMatchObject({
       name: "DELA CRUZ, JUAN SANTOS", age: "26 years old", birthdate: "March 1, 2000", date: "November 4, 2026",
-      purpose: "Employment", purposeNote: "Job", idType: "Driver's License", idDate: "January 5, 2024", orNumber: "OR-9",
+      purpose: "Employment", idType: "Driver's License", idDate: "January 5, 2024", orNumber: "OR-9",
     })
     expect(data.photoUrl).toBe(resident.photoUrl)
   })

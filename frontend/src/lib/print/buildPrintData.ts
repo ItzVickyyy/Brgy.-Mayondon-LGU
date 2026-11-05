@@ -57,7 +57,6 @@ export function buildPrintData(issuance: MockIssuance, lookups: PrintLookups, na
     civilStatus: resident?.civilStatus ?? "",
     purpose: byId(lookups.purposes, payload.purposeId),
     remarks: payload.remarks ?? "",
-    remarks2: "",
     idType: byId(lookups.idTypes, payload.identification?.idTypeId),
     idNumber: payload.identification?.idNumber ?? "",
     idPlace: payload.identification?.placeOfIssue ?? "",
@@ -67,7 +66,6 @@ export function buildPrintData(issuance: MockIssuance, lookups: PrintLookups, na
     sectorLine: sectors.length ? `SECTOR : ${sectors.join(" / ")}` : "",
   }
 
-  if (details.type === "BARANGAY_CLEARANCE") values.purposeNote = details.purposeNote ?? ""
   if (details.type === "FRANCHISE_CLEARANCE") {
     if (lookups.tricycle) Object.assign(values, {
       association: lookups.tricycle.association, make: lookups.tricycle.make, bodyType: lookups.tricycle.bodyType, motorNumber: lookups.tricycle.motorNumber,

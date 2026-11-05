@@ -56,7 +56,6 @@ const purokChoices = [1, 2, 3, 4, 5, 6].map((purok) => ({ value: String(purok), 
 const fieldLabelClass = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
 
 function normalizedOptionValue(fieldName: string, option: string) {
-  if (fieldName === "referredBy" && option !== "None") return initialOfficials.find((official) => official.status === "Current" && official.name === option)?.id ?? option
   if (fieldName === "witnessOfficialId") return initialOfficials.find((official) => official.status === "Current" && official.name === option)?.id ?? option
   if (fieldName === "services" || fieldName === "connectionType" || fieldName === "classification" || fieldName === "assistanceType" || fieldName === "transactionType") return option.toLowerCase()
   if (fieldName === "isJobstartBeneficiary") return option === "Yes" ? "true" : "false"
@@ -86,7 +85,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
   const [pendingDocumentType, setPendingDocumentType] = useState<DocumentCode | null>(null)
   const [validUntilEdited, setValidUntilEdited] = useState(false)
   const [addressParts, setAddressParts] = useState(() => ({ houseNumber: selectedResident?.houseNumber ?? "", street: selectedResident?.street ?? "", purok: selectedResident?.purok ?? 1 }))
-  const [moreOpen, setMoreOpen] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [saving, setSaving] = useState(false)
   const [successRecord, setSuccessRecord] = useState<MockIssuance | null>(null)
@@ -223,7 +221,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     }
     if (field.name === "purpose") return readErrorMessage(errors.purposeText)
     if (field.name === "sector") return readErrorMessage(errors.sectors)
-    const key = field.name === "relationship" ? "beneficiaryRelationship" : field.name === "referredBy" ? "referredByOfficialId" : field.name
+    const key = field.name === "relationship" ? "beneficiaryRelationship" : field.name
     return readErrorMessage((errors.details as Record<string, unknown> | undefined)?.[key])
   }
 
@@ -238,7 +236,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         : field.name === "remarks" ? form.watch("remarks")
         : field.name === "idNumber" && documentType === "BARANGAY_ID" ? selectedResident?.idNumber?.split("-").slice(-1)[0] ?? issuanceApi.getNextBarangayIdNumber()
         : field.name === "sector" ? selectedSector
-        : field.name === "referredBy" ? (details as unknown as Record<string, unknown>).referredByOfficialId ?? "None"
         : field.name === "for" ? ((details as unknown as Record<string, unknown>).forSelf === false ? "Someone else" : "Myself")
         : field.name === "relationship" ? (details as unknown as Record<string, unknown>).beneficiaryRelationship
         : field.name === "sectorIdNumber" ? form.watch("sectors")?.[0]?.idNumber ?? ""
@@ -256,7 +253,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       } else if (field.group === "payment") {
         setPayment(paymentKeyOf(field.name), nextValue)
       } else if (field.name === "purpose") setRootField("purposeText", String(nextValue))
-      else if (field.name === "referredBy") setDetail("referredByOfficialId", String(nextValue) === "None" ? undefined : String(nextValue))
       else if (field.name === "remarks") setRootField("remarks", String(nextValue))
       else if (field.name === "sector" && field.type === "multiselect") { const values = Array.isArray(nextValue) ? nextValue as string[] : []; setSectorManuallySelected(true); setSelectedSector(values); form.setValue("sectors", values.map((sector) => ({ sectorId: Math.max(1, (field.options ?? []).indexOf(sector) + 1) })), { shouldDirty: true }) }
       else if (field.name === "sector") { setSectorManuallySelected(true); setSelectedSector(String(nextValue)); form.setValue("sectors", [{ sectorId: Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1) }], { shouldDirty: true }) }
@@ -270,7 +266,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
       } else if (field.name === "validUntil") { setValidUntilEdited(true); setDetail(field.name, nextValue) }
       else setDetail(field.name, nextValue)
     }
-    const fieldOptions = field.name === "associationName" ? knownAssociations : field.name === "referredBy" ? ["None", ...initialOfficials.filter((official) => official.status === "Current").map((official) => official.name)] : field.name === "witnessOfficialId" ? initialOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
+    const fieldOptions = field.name === "associationName" ? knownAssociations : field.name === "witnessOfficialId" ? initialOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
     const missingNow = attempted && Boolean(field.required) && !fieldHasValue(field)
     const invalid = Boolean(fieldError) || missingNow
     const describedBy = fieldError || missingNow ? `${fieldId}-error` : undefined
@@ -493,7 +489,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setPendingDocumentType(null)
     setAddressParts({ houseNumber: "", street: "", purok: 1 })
     setValidUntilEdited(false)
-    setMoreOpen(false)
     setPreviewOpen(false)
     setSuccessRecord(null)
     setDuplicate(null)
@@ -662,7 +657,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     else if (field.name === "sectorIdNumber") value = form.getValues("sectors")?.[0]?.idNumber
     else if (field.name === "for") value = detailValues.forSelf === false ? "Someone else" : "Myself"
     else if (field.name === "relationship") value = detailValues.beneficiaryRelationship
-    else if (field.name === "referredBy") value = initialOfficials.find((official) => official.id === detailValues.referredByOfficialId)?.name
     else if (field.name === "witnessOfficialId") value = initialOfficials.find((official) => official.id === detailValues.witnessOfficialId)?.name
     else value = detailValues[field.name]
     if (Array.isArray(value)) return value.join(", ")
@@ -875,10 +869,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
                 <label htmlFor="issuance-signatoryOfficialId">Signatory {availableSignatories.length > 0 ? <span className="text-destructive">*</span> : null}</label>
                 {availableSignatories.length > 0 ? <SelectField id="issuance-signatoryOfficialId" value={form.watch("signatoryOfficialId") ?? ""} onChange={(next) => form.setValue("signatoryOfficialId", next, { shouldDirty: true })} placeholder="Choose an official…" invalid={Boolean(readErrorMessage(form.formState.errors.signatoryOfficialId)) || (attempted && signatoryMissing)} describedBy={readErrorMessage(form.formState.errors.signatoryOfficialId) ? "issuance-signatory-error" : undefined} options={availableSignatories.map((official) => ({ value: official.id, label: `${official.name} · ${official.position}` }))} /> : <p className="rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">No officials are configured. The signature line will be left blank.</p>}
                 {readErrorMessage(form.formState.errors.signatoryOfficialId) ? <span id="issuance-signatory-error" role="alert" className="text-xs font-normal text-destructive">{readErrorMessage(form.formState.errors.signatoryOfficialId)}</span> : attempted && signatoryMissing ? <span role="alert" className="text-xs font-normal text-destructive">Please choose who signs this document.</span> : null}
-              </div> : null}
-              {fieldsByGroup("more").length ? <div className="rounded-lg border border-dashed p-3">
-                <button type="button" className="flex min-h-9 w-full items-center gap-2 text-sm font-medium" aria-expanded={moreOpen} onClick={() => setMoreOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", moreOpen && "rotate-180")} />Optional extras</button>
-                {!moreOpen ? <p className="mt-1 text-xs text-muted-foreground">{fieldsByGroup("more").map((field) => previewValue(field)).filter(Boolean).join(" · ") || "Nothing added. Defaults are fine for most requests."}</p> : <div className="mt-3 grid gap-4 sm:grid-cols-2">{fieldsByGroup("more").map(renderField)}</div>}
               </div> : null}
               {details.type === "FIRST_TIME_JOBSEEKER" && details.isJobstartBeneficiary ? <p className="text-sm text-muted-foreground">JobStart beneficiary selected. The Punong Barangay will determine eligibility.</p> : null}
             </IssuanceSection>

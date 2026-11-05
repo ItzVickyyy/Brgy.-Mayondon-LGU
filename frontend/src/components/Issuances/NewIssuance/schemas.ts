@@ -23,7 +23,7 @@ const paymentSchema = z.object({
 })
 
 const detailsSchemas = {
-  BARANGAY_CLEARANCE: z.object({ type: z.literal("BARANGAY_CLEARANCE"), purposeNote: z.string().optional(), referredByOfficialId: z.string().optional() }),
+  BARANGAY_CLEARANCE: z.object({ type: z.literal("BARANGAY_CLEARANCE") }),
   FRANCHISE_CLEARANCE: z.object({ type: z.literal("FRANCHISE_CLEARANCE"), associationName: nonEmpty, make: nonEmpty, bodyType: nonEmpty, motorNumber: nonEmpty, color: nonEmpty, plateNumber: nonEmpty }),
   UTILITY_CLEARANCE: z.object({ type: z.literal("UTILITY_CLEARANCE"), services: z.array(z.enum(["electric", "water"])).min(1), connectionType: z.enum(["new", "reconnection"]), classification: z.enum(["residential", "commercial"]), location: nonEmpty }),
   RESIDENCY: z.object({ type: z.literal("RESIDENCY") }),

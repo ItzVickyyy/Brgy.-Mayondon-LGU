@@ -103,6 +103,25 @@ function Dashboard() {
         <SummaryCard title={isAdmin ? "Pending Registrations" : "Pending Document Requests"} value="0" description="Awaiting review" icon={Users} />
       </section>
 
+      <section aria-label="Quick actions">
+        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <SectionHeading title="Quick Actions" description="Common tasks for the barangay office" />
+          <div className="mt-4 flex flex-col gap-3 lg:flex-row">
+            {[
+              { title: "Find a resident", description: "Search resident and ID records", to: "/records", icon: Users },
+              { title: "Create an issuance", description: "Start a new document request", to: "/issuances", icon: FileCheck2 },
+              { title: "Review issuance history", description: "Find previous document records", to: "/issuances", icon: CalendarDays },
+              { title: "View dashboard activity", description: "Review recent office actions", to: "/activity-log", icon: Activity },
+            ].map((item) => (
+              <Link key={item.title} to={item.to} className="group flex min-h-24 items-start gap-3 rounded-xl border p-4 lg:flex-1 transition-colors hover:border-primary/40 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                <span className="rounded-lg bg-primary/10 p-2 text-primary"><item.icon className="size-5" aria-hidden="true" /></span>
+                <span><span className="block font-semibold group-hover:text-primary">{item.title}</span><span className="mt-1 block text-sm leading-5 text-muted-foreground">{item.description}</span></span>
+              </Link>
+            ))}
+          </div>
+        </article>
+      </section>
+
       <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -144,7 +163,7 @@ function Dashboard() {
         </article>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-2">
+      <section className="grid gap-4">
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col items-start gap-2"><SectionHeading title="Expiring IDs and Clearances" description="Records that may need attention soon" /></div>
           <div className="mt-4 divide-y">
@@ -157,22 +176,6 @@ function Dashboard() {
             <p className="py-3 text-sm text-muted-foreground">No records are expiring soon.</p>
           </div>
           <Link to="/issuances" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary hover:underline">Open issuance history</Link>
-        </article>
-        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <SectionHeading title="Quick Actions" description="Common tasks for the barangay office" />
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {[
-              { title: "Find a resident", description: "Search resident and ID records", to: "/records", icon: Users },
-              { title: "Create an issuance", description: "Start a new document request", to: "/issuances", icon: FileCheck2 },
-              { title: "Review issuance history", description: "Find previous document records", to: "/issuances", icon: CalendarDays },
-              { title: "View dashboard activity", description: "Review recent office actions", to: "/activity-log", icon: Activity },
-            ].map((item) => (
-              <Link key={item.title} to={item.to} className="group flex min-h-24 items-start gap-3 rounded-xl border p-4 transition-colors hover:border-primary/40 hover:bg-muted/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
-                <span className="rounded-lg bg-primary/10 p-2 text-primary"><item.icon className="size-5" aria-hidden="true" /></span>
-                <span><span className="block font-semibold group-hover:text-primary">{item.title}</span><span className="mt-1 block text-sm leading-5 text-muted-foreground">{item.description}</span></span>
-              </Link>
-            ))}
-          </div>
         </article>
       </section>
 

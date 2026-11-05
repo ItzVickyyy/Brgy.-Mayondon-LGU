@@ -60,7 +60,6 @@ function readField(field: DetailFieldConfig, issuance: MockIssuance, record: Iss
   if (field.name === "sectorIdNumber") return payload.sectors?.[0]?.idNumber ?? ""
   if (field.name === "for") return details.forSelf === false ? "Someone else" : "Myself"
   if (field.name === "relationship") return stringify(field, details.beneficiaryRelationship)
-  if (field.name === "referredBy") return officialName(details.referredByOfficialId) || "None"
   if (field.name === "witnessOfficialId") return officialName(details.witnessOfficialId)
   return stringify(field, details[field.name])
 }
