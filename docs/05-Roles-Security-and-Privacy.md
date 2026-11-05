@@ -21,7 +21,7 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 - **Staff** — routine resident-record and document-issuance work; views and updates the records needed for duties; views their own activity.
 - **System Administrator** — routine work plus user accounts, access, system configuration, reports, backup/restore and administrative review.
 
-**Current implementation:** the API exposes `is_superuser`. The prototype maps System Administrator → `is_superuser = true` and Staff → `false`. This is a **UI/API mapping, not a role enum or a permission system.** A future backend should use a role enum `admin` / `staff` (UI label for `admin`: System Administrator). **Not implemented.**
+**Current implementation (backend):** each account has a `role` of `admin` (UI label: System Administrator) or `staff`, stored in the database with constraints that reject any other value. The legacy `is_superuser` flag is kept for older clients and is always equal to `role = admin` (the database enforces this; the API accepts either field and rejects a conflict). `backend/app/core/permissions.py` holds the role → permission matrix; endpoints ask for a permission (`require_permission`), and the role is read from the database on every request, so a role change or deactivation applies immediately. **Only the user-account endpoints are real so far** (admin only); the other permissions in the matrix are declared for the records, issuance, reports and backup endpoints that do not exist yet. The matrix is still a **proposal, not a client-approved policy (D-10, D-11)**.
 
 ### A3. Proposed access matrix
 
@@ -46,7 +46,7 @@ If the client keeps "six accounts, full access", still review whether deletion, 
 
 ### A4. Account status (planned, not implemented)
 
-Suggested backend fields: `role` (`admin` | `staff`) and `status` (`pending`, `active`, `rejected`, `inactive`). The current `is_active` boolean cannot represent pending or rejected. Do **not** implement approval with only a frontend label or component state. The prototype's pending/approved/rejected examples are fictional.
+`role` (`admin` | `staff`) is implemented (A2). `status` (`pending`, `active`, `rejected`, `inactive`) is not: the current `is_active` boolean cannot represent pending or rejected. Do **not** implement approval with only a frontend label or component state. The prototype's pending/approved/rejected examples are fictional.
 
 ### A5. Audit history (planned, not implemented)
 
@@ -54,6 +54,8 @@ Append-only history for sensitive actions: who, when, affected record, reason wh
 
 ### A6. Account lifecycle
 
+- The system cannot be left without an administrator: the API refuses to demote, deactivate or delete the last active admin.
+- A first Staff account can be provisioned the same way with `FIRST_STAFF` and `FIRST_STAFF_PASSWORD` in `.env` (both or neither; created only if missing, never overwritten).
 - First administrator is provisioned through controlled initial setup (`FIRST_SUPERUSER` in `.env`). There is **no public sign-up**; an admin creates accounts. The User Accounts table shows whatever the database holds, including this seeded account; it is deployment data, not code. **Before real use, create a real admin in User Accounts, then delete the seed account** (the app refuses to delete the last active admin).
 - Use **individual** accounts, not shared ones.
 - Disable access when staff leave or no longer need it, while preserving required issuance history.
@@ -170,4 +172,4 @@ These are **requirements to implement and verify, not claims that they exist.**
 
 ## Part E. Verification status
 
-**Current status: PENDING.** The hosting design changed on Oct 25 from Vercel + Supabase to a local Docker + PostgreSQL deployment on the office LAN, so the old Vercel/Supabase verification items **no longer apply** and have been removed from this checklist. What remains open is verification of the **actual LAN deployment** — see the acceptance checklist in [06-Architecture-and-Deployment.md](06-Architecture-and-Deployment.md). The team agreed (Oct 18) to pause further security code changes until the real hosting setup can be inspected; role/status/audit work is therefore **planned, not started** **(D-39)**.
+**Current status: PENDING.** The hosting design changed on Oct 25 from Vercel + Supabase to a local Docker + PostgreSQL deployment on the office LAN, so the old Vercel/Supabase verification items **no longer apply** and have been removed from this checklist. What remains open is verification of the **actual LAN deployment** — see the acceptance checklist in [06-Architecture-and-Deployment.md](06-Architecture-and-Deployment.md). The team agreed (Oct 18) to pause further security code changes until the real hosting setup can be inspected; `role` is now implemented and tested through the API; account `status` and an append-only audit history remain **planned, not started** **(D-39)**.

@@ -33,7 +33,7 @@ Last updated: November 5, 2026
 | D-11 | **Staff self-registration with admin approval** vs the brief/README rule of *no public sign-up; admin creates accounts*. Who is the System Administrator and who may approve/disable accounts? | Drop self-registration unless the client asks; admin-created accounts match the brief and need no email | Client / Team | V1 | Open |
 | D-12 | **Account setup and password recovery offline.** Email is disabled, so the reset flow does not work. What is the local procedure (admin sets a temporary password? written recovery code?) and who owns it? | Admin-managed temporary password with forced change | Client / Team | Test | Open |
 | D-25 | Even if all six keep "full access": may staff **delete, export, import, manage accounts, back up/restore**? Proposed: staff cannot import, archive, void, or restore | Decide per action, not per person | Client | Test | Open |
-| D-39 | Backend authorization is **not implemented** for roles, account status (`pending/active/rejected/inactive`), or audit logging; role is only `is_superuser`. Decide the model, then implement and test direct-API access. | Build after D-10/D-11 are settled | Team | Data | Open |
+| D-39 | Backend authorization: **role (`admin`/`staff`) is implemented and enforced on the user-account API** (see [05](05-Roles-Security-and-Privacy.md) A2). Still not implemented: account status (`pending/active/rejected/inactive`) and audit logging. Endpoints for records, issuance, reports and backup must use `require_permission` when they are built, and each needs direct-API tests. | Build the rest after D-10/D-11 are settled | Team | Data | Partly done |
 
 ## C. Scope, documents and printing
 
