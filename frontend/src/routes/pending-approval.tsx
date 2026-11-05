@@ -23,7 +23,7 @@ function PendingApproval() {
         </div>
         <section className="flex gap-3 rounded-xl border p-4">
           <Clock3
-            className="mt-0.5 size-5 shrink-0 text-amber-600"
+            className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400"
             aria-hidden="true"
           />
           <div>
@@ -49,7 +49,7 @@ function PendingApproval() {
 
         <RouterLink
           to="/login"
-          className="inline-flex min-h-11 items-center font-medium text-primary underline-offset-4 hover:underline"
+          className="inline-flex min-h-11 items-center font-medium text-brand underline-offset-4 hover:underline"
         >
           Back to Staff Login
         </RouterLink>

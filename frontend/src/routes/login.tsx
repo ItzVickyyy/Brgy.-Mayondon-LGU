@@ -163,7 +163,7 @@ function Login() {
                     <FormLabel>Password</FormLabel>
                     <RouterLink
                       to="/recover-password"
-                      className="ml-auto text-sm font-medium text-primary underline-offset-4 hover:underline"
+                      className="ml-auto text-sm font-medium text-brand underline-offset-4 hover:underline"
                     >
                       Forgot password?
                     </RouterLink>
@@ -194,7 +194,7 @@ function Login() {
             Need staff access?{" "}
             <RouterLink
               to="/request-access"
-              className="font-medium text-primary underline-offset-4 hover:underline"
+              className="font-medium text-brand underline-offset-4 hover:underline"
             >
               Request access
             </RouterLink>
@@ -203,7 +203,7 @@ function Login() {
             Account pending or not approved?{" "}
             <RouterLink
               to="/pending-approval"
-              className="font-medium text-primary underline-offset-4 hover:underline"
+              className="font-medium text-brand underline-offset-4 hover:underline"
             >
               Request Access
             </RouterLink>

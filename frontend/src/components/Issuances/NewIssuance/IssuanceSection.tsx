@@ -35,7 +35,7 @@ export function IssuanceSection({
             "flex size-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold",
             done
               ? "border-emerald-600 bg-emerald-600 text-white"
-              : "border-primary/30 bg-primary/10 text-primary",
+              : "border-brand/30 bg-brand/10 text-brand",
           )}
         >
           {done ? <Check className="size-4" /> : step}

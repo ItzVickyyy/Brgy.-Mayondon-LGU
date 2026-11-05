@@ -41,13 +41,13 @@ const adminActivities: { title: string; detail: string; time: string }[] = []
 
 function SummaryCard({ title, value, description, icon: Icon }: { title: string; value: string; description: string; icon: typeof Users }) {
   return (
-    <article className="rounded-xl border border-primary/25 bg-primary/5 p-4 shadow-sm sm:p-5">
+    <article className="rounded-xl border border-brand/25 bg-brand/5 p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">{value}</p>
         </div>
-        <div className="rounded-lg bg-primary/15 p-2.5 text-primary">
+        <div className="rounded-lg bg-brand/15 p-2.5 text-brand">
           <Icon className="size-5" aria-hidden="true" />
         </div>
       </div>
@@ -113,9 +113,9 @@ function Dashboard() {
               { title: "Review issuance history", description: "Find previous document records", to: "/issuances", icon: CalendarDays },
               { title: "View dashboard activity", description: "Review recent office actions", to: "/activity-log", icon: Activity },
             ].map((item) => (
-              <Link key={item.title} to={item.to} className="group flex min-h-16 items-center gap-3 rounded-xl border border-primary/25 bg-primary/5 p-3 transition-colors hover:border-primary/50 hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-1">
-                <span className="rounded-lg bg-primary/15 p-2 text-primary"><item.icon className="size-5" aria-hidden="true" /></span>
-                <span><span className="block font-semibold group-hover:text-primary">{item.title}</span><span className="block text-sm leading-5 text-muted-foreground">{item.description}</span></span>
+              <Link key={item.title} to={item.to} className="group flex min-h-16 items-center gap-3 rounded-xl border border-brand/25 bg-brand/5 p-3 transition-colors hover:border-brand/50 hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-1">
+                <span className="rounded-lg bg-brand/15 p-2 text-brand"><item.icon className="size-5" aria-hidden="true" /></span>
+                <span><span className="block font-semibold group-hover:text-brand">{item.title}</span><span className="block text-sm leading-5 text-muted-foreground">{item.description}</span></span>
               </Link>
             ))}
           </div>
@@ -131,7 +131,7 @@ function Dashboard() {
             {visibleMonths.map((item) => (
               <div key={item.month} className="flex h-full flex-1 flex-col items-center justify-end gap-2">
                 <span className="text-xs tabular-nums text-muted-foreground">{item.count}</span>
-                <div className="w-full max-w-12 rounded-t-md bg-primary/80 transition-all" style={{ height: `${(item.count / maxMonthly) * 72}%` }} />
+                <div className="w-full max-w-12 rounded-t-md bg-brand/80 transition-all" style={{ height: `${(item.count / maxMonthly) * 72}%` }} />
                 <span className="pb-2 text-xs text-muted-foreground">{item.month}</span>
               </div>
             ))}
@@ -150,7 +150,7 @@ function Dashboard() {
                   <span className="shrink-0 tabular-nums text-muted-foreground">{item.count}</span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${totalByType > 0 ? (item.count / totalByType) * 100 : 0}%` }} />
+                  <div className="h-full rounded-full bg-brand" style={{ width: `${totalByType > 0 ? (item.count / totalByType) * 100 : 0}%` }} />
                 </div>
               </div>
             ))}
@@ -175,13 +175,13 @@ function Dashboard() {
             ))}
             <p className="py-3 text-sm text-muted-foreground">No records are expiring soon.</p>
           </div>
-          <Link to="/issuances" className="mt-3 inline-flex min-h-11 items-center font-semibold text-primary hover:underline">Open issuance history</Link>
+          <Link to="/issuances" className="mt-3 inline-flex min-h-11 items-center font-semibold text-brand hover:underline">Open issuance history</Link>
         </article>
       </section>
 
       <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
         <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-primary/10 p-2.5 text-primary"><Activity className="size-5" aria-hidden="true" /></div>
+          <div className="rounded-lg bg-brand/10 p-2.5 text-brand"><Activity className="size-5" aria-hidden="true" /></div>
           <div>
             <div className="flex flex-col items-start gap-2"><SectionHeading title="Recent Activities" description={isAdmin ? "Recent system-wide activity" : "Your recent activity"} /></div>
           </div>

@@ -22,7 +22,7 @@ test("Records Management page starts with an empty resident list", async ({
 }) => {
   await page.goto("/records")
   await expect(
-    page.getByRole("heading", { name: "Resident Records" }),
+    page.getByRole("heading", { name: "Records Management" }),
   ).toBeVisible()
   await expect(page.getByText("No matching residents")).toBeVisible()
 
@@ -65,13 +65,18 @@ test("Dashboard uses document-focused summary cards without a data badge", async
   await expect(page.getByText("Sample Data")).toHaveCount(0)
 })
 
-test("Barangay IDs route displays the ID management page", async ({
+test("Barangay IDs route redirects to the Records Management ID tab", async ({
   page,
 }) => {
   await page.goto("/barangay-ids")
+  await expect(page).toHaveURL(/\/records\?view=barangay-ids/)
   await expect(
-    page.getByRole("heading", { name: "Barangay ID Management" }),
+    page.getByRole("heading", { name: "Records Management" }),
   ).toBeVisible()
+  await expect(page.getByRole("tab", { name: "Barangay IDs" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  )
   await expect(page.getByText("No ID records match your search")).toBeVisible()
 })
 

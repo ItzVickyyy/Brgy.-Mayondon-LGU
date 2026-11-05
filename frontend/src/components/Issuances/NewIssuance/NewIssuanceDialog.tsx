@@ -23,6 +23,8 @@ type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
   initialResidentId?: string
+  /** When set together with initialResidentId (or alone), the dialog opens on this document type. */
+  initialDocumentType?: DocumentCode
   /** Called for every save. `meta.auto` is true for the quiet automatic draft saves. */
   onSaved: (record: MockIssuance, meta?: { auto: boolean }) => void
   /** Called when a draft is deleted (discarded, or turned into an issued document). */
@@ -71,7 +73,7 @@ function getDefaultToday(value: unknown) {
   return value === "today" ? localIsoDate() : typeof value === "string" ? value : ""
 }
 
-export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSaved, onDraftRemoved, onPrint }: Props) {
+export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initialDocumentType, onSaved, onDraftRemoved, onPrint }: Props) {
   const form = useNewIssuanceForm(initialResidentId ?? "")
   const [residents, setResidents] = useState<ResidentRecord[]>([])
   const [residentQuery, setResidentQuery] = useState("")
@@ -166,7 +168,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     setFormError("")
   }
 
-  function selectResident(resident: ResidentRecord) {
+  function selectResident(resident: ResidentRecord, code: DocumentCode = documentType) {
     if (resident.status === "Archived") return
     setSelectedResident(resident)
     setEditingResident(false)
@@ -174,11 +176,24 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
     form.setValue("residentId", resident.id, { shouldDirty: true })
     setResidentUpdates({})
     setAddressParts({ houseNumber: resident.houseNumber ?? "", street: resident.street ?? "", purok: resident.purok ?? 1 })
-    prefillResidentSector(documentType, resident)
+    prefillResidentSector(code, resident)
     setSectorManuallySelected(false)
     setDuplicate(null)
     setFormError("")
   }
+
+  // Opened from another page (for example an ID row in Records Management): select the resident and document type once per open.
+  const appliedInitialRef = useRef("")
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once per open for the given resident and type
+  useEffect(() => {
+    if (!open) { appliedInitialRef.current = ""; return }
+    const key = `${initialResidentId ?? ""}|${initialDocumentType ?? ""}`
+    if (key === "|" || appliedInitialRef.current === key) return
+    appliedInitialRef.current = key
+    if (initialDocumentType && initialDocumentType !== form.getValues("documentType")) applyDocumentType(initialDocumentType)
+    const resident = initialResidentId ? issuanceApi.getResident(initialResidentId) : undefined
+    if (resident) selectResident(resident, initialDocumentType)
+  }, [open, initialResidentId, initialDocumentType])
 
   function setDetail(name: string, value: unknown) {
     const current = form.getValues("details") as unknown as Record<string, unknown>
@@ -767,7 +782,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         <DialogDescription>Pick the document, find the resident, fill in the details. Everything on one screen.</DialogDescription>
       </DialogHeader>
       {successRecord ? <div className="flex flex-1 flex-col items-center justify-center gap-4 overflow-y-auto p-8 text-center" role="status">
-        <CheckCircle2 className="size-12 text-emerald-600" aria-hidden="true" />
+        <CheckCircle2 className="size-12 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
         <div>
           <p className="text-lg font-semibold">Issued: {successRecord.referenceNo}</p>
           <p className="mt-1 text-sm text-muted-foreground">{config.name} for {selectedResident?.name ?? "the resident"} was saved.</p>
@@ -798,7 +813,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
             <IssuanceSection id="issuance-step-resident" step={2} title="Who is it for?" description={selectedResident && !editingResident ? "You can edit this resident or choose someone else." : editingResident ? "Update this resident's information, then save your changes." : "Type the person's name and select them from the list, or fill in the form below if they are not listed."} done={residentDone}>
               {selectedResident && !editingResident ? <div className="flex items-start justify-between gap-3 rounded-lg border border-emerald-600/40 bg-emerald-500/5 p-4">
                 <div className="flex min-w-0 items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600" aria-hidden="true" />
+                  <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
                   <div className="min-w-0">
                     <p className="text-base font-semibold">{selectedResident.name}</p>
                     <p className="mt-0.5 text-sm">{getResidentAddress(selectedResident)}</p>
@@ -891,7 +906,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
         </div>
         <DialogFooter className="shrink-0 items-center gap-2 border-t px-5 py-3 sm:justify-between">
           <div className="flex min-w-0 flex-col gap-0.5 text-sm" aria-live="polite">
-            {remaining ? <button type="button" onClick={goToFirstMissing} className="inline-flex min-h-9 items-center gap-1.5 self-start text-amber-700 underline-offset-4 hover:underline"><CircleAlert className="size-4" aria-hidden="true" />{remaining} {remaining === 1 ? "item" : "items"} still needed. Go to next</button> : <span className="inline-flex min-h-9 items-center gap-1.5 font-medium text-emerald-700"><CheckCircle2 className="size-4" aria-hidden="true" />Ready to issue</span>}
+            {remaining ? <button type="button" onClick={goToFirstMissing} className="inline-flex min-h-9 items-center gap-1.5 self-start text-amber-700 dark:text-amber-400 underline-offset-4 hover:underline"><CircleAlert className="size-4" aria-hidden="true" />{remaining} {remaining === 1 ? "item" : "items"} still needed. Go to next</button> : <span className="inline-flex min-h-9 items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400"><CheckCircle2 className="size-4" aria-hidden="true" />Ready to issue</span>}
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="autosave-status">
               <span className={cn("size-2 rounded-full", autoSave.state === "saved" ? "bg-emerald-500" : autoSave.state === "saving" ? "animate-pulse bg-amber-500" : autoSave.state === "error" ? "bg-destructive" : "bg-muted-foreground/40")} aria-hidden="true" />
               {autoSave.state === "saving" ? "Saving draft…" : autoSave.state === "saved" ? `Draft saved automatically at ${autoSave.at?.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}` : autoSave.state === "error" ? "The draft could not be saved. What you typed is still here." : selectedResident ? "Saves as a draft automatically while you type" : "Saves as a draft automatically once you choose a person"}

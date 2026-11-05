@@ -480,7 +480,7 @@ export function CheckField({
         "inline-flex min-h-11 cursor-pointer items-center gap-3 text-sm font-normal select-none",
         variant === "box" &&
           "rounded-lg border bg-background px-3.5 transition-colors hover:bg-muted",
-        variant === "box" && checked && "border-primary bg-primary/5",
+        variant === "box" && checked && "border-brand bg-brand/5",
         disabled && "cursor-not-allowed opacity-50",
       )}
     >
@@ -491,7 +491,7 @@ export function CheckField({
         aria-invalid={invalid || undefined}
         aria-describedby={describedBy}
         onCheckedChange={(next) => onChange(next === true)}
-        className="size-5 rounded-md border-2 border-muted-foreground/50 bg-background data-[state=checked]:border-primary [&_svg]:size-4"
+        className="size-5 rounded-md border-2 border-muted-foreground/50 bg-background data-[state=checked]:border-brand [&_svg]:size-4"
       />
       <span className={cn(checked && variant === "box" && "font-medium")}>
         {label}
@@ -534,7 +534,7 @@ export function ChoiceRow({
             className={cn(
               "flex cursor-pointer items-center justify-center rounded-md border bg-background text-sm transition-colors hover:bg-muted has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50",
               selected &&
-                "border-primary bg-primary/10 font-medium text-primary hover:bg-primary/10",
+                "border-brand bg-brand/10 font-medium text-brand hover:bg-brand/10",
             )}
           >
             <input

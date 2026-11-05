@@ -70,7 +70,7 @@ export function User({
               aria-label="User menu"
               title={user?.full_name || user?.email || "User menu"}
             >
-              <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/20 bg-primary/10 text-primary">
+              <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand/20 bg-brand/10 text-brand">
                 {user?.profile_photo_url ? (
                   <img
                     src={user.profile_photo_url}
@@ -123,7 +123,7 @@ export function User({
                     >
                       <span className="flex-1">{language}</span>
                       {selected ? (
-                        <Check className="size-4 text-primary" />
+                        <Check className="size-4 text-brand" />
                       ) : null}
                     </DropdownMenuItem>
                   )

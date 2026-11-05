@@ -84,7 +84,7 @@ export function ResidentProfileDialog({
         {resident ? (
           <>
             <div className="flex flex-col gap-3 rounded-xl border bg-muted/20 p-4 sm:flex-row sm:items-center">
-              <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
                 <UserRound className="size-6" aria-hidden="true" />
               </span>
               <div className="min-w-0 flex-1">
@@ -182,7 +182,7 @@ export function ResidentProfileDialog({
             {profileTab === "Family & Sector" ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 <section className="rounded-xl border bg-card p-4">
-                  <Users className="size-5 text-primary" aria-hidden="true" />
+                  <Users className="size-5 text-brand" aria-hidden="true" />
                   <h3 className="mt-2 font-semibold">Family details</h3>
                   <p className="mt-1 text-sm text-muted-foreground">
                     Household reference, family members, and relationships.
@@ -190,7 +190,7 @@ export function ResidentProfileDialog({
                 </section>
                 <section className="rounded-xl border bg-card p-4 shadow-sm">
                   <UserRound
-                    className="size-5 text-primary"
+                    className="size-5 text-brand"
                     aria-hidden="true"
                   />
                   <h3 className="mt-2 font-semibold">
@@ -206,7 +206,7 @@ export function ResidentProfileDialog({
               <div className="grid gap-3 sm:grid-cols-2">
                 <section className="rounded-xl border bg-card p-4 shadow-sm">
                   <CreditCard
-                    className="size-5 text-primary"
+                    className="size-5 text-brand"
                     aria-hidden="true"
                   />
                   <p className="mt-2 text-sm text-muted-foreground">
@@ -225,7 +225,7 @@ export function ResidentProfileDialog({
             {profileTab === "Issuance History" ? (
               <section className="rounded-xl border bg-card p-4 sm:p-5">
                 <FileCheck2
-                  className="size-6 text-primary"
+                  className="size-6 text-brand"
                   aria-hidden="true"
                 />
                 <h3 className="mt-2 font-semibold">Issuance history</h3>

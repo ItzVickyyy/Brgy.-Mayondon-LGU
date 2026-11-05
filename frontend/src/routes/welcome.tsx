@@ -26,7 +26,7 @@ function WelcomePage() {
 
       <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col justify-center gap-8 px-4 py-12 sm:px-6 sm:py-16">
         <section className="rounded-2xl border bg-card px-6 py-10 sm:px-10 sm:py-14">
-          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-primary">
+          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-brand">
             {SITE.location}
           </p>
           <h1 className="max-w-3xl text-3xl font-bold tracking-tight sm:text-5xl">
@@ -49,7 +49,7 @@ function WelcomePage() {
             Barangay personnel who need access can{" "}
             <RouterLink
               to="/request-access"
-              className="font-medium text-primary underline-offset-4 hover:underline"
+              className="font-medium text-brand underline-offset-4 hover:underline"
             >
               preview the access request
             </RouterLink>
