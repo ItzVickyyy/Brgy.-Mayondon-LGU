@@ -26,6 +26,7 @@ from app.models import (
     UserUpdate,
     UserUpdateMe,
 )
+from app.models_issuance import Issuance
 from app.utils import (
     generate_new_account_email,
     generate_password_reset_token,
@@ -149,6 +150,18 @@ def read_user_me(current_user: CurrentUser) -> Any:
     return current_user
 
 
+def _require_no_issued_documents(session: SessionDep, user: User) -> None:
+    """An account that issued documents is deactivated, never deleted (decision 24)."""
+    if session.exec(
+        select(Issuance.id).where(Issuance.issued_by_user_id == user.id).limit(1)
+    ).first():
+        raise HTTPException(
+            status_code=409,
+            detail="This account has issued documents, so it cannot be deleted. "
+            "Deactivate it instead.",
+        )
+
+
 @router.delete("/me", response_model=Message)
 def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
@@ -158,6 +171,7 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
+    _require_no_issued_documents(session, current_user)
     session.delete(current_user)
     session.commit()
     return Message(message="User deleted successfully")
@@ -269,6 +283,7 @@ def delete_user(
             status_code=400,
             detail="At least one active System Administrator must remain.",
         )
+    _require_no_issued_documents(session, user)
     session.delete(user)
     session.commit()
     record_admin_action(actor_id=current_user.id, action="user.delete", target_type="user", target_id=user_id)
