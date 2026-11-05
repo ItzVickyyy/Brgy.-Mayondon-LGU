@@ -36,6 +36,7 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 | Records Management, Barangay IDs tab: list and view | Allowed | Allowed |
 | Barangay IDs: create, renew, print (done through Issuance Management, ID document type) | Allowed | Allowed |
 | Records Management, Barangay IDs: override validity rules | No | Allowed |
+| Marginalized Sector health condition (value) | Allowed on the single record only; masked in lists; each read is audited | Same |
 | Activity Log | Own activity | All users, with filters |
 | My Account, User Settings | Allowed | Allowed |
 | Officials, User Accounts, Pending Registrations | No | Allowed |
@@ -48,9 +49,11 @@ If the client keeps "six accounts, full access", still review whether deletion, 
 
 `role` (`admin` | `staff`) is implemented (A2). `status` (`pending`, `active`, `rejected`, `inactive`) is not: the current `is_active` boolean cannot represent pending or rejected. Do **not** implement approval with only a frontend label or component state. The prototype's pending/approved/rejected examples are fictional.
 
-### A5. Audit history (planned, not implemented)
+### A5. Audit history (design settled Nov 5, 2026; not implemented)
 
 Append-only history for sensitive actions: who, when, affected record, reason where required. Ordinary users cannot rewrite or delete entries; any retention/cleanup must be explicitly controlled and documented. Never log passwords, tokens, reset links or unnecessary resident data **(D-24)**.
+
+Design: an `audit_log` table whose rows cannot be updated or deleted (a database trigger rejects it), written in the same transaction as the change it records. The actor's email is copied into the row so history survives account changes. Columns are in [09](09-Issuance-Form-Data-Map.md). Reading the Marginalized Sector health condition is itself an audited action.
 
 ### A6. Account lifecycle
 
@@ -58,7 +61,7 @@ Append-only history for sensitive actions: who, when, affected record, reason wh
 - A first Staff account can be provisioned the same way with `FIRST_STAFF` and `FIRST_STAFF_PASSWORD` in `.env` (both or neither; created only if missing, never overwritten).
 - First administrator is provisioned through controlled initial setup (`FIRST_SUPERUSER` in `.env`). There is **no public sign-up**; an admin creates accounts. The User Accounts table shows whatever the database holds, including this seeded account; it is deployment data, not code. **Before real use, create a real admin in User Accounts, then delete the seed account** (the app refuses to delete the last active admin).
 - Use **individual** accounts, not shared ones.
-- Disable access when staff leave or no longer need it, while preserving required issuance history.
+- Disable access when staff leave or no longer need it, while preserving required issuance history. Once records exist, an account that issued a document **cannot be deleted** (the API will answer 409); deactivate it instead. This applies when the issuance tables are built.
 - Account setup and password reset by email **will not work offline** (no SMTP). A client-approved local procedure is required so staff are never locked out **(D-12)**.
 - Who may approve or disable accounts, and who the System Administrator is, are undecided **(D-11)**.
 

@@ -21,6 +21,19 @@ Last updated: November 5, 2026. Synthetic data only: never write real names, ID 
 | 11 | **No sample or example email addresses** in placeholders or seed text (`name@example.com`, `user@example.com` were removed). | Placeholder cleanup | They look like real data |
 | 12 | The User Accounts table shows whatever the database holds, including the seeded first admin (`FIRST_SUPERUSER`). That row is deployment data, not code. To replace it: create a real admin, then delete the seed account (the last active admin cannot be deleted). | Same | See [05](05-Roles-Security-and-Privacy.md) A6 |
 
+## Database design (settled Nov 5, 2026)
+
+Full wording and reasons are in [09](09-Issuance-Form-Data-Map.md), *Settled design decisions*. Design decisions by the owner, not client approvals. Do not undo them without asking.
+
+| # | Decision | Reason |
+|---|---|---|
+| 20 | **Resident photos are stored in the database** (`resident_photos`, `bytea`), with no `photo_url` column and no photo files on disk. | The backup script only dumps PostgreSQL; photos must never leave the host |
+| 21 | `residents.id_number` is the current ID number. Each ID card (new, renewal, replacement) is its own issuance row with its own `id_number`. | History is never overwritten |
+| 22 | **No "sensitive read" permission.** The health condition is masked in lists, returned only on the single record to `issuance.write`, and each read is audited. | Staff must enter and print it, so a permission they all hold restricts nothing |
+| 23 | Business dates are `date` and "today" is computed in `Asia/Manila`, not UTC. Age and ID status are computed, never stored. | The Docker host runs on UTC |
+| 24 | An account that issued a document is deactivated, never deleted (`ON DELETE RESTRICT`). `audit_log` is append only. | Keeps issuance history |
+| 25 | Sex and civil status are `CHECK`-constrained text. Residents use `suffix`. | Short fixed lists; matches the form contract |
+
 ## Printing
 
 | # | Decision | Reason |
