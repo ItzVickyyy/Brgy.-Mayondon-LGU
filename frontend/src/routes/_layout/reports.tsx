@@ -2,7 +2,10 @@ import { createFileRoute } from "@tanstack/react-router"
 import {
   BarChart3,
   CheckCircle2,
+  Clock3,
   Download,
+  FileCheck2,
+  FileUp,
   X,
 } from "lucide-react"
 import { useState } from "react"
@@ -10,6 +13,7 @@ import { useState } from "react"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { TablePagination, usePagination } from "@/components/Common/TablePagination"
 import { NoPermission } from "@/components/Common/NoPermission"
+import { StatCard } from "@/components/Common/StatCard"
 import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
@@ -154,15 +158,17 @@ function Reports() {
       </div>
 
       {notice ? (
-        <div role="status" className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm">
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+        <div role="status" className="flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm">
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden="true" />
           <p className="flex-1">{notice}</p>
           <Button variant="ghost" size="icon" onClick={() => setNotice("")} aria-label="Dismiss message"><X aria-hidden="true" /></Button>
         </div>
       ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <EmptyState title="No report data yet" description="Summary cards will show totals when records are available." />
+        <StatCard icon={FileCheck2} label="Documents Issued" value={documentTypeRows.reduce((total, row) => total + row.issued, 0)} description={periodLabel[period] ?? "Selected period"} />
+        <StatCard icon={Clock3} label="Records Expiring" value={expiringRows.length} description="Expiring soon or already expired" />
+        <StatCard icon={FileUp} label="Masterlist Imports" value={importRows.length} description={periodLabel[period] ?? "Selected period"} />
       </div>
 
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
@@ -255,7 +261,7 @@ function Reports() {
               <h3 className="mb-3 font-semibold tracking-tight">Account activity · {periodLabel[period]}</h3>
               <table className="w-full min-w-[1000px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"><tr>{["User", "Role", "Sign-ins", "Documents issued", "Records added / edited", "Last activity", "Actions"].map((label) => <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 font-medium sm:px-5"}>{label}</th>)}</tr></thead>
-                <tbody className="divide-y">{accountPagination.paginatedItems.map((row) => <tr key={row.user} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-semibold sm:px-5">{row.user}</td><td className="px-4 py-3 sm:px-5"><Badge variant="outline" className={row.role === "System Administrator" ? "border-primary/30 bg-primary/10 text-primary" : statusStyles.Inactive}>{row.role}</Badge></td><td className="px-4 py-3 tabular-nums sm:px-5">{row.signIns}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.documents}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.records}</td><td className="px-4 py-3 sm:px-5">{row.lastActivity}</td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" asChild><a href={`/activity-log?user=${encodeURIComponent(row.user)}&period=${period}`}>View in Activity Log</a></Button></td></tr>)}</tbody>
+                <tbody className="divide-y">{accountPagination.paginatedItems.map((row) => <tr key={row.user} className="transition-colors hover:bg-muted/30"><td className="px-4 py-3 font-semibold sm:px-5">{row.user}</td><td className="px-4 py-3 sm:px-5"><Badge variant="outline" className={row.role === "System Administrator" ? "border-brand/30 bg-brand/10 text-brand" : statusStyles.Inactive}>{row.role}</Badge></td><td className="px-4 py-3 tabular-nums sm:px-5">{row.signIns}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.documents}</td><td className="px-4 py-3 tabular-nums sm:px-5">{row.records}</td><td className="px-4 py-3 sm:px-5">{row.lastActivity}</td><td className="px-4 py-3 sm:px-5"><Button variant="outline" size="sm" asChild><a href={`/activity-log?user=${encodeURIComponent(row.user)}&period=${period}`}>View in Activity Log</a></Button></td></tr>)}</tbody>
                 <tfoot><tr className="border-t bg-muted/30 font-semibold"><td className="px-4 py-3 sm:px-5" colSpan={2}>Total</td><td className="px-4 py-3 sm:px-5">{accountActivityRows.reduce((total, row) => total + row.signIns, 0)}</td><td className="px-4 py-3 sm:px-5">{accountActivityRows.reduce((total, row) => total + row.documents, 0)}</td><td className="px-4 py-3 sm:px-5">{accountActivityRows.reduce((total, row) => total + row.records, 0)}</td><td className="px-4 py-3 sm:px-5">—</td><td className="px-4 py-3 sm:px-5">—</td></tr></tfoot>
               </table>
               {accountActivityRows.length === 0 ? <EmptyState title="No account activity" description="Account activity will appear here when records are available." /> : null}

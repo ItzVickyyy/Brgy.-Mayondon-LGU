@@ -76,9 +76,9 @@ function BackupRestore() {
       {notice ? (
         <div
           role="status"
-          className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm"
+          className="flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm"
         >
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden="true" />
           <p className="flex-1">{notice}</p>
           <Button variant="ghost" size="icon" className="size-11" onClick={() => setNotice("")} aria-label="Dismiss message"><X aria-hidden="true" /></Button>
         </div>
@@ -87,8 +87,8 @@ function BackupRestore() {
       <div className="grid gap-4 md:grid-cols-2">
         <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-primary/10 p-2.5">
-              <DatabaseBackup className="size-5 text-primary" />
+            <div className="rounded-lg bg-brand/10 p-2.5">
+              <DatabaseBackup className="size-5 text-brand" />
             </div>
             <div>
               <h2 className="font-semibold">Create a Backup</h2>
@@ -123,8 +123,8 @@ function BackupRestore() {
 
         <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-primary/10 p-2.5">
-              <Clock3 className="size-5 text-primary" />
+            <div className="rounded-lg bg-brand/10 p-2.5">
+              <Clock3 className="size-5 text-brand" />
             </div>
             <div>
               <h2 className="font-semibold">Backup Schedule</h2>

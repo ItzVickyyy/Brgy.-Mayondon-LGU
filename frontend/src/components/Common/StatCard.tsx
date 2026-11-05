@@ -22,7 +22,7 @@ export function StatCard({
             {value}
           </p>
         </div>
-        <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
+        <div className="rounded-lg bg-brand/10 p-2.5 text-brand">
           <Icon className="size-5" aria-hidden="true" />
         </div>
       </div>

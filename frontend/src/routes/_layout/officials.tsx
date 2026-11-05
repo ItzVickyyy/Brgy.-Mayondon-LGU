@@ -146,7 +146,7 @@ function OfficialsManagement() {
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-col gap-3 border-b p-4 sm:p-5">
           <div className="flex items-center gap-3">
-            <div className="rounded-lg bg-primary/10 p-2.5 text-primary">
+            <div className="rounded-lg bg-brand/10 p-2.5 text-brand">
               <UserRound className="size-5" aria-hidden="true" />
             </div>
             <div>

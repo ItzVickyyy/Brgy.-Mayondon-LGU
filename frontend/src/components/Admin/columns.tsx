@@ -45,7 +45,7 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
     id: "role",
     header: "Role",
     cell: ({ row }) => (
-      <Badge variant="outline" className={row.original.is_superuser ? "border-primary/30 bg-primary/10 text-primary" : "border-border bg-muted text-muted-foreground"}>
+      <Badge variant="outline" className={row.original.is_superuser ? "border-brand/30 bg-brand/10 text-brand" : "border-border bg-muted text-muted-foreground"}>
         {row.original.is_superuser ? "System Administrator" : "Staff"}
       </Badge>
     ),

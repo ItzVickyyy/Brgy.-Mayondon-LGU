@@ -10,6 +10,7 @@ import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { BarangayIdsView } from "@/components/Records/BarangayIdsView"
 import { ResidentProfileDialog } from "@/components/Records/ResidentProfileDialog"
 import {
   type ResidentRecord,
@@ -22,15 +23,18 @@ import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_layout/records")({
   component: RecordsManagement,
-  head: () => ({ meta: [{ title: pageTitle("Resident Records") }] }),
+  validateSearch: (search: Record<string, unknown>): { view?: "barangay-ids" } =>
+    search.view === "barangay-ids" ? { view: "barangay-ids" } : {},
+  head: () => ({ meta: [{ title: pageTitle("Records Management") }] }),
 })
 
-type View = "residents" | "family-sector" | "import"
+type View = "residents" | "barangay-ids" | "family-sector" | "import"
 
 const inputClass = formControlClass
 
 function RecordsManagement() {
-  const [view, setView] = useState<View>("residents")
+  const initialView = Route.useSearch().view
+  const [view, setView] = useState<View>(initialView ?? "residents")
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<"Active" | "Archived" | "all">("Active")
   const [residentTypeFilter, setResidentTypeFilter] = useState("all")
@@ -66,6 +70,7 @@ function RecordsManagement() {
 
   const tabs: { id: View; label: string }[] = [
     { id: "residents", label: "Residents" },
+    { id: "barangay-ids", label: "Barangay IDs" },
     { id: "family-sector", label: "Family & Sector Details" },
     ...(isAdmin ? [{ id: "import" as const, label: "Import Masterlist" }] : []),
   ]
@@ -75,11 +80,12 @@ function RecordsManagement() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            Resident Records
+            Records Management
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-            Search and maintain resident information, related family and sector
-            details, and existing Barangay ID references.
+            Search and maintain resident information, family and sector details,
+            and Barangay ID records. New and renewed IDs are issued from Issuance
+            Management.
           </p>
         </div>
         <Button className="min-h-11" onClick={() => setNotice("Resident record form opened.")}>
@@ -91,7 +97,7 @@ function RecordsManagement() {
       <div
         className="flex flex-wrap gap-2 border-b pb-3"
         role="tablist"
-        aria-label="Resident record views"
+        aria-label="Records Management views"
       >
         {tabs.map((tab) => (
           <Button
@@ -114,9 +120,9 @@ function RecordsManagement() {
       {notice && (
         <div
           role="status"
-          className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm"
+          className="flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm"
         >
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden="true" />
           <p className="flex-1">{notice}</p>
           <Button variant="ghost" size="icon" className="size-11" onClick={() => setNotice("")} aria-label="Dismiss message">
             <X aria-hidden="true" />
@@ -128,7 +134,7 @@ function RecordsManagement() {
         <>
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard icon={Users} label="Resident Records" value={String(residents.length)} description="Resident records in this view" />
-            <StatCard icon={CreditCard} label="ID and Registration Details" value="Included" description="Resident registration and ID details" />
+            <StatCard icon={CreditCard} label="Residents with Valid ID" value={String(residents.filter((resident) => resident.idStatus === "Valid").length)} description="Active Barangay ID on record" />
             <StatCard icon={Archive} label="Record Removal" value="Archive" description="Prefer inactive status over permanent deletion" />
           </div>
 
@@ -172,7 +178,7 @@ function RecordsManagement() {
               <table className="w-full min-w-[1040px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    {["Resident", "Birthdate / Age", "Address", "Barangay ID", "Resident type", "Status", "Actions"].map((label) => (
+                    {["Resident", "Birthdate / Age", "Address", "Resident type", "Barangay ID", "Status", "Actions"].map((label) => (
                       <th key={label} className={`px-4 py-3 align-middle font-medium sm:px-5 ${label === "Actions" ? "text-right" : ""}`}>{label}</th>
                     ))}
                   </tr>
@@ -193,13 +199,10 @@ function RecordsManagement() {
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">{formattedBirthdate} · {age} yrs</td>
                         <td className="max-w-[220px] truncate px-4 py-3 align-middle sm:px-5" title={resident.address}>{resident.address}</td>
-                        <td className="px-4 py-3 align-middle sm:px-5">
-                          <div className="flex flex-col items-start gap-1.5">
-                            <span className="font-mono">{resident.idNumber}</span>
-                            <Badge variant="outline" className={statusStyles[resident.idStatus]}>{resident.idStatus}</Badge>
-                          </div>
-                        </td>
                         <td className="px-4 py-3 align-middle sm:px-5">{resident.residentType}</td>
+                        <td className="px-4 py-3 align-middle sm:px-5">
+                          <Badge variant="outline" className={statusStyles[resident.idStatus]}>{resident.idStatus}</Badge>
+                        </td>
                         <td className="px-4 py-3 align-middle sm:px-5"><Badge variant="outline" className={statusStyles[resident.status]}>{resident.status}</Badge></td>
                         <td className="px-4 py-3 align-middle sm:px-5">
                           <RowActions
@@ -257,10 +260,12 @@ function RecordsManagement() {
         </>
       )}
 
+      {view === "barangay-ids" && <BarangayIdsView onNotice={setNotice} />}
+
       {view === "family-sector" && (
         <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
-            <span className="rounded-lg bg-primary/10 p-2.5 text-primary"><Users className="size-5" aria-hidden="true" /></span>
+            <span className="rounded-lg bg-brand/10 p-2.5 text-brand"><Users className="size-5" aria-hidden="true" /></span>
             <div>
               <h2 className="font-semibold tracking-tight">
                 Family, Beneficiary, and Marginalized-Sector Details
@@ -297,10 +302,10 @@ function RecordsManagement() {
             ].map((item) => (
               <article
                 key={item.title}
-                className="flex min-h-36 flex-col rounded-xl border bg-background p-4 transition-colors hover:border-primary/40"
+                className="flex min-h-36 flex-col rounded-xl border bg-background p-4 transition-colors hover:border-brand/40"
               >
                 <div className="flex items-center gap-2">
-                  <span className="rounded-lg bg-primary/10 p-2.5 text-primary">
+                  <span className="rounded-lg bg-brand/10 p-2.5 text-brand">
                     <item.icon className="size-5" aria-hidden="true" />
                   </span>
                   <h3 className="font-semibold">{item.title}</h3>
@@ -324,7 +329,7 @@ function RecordsManagement() {
       {view === "import" && isAdmin && (
         <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
-            <span className="rounded-lg bg-primary/10 p-2.5 text-primary"><FileUp className="size-5" aria-hidden="true" /></span>
+            <span className="rounded-lg bg-brand/10 p-2.5 text-brand"><FileUp className="size-5" aria-hidden="true" /></span>
             <div>
               <h2 className="font-semibold">Import Existing Masterlist</h2>
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -353,8 +358,8 @@ function RecordsManagement() {
             )}
           </fieldset>
           {importStep === 0 ? (
-            <label className="mt-4 flex min-h-36 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 text-center hover:border-primary/50 hover:bg-muted/30">
-              <Upload className="size-7 text-primary" aria-hidden="true" />
+            <label className="mt-4 flex min-h-36 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 text-center hover:border-brand/50 hover:bg-muted/30">
+              <Upload className="size-7 text-brand" aria-hidden="true" />
               <span className="font-semibold">
                 {selectedFile || "Choose a masterlist file"}
               </span>

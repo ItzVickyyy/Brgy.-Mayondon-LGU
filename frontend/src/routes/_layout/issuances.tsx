@@ -38,7 +38,7 @@ import { CalibrationPanel } from "@/components/Issuances/CalibrationPanel"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
 import { usePrintIssuance } from "@/components/Issuances/usePrintIssuance"
 import { NewIssuanceDialog } from "@/components/Issuances/NewIssuance/NewIssuanceDialog"
-import { documentConfig } from "@/components/Issuances/NewIssuance/documentConfig"
+import { type DocumentCode, documentConfig } from "@/components/Issuances/NewIssuance/documentConfig"
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { getMissingFields } from "@/components/Issuances/print-summary"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
@@ -102,6 +102,12 @@ function formatDate(value: string) {
 function getPreselectedResident() {
   if (typeof window === "undefined") return ""
   return new URLSearchParams(window.location.search).get("resident") ?? ""
+}
+
+function getPreselectedType(): DocumentCode | undefined {
+  if (typeof window === "undefined") return undefined
+  const type = new URLSearchParams(window.location.search).get("type") ?? ""
+  return type in documentConfig ? (type as DocumentCode) : undefined
 }
 
 function IssuancesManagement() {
@@ -503,7 +509,7 @@ function IssuancesManagement() {
                 const selectedValues = value.split("||").filter(Boolean)
                 const limitReached = field.type === "multiselect" && Boolean(field.maxSelected) && selectedValues.length >= (field.maxSelected ?? 0)
                 const optionDisabled = Boolean(multi && limitReached && !selected)
-                return <label key={option} className={cn("inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm font-normal focus-within:ring-[3px] focus-within:ring-ring/50", selected ? "border-primary bg-primary/10" : "bg-background hover:bg-muted", optionDisabled && "cursor-not-allowed opacity-50")}>
+                return <label key={option} className={cn("inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border px-3 text-sm font-normal focus-within:ring-[3px] focus-within:ring-ring/50", selected ? "border-brand bg-brand/10" : "bg-background hover:bg-muted", optionDisabled && "cursor-not-allowed opacity-50")}>
                   <input id={field.options?.[0] === option ? fieldId : undefined} type={multi ? "checkbox" : "radio"} name={field.name} checked={selected} disabled={optionDisabled} aria-disabled={optionDisabled} onChange={(event) => {
                     if (!multi) updateField(field.name, option)
                     else {
@@ -536,7 +542,7 @@ function IssuancesManagement() {
           <input id={fieldId} type={field.type === "number" ? "number" : "text"} value={value} onChange={(event) => updateField(field.name, event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") event.preventDefault() }} max={field.name.toLowerCase().includes("dateofissue") ? localDateValue() : undefined} min={field.type === "number" ? "0" : undefined} className={cn(inputClassName, error && "border-destructive")} aria-invalid={Boolean(error)} />
         )}
         {field.help ? <p className="text-xs font-normal text-muted-foreground">{field.help}</p> : null}
-        {field.name === "purpose" && selectedType === "Barangay Clearance" && formValues.purpose === "Employment Requirement/First Time Jobseeker" ? <button type="button" className="min-h-11 text-left text-xs text-primary underline underline-offset-4" onClick={() => updateField("purposeNote", "NOT APPLICABLE FOR LOAN PURPOSES")}>Use note: NOT APPLICABLE FOR LOAN PURPOSES</button> : null}
+        {field.name === "purpose" && selectedType === "Barangay Clearance" && formValues.purpose === "Employment Requirement/First Time Jobseeker" ? <button type="button" className="min-h-11 text-left text-xs text-brand underline underline-offset-4" onClick={() => updateField("purposeNote", "NOT APPLICABLE FOR LOAN PURPOSES")}>Use note: NOT APPLICABLE FOR LOAN PURPOSES</button> : null}
         {error ? <p id={`${fieldId}-error`} className="text-xs font-normal text-destructive">{error}</p> : null}
       </div>
     )
@@ -580,10 +586,10 @@ function IssuancesManagement() {
       {notice && (
         <div
           role="status"
-          className="print:hidden flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 text-sm"
+          className="print:hidden flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm"
         >
           <CheckCircle2
-            className="mt-0.5 size-4 shrink-0 text-primary"
+            className="mt-0.5 size-4 shrink-0 text-brand"
             aria-hidden="true"
           />
           <p className="flex-1">{notice}</p>
@@ -649,10 +655,10 @@ function IssuancesManagement() {
                               const info = documentCardInfo[type]
                               const selected = selectedType === type
                               return (
-                                <label key={type} className={cn("flex min-h-[58px] min-w-0 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-all focus-within:ring-[3px] focus-within:ring-ring/50", selected ? "border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20" : "bg-background hover:border-muted-foreground/40 hover:bg-muted/60")}>
+                                <label key={type} className={cn("flex min-h-[58px] min-w-0 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2.5 text-sm transition-all focus-within:ring-[3px] focus-within:ring-ring/50", selected ? "border-brand bg-brand/5 shadow-sm ring-1 ring-brand/20" : "bg-background hover:border-muted-foreground/40 hover:bg-muted/60")}>
                                   <input type="radio" name="documentType" checked={selected} onChange={() => changeDocumentType(type)} className="size-4 shrink-0 accent-primary" />
                                   <span className="min-w-0 flex-1 break-words font-medium leading-snug">{info.name}</span>
-                                  {selected ? <Check aria-hidden="true" className="size-4 shrink-0 text-primary" /> : null}
+                                  {selected ? <Check aria-hidden="true" className="size-4 shrink-0 text-brand" /> : null}
                                 </label>
                               )
                             })}
@@ -700,7 +706,7 @@ function IssuancesManagement() {
                         </div>
                       ) : null}
                       {selectedResidentId ? <div className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm"><span className="min-w-0"><strong>{selectedResidentId || "Selected resident"}</strong><span className="ml-2 font-mono text-xs text-muted-foreground">{selectedResidentId}</span> </span><Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={() => { setSelectedResidentId(""); setResidentQuery(""); setManualEntry(false) }}>Change</Button></div> : null}
-                      {!manualEntry && !selectedResidentId ? <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm"><button type="button" className="min-h-11 text-primary underline underline-offset-4" onClick={startManualEntry}>Resident not found? Enter details manually</button><button type="button" className="min-h-11 text-muted-foreground underline underline-offset-4" onClick={() => setNotice("Add to Resident Records is not connected yet. Open Resident Records to add a record.")}>Add to Resident Records</button></div> : null}
+                      {!manualEntry && !selectedResidentId ? <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm"><button type="button" className="min-h-11 text-brand underline underline-offset-4" onClick={startManualEntry}>Resident not found? Enter details manually</button><button type="button" className="min-h-11 text-muted-foreground underline underline-offset-4" onClick={() => setNotice("Add to Resident Records is not connected yet. Open Resident Records to add a record.")}>Add to Resident Records</button></div> : null}
                       <p className="mt-2 text-xs text-muted-foreground">Changes here apply to this document only. To change the resident's record, use Resident Records.</p>
                     </div>
                     {((documentSections[selectedType] ?? []).find((section) => section.id === "resident")?.fields ?? []).map((field) => {
@@ -735,7 +741,7 @@ function IssuancesManagement() {
                         ) : regularFields.map(renderField)}
                         {advancedFields.length > 0 ? (
                           <details className="md:col-span-2" open={clearanceAdvancedOpen} onToggle={(event) => setClearanceAdvancedOpen(event.currentTarget.open)}>
-                            <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-primary underline underline-offset-4">More options (optional){!clearanceAdvancedOpen && advancedSummary ? <span className="ml-2 break-words text-xs font-normal text-muted-foreground">{advancedSummary}</span> : null}</summary>
+                            <summary className="min-h-11 cursor-pointer py-2 text-sm font-medium text-brand underline underline-offset-4">More options (optional){!clearanceAdvancedOpen && advancedSummary ? <span className="ml-2 break-words text-xs font-normal text-muted-foreground">{advancedSummary}</span> : null}</summary>
                             <div className="grid gap-4 md:grid-cols-2">{advancedFields.map(renderField)}</div>
                           </details>
                         ) : null}
@@ -784,8 +790,21 @@ function IssuancesManagement() {
 
       <NewIssuanceDialog
         open={isSimplifiedDialogOpen}
-        onOpenChange={setIsSimplifiedDialogOpen}
+        onOpenChange={(next) => {
+          setIsSimplifiedDialogOpen(next)
+          if (!next && typeof window !== "undefined") {
+            // Drop ?resident= and ?type= so the next "New Issuance" opens blank.
+            const params = new URLSearchParams(window.location.search)
+            if (params.has("resident") || params.has("type")) {
+              params.delete("resident")
+              params.delete("type")
+              const query = params.toString()
+              window.history.replaceState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`)
+            }
+          }
+        }}
         initialResidentId={getPreselectedResident()}
+        initialDocumentType={getPreselectedType()}
         onDraftRemoved={(id) => setDrafts((previous) => previous.filter((draft) => draft.fields.mockIssuanceId !== id))}
         onPrint={(record) => printStoredIssuance(record.id)}
         onSaved={(record, meta) => {

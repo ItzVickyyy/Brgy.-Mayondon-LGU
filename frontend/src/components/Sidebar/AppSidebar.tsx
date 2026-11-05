@@ -5,7 +5,6 @@ import {
   Clock3,
   DatabaseBackup,
   FileCheck2,
-  IdCard,
   LayoutDashboard,
   ShieldCheck,
   Users,
@@ -41,14 +40,8 @@ const items: NavigationItem[] = [
   },
   {
     icon: Users,
-    title: "Resident Records",
+    title: "Records Management",
     path: "/records",
-    section: "Records and Documents",
-  },
-  {
-    icon: IdCard,
-    title: "Barangay IDs",
-    path: "/barangay-ids",
     section: "Records and Documents",
   },
   {

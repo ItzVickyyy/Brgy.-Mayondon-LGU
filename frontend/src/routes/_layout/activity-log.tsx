@@ -211,7 +211,7 @@ function ActivityLog() {
                   <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">{row.module}</td>
                   <td className="px-4 py-3 align-middle sm:px-5">
                     {row.recordReference && row.recordHref ? (
-                      <a href={row.recordHref} className="font-mono text-primary hover:underline">{row.recordReference}</a>
+                      <a href={row.recordHref} className="font-mono text-brand hover:underline">{row.recordReference}</a>
                     ) : row.recordReference ? (
                       <span className="font-mono">{row.recordReference}</span>
                     ) : "—"}

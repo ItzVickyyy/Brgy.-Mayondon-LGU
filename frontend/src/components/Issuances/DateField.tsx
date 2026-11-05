@@ -222,7 +222,7 @@ export function DateField({
                   className={cn(
                     "h-11 w-full rounded-md text-sm hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-30",
                     selected && "bg-primary text-primary-foreground hover:bg-primary/90",
-                    isToday && !selected && "border border-primary/50 font-semibold",
+                    isToday && !selected && "border border-brand/50 font-semibold",
                   )}
                 >
                   {day}
@@ -232,7 +232,7 @@ export function DateField({
           </div>
           {showTodayLink ? (
             <div className="mt-3 flex justify-end border-t pt-2">
-              <button type="button" onClick={chooseToday} className="min-h-11 px-2 text-sm font-medium text-primary underline underline-offset-4">Today</button>
+              <button type="button" onClick={chooseToday} className="min-h-11 px-2 text-sm font-medium text-brand underline underline-offset-4">Today</button>
             </div>
           ) : null}
         </div>

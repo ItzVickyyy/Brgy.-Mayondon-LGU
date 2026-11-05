@@ -74,7 +74,6 @@ const contactFields: {
     key: "email",
     label: "Email",
     type: "email",
-    placeholder: "name@example.com",
   },
   {
     key: "phone_number",
@@ -231,7 +230,7 @@ export function MyAccountModal({
       <DialogContent className="flex max-h-[92vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-4xl">
         <DialogHeader className="shrink-0 border-b bg-muted/20 px-5 py-4 text-left sm:px-7">
           <div className="flex items-center gap-3">
-            <span className="flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
+            <span className="flex size-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
               <UserRound className="size-5" />
             </span>
             <div>
@@ -335,7 +334,7 @@ export function MyAccountModal({
                     description="Protect your account and sign-in credentials."
                   />
                   <div className="flex items-center gap-3 rounded-xl border p-4 sm:p-5">
-                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                    <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
                       <ShieldCheck className="size-5" />
                     </span>
                     <div>
@@ -395,7 +394,7 @@ export function MyAccountModal({
                           setSelectedPhotoName(file.name)
                         }
                       }}
-                      className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors sm:flex-row sm:text-left ${isPhotoDragging ? "border-primary bg-primary/5" : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30"}`}
+                      className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed px-5 py-6 text-center transition-colors sm:flex-row sm:text-left ${isPhotoDragging ? "border-brand bg-brand/5" : "border-muted-foreground/25 hover:border-brand/50 hover:bg-muted/30"}`}
                     >
                       <div className="flex size-20 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-background text-muted-foreground shadow-sm">
                         {previewPhoto ? (
@@ -605,7 +604,7 @@ export function MyAccountModal({
                   />
                   <div className="rounded-xl border p-4 sm:p-5">
                     <div className="mb-4 flex items-start gap-3">
-                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
                         <ShieldCheck className="size-5" />
                       </span>
                       <div>

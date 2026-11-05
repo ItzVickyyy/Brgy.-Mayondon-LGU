@@ -33,7 +33,7 @@ export function PrintSummaryPanel({ type, values, currentDate, fields, structure
         {rows.map(({ label, value }) => (
           <div key={label} className="grid min-w-0 grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] gap-2">
             <dt className="min-w-0 break-words text-xs font-medium text-muted-foreground">{label}</dt>
-            <dd className={cn("min-w-0 break-words text-right text-sm", !value && showMissing && "font-medium text-amber-600", !value && !showMissing && "text-muted-foreground")}>
+            <dd className={cn("min-w-0 break-words text-right text-sm", !value && showMissing && "font-medium text-amber-600 dark:text-amber-400", !value && !showMissing && "text-muted-foreground")}>
               {value || (showMissing ? <span className="inline-flex items-center gap-1"><AlertCircle className="size-3.5" aria-hidden="true" />Missing</span> : "—")}
             </dd>
           </div>
@@ -44,7 +44,7 @@ export function PrintSummaryPanel({ type, values, currentDate, fields, structure
         <>
           <p className="text-sm font-semibold">Missing ({missing.length})</p>
           <ul className="mt-2 space-y-1 text-sm">
-            {missing.map((field) => <li key={field.name}><button type="button" className="min-h-8 max-w-full break-words text-left text-amber-700 underline underline-offset-4" onClick={() => { const target = document.getElementById(`issuance-${field.name}`) ?? document.getElementById(`field-${field.name}`) ?? document.getElementById(field.name === "address" ? "resident-missing-address-houseNumber" : `resident-missing-${field.name}`); target?.scrollIntoView({ behavior: "smooth", block: "center" }); target?.focus() }}>{field.label}</button></li>)}
+            {missing.map((field) => <li key={field.name}><button type="button" className="min-h-8 max-w-full break-words text-left text-amber-700 dark:text-amber-400 underline underline-offset-4" onClick={() => { const target = document.getElementById(`issuance-${field.name}`) ?? document.getElementById(`field-${field.name}`) ?? document.getElementById(field.name === "address" ? "resident-missing-address-houseNumber" : `resident-missing-${field.name}`); target?.scrollIntoView({ behavior: "smooth", block: "center" }); target?.focus() }}>{field.label}</button></li>)}
           </ul>
         </>
       ) : showMissing ? (

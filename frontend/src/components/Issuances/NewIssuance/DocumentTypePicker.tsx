@@ -43,7 +43,7 @@ export function DocumentTypePicker({ value, onChange }: Props) {
                       "inline-flex h-9 cursor-pointer items-center rounded-md border bg-background px-3.5 text-sm transition-colors",
                       "hover:bg-muted has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50",
                       selected &&
-                        "border-primary bg-primary font-medium text-primary-foreground hover:bg-primary",
+                        "border-brand bg-primary font-medium text-primary-foreground hover:bg-primary",
                     )}
                   >
                     <input

@@ -80,7 +80,7 @@ function RequestAccess() {
         </p>
         <RouterLink
           to="/pending-approval"
-          className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+          className="text-sm font-medium text-brand underline-offset-4 hover:underline"
         >
           View pending or rejected account messages
         </RouterLink>

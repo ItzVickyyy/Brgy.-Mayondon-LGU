@@ -272,7 +272,7 @@ function Calendar({
                   "bg-primary text-primary-foreground hover:bg-primary",
                 year === new Date().getFullYear() &&
                   year !== cursor.year &&
-                  "ring-1 ring-primary/50",
+                  "ring-1 ring-brand/50",
               )}
             >
               {year}
@@ -374,7 +374,7 @@ function Calendar({
                 className={cn(
                   "mx-auto flex size-9 items-center justify-center rounded-full text-sm hover:bg-muted disabled:pointer-events-none disabled:opacity-30",
                   !cell.inMonth && "text-muted-foreground/60",
-                  cell.iso === today && !selected && "ring-1 ring-primary/60",
+                  cell.iso === today && !selected && "ring-1 ring-brand/60",
                   selected &&
                     "bg-primary font-semibold text-primary-foreground hover:bg-primary",
                 )}
@@ -398,7 +398,7 @@ function Calendar({
           <button
             type="button"
             onClick={() => onSelect(today)}
-            className="h-9 rounded-md px-3 text-sm font-medium text-primary hover:bg-muted"
+            className="h-9 rounded-md px-3 text-sm font-medium text-brand hover:bg-muted"
           >
             Today
           </button>

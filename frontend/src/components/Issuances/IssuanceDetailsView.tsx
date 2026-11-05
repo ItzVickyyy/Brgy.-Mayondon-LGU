@@ -68,7 +68,7 @@ function Section({ step, title, children }: { step?: number; title: string; chil
   return (
     <section className="rounded-xl border bg-card p-4">
       <h3 className="mb-3 flex items-center gap-2 text-sm font-semibold tracking-tight">
-        {step ? <span aria-hidden="true" className="flex size-6 items-center justify-center rounded-full border border-primary/30 bg-primary/10 text-xs font-semibold text-primary">{step}</span> : null}
+        {step ? <span aria-hidden="true" className="flex size-6 items-center justify-center rounded-full border border-brand/30 bg-brand/10 text-xs font-semibold text-brand">{step}</span> : null}
         {title}
       </h3>
       {children}

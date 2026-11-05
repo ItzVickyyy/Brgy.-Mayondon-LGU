@@ -99,7 +99,6 @@ function RecoverPassword() {
                   <FormControl>
                     <Input
                       data-testid="email-input"
-                      placeholder="user@example.com"
                       type="email"
                       {...field}
                     />
