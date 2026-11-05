@@ -187,6 +187,11 @@ export type UpdatePassword = {
 };
 
 /**
+ * Account roles. "admin" is shown in the UI as System Administrator.
+ */
+export type UserRole = 'admin' | 'staff';
+
+/**
  * UserCreate
  */
 export type UserCreate = {
@@ -202,6 +207,10 @@ export type UserCreate = {
      * Is Superuser
      */
     is_superuser?: boolean;
+    /**
+     * Role
+     */
+    role?: UserRole;
     /**
      * Full Name
      */
@@ -240,6 +249,10 @@ export type UserPublic = {
      * Is Superuser
      */
     is_superuser?: boolean;
+    /**
+     * Role
+     */
+    role?: UserRole;
     /**
      * Full Name
      */
@@ -288,6 +301,10 @@ export type UserUpdate = {
      * Is Superuser
      */
     is_superuser?: boolean | null;
+    /**
+     * Role
+     */
+    role?: UserRole | null;
     /**
      * Full Name
      */

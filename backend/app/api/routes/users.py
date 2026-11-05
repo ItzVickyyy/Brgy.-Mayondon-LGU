@@ -8,10 +8,11 @@ from app import crud
 from app.api.deps import (
     CurrentUser,
     SessionDep,
-    require_admin,
+    require_permission,
 )
 from app.core.audit import record_admin_action
 from app.core.config import settings
+from app.core.permissions import Permission, has_permission, is_admin
 from app.core.security import get_password_hash, verify_password
 from app.models import (
     Item,
@@ -21,6 +22,7 @@ from app.models import (
     UserCreate,
     UserPublic,
     UserRegister,
+    UserRole,
     UsersPublic,
     UserUpdate,
     UserUpdateMe,
@@ -33,10 +35,13 @@ from app.utils import (
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+# Every account-management endpoint below requires this permission (admin only).
+require_user_admin = require_permission(Permission.USERS_MANAGE)
+
 
 @router.get(
     "/",
-    dependencies=[Depends(require_admin)],
+    dependencies=[Depends(require_user_admin)],
     response_model=UsersPublic,
 )
 def read_users(
@@ -61,7 +66,7 @@ def read_users(
 
 
 @router.post(
-    "/", dependencies=[Depends(require_admin)], response_model=UserPublic
+    "/", dependencies=[Depends(require_user_admin)], response_model=UserPublic
 )
 def create_user(*, session: SessionDep, user_in: UserCreate, current_user: CurrentUser) -> Any:
     """
@@ -150,7 +155,7 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
     Delete own user.
     """
-    if current_user.is_superuser:
+    if is_admin(current_user):
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
@@ -190,7 +195,7 @@ def read_user_by_id(
     user = session.get(User, user_id)
     if user == current_user:
         return user
-    if not current_user.is_superuser:
+    if not has_permission(current_user, Permission.USERS_MANAGE):
         raise HTTPException(
             status_code=403,
             detail="The user doesn't have enough privileges",
@@ -202,7 +207,7 @@ def read_user_by_id(
 
 @router.patch(
     "/{user_id}",
-    dependencies=[Depends(require_admin)],
+    dependencies=[Depends(require_user_admin)],
     response_model=UserPublic,
 )
 def update_user(
@@ -229,12 +234,24 @@ def update_user(
                 status_code=409, detail="User with this email already exists"
             )
 
+    previous_role = db_user.role
+    loses_admin = user_in.is_active is False or (
+        user_in.role is not None and user_in.role != UserRole.admin
+    )
+    if loses_admin and crud.is_last_active_admin(session=session, user=db_user):
+        raise HTTPException(
+            status_code=400,
+            detail="At least one active System Administrator must remain.",
+        )
+
     db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
     record_admin_action(actor_id=current_user.id, action="user.update", target_type="user", target_id=db_user.id)
+    if db_user.role != previous_role:
+        record_admin_action(actor_id=current_user.id, action="user.role_change", target_type="user", target_id=db_user.id)
     return db_user
 
 
-@router.delete("/{user_id}", dependencies=[Depends(require_admin)])
+@router.delete("/{user_id}", dependencies=[Depends(require_user_admin)])
 def delete_user(
     session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
 ) -> Message:
@@ -247,6 +264,11 @@ def delete_user(
     if user == current_user:
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
+        )
+    if crud.is_last_active_admin(session=session, user=user):
+        raise HTTPException(
+            status_code=400,
+            detail="At least one active System Administrator must remain.",
         )
     statement = delete(Item).where(col(Item.owner_id) == user_id)
     session.exec(statement)

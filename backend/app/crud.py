@@ -6,7 +6,7 @@ from sqlmodel import Session, func, select
 
 from app.core.config import settings
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserRole, UserUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -40,6 +40,18 @@ def get_user_by_email(*, session: Session, email: str) -> User | None:
     statement = select(User).where(func.lower(User.email) == email.strip().lower())
     session_user = session.exec(statement).first()
     return session_user
+
+
+def is_last_active_admin(*, session: Session, user: User) -> bool:
+    """True if ``user`` is an active administrator and no other active one exists."""
+    if user.role != UserRole.admin or not user.is_active:
+        return False
+    other = session.exec(
+        select(func.count())
+        .select_from(User)
+        .where(User.role == UserRole.admin, User.is_active, User.id != user.id)
+    ).one()
+    return other == 0
 
 
 # Dummy hash to use for timing attack prevention when user is not found

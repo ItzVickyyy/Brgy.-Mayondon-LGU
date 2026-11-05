@@ -157,7 +157,7 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 - **Printing is implemented for six templates** (Clearance, Franchise, Electrical/Water, Indigency, Marginalized Sector, Assistance certification) as typed values on pre-printed forms, with a Printing setup dialog for calibration. Residency, First-Time Jobseekers and Barangay ID have no template. Details: [04-Documents-and-Printing.md](04-Documents-and-Printing.md). Not yet verified on a real printer.
 - Masterlist import shows a file-selection area and planned validation summary; parsing, mapping, preview, duplicate detection and import are not implemented.
 - Request Access / Pending Approval / Pending Registrations do not submit, save, approve, reject or create accounts. Sidebar pending counts are fictional.
-- The account form maps **System Administrator → `is_superuser = true`** and **Staff → `is_superuser = false`**. No separate backend role enum exists, and `is_active` cannot represent pending/rejected.
+- The account form maps **System Administrator → `is_superuser = true`** and **Staff → `is_superuser = false`**. The backend now has a `role` field (`admin` / `staff`); the form still sends `is_superuser`, which the API maps to the role. `is_active` cannot represent pending/rejected.
 - Backup/Restore screen is a concept (manual backup, proposed schedule controls, sample history, restore confirmation layout). It does not run any backup or restore.
 - Account profile, password change and account management use the existing foundation functionality.
 - The footer shows branding only; Terms of Use and Privacy Policy are not implemented. Any legal text must be marked "Draft, pending barangay review".

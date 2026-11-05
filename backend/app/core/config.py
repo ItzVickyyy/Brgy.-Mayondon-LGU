@@ -93,6 +93,10 @@ class Settings(BaseSettings):
     EMAIL_TEST_USER: EmailStr = "test@example.com"
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
+    # Optional first Staff account, created at startup if it does not exist.
+    # Set both or neither. Staff cannot manage accounts (see core/permissions.py).
+    FIRST_STAFF: EmailStr | None = None
+    FIRST_STAFF_PASSWORD: str | None = None
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
@@ -122,6 +126,9 @@ class Settings(BaseSettings):
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
+        if bool(self.FIRST_STAFF) != bool(self.FIRST_STAFF_PASSWORD):
+            raise ValueError("Set both FIRST_STAFF and FIRST_STAFF_PASSWORD, or neither.")
+        self._check_default_secret("FIRST_STAFF_PASSWORD", self.FIRST_STAFF_PASSWORD)
 
         return self
 

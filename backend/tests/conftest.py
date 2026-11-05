@@ -8,7 +8,7 @@ from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
 from app.models import Item, User
-from tests.utils.user import authentication_token_from_email
+from tests.utils.user import authentication_token_from_email, staff_headers
 from tests.utils.utils import get_superuser_token_headers
 
 
@@ -33,6 +33,12 @@ def client() -> Generator[TestClient]:
 @pytest.fixture
 def superuser_token_headers(client: TestClient) -> dict[str, str]:
     return get_superuser_token_headers(client)
+
+
+@pytest.fixture
+def staff_token_headers(client: TestClient, db: Session) -> dict[str, str]:
+    """Headers for a fresh Staff account created through the real crud layer."""
+    return staff_headers(client=client, db=db)
 
 
 @pytest.fixture(scope="module")

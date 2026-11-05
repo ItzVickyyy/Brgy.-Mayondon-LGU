@@ -1,4 +1,4 @@
-from collections.abc import Generator
+from collections.abc import Callable, Generator
 from typing import Annotated
 
 import jwt
@@ -11,6 +11,7 @@ from sqlmodel import Session
 from app.core import security
 from app.core.config import settings
 from app.core.db import engine
+from app.core.permissions import Permission, has_permission, is_admin
 from app.models import TokenPayload, User
 
 reusable_oauth2 = OAuth2PasswordBearer(
@@ -54,9 +55,26 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
 CurrentUser = Annotated[User, Depends(get_current_user)]
 
 
+def require_permission(permission: Permission) -> Callable[[User], User]:
+    """Build a dependency that allows only roles holding ``permission``.
+
+    The role is read from the database on every request, so a role change or
+    deactivation takes effect immediately, not when the token expires.
+    """
+
+    def dependency(current_user: CurrentUser) -> User:
+        if not has_permission(current_user, permission):
+            raise HTTPException(
+                status_code=403, detail="The user doesn't have enough privileges"
+            )
+        return current_user
+
+    return dependency
+
+
 def require_admin(current_user: CurrentUser) -> User:
-    """Require an authenticated admin account for protected operations."""
-    if not current_user.is_superuser:
+    """Require the System Administrator role."""
+    if not is_admin(current_user):
         raise HTTPException(
             status_code=403, detail="The user doesn't have enough privileges"
         )
