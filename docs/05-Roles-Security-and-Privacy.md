@@ -40,6 +40,8 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 | Activity Log | Own activity | All users, with filters |
 | My Account, User Settings | Allowed | Allowed |
 | Officials, User Accounts, Pending Registrations | No | Allowed |
+| Streets and Tricycle Associations lists (add, rename, remove if unused) | No | Allowed |
+| Lookup lists and officials list (read, for the forms) | Allowed | Allowed |
 | Management Reports | No | Allowed |
 | Backup and Restore | No; manual-backup permission to confirm | Allowed |
 
