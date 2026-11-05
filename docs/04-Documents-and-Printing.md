@@ -118,7 +118,7 @@ Six print templates are currently defined in `frontend/src/lib/print/templates.t
 
 The Issuances page has a **Printing setup** screen for selecting a template, saving per-template X/Y calibration offsets, printing a calibration sheet and resetting offsets. Offsets are stored in browser local storage. The default positions are estimates and still require visual comparison and real-paper calibration.
 
-The following documents have **no print template** yet: Residency, First-Time Jobseekers, PhilHealth, Barangay ID front and Barangay ID back. Confirm the intended output and approved source format before adding templates.
+The following documents have **no print template** yet: Residency, First-Time Jobseekers, Barangay ID front and Barangay ID back. (PhilHealth Certification was removed from the app entirely; it is no longer a document type.) Confirm the intended output and approved source format before adding templates.
 
 Required fields and validation rules remain **unconfirmed**. Do not treat the presence of a source form as client approval.
 
