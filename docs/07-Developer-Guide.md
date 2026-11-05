@@ -4,7 +4,7 @@ How the three-person team works: reading order, branching, reviews, testing, dat
 
 Undecided items are tagged `(D-xx)`; see [08-Open-Decisions.md](08-Open-Decisions.md).
 
-Last updated: November 1, 2026
+Last updated: November 5, 2026
 
 ## 1. Read these first
 
@@ -105,6 +105,12 @@ cd frontend && bun run lint && bun run build
 ```
 
 Run Docker Compose and Playwright checks when a change touches container setup, full-stack integration, authentication, routing or user workflows.
+
+**Frontend build notes.** The route tree is generated during the build, so run `bun run build` first, then `bunx tsc -p tsconfig.build.json --noEmit`. Biome reports pre-existing formatting and import-sort noise; ignore it unless you touched those lines.
+
+**Print and form unit-style specs** (Playwright files in `frontend/tests/`, no login needed): `print-data.spec.ts`, `print-overlay.spec.ts`, `print-calibration.spec.ts`, `print-load.spec.ts`, `photo-upload.spec.ts`, `issuance-schema.spec.ts`. Run them with `bunx playwright test tests/<file>`. Documentation-only changes need no build or tests.
+
+**Tests changed by the Records Management merge:** `admin-portal-pages.spec.ts` now expects the "Records Management" heading on `/records` and that `/barangay-ids` redirects to `/records?view=barangay-ids`. `welcome.spec.ts` tests the Welcome page copy; check it before renaming anything on that page.
 
 ## 7. Database and API changes
 

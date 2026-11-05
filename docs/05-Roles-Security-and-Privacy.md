@@ -4,7 +4,7 @@ Who may do what, the security checklist, and the privacy safeguards for resident
 
 **Read this first:** this is a **checklist and plan, not proof the system is secure.** Record evidence for completed checks and track unresolved risks. Do not tick an item because a feature exists. Passing automated tests means the tested checks passed — nothing more. Undecided items are tagged `(D-xx)`; see [08-Open-Decisions.md](08-Open-Decisions.md).
 
-Last updated: November 1, 2026
+Last updated: November 5, 2026
 
 **Labels:** **Core** applies regardless of client features · **When applicable** only if that feature or deployment model is used · **Before deployment** must be verified on the real hosting/network before real users or data.
 
@@ -28,13 +28,14 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 | Module / action | Staff | System Administrator |
 |---|---|---|
 | Dashboard | Operational cards, own recent activity | Same, plus system-wide activity |
-| Resident Records: search, view, add, edit | Allowed | Allowed |
-| Resident Records: import masterlist | No (proposed; confirm) | Allowed |
-| Resident Records: archive | No | Allowed |
+| Records Management, Residents: search, view, add, edit | Allowed | Allowed |
+| Records Management, Import Masterlist tab | No (proposed; confirm) | Allowed |
+| Records Management: archive | No | Allowed |
 | Issuance: create, review, print, correct with reason | Allowed | Allowed |
 | Issuance: void/cancel | No | Allowed |
-| Barangay IDs: list, create, renew, print | Allowed | Allowed |
-| Barangay IDs: override validity rules | No | Allowed |
+| Records Management, Barangay IDs tab: list and view | Allowed | Allowed |
+| Barangay IDs: create, renew, print (done through Issuance Management, ID document type) | Allowed | Allowed |
+| Records Management, Barangay IDs: override validity rules | No | Allowed |
 | Activity Log | Own activity | All users, with filters |
 | My Account, User Settings | Allowed | Allowed |
 | Officials, User Accounts, Pending Registrations | No | Allowed |
@@ -53,7 +54,7 @@ Append-only history for sensitive actions: who, when, affected record, reason wh
 
 ### A6. Account lifecycle
 
-- First administrator is provisioned through controlled initial setup (`FIRST_SUPERUSER` in `.env`). There is **no public sign-up**; an admin creates accounts.
+- First administrator is provisioned through controlled initial setup (`FIRST_SUPERUSER` in `.env`). There is **no public sign-up**; an admin creates accounts. The User Accounts table shows whatever the database holds, including this seeded account; it is deployment data, not code. **Before real use, create a real admin in User Accounts, then delete the seed account** (the app refuses to delete the last active admin).
 - Use **individual** accounts, not shared ones.
 - Disable access when staff leave or no longer need it, while preserving required issuance history.
 - Account setup and password reset by email **will not work offline** (no SMTP). A client-approved local procedure is required so staff are never locked out **(D-12)**.
