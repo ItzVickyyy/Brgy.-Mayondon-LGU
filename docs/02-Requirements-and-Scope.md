@@ -4,7 +4,7 @@ The client's problem, goals, scope, features and requirements. Combines the fina
 
 **Status:** The Creative Brief was signed by the professor and is the **approved planning baseline**. Client sign-off of the brief and of the local-network architecture is not recorded **(D-02)**. Anything marked *Proposed* below is **not** a client requirement yet. Undecided items are tagged `(D-xx)` and listed in [08-Open-Decisions.md](08-Open-Decisions.md).
 
-Last updated: November 1, 2026 (reflects the revised brief supplied October 27, 2026)
+Last updated: November 5, 2026 (reflects the revised brief supplied October 27, 2026)
 
 ## 1. Status labels (use consistently)
 
@@ -90,9 +90,9 @@ Confirm any change to this list with the client before coding.
 
 1. **Login** — six staff accounts, all with full access (brief). *Proposed alternative:* Staff and System Administrator roles **(D-10)**.
 2. **Dashboard** — documents issued; clearances/IDs nearing expiry **(D-21)**.
-3. **Resident Records** — add, edit, search, import masterlist.
+3. **Records Management** — resident records (add, edit, search, import masterlist) and Barangay ID records, in one place.
 4. **Family and Sector Details** — only where the client workflow requires **(D-20)**.
-5. **ID Records** — preserve existing Barangay ID numbering. Normal validity is one year; **six months** for new or renting residents until proof of voter registration is provided. The client also keeps a separate list of newer residents (from 2019) with registered/unregistered remarks **(D-18)**.
+5. **ID Records** (the Barangay IDs tab of Records Management; IDs are issued through Issuance Management) — preserve existing Barangay ID numbering. Normal validity is one year; **six months** for new or renting residents until proof of voter registration is provided. The client also keeps a separate list of newer residents (from 2019) with registered/unregistered remarks **(D-18)**.
 6. **Document Requests** — record requests, maintain document purposes, preserve issuance history.
 7. **Document and ID Printing** — populate approved layouts, including the ID photo. Print only variable details on the existing blank form; calibrate position, scaling, paper size, margins and printer settings against the real forms and test printed samples before acceptance. Do not recreate the pre-printed header, labels, signature or dry-seal area unless the client approves a different layout. Details: [04-Documents-and-Printing.md](04-Documents-and-Printing.md).
 8. **Backup and Restore** — scheduled **and** manual local backups to an external drive; agree on schedule, custody, restore procedure and responsibilities, then test **(D-35)**.
