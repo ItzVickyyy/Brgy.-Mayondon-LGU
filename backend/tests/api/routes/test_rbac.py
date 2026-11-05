@@ -318,6 +318,7 @@ ADMIN_ONLY = {
     Permission.USERS_MANAGE,
     Permission.REGISTRATIONS_REVIEW,
     Permission.OFFICIALS_MANAGE,
+    Permission.LOOKUPS_MANAGE,
     Permission.RECORDS_IMPORT,
     Permission.RECORDS_ARCHIVE,
     Permission.ISSUANCE_VOID,
