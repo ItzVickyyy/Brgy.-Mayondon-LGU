@@ -56,7 +56,7 @@ Browser print must use **actual size / 100% scaling** with headers and footers d
 ### 4.1 Barangay Clearance
 - Date at top right, above the pre-printed Date line
 - Name, address, **age calculated from birthdate**, birthdate, birthplace, civil status
-- Purpose, a purpose note on the following line, remarks, and an optional second remarks line such as `c/o [Kagawad]`
+- Purpose and remarks. The purpose note and the "c/o" second remarks line were removed from the New Issuance form and from the print overlay.
 - Resident photo in the designated box on the right (if approved)
 - Bottom fields: valid ID presented, ID number, place of issue, date of issue, official receipt number
 - Do **not** print in the right thumbmark box or the resident signature line

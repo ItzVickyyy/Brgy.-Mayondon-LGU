@@ -40,8 +40,8 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "name", x: 135, y: 320, w: 255 }, { key: "address", x: 135, y: 339, w: 255 },
       { key: "age", x: 135, y: 359 }, { key: "birthdate", x: 135, y: 378 }, { key: "birthplace", x: 135, y: 398, w: 255 },
       { key: "civilStatus", x: 135, y: 417 },
-      { key: "purpose", x: 135, y: 456, w: 255 }, { key: "purposeNote", x: 135, y: 475, w: 255 },
-      { key: "remarks", x: 135, y: 495, w: 320 }, { key: "remarks2", x: 135, y: 514, w: 320 },
+      { key: "purpose", x: 135, y: 456, w: 255 },
+      { key: "remarks", x: 135, y: 495, w: 320 },
       // Bottom block is on page 2 in the LibreOffice render; 17 pt steps are estimated. Calibrate.
       { key: "idType", x: 243, y: 686, w: 250 }, { key: "idNumber", x: 243, y: 703, w: 250 },
       { key: "idPlace", x: 243, y: 720, w: 250 }, { key: "idDate", x: 243, y: 737, w: 250 }, { key: "orNumber", x: 243, y: 754, w: 250 },

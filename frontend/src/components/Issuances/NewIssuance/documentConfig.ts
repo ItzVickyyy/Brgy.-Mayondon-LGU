@@ -1,4 +1,4 @@
-import { addressedOfficeOptions, clearancePurposeOptions, idTypeOptions, indigencyPurposeOptions, indigencySectorOptions, purposeNoteOptions } from "@/components/Issuances/config"
+import { addressedOfficeOptions, clearancePurposeOptions, idTypeOptions, indigencyPurposeOptions, indigencySectorOptions } from "@/components/Issuances/config"
 
 export type DocumentCode =
   | "BARANGAY_CLEARANCE"
@@ -80,9 +80,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
     fields: [
       { name: "purpose", label: "Purpose", type: "select", required: true, options: purposeOptions, group: "main" },
       ...identityFields, ...stampFields,
-      { name: "purposeNote", label: "Purpose note", type: "combobox", options: purposeNoteOptions, group: "more" },
-      { name: "remarks", label: "Remarks", type: "text", default: "NO DEROGATORY RECORD ON FILE", group: "more" },
-      { name: "referredBy", label: "Referred by (c/o)", type: "select", options: ["None", "Punong Barangay", "Barangay Kagawad", "SK Chairperson"], default: "None", group: "more" },
+      { name: "remarks", label: "Remarks", type: "text", default: "NO DEROGATORY RECORD ON FILE", group: "main" },
     ],
   },
   FRANCHISE_CLEARANCE: {
@@ -116,7 +114,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
     fields: [
       { name: "purpose", label: "Purpose", type: "combobox", required: true, options: purposeOptions, group: "main" },
       { name: "residentSince", label: "Residing since", type: "text", group: "main" },
-      { name: "additionalStatement", label: "Additional statement", type: "textarea", group: "more" },
+      { name: "additionalStatement", label: "Additional statement", type: "textarea", group: "main" },
       ...identityFields.map((field) => ({ ...field, required: false })), ...paymentFields.map((field) => ({ ...field, required: false })),
     ],
   },
@@ -128,7 +126,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
       { name: "sector", label: "Sector", type: "multiselect", required: true, options: sectorOptions, maxSelected: 2, group: "main" },
       { name: "purpose", label: "Purpose", type: "combobox", required: true, options: indigencyPurposes, group: "main" },
       { name: "addressedToOffice", label: "Office addressed to", type: "combobox", required: true, options: addressedOfficeOptions, group: "main" },
-      { name: "requestedBy", label: "Requested by", type: "text", group: "more", help: "Only if someone other than the resident asked for it. Printed after \"Requested by:\"." },
+      { name: "requestedBy", label: "Requested by", type: "text", group: "main", help: "Only if someone other than the resident asked for it. Printed after \"Requested by:\"." },
     ],
   },
   PHILHEALTH_CERT: {
