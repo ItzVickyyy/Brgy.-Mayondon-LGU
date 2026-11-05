@@ -2,7 +2,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlmodel import col, delete, func, select
+from sqlmodel import col, func, select
 
 from app import crud
 from app.api.deps import (
@@ -15,7 +15,6 @@ from app.core.config import settings
 from app.core.permissions import Permission, has_permission, is_admin
 from app.core.security import get_password_hash, verify_password
 from app.models import (
-    Item,
     Message,
     UpdatePassword,
     User,
@@ -270,8 +269,6 @@ def delete_user(
             status_code=400,
             detail="At least one active System Administrator must remain.",
         )
-    statement = delete(Item).where(col(Item.owner_id) == user_id)
-    session.exec(statement)
     session.delete(user)
     session.commit()
     record_admin_action(actor_id=current_user.id, action="user.delete", target_type="user", target_id=user_id)
