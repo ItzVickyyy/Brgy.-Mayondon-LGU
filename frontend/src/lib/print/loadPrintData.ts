@@ -1,5 +1,5 @@
 /**
- * Loads everything buildPrintData needs for one stored issuance (round 5 of docs/HANDOFF-printing.md).
+ * Loads everything buildPrintData needs for one stored issuance (see docs/04-Documents-and-Printing.md section 6).
  * Talks to the (mock) issuance API, so it is async. The pure mapping stays in buildPrintData.ts.
  */
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
