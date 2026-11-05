@@ -80,7 +80,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       date(220),
       { key: "name", x: 135, y: 341, w: 400 }, { key: "address", x: 135, y: 360, w: 400 }, { key: "age", x: 135, y: 380 },
       // "SECTOR :" is NOT pre-printed (docs/04 4.2): the print builder must supply the label in `sectorLine`.
-      { key: "sectorLine", x: 56, y: 399, w: 480 },
+      { key: "sectorLine", x: 50, y: 399, w: 480 },
       { key: "purpose", x: 135, y: 477, w: 400 }, { key: "addressedTo", x: 135, y: 496, w: 400 },
     ],
   },
@@ -90,17 +90,17 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
     fields: [
       { key: "name", x: 261, y: 229, w: 190 }, { key: "address", x: 74, y: 273, w: 240 }, { key: "sector", x: 131, y: 316, w: 215 },
       { key: "name", x: 294, y: 360, w: 200 }, { key: "healthCondition", x: 181, y: 403, w: 200 },
-      { key: "day", x: 232, y: 454, w: 22, align: "center" }, { key: "month", x: 273, y: 454, w: 125 },
+      { key: "day", x: 240, y: 457, w: 22, align: "center" }, { key: "month", x: 273, y: 457, w: 125 },
     ],
   },
   // Page 2 of the same file (Certification for assistance request).
   assistance: {
     id: "assistance", documentCode: "ASSISTANCE", paper,
     fields: [
-      { key: "name", x: 203, y: 197, w: 165, page: 1 }, { key: "address", x: 123, y: 222, w: 165, page: 1 }, { key: "years", x: 495, y: 222, w: 14, page: 1 },
-      { key: "sector", x: 222, y: 296, w: 200, page: 1 },
-      { key: "relationship", x: 74, y: 396, w: 175, page: 1 }, { key: "underName", x: 340, y: 396, w: 190, page: 1 },
-      { key: "day", x: 157, y: 519, w: 36, align: "center", page: 1 }, { key: "month", x: 227, y: 519, w: 130, page: 1 },
+      { key: "name", x: 203, y: 200, w: 165, page: 1 }, { key: "address", x: 123, y: 225, w: 165, page: 1 }, { key: "years", x: 495, y: 225, w: 14, page: 1 },
+      { key: "sector", x: 222, y: 299, w: 200, page: 1 },
+      { key: "relationship", x: 74, y: 399, w: 175, page: 1 }, { key: "underName", x: 340, y: 399, w: 190, page: 1 },
+      { key: "day", x: 174, y: 522, w: 36, align: "center", page: 1 }, { key: "month", x: 227, y: 522, w: 130, page: 1 },
     ],
     // The sample .docx has "(X)" pre-typed on financial and oneself; blank stock must show "( )" for these marks.
     marks: [

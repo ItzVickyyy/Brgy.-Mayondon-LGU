@@ -7,6 +7,7 @@ export const printOverlayCss = `
   font-family: Arial, Helvetica, sans-serif; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact }
 .print-overlay-page > * { position: absolute; white-space: nowrap }
 @media print {
+  html, body { margin: 0 !important; padding: 0 !important }
   body > *:not(.print-overlay-root) { display: none !important }
   /* The Issuances page hides body descendants with visibility for its own print preview; the overlay must opt back in. */
   .print-overlay-root, .print-overlay-root * { visibility: visible !important }
