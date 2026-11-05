@@ -34,7 +34,7 @@ const cap = (value: string) => (value ? value.charAt(0).toUpperCase() + value.sl
 
 export function buildPrintData(issuance: MockIssuance, lookups: PrintLookups, name?: PrintResidentName): PrintData | null {
   const templateId = templateIdByDocumentCode[issuance.documentType]
-  if (!templateId) return null // Residency, First-Time Jobseeker, PhilHealth, Barangay ID: no overlay template yet
+  if (!templateId) return null // Residency, First-Time Jobseeker, Barangay ID: no overlay template yet
   const { payload, residentSnapshot: resident, issueDate } = issuance
   const details = payload.details
   const sectors = (payload.sectors ?? []).map((sector) => byId(lookups.sectors, sector.sectorId)).filter(Boolean)

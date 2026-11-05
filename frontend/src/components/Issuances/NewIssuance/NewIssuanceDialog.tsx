@@ -37,7 +37,6 @@ const printedNameType: Record<DocumentCode, string> = {
   BARANGAY_CLEARANCE: "Barangay Clearance",
   FRANCHISE_CLEARANCE: "Barangay Franchise Clearance",
   UTILITY_CLEARANCE: "Barangay Clearance, Electrical and Water Connection",
-  PHILHEALTH_CERT: "PhilHealth Certification",
   RESIDENCY: "Certification of Residency",
   INDIGENCY: "Certificate of Indigency",
   ASSISTANCE: "Certification (assistance request)",
@@ -780,7 +779,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, onSav
           <Button type="button" onClick={() => { resetDialog(); onOpenChange(false) }}>Done</Button>
         </div>
       </div> : <form noValidate className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => { event.preventDefault(); void issue() }} onKeyDown={(event) => { if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); void issue() } }}>
-        <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_368px]">
           <div className="min-h-0 space-y-4 overflow-y-auto bg-muted/30 px-4 py-4 sm:px-5">
             <IssuanceSection id="issuance-step-document" step={1} title="What are you issuing?" done>
               <DocumentTypePicker value={documentType} onChange={changeDocumentType} />
