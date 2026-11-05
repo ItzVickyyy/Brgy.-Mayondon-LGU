@@ -2,12 +2,13 @@ from collections.abc import Generator
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, delete
+from sqlmodel import Session, col, delete
 
 from app.core.config import settings
 from app.core.db import engine, init_db
 from app.main import app
 from app.models import User
+from app.models_issuance import Issuance, Tricycle
 from app.models_residents import Resident
 from tests.utils.user import authentication_token_from_email, staff_headers
 from tests.utils.utils import get_superuser_token_headers
@@ -18,6 +19,12 @@ def db() -> Generator[Session]:
     with Session(engine) as session:
         init_db(session)
         yield session
+        # Corrections point at the issuance they correct, so remove them first.
+        session.execute(
+            delete(Issuance).where(col(Issuance.corrects_issuance_id).is_not(None))
+        )
+        session.execute(delete(Issuance))
+        session.execute(delete(Tricycle))
         session.execute(delete(Resident))
         statement = delete(User)
         session.execute(statement)

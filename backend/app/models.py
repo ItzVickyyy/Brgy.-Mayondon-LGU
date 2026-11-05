@@ -186,3 +186,4 @@ class NewPassword(SQLModel):
 # reuse helpers above and so Alembic sees every table through ``app.models``.
 from app import models_foundation  # noqa: E402,F401
 from app import models_residents  # noqa: E402,F401
+from app import models_issuance  # noqa: E402,F401
