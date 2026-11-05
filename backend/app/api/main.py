@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.routes import login, private, users, utils
+from app.api.routes import login, private, residents, users, utils
 from app.core.config import settings
 
 
@@ -9,6 +9,7 @@ def create_api_router(fastapi_env: str | None) -> APIRouter:
     router = APIRouter()
     router.include_router(login.router)
     router.include_router(users.router)
+    router.include_router(residents.router)
     router.include_router(utils.router)
 
     if fastapi_env == "development":
