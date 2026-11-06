@@ -8,7 +8,7 @@ from sqlmodel import Session, select
 
 from app.core.config import settings
 from app.core.dates import age_on, today_manila
-from app.models_foundation import AuditLog, Sector
+from app.models_foundation import AuditLog, Sector, Street
 from app.models_residents import Resident
 from tests.utils.utils import random_lower_string
 
@@ -293,6 +293,33 @@ def test_search_matches_each_word_and_filters_by_sector(
     ).json()
     assert [x["id"] for x in r["data"]] == [a["id"]]
 
+
+def test_search_matches_address_and_id_number(
+    client: TestClient, staff_token_headers: Headers, db: Session
+) -> None:
+    tag = random_lower_string()[:8]
+    street = Street(name=f"Search Road {tag}")
+    db.add(street)
+    db.commit()
+    db.refresh(street)
+    resident = _create(
+        client,
+        staff_token_headers,
+        house_number=f"{tag}-17",
+        street_id=street.id,
+        id_number=f"MAY-{tag.upper()}-01",
+    )
+
+    for term in (tag, street.name, f"MAY-{tag.upper()}-01"):
+        response = client.get(
+            f"{API}/residents/",
+            headers=staff_token_headers,
+            params={"q": term},
+        )
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["count"] == 1
+        assert [row["id"] for row in body["data"]] == [resident["id"]]
 
 def test_list_pagination_limits(
     client: TestClient, staff_token_headers: Headers
