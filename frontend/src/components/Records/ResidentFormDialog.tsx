@@ -171,7 +171,7 @@ export function ResidentFormDialog({
     setError("")
     try {
       const body = buildBody(form)
-      const saved = resident
+      let saved: ResidentPublic = resident
         ? (await ResidentsService.updateResident({ path: { resident_id: resident.id }, body })).data
         : (await ResidentsService.createResident({
             body,
@@ -181,6 +181,7 @@ export function ResidentFormDialog({
       if (photoDataUrl) {
         try {
           await uploadResidentPhoto(saved.id, photoDataUrl)
+          saved = (await ResidentsService.readResident({ path: { resident_id: saved.id } })).data
         } catch (caughtPhoto) {
           photoError = readApiError(caughtPhoto).message
         }
