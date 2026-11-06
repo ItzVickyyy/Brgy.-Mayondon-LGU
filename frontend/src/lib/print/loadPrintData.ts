@@ -4,6 +4,7 @@
  * Tests pass the in-memory copy of the API (`issuanceApi.mock`) instead of the real one.
  */
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
+import { printTemplates } from "./templates"
 import type { MockIssuance } from "@/components/Issuances/NewIssuance/issuanceTypes"
 import {
   buildPrintData,
@@ -33,6 +34,7 @@ export type PrintApi = {
       }
     | undefined
   >
+  loadResidentPhoto?(id: string): Promise<string | undefined>
   getTricycle(id?: string): Promise<
     | {
         associationName: string
@@ -85,6 +87,9 @@ export async function loadPrintData(
       : undefined,
   }
   const data = buildPrintData(issuance, printLookups, name)
+  if (data && printTemplates[data.templateId].photo && api.loadResidentPhoto) {
+    data.photoUrl = await api.loadResidentPhoto(issuance.residentId)
+  }
   if (!data)
     return {
       ok: false,
