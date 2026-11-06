@@ -4,7 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
-import { CalendarDays, FileCheck2, FileText, Search, X } from "lucide-react"
+import { CalendarDays, FileCheck2, FilePenLine, FileText, Printer, Search, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import type { IssuanceListItem, IssuancePublic } from "@/client"
 import { DashboardService, IssuancesService, LookupsService } from "@/client"
@@ -31,11 +31,12 @@ import {
 } from "@/components/ui/dialog"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { cn } from "@/lib/utils"
 
 type StatusFilter = "all" | "issued" | "draft" | "voided"
-type PendingAction = { item: IssuanceListItem; action: "void" | "discard" }
+type PendingAction = { item: IssuanceListItem; action: "void" | "discard" | "correct" }
 
 const PAGE_SIZE = 10
 const filterLabelClass =
@@ -175,8 +176,12 @@ function IssuanceDetailsDialog({
 
 export function IssuanceHistory({
   onNotice,
+  onContinueDraft,
+  onPrint,
 }: {
   onNotice: (message: string) => void
+  onContinueDraft: (id: string) => void
+  onPrint: (item: IssuanceListItem) => Promise<string | void> | string | void
 }) {
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
@@ -285,17 +290,24 @@ export function IssuanceHistory({
           path: { issuance_id: item.id },
           body: { reason },
         })
-      } else {
-        await IssuancesService.discardDraft({ path: { issuance_id: item.id } })
+        return undefined
       }
+      if (action === "correct") return await issuanceApi.correctIssuance(item.id, reason)
+      await IssuancesService.discardDraft({ path: { issuance_id: item.id } })
+      return undefined
     },
-    onSuccess: (_data, { item, action }) => {
+    onSuccess: (createdDraft, { item, action }) => {
       setErrorNotice("")
-      onNotice(
-        action === "void"
-          ? `${item.reference_no ?? "The document"} was voided.`
-          : "The draft was discarded.",
-      )
+      if (action === "correct" && createdDraft) {
+        onNotice("A correction draft was created for " + (item.reference_no ?? "this document") + ".")
+        onContinueDraft(createdDraft.id)
+      } else {
+        onNotice(
+          action === "void"
+            ? (item.reference_no ?? "The document") + " was voided."
+            : "The draft was discarded.",
+        )
+      }
       refresh()
     },
     onError: (error) => setErrorNotice(readApiError(error).message),
@@ -532,6 +544,31 @@ export function IssuanceHistory({
                                   setPending({ item, action: "void" }),
                               },
                               {
+                                label: "Continue draft",
+                                hidden: !isDraft,
+                                icon: <FilePenLine aria-hidden="true" className="size-4" />,
+                                onSelect: () => onContinueDraft(item.id),
+                              },
+                              {
+                                label: "Correct & edit",
+                                hidden: !isIssued,
+                                icon: <FilePenLine aria-hidden="true" className="size-4" />,
+                                onSelect: () => setPending({ item, action: "correct" }),
+                              },
+                              {
+                                label: "Reprint",
+                                hidden: !isIssued,
+                                icon: <Printer aria-hidden="true" className="size-4" />,
+                                onSelect: async () => {
+                                  try {
+                                    const message = await onPrint(item)
+                                    if (message) onNotice(message)
+                                  } catch (error) {
+                                    setErrorNotice(readApiError(error).message)
+                                  }
+                                },
+                              },
+                              {
                                 label: "Discard draft",
                                 hidden: !isDraft,
                                 destructive: true,
@@ -584,19 +621,21 @@ export function IssuanceHistory({
         onOpenChange={(open) => {
           if (!open) setPending(null)
         }}
-        title={pending?.action === "void" ? "Void issuance?" : "Discard draft?"}
+        title={pending?.action === "void" ? "Void issuance?" : pending?.action === "correct" ? "Create correction draft?" : "Discard draft?"}
         description={
           pending
             ? pending.action === "void"
               ? `Void ${pending.item.reference_no}? It stays in the history and cannot be edited. A reason is required.`
-              : "Discard this pending draft? It will be deleted."
+              : pending.action === "correct"
+                ? "Create a new editable draft from this issued document? The original remains issued until an administrator voids it."
+                : "Discard this pending draft? It will be deleted."
             : ""
         }
         confirmLabel={
-          pending?.action === "void" ? "Void issuance" : "Discard draft"
+          pending?.action === "void" ? "Void issuance" : pending?.action === "correct" ? "Create correction draft" : "Discard draft"
         }
-        destructive
-        reason={pending?.action === "void" ? "required" : "none"}
+        destructive={pending?.action !== "correct"}
+        reason={pending?.action === "void" || pending?.action === "correct" ? "required" : "none"}
         onConfirm={(reason) => {
           if (!pending) return
           actionMutation.mutate({ ...pending, reason })
