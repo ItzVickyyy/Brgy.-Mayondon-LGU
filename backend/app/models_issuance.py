@@ -1,8 +1,9 @@
 """Issuance core: the document record, its shared parts and per-type details.
 
 Design source: docs/09-Issuance-Form-Data-Map.md. Implemented here: Barangay
-Clearance, Franchise Clearance, Utility (Electrical/Water) Clearance and
-Certificate of Indigency. The other document types follow in later patches.
+Clearance, Franchise Clearance, Utility (Electrical/Water) Clearance,
+Certificate of Indigency, Residency, Assistance, Marginalized Sector and
+First-Time Jobseeker. The Barangay ID follows in a later patch.
 
 Rules that shape the tables:
 - An issued row is never edited or deleted. A correction is a new row that
@@ -44,6 +45,9 @@ DEFAULT_CLEARANCE_REMARKS = "NO DEROGATORY RECORD ON FILE"
 # Keys are ``document_types.code``. Resident fields are checked when issuing
 # (docs/09, "Values saved back to residents").
 ADDRESS_FIELDS = ("house_number", "street_id", "purok")
+# ``sections`` are required to issue; ``optional_sections`` may be saved too.
+# ``resident_fields`` must be filled on the resident record to issue. The pseudo
+# field ``resident_since`` means "residing since" year or "since birth".
 DOCUMENT_RULES: dict[str, dict[str, tuple[str, ...]]] = {
     "BARANGAY_CLEARANCE": {
         "sections": ("identification", "payment"),
@@ -66,7 +70,38 @@ DOCUMENT_RULES: dict[str, dict[str, tuple[str, ...]]] = {
         "sections": ("indigency", "sectors"),
         "resident_fields": ("birthdate", *ADDRESS_FIELDS),
     },
+    "RESIDENCY": {
+        "sections": (),
+        "optional_sections": ("identification", "payment"),
+        "resident_fields": ("resident_since", *ADDRESS_FIELDS),
+    },
+    "ASSISTANCE": {
+        "sections": ("assistance", "sectors"),
+        "resident_fields": ("resident_since", *ADDRESS_FIELDS),
+    },
+    "MARGINALIZED_SECTOR": {
+        "sections": ("marginalized", "sectors"),
+        "resident_fields": ADDRESS_FIELDS,
+    },
+    "FIRST_TIME_JOBSEEKER": {
+        "sections": ("jobseeker",),
+        "resident_fields": (
+            "birthdate",
+            "civil_status",
+            "sex",
+            "resident_since",
+            *ADDRESS_FIELDS,
+        ),
+    },
 }
+# (minimum, maximum) number of sectors on the document (docs/09).
+SECTOR_LIMITS: dict[str, tuple[int, int]] = {
+    "INDIGENCY": (1, 2),
+    "ASSISTANCE": (1, 1),
+    "MARGINALIZED_SECTOR": (1, 1),
+}
+ASSISTANCE_TYPES = ("financial", "medical", "burial")
+RESTRICTED = "[restricted]"  # shown instead of the health condition (decision 3)
 ALL_SECTIONS = (
     "identification",
     "payment",
@@ -74,6 +109,9 @@ ALL_SECTIONS = (
     "utility",
     "indigency",
     "franchise",
+    "marginalized",
+    "assistance",
+    "jobseeker",
 )
 
 
@@ -290,6 +328,64 @@ class IssuanceFranchise(SQLModel, table=True):
     tricycle_id: int = Field(foreign_key="tricycles.id", ondelete="RESTRICT")
 
 
+class IssuanceMarginalizedSector(SQLModel, table=True):
+    """Sensitive: the health condition is masked everywhere except the audited
+    single-issuance read (decision 3). Never log or export it."""
+
+    __tablename__ = "issuance_marginalized_sector"
+
+    issuance_id: uuid.UUID = Field(
+        foreign_key="issuances.id", primary_key=True, ondelete="CASCADE"
+    )
+    health_condition: str = Field(max_length=500)
+
+
+class IssuanceAssistance(SQLModel, table=True):
+    __tablename__ = "issuance_assistance"
+    __table_args__ = (
+        CheckConstraint(
+            _in_list("assistance_type", ASSISTANCE_TYPES),
+            name="ck_issuance_assistance_type",
+        ),
+        CheckConstraint(
+            "for_self OR (beneficiary_name IS NOT NULL "
+            "AND beneficiary_relationship IS NOT NULL)",
+            name="ck_issuance_assistance_beneficiary",
+        ),
+    )
+
+    issuance_id: uuid.UUID = Field(
+        foreign_key="issuances.id", primary_key=True, ondelete="CASCADE"
+    )
+    assistance_type: str = Field(max_length=20)
+    for_self: bool = Field(
+        default=True,
+        sa_column=Column(Boolean, nullable=False, server_default=text("true")),
+    )
+    beneficiary_name: str | None = Field(default=None, max_length=255)
+    beneficiary_relationship: str | None = Field(default=None, max_length=100)
+
+
+class IssuanceFirstTimeJobseeker(SQLModel, table=True):
+    """One issued row per resident is enforced in the API (the issue route locks
+    the resident), because a partial index cannot name a seeded document type."""
+
+    __tablename__ = "issuance_first_time_jobseeker"
+
+    issuance_id: uuid.UUID = Field(
+        foreign_key="issuances.id", primary_key=True, ondelete="CASCADE"
+    )
+    educational_attainment: str = Field(max_length=150)
+    course: str = Field(max_length=150)
+    is_jobstart_beneficiary: bool = Field(
+        default=False,
+        sa_column=Column(Boolean, nullable=False, server_default=text("false")),
+    )
+    witness_official_id: uuid.UUID | None = Field(
+        default=None, foreign_key="officials.id", ondelete="RESTRICT"
+    )
+
+
 # --- API shapes -------------------------------------------------------------
 
 Req = Annotated[
@@ -410,6 +506,48 @@ class FranchiseIn(SQLModel):
     ]
 
 
+class MarginalizedIn(SQLModel):
+    health_condition: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)
+    ]
+
+
+class AssistanceIn(SQLModel):
+    assistance_type: Literal["financial", "medical", "burial"]
+    for_self: bool = True
+    beneficiary_name: str | None = Field(default=None, max_length=255)
+    beneficiary_relationship: str | None = Field(default=None, max_length=100)
+
+    @field_validator("beneficiary_name", "beneficiary_relationship")
+    @classmethod
+    def _blank_to_none(cls, value: str | None) -> str | None:
+        return _clean(value)
+
+    @model_validator(mode="after")
+    def _beneficiary_rule(self) -> AssistanceIn:
+        if self.for_self:
+            # The form hides these when the resident asks for themselves.
+            self.beneficiary_name = None
+            self.beneficiary_relationship = None
+        elif not (self.beneficiary_name and self.beneficiary_relationship):
+            raise ValueError(
+                "beneficiary_name and beneficiary_relationship are required "
+                "when the assistance is not for the resident"
+            )
+        return self
+
+
+class JobseekerIn(SQLModel):
+    educational_attainment: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=150)
+    ]
+    course: Annotated[
+        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=150)
+    ] = "N/A"
+    is_jobstart_beneficiary: bool = False
+    witness_official_id: uuid.UUID | None = None
+
+
 class IssuanceCreate(SQLModel):
     document_type_id: int
     resident_id: uuid.UUID
@@ -423,6 +561,9 @@ class IssuanceCreate(SQLModel):
     utility: UtilityIn | None = None
     indigency: IndigencyIn | None = None
     franchise: FranchiseIn | None = None
+    marginalized: MarginalizedIn | None = None
+    assistance: AssistanceIn | None = None
+    jobseeker: JobseekerIn | None = None
 
     @field_validator("issue_date")
     @classmethod
@@ -453,6 +594,9 @@ class IssuanceUpdate(SQLModel):
     utility: UtilityIn | None = None
     indigency: IndigencyIn | None = None
     franchise: FranchiseIn | None = None
+    marginalized: MarginalizedIn | None = None
+    assistance: AssistanceIn | None = None
+    jobseeker: JobseekerIn | None = None
 
     @field_validator("issue_date")
     @classmethod
@@ -521,6 +665,24 @@ class FranchisePublic(SQLModel):
     plate_number: str
 
 
+class MarginalizedPublic(SQLModel):
+    health_condition: str  # "[restricted]" except on the audited single read
+
+
+class AssistancePublic(SQLModel):
+    assistance_type: str
+    for_self: bool
+    beneficiary_name: str | None
+    beneficiary_relationship: str | None
+
+
+class JobseekerPublic(SQLModel):
+    educational_attainment: str
+    course: str
+    is_jobstart_beneficiary: bool
+    witness_official_id: uuid.UUID | None
+
+
 class SnapshotPublic(SQLModel):
     full_name: str
     address_line: str | None
@@ -561,6 +723,9 @@ class IssuancePublic(IssuanceListItem):
     utility: UtilityPublic | None = None
     indigency: IndigencyPublic | None = None
     franchise: FranchisePublic | None = None
+    marginalized: MarginalizedPublic | None = None
+    assistance: AssistancePublic | None = None
+    jobseeker: JobseekerPublic | None = None
     snapshot: SnapshotPublic | None = None
 
 

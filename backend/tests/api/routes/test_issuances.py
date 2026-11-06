@@ -174,7 +174,7 @@ def test_unsupported_document_type_is_not_implemented(
         f"{ISS}/",
         headers=staff_token_headers,
         json={
-            "document_type_id": _doc(client, staff_token_headers, "ASSISTANCE"),
+            "document_type_id": _doc(client, staff_token_headers, "BARANGAY_ID"),
             "resident_id": res["id"],
         },
     )
