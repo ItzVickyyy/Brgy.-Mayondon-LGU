@@ -2,8 +2,8 @@
 
 Design source: docs/09-Issuance-Form-Data-Map.md. Implemented here: Barangay
 Clearance, Franchise Clearance, Utility (Electrical/Water) Clearance,
-Certificate of Indigency, Residency, Assistance, Marginalized Sector and
-First-Time Jobseeker. The Barangay ID follows in a later patch.
+Certificate of Indigency, Residency, Assistance, Marginalized Sector,
+First-Time Jobseeker and Barangay ID.
 
 Rules that shape the tables:
 - An issued row is never edited or deleted. A correction is a new row that
@@ -93,6 +93,21 @@ DOCUMENT_RULES: dict[str, dict[str, tuple[str, ...]]] = {
             *ADDRESS_FIELDS,
         ),
     },
+    "BARANGAY_ID": {
+        "sections": ("barangay_id",),
+        # ``photo`` means a row in resident_photos (docs/09, "Values saved back").
+        "resident_fields": (
+            "birthdate",
+            "birth_place",
+            "civil_status",
+            "sex",
+            *ADDRESS_FIELDS,
+            "emergency_contact_name",
+            "emergency_contact_address",
+            "emergency_contact_phone",
+            "photo",
+        ),
+    },
 }
 # (minimum, maximum) number of sectors on the document (docs/09).
 SECTOR_LIMITS: dict[str, tuple[int, int]] = {
@@ -101,6 +116,10 @@ SECTOR_LIMITS: dict[str, tuple[int, int]] = {
     "MARGINALIZED_SECTOR": (1, 1),
 }
 ASSISTANCE_TYPES = ("financial", "medical", "burial")
+ID_TRANSACTION_TYPES = ("new", "renewal", "replacement")
+# An ID counts as "expiring soon" this many days before ``valid_until``. The
+# real threshold is open (D-21); change it here only.
+ID_EXPIRING_SOON_DAYS = 30
 RESTRICTED = "[restricted]"  # shown instead of the health condition (decision 3)
 ALL_SECTIONS = (
     "identification",
@@ -112,6 +131,7 @@ ALL_SECTIONS = (
     "marginalized",
     "assistance",
     "jobseeker",
+    "barangay_id",
 )
 
 
@@ -275,6 +295,10 @@ class IssuanceResidentSnapshot(SQLModel, table=True):
         default=False,
         sa_column=Column(Boolean, nullable=False, server_default=text("false")),
     )
+    # Printed on the back of the Barangay ID only; empty for other documents.
+    emergency_contact_name: str | None = Field(default=None, max_length=255)
+    emergency_contact_address: str | None = Field(default=None, max_length=500)
+    emergency_contact_phone: str | None = Field(default=None, max_length=30)
 
 
 class IssuanceUtility(SQLModel, table=True):
@@ -384,6 +408,30 @@ class IssuanceFirstTimeJobseeker(SQLModel, table=True):
     witness_official_id: uuid.UUID | None = Field(
         default=None, foreign_key="officials.id", ondelete="RESTRICT"
     )
+
+
+class IssuanceBarangayId(SQLModel, table=True):
+    """One row per ID card (new, renewal or replacement), so history is kept.
+
+    ``id_number`` may stay empty on a draft; it is fixed when the card is
+    issued and is then copied to ``residents.id_number`` (docs/09, decision 2).
+    """
+
+    __tablename__ = "issuance_barangay_id"
+    __table_args__ = (
+        CheckConstraint(
+            _in_list("transaction_type", ID_TRANSACTION_TYPES),
+            name="ck_issuance_barangay_id_transaction",
+        ),
+        Index("ix_issuance_barangay_id_number", "id_number"),
+    )
+
+    issuance_id: uuid.UUID = Field(
+        foreign_key="issuances.id", primary_key=True, ondelete="CASCADE"
+    )
+    transaction_type: str = Field(max_length=20)
+    valid_until: date
+    id_number: str | None = Field(default=None, max_length=50)
 
 
 # --- API shapes -------------------------------------------------------------
@@ -548,6 +596,17 @@ class JobseekerIn(SQLModel):
     witness_official_id: uuid.UUID | None = None
 
 
+class BarangayIdIn(SQLModel):
+    transaction_type: Literal["new", "renewal", "replacement"]
+    valid_until: date
+    id_number: str | None = Field(default=None, max_length=50)
+
+    @field_validator("id_number")
+    @classmethod
+    def _blank_to_none(cls, value: str | None) -> str | None:
+        return _clean(value)
+
+
 class IssuanceCreate(SQLModel):
     document_type_id: int
     resident_id: uuid.UUID
@@ -564,6 +623,7 @@ class IssuanceCreate(SQLModel):
     marginalized: MarginalizedIn | None = None
     assistance: AssistanceIn | None = None
     jobseeker: JobseekerIn | None = None
+    barangay_id: BarangayIdIn | None = None
 
     @field_validator("issue_date")
     @classmethod
@@ -597,6 +657,7 @@ class IssuanceUpdate(SQLModel):
     marginalized: MarginalizedIn | None = None
     assistance: AssistanceIn | None = None
     jobseeker: JobseekerIn | None = None
+    barangay_id: BarangayIdIn | None = None
 
     @field_validator("issue_date")
     @classmethod
@@ -683,6 +744,12 @@ class JobseekerPublic(SQLModel):
     witness_official_id: uuid.UUID | None
 
 
+class BarangayIdPublic(SQLModel):
+    transaction_type: str
+    valid_until: date
+    id_number: str | None
+
+
 class SnapshotPublic(SQLModel):
     full_name: str
     address_line: str | None
@@ -692,6 +759,9 @@ class SnapshotPublic(SQLModel):
     civil_status: str | None
     resident_since_year: int | None
     resident_since_birth: bool
+    emergency_contact_name: str | None = None
+    emergency_contact_address: str | None = None
+    emergency_contact_phone: str | None = None
 
 
 class IssuanceListItem(SQLModel):
@@ -726,9 +796,30 @@ class IssuancePublic(IssuanceListItem):
     marginalized: MarginalizedPublic | None = None
     assistance: AssistancePublic | None = None
     jobseeker: JobseekerPublic | None = None
+    barangay_id: BarangayIdPublic | None = None
     snapshot: SnapshotPublic | None = None
 
 
 class IssuancesPublic(SQLModel):
     data: list[IssuanceListItem]
+    count: int
+
+
+class BarangayIdListItem(SQLModel):
+    """The latest issued ID card of one resident (Records Management tab)."""
+
+    issuance_id: uuid.UUID
+    reference_no: str
+    resident_id: uuid.UUID
+    resident_name: str
+    resident_status: str
+    id_number: str
+    transaction_type: str
+    issue_date: date
+    valid_until: date
+    status: Literal["valid", "expiring_soon", "expired"]
+
+
+class BarangayIdsPublic(SQLModel):
+    data: list[BarangayIdListItem]
     count: int

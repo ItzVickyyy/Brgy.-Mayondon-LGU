@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.routes import (
+    barangay_ids,
     issuances,
     login,
     lookups,
@@ -22,6 +23,7 @@ def create_api_router(fastapi_env: str | None) -> APIRouter:
     router.include_router(lookups.router)
     router.include_router(officials.router)
     router.include_router(issuances.router)
+    router.include_router(barangay_ids.router)
     router.include_router(utils.router)
 
     if fastapi_env == "development":
