@@ -527,9 +527,17 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         setSaving(false)
         return
       }
-      const record = await issuanceApi.createIssuance(raw)
-      // The automatic draft is replaced by the finished document.
-      await removeDraft()
+      const existingDraftId = draftIdRef.current
+      const record = existingDraftId
+        ? await issuanceApi.issueDraft(existingDraftId, raw)
+        : await issuanceApi.createIssuance(raw)
+      // Issue an existing draft in place so a correction keeps its original-document link.
+      if (existingDraftId) {
+        draftIdRef.current = null
+        onDraftRemoved?.(existingDraftId)
+      } else {
+        await removeDraft()
+      }
       setSuccessRecord(record)
       setPrintNotice("")
       onSaved(record)
