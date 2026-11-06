@@ -321,6 +321,7 @@ def test_search_matches_address_and_id_number(
         assert body["count"] == 1
         assert [row["id"] for row in body["data"]] == [resident["id"]]
 
+
 def test_list_pagination_limits(
     client: TestClient, staff_token_headers: Headers
 ) -> None:
