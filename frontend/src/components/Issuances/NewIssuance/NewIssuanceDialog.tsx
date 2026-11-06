@@ -26,6 +26,7 @@ type Props = {
   initialResidentId?: string
   /** When set together with initialResidentId (or alone), the dialog opens on this document type. */
   initialDocumentType?: DocumentCode
+  initialDraftId?: string
   /** Called for every save. `meta.auto` is true for the quiet automatic draft saves. */
   onSaved: (record: MockIssuance, meta?: { auto: boolean }) => void
   /** Called when a draft is deleted (discarded, or turned into an issued document). */
@@ -75,7 +76,7 @@ function getDefaultToday(value: unknown) {
   return value === "today" ? localIsoDate() : typeof value === "string" ? value : ""
 }
 
-export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initialDocumentType, onSaved, onDraftRemoved, onPrint }: Props) {
+export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initialDocumentType, initialDraftId, onSaved, onDraftRemoved, onPrint }: Props) {
   const form = useNewIssuanceForm(initialResidentId ?? "")
   const lookupsQuery = useQuery({ queryKey: ["issuance-lookups"], queryFn: () => issuanceApi.getLookups(), enabled: open, staleTime: 60_000 })
   const officialsQuery = useQuery({ queryKey: ["issuance-officials"], queryFn: () => issuanceApi.getOfficials(), enabled: open, staleTime: 60_000 })
@@ -107,6 +108,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const [printNotice, setPrintNotice] = useState("")
   const [autoSave, setAutoSave] = useState<{ state: "idle" | "saving" | "saved" | "error"; at?: Date }>({ state: "idle" })
   const draftIdRef = useRef<string | null>(null)
+  const restoredDraftRef = useRef("")
   const lastSavedRef = useRef("")
   const saveChain = useRef<Promise<unknown>>(Promise.resolve())
   const documentType = form.watch("documentType")
@@ -381,6 +383,66 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     return next as Promise<MockIssuance | null>
   }
 
+  // Restore a server-side draft selected from Issuance History.
+  useEffect(() => {
+    if (!open || !initialDraftId || draftIdRef.current === initialDraftId) return
+    let active = true
+    setSaving(true)
+    setFormError("")
+    void (async () => {
+      const record = await issuanceApi.getIssuance(initialDraftId)
+      if (!active) return
+      if (!record || record.status !== "draft") {
+        setFormError("This draft is no longer available. Refresh Issuance History and try again.")
+        setSaving(false)
+        return
+      }
+      const resident = await issuanceApi.fetchResident(record.residentId)
+      if (!active) return
+      if (!resident) {
+        setFormError("The resident linked to this draft could not be loaded.")
+        setSaving(false)
+        return
+      }
+      const lookups = await issuanceApi.getLookups()
+      const tricycle = record.documentType === "FRANCHISE_CLEARANCE"
+        ? await issuanceApi.getTricycle((record.payload.details as { tricycleId?: string }).tricycleId)
+        : undefined
+      if (!active) return
+      const restored = {
+        ...record.payload,
+        purposeText: issuanceApi.getPurposeLabel(record.payload.purposeId) ?? "",
+        residentId: record.residentId,
+        status: "draft" as const,
+        details: tricycle ? { ...record.payload.details, ...tricycle } : record.payload.details,
+      }
+      form.reset(restored as never)
+      setSelectedResident(resident)
+      setAddressParts({ houseNumber: resident.houseNumber ?? "", street: resident.street ?? "", purok: resident.purok ?? 1 })
+      setResidentUpdates({})
+      setEditingResident(false)
+      const sectorField = documentConfig[record.documentType].fields.find((field) => field.name === "sector")
+      const selected = (record.payload.sectors ?? []).map((sector) => lookups.sectors[sector.sectorId - 1]).filter((name): name is string => Boolean(name))
+      setSelectedSector(sectorField?.type === "multiselect" ? selected : selected[0] ?? "")
+      setSectorManuallySelected(false)
+      setValidUntilEdited(true)
+      draftIdRef.current = record.id
+      lastSavedRef.current = ""
+      setAutoSave({ state: "saved", at: new Date() })
+      setSaving(false)
+    })().catch((error) => {
+      if (!active) return
+      setFormError(error instanceof Error ? error.message : "The saved draft could not be opened.")
+      setSaving(false)
+    })
+    return () => { active = false }
+  }, [open, initialDraftId])
+
+  useEffect(() => {
+    if (!open || !initialDraftId || !selectedResident || draftIdRef.current !== initialDraftId || restoredDraftRef.current === initialDraftId) return
+    lastSavedRef.current = draftSignature
+    restoredDraftRef.current = initialDraftId
+  }, [open, initialDraftId, selectedResident, draftSignature])
   // Save quietly a moment after the person stops typing. persistDraft reads the latest values through draftSignature.
   // biome-ignore lint/correctness/useExhaustiveDependencies: draftSignature already covers every form value
   useEffect(() => {
