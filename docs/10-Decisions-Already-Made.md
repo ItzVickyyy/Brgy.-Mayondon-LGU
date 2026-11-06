@@ -2,7 +2,7 @@
 
 **For AI assistants and new contributors: read this file first.** These are changes the project owner already made on `draft/admin-portal`. Do not bring back anything listed as removed, and do not "fix" a legacy item unless the owner asks. If you think a decision is wrong, say so and ask; do not change it silently.
 
-Last updated: November 5, 2026. Synthetic data only: never write real names, ID numbers or photos into docs, code or tests.
+Last updated: November 6, 2026. Synthetic data only: never write real names, ID numbers or photos into docs, code or tests.
 
 ## Removed or settled
 
