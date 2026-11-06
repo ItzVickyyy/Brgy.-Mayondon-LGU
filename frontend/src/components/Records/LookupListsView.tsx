@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { Plus, Pencil, Save, Trash2, X } from "lucide-react"
-import { useState } from "react"
+import { useState, type FormEvent } from "react"
 
 import { LookupsService, type LookupItem } from "@/client"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
@@ -103,9 +103,10 @@ function LookupListPanel({
     },
     onError: (caught, input) => {
       const failure = readApiError(caught)
+      const status = (caught as { response?: { status?: number } }).response?.status
       setNotice("")
       setError(
-        failure.status === 409 && input.action === "delete"
+        status === 409 && input.action === "delete"
           ? "This item is already used by a record. It cannot be deleted. Rename it only if the new name is correct for existing records."
           : failure.message,
       )
@@ -124,7 +125,7 @@ function LookupListPanel({
     setEditingName("")
   }
 
-  function submitCreate(event: React.FormEvent<HTMLFormElement>) {
+  function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const name = newName.trim()
     if (!name) return
