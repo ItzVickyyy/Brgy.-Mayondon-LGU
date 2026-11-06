@@ -594,6 +594,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setDiscardOpen(false)
     setQuickAdd(emptyQuickAdd)
     draftIdRef.current = null
+    restoredDraftRef.current = ""
     lastSavedRef.current = ""
     saveChain.current = Promise.resolve()
     setAutoSave({ state: "idle" })
