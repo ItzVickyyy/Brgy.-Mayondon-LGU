@@ -1,14 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router"
 import {
-  CalendarDays,
   Check,
   CheckCircle2,
   Eraser,
   Eye,
   FileCheck2,
-  FileText,
   Plus,
-  Pencil,
   Printer,
   Search,
   Settings2,
@@ -16,23 +13,17 @@ import {
 } from "lucide-react"
 import { Fragment, useEffect, useMemo, useState } from "react"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
-import { EmptyState } from "@/components/Common/FeedbackState"
-import { TablePagination, usePagination } from "@/components/Common/TablePagination"
-import { RowActions } from "@/components/Common/RowActions"
 import { formControlClass } from "@/components/Common/formStyles"
-import { statusStyles } from "@/components/Common/statusStyles"
 import {
   documentFields,
   documentSections,
   documentTypes,
-  historyDocumentTypes,
   documentCardInfo,
   documentMeta,
-  normalizeDocumentType,
   type IssuanceRecord,
 } from "@/components/Issuances/config"
-import { FormSection, SummaryCard } from "@/components/Issuances/IssuanceLayout"
-import { IssuanceDetailsView } from "@/components/Issuances/IssuanceDetailsView"
+import { FormSection } from "@/components/Issuances/IssuanceLayout"
+import { IssuanceHistory } from "@/components/Issuances/IssuanceHistory"
 import { DateField } from "@/components/Issuances/DateField"
 import { CalibrationPanel } from "@/components/Issuances/CalibrationPanel"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
@@ -44,7 +35,6 @@ import { getMissingFields } from "@/components/Issuances/print-summary"
 import { initialOfficials } from "@/components/Officials/officials-sample-data"
 import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -55,8 +45,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { pageTitle } from "@/config/site"
-import useAuth from "@/hooks/useAuth"
-import { isSystemAdministrator } from "@/lib/access"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_layout/issuances")({
@@ -66,7 +54,6 @@ export const Route = createFileRoute("/_layout/issuances")({
 
 const inputClassName = formControlClass
 const labelClassName = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
-const filterLabelClass = "flex min-w-0 flex-col gap-1.5 text-xs font-medium text-muted-foreground"
 
 function localDateValue() {
   const now = new Date()
@@ -85,18 +72,6 @@ function createDefaultFormValues(type: string) {
       return []
     }),
   ) as Record<string, string>
-}
-
-function formatDate(value: string) {
-  if (!value) return "Not entered"
-  const parsed = new Date(`${value}T00:00:00`)
-  return Number.isNaN(parsed.getTime())
-    ? value
-    : parsed.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
 }
 
 function getPreselectedResident() {
@@ -127,18 +102,10 @@ function IssuancesManagement() {
   const [dateFieldResetKey, setDateFieldResetKey] = useState(0)
   const [usedAssociations, setUsedAssociations] = useState<string[]>([])
   const [usedIndigencyPurposes, setUsedIndigencyPurposes] = useState<string[]>([])
-  const [search, setSearch] = useState("")
-  const [historyType, setHistoryType] = useState("All document types")
-  const [historyStatus, setHistoryStatus] = useState("all")
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
   const [historyRecords, setHistoryRecords] = useState<IssuanceRecord[]>([])
-  const [pendingAction, setPendingAction] = useState<{ record: IssuanceRecord; action: "void" | "correct" | "discard" } | null>(null)
   const [correctionReason, setCorrectionReason] = useState("")
   const [correctionTarget, setCorrectionTarget] = useState<IssuanceRecord | null>(null)
   const [continueTarget, setContinueTarget] = useState<IssuanceRecord | null>(null)
-  const { user } = useAuth()
-  const isAdmin = isSystemAdministrator(user)
   const [formValues, setFormValues] = useState<Record<string, string>>(() => {
     const defaults = createDefaultFormValues(documentTypes[0])
     return { ...defaults, ...(getPreselectedResident() ? { name: getPreselectedResident() } : {}) }
@@ -148,51 +115,11 @@ function IssuancesManagement() {
   const [printRecord, setPrintRecord] = useState<IssuanceRecord | null>(null)
   const [printSetupOpen, setPrintSetupOpen] = useState(false)
   const { print: printStoredIssuance, overlay: printOverlay } = usePrintIssuance()
-  const [viewRecord, setViewRecord] = useState<IssuanceRecord | null>(null)
   const [notice, setNotice] = useState("")
   const [noticePrintRecord, setNoticePrintRecord] = useState<IssuanceRecord | null>(null)
   const currentName = formValues.name?.trim() || "Name not entered"
   const currentDate = formValues.date || ""
   const allRecords = useMemo(() => [...drafts, ...historyRecords], [drafts, historyRecords])
-  const filteredIssuances = useMemo(
-    () =>
-      allRecords
-        .filter((item) => {
-          const query = search.trim().toLowerCase()
-          const matchesSearch = [
-            item.id,
-            item.resident,
-            item.type,
-            item.date,
-            item.status,
-            item.purpose ?? "",
-          ].some((value) => value.toLowerCase().includes(query))
-          const matchesType = historyType === "All document types" || normalizeDocumentType(item.type) === normalizeDocumentType(historyType)
-          const matchesStatus = historyStatus === "all" || item.status === historyStatus
-          return matchesSearch && matchesType && matchesStatus &&
-            (!startDate || item.date >= startDate) &&
-            (!endDate || item.date <= endDate)
-        })
-        .sort((a, b) => b.date.localeCompare(a.date)),
-    [allRecords, endDate, historyStatus, historyType, search, startDate],
-  )
-  const issuancePagination = usePagination(filteredIssuances, 10, search + "|" + historyType + "|" + historyStatus + "|" + startDate + "|" + endDate)
-
-  const issuedCount = allRecords.filter(
-    (item) => item.status === "Issued",
-  ).length
-  const latestDate =
-    allRecords
-      .map((item) => item.date)
-      .filter(Boolean)
-      .sort()
-      .reverse()[0] ?? ""
-  const typeCounts = allRecords.reduce<Record<string, number>>((acc, item) => {
-    acc[item.type] = (acc[item.type] ?? 0) + 1
-    return acc
-  }, {})
-  const topType = Object.entries(typeCounts).sort((a, b) => b[1] - a[1])[0]
-  const hasFilters = search.trim() !== "" || historyType !== "All document types" || historyStatus !== "all" || startDate !== "" || endDate !== ""
 
   useEffect(() => {
     let active = true
@@ -600,28 +527,6 @@ function IssuancesManagement() {
         </div>
       )}
 
-      {/* Summary */}
-      <div className="print:hidden grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        <SummaryCard
-          icon={FileCheck2}
-          label="Total issued"
-          value={issuedCount}
-          hint="All recorded issuances"
-        />
-        <SummaryCard
-          icon={CalendarDays}
-          label="Latest issuance"
-          value={latestDate ? formatDate(latestDate) : "None yet"}
-          hint="Most recent record date"
-        />
-        <SummaryCard
-          icon={FileText}
-          label="Most issued document"
-          value={topType ? topType[1] : 0}
-          hint={topType ? topType[0] : "No records yet"}
-        />
-      </div>
-
       {/* New issuance dialog */}
       <Dialog open={isIssuanceModalOpen} onOpenChange={requestCloseForm}>
         <DialogContent className="print:hidden flex max-h-[96dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-7xl" onOpenAutoFocus={(event) => { event.preventDefault(); document.getElementById("resident-search")?.focus() }}>
@@ -859,314 +764,7 @@ function IssuancesManagement() {
         }}
       />
 
-      {/* Record details dialog */}
-      <Dialog
-        open={viewRecord !== null}
-        onOpenChange={(open) => !open && setViewRecord(null)}
-      >
-        <DialogContent className="print:hidden max-h-[90vh] overflow-y-auto sm:max-w-2xl">
-          {viewRecord && (
-            <>
-              <DialogHeader>
-                <DialogTitle>{viewRecord.type}</DialogTitle>
-                <DialogDescription>
-                  {viewRecord.id} · {viewRecord.resident}
-                </DialogDescription>
-              </DialogHeader>
-              <IssuanceDetailsView record={viewRecord} />
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setViewRecord(null)}>
-                  Close
-                </Button>
-                {viewRecord.status === "Issued" ? (
-                  <>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        const record = viewRecord
-                        setViewRecord(null)
-                        setPendingAction({ record, action: "correct" })
-                      }}
-                    >
-                      <Pencil aria-hidden="true" />
-                      Edit
-                    </Button>
-                    <Button onClick={() => printNow(viewRecord)}>
-                      <Printer aria-hidden="true" />
-                      Reprint
-                    </Button>
-                  </>
-                ) : null}
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <ConfirmDialog
-        open={pendingAction !== null}
-        onOpenChange={(open) => { if (!open) setPendingAction(null) }}
-        title={
-          pendingAction?.action === "void"
-            ? "Void issuance?"
-            : pendingAction?.action === "correct"
-              ? "Edit this issuance?"
-              : "Discard draft?"
-        }
-        description={
-          pendingAction
-            ? pendingAction.action === "void"
-              ? `Void ${pendingAction.record.id}? The issued transaction will remain in history.`
-              : pendingAction.action === "correct"
-                ? `Edit ${pendingAction.record.id}? Your changes are saved as a new record and the original stays in history. A reason is required.`
-                : `Discard the pending draft ${pendingAction.record.id}?`
-            : "Confirm this action."
-        }
-        confirmLabel={
-          pendingAction?.action === "void"
-            ? "Void issuance"
-            : pendingAction?.action === "correct"
-              ? "Continue to edit"
-              : "Discard draft"
-        }
-        destructive={pendingAction?.action !== "correct"}
-        reason={pendingAction?.action === "discard" ? "none" : "required"}
-        onConfirm={(reason) => {
-          if (!pendingAction) return
-          const { record, action } = pendingAction
-          if (action === "void") {
-            if (record.fields.mockIssuanceId) void issuanceApi.voidIssuance(record.fields.mockIssuanceId, reason, isAdmin ? "admin" : "staff").catch((error) => setNotice(error instanceof Error ? error.message : "Unable to void the issuance."))
-            const updated = { ...record, status: "Voided" as const, voidReason: reason }
-            setHistoryRecords((previous) => previous.map((item) => item.id === record.id ? updated : item))
-            setDrafts((previous) => previous.map((item) => item.id === record.id ? updated : item))
-            setNotice(`${record.id} was marked as voided.`)
-          } else if (action === "discard") {
-            setHistoryRecords((previous) => previous.filter((item) => item.id !== record.id))
-            setDrafts((previous) => previous.filter((item) => item.id !== record.id))
-            setNotice(`${record.id} draft was discarded.`)
-          } else {
-            setCorrectionTarget(record)
-            setCorrectionReason(reason)
-            setSelectedType(record.type)
-            setFormValues({ ...createDefaultFormValues(record.type), ...record.fields, name: record.resident, date: record.date, purpose: record.purpose ?? record.fields.purpose ?? "", validUntil: record.validUntil ?? record.fields.validUntil ?? "" })
-            setIsIssuanceModalOpen(true)
-          }
-          setPendingAction(null)
-        }}
-      />
-
-      {/* History */}
-      <section className="print:hidden overflow-hidden rounded-xl border bg-card shadow-sm">
-        <div className="flex flex-col gap-4 border-b p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <h2 className="font-semibold tracking-tight">Issuance History</h2>
-              <p className="mt-1 text-sm text-muted-foreground">Search and filter issuance records.</p>
-            </div>
-            {hasFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="min-h-11"
-                onClick={() => {
-                  setSearch("")
-                  setHistoryType("All document types")
-                  setHistoryStatus("all")
-                  setStartDate("")
-                  setEndDate("")
-                }}
-              >
-                <X aria-hidden="true" />
-                Reset filters
-              </Button>
-            )}
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[2fr_1.4fr_1fr_1fr_1fr]">
-            <label className={`${filterLabelClass} sm:col-span-2 xl:col-span-1`}>
-              <span>Search</span>
-              <span className="relative block">
-                <Search
-                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search by reference, resident, type, or date"
-                  className={cn(inputClassName, "pl-9")}
-                />
-              </span>
-            </label>
-            <label className={filterLabelClass}>
-              <span>Document type</span>
-              <select
-                value={historyType}
-                onChange={(event) => setHistoryType(event.target.value)}
-                className={inputClassName}
-              >
-                <option>All document types</option>
-                {historyDocumentTypes.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={filterLabelClass}>
-              <span>Status</span>
-              <select value={historyStatus} onChange={(event) => setHistoryStatus(event.target.value)} className={inputClassName}>
-                <option value="all">All statuses</option>
-                <option>Issued</option>
-                <option>Pending</option>
-                <option>Voided</option>
-              </select>
-            </label>
-            <label className={filterLabelClass}>
-              <span>From</span>
-              <input aria-label="Issued from date" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} className={inputClassName} />
-            </label>
-            <label className={filterLabelClass}>
-              <span>To</span>
-              <input aria-label="Issued to date" type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} className={inputClassName} />
-            </label>
-          </div>
-        </div>
-
-        {/* Desktop table */}
-        <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[1100px] text-left text-sm">
-            <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
-              <tr>
-                {["Resident", "Document", "Purpose", "Date issued", "Valid until", "Status", "Actions"].map((label) => (
-                  <th key={label} className={label === "Actions" ? "px-4 py-3 text-right font-medium sm:px-5" : "px-4 py-3 align-middle font-medium sm:px-5"}>{label}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {issuancePagination.paginatedItems.map((item) => {
-                const pending = item.status === "Pending"
-                const voided = item.status === "Voided"
-                const expired = Boolean(item.validUntil && item.validUntil < localDateValue())
-                return (
-                  <tr key={item.id} className="transition-colors hover:bg-muted/30">
-                    <td className="px-4 py-3 align-middle sm:px-5">
-                      <p className="font-semibold">{item.resident}</p>
-                      <p className="mt-1 font-mono text-xs text-muted-foreground">{item.id}</p>
-                    </td>
-                    <td className="max-w-xs px-4 py-3 align-middle sm:px-5">{item.type}</td>
-                    <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">{item.purpose || item.fields.purpose || "—"}</td>
-                    <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">{pending ? "—" : formatDate(item.date)}</td>
-                    <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
-                      {item.validUntil ? (
-                        <div className="flex flex-col items-start gap-1">
-                          <span>{formatDate(item.validUntil)}</span>
-                          {expired ? <Badge variant="outline" className={statusStyles.Expired}>Expired</Badge> : null}
-                        </div>
-                      ) : "—"}
-                    </td>
-                    <td className="px-4 py-3 align-middle sm:px-5">
-                      <Badge variant="outline" className={statusStyles[item.status]}>{item.status}</Badge>
-                    </td>
-                    <td className="px-4 py-3 align-middle sm:px-5">
-                      <RowActions
-                        name={item.resident}
-                        isAdmin={isAdmin}
-                        primary={
-                          voided
-                            ? { label: "View", variant: "outline", onSelect: () => setViewRecord(item) }
-                            : pending
-                              ? {
-                                  label: "Continue",
-                                  onSelect: () => {
-                                    setContinueTarget(item)
-                                    setSelectedType(item.type)
-                                    setFormValues({ ...createDefaultFormValues(item.type), ...item.fields, name: item.resident, date: item.date, purpose: item.purpose ?? item.fields.purpose ?? "", validUntil: item.validUntil ?? item.fields.validUntil ?? "" })
-                                    setIsIssuanceModalOpen(true)
-                                  },
-                                }
-                              : { label: "Reprint", variant: "outline", icon: <Printer aria-hidden="true" />, onSelect: () => printNow(item) }
-                        }
-                        items={[
-                          { label: "View details", onSelect: () => setViewRecord(item) },
-                          { label: "Edit", hidden: pending || voided, onSelect: () => setPendingAction({ record: item, action: "correct" }) },
-                          { label: "Void issuance", adminOnly: true, hidden: pending || voided, destructive: true, onSelect: () => setPendingAction({ record: item, action: "void" }) },
-                          { label: "Discard draft", hidden: !pending, destructive: true, onSelect: () => setPendingAction({ record: item, action: "discard" }) },
-                        ]}
-                      />
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile cards */}
-        <ul className="divide-y md:hidden">
-          {issuancePagination.paginatedItems.map((item) => {
-            const pending = item.status === "Pending"
-            const voided = item.status === "Voided"
-            return (
-              <li key={item.id} className="flex flex-col gap-3 p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="font-semibold">{item.resident}</p>
-                    <p className="mt-1 font-mono text-xs text-muted-foreground">{item.id}</p>
-                    <p className="mt-2 text-sm">{item.type}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">{item.purpose || item.fields.purpose || "—"}</p>
-                  </div>
-                  <Badge variant="outline" className={statusStyles[item.status]}>{item.status}</Badge>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Date issued</p>
-                    <p>{pending ? "—" : formatDate(item.date)}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">Valid until</p>
-                    <p>{item.validUntil ? formatDate(item.validUntil) : "—"}</p>
-                  </div>
-                </div>
-                <div className="flex justify-end">
-                  <RowActions
-                    name={item.resident}
-                    isAdmin={isAdmin}
-                    primary={
-                      voided
-                        ? { label: "View", variant: "outline", onSelect: () => setViewRecord(item) }
-                        : pending
-                          ? {
-                              label: "Continue",
-                              onSelect: () => {
-                                setContinueTarget(item)
-                                setSelectedType(item.type)
-                                setFormValues({ ...createDefaultFormValues(item.type), ...item.fields, name: item.resident, date: item.date, purpose: item.purpose ?? item.fields.purpose ?? "", validUntil: item.validUntil ?? item.fields.validUntil ?? "" })
-                                setIsIssuanceModalOpen(true)
-                              },
-                            }
-                          : { label: "Reprint", variant: "outline", icon: <Printer aria-hidden="true" />, onSelect: () => printNow(item) }
-                    }
-                    items={[
-                      { label: "View details", onSelect: () => setViewRecord(item) },
-                      { label: "Edit", hidden: pending || voided, onSelect: () => setPendingAction({ record: item, action: "correct" }) },
-                      { label: "Void issuance", adminOnly: true, hidden: pending || voided, destructive: true, onSelect: () => setPendingAction({ record: item, action: "void" }) },
-                      { label: "Discard draft", hidden: !pending, destructive: true, onSelect: () => setPendingAction({ record: item, action: "discard" }) },
-                    ]}
-                  />
-                </div>
-              </li>
-            )
-          })}
-        </ul>
-        <TablePagination start={issuancePagination.start} end={issuancePagination.end} total={issuancePagination.total} pageIndex={issuancePagination.pageIndex} pageCount={issuancePagination.pageCount} onPageChange={issuancePagination.setPageIndex} />
-
-        {filteredIssuances.length === 0 && (
-          <EmptyState
-            title="No records found"
-            description="Try a different search or document type, or create a new issuance."
-          />
-        )}
-      </section>
+      <IssuanceHistory onNotice={setNotice} />
 
       <Dialog open={printSetupOpen} onOpenChange={setPrintSetupOpen}>
         <DialogContent className="max-w-lg">
