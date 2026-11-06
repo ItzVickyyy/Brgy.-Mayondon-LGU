@@ -350,6 +350,11 @@ async function savePhoto(residentId: string, dataUrl: string) {
   })
 }
 
+/** Uploads or replaces a resident portrait using the API photo-size rules. */
+export async function uploadResidentPhoto(residentId: string, dataUrl: string) {
+  await savePhoto(residentId, dataUrl)
+}
+
 async function fetchPhoto(residentId: string): Promise<string | undefined> {
   try {
     const response = await client.get({
