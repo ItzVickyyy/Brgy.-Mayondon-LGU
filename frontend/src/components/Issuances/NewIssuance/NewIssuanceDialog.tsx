@@ -104,6 +104,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const [discardOpen, setDiscardOpen] = useState(false)
   const [attempted, setAttempted] = useState(false)
   const [quickAttempted, setQuickAttempted] = useState(false)
+  const [quickDuplicateSignature, setQuickDuplicateSignature] = useState<string | null>(null)
   const [editingResident, setEditingResident] = useState(false)
   const [printNotice, setPrintNotice] = useState("")
   const [autoSave, setAutoSave] = useState<{ state: "idle" | "saving" | "saved" | "error"; at?: Date }>({ state: "idle" })
@@ -607,6 +608,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setFormError("")
     setAttempted(false)
     setQuickAttempted(false)
+    setQuickDuplicateSignature(null)
     setEditingResident(false)
     setPrintNotice("")
     setDiscardOpen(false)
@@ -634,7 +636,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     street: !quickAdd.street.trim(),
   }
 
-  async function createResident() {
+  async function createResident(confirmDuplicate = false) {
     const firstMissing = (Object.keys(quickMissing) as (keyof typeof quickMissing)[]).find((key) => quickMissing[key])
     if (firstMissing) {
       setQuickAttempted(true)
@@ -668,15 +670,22 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         })
         setEditingResident(false)
       } else {
-        const resident = await issuanceApi.createResident(quickAdd)
+        const resident = await issuanceApi.createResident(quickAdd, confirmDuplicate)
         setResidents((previous) => [...previous, resident])
         selectResident(resident)
       }
       setQuickAdd(emptyQuickAdd)
       setQuickAttempted(false)
+      setQuickDuplicateSignature(null)
       setFormError("")
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : editingResident ? "Unable to update this resident." : "Unable to add this resident.")
+      const failure = error as { code?: string; message?: string }
+      if (!editingResident && failure.code === "possible_duplicate") {
+        setQuickDuplicateSignature(JSON.stringify(quickAdd))
+        setFormError("A resident with the same name and birthdate may already exist. Review the details before choosing Save anyway.")
+      } else {
+        setFormError(failure.message || (editingResident ? "Unable to update this resident." : "Unable to add this resident."))
+      }
     }
   }
 
@@ -953,7 +962,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                     <label className={fieldLabelClass}>Living here since (year)<input type="number" min="1900" max={new Date().getFullYear()} placeholder="Example: 2005" value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: event.target.value ? Number(event.target.value) : undefined }))} className={formControlClass} /></label>
                     <CheckField label="Lived here since birth" checked={quickAdd.residentSinceBirth} onChange={(checked) => setQuickAdd((previous) => ({ ...previous, residentSinceBirth: checked, residentSinceYear: undefined }))} />
                   </div>
-                  <div className="flex justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues()} onClick={() => { if (editingResident && selectedResident) { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }) } else setQuickAdd(emptyQuickAdd); setQuickAttempted(false) }}>{editingResident ? "Reset changes" : "Clear"}</Button><Button type="button" onClick={() => void createResident()}>{editingResident ? "Save changes" : "Save and select"}</Button></div>
+                  <div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues()} onClick={() => { if (editingResident && selectedResident) { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }) } else setQuickAdd(emptyQuickAdd); setQuickAttempted(false); setQuickDuplicateSignature(null) }}>{editingResident ? "Reset changes" : "Clear"}</Button>{!editingResident && quickDuplicateSignature === JSON.stringify(quickAdd) ? <Button type="button" variant="outline" onClick={() => void createResident(true)}>Save anyway</Button> : null}<Button type="button" onClick={() => void createResident()}>{editingResident ? "Save changes" : "Save and select"}</Button></div>
                 </div>
               </div>}
               {selectedResident && neededFromRecord.length ? <div className="space-y-4 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4">
