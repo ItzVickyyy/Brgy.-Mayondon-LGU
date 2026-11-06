@@ -116,6 +116,7 @@ def _id_statuses(
             statuses[resident_id] = "valid"
     return statuses
 
+
 def _to_public(
     resident: Resident,
     sectors: list[int],
