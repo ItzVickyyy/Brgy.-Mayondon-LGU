@@ -170,6 +170,11 @@ def list_residents(
             col(Resident.first_name).ilike(pattern)
             | col(Resident.last_name).ilike(pattern)
             | col(Resident.middle_name).ilike(pattern)
+            | col(Resident.id_number).ilike(pattern)
+            | col(Resident.house_number).ilike(pattern)
+            | col(Resident.street_id).in_(
+                select(Street.id).where(col(Street.name).ilike(pattern))
+            )
         )
     count = session.exec(select(sa_func.count()).select_from(stmt.subquery())).one()
     rows = session.exec(
