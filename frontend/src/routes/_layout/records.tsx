@@ -820,13 +820,12 @@ function RecordsManagement() {
         resident={formResident}
         streets={streets}
         sectors={sectors}
-        onSaved={(saved, mode) => {
+        onSaved={(saved, mode, photoError) => {
           setFormOpen(false)
-          setNotice(
-            mode === "created"
-              ? `${saved.full_name} was added.`
-              : `${saved.full_name} was updated.`,
-          )
+          const savedMessage = mode === "created"
+            ? `${saved.full_name} was added.`
+            : `${saved.full_name} was updated.`
+          setNotice(photoError ? `${savedMessage} Photo upload failed: ${photoError}` : savedMessage)
           setErrorNotice("")
           setSelectedResident((current) =>
             current && current.id === saved.id ? saved : current,
