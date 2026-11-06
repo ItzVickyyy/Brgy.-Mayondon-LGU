@@ -82,6 +82,8 @@ No `full_name` column. One backend function builds the display and printed name,
 
 A database trigger rejects `UPDATE`, `DELETE` and `TRUNCATE`, so the app cannot rewrite history even by mistake. A successful action writes its row in the **same transaction** as the change; denied and failed attempts are written separately because the main transaction rolls back. This table replaces the log line that `record_admin_action` writes today. Which actions must be logged, who reviews them and retention stay open (D-24, D-26).
 
+**Reading it:** `GET /api/v1/activity` (filters: person, module, action, outcome, record, Manila date range) and `GET /api/v1/activity/options`. Staff see only their own rows (`activity.view_own`); the System Administrator sees everyone's (`activity.view_all`). Account actions (`user.create`, `user.update`, `user.role_change`, `user.password_change`, `user.update_self`, `user.delete`, `user.delete_self`) are written to this table as well as to the application log; unlike issuance and record changes, the create, update and role change rows are saved just after the change, not in the same transaction.
+
 ### Not designed yet (waiting on the client)
 
 - **Family, beneficiary and sector-detail fields (D-20):** no table until the client says which fields they need.
