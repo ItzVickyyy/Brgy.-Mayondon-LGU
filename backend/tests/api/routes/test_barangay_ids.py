@@ -247,6 +247,7 @@ def test_resident_response_reports_latest_id_status(
         valid_until=_until(10),
         id_number=_number(),
     )
+    assert expiring["status"] == "issued"
     response = client.get(resident_url, headers=headers)
     assert response.json()["id_status"] == "expiring_soon"
 
