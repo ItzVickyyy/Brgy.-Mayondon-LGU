@@ -10,7 +10,7 @@ from app.api.deps import (
     SessionDep,
     require_permission,
 )
-from app.core.audit import record_admin_action
+from app.core.audit import record_admin_action, record_audit_event
 from app.core.config import settings
 from app.core.permissions import Permission, has_permission, is_admin
 from app.core.security import get_password_hash, verify_password
@@ -81,6 +81,16 @@ def create_user(*, session: SessionDep, user_in: UserCreate, current_user: Curre
 
     user = crud.create_user(session=session, user_create=user_in)
     record_admin_action(actor_id=current_user.id, action="user.create", target_type="user", target_id=user.id)
+    record_audit_event(
+        session,
+        action="user.create",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=user.id,
+        details={"role": str(user.role)},
+        commit=True,
+    )
     if settings.emails_enabled and user_in.email:
         setup_token = generate_password_reset_token(
             email=user.email, hashed_password=user.hashed_password
@@ -113,6 +123,15 @@ def update_user_me(
     user_data = user_in.model_dump(exclude_unset=True)
     current_user.sqlmodel_update(user_data)
     session.add(current_user)
+    record_audit_event(
+        session,
+        action="user.update_self",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=current_user.id,
+        details={"fields": sorted(user_data)},
+    )
     session.commit()
     session.refresh(current_user)
     return current_user
@@ -138,6 +157,14 @@ def update_password_me(
     current_user.failed_login_attempts = 0
     current_user.locked_until = None
     session.add(current_user)
+    record_audit_event(
+        session,
+        action="user.password_change",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=current_user.id,
+    )
     session.commit()
     return Message(message="Password updated successfully")
 
@@ -172,6 +199,16 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
     _require_no_issued_documents(session, current_user)
+    # Same transaction as the delete: the actor link becomes NULL afterwards,
+    # and the email stays in the row.
+    record_audit_event(
+        session,
+        action="user.delete_self",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=current_user.id,
+    )
     session.delete(current_user)
     session.commit()
     return Message(message="User deleted successfully")
@@ -257,10 +294,30 @@ def update_user(
             detail="At least one active System Administrator must remain.",
         )
 
+    changed_fields = sorted(user_in.model_dump(exclude_unset=True))
     db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
     record_admin_action(actor_id=current_user.id, action="user.update", target_type="user", target_id=db_user.id)
+    record_audit_event(
+        session,
+        action="user.update",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=db_user.id,
+        details={"fields": changed_fields},
+    )
     if db_user.role != previous_role:
         record_admin_action(actor_id=current_user.id, action="user.role_change", target_type="user", target_id=db_user.id)
+        record_audit_event(
+            session,
+            action="user.role_change",
+            actor=current_user,
+            module="users",
+            record_type="user",
+            record_id=db_user.id,
+            details={"from": str(previous_role), "to": str(db_user.role)},
+        )
+    session.commit()
     return db_user
 
 
@@ -284,6 +341,14 @@ def delete_user(
             detail="At least one active System Administrator must remain.",
         )
     _require_no_issued_documents(session, user)
+    record_audit_event(
+        session,
+        action="user.delete",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=user_id,
+    )
     session.delete(user)
     session.commit()
     record_admin_action(actor_id=current_user.id, action="user.delete", target_type="user", target_id=user_id)
