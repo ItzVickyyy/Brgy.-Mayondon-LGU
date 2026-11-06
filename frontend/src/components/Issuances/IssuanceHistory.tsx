@@ -471,6 +471,14 @@ export function IssuanceHistory({
                   {items.map((item) => {
                     const isDraft = item.status === "draft"
                     const isIssued = item.status === "issued"
+                    const canReprint = [
+                      "BARANGAY_CLEARANCE",
+                      "FRANCHISE_CLEARANCE",
+                      "UTILITY_CLEARANCE",
+                      "INDIGENCY",
+                      "MARGINALIZED_SECTOR",
+                      "ASSISTANCE",
+                    ].includes(item.document_type_code)
                     const label = statusText[item.status] ?? item.status
                     const expired = Boolean(
                       isIssued && item.expires_on && item.expires_on < today,
@@ -557,7 +565,7 @@ export function IssuanceHistory({
                               },
                               {
                                 label: "Reprint",
-                                hidden: !isIssued,
+                                hidden: !isIssued || !canReprint,
                                 icon: <Printer aria-hidden="true" className="size-4" />,
                                 onSelect: async () => {
                                   try {
