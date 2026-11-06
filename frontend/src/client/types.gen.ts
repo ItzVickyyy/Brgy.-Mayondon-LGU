@@ -1601,6 +1601,10 @@ export type ResidentPublic = {
      */
     has_photo: boolean;
     /**
+     * Latest Barangay ID status
+     */
+    id_status: 'none' | 'valid' | 'expiring_soon' | 'expired';
+    /**
      * Status
      */
     status: string;
