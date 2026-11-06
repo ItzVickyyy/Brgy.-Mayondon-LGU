@@ -6,6 +6,7 @@ import {
   type ResidentPublic,
   ResidentsService,
 } from "@/client"
+import { uploadResidentPhoto } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { formControlClass } from "@/components/Common/formStyles"
 import { Button } from "@/components/ui/button"
 import {
@@ -133,7 +134,7 @@ type ResidentFormDialogProps = {
   resident: ResidentPublic | null
   streets: LookupItem[]
   sectors: LookupItem[]
-  onSaved: (resident: ResidentPublic, mode: "created" | "updated") => void
+  onSaved: (resident: ResidentPublic, mode: "created" | "updated", photoError?: string) => void
 }
 
 const labelClass = "flex flex-col gap-2 text-sm font-medium"
@@ -150,12 +151,14 @@ export function ResidentFormDialog({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [duplicate, setDuplicate] = useState(false)
+  const [photoDataUrl, setPhotoDataUrl] = useState("")
 
   useEffect(() => {
     if (!open) return
     setForm(resident ? formFromResident(resident) : emptyForm())
     setError("")
     setDuplicate(false)
+    setPhotoDataUrl("")
   }, [open, resident])
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
@@ -168,23 +171,21 @@ export function ResidentFormDialog({
     setError("")
     try {
       const body = buildBody(form)
-      if (resident) {
-        const saved = (
-          await ResidentsService.updateResident({
-            path: { resident_id: resident.id },
-            body,
-          })
-        ).data
-        onSaved(saved, "updated")
-      } else {
-        const saved = (
-          await ResidentsService.createResident({
+      const saved = resident
+        ? (await ResidentsService.updateResident({ path: { resident_id: resident.id }, body })).data
+        : (await ResidentsService.createResident({
             body,
             query: confirmDuplicate ? { confirm_duplicate: true } : undefined,
-          })
-        ).data
-        onSaved(saved, "created")
+          })).data
+      let photoError = ""
+      if (photoDataUrl) {
+        try {
+          await uploadResidentPhoto(saved.id, photoDataUrl)
+        } catch (caughtPhoto) {
+          photoError = readApiError(caughtPhoto).message
+        }
       }
+      onSaved(saved, resident ? "updated" : "created", photoError || undefined)
     } catch (caught) {
       const failure = readApiError(caught)
       if (failure.code === "possible_duplicate") setDuplicate(true)
@@ -264,6 +265,33 @@ export function ResidentFormDialog({
               className={formControlClass}
             />
           </label>
+          <div className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
+            <label htmlFor="resident-photo">Resident photo</label>
+            <p className="text-xs font-normal text-muted-foreground">
+              {resident?.has_photo ? "A photo is already on file. Uploading a new image replaces it." : "Optional. Add a clear resident portrait for Barangay ID and document printing."}
+            </p>
+            <input
+              id="resident-photo"
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm"
+              onChange={(event) => {
+                const file = event.target.files?.[0]
+                if (!file) return
+                if (file.size > 10 * 1024 * 1024) {
+                  setError("Choose an image smaller than 10 MB.")
+                  event.target.value = ""
+                  return
+                }
+                const reader = new FileReader()
+                reader.onload = () => setPhotoDataUrl(String(reader.result ?? ""))
+                reader.onerror = () => setError("The selected photo could not be read.")
+                reader.readAsDataURL(file)
+              }}
+            />
+            {photoDataUrl ? <img src={photoDataUrl} alt="Selected resident portrait preview" className="h-28 w-24 rounded-md border bg-white object-cover" /> : null}
+          </div>
+
           <label className={labelClass}>
             Birth place
             <input
