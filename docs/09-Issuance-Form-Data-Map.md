@@ -84,6 +84,15 @@ A database trigger rejects `UPDATE`, `DELETE` and `TRUNCATE`, so the app cannot 
 
 **Reading it:** `GET /api/v1/activity` (filters: person, module, action, outcome, record, Manila date range) and `GET /api/v1/activity/options`. Staff see only their own rows (`activity.view_own`); the System Administrator sees everyone's (`activity.view_all`). Account actions (`user.create`, `user.update`, `user.role_change`, `user.password_change`, `user.update_self`, `user.delete`, `user.delete_self`) are written to this table as well as to the application log; unlike issuance and record changes, the create, update and role change rows are saved just after the change, not in the same transaction.
 
+### Dashboard and report figures (computed on read, nothing stored)
+
+`GET /api/v1/dashboard` (Staff and Admin) and `GET /api/v1/reports/*` (System Administrator, `reports.view`: `summary`, `issuances-by-type`, `issuances-by-purpose`, `expiring`, `account-activity`, `records-overview`). Counts only: no health condition and no resident names in any total. The expiring list names the resident because it is a work list.
+
+- **Period:** `today`, `week` (from Monday), `month`, `quarter`, `3months`, `6months` (calendar months, current month included), `year`, `overall`. Each runs **up to today**, Manila date. The "previous period" is the same span one unit earlier (month so far against the same days of last month); `overall` has none.
+- **Issued** means a document in force (`status = 'issued'`) counted by `issue_date`. **Voided** documents are counted separately and never as issued. **Corrections** are issued documents that replace an earlier one.
+- **Expiring or expired** looks only at a resident's **latest issued** Barangay Clearance and latest issued Barangay ID (by `issued_at`), so a renewed record is not listed. "Soon" is 30 days for both (`CLEARANCE_EXPIRING_SOON_DAYS`, `ID_EXPIRING_SOON_DAYS`; D-21 is open). The ID counts use the same rule as `GET /barangay-ids`.
+- **Not reported yet:** sign-ins (not recorded), masterlist imports (no import yet, D-19), pending registrations (no registration flow). The dashboard's "pending document requests" card is `open_drafts`, the number of unissued drafts.
+
 ### Not designed yet (waiting on the client)
 
 - **Family, beneficiary and sector-detail fields (D-20):** no table until the client says which fields they need.
