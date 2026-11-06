@@ -2,7 +2,7 @@
 
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { itemsCreateItemData, itemsCreateItemErrors, itemsCreateItemResponses, itemsDeleteItemData, itemsDeleteItemErrors, itemsDeleteItemResponses, itemsReadItemData, itemsReadItemErrors, itemsReadItemResponses, itemsReadItemsData, itemsReadItemsErrors, itemsReadItemsResponses, itemsUpdateItemData, itemsUpdateItemErrors, itemsUpdateItemResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
+import type { activityActivityOptionsData, activityActivityOptionsResponses, activityListActivityData, activityListActivityErrors, activityListActivityResponses, barangayIdsListBarangayIdsData, barangayIdsListBarangayIdsErrors, barangayIdsListBarangayIdsResponses, dashboardDashboardData, dashboardDashboardErrors, dashboardDashboardResponses, issuancesCorrectData, issuancesCorrectErrors, issuancesCorrectResponses, issuancesCreateIssuanceData, issuancesCreateIssuanceErrors, issuancesCreateIssuanceResponses, issuancesDiscardDraftData, issuancesDiscardDraftErrors, issuancesDiscardDraftResponses, issuancesGetIssuanceData, issuancesGetIssuanceErrors, issuancesGetIssuanceResponses, issuancesIssueData, issuancesIssueErrors, issuancesIssueResponses, issuancesListIssuancesData, issuancesListIssuancesErrors, issuancesListIssuancesResponses, issuancesUpdateDraftData, issuancesUpdateDraftErrors, issuancesUpdateDraftResponses, issuancesVoidData, issuancesVoidErrors, issuancesVoidResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, lookupsCreateStreetData, lookupsCreateStreetErrors, lookupsCreateStreetResponses, lookupsCreateTricycleAssociationData, lookupsCreateTricycleAssociationErrors, lookupsCreateTricycleAssociationResponses, lookupsDeleteStreetData, lookupsDeleteStreetErrors, lookupsDeleteStreetResponses, lookupsDeleteTricycleAssociationData, lookupsDeleteTricycleAssociationErrors, lookupsDeleteTricycleAssociationResponses, lookupsListDocumentTypesData, lookupsListDocumentTypesResponses, lookupsListIdTypesData, lookupsListIdTypesResponses, lookupsListIssuancePurposesData, lookupsListIssuancePurposesResponses, lookupsListSectorsData, lookupsListSectorsResponses, lookupsListStreetsData, lookupsListStreetsResponses, lookupsListTricycleAssociationsData, lookupsListTricycleAssociationsResponses, lookupsRenameStreetData, lookupsRenameStreetErrors, lookupsRenameStreetResponses, lookupsRenameTricycleAssociationData, lookupsRenameTricycleAssociationErrors, lookupsRenameTricycleAssociationResponses, officialsCreateOfficialData, officialsCreateOfficialErrors, officialsCreateOfficialResponses, officialsGetOfficialData, officialsGetOfficialErrors, officialsGetOfficialResponses, officialsListOfficialsData, officialsListOfficialsErrors, officialsListOfficialsResponses, officialsUpdateOfficialData, officialsUpdateOfficialErrors, officialsUpdateOfficialResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, reportsAccountActivityData, reportsAccountActivityErrors, reportsAccountActivityResponses, reportsExpiringData, reportsExpiringErrors, reportsExpiringResponses, reportsIssuancesByPurposeData, reportsIssuancesByPurposeErrors, reportsIssuancesByPurposeResponses, reportsIssuancesByTypeData, reportsIssuancesByTypeErrors, reportsIssuancesByTypeResponses, reportsRecordsOverviewData, reportsRecordsOverviewResponses, reportsSummaryData, reportsSummaryErrors, reportsSummaryResponses, residentsArchiveResidentData, residentsArchiveResidentErrors, residentsArchiveResidentResponses, residentsCreateResidentData, residentsCreateResidentErrors, residentsCreateResidentResponses, residentsDeletePhotoData, residentsDeletePhotoErrors, residentsDeletePhotoResponses, residentsGetPhotoData, residentsGetPhotoErrors, residentsGetPhotoResponses, residentsListResidentsData, residentsListResidentsErrors, residentsListResidentsResponses, residentsPutPhotoData, residentsPutPhotoErrors, residentsPutPhotoResponses, residentsReadResidentData, residentsReadResidentErrors, residentsReadResidentResponses, residentsRestoreResidentData, residentsRestoreResidentErrors, residentsRestoreResidentResponses, residentsUpdateResidentData, residentsUpdateResidentErrors, residentsUpdateResidentResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -53,8 +53,6 @@ export class LoginService {
     
     /**
      * Recover Password
-     *
-     * Password Recovery
      */
     public static recoverPassword<ThrowOnError extends boolean = true>(options: Options<loginRecoverPasswordData, ThrowOnError>) {
         return (options.client ?? client).post<loginRecoverPasswordResponses, loginRecoverPasswordErrors, ThrowOnError>({
@@ -201,6 +199,9 @@ export class UsersService {
      * Register User
      *
      * Create new user without the need to be logged in.
+     *
+     * Disabled by default (USERS_OPEN_REGISTRATION=False): accounts are created
+     * by an admin from the Admin page.
      */
     public static registerUser<ThrowOnError extends boolean = true>(options: Options<usersRegisterUserData, ThrowOnError>) {
         return (options.client ?? client).post<usersRegisterUserResponses, usersRegisterUserErrors, ThrowOnError>({
@@ -261,6 +262,630 @@ export class UsersService {
     }
 }
 
+export class ResidentsService {
+    /**
+     * List Residents
+     *
+     * Search residents. Every word typed must match the first, middle or last name.
+     */
+    public static listResidents<ThrowOnError extends boolean = true>(options?: Options<residentsListResidentsData, ThrowOnError>) {
+        return (options?.client ?? client).get<residentsListResidentsResponses, residentsListResidentsErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/residents/',
+            ...options
+        });
+    }
+    
+    /**
+     * Create Resident
+     *
+     * Add a resident. Same names and birthdate as an existing record are warned
+     * about (409, code ``possible_duplicate``), not blocked: the clerk can confirm.
+     */
+    public static createResident<ThrowOnError extends boolean = true>(options: Options<residentsCreateResidentData, ThrowOnError>) {
+        return (options.client ?? client).post<residentsCreateResidentResponses, residentsCreateResidentErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/residents/',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Read Resident
+     */
+    public static readResident<ThrowOnError extends boolean = true>(options: Options<residentsReadResidentData, ThrowOnError>) {
+        return (options.client ?? client).get<residentsReadResidentResponses, residentsReadResidentErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/residents/{resident_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Update Resident
+     */
+    public static updateResident<ThrowOnError extends boolean = true>(options: Options<residentsUpdateResidentData, ThrowOnError>) {
+        return (options.client ?? client).patch<residentsUpdateResidentResponses, residentsUpdateResidentErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/residents/{resident_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Archive Resident
+     */
+    public static archiveResident<ThrowOnError extends boolean = true>(options: Options<residentsArchiveResidentData, ThrowOnError>) {
+        return (options.client ?? client).post<residentsArchiveResidentResponses, residentsArchiveResidentErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/residents/{resident_id}/archive',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Restore Resident
+     */
+    public static restoreResident<ThrowOnError extends boolean = true>(options: Options<residentsRestoreResidentData, ThrowOnError>) {
+        return (options.client ?? client).post<residentsRestoreResidentResponses, residentsRestoreResidentErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/residents/{resident_id}/restore',
+            ...options
+        });
+    }
+    
+    /**
+     * Delete Photo
+     */
+    public static deletePhoto<ThrowOnError extends boolean = true>(options: Options<residentsDeletePhotoData, ThrowOnError>) {
+        return (options.client ?? client).delete<residentsDeletePhotoResponses, residentsDeletePhotoErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/residents/{resident_id}/photo',
+            ...options
+        });
+    }
+    
+    /**
+     * Get Photo
+     */
+    public static getPhoto<ThrowOnError extends boolean = true>(options: Options<residentsGetPhotoData, ThrowOnError>) {
+        return (options.client ?? client).get<residentsGetPhotoResponses, residentsGetPhotoErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/residents/{resident_id}/photo',
+            ...options
+        });
+    }
+    
+    /**
+     * Put Photo
+     *
+     * Store the processed photo. Send the raw PNG or WebP bytes as the body.
+     */
+    public static putPhoto<ThrowOnError extends boolean = true>(options: Options<residentsPutPhotoData, ThrowOnError>) {
+        return (options.client ?? client).put<residentsPutPhotoResponses, residentsPutPhotoErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/residents/{resident_id}/photo',
+            ...options
+        });
+    }
+}
+
+export class LookupsService {
+    /**
+     * List Document Types
+     */
+    public static listDocumentTypes<ThrowOnError extends boolean = true>(options?: Options<lookupsListDocumentTypesData, ThrowOnError>) {
+        return (options?.client ?? client).get<lookupsListDocumentTypesResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/document-types',
+            ...options
+        });
+    }
+    
+    /**
+     * List Sectors
+     */
+    public static listSectors<ThrowOnError extends boolean = true>(options?: Options<lookupsListSectorsData, ThrowOnError>) {
+        return (options?.client ?? client).get<lookupsListSectorsResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/sectors',
+            ...options
+        });
+    }
+    
+    /**
+     * List Id Types
+     */
+    public static listIdTypes<ThrowOnError extends boolean = true>(options?: Options<lookupsListIdTypesData, ThrowOnError>) {
+        return (options?.client ?? client).get<lookupsListIdTypesResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/id-types',
+            ...options
+        });
+    }
+    
+    /**
+     * List Issuance Purposes
+     */
+    public static listIssuancePurposes<ThrowOnError extends boolean = true>(options?: Options<lookupsListIssuancePurposesData, ThrowOnError>) {
+        return (options?.client ?? client).get<lookupsListIssuancePurposesResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/issuance-purposes',
+            ...options
+        });
+    }
+    
+    /**
+     * List Streets
+     */
+    public static listStreets<ThrowOnError extends boolean = true>(options?: Options<lookupsListStreetsData, ThrowOnError>) {
+        return (options?.client ?? client).get<lookupsListStreetsResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/streets',
+            ...options
+        });
+    }
+    
+    /**
+     * Create Street
+     */
+    public static createStreet<ThrowOnError extends boolean = true>(options: Options<lookupsCreateStreetData, ThrowOnError>) {
+        return (options.client ?? client).post<lookupsCreateStreetResponses, lookupsCreateStreetErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/streets',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * List Tricycle Associations
+     */
+    public static listTricycleAssociations<ThrowOnError extends boolean = true>(options?: Options<lookupsListTricycleAssociationsData, ThrowOnError>) {
+        return (options?.client ?? client).get<lookupsListTricycleAssociationsResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/tricycle-associations',
+            ...options
+        });
+    }
+    
+    /**
+     * Create Tricycle Association
+     */
+    public static createTricycleAssociation<ThrowOnError extends boolean = true>(options: Options<lookupsCreateTricycleAssociationData, ThrowOnError>) {
+        return (options.client ?? client).post<lookupsCreateTricycleAssociationResponses, lookupsCreateTricycleAssociationErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/tricycle-associations',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Delete Street
+     */
+    public static deleteStreet<ThrowOnError extends boolean = true>(options: Options<lookupsDeleteStreetData, ThrowOnError>) {
+        return (options.client ?? client).delete<lookupsDeleteStreetResponses, lookupsDeleteStreetErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/streets/{street_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Rename Street
+     */
+    public static renameStreet<ThrowOnError extends boolean = true>(options: Options<lookupsRenameStreetData, ThrowOnError>) {
+        return (options.client ?? client).patch<lookupsRenameStreetResponses, lookupsRenameStreetErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/streets/{street_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Delete Tricycle Association
+     */
+    public static deleteTricycleAssociation<ThrowOnError extends boolean = true>(options: Options<lookupsDeleteTricycleAssociationData, ThrowOnError>) {
+        return (options.client ?? client).delete<lookupsDeleteTricycleAssociationResponses, lookupsDeleteTricycleAssociationErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/tricycle-associations/{item_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Rename Tricycle Association
+     */
+    public static renameTricycleAssociation<ThrowOnError extends boolean = true>(options: Options<lookupsRenameTricycleAssociationData, ThrowOnError>) {
+        return (options.client ?? client).patch<lookupsRenameTricycleAssociationResponses, lookupsRenameTricycleAssociationErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/tricycle-associations/{item_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class OfficialsService {
+    /**
+     * List Officials
+     */
+    public static listOfficials<ThrowOnError extends boolean = true>(options?: Options<officialsListOfficialsData, ThrowOnError>) {
+        return (options?.client ?? client).get<officialsListOfficialsResponses, officialsListOfficialsErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/officials/',
+            ...options
+        });
+    }
+    
+    /**
+     * Create Official
+     */
+    public static createOfficial<ThrowOnError extends boolean = true>(options: Options<officialsCreateOfficialData, ThrowOnError>) {
+        return (options.client ?? client).post<officialsCreateOfficialResponses, officialsCreateOfficialErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/officials/',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Get Official
+     */
+    public static getOfficial<ThrowOnError extends boolean = true>(options: Options<officialsGetOfficialData, ThrowOnError>) {
+        return (options.client ?? client).get<officialsGetOfficialResponses, officialsGetOfficialErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/officials/{official_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Update Official
+     */
+    public static updateOfficial<ThrowOnError extends boolean = true>(options: Options<officialsUpdateOfficialData, ThrowOnError>) {
+        return (options.client ?? client).patch<officialsUpdateOfficialResponses, officialsUpdateOfficialErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/officials/{official_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class IssuancesService {
+    /**
+     * List Issuances
+     */
+    public static listIssuances<ThrowOnError extends boolean = true>(options?: Options<issuancesListIssuancesData, ThrowOnError>) {
+        return (options?.client ?? client).get<issuancesListIssuancesResponses, issuancesListIssuancesErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/issuances/',
+            ...options
+        });
+    }
+    
+    /**
+     * Create Issuance
+     *
+     * Create a draft. Detail sections are saved when they are sent complete.
+     */
+    public static createIssuance<ThrowOnError extends boolean = true>(options: Options<issuancesCreateIssuanceData, ThrowOnError>) {
+        return (options.client ?? client).post<issuancesCreateIssuanceResponses, issuancesCreateIssuanceErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/issuances/',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Discard Draft
+     *
+     * Discard a draft. Issued and voided documents are never deleted.
+     */
+    public static discardDraft<ThrowOnError extends boolean = true>(options: Options<issuancesDiscardDraftData, ThrowOnError>) {
+        return (options.client ?? client).delete<issuancesDiscardDraftResponses, issuancesDiscardDraftErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/issuances/{issuance_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Get Issuance
+     *
+     * The only response that carries the health condition (decision 3).
+     *
+     * Every read that returns it adds an ``issuance.view_sensitive`` audit row.
+     * The row names the field, never the value.
+     */
+    public static getIssuance<ThrowOnError extends boolean = true>(options: Options<issuancesGetIssuanceData, ThrowOnError>) {
+        return (options.client ?? client).get<issuancesGetIssuanceResponses, issuancesGetIssuanceErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/issuances/{issuance_id}',
+            ...options
+        });
+    }
+    
+    /**
+     * Update Draft
+     */
+    public static updateDraft<ThrowOnError extends boolean = true>(options: Options<issuancesUpdateDraftData, ThrowOnError>) {
+        return (options.client ?? client).patch<issuancesUpdateDraftResponses, issuancesUpdateDraftErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/issuances/{issuance_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Issue
+     *
+     * Turn a complete draft into an issued document with a reference number.
+     */
+    public static issue<ThrowOnError extends boolean = true>(options: Options<issuancesIssueData, ThrowOnError>) {
+        return (options.client ?? client).post<issuancesIssueResponses, issuancesIssueErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/issuances/{issuance_id}/issue',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Correct
+     *
+     * Start a correction: a new draft copied from an issued document.
+     *
+     * The issued document is not changed. Edit the draft, then issue it. The
+     * original stays valid until a System Administrator voids it.
+     */
+    public static correct<ThrowOnError extends boolean = true>(options: Options<issuancesCorrectData, ThrowOnError>) {
+        return (options.client ?? client).post<issuancesCorrectResponses, issuancesCorrectErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/issuances/{issuance_id}/correct',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Void
+     */
+    public static void<ThrowOnError extends boolean = true>(options: Options<issuancesVoidData, ThrowOnError>) {
+        return (options.client ?? client).post<issuancesVoidResponses, issuancesVoidErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/issuances/{issuance_id}/void',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+}
+
+export class BarangayIdsService {
+    /**
+     * List Barangay Ids
+     *
+     * Latest issued card per resident. A voided card is not listed; the card
+     * issued before it, if any, shows instead.
+     */
+    public static idsListBarangayIds<ThrowOnError extends boolean = true>(options?: Options<barangayIdsListBarangayIdsData, ThrowOnError>) {
+        return (options?.client ?? client).get<barangayIdsListBarangayIdsResponses, barangayIdsListBarangayIdsErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/barangay-ids/',
+            ...options
+        });
+    }
+}
+
+export class ActivityService {
+    /**
+     * List Activity
+     *
+     * Newest first. Staff always get their own rows; asking for another
+     * person's rows is a 403, not an empty list.
+     */
+    public static listActivity<ThrowOnError extends boolean = true>(options?: Options<activityListActivityData, ThrowOnError>) {
+        return (options?.client ?? client).get<activityListActivityResponses, activityListActivityErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/activity/',
+            ...options
+        });
+    }
+    
+    /**
+     * Activity Options
+     *
+     * Distinct modules, actions and people for the filter drop-downs.
+     */
+    public static activityOptions<ThrowOnError extends boolean = true>(options?: Options<activityActivityOptionsData, ThrowOnError>) {
+        return (options?.client ?? client).get<activityActivityOptionsResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/activity/options',
+            ...options
+        });
+    }
+}
+
+export class DashboardService {
+    /**
+     * Dashboard
+     */
+    public static dashboard<ThrowOnError extends boolean = true>(options?: Options<dashboardDashboardData, ThrowOnError>) {
+        return (options?.client ?? client).get<dashboardDashboardResponses, dashboardDashboardErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/dashboard/',
+            ...options
+        });
+    }
+}
+
+export class ReportsService {
+    /**
+     * Summary
+     */
+    public static summary<ThrowOnError extends boolean = true>(options?: Options<reportsSummaryData, ThrowOnError>) {
+        return (options?.client ?? client).get<reportsSummaryResponses, reportsSummaryErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/reports/summary',
+            ...options
+        });
+    }
+    
+    /**
+     * Issuances By Type
+     */
+    public static issuancesByType<ThrowOnError extends boolean = true>(options?: Options<reportsIssuancesByTypeData, ThrowOnError>) {
+        return (options?.client ?? client).get<reportsIssuancesByTypeResponses, reportsIssuancesByTypeErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/reports/issuances-by-type',
+            ...options
+        });
+    }
+    
+    /**
+     * Issuances By Purpose
+     */
+    public static issuancesByPurpose<ThrowOnError extends boolean = true>(options?: Options<reportsIssuancesByPurposeData, ThrowOnError>) {
+        return (options?.client ?? client).get<reportsIssuancesByPurposeResponses, reportsIssuancesByPurposeErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/reports/issuances-by-purpose',
+            ...options
+        });
+    }
+    
+    /**
+     * Expiring
+     *
+     * Each resident's latest clearance or card that is expiring soon or
+     * already expired, soonest (or longest expired) first.
+     */
+    public static expiring<ThrowOnError extends boolean = true>(options?: Options<reportsExpiringData, ThrowOnError>) {
+        return (options?.client ?? client).get<reportsExpiringResponses, reportsExpiringErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/reports/expiring',
+            ...options
+        });
+    }
+    
+    /**
+     * Account Activity
+     *
+     * Per account: documents issued and records changed in the period.
+     * Sign-ins are not recorded anywhere yet, so they are not reported.
+     */
+    public static accountActivity<ThrowOnError extends boolean = true>(options?: Options<reportsAccountActivityData, ThrowOnError>) {
+        return (options?.client ?? client).get<reportsAccountActivityResponses, reportsAccountActivityErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/reports/account-activity',
+            ...options
+        });
+    }
+    
+    /**
+     * Records Overview
+     *
+     * Residents by status and sector, and Barangay IDs by status.
+     */
+    public static recordsOverview<ThrowOnError extends boolean = true>(options?: Options<reportsRecordsOverviewData, ThrowOnError>) {
+        return (options?.client ?? client).get<reportsRecordsOverviewResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/reports/records-overview',
+            ...options
+        });
+    }
+}
+
 export class UtilsService {
     /**
      * Test Email
@@ -284,86 +909,6 @@ export class UtilsService {
             responseType: 'json',
             url: '/api/v1/utils/health-check/',
             ...options
-        });
-    }
-}
-
-export class ItemsService {
-    /**
-     * Read Items
-     *
-     * Retrieve items.
-     */
-    public static readItems<ThrowOnError extends boolean = true>(options?: Options<itemsReadItemsData, ThrowOnError>) {
-        return (options?.client ?? client).get<itemsReadItemsResponses, itemsReadItemsErrors, ThrowOnError>({
-            responseType: 'json',
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/items/',
-            ...options
-        });
-    }
-    
-    /**
-     * Create Item
-     *
-     * Create new item.
-     */
-    public static createItem<ThrowOnError extends boolean = true>(options: Options<itemsCreateItemData, ThrowOnError>) {
-        return (options.client ?? client).post<itemsCreateItemResponses, itemsCreateItemErrors, ThrowOnError>({
-            responseType: 'json',
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/items/',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
-        });
-    }
-    
-    /**
-     * Delete Item
-     *
-     * Delete an item.
-     */
-    public static deleteItem<ThrowOnError extends boolean = true>(options: Options<itemsDeleteItemData, ThrowOnError>) {
-        return (options.client ?? client).delete<itemsDeleteItemResponses, itemsDeleteItemErrors, ThrowOnError>({
-            responseType: 'json',
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/items/{id}',
-            ...options
-        });
-    }
-    
-    /**
-     * Read Item
-     *
-     * Get item by ID.
-     */
-    public static readItem<ThrowOnError extends boolean = true>(options: Options<itemsReadItemData, ThrowOnError>) {
-        return (options.client ?? client).get<itemsReadItemResponses, itemsReadItemErrors, ThrowOnError>({
-            responseType: 'json',
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/items/{id}',
-            ...options
-        });
-    }
-    
-    /**
-     * Update Item
-     *
-     * Update an item.
-     */
-    public static updateItem<ThrowOnError extends boolean = true>(options: Options<itemsUpdateItemData, ThrowOnError>) {
-        return (options.client ?? client).put<itemsUpdateItemResponses, itemsUpdateItemErrors, ThrowOnError>({
-            responseType: 'json',
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/items/{id}',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
         });
     }
 }

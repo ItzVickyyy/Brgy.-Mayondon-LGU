@@ -150,7 +150,7 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 
 **Everything below is prototype-only:**
 
-- Dashboard figures, charts, history rows, names and activity are **fictional**; charts are not connected to live statistics.
+- **The Dashboard is connected** to `GET /api/v1/dashboard` and `GET /api/v1/activity?limit=5` (real counts, charts, expiring list and recent activity; see docs/09). The Admin card "Pending Registrations" shows a dash because there is no registration flow yet. The other pages below are still prototype-only.
 - Records and Officials show sample rows and do not create, update or delete database records.
 - Issuance drafts live in browser memory for the page session only; refreshing clears them. They are not official issuances and are not connected to a database or API.
 - The Document Management resident selector uses hard-coded sample residents; purposes are hard-coded.
@@ -169,7 +169,7 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 
 | Brief requirement | Prototype status | Remaining work |
 |---|---|---|
-| Dashboard: issued documents and expiring clearances/IDs | Layout retained; cards use fictional values | Connect verified database totals |
+| Dashboard: issued documents and expiring clearances/IDs | Connected to real totals (counts only); layout retained | Confirm periods and the 30-day window with the client **(D-21)**; Pending Registrations card |
 | Resident records: add, edit, search | List/profile draft with sample rows | Create/edit/profile actions and persistence; confirm search fields |
 | Family, beneficiary, sector details | Draft tab | Confirm real fields and sector categories against the masterlists |
 | Import masterlists | Draft file area and validation summary | Parsing, mapping, preview, validation, duplicates, import |
