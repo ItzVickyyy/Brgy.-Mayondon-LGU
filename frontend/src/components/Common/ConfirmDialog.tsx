@@ -40,7 +40,7 @@ export function ConfirmDialog({
   }, [open])
 
   const needsReason = reason === "required"
-  const canConfirm = !needsReason || reasonText.trim().length > 0
+  const canConfirm = !needsReason || reasonText.trim().length >= 3
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -62,7 +62,11 @@ export function ConfirmDialog({
               className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
               placeholder="Enter a reason"
               required={needsReason}
+              aria-describedby={needsReason ? "confirm-reason-help" : undefined}
             />
+            {needsReason && reasonText.trim().length > 0 && reasonText.trim().length < 3 ? (
+              <p id="confirm-reason-help" className="text-xs text-destructive">Enter at least 3 characters.</p>
+            ) : null}
           </div>
         ) : null}
         <DialogFooter>
