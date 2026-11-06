@@ -279,6 +279,8 @@ export function ResidentFormDialog({
               onChange={(event) => {
                 const file = event.target.files?.[0]
                 if (!file) return
+                setPhotoDataUrl("")
+                setError("")
                 if (file.size > 10 * 1024 * 1024) {
                   setError("Choose an image smaller than 10 MB.")
                   event.target.value = ""
