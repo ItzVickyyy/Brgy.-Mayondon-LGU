@@ -459,7 +459,11 @@ function RecordsManagement() {
                             <td className="px-4 py-3 align-middle sm:px-5">
                               <Badge
                                 variant="outline"
-                                className={statusStyles[idStatusLabels[resident.id_status]]}
+                                className={
+                                  statusStyles[
+                                    idStatusLabels[resident.id_status]
+                                  ]
+                                }
                               >
                                 {idStatusLabels[resident.id_status]}
                               </Badge>
@@ -567,21 +571,18 @@ function RecordsManagement() {
                 description:
                   "Household reference, family members, and relationships.",
                 icon: Users,
-                action: "Manage family details",
               },
               {
                 title: "Beneficiary Details",
                 description:
                   "Beneficiary information used by approved barangay forms.",
                 icon: UserRound,
-                action: "Manage beneficiaries",
               },
               {
                 title: "Marginalized-Sector Details",
                 description:
                   "Sector classifications associated with resident records.",
                 icon: FileUp,
-                action: "Manage sector details",
               },
             ].map((item) => (
               <article
@@ -600,9 +601,10 @@ function RecordsManagement() {
                 <Button
                   variant="outline"
                   className="mt-4 min-h-11 self-start"
-                  onClick={() => setNotice(`${item.action} screen selected.`)}
+                  disabled
+                  title="This screen has not been built yet."
                 >
-                  {item.action}
+                  Not available yet
                 </Button>
               </article>
             ))}
@@ -624,6 +626,13 @@ function RecordsManagement() {
               </p>
             </div>
           </div>
+          <p
+            role="status"
+            className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm font-medium text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+          >
+            Importing is not available yet. Nothing on this screen is uploaded
+            or saved, and no resident records are created.
+          </p>
           <fieldset
             className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4"
             aria-label="Masterlist import steps"
@@ -831,10 +840,15 @@ function RecordsManagement() {
         sectors={sectors}
         onSaved={(saved, mode, photoError) => {
           setFormOpen(false)
-          const savedMessage = mode === "created"
-            ? `${saved.full_name} was added.`
-            : `${saved.full_name} was updated.`
-          setNotice(photoError ? `${savedMessage} Photo upload failed: ${photoError}` : savedMessage)
+          const savedMessage =
+            mode === "created"
+              ? `${saved.full_name} was added.`
+              : `${saved.full_name} was updated.`
+          setNotice(
+            photoError
+              ? `${savedMessage} Photo upload failed: ${photoError}`
+              : savedMessage,
+          )
           setErrorNotice("")
           setSelectedResident((current) =>
             current && current.id === saved.id ? saved : current,
