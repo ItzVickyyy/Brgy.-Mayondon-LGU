@@ -65,6 +65,13 @@ type View = "residents" | "barangay-ids" | "family-sector" | "lists" | "import"
 const inputClass = formControlClass
 const PAGE_SIZE = 10
 
+const idStatusLabels: Record<ResidentPublic["id_status"], string> = {
+  none: "None",
+  valid: "Valid",
+  expiring_soon: "Expiring soon",
+  expired: "Expired",
+}
+
 function RecordsManagement() {
   const initialView = Route.useSearch().view
   const queryClient = useQueryClient()
@@ -398,7 +405,7 @@ function RecordsManagement() {
                           "Birthdate / Age",
                           "Address",
                           "Resident type",
-                          "Barangay ID",
+                          "ID status",
                           "Status",
                           "Actions",
                         ].map((label) => (
@@ -450,18 +457,12 @@ function RecordsManagement() {
                               {resident.resident_type || "—"}
                             </td>
                             <td className="px-4 py-3 align-middle sm:px-5">
-                              {resident.id_number ? (
-                                <span className="font-mono">
-                                  {resident.id_number}
-                                </span>
-                              ) : (
-                                <Badge
-                                  variant="outline"
-                                  className={statusStyles.None}
-                                >
-                                  None
-                                </Badge>
-                              )}
+                              <Badge
+                                variant="outline"
+                                className={statusStyles[idStatusLabels[resident.id_status]]}
+                              >
+                                {idStatusLabels[resident.id_status]}
+                              </Badge>
                             </td>
                             <td className="px-4 py-3 align-middle sm:px-5">
                               <Badge
