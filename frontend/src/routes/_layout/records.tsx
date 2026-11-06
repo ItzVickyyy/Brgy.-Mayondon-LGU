@@ -533,7 +533,7 @@ function RecordsManagement() {
         </>
       )}
 
-      {view === "barangay-ids" && <BarangayIdsView onNotice={setNotice} />}
+      {view === "barangay-ids" && <BarangayIdsView />}
 
       {view === "family-sector" && (
         <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
