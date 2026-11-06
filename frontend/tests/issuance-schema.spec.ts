@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
 import { documentDetailsSchema, documentDetailSchemas } from "@/components/Issuances/NewIssuance/schemas"
-import { getMissingResidentFields, issuanceApi, mockIssuanceStore } from "@/components/Issuances/NewIssuance/issuanceApi"
+import { getMissingResidentFields, issuanceApi, mockIssuanceStore } from "@/components/Issuances/NewIssuance/issuanceApi.mock"
 import type { DocumentCode } from "@/components/Issuances/NewIssuance/documentConfig"
 import type { ResidentRecord } from "@/components/Records/records-sample-data"
 

@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import {
   Check,
@@ -92,6 +93,7 @@ function IssuancesManagement() {
   const [residentQuery, setResidentQuery] = useState("")
   const [residentMatches, setResidentMatches] = useState<ResidentRecord[]>([])
   const [selectedResidentId, setSelectedResidentId] = useState("")
+  const queryClient = useQueryClient()
   const [manualEntry, setManualEntry] = useState(false)
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
@@ -710,35 +712,15 @@ function IssuancesManagement() {
         }}
         initialResidentId={getPreselectedResident()}
         initialDocumentType={getPreselectedType()}
-        onDraftRemoved={(id) => setDrafts((previous) => previous.filter((draft) => draft.fields.mockIssuanceId !== id))}
+        onDraftRemoved={() => { void queryClient.invalidateQueries({ queryKey: ["issuances"] }) }}
         onPrint={(record) => printStoredIssuance(record.id)}
         onSaved={(record, meta) => {
-          const resident = issuanceApi.getResident(record.residentId)
-          const type = documentConfig[record.documentType].name
-          const status = record.status === "draft" ? "Pending" : "Issued"
-          const purpose = issuanceApi.getPurposeLabel(record.payload.purposeId) ?? ""
-          const fields: Record<string, string> = { purpose, mockIssuanceId: record.id }
-          if (record.payload.details.type === "BARANGAY_ID") fields.validUntil = record.payload.details.validUntil
-          const historyRecord: IssuanceRecord = {
-            id: record.referenceNo,
-            resident: record.residentSnapshot?.fullName ?? resident?.name ?? "Selected resident",
-            type,
-            date: record.issueDate,
-            status,
-            purpose,
-            validUntil: record.payload.details.type === "BARANGAY_ID" ? record.payload.details.validUntil : documentConfig[record.documentType].validityMonths ? (() => { const date = new Date(`${record.issueDate}T00:00:00`); date.setMonth(date.getMonth() + (documentConfig[record.documentType].validityMonths ?? 0)); return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}` })() : undefined,
-            orNumber: record.payload.payment?.officialReceiptNo,
-            issuedBy: record.status === "issued" ? "staff" : undefined,
-            fields,
+          // The history list reads the server, so refresh it instead of building rows here.
+          for (const key of ["issuances", "issuances-summary", "barangay-ids", "barangay-id-count", "dashboard", "residents"]) {
+            void queryClient.invalidateQueries({ queryKey: [key] })
           }
-          if (record.status === "draft") {
-            // Automatic saves update the same draft again and again, so replace it instead of adding a copy.
-            setDrafts((previous) => previous.some((draft) => draft.fields.mockIssuanceId === record.id)
-              ? previous.map((draft) => draft.fields.mockIssuanceId === record.id ? historyRecord : draft)
-              : [historyRecord, ...previous])
-          } else setHistoryRecords((previous) => [historyRecord, ...previous])
           if (meta?.auto) return
-          setNotice(record.status === "draft" ? `${record.referenceNo} was saved as a draft.` : `${record.referenceNo} was recorded as issued.`)
+          setNotice(record.status === "draft" ? `${record.referenceNo === "Draft" ? "The draft" : record.referenceNo} was saved as a draft.` : `${record.referenceNo} was recorded as issued.`)
           setNoticePrintRecord(null)
         }}
       />

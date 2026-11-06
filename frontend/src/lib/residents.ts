@@ -46,6 +46,8 @@ export type ApiError = {
   /** `detail.code` for the structured 409/422 answers, such as "possible_duplicate". */
   code: string | null
   message: string
+  /** The whole `detail` from the API (for example the `sections` list), when there is one. */
+  detail?: unknown
 }
 
 /** Reads the FastAPI error body into a code and a sentence a clerk can read. */
@@ -67,6 +69,7 @@ export function readApiError(error: unknown): ApiError {
     if (detail && typeof detail === "object") {
       const code = (detail as { code?: unknown }).code
       return {
+        detail,
         code: typeof code === "string" ? code : null,
         message:
           typeof code === "string"
