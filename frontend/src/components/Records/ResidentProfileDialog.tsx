@@ -22,6 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { formatBusinessDate, residentAddress } from "@/lib/residents"
+import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 
 type ResidentProfileDialogProps = {
   resident: ResidentPublic | null
@@ -64,6 +65,12 @@ export function ResidentProfileDialog({
     enabled: Boolean(resident) && profileTab === "Issuance History",
   })
 
+  const photoQuery = useQuery({
+    queryKey: ["resident-photo", resident?.id],
+    queryFn: async () => resident ? issuanceApi.loadResidentPhoto(resident.id) : undefined,
+    enabled: Boolean(resident?.has_photo) && profileTab === "Details",
+    staleTime: 0,
+  })
   const documentName = new Map(
     documentTypes.map((item) => [item.id, item.name]),
   )
@@ -173,14 +180,22 @@ export function ResidentProfileDialog({
             </div>
 
             {profileTab === "Details" ? (
-              <div className="grid gap-3 sm:grid-cols-2">
-                {details.map(([label, value]) => (
+              <>
+                {resident?.has_photo ? (
+                  <div className="mb-3 flex items-center gap-4 rounded-xl border bg-card p-4">
+                    {photoQuery.data ? <img src={photoQuery.data} alt={resident.full_name + " portrait"} className="h-24 w-20 rounded-md border bg-white object-cover" /> : <div className="flex h-24 w-20 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">{photoQuery.isLoading ? "Loading photo" : "Photo unavailable"}</div>}
+                    <div><p className="font-semibold">Resident photo</p><p className="mt-1 text-sm text-muted-foreground">Used for Barangay ID and supported document printing.</p></div>
+                  </div>
+                ) : null}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {details.map(([label, value]) => (
                   <div key={label} className="rounded-lg border bg-card p-4">
                     <p className="text-sm text-muted-foreground">{label}</p>
                     <p className="mt-1 break-words font-semibold">{value}</p>
                   </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </>
             ) : null}
 
             {profileTab === "Family & Sector" ? (
