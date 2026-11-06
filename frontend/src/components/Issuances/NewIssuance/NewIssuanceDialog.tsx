@@ -104,6 +104,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const [discardOpen, setDiscardOpen] = useState(false)
   const [attempted, setAttempted] = useState(false)
   const [quickAttempted, setQuickAttempted] = useState(false)
+  const [quickSaving, setQuickSaving] = useState(false)
   const [quickDuplicateSignature, setQuickDuplicateSignature] = useState<string | null>(null)
   const [editingResident, setEditingResident] = useState(false)
   const [printNotice, setPrintNotice] = useState("")
@@ -646,6 +647,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       target?.focus()
       return
     }
+    setQuickSaving(true)
     try {
       if (editingResident && selectedResident) {
         const name = [quickAdd.firstName.trim(), quickAdd.middleName?.trim(), quickAdd.lastName.trim(), quickAdd.suffix?.trim()].filter(Boolean).join(" ")
@@ -686,6 +688,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       } else {
         setFormError(failure.message || (editingResident ? "Unable to update this resident." : "Unable to add this resident."))
       }
+    } finally {
+      setQuickSaving(false)
     }
   }
 
@@ -939,7 +943,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                   <span className="text-base font-medium">{resident.name}{resident.status === "Archived" ? <span className="ml-2 text-xs font-normal text-muted-foreground">Archived</span> : null}</span>
                   <span className="text-sm text-muted-foreground">{getResidentAddress(resident)}</span>
                 </button>)}</div> : residentQuery.trim() ? <p className="rounded-lg border border-dashed p-4 text-sm">No one found with that name. Check the spelling, or add them as a new resident in the form below.</p> : null}
-                <div className="space-y-4 rounded-lg border bg-muted/30 p-4">
+                <fieldset disabled={quickSaving} className="min-w-0 space-y-4 rounded-lg border bg-muted/30 p-4">
                   <div className="flex items-baseline justify-between gap-2"><p className="font-semibold">{editingResident ? "Edit resident details" : "Add a new resident"}</p><span className="text-xs text-muted-foreground"><span className="text-destructive">*</span> must be filled in</span></div>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_7.5rem]">
                     <label className={fieldLabelClass}><span>First name <span className="text-destructive">*</span></span><input id="quickadd-firstName" value={quickAdd.firstName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, firstName: event.target.value }))} className={cn(formControlClass, quickInvalid("firstName") && "border-destructive")} aria-invalid={quickInvalid("firstName") || undefined} autoComplete="off" />{quickError("firstName")}</label>
@@ -962,8 +966,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                     <label className={fieldLabelClass}>Living here since (year)<input type="number" min="1900" max={new Date().getFullYear()} placeholder="Example: 2005" value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: event.target.value ? Number(event.target.value) : undefined }))} className={formControlClass} /></label>
                     <CheckField label="Lived here since birth" checked={quickAdd.residentSinceBirth} onChange={(checked) => setQuickAdd((previous) => ({ ...previous, residentSinceBirth: checked, residentSinceYear: undefined }))} />
                   </div>
-                  <div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues()} onClick={() => { if (editingResident && selectedResident) { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }) } else setQuickAdd(emptyQuickAdd); setQuickAttempted(false); setQuickDuplicateSignature(null) }}>{editingResident ? "Reset changes" : "Clear"}</Button>{!editingResident && quickDuplicateSignature === JSON.stringify(quickAdd) ? <Button type="button" variant="outline" onClick={() => void createResident(true)}>Save anyway</Button> : null}<Button type="button" onClick={() => void createResident()}>{editingResident ? "Save changes" : "Save and select"}</Button></div>
-                </div>
+                  <div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues() || quickSaving} onClick={() => { if (editingResident && selectedResident) { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }) } else setQuickAdd(emptyQuickAdd); setQuickAttempted(false); setQuickDuplicateSignature(null) }}>{editingResident ? "Reset changes" : "Clear"}</Button>{!editingResident && quickDuplicateSignature === JSON.stringify(quickAdd) ? <Button type="button" variant="outline" disabled={quickSaving} onClick={() => void createResident(true)}>{quickSaving ? "Saving…" : "Save anyway"}</Button> : null}<Button type="button" disabled={quickSaving} onClick={() => void createResident()}>{quickSaving ? "Saving…" : editingResident ? "Save changes" : "Save and select"}</Button></div>
+                </fieldset>
               </div>}
               {selectedResident && neededFromRecord.length ? <div className="space-y-4 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4">
                 <div>
