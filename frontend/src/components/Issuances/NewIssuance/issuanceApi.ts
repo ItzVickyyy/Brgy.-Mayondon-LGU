@@ -801,7 +801,10 @@ export const issuanceApi = {
     }
   },
 
-  async createResident(input: QuickResidentInput): Promise<ResidentRecord> {
+  async createResident(
+    input: QuickResidentInput,
+    confirmDuplicate = false,
+  ): Promise<ResidentRecord> {
     try {
       const data = await loadLookups()
       const body: ResidentCreate = {
@@ -821,7 +824,10 @@ export const issuanceApi = {
           ? null
           : (input.residentSinceYear ?? null),
       }
-      const response = await ResidentsService.createResident({ body })
+      const response = await ResidentsService.createResident({
+        body,
+        query: confirmDuplicate ? { confirm_duplicate: true } : undefined,
+      })
       if (input.photoUrl?.startsWith("data:"))
         await savePhoto(response.data.id, input.photoUrl)
       return (
