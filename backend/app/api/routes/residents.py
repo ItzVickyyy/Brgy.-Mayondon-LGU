@@ -7,7 +7,7 @@ audit row in the same transaction. Audit details hold field names, never values.
 """
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
@@ -16,10 +16,11 @@ from sqlmodel import Session, col, delete, select
 
 from app.api.deps import SessionDep, require_permission
 from app.core.audit import record_audit_event
-from app.core.dates import age_on
+from app.core.dates import age_on, today_manila
 from app.core.permissions import Permission
 from app.models import User
 from app.models_foundation import Sector, Street
+from app.models_issuance import ID_EXPIRING_SOON_DAYS, Issuance, IssuanceBarangayId
 from app.models_residents import (
     MAX_PHOTO_BYTES,
     ArchiveRequest,
@@ -73,8 +74,53 @@ def _photo_ids(session: Session, resident_ids: list[uuid.UUID]) -> set[uuid.UUID
     )
 
 
+def _id_statuses(
+    session: Session, resident_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, Literal["none", "valid", "expiring_soon", "expired"]]:
+    statuses: dict[uuid.UUID, Literal["none", "valid", "expiring_soon", "expired"]] = {
+        resident_id: "none" for resident_id in resident_ids
+    }
+    if not resident_ids:
+        return statuses
+
+    latest = (
+        select(col(Issuance.id).label("id"))
+        .join(
+            IssuanceBarangayId,
+            col(IssuanceBarangayId.issuance_id) == col(Issuance.id),
+        )
+        .where(
+            Issuance.status == "issued",
+            col(Issuance.resident_id).in_(resident_ids),
+        )
+        .distinct(col(Issuance.resident_id))
+        .order_by(col(Issuance.resident_id), col(Issuance.issued_at).desc())
+        .subquery()
+    )
+    rows = session.exec(
+        select(Issuance.resident_id, IssuanceBarangayId.valid_until)
+        .join(latest, latest.c.id == col(Issuance.id))
+        .join(
+            IssuanceBarangayId,
+            col(IssuanceBarangayId.issuance_id) == col(Issuance.id),
+        )
+    ).all()
+    today = today_manila()
+    soon = today + timedelta(days=ID_EXPIRING_SOON_DAYS)
+    for resident_id, valid_until in rows:
+        if valid_until < today:
+            statuses[resident_id] = "expired"
+        elif valid_until <= soon:
+            statuses[resident_id] = "expiring_soon"
+        else:
+            statuses[resident_id] = "valid"
+    return statuses
+
 def _to_public(
-    resident: Resident, sectors: list[int], has_photo: bool
+    resident: Resident,
+    sectors: list[int],
+    has_photo: bool,
+    id_status: Literal["none", "valid", "expiring_soon", "expired"],
 ) -> ResidentPublic:
     data = resident.model_dump()
     return ResidentPublic.model_validate(
@@ -84,6 +130,7 @@ def _to_public(
             "age": age_on(resident.birthdate),
             "sector_ids": sectors,
             "has_photo": has_photo,
+            "id_status": id_status,
         }
     )
 
@@ -93,6 +140,7 @@ def _public(session: Session, resident: Resident) -> ResidentPublic:
         resident,
         _sector_ids(session, [resident.id])[resident.id],
         resident.id in _photo_ids(session, [resident.id]),
+        _id_statuses(session, [resident.id])[resident.id],
     )
 
 
@@ -189,8 +237,13 @@ def list_residents(
     ids = [r.id for r in rows]
     sectors = _sector_ids(session, ids)
     photos = _photo_ids(session, ids)
+    id_statuses = _id_statuses(session, ids)
     return ResidentsPublic(
-        data=[_to_public(r, sectors[r.id], r.id in photos) for r in rows], count=count
+        data=[
+            _to_public(r, sectors[r.id], r.id in photos, id_statuses[r.id])
+            for r in rows
+        ],
+        count=count,
     )
 
 
