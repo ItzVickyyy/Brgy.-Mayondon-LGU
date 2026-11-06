@@ -5,10 +5,11 @@ from datetime import timedelta
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from app.core.config import settings
 from app.core.dates import today_manila
+from app.models_issuance import IssuanceBarangayId
 from app.core.permissions import has_permission as real_has_permission
 from tests.api.routes.test_issuances import (  # noqa: F401  (fixtures are reused)
     _audit,
@@ -229,6 +230,46 @@ def test_valid_until_must_be_after_the_issue_date(
         code, body = _try_issue(client, staff_token_headers, draft["id"])
         assert code == 422 and body["detail"]["code"] == "invalid_valid_until"
 
+
+def test_resident_response_reports_latest_id_status(
+    client: TestClient, staff_token_headers: Headers, street_id: int, db: Session
+) -> None:
+    resident = _id_resident(client, staff_token_headers, street_id)
+    resident_url = f"{API}/residents/{resident['id']}"
+    headers = staff_token_headers
+    initial = client.get(resident_url, headers=headers)
+    assert initial.status_code == 200 and initial.json()["id_status"] == "none"
+
+    expiring = _issue_card(
+        client,
+        headers,
+        resident["id"],
+        valid_until=_until(10),
+        id_number=_number(),
+    )
+    response = client.get(resident_url, headers=headers)
+    assert response.json()["id_status"] == "expiring_soon"
+
+    renewed = _issue_card(
+        client,
+        headers,
+        resident["id"],
+        transaction_type="renewal",
+        valid_until=_until(365),
+    )
+    response = client.get(resident_url, headers=headers)
+    assert response.json()["id_status"] == "valid"
+
+    detail = db.exec(
+        select(IssuanceBarangayId).where(
+            IssuanceBarangayId.issuance_id == renewed["id"]
+        )
+    ).one()
+    detail.valid_until = today_manila() - timedelta(days=1)
+    db.add(detail)
+    db.commit()
+    response = client.get(resident_url, headers=headers)
+    assert response.json()["id_status"] == "expired"
 
 # --- Renewal, replacement and history ---------------------------------------------
 
