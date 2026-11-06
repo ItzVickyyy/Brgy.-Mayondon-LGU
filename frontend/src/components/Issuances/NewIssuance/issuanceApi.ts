@@ -1039,6 +1039,28 @@ export const issuanceApi = {
       return fail(error)
     }
   },
+
+  /** Updates and issues an existing draft without losing its correction link or reference. */
+  async issueDraft(id: string, input: IssuanceInput) {
+    try {
+      const data = await loadLookups()
+      await applyResidentUpdates(input)
+      await IssuancesService.updateDraft({
+        path: { issuance_id: id },
+        body: await toUpdateBody(input, data),
+      })
+      const purposeName = text(input.purposeText)
+      const needsName = !input.purposeId && purposeName && !purposeIdFor(input, data)
+      const issued = await IssuancesService.issue({
+        path: { issuance_id: id },
+        body: needsName ? { purpose_name: purposeName } : undefined,
+      })
+      if (needsName) refreshLookups()
+      return await finish(issued.data)
+    } catch (error) {
+      return fail(error)
+    }
+  },
 }
 
 const purposeLabels = new Map<number, string>()
