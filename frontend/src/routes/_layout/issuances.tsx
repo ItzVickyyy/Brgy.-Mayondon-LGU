@@ -89,6 +89,7 @@ function getPreselectedType(): DocumentCode | undefined {
 function IssuancesManagement() {
   const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(false)
   const [isSimplifiedDialogOpen, setIsSimplifiedDialogOpen] = useState(() => Boolean(getPreselectedResident()))
+  const [initialDraftId, setInitialDraftId] = useState("")
   const [selectedType, setSelectedType] = useState<string>(documentTypes[0])
   const [residentQuery, setResidentQuery] = useState("")
   const [residentMatches, setResidentMatches] = useState<ResidentRecord[]>([])
@@ -699,6 +700,7 @@ function IssuancesManagement() {
         open={isSimplifiedDialogOpen}
         onOpenChange={(next) => {
           setIsSimplifiedDialogOpen(next)
+          if (!next) setInitialDraftId("")
           if (!next && typeof window !== "undefined") {
             // Drop ?resident= and ?type= so the next "New Issuance" opens blank.
             const params = new URLSearchParams(window.location.search)
@@ -712,6 +714,7 @@ function IssuancesManagement() {
         }}
         initialResidentId={getPreselectedResident()}
         initialDocumentType={getPreselectedType()}
+        initialDraftId={initialDraftId || undefined}
         onDraftRemoved={() => { void queryClient.invalidateQueries({ queryKey: ["issuances"] }) }}
         onPrint={(record) => printStoredIssuance(record.id)}
         onSaved={(record, meta) => {
@@ -746,7 +749,14 @@ function IssuancesManagement() {
         }}
       />
 
-      <IssuanceHistory onNotice={setNotice} />
+      <IssuanceHistory
+        onNotice={setNotice}
+        onContinueDraft={(id) => {
+          setInitialDraftId(id)
+          setIsSimplifiedDialogOpen(true)
+        }}
+        onPrint={(item) => printStoredIssuance(item.id)}
+      />
 
       <Dialog open={printSetupOpen} onOpenChange={setPrintSetupOpen}>
         <DialogContent className="max-w-lg">
