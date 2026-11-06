@@ -1,11 +1,19 @@
+import { useQuery } from "@tanstack/react-query"
 import { CreditCard, FileCheck2, UserRound, Users } from "lucide-react"
-import { useEffect, useState } from "react"
-import { formControlClass } from "@/components/Common/formStyles"
+
+import {
+  IssuancesService,
+  type LookupItem,
+  type ResidentPublic,
+} from "@/client"
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/components/Common/FeedbackState"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-
-import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import {
   Dialog,
   DialogContent,
@@ -13,34 +21,26 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-
-function residentBirthdateAge(value: string) {
-  const birthdate = new Date(`${value}T00:00:00`)
-  if (Number.isNaN(birthdate.getTime())) return value
-  const today = new Date()
-  let age = today.getFullYear() - birthdate.getFullYear()
-  if (
-    today.getMonth() < birthdate.getMonth() ||
-    (today.getMonth() === birthdate.getMonth() &&
-      today.getDate() < birthdate.getDate())
-  ) {
-    age -= 1
-  }
-  return `${birthdate.toLocaleDateString("en-US", {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-  })} · ${age} yrs`
-}
+import { formatBusinessDate, residentAddress } from "@/lib/residents"
 
 type ResidentProfileDialogProps = {
-  resident: ResidentRecord | null
+  resident: ResidentPublic | null
   onOpenChange: (open: boolean) => void
   profileTab: string
   onProfileTabChange: (tab: string) => void
-  editable?: boolean
-  startInEditMode?: boolean
-  onSave?: (resident: ResidentRecord) => void
+  streets: Map<number, string>
+  sectors: LookupItem[]
+  documentTypes: LookupItem[]
+  /** Shown only for an active resident; opens the edit form. */
+  onEdit?: () => void
+}
+
+const statusLabel = (status: string) =>
+  status.charAt(0).toUpperCase() + status.slice(1)
+
+const voterLabel: Record<string, string> = {
+  registered: "Registered",
+  unregistered: "Unregistered",
 }
 
 export function ResidentProfileDialog({
@@ -48,29 +48,76 @@ export function ResidentProfileDialog({
   onOpenChange,
   profileTab,
   onProfileTabChange,
-  editable = false,
-  startInEditMode = false,
-  onSave,
+  streets,
+  sectors,
+  documentTypes,
+  onEdit,
 }: ResidentProfileDialogProps) {
-  const [isEditing, setIsEditing] = useState(startInEditMode)
-  const [editName, setEditName] = useState("")
-  const [editBirthdate, setEditBirthdate] = useState("")
-  const [editAddress, setEditAddress] = useState("")
-  const [editResidentType, setEditResidentType] = useState("")
-  const [editIdNumber, setEditIdNumber] = useState("")
-  const [editIdStatus, setEditIdStatus] = useState<ResidentRecord["idStatus"]>("Valid")
-  const [editRegistration, setEditRegistration] = useState<ResidentRecord["registration"]>("Registered")
+  const historyQuery = useQuery({
+    queryKey: ["resident-issuances", resident?.id],
+    queryFn: async () =>
+      (
+        await IssuancesService.listIssuances({
+          query: { resident_id: resident?.id, status: "all", limit: 50 },
+        })
+      ).data,
+    enabled: Boolean(resident) && profileTab === "Issuance History",
+  })
 
-  useEffect(() => {
-    setIsEditing(startInEditMode)
-    setEditName(resident?.name ?? "")
-    setEditBirthdate(resident?.birthdate ?? "")
-    setEditAddress(resident?.address ?? "")
-    setEditResidentType(resident?.residentType ?? "")
-    setEditIdNumber(resident?.idNumber ?? "")
-    setEditIdStatus(resident?.idStatus ?? "Valid")
-    setEditRegistration(resident?.registration ?? "Registered")
-  }, [resident, startInEditMode])
+  const documentName = new Map(
+    documentTypes.map((item) => [item.id, item.name]),
+  )
+  const sectorNames = resident
+    ? resident.sector_ids.map(
+        (id) => sectors.find((sector) => sector.id === id)?.name ?? `#${id}`,
+      )
+    : []
+  const archived = resident?.status === "archived"
+
+  const details: [string, string][] = resident
+    ? [
+        ["Resident reference", resident.id],
+        ["Full name", resident.full_name],
+        [
+          "Birthdate / age",
+          resident.birthdate
+            ? `${formatBusinessDate(resident.birthdate)}${resident.age !== null ? ` · ${resident.age} yrs` : ""}`
+            : "—",
+        ],
+        ["Birth place", resident.birth_place || "—"],
+        ["Sex", resident.sex || "—"],
+        ["Civil status", resident.civil_status || "—"],
+        ["Complete address", residentAddress(resident, streets) || "—"],
+        [
+          "Resident since",
+          resident.resident_since_birth
+            ? "Since birth"
+            : resident.resident_since_year
+              ? String(resident.resident_since_year)
+              : "—",
+        ],
+        ["Resident type", resident.resident_type || "—"],
+        [
+          "Voter registration",
+          voterLabel[resident.voter_registration ?? ""] ?? "—",
+        ],
+        ["Emergency contact", resident.emergency_contact_name || "—"],
+        [
+          "Emergency contact address",
+          resident.emergency_contact_address || "—",
+        ],
+        ["Emergency contact phone", resident.emergency_contact_phone || "—"],
+        ["Photo", resident.has_photo ? "On file" : "None"],
+        ["Record status", statusLabel(resident.status)],
+        ...(archived && resident.archive_reason
+          ? ([["Archive reason", resident.archive_reason]] as [
+              string,
+              string,
+            ][])
+          : []),
+      ]
+    : []
+
   return (
     <Dialog open={Boolean(resident)} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto">
@@ -88,12 +135,17 @@ export function ResidentProfileDialog({
                 <UserRound className="size-6" aria-hidden="true" />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-lg font-semibold">{resident.name}</p>
+                <p className="text-lg font-semibold">{resident.full_name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {resident.id} · {resident.address}
+                  {residentAddress(resident, streets) || "No address on record"}
                 </p>
               </div>
-              <Badge variant="outline" className={statusStyles[resident.status]}>{resident.status}</Badge>
+              <Badge
+                variant="outline"
+                className={statusStyles[statusLabel(resident.status)]}
+              >
+                {statusLabel(resident.status)}
+              </Badge>
             </div>
             <div
               className="flex flex-wrap gap-2 border-b pb-3"
@@ -119,89 +171,45 @@ export function ResidentProfileDialog({
                 </Button>
               ))}
             </div>
+
             {profileTab === "Details" ? (
-              isEditing ? (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <label className="flex flex-col gap-2 text-sm font-medium">
-                    Full name
-                    <input value={editName} onChange={(event) => setEditName(event.target.value)} className={formControlClass} required />
-                  </label>
-                  <label className="flex flex-col gap-2 text-sm font-medium">
-                    Birthdate
-                    <input type="date" value={editBirthdate} onChange={(event) => setEditBirthdate(event.target.value)} className={formControlClass} required />
-                  </label>
-                  <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
-                    Complete address
-                    <input value={editAddress} onChange={(event) => setEditAddress(event.target.value)} className={formControlClass} required />
-                  </label>
-                  <label className="flex flex-col gap-2 text-sm font-medium">
-                    Resident type
-                    <select value={editResidentType} onChange={(event) => setEditResidentType(event.target.value)} className={formControlClass}>
-                      {["Existing resident", "New / renting resident"].map((item) => <option key={item}>{item}</option>)}
-                    </select>
-                  </label>
-                  <label className="flex flex-col gap-2 text-sm font-medium">
-                    Barangay ID number
-                    <input value={editIdNumber} onChange={(event) => setEditIdNumber(event.target.value)} className={formControlClass} required />
-                  </label>
-                  <label className="flex flex-col gap-2 text-sm font-medium">
-                    Barangay ID status
-                    <select value={editIdStatus} onChange={(event) => setEditIdStatus(event.target.value as ResidentRecord["idStatus"])} className={formControlClass}>
-                      {["Valid", "Expiring soon", "Expired", "None"].map((item) => <option key={item}>{item}</option>)}
-                    </select>
-                  </label>
-                  <label className="flex flex-col gap-2 text-sm font-medium">
-                    Registration
-                    <select value={editRegistration} onChange={(event) => setEditRegistration(event.target.value as ResidentRecord["registration"])} className={formControlClass}>
-                      <option>Registered</option>
-                      <option>Unregistered</option>
-                    </select>
-                  </label>
-                </div>
-              ) : (
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {[
-                    ["Resident reference", resident.id],
-                    ["Full name", resident.name],
-                    ["Birthdate / age", residentBirthdateAge(resident.birthdate)],
-                    ["Complete address", resident.address],
-                    ["Resident type", resident.residentType],
-                    ["Barangay ID number", resident.idNumber],
-                    ["Barangay ID status", resident.idStatus],
-                    ["Registration", resident.registration],
-                    ["Record status", resident.status],
-                  ].map(([label, value]) => (
-                    <div key={label} className="rounded-lg border bg-card p-4">
-                      <p className="text-sm text-muted-foreground">{label}</p>
-                      <p className="mt-1 font-semibold">{value}</p>
-                    </div>
-                  ))}
-                </div>
-              )
+              <div className="grid gap-3 sm:grid-cols-2">
+                {details.map(([label, value]) => (
+                  <div key={label} className="rounded-lg border bg-card p-4">
+                    <p className="text-sm text-muted-foreground">{label}</p>
+                    <p className="mt-1 break-words font-semibold">{value}</p>
+                  </div>
+                ))}
+              </div>
             ) : null}
+
             {profileTab === "Family & Sector" ? (
               <div className="grid gap-3 sm:grid-cols-2">
+                <section className="rounded-xl border bg-card p-4 shadow-sm">
+                  <UserRound className="size-5 text-brand" aria-hidden="true" />
+                  <h3 className="mt-2 font-semibold">Sectors</h3>
+                  {sectorNames.length > 0 ? (
+                    <ul className="mt-2 list-disc pl-5 text-sm">
+                      {sectorNames.map((name) => (
+                        <li key={name}>{name}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      No sector recorded.
+                    </p>
+                  )}
+                </section>
                 <section className="rounded-xl border bg-card p-4">
                   <Users className="size-5 text-brand" aria-hidden="true" />
                   <h3 className="mt-2 font-semibold">Family details</h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Household reference, family members, and relationships.
-                  </p>
-                </section>
-                <section className="rounded-xl border bg-card p-4 shadow-sm">
-                  <UserRound
-                    className="size-5 text-brand"
-                    aria-hidden="true"
-                  />
-                  <h3 className="mt-2 font-semibold">
-                    Beneficiary and sector details
-                  </h3>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Beneficiary information and sector classifications.
+                    Household and family member records are not available yet.
                   </p>
                 </section>
               </div>
             ) : null}
+
             {profileTab === "Barangay ID" ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 <section className="rounded-xl border bg-card p-4 shadow-sm">
@@ -212,58 +220,100 @@ export function ResidentProfileDialog({
                   <p className="mt-2 text-sm text-muted-foreground">
                     Barangay ID number
                   </p>
-                  <p className="mt-1 font-semibold">{resident.idNumber}</p>
+                  <p className="mt-1 font-semibold">
+                    {resident.id_number || "None on record"}
+                  </p>
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    ID numbers are set when an ID is issued from Issuance
+                    Management.
+                  </p>
                 </section>
                 <section className="rounded-xl border bg-card p-4 shadow-sm">
                   <p className="text-sm text-muted-foreground">
-                    Registration status
+                    Voter registration
                   </p>
-                  <p className="mt-1 font-semibold">{resident.registration}</p>
+                  <p className="mt-1 font-semibold">
+                    {voterLabel[resident.voter_registration ?? ""] ?? "—"}
+                  </p>
                 </section>
               </div>
             ) : null}
+
             {profileTab === "Issuance History" ? (
               <section className="rounded-xl border bg-card p-4 sm:p-5">
-                <FileCheck2
-                  className="size-6 text-brand"
-                  aria-hidden="true"
-                />
-                <h3 className="mt-2 font-semibold">Issuance history</h3>
-                <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                  Documents associated with this resident will appear here when
-                  the issuance records are connected.
-                </p>
+                <div className="flex items-center gap-2">
+                  <FileCheck2
+                    className="size-6 text-brand"
+                    aria-hidden="true"
+                  />
+                  <h3 className="font-semibold">Issuance history</h3>
+                </div>
+                {historyQuery.isLoading ? (
+                  <LoadingState title="Loading history..." />
+                ) : historyQuery.isError ? (
+                  <ErrorState
+                    title="Could not load the history"
+                    onRetry={() => historyQuery.refetch()}
+                  />
+                ) : historyQuery.data && historyQuery.data.data.length > 0 ? (
+                  <div className="mt-3 overflow-x-auto">
+                    <table className="w-full min-w-[480px] text-left text-sm">
+                      <thead className="text-xs uppercase tracking-wide text-muted-foreground">
+                        <tr>
+                          {[
+                            "Reference",
+                            "Document",
+                            "Issue date",
+                            "Status",
+                          ].map((label) => (
+                            <th key={label} className="py-2 pr-4 font-medium">
+                              {label}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {historyQuery.data.data.map((item) => (
+                          <tr key={item.id}>
+                            <td className="py-2 pr-4 font-mono">
+                              {item.reference_no ?? "Draft"}
+                            </td>
+                            <td className="py-2 pr-4">
+                              {documentName.get(item.document_type_id) ??
+                                item.document_type_code}
+                            </td>
+                            <td className="py-2 pr-4">
+                              {formatBusinessDate(item.issue_date)}
+                            </td>
+                            <td className="py-2 pr-4">
+                              <Badge
+                                variant="outline"
+                                className={
+                                  statusStyles[statusLabel(item.status)]
+                                }
+                              >
+                                {statusLabel(item.status)}
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <EmptyState
+                    title="No documents yet"
+                    description="Documents issued to this resident will appear here."
+                  />
+                )}
               </section>
             ) : null}
-            {editable && profileTab === "Details" ? (
-              <div className="flex justify-end gap-2">
-                {isEditing ? (
-                  <>
-                    <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
-                    <Button
-                      type="button"
-                      disabled={!editName.trim() || !editBirthdate || !editAddress.trim() || !editIdNumber.trim()}
-                      onClick={() => {
-                        if (!resident || !onSave) return
-                        onSave({
-                          ...resident,
-                          name: editName.trim(),
-                          birthdate: editBirthdate,
-                          address: editAddress.trim(),
-                          residentType: editResidentType,
-                          idNumber: editIdNumber.trim(),
-                          idStatus: editIdStatus,
-                          registration: editRegistration,
-                        })
-                        setIsEditing(false)
-                      }}
-                    >
-                      Save changes
-                    </Button>
-                  </>
-                ) : (
-                  <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>Edit details</Button>
-                )}
+
+            {onEdit && !archived && profileTab === "Details" ? (
+              <div className="flex justify-end">
+                <Button type="button" variant="outline" onClick={onEdit}>
+                  Edit details
+                </Button>
               </div>
             ) : null}
           </>

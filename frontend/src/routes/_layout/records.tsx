@@ -1,29 +1,60 @@
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { Archive, CheckCircle2, CreditCard, FileUp, Search, Upload, UserRound, Users, X } from "lucide-react"
-import { useMemo, useState } from "react"
+import {
+  Archive,
+  CheckCircle2,
+  CreditCard,
+  FileUp,
+  Search,
+  Upload,
+  UserRound,
+  Users,
+  X,
+} from "lucide-react"
+import { useEffect, useState } from "react"
+import {
+  BarangayIdsService,
+  LookupsService,
+  type ResidentPublic,
+  ResidentsService,
+} from "@/client"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
-import { EmptyState } from "@/components/Common/FeedbackState"
-import { TablePagination, usePagination } from "@/components/Common/TablePagination"
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/components/Common/FeedbackState"
+import { formControlClass } from "@/components/Common/formStyles"
 import { RowActions } from "@/components/Common/RowActions"
 import { StatCard } from "@/components/Common/StatCard"
-import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
+import { TablePagination } from "@/components/Common/TablePagination"
+import { BarangayIdsView } from "@/components/Records/BarangayIdsView"
+import { ResidentFormDialog } from "@/components/Records/ResidentFormDialog"
+import { ResidentProfileDialog } from "@/components/Records/ResidentProfileDialog"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { BarangayIdsView } from "@/components/Records/BarangayIdsView"
-import { ResidentProfileDialog } from "@/components/Records/ResidentProfileDialog"
-import {
-  type ResidentRecord,
-  sampleResidents,
-} from "@/components/Records/records-sample-data"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import {
+  formatBusinessDate,
+  readApiError,
+  residentAddress,
+  streetNameMap,
+} from "@/lib/residents"
 import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_layout/records")({
   component: RecordsManagement,
-  validateSearch: (search: Record<string, unknown>): { view?: "barangay-ids" } =>
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { view?: "barangay-ids" } =>
     search.view === "barangay-ids" ? { view: "barangay-ids" } : {},
   head: () => ({ meta: [{ title: pageTitle("Records Management") }] }),
 })
@@ -31,42 +62,164 @@ export const Route = createFileRoute("/_layout/records")({
 type View = "residents" | "barangay-ids" | "family-sector" | "import"
 
 const inputClass = formControlClass
+const PAGE_SIZE = 10
 
 function RecordsManagement() {
   const initialView = Route.useSearch().view
+  const queryClient = useQueryClient()
   const [view, setView] = useState<View>(initialView ?? "residents")
   const [search, setSearch] = useState("")
-  const [statusFilter, setStatusFilter] = useState<"Active" | "Archived" | "all">("Active")
-  const [residentTypeFilter, setResidentTypeFilter] = useState("all")
-  const [residents, setResidents] = useState(sampleResidents)
-  const [archiveTarget, setArchiveTarget] = useState<ResidentRecord | null>(null)
-  const [restoreTarget, setRestoreTarget] = useState<ResidentRecord | null>(null)
+  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [statusFilter, setStatusFilter] = useState<
+    "active" | "archived" | "all"
+  >("active")
+  const [pageIndex, setPageIndex] = useState(0)
+  const [archiveTarget, setArchiveTarget] = useState<ResidentPublic | null>(
+    null,
+  )
+  const [restoreTarget, setRestoreTarget] = useState<ResidentPublic | null>(
+    null,
+  )
   const [notice, setNotice] = useState("")
+  const [errorNotice, setErrorNotice] = useState("")
   const [selectedFile, setSelectedFile] = useState("")
   const [importStep, setImportStep] = useState(0)
   const [selectedResident, setSelectedResident] =
-    useState<ResidentRecord | null>(null)
-  const [isEditingResident, setIsEditingResident] = useState(false)
+    useState<ResidentPublic | null>(null)
+  const [formOpen, setFormOpen] = useState(false)
+  const [formResident, setFormResident] = useState<ResidentPublic | null>(null)
   const [profileTab, setProfileTab] = useState("Details")
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
 
-  const filteredResidents = useMemo(
-    () =>
-      residents
-        .filter((resident) => {
-          const query = search.trim().toLowerCase()
-          const matchesSearch = [resident.name, resident.address, resident.idNumber].some((value) =>
-            value.toLowerCase().includes(query),
-          )
-          return matchesSearch &&
-            (statusFilter === "all" || resident.status === statusFilter) &&
-            (residentTypeFilter === "all" || resident.residentType === residentTypeFilter)
+  useEffect(() => {
+    const timer = window.setTimeout(
+      () => setDebouncedSearch(search.trim()),
+      300,
+    )
+    return () => window.clearTimeout(timer)
+  }, [search])
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the filters are the trigger.
+  useEffect(() => {
+    setPageIndex(0)
+  }, [debouncedSearch, statusFilter])
+
+  const streetsQuery = useQuery({
+    queryKey: ["lookups", "streets"],
+    queryFn: async () => (await LookupsService.listStreets()).data,
+  })
+  const sectorsQuery = useQuery({
+    queryKey: ["lookups", "sectors"],
+    queryFn: async () => (await LookupsService.listSectors()).data,
+  })
+  const documentTypesQuery = useQuery({
+    queryKey: ["lookups", "document-types"],
+    queryFn: async () => (await LookupsService.listDocumentTypes()).data,
+  })
+  const streets = streetsQuery.data ?? []
+  const sectors = sectorsQuery.data ?? []
+  const streetNames = streetNameMap(streets)
+
+  const residentsQuery = useQuery({
+    queryKey: ["residents", debouncedSearch, statusFilter, pageIndex],
+    queryFn: async () =>
+      (
+        await ResidentsService.listResidents({
+          query: {
+            q: debouncedSearch || undefined,
+            status: statusFilter,
+            skip: pageIndex * PAGE_SIZE,
+            limit: PAGE_SIZE,
+          },
         })
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    [residents, residentTypeFilter, search, statusFilter],
-  )
-  const residentPagination = usePagination(filteredResidents, 10, search + "|" + statusFilter + "|" + residentTypeFilter)
+      ).data,
+    placeholderData: keepPreviousData,
+  })
+  const residents = residentsQuery.data?.data ?? []
+  const total = residentsQuery.data?.count ?? 0
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
+  const start = total ? pageIndex * PAGE_SIZE + 1 : 0
+  const end = Math.min((pageIndex + 1) * PAGE_SIZE, total)
+
+  // Residents whose latest Barangay ID is still usable (valid, or valid but expiring soon).
+  const validIdQuery = useQuery({
+    queryKey: ["barangay-id-count", "valid"],
+    queryFn: async () =>
+      (
+        await BarangayIdsService.idsListBarangayIds({
+          query: { status: "valid", limit: 1 },
+        })
+      ).data.count,
+  })
+  const soonIdQuery = useQuery({
+    queryKey: ["barangay-id-count", "expiring_soon"],
+    queryFn: async () =>
+      (
+        await BarangayIdsService.idsListBarangayIds({
+          query: { status: "expiring_soon", limit: 1 },
+        })
+      ).data.count,
+  })
+  const validIds =
+    validIdQuery.data !== undefined && soonIdQuery.data !== undefined
+      ? String(validIdQuery.data + soonIdQuery.data)
+      : "—"
+
+  function refreshResidents() {
+    void queryClient.invalidateQueries({ queryKey: ["residents"] })
+    void queryClient.invalidateQueries({ queryKey: ["barangay-id-count"] })
+  }
+
+  const archiveMutation = useMutation({
+    mutationFn: async ({
+      resident,
+      reason,
+    }: {
+      resident: ResidentPublic
+      reason: string
+    }) =>
+      (
+        await ResidentsService.archiveResident({
+          path: { resident_id: resident.id },
+          body: { reason },
+        })
+      ).data,
+    onSuccess: (resident) => {
+      setNotice(`${resident.full_name} was archived.`)
+      setErrorNotice("")
+      refreshResidents()
+    },
+    onError: (error) => {
+      setNotice("")
+      setErrorNotice(readApiError(error).message)
+    },
+  })
+
+  const restoreMutation = useMutation({
+    mutationFn: async (resident: ResidentPublic) =>
+      (
+        await ResidentsService.restoreResident({
+          path: { resident_id: resident.id },
+        })
+      ).data,
+    onSuccess: (resident) => {
+      setNotice(`${resident.full_name} was restored.`)
+      setErrorNotice("")
+      refreshResidents()
+    },
+    onError: (error) => {
+      setNotice("")
+      setErrorNotice(readApiError(error).message)
+    },
+  })
+
+  function openForm(resident: ResidentPublic | null) {
+    setFormResident(resident)
+    setFormOpen(true)
+    setNotice("")
+    setErrorNotice("")
+  }
 
   const tabs: { id: View; label: string }[] = [
     { id: "residents", label: "Residents" },
@@ -84,11 +237,11 @@ function RecordsManagement() {
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
             Search and maintain resident information, family and sector details,
-            and Barangay ID records. New and renewed IDs are issued from Issuance
-            Management.
+            and Barangay ID records. New and renewed IDs are issued from
+            Issuance Management.
           </p>
         </div>
-        <Button className="min-h-11" onClick={() => setNotice("Resident record form opened.")}>
+        <Button className="min-h-11" onClick={() => openForm(null)}>
           <UserRound aria-hidden="true" />
           Add Resident
         </Button>
@@ -122,9 +275,36 @@ function RecordsManagement() {
           role="status"
           className="flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm"
         >
-          <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden="true" />
+          <CheckCircle2
+            className="mt-0.5 size-4 shrink-0 text-brand"
+            aria-hidden="true"
+          />
           <p className="flex-1">{notice}</p>
-          <Button variant="ghost" size="icon" className="size-11" onClick={() => setNotice("")} aria-label="Dismiss message">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11"
+            onClick={() => setNotice("")}
+            aria-label="Dismiss message"
+          >
+            <X aria-hidden="true" />
+          </Button>
+        </div>
+      )}
+
+      {errorNotice && (
+        <div
+          role="alert"
+          className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
+        >
+          <p className="flex-1">{errorNotice}</p>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11"
+            onClick={() => setErrorNotice("")}
+            aria-label="Dismiss error"
+          >
             <X aria-hidden="true" />
           </Button>
         </div>
@@ -133,9 +313,24 @@ function RecordsManagement() {
       {view === "residents" && (
         <>
           <div className="grid gap-4 sm:grid-cols-3">
-            <StatCard icon={Users} label="Resident Records" value={String(residents.length)} description="Resident records in this view" />
-            <StatCard icon={CreditCard} label="Residents with Valid ID" value={String(residents.filter((resident) => resident.idStatus === "Valid").length)} description="Active Barangay ID on record" />
-            <StatCard icon={Archive} label="Record Removal" value="Archive" description="Prefer inactive status over permanent deletion" />
+            <StatCard
+              icon={Users}
+              label="Resident Records"
+              value={residentsQuery.data ? String(total) : "—"}
+              description="Matching the current search and filter"
+            />
+            <StatCard
+              icon={CreditCard}
+              label="Residents with Valid ID"
+              value={validIds}
+              description="Latest Barangay ID is still valid"
+            />
+            <StatCard
+              icon={Archive}
+              label="Record Removal"
+              value="Archive"
+              description="Prefer inactive status over permanent deletion"
+            />
           </div>
 
           <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
@@ -149,7 +344,10 @@ function RecordsManagement() {
               <div className="flex flex-col gap-2 sm:flex-row">
                 <label className="relative block min-w-0 flex-1 sm:max-w-sm">
                   <span className="sr-only">Search resident records</span>
-                  <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                  <Search
+                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden="true"
+                  />
                   <input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
@@ -159,103 +357,178 @@ function RecordsManagement() {
                 </label>
                 <label className="sm:w-44">
                   <span className="sr-only">Filter by record status</span>
-                  <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "Active" | "Archived" | "all")} className={inputClass}>
-                    <option value="Active">Active</option>
-                    <option value="Archived">Archived</option>
+                  <select
+                    value={statusFilter}
+                    onChange={(event) =>
+                      setStatusFilter(
+                        event.target.value as "active" | "archived" | "all",
+                      )
+                    }
+                    className={inputClass}
+                  >
+                    <option value="active">Active</option>
+                    <option value="archived">Archived</option>
                     <option value="all">All statuses</option>
-                  </select>
-                </label>
-                <label className="sm:w-56">
-                  <span className="sr-only">Filter by resident type</span>
-                  <select value={residentTypeFilter} onChange={(event) => setResidentTypeFilter(event.target.value)} className={inputClass}>
-                    <option value="all">All resident types</option>
-                    {[...new Set(residents.map((resident) => resident.residentType))].map((type) => <option key={type}>{type}</option>)}
                   </select>
                 </label>
               </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[1040px] text-left text-sm">
-                <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>
-                    {["Resident", "Birthdate / Age", "Address", "Resident type", "Barangay ID", "Status", "Actions"].map((label) => (
-                      <th key={label} className={`px-4 py-3 align-middle font-medium sm:px-5 ${label === "Actions" ? "text-right" : ""}`}>{label}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {residentPagination.paginatedItems.map((resident) => {
-                    const birthdate = new Date(`${resident.birthdate}T00:00:00`)
-                    const formattedBirthdate = birthdate.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" })
-                    const today = new Date()
-                    let age = today.getFullYear() - birthdate.getFullYear()
-                    if (today.getMonth() < birthdate.getMonth() || (today.getMonth() === birthdate.getMonth() && today.getDate() < birthdate.getDate())) age -= 1
-                    const archived = resident.status === "Archived"
-                    return (
-                      <tr key={resident.id} className={cn("transition-colors hover:bg-muted/30", archived && "opacity-70")}>
-                        <td className="px-4 py-3 align-middle sm:px-5">
-                          <p className="font-semibold">{resident.name}</p>
-                          <p className="mt-1 font-mono text-xs text-muted-foreground">{resident.id}</p>
-                        </td>
-                        <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">{formattedBirthdate} · {age} yrs</td>
-                        <td className="max-w-[220px] truncate px-4 py-3 align-middle sm:px-5" title={resident.address}>{resident.address}</td>
-                        <td className="px-4 py-3 align-middle sm:px-5">{resident.residentType}</td>
-                        <td className="px-4 py-3 align-middle sm:px-5">
-                          <Badge variant="outline" className={statusStyles[resident.idStatus]}>{resident.idStatus}</Badge>
-                        </td>
-                        <td className="px-4 py-3 align-middle sm:px-5"><Badge variant="outline" className={statusStyles[resident.status]}>{resident.status}</Badge></td>
-                        <td className="px-4 py-3 align-middle sm:px-5">
-                          <RowActions
-                            name={resident.name}
-                            isAdmin={isAdmin}
-                            primary={{
-                              label: "View profile",
-                              variant: "outline",
-                              onSelect: () => {
-                                setSelectedResident(resident)
-                                setProfileTab("Details")
-                                setIsEditingResident(false)
-                              },
-                            }}
-                            items={[
-                              {
-                                label: "Edit details",
-                                hidden: archived,
-                                onSelect: () => {
-                                  setSelectedResident(resident)
-                                  setProfileTab("Details")
-                                  setIsEditingResident(true)
-                                },
-                              },
-                              {
-                                label: "New issuance",
-                                hidden: archived,
-                                onSelect: () => window.location.assign(`/issuances?resident=${encodeURIComponent(resident.id)}`),
-                              },
-                              {
-                                label: "Archive",
-                                adminOnly: true,
-                                hidden: archived,
-                                destructive: true,
-                                onSelect: () => setArchiveTarget(resident),
-                              },
-                              {
-                                label: "Restore from archive",
-                                adminOnly: true,
-                                hidden: !archived,
-                                onSelect: () => setRestoreTarget(resident),
-                              },
-                            ]}
-                          />
-                        </td>
+            {residentsQuery.isLoading ? (
+              <LoadingState title="Loading residents..." />
+            ) : residentsQuery.isError ? (
+              <ErrorState
+                title="Could not load residents"
+                description="Check your connection and try again."
+                onRetry={() => residentsQuery.refetch()}
+              />
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[960px] text-left text-sm">
+                    <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+                      <tr>
+                        {[
+                          "Resident",
+                          "Birthdate / Age",
+                          "Address",
+                          "Resident type",
+                          "Barangay ID",
+                          "Status",
+                          "Actions",
+                        ].map((label) => (
+                          <th
+                            key={label}
+                            className={`px-4 py-3 align-middle font-medium sm:px-5 ${label === "Actions" ? "text-right" : ""}`}
+                          >
+                            {label}
+                          </th>
+                        ))}
                       </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-              {filteredResidents.length === 0 ? <EmptyState title="No matching residents" description="Try a different name, address, ID number, or filter." /> : null}
-            </div>
-            <TablePagination start={residentPagination.start} end={residentPagination.end} total={residentPagination.total} pageIndex={residentPagination.pageIndex} pageCount={residentPagination.pageCount} onPageChange={residentPagination.setPageIndex} />
+                    </thead>
+                    <tbody className="divide-y">
+                      {residents.map((resident) => {
+                        const archived = resident.status === "archived"
+                        const statusText = archived ? "Archived" : "Active"
+                        const address = residentAddress(resident, streetNames)
+                        return (
+                          <tr
+                            key={resident.id}
+                            className={cn(
+                              "transition-colors hover:bg-muted/30",
+                              archived && "opacity-70",
+                            )}
+                          >
+                            <td className="px-4 py-3 align-middle sm:px-5">
+                              <p className="font-semibold">
+                                {resident.full_name}
+                              </p>
+                              <p
+                                className="mt-1 font-mono text-xs text-muted-foreground"
+                                title={resident.id}
+                              >
+                                {resident.id.slice(0, 8)}…
+                              </p>
+                            </td>
+                            <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                              {resident.birthdate
+                                ? `${formatBusinessDate(resident.birthdate)}${resident.age !== null ? ` · ${resident.age} yrs` : ""}`
+                                : "—"}
+                            </td>
+                            <td
+                              className="max-w-[220px] truncate px-4 py-3 align-middle sm:px-5"
+                              title={address}
+                            >
+                              {address || "—"}
+                            </td>
+                            <td className="px-4 py-3 align-middle sm:px-5">
+                              {resident.resident_type || "—"}
+                            </td>
+                            <td className="px-4 py-3 align-middle sm:px-5">
+                              {resident.id_number ? (
+                                <span className="font-mono">
+                                  {resident.id_number}
+                                </span>
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className={statusStyles.None}
+                                >
+                                  None
+                                </Badge>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 align-middle sm:px-5">
+                              <Badge
+                                variant="outline"
+                                className={statusStyles[statusText]}
+                              >
+                                {statusText}
+                              </Badge>
+                            </td>
+                            <td className="px-4 py-3 align-middle sm:px-5">
+                              <RowActions
+                                name={resident.full_name}
+                                isAdmin={isAdmin}
+                                primary={{
+                                  label: "View profile",
+                                  variant: "outline",
+                                  onSelect: () => {
+                                    setSelectedResident(resident)
+                                    setProfileTab("Details")
+                                  },
+                                }}
+                                items={[
+                                  {
+                                    label: "Edit details",
+                                    hidden: archived,
+                                    onSelect: () => openForm(resident),
+                                  },
+                                  {
+                                    label: "New issuance",
+                                    hidden: archived,
+                                    onSelect: () =>
+                                      window.location.assign(
+                                        `/issuances?resident=${encodeURIComponent(resident.id)}`,
+                                      ),
+                                  },
+                                  {
+                                    label: "Archive",
+                                    adminOnly: true,
+                                    hidden: archived,
+                                    destructive: true,
+                                    onSelect: () => setArchiveTarget(resident),
+                                  },
+                                  {
+                                    label: "Restore from archive",
+                                    adminOnly: true,
+                                    hidden: !archived,
+                                    onSelect: () => setRestoreTarget(resident),
+                                  },
+                                ]}
+                              />
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                  {residents.length === 0 ? (
+                    <EmptyState
+                      title="No matching residents"
+                      description="Try a different name, address, ID number, or filter."
+                    />
+                  ) : null}
+                </div>
+                <TablePagination
+                  start={start}
+                  end={end}
+                  total={total}
+                  pageIndex={pageIndex}
+                  pageCount={pageCount}
+                  onPageChange={setPageIndex}
+                />
+              </>
+            )}
           </section>
         </>
       )}
@@ -265,7 +538,9 @@ function RecordsManagement() {
       {view === "family-sector" && (
         <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
-            <span className="rounded-lg bg-brand/10 p-2.5 text-brand"><Users className="size-5" aria-hidden="true" /></span>
+            <span className="rounded-lg bg-brand/10 p-2.5 text-brand">
+              <Users className="size-5" aria-hidden="true" />
+            </span>
             <div>
               <h2 className="font-semibold tracking-tight">
                 Family, Beneficiary, and Marginalized-Sector Details
@@ -329,7 +604,9 @@ function RecordsManagement() {
       {view === "import" && isAdmin && (
         <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
-            <span className="rounded-lg bg-brand/10 p-2.5 text-brand"><FileUp className="size-5" aria-hidden="true" /></span>
+            <span className="rounded-lg bg-brand/10 p-2.5 text-brand">
+              <FileUp className="size-5" aria-hidden="true" />
+            </span>
             <div>
               <h2 className="font-semibold">Import Existing Masterlist</h2>
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
@@ -421,7 +698,10 @@ function RecordsManagement() {
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     {["Field", "Source column", "Validation"].map((label) => (
-                      <th key={label} className="px-4 py-3 align-middle font-medium sm:px-5">
+                      <th
+                        key={label}
+                        className="px-4 py-3 align-middle font-medium sm:px-5"
+                      >
                         {label}
                       </th>
                     ))}
@@ -434,9 +714,16 @@ function RecordsManagement() {
                     ["Resident type", "Resident Type", "Check allowed values"],
                     ["Barangay ID number", "ID Number", "Check duplicates"],
                   ].map((row) => (
-                    <tr key={row[0]} className="transition-colors hover:bg-muted/30">
-                      <td className="px-4 py-3 align-middle font-medium sm:px-5">{row[0]}</td>
-                      <td className="px-4 py-3 align-middle sm:px-5">{row[1]}</td>
+                    <tr
+                      key={row[0]}
+                      className="transition-colors hover:bg-muted/30"
+                    >
+                      <td className="px-4 py-3 align-middle font-medium sm:px-5">
+                        {row[0]}
+                      </td>
+                      <td className="px-4 py-3 align-middle sm:px-5">
+                        {row[1]}
+                      </td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {row[2]}
                       </td>
@@ -454,7 +741,10 @@ function RecordsManagement() {
                 ["Skipped", "Pending"],
                 ["Failed", "Pending"],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+                <div
+                  key={label}
+                  className="rounded-xl border bg-card p-4 shadow-sm sm:p-5"
+                >
                   <p className="text-sm text-muted-foreground">{label}</p>
                   <p className="mt-2 text-xl font-semibold">{value}</p>
                 </div>
@@ -462,61 +752,100 @@ function RecordsManagement() {
             </div>
           ) : null}
           <div className="mt-5 flex flex-wrap justify-between gap-3 border-t pt-4">
-            <Button className="min-h-11" type="button" variant="outline" disabled={importStep === 0} onClick={() => setImportStep((step) => Math.max(0, step - 1))}>Previous step</Button>
-            <Button className="min-h-11" type="button" disabled={importStep === 3 || (importStep === 0 && !selectedFile)} onClick={() => setImportStep((step) => Math.min(3, step + 1))}>{importStep === 2 ? "Review results" : "Continue"}</Button>
+            <Button
+              className="min-h-11"
+              type="button"
+              variant="outline"
+              disabled={importStep === 0}
+              onClick={() => setImportStep((step) => Math.max(0, step - 1))}
+            >
+              Previous step
+            </Button>
+            <Button
+              className="min-h-11"
+              type="button"
+              disabled={importStep === 3 || (importStep === 0 && !selectedFile)}
+              onClick={() => setImportStep((step) => Math.min(3, step + 1))}
+            >
+              {importStep === 2 ? "Review results" : "Continue"}
+            </Button>
           </div>
         </section>
       )}
 
       <ConfirmDialog
         open={archiveTarget !== null}
-        onOpenChange={(open) => { if (!open) setArchiveTarget(null) }}
+        onOpenChange={(open) => {
+          if (!open) setArchiveTarget(null)
+        }}
         title="Archive resident record?"
-        description={archiveTarget ? `Archive ${archiveTarget.name}? The record will remain in history.` : "Confirm archive."}
+        description={
+          archiveTarget
+            ? `Archive ${archiveTarget.full_name}? The record will remain in history.`
+            : "Confirm archive."
+        }
         confirmLabel="Archive record"
         destructive
         reason="required"
         onConfirm={(reason) => {
           if (!archiveTarget) return
-          setResidents((current) => current.map((resident) => resident.id === archiveTarget.id ? { ...resident, status: "Archived", archiveReason: reason } : resident))
-          setNotice(`${archiveTarget.name} was archived.`)
+          archiveMutation.mutate({
+            resident: archiveTarget,
+            reason: reason.trim(),
+          })
           setArchiveTarget(null)
         }}
       />
       <ConfirmDialog
         open={restoreTarget !== null}
-        onOpenChange={(open) => { if (!open) setRestoreTarget(null) }}
+        onOpenChange={(open) => {
+          if (!open) setRestoreTarget(null)
+        }}
         title="Restore resident record?"
-        description={restoreTarget ? `Restore ${restoreTarget.name} to active records?` : "Confirm restore."}
+        description={
+          restoreTarget
+            ? `Restore ${restoreTarget.full_name} to active records?`
+            : "Confirm restore."
+        }
         confirmLabel="Restore record"
         onConfirm={() => {
           if (!restoreTarget) return
-          setResidents((current) => current.map((resident) => resident.id === restoreTarget.id ? { ...resident, status: "Active", archiveReason: undefined } : resident))
-          setNotice(`${restoreTarget.name} was restored.`)
+          restoreMutation.mutate(restoreTarget)
           setRestoreTarget(null)
+        }}
+      />
+      <ResidentFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        resident={formResident}
+        streets={streets}
+        sectors={sectors}
+        onSaved={(saved, mode) => {
+          setFormOpen(false)
+          setNotice(
+            mode === "created"
+              ? `${saved.full_name} was added.`
+              : `${saved.full_name} was updated.`,
+          )
+          setErrorNotice("")
+          setSelectedResident((current) =>
+            current && current.id === saved.id ? saved : current,
+          )
+          refreshResidents()
         }}
       />
       <ResidentProfileDialog
         resident={selectedResident}
         onOpenChange={(open) => {
-          if (!open) {
-            setSelectedResident(null)
-            setIsEditingResident(false)
-          }
+          if (!open) setSelectedResident(null)
         }}
         profileTab={profileTab}
         onProfileTabChange={setProfileTab}
-        editable={selectedResident?.status === "Active"}
-        startInEditMode={isEditingResident}
-        onSave={(updatedResident) => {
-          setResidents((current) =>
-            current.map((resident) =>
-              resident.id === updatedResident.id ? updatedResident : resident,
-            ),
-          )
-          setSelectedResident(updatedResident)
-          setNotice("Resident details updated in the current view.")
-          setIsEditingResident(false)
+        streets={streetNames}
+        sectors={sectors}
+        documentTypes={documentTypesQuery.data ?? []}
+        onEdit={() => {
+          if (selectedResident) openForm(selectedResident)
         }}
       />
     </div>
