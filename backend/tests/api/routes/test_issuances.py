@@ -18,7 +18,7 @@ from app.models_foundation import (
     Street,
     TricycleAssociation,
 )
-from app.models_issuance import Issuance, Tricycle
+from app.models_issuance import DOCUMENT_RULES, Issuance, Tricycle
 from app.models_residents import Resident
 from tests.utils.utils import random_lower_string
 
@@ -166,9 +166,14 @@ def test_requires_login(client: TestClient) -> None:
     assert client.post(f"{ISS}/", json={}).status_code == 401
 
 
-def test_unsupported_document_type_is_not_implemented(
-    client: TestClient, staff_token_headers: Headers, street_id: int
+def test_document_type_without_rules_is_not_implemented(
+    client: TestClient,
+    staff_token_headers: Headers,
+    street_id: int,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    # Every seeded type has rules now, so take one away to reach the 501 path.
+    monkeypatch.delitem(DOCUMENT_RULES, "BARANGAY_ID")
     res = _resident(client, staff_token_headers, street_id)
     r = client.post(
         f"{ISS}/",

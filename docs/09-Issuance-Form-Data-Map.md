@@ -138,7 +138,7 @@ Source: the stamp box and receipt cells of the office's current *Clearance Issui
 
 ### `issuance_resident_snapshot` (1:1, written only when `issued`)
 
-`full_name`, `address_line`, `birth_date`, `birth_place`, `sex`, `civil_status`, `resident_since_year`, `resident_since_birth`. Copied from the resident at the moment of issue. The photo is **not** snapshotted in Version 1: a reprint uses the resident's current photo (revisit with D-45).
+`full_name`, `address_line`, `birth_date`, `birth_place`, `sex`, `civil_status`, `resident_since_year`, `resident_since_birth`, and for a Barangay ID only `emergency_contact_name`, `emergency_contact_address`, `emergency_contact_phone` (printed on the card back). Copied from the resident at the moment of issue. The photo is **not** snapshotted in Version 1: a reprint uses the resident's current photo (revisit with D-45).
 
 ## Document detail tables (1:1 with `issuances`)
 
@@ -153,7 +153,7 @@ Source: the stamp box and receipt cells of the office's current *Clearance Issui
 | `issuance_assistance` | Assistance requested → `assistance_type` (`financial`, `medical`, `burial`); For → `for_self` (bool); Name → `beneficiary_name`; Relationship → `beneficiary_relationship` (both required when `for_self` is false) |
 | `issuance_marginalized_sector` | Health condition → `health_condition`. **Sensitive:** masked as `[restricted]` in every list, returned only by the single-issuance endpoint, and each read is audited (decision 3) |
 | `issuance_first_time_jobseeker` | Educational attainment → `educational_attainment`; Course → `course` (default `N/A`); JobStart beneficiary → `is_jobstart_beneficiary` (bool); Witness → `witness_official_id` (FK `officials`). "Parts to print" is a print-time choice and is **not stored**. Rule: one issued row per resident, enforced with a partial unique index on `(resident_id)` where `status = 'issued'` |
-| `issuance_barangay_id` | Transaction → `transaction_type` (`new`, `renewal`, `replacement`); Valid until → `valid_until`; `id_number` (the number printed on this card). The number is assigned on issue and also becomes the resident's current number (`residents.id_number`), so each card keeps its own history row (decision 2) |
+| `issuance_barangay_id` | Transaction → `transaction_type` (`new`, `renewal`, `replacement`); Valid until → `valid_until`; `id_number` (the number printed on this card). The number is assigned on issue and also becomes the resident's current number (`residents.id_number`), so each card keeps its own history row (decision 2). **Rules as built:** the clerk types `valid_until` (validity length is open, D-18) and, for a new card, the number (series is open, D-43); a renewal or replacement keeps the resident's current number unless another is typed. `new` is refused when the resident already has a card or a number on record; `renewal` and `replacement` need one of them. A number held by another resident is refused. `expires_on` is set to `valid_until`. Issue needs birthdate, birth place, civil status, sex, the address trio, the three emergency contact fields and a photo on the resident record. A voided card leaves `residents.id_number` unchanged |
 
 Residency has no detail table (wording is open, D-15). "Residing since" is a resident-record value, not an issuance column.
 

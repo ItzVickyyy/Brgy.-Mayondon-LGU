@@ -1,9 +1,10 @@
 """Issuance API: drafts, issuing, correcting and voiding documents.
 
 Supported document types are listed in ``DOCUMENT_RULES`` (models_issuance.py);
-the Barangay ID is not supported yet and answers 501.
+a type without an entry answers 501.
 Every route needs ISSUANCE_WRITE (Staff and System Administrator), except void,
-which needs ISSUANCE_VOID (System Administrator only).
+which needs ISSUANCE_VOID (System Administrator only). Barangay ID drafts also
+need ID_WRITE (docs/05), checked once the document type is known.
 
 Life of a document:
   draft  --issue-->  issued  --void (admin, reason)-->  voided
@@ -21,12 +22,13 @@ from typing import Annotated, Any, Literal
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
 from sqlalchemy import func as sa_func
 from sqlalchemy import text
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, delete, select
 
 from app.api.deps import SessionDep, require_permission
 from app.core.audit import record_audit_event
 from app.core.dates import add_months, today_manila
-from app.core.permissions import Permission
+from app.core.permissions import Permission, has_permission
 from app.models import User
 from app.models_foundation import (
     DocumentType,
@@ -45,12 +47,14 @@ from app.models_issuance import (
     RESTRICTED,
     SECTOR_LIMITS,
     AssistancePublic,
+    BarangayIdPublic,
     FranchiseIn,
     FranchisePublic,
     IdentificationPublic,
     IndigencyPublic,
     Issuance,
     IssuanceAssistance,
+    IssuanceBarangayId,
     IssuanceCreate,
     IssuanceFirstTimeJobseeker,
     IssuanceFranchise,
@@ -75,7 +79,7 @@ from app.models_issuance import (
     Tricycle,
     UtilityPublic,
 )
-from app.models_residents import Resident, build_full_name
+from app.models_residents import Resident, ResidentPhoto, build_full_name
 
 router = APIRouter(prefix="/issuances", tags=["issuances"])
 
@@ -126,6 +130,16 @@ def _require_draft(issuance: Issuance) -> None:
         raise HTTPException(
             status_code=409,
             detail="Only a draft can be edited. Use correct to change an issued document",
+        )
+
+
+def _require_id_permission(user: User, code: str) -> None:
+    """Barangay ID work needs ID_WRITE as well (docs/05). Today Staff and the
+    System Administrator both hold it; the check keeps the two apart if the
+    matrix ever changes."""
+    if code == "BARANGAY_ID" and not has_permission(user, Permission.ID_WRITE):
+        raise HTTPException(
+            status_code=403, detail="Not allowed to work with Barangay IDs"
         )
 
 
@@ -368,6 +382,15 @@ def _apply_sections(
             issuance.id,
             None if data.assistance is None else data.assistance.model_dump(),
         )
+    if "barangay_id" in sent and "barangay_id" in allowed:
+        card = data.barangay_id
+        # A card that is still a draft keeps the number the clerk typed, if any.
+        _replace_one(
+            session,
+            IssuanceBarangayId,
+            issuance.id,
+            None if card is None else card.model_dump(),
+        )
     if "jobseeker" in sent and "jobseeker" in allowed:
         job = data.jobseeker
         if (
@@ -470,6 +493,9 @@ def _public(
     job = session.get(IssuanceFirstTimeJobseeker, issuance.id)
     if job:
         data["jobseeker"] = JobseekerPublic.model_validate(job.model_dump())
+    card = session.get(IssuanceBarangayId, issuance.id)
+    if card:
+        data["barangay_id"] = BarangayIdPublic.model_validate(card.model_dump())
     snap = session.get(IssuanceResidentSnapshot, issuance.id)
     if snap:
         data["snapshot"] = SnapshotPublic.model_validate(snap.model_dump())
@@ -533,6 +559,7 @@ def create_issuance(
 ) -> IssuancePublic:
     """Create a draft. Detail sections are saved when they are sent complete."""
     doc_type = _doc_type(session, body.document_type_id)
+    _require_id_permission(user, doc_type.code)
     _require_active(_resident(session, body.resident_id))
     _check_core_references(
         session, purpose_id=body.purpose_id, official_id=body.signatory_official_id
@@ -584,12 +611,13 @@ def get_issuance(
 
 @router.patch("/{issuance_id}", response_model=IssuancePublic)
 def update_draft(
-    issuance_id: uuid.UUID, body: IssuanceUpdate, session: SessionDep, _user: WriteUser
+    issuance_id: uuid.UUID, body: IssuanceUpdate, session: SessionDep, user: WriteUser
 ) -> IssuancePublic:
     issuance = _get_or_404(session, issuance_id)
     _require_draft(issuance)
     doc_type = session.get(DocumentType, issuance.document_type_id)
     assert doc_type is not None
+    _require_id_permission(user, doc_type.code)
     _require_active(_resident(session, issuance.resident_id))
     sent = body.model_fields_set
     if "issue_date" in sent:
@@ -617,7 +645,7 @@ def update_draft(
 
 @router.delete("/{issuance_id}", status_code=204)
 def discard_draft(
-    issuance_id: uuid.UUID, session: SessionDep, _user: WriteUser
+    issuance_id: uuid.UUID, session: SessionDep, user: WriteUser
 ) -> Response:
     """Discard a draft. Issued and voided documents are never deleted."""
     issuance = _get_or_404(session, issuance_id)
@@ -625,6 +653,9 @@ def discard_draft(
         raise HTTPException(
             status_code=409, detail="Only a draft can be discarded. Void it instead"
         )
+    doc_type = session.get(DocumentType, issuance.document_type_id)
+    assert doc_type is not None
+    _require_id_permission(user, doc_type.code)
     session.delete(issuance)
     session.commit()
     return Response(status_code=204)
@@ -641,6 +672,7 @@ def _missing_sections(session: Session, issuance: Issuance, code: str) -> list[s
         is not None,
         "assistance": session.get(IssuanceAssistance, issuance.id) is not None,
         "jobseeker": session.get(IssuanceFirstTimeJobseeker, issuance.id) is not None,
+        "barangay_id": session.get(IssuanceBarangayId, issuance.id) is not None,
         "sectors": session.exec(
             select(IssuanceSector.sector_id).where(
                 IssuanceSector.issuance_id == issuance.id
@@ -651,7 +683,9 @@ def _missing_sections(session: Session, issuance: Issuance, code: str) -> list[s
     return [s for s in DOCUMENT_RULES[code]["sections"] if not present[s]]
 
 
-def _resident_field_missing(resident: Resident, field: str) -> bool:
+def _resident_field_missing(session: Session, resident: Resident, field: str) -> bool:
+    if field == "photo":
+        return session.get(ResidentPhoto, resident.id) is None
     if field == "resident_since":
         return (
             resident.resident_since_year is None and not resident.resident_since_birth
@@ -689,6 +723,97 @@ def _resolve_purpose(session: Session, issuance: Issuance, name: str | None) -> 
     return added
 
 
+def _issued_card_exists(session: Session, resident_id: uuid.UUID) -> bool:
+    return (
+        session.exec(
+            select(Issuance.id)
+            .join(
+                IssuanceBarangayId,
+                col(IssuanceBarangayId.issuance_id) == col(Issuance.id),
+            )
+            .where(Issuance.resident_id == resident_id, Issuance.status == "issued")
+        ).first()
+        is not None
+    )
+
+
+def _prepare_id_card(
+    session: Session, issuance: Issuance, resident: Resident
+) -> IssuanceBarangayId:
+    """Check the ID card rules and settle its number. Raises 409 or 422.
+
+    The numbering series is still open (D-43), so the clerk types the number
+    for a new card; a renewal or replacement keeps the resident's current
+    number unless another is typed. ``valid_until`` is also typed because the
+    validity length is open (D-18).
+    """
+    card = session.get(IssuanceBarangayId, issuance.id)
+    assert card is not None
+    if card.valid_until <= issuance.issue_date:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "invalid_valid_until",
+                "message": "valid_until must be after the issue date",
+            },
+        )
+    # A correction replaces a card that is already in the history; skip the
+    # new/renewal check for it.
+    if issuance.corrects_issuance_id is None:
+        has_card = _issued_card_exists(session, resident.id)
+        has_number = resident.id_number is not None
+        if card.transaction_type == "new" and (has_card or has_number):
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "id_already_exists",
+                    "message": "This resident already has an ID. "
+                    "Use renewal or replacement",
+                },
+            )
+        if card.transaction_type != "new" and not (has_card or has_number):
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "no_earlier_id",
+                    "message": "This resident has no earlier ID. Use new",
+                },
+            )
+    number = card.id_number or resident.id_number
+    if number is None:
+        raise HTTPException(status_code=422, detail={"code": "id_number_required"})
+    clash = (
+        session.exec(
+            select(Resident.id).where(
+                sa_func.lower(col(Resident.id_number)) == number.lower(),
+                Resident.id != resident.id,
+            )
+        ).first()
+        or session.exec(
+            select(Issuance.id)
+            .join(
+                IssuanceBarangayId,
+                col(IssuanceBarangayId.issuance_id) == col(Issuance.id),
+            )
+            .where(
+                Issuance.status == "issued",
+                Issuance.resident_id != resident.id,
+                sa_func.lower(col(IssuanceBarangayId.id_number)) == number.lower(),
+            )
+        ).first()
+    )
+    if clash is not None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "id_number_in_use",
+                "message": "This ID number belongs to another resident",
+            },
+        )
+    card.id_number = number
+    return card
+
+
 @router.post("/{issuance_id}/issue", response_model=IssuancePublic)
 def issue(
     issuance_id: uuid.UUID,
@@ -716,7 +841,7 @@ def issue(
     missing_fields = [
         f
         for f in DOCUMENT_RULES[doc_type.code]["resident_fields"]
-        if _resident_field_missing(resident, f)
+        if _resident_field_missing(session, resident, f)
     ]
     if missing_fields:
         raise HTTPException(
@@ -760,6 +885,16 @@ def issue(
                 detail="This official receipt number is already used by another document",
             )
 
+    card: IssuanceBarangayId | None = None
+    if doc_type.code == "BARANGAY_ID":
+        _require_id_permission(user, doc_type.code)
+        # Lock the resident so two cards cannot take the same number or
+        # both be "new" for one person.
+        session.exec(
+            select(Resident.id).where(Resident.id == resident.id).with_for_update()
+        ).first()
+        card = _prepare_id_card(session, issuance, resident)
+
     purpose_added = _resolve_purpose(
         session, issuance, body.purpose_name if body else None
     )
@@ -774,6 +909,12 @@ def issue(
     issuance.updated_at = now
     if doc_type.validity_months:
         issuance.expires_on = add_months(issuance.issue_date, doc_type.validity_months)
+    if card is not None:
+        issuance.expires_on = card.valid_until
+        session.add(card)
+        resident.id_number = card.id_number
+        resident.updated_at = now
+        session.add(resident)
     session.add(issuance)
     session.add(
         IssuanceResidentSnapshot(
@@ -786,12 +927,19 @@ def issue(
             civil_status=resident.civil_status,
             resident_since_year=resident.resident_since_year,
             resident_since_birth=resident.resident_since_birth,
+            emergency_contact_name=resident.emergency_contact_name if card else None,
+            emergency_contact_address=(
+                resident.emergency_contact_address if card else None
+            ),
+            emergency_contact_phone=resident.emergency_contact_phone if card else None,
         )
     )
     details: dict[str, Any] = {
         "document_type": doc_type.code,
         "reference_no": issuance.reference_no,
     }
+    if card is not None:
+        details["id_transaction"] = card.transaction_type
     if purpose_added:
         details["purpose_added"] = True
     if issuance.corrects_issuance_id is not None:
@@ -805,7 +953,20 @@ def issue(
         record_id=issuance.id,
         details=details,
     )
-    session.commit()
+    try:
+        session.commit()
+    except IntegrityError as exc:
+        # Two clerks took the same ID number at once; the unique index decided.
+        session.rollback()
+        if card is None:
+            raise
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "id_number_in_use",
+                "message": "This ID number belongs to another resident",
+            },
+        ) from exc
     session.refresh(issuance)
     return _public(session, issuance)
 
@@ -824,6 +985,9 @@ def correct(
         raise HTTPException(
             status_code=409, detail="Only an issued document can be corrected"
         )
+    original_type = session.get(DocumentType, original.document_type_id)
+    assert original_type is not None
+    _require_id_permission(user, original_type.code)
     _require_active(_resident(session, original.resident_id))
     open_draft = session.exec(
         select(Issuance.id).where(
@@ -857,6 +1021,7 @@ def correct(
         IssuanceMarginalizedSector,
         IssuanceAssistance,
         IssuanceFirstTimeJobseeker,
+        IssuanceBarangayId,
     ):
         row = session.get(model, original.id)
         if row is not None:
