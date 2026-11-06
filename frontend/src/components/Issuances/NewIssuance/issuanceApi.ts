@@ -669,6 +669,7 @@ function toMockIssuance(issuance: IssuancePublic): MockIssuance {
           | "renewal"
           | "replacement",
         validUntil: idCard?.valid_until ?? "",
+        idNumber: idCard?.id_number ?? undefined,
       }
       break
     default:
