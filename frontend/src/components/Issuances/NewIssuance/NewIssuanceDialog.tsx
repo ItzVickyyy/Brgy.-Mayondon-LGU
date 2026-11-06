@@ -384,6 +384,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   }
 
   // Restore a server-side draft selected from Issuance History.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: restore once when the selected draft changes.
   useEffect(() => {
     if (!open || !initialDraftId || draftIdRef.current === initialDraftId) return
     let active = true
