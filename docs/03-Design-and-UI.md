@@ -150,7 +150,7 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 
 **Everything below is prototype-only:**
 
-- **The Dashboard is connected** to `GET /api/v1/dashboard` and `GET /api/v1/activity?limit=5` (real counts, charts, expiring list and recent activity; see docs/09). The Admin card "Pending Registrations" shows a dash because there is no registration flow yet. The other pages below are still prototype-only.
+- **The Dashboard is connected** to `GET /api/v1/dashboard` and `GET /api/v1/activity?limit=5` (real counts, charts, expiring list and recent activity; see docs/09). The Admin card "Pending Registrations" shows a dash because there is no registration flow yet. **Reports (`/reports`) is connected** to `GET /api/v1/reports/*` for document type, purpose, expiring records and account activity. Expiring records are a snapshot as of today (the period does not apply), the Sign-ins column was removed (sign-ins are not recorded), and the masterlist import report shows "not available yet" (no import exists, D-19). CSV export is built in the browser from the loaded rows. The other pages below are still prototype-only.
 - Records and Officials show sample rows and do not create, update or delete database records.
 - Issuance drafts live in browser memory for the page session only; refreshing clears them. They are not official issuances and are not connected to a database or API.
 - The Document Management resident selector uses hard-coded sample residents; purposes are hard-coded.
