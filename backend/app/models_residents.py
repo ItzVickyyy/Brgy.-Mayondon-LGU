@@ -316,6 +316,7 @@ class ResidentPublic(ResidentFields):
     age: int | None
     sector_ids: list[int]
     has_photo: bool
+    id_status: Literal["none", "valid", "expiring_soon", "expired"]
     status: str
     archive_reason: str | None
     archived_at: datetime | None
