@@ -4,7 +4,7 @@ Who may do what, the security checklist, and the privacy safeguards for resident
 
 **Read this first:** this is a **checklist and plan, not proof the system is secure.** Record evidence for completed checks and track unresolved risks. Do not tick an item because a feature exists. Passing automated tests means the tested checks passed — nothing more. Undecided items are tagged `(D-xx)`; see [08-Open-Decisions.md](08-Open-Decisions.md).
 
-Last updated: November 5, 2026
+Last updated: November 6, 2026
 
 **Labels:** **Core** applies regardless of client features · **When applicable** only if that feature or deployment model is used · **Before deployment** must be verified on the real hosting/network before real users or data.
 
@@ -21,7 +21,7 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 - **Staff** — routine resident-record and document-issuance work; views and updates the records needed for duties; views their own activity.
 - **System Administrator** — routine work plus user accounts, access, system configuration, reports, backup/restore and administrative review.
 
-**Current implementation (backend):** each account has a `role` of `admin` (UI label: System Administrator) or `staff`, stored in the database with constraints that reject any other value. The legacy `is_superuser` flag is kept for older clients and is always equal to `role = admin` (the database enforces this; the API accepts either field and rejects a conflict). `backend/app/core/permissions.py` holds the role → permission matrix; endpoints ask for a permission (`require_permission`), and the role is read from the database on every request, so a role change or deactivation applies immediately. **Only the user-account endpoints are real so far** (admin only); the other permissions in the matrix are declared for the records, issuance, reports and backup endpoints that do not exist yet. The matrix is still a **proposal, not a client-approved policy (D-10, D-11)**.
+**Current implementation (backend):** each account has a `role` of `admin` (UI label: System Administrator) or `staff`, stored in the database with constraints that reject any other value. The legacy `is_superuser` flag is kept for older clients and is always equal to `role = admin` (the database enforces this; the API accepts either field and rejects a conflict). `backend/app/core/permissions.py` holds the role → permission matrix; implemented resident, lookup, official, issuance, activity, dashboard, report and user routes enforce their declared permissions with `require_permission`. The role is read from the database on every request, so a role change or deactivation applies immediately. `LOOKUPS_MANAGE` is admin-only and controls adding, renaming and deleting unused Streets and Tricycle Associations. Backup/restore routes and account approval states are not implemented. This matrix is still a **proposal, not a client-approved policy (D-10, D-11)**.
 
 ### A3. Proposed access matrix
 
@@ -40,7 +40,7 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 | Activity Log | Own activity | All users, with filters |
 | My Account, User Settings | Allowed | Allowed |
 | Officials, User Accounts, Pending Registrations | No | Allowed |
-| Streets and Tricycle Associations lists (add, rename, remove if unused) | No | Allowed |
+| Streets and Tricycle Associations lists (add, rename, remove if unused; `LOOKUPS_MANAGE`) | No | Allowed |
 | Lookup lists and officials list (read, for the forms) | Allowed | Allowed |
 | Management Reports | No | Allowed |
 | Backup and Restore | No; manual-backup permission to confirm | Allowed |
