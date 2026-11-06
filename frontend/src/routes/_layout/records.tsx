@@ -35,6 +35,7 @@ import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { BarangayIdsView } from "@/components/Records/BarangayIdsView"
+import { LookupListsView } from "@/components/Records/LookupListsView"
 import { ResidentFormDialog } from "@/components/Records/ResidentFormDialog"
 import { ResidentProfileDialog } from "@/components/Records/ResidentProfileDialog"
 import { Badge } from "@/components/ui/badge"
@@ -59,7 +60,7 @@ export const Route = createFileRoute("/_layout/records")({
   head: () => ({ meta: [{ title: pageTitle("Records Management") }] }),
 })
 
-type View = "residents" | "barangay-ids" | "family-sector" | "import"
+type View = "residents" | "barangay-ids" | "family-sector" | "lists" | "import"
 
 const inputClass = formControlClass
 const PAGE_SIZE = 10
@@ -225,7 +226,12 @@ function RecordsManagement() {
     { id: "residents", label: "Residents" },
     { id: "barangay-ids", label: "Barangay IDs" },
     { id: "family-sector", label: "Family & Sector Details" },
-    ...(isAdmin ? [{ id: "import" as const, label: "Import Masterlist" }] : []),
+    ...(isAdmin
+      ? [
+          { id: "lists" as const, label: "Lookup Lists" },
+          { id: "import" as const, label: "Import Masterlist" },
+        ]
+      : []),
   ]
 
   return (
@@ -534,6 +540,8 @@ function RecordsManagement() {
       )}
 
       {view === "barangay-ids" && <BarangayIdsView />}
+
+      {view === "lists" && isAdmin && <LookupListsView />}
 
       {view === "family-sector" && (
         <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
