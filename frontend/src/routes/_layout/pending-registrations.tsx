@@ -4,20 +4,23 @@ import { useMemo, useState } from "react"
 
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
-import { TablePagination, usePagination } from "@/components/Common/TablePagination"
 import { formControlClass } from "@/components/Common/formStyles"
+import { NoPermission } from "@/components/Common/NoPermission"
 import { RowActions } from "@/components/Common/RowActions"
 import { statusStyles } from "@/components/Common/statusStyles"
+import {
+  TablePagination,
+  usePagination,
+} from "@/components/Common/TablePagination"
 import { Badge } from "@/components/ui/badge"
-import { NoPermission } from "@/components/Common/NoPermission"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import {
-  updateRegistrationStatus,
-  useRegistrations,
   type Registration,
   type RegistrationStatus,
+  updateRegistrationStatus,
+  useRegistrations,
 } from "@/lib/registration-store"
 
 export const Route = createFileRoute("/_layout/pending-registrations")({
@@ -61,7 +64,11 @@ function PendingRegistrations() {
         return new Date(a.submitted).getTime() - new Date(b.submitted).getTime()
       })
   }, [registrations, search, statusFilter])
-  const registrationPagination = usePagination(visibleRegistrations, 10, search + "|" + statusFilter)
+  const registrationPagination = usePagination(
+    visibleRegistrations,
+    10,
+    `${search}|${statusFilter}`,
+  )
 
   const isAdmin = isSystemAdministrator(user)
   if (!isAdmin) return <NoPermission />
@@ -87,9 +94,7 @@ function PendingRegistrations() {
         <div className="flex flex-col gap-3 border-b p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-semibold tracking-tight">
-                Access Requests
-              </h2>
+              <h2 className="font-semibold tracking-tight">Access Requests</h2>
               <p className="mt-1 text-sm text-muted-foreground">
                 Review the applicant details before deciding.
               </p>
@@ -118,7 +123,9 @@ function PendingRegistrations() {
               <select
                 value={statusFilter}
                 onChange={(event) =>
-                  setStatusFilter(event.target.value as "all" | RegistrationStatus)
+                  setStatusFilter(
+                    event.target.value as "all" | RegistrationStatus,
+                  )
                 }
                 className={formControlClass}
               >
@@ -135,7 +142,14 @@ function PendingRegistrations() {
           <table className="w-full min-w-[800px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                {["Applicant", "Position", "Email / Username", "Submitted", "Status", "Actions"].map((item) => (
+                {[
+                  "Applicant",
+                  "Position",
+                  "Email / Username",
+                  "Submitted",
+                  "Status",
+                  "Actions",
+                ].map((item) => (
                   <th
                     key={item}
                     className={`px-4 py-3 font-medium align-middle sm:px-5 ${item === "Actions" ? "text-right" : ""}`}
@@ -147,19 +161,34 @@ function PendingRegistrations() {
             </thead>
             <tbody className="divide-y">
               {registrationPagination.paginatedItems.map((row) => (
-                <tr key={row.username} className="transition-colors hover:bg-muted/30">
+                <tr
+                  key={row.username}
+                  className="transition-colors hover:bg-muted/30"
+                >
                   <td className="px-4 py-3 align-middle sm:px-5">
                     <div className="flex items-start gap-2">
-                      <UserRoundCheck className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                      <UserRoundCheck
+                        className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                        aria-hidden="true"
+                      />
                       <span className="font-medium">{row.name}</span>
                     </div>
                   </td>
-                  <td className="px-4 py-3 align-middle sm:px-5">{row.position}</td>
-                  <td className="px-4 py-3 align-middle font-medium sm:px-5">{row.username}</td>
-                  <td className="px-4 py-3 align-middle sm:px-5">{row.submitted}</td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    {row.position}
+                  </td>
+                  <td className="px-4 py-3 align-middle font-medium sm:px-5">
+                    {row.username}
+                  </td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    {row.submitted}
+                  </td>
                   <td className="px-4 py-3 align-middle sm:px-5">
                     <div className="flex flex-col items-start gap-1">
-                      <Badge variant="outline" className={statusStyles[row.status]}>
+                      <Badge
+                        variant="outline"
+                        className={statusStyles[row.status]}
+                      >
                         {row.status}
                       </Badge>
                       {row.decidedBy && row.decidedOn ? (
@@ -181,18 +210,22 @@ function PendingRegistrations() {
                         isAdmin={isAdmin}
                         primary={{
                           label: "Approve as Staff",
-                          onSelect: () => setPendingDecision({ row, status: "Approved" }),
+                          onSelect: () =>
+                            setPendingDecision({ row, status: "Approved" }),
                         }}
                         items={[
                           {
                             label: "Reject",
-                            onSelect: () => setPendingDecision({ row, status: "Rejected" }),
+                            onSelect: () =>
+                              setPendingDecision({ row, status: "Rejected" }),
                             destructive: true,
                           },
                         ]}
                       />
                     ) : (
-                      <span className="block text-right text-muted-foreground">—</span>
+                      <span className="block text-right text-muted-foreground">
+                        —
+                      </span>
                     )}
                   </td>
                 </tr>
@@ -202,11 +235,22 @@ function PendingRegistrations() {
           {visibleRegistrations.length === 0 ? (
             <EmptyState
               title="No registrations found"
-              description="Try a different applicant name, username, date, or status."
+              description={
+                registrations.length === 0
+                  ? "Staff sign-up requests are not available yet, so this list stays empty. An administrator adds staff accounts under User Accounts."
+                  : "Try a different applicant name, username, date, or status."
+              }
             />
           ) : null}
         </div>
-        <TablePagination start={registrationPagination.start} end={registrationPagination.end} total={registrationPagination.total} pageIndex={registrationPagination.pageIndex} pageCount={registrationPagination.pageCount} onPageChange={registrationPagination.setPageIndex} />
+        <TablePagination
+          start={registrationPagination.start}
+          end={registrationPagination.end}
+          total={registrationPagination.total}
+          pageIndex={registrationPagination.pageIndex}
+          pageCount={registrationPagination.pageCount}
+          onPageChange={registrationPagination.setPageIndex}
+        />
       </section>
 
       <ConfirmDialog
@@ -225,7 +269,9 @@ function PendingRegistrations() {
             : "Confirm this registration decision."
         }
         confirmLabel={
-          pendingDecision?.status === "Approved" ? "Approve as Staff" : "Reject request"
+          pendingDecision?.status === "Approved"
+            ? "Approve as Staff"
+            : "Reject request"
         }
         destructive={pendingDecision?.status === "Rejected"}
         reason={pendingDecision?.status === "Rejected" ? "optional" : "none"}
