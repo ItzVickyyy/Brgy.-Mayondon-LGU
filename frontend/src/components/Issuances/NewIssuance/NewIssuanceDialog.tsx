@@ -109,6 +109,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const [autoSave, setAutoSave] = useState<{ state: "idle" | "saving" | "saved" | "error"; at?: Date }>({ state: "idle" })
   const draftIdRef = useRef<string | null>(null)
   const restoredDraftRef = useRef("")
+  const correctionDraftRef = useRef(false)
   const lastSavedRef = useRef("")
   const saveChain = useRef<Promise<unknown>>(Promise.resolve())
   const documentType = form.watch("documentType")
@@ -432,6 +433,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       setSectorManuallySelected(false)
       setValidUntilEdited(true)
       draftIdRef.current = record.id
+      correctionDraftRef.current = Boolean(record.correctsIssuanceId)
       lastSavedRef.current = ""
       setAutoSave({ state: "saved", at: new Date() })
       setSaving(false)
@@ -511,7 +513,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setSaving(true)
     setFormError("")
     try {
-      const check = await issuanceApi.checkIssuance(selectedResident.id, documentType)
+      // A correction draft may replace its linked original. The API still checks for any other issued copy.
+      const check = correctionDraftRef.current
+        ? { existingIssued: undefined }
+        : await issuanceApi.checkIssuance(selectedResident.id, documentType)
       if (check.existingIssued) {
         setDuplicate(check.existingIssued)
         setSaving(false)
@@ -608,6 +613,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setQuickAdd(emptyQuickAdd)
     draftIdRef.current = null
     restoredDraftRef.current = ""
+    correctionDraftRef.current = false
     lastSavedRef.current = ""
     saveChain.current = Promise.resolve()
     setAutoSave({ state: "idle" })
