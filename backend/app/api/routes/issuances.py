@@ -1,6 +1,7 @@
 """Issuance API: drafts, issuing, correcting and voiding documents.
 
-Supported document types are listed in ``DOCUMENT_RULES`` (models_issuance.py).
+Supported document types are listed in ``DOCUMENT_RULES`` (models_issuance.py);
+the Barangay ID is not supported yet and answers 501.
 Every route needs ISSUANCE_WRITE (Staff and System Administrator), except void,
 which needs ISSUANCE_VOID (System Administrator only).
 
@@ -41,16 +42,22 @@ from app.models_issuance import (
     DEFAULT_CLEARANCE_REMARKS,
     DOCUMENT_RULES,
     FREE_RECEIPT,
+    RESTRICTED,
+    SECTOR_LIMITS,
+    AssistancePublic,
     FranchiseIn,
     FranchisePublic,
     IdentificationPublic,
     IndigencyPublic,
     Issuance,
+    IssuanceAssistance,
     IssuanceCreate,
+    IssuanceFirstTimeJobseeker,
     IssuanceFranchise,
     IssuanceIdentification,
     IssuanceIndigency,
     IssuanceListItem,
+    IssuanceMarginalizedSector,
     IssuancePayment,
     IssuancePublic,
     IssuanceResidentSnapshot,
@@ -59,6 +66,8 @@ from app.models_issuance import (
     IssuanceUpdate,
     IssuanceUtility,
     IssueRequest,
+    JobseekerPublic,
+    MarginalizedPublic,
     PaymentPublic,
     ReasonRequest,
     SectorPublic,
@@ -248,7 +257,8 @@ def _apply_sections(
     code: str,
     data: IssuanceCreate | IssuanceUpdate,
 ) -> None:
-    allowed = DOCUMENT_RULES[code]["sections"]
+    rules = DOCUMENT_RULES[code]
+    allowed = rules["sections"] + rules.get("optional_sections", ())
     sent = data.model_fields_set
     for name in ALL_SECTIONS:
         if name in sent and getattr(data, name) is not None and name not in allowed:
@@ -296,6 +306,11 @@ def _apply_sections(
         ids = [s.sector_id for s in sectors]
         if len(set(ids)) != len(ids):
             raise HTTPException(status_code=422, detail="Duplicate sector")
+        if len(ids) > SECTOR_LIMITS[code][1]:
+            raise HTTPException(
+                status_code=422,
+                detail=f"At most {SECTOR_LIMITS[code][1]} sector(s) for this document",
+            )
         if ids:
             found = session.exec(select(Sector.id).where(col(Sector.id).in_(ids))).all()
             if len(found) != len(ids):
@@ -339,6 +354,34 @@ def _apply_sections(
             _replace_one(
                 session, IssuanceFranchise, issuance.id, {"tricycle_id": tricycle.id}
             )
+    if "marginalized" in sent and "marginalized" in allowed:
+        _replace_one(
+            session,
+            IssuanceMarginalizedSector,
+            issuance.id,
+            None if data.marginalized is None else data.marginalized.model_dump(),
+        )
+    if "assistance" in sent and "assistance" in allowed:
+        _replace_one(
+            session,
+            IssuanceAssistance,
+            issuance.id,
+            None if data.assistance is None else data.assistance.model_dump(),
+        )
+    if "jobseeker" in sent and "jobseeker" in allowed:
+        job = data.jobseeker
+        if (
+            job is not None
+            and job.witness_official_id is not None
+            and session.get(Official, job.witness_official_id) is None
+        ):
+            raise HTTPException(status_code=422, detail="Unknown witness")
+        _replace_one(
+            session,
+            IssuanceFirstTimeJobseeker,
+            issuance.id,
+            None if job is None else job.model_dump(),
+        )
 
 
 # --- Reading ------------------------------------------------------------------
@@ -368,7 +411,11 @@ def _item_fields(
     }
 
 
-def _public(session: Session, issuance: Issuance) -> IssuancePublic:
+def _public(
+    session: Session, issuance: Issuance, *, reveal_sensitive: bool = False
+) -> IssuancePublic:
+    """Build the full response. The health condition is masked unless
+    ``reveal_sensitive`` is set; only the audited single read sets it."""
     doc_type = session.get(DocumentType, issuance.document_type_id)
     resident = session.get(Resident, issuance.resident_id)
     assert doc_type is not None and resident is not None
@@ -412,6 +459,17 @@ def _public(session: Session, issuance: Issuance) -> IssuancePublic:
         data["franchise"] = FranchisePublic.model_validate(
             {**tricycle.model_dump(), "tricycle_id": tricycle.id}
         )
+    marg = session.get(IssuanceMarginalizedSector, issuance.id)
+    if marg:
+        data["marginalized"] = MarginalizedPublic(
+            health_condition=marg.health_condition if reveal_sensitive else RESTRICTED
+        )
+    assist = session.get(IssuanceAssistance, issuance.id)
+    if assist:
+        data["assistance"] = AssistancePublic.model_validate(assist.model_dump())
+    job = session.get(IssuanceFirstTimeJobseeker, issuance.id)
+    if job:
+        data["jobseeker"] = JobseekerPublic.model_validate(job.model_dump())
     snap = session.get(IssuanceResidentSnapshot, issuance.id)
     if snap:
         data["snapshot"] = SnapshotPublic.model_validate(snap.model_dump())
@@ -501,9 +559,27 @@ def create_issuance(
 
 @router.get("/{issuance_id}", response_model=IssuancePublic)
 def get_issuance(
-    issuance_id: uuid.UUID, session: SessionDep, _user: WriteUser
+    issuance_id: uuid.UUID, session: SessionDep, user: WriteUser
 ) -> IssuancePublic:
-    return _public(session, _get_or_404(session, issuance_id))
+    """The only response that carries the health condition (decision 3).
+
+    Every read that returns it adds an ``issuance.view_sensitive`` audit row.
+    The row names the field, never the value.
+    """
+    issuance = _get_or_404(session, issuance_id)
+    if session.get(IssuanceMarginalizedSector, issuance.id) is None:
+        return _public(session, issuance)
+    record_audit_event(
+        session,
+        action="issuance.view_sensitive",
+        actor=user,
+        module=MODULE,
+        record_type="issuance",
+        record_id=issuance.id,
+        details={"field": "health_condition"},
+        commit=True,
+    )
+    return _public(session, issuance, reveal_sensitive=True)
 
 
 @router.patch("/{issuance_id}", response_model=IssuancePublic)
@@ -561,6 +637,10 @@ def _missing_sections(session: Session, issuance: Issuance, code: str) -> list[s
         "utility": session.get(IssuanceUtility, issuance.id) is not None,
         "indigency": session.get(IssuanceIndigency, issuance.id) is not None,
         "franchise": session.get(IssuanceFranchise, issuance.id) is not None,
+        "marginalized": session.get(IssuanceMarginalizedSector, issuance.id)
+        is not None,
+        "assistance": session.get(IssuanceAssistance, issuance.id) is not None,
+        "jobseeker": session.get(IssuanceFirstTimeJobseeker, issuance.id) is not None,
         "sectors": session.exec(
             select(IssuanceSector.sector_id).where(
                 IssuanceSector.issuance_id == issuance.id
@@ -569,6 +649,14 @@ def _missing_sections(session: Session, issuance: Issuance, code: str) -> list[s
         is not None,
     }
     return [s for s in DOCUMENT_RULES[code]["sections"] if not present[s]]
+
+
+def _resident_field_missing(resident: Resident, field: str) -> bool:
+    if field == "resident_since":
+        return (
+            resident.resident_since_year is None and not resident.resident_since_birth
+        )
+    return getattr(resident, field) in (None, "")
 
 
 def _address_line(session: Session, resident: Resident) -> str | None:
@@ -628,27 +716,31 @@ def issue(
     missing_fields = [
         f
         for f in DOCUMENT_RULES[doc_type.code]["resident_fields"]
-        if getattr(resident, f) in (None, "")
+        if _resident_field_missing(resident, f)
     ]
     if missing_fields:
         raise HTTPException(
             status_code=422,
             detail={"code": "missing_resident_fields", "fields": missing_fields},
         )
-    if (
-        doc_type.one_per_resident
-        and session.exec(
-            select(Issuance.id).where(
-                Issuance.resident_id == issuance.resident_id,
-                Issuance.document_type_id == issuance.document_type_id,
-                Issuance.status == "issued",
-            )
+    if doc_type.one_per_resident:
+        # Lock the resident so two issues for the same person cannot both pass.
+        session.exec(
+            select(Resident.id).where(Resident.id == resident.id).with_for_update()
         ).first()
-    ):
-        raise HTTPException(
-            status_code=409,
-            detail="This resident already has this document. Void it first or correct it",
+        existing = select(Issuance.id).where(
+            Issuance.resident_id == issuance.resident_id,
+            Issuance.document_type_id == issuance.document_type_id,
+            Issuance.status == "issued",
         )
+        if issuance.corrects_issuance_id is not None:
+            existing = existing.where(Issuance.id != issuance.corrects_issuance_id)
+        if session.exec(existing).first() is not None:
+            raise HTTPException(
+                status_code=409,
+                detail="This resident already has this document. "
+                "Void it first or correct it",
+            )
     payment = session.get(IssuancePayment, issuance.id)
     if payment is not None and not payment.is_free:
         clash = (
@@ -762,6 +854,9 @@ def correct(
         IssuanceUtility,
         IssuanceIndigency,
         IssuanceFranchise,
+        IssuanceMarginalizedSector,
+        IssuanceAssistance,
+        IssuanceFirstTimeJobseeker,
     ):
         row = session.get(model, original.id)
         if row is not None:
