@@ -415,7 +415,11 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         purposeText: issuanceApi.getPurposeLabel(record.payload.purposeId) ?? "",
         residentId: record.residentId,
         status: "draft" as const,
-        details: tricycle ? { ...record.payload.details, ...tricycle } : record.payload.details,
+        details: tricycle
+          ? { ...record.payload.details, ...tricycle }
+          : record.documentType === "FIRST_TIME_JOBSEEKER"
+            ? { ...record.payload.details, parts: ["applicant_sheet", "oath", "certification"] }
+            : record.payload.details,
       }
       form.reset(restored as never)
       setSelectedResident(resident)
