@@ -120,6 +120,8 @@ ID_TRANSACTION_TYPES = ("new", "renewal", "replacement")
 # An ID counts as "expiring soon" this many days before ``valid_until``. The
 # real threshold is open (D-21); change it here only.
 ID_EXPIRING_SOON_DAYS = 30
+# Same idea for Barangay Clearances (reports and dashboard); also open (D-21).
+CLEARANCE_EXPIRING_SOON_DAYS = 30
 RESTRICTED = "[restricted]"  # shown instead of the health condition (decision 3)
 ALL_SECTIONS = (
     "identification",
