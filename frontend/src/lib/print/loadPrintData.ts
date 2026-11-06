@@ -87,14 +87,14 @@ export async function loadPrintData(
       : undefined,
   }
   const data = buildPrintData(issuance, printLookups, name)
-  if (data && printTemplates[data.templateId].photo && api.loadResidentPhoto) {
-    data.photoUrl = await api.loadResidentPhoto(issuance.residentId)
-  }
   if (!data)
     return {
       ok: false,
       message:
         "This document type has no print template yet, so it cannot be printed from here.",
     }
+  if (printTemplates[data.templateId].photo && api.loadResidentPhoto) {
+    data.photoUrl = await api.loadResidentPhoto(issuance.residentId)
+  }
   return { ok: true, data }
 }
