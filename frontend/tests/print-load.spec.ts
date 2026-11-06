@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test"
 import {
   issuanceApi,
   mockIssuanceStore,
-} from "../src/components/Issuances/NewIssuance/issuanceApi"
+} from "../src/components/Issuances/NewIssuance/issuanceApi.mock"
 import { loadPrintData } from "../src/lib/print/loadPrintData"
 import { printOverlayCss } from "../src/lib/print/overlayStyles"
 
@@ -49,7 +49,7 @@ test("clearance loads name, purpose and photo", async () => {
     details: { type: "BARANGAY_CLEARANCE" },
     status: "issued",
   })
-  const result = await loadPrintData(record.id)
+  const result = await loadPrintData(record.id, issuanceApi)
   expect(result.ok).toBe(true)
   if (!result.ok) return
   expect(result.data.templateId).toBe("clearance")
@@ -82,7 +82,7 @@ test("franchise resolves the stored tricycle and association", async () => {
     payment: { officialReceiptNo: "FOC", isFree: true },
     status: "issued",
   })
-  const result = await loadPrintData(record.id)
+  const result = await loadPrintData(record.id, issuanceApi)
   expect(result.ok).toBe(true)
   if (!result.ok) return
   expect(result.data.templateId).toBe("franchise")
@@ -98,7 +98,7 @@ test("franchise resolves the stored tricycle and association", async () => {
 
 test("unknown, voided and template-less documents return a message instead of throwing", async () => {
   const resident = await seedResident()
-  expect(await loadPrintData("nope")).toMatchObject({ ok: false })
+  expect(await loadPrintData("nope", issuanceApi)).toMatchObject({ ok: false })
 
   const residency = await issuanceApi.createIssuance({
     documentType: "RESIDENCY",
@@ -109,7 +109,7 @@ test("unknown, voided and template-less documents return a message instead of th
     details: { type: "RESIDENCY" },
     status: "issued",
   })
-  expect(await loadPrintData(residency.id)).toMatchObject({
+  expect(await loadPrintData(residency.id, issuanceApi)).toMatchObject({
     ok: false,
     message: expect.stringContaining("no print template"),
   })
@@ -130,7 +130,7 @@ test("unknown, voided and template-less documents return a message instead of th
     status: "issued",
   })
   await issuanceApi.voidIssuance(clearance.id, "test", "admin")
-  expect(await loadPrintData(clearance.id)).toMatchObject({
+  expect(await loadPrintData(clearance.id, issuanceApi)).toMatchObject({
     ok: false,
     message: expect.stringContaining("voided"),
   })

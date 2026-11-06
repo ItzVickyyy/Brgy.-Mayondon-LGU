@@ -1,9 +1,9 @@
 import { z } from "zod"
 import type { DocumentCode } from "./documentConfig"
-import { initialOfficials } from "@/components/Officials/officials-sample-data"
 
 const nonEmpty = z.string().trim().min(1, "This field is required.")
-const hasAvailableSignatory = initialOfficials.some((official) => official.status === "Current" && ["Punong Barangay", "Barangay Kagawad", "Barangay Clerk", "Administrative Assistant", "SK Chairperson", "OIC Kagawad"].includes(official.position))
+/** Set by the form once the officials are loaded: a signatory is only required when one exists. */
+export const signatoryRules = { available: false }
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Use a valid ISO date (YYYY-MM-DD).")
 const identificationSchema = z.object({
   idTypeId: z.number().int().positive(),
@@ -31,7 +31,7 @@ const detailsSchemas = {
   ASSISTANCE: z.object({ type: z.literal("ASSISTANCE"), assistanceType: z.enum(["financial", "medical", "burial"]), forSelf: z.boolean(), beneficiaryName: z.string().optional(), beneficiaryRelationship: z.string().optional() }),
   MARGINALIZED_SECTOR: z.object({ type: z.literal("MARGINALIZED_SECTOR"), healthCondition: nonEmpty }),
   FIRST_TIME_JOBSEEKER: z.object({ type: z.literal("FIRST_TIME_JOBSEEKER"), educationalAttainment: nonEmpty, course: nonEmpty, isJobstartBeneficiary: z.boolean(), witnessOfficialId: nonEmpty, parts: z.array(z.enum(["applicant_sheet", "oath", "certification"])).min(1) }),
-  BARANGAY_ID: z.object({ type: z.literal("BARANGAY_ID"), transactionType: z.enum(["new", "renewal", "replacement"]), validUntil: isoDate }),
+  BARANGAY_ID: z.object({ type: z.literal("BARANGAY_ID"), transactionType: z.enum(["new", "renewal", "replacement"]), validUntil: isoDate, idNumber: z.string().trim().optional() }),
 }
 
 export const documentDetailsSchema = z.discriminatedUnion("type", [
@@ -88,7 +88,7 @@ const baseIssuanceSchema = z.object({
     if (["ASSISTANCE", "MARGINALIZED_SECTOR"].includes(value.documentType) && (value.sectors?.length ?? 0) !== 1) {
       context.addIssue({ code: "custom", path: ["sectors"], message: "Choose exactly one sector." })
     }
-    if (hasAvailableSignatory && ["RESIDENCY", "ASSISTANCE", "MARGINALIZED_SECTOR", "FIRST_TIME_JOBSEEKER"].includes(value.documentType) && !value.signatoryOfficialId) {
+    if (signatoryRules.available && ["RESIDENCY", "ASSISTANCE", "MARGINALIZED_SECTOR", "FIRST_TIME_JOBSEEKER"].includes(value.documentType) && !value.signatoryOfficialId) {
       context.addIssue({ code: "custom", path: ["signatoryOfficialId"], message: "Choose a signatory." })
     }
     const codeNeedsIdentity: DocumentCode[] = ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"]

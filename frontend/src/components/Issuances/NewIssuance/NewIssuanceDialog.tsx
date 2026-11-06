@@ -2,9 +2,10 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { ChevronDown, CircleAlert, CheckCircle2, Clock, Keyboard, Printer, Search } from "lucide-react"
 import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuanceForm"
 import { documentConfig, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
-import { getMissingResidentFields, getResidentAddress, issuanceApi, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
+import { signatoryRules } from "./schemas"
+import { useQuery } from "@tanstack/react-query"
+import { getMissingResidentFields, getResidentAddress, issuanceApi, PHOTO_ON_FILE, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
 import type { ResidentRecord } from "@/components/Records/records-sample-data"
-import { initialOfficials } from "@/components/Officials/officials-sample-data"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { formControlClass } from "@/components/Common/formStyles"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
@@ -33,8 +34,10 @@ type Props = {
   onPrint?: (record: MockIssuance) => Promise<string | void> | string | void
 }
 
-const knownStreets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
-const knownAssociations = ["Mayondon Tricycle Operators and Drivers Association"]
+type CurrentOfficial = { id: string; name: string; position: string; status: "Current" }
+// The officials come from the server. Helpers outside the component read this copy, which the component refreshes on every render.
+let currentOfficials: CurrentOfficial[] = []
+const signatoryPositions = ["Punong Barangay", "Barangay Kagawad", "Barangay Clerk", "Administrative Assistant", "SK Chairperson", "OIC Kagawad"]
 const printedNameType: Record<DocumentCode, string> = {
   BARANGAY_CLEARANCE: "Barangay Clearance",
   FRANCHISE_CLEARANCE: "Barangay Franchise Clearance",
@@ -48,7 +51,6 @@ const printedNameType: Record<DocumentCode, string> = {
 }
 const stampDocuments: DocumentCode[] = ["BARANGAY_CLEARANCE", "FRANCHISE_CLEARANCE", "UTILITY_CLEARANCE"]
 const identityDocuments: DocumentCode[] = stampDocuments
-const availableSignatories = initialOfficials.filter((official) => official.status === "Current" && ["Punong Barangay", "Barangay Kagawad", "Barangay Clerk", "Administrative Assistant", "SK Chairperson", "OIC Kagawad"].includes(official.position))
 type PaymentKey = "officialReceiptNo" | "isFree" | "dateOfPayment" | "certifiedBy"
 const paymentKeyOf = (fieldName: string): PaymentKey => (fieldName === "isFree" || fieldName === "dateOfPayment" || fieldName === "certifiedBy" ? fieldName : "officialReceiptNo")
 const nameExtensions = ["None", "Jr.", "Sr.", "II", "III", "IV", "V"]
@@ -57,7 +59,7 @@ const purokChoices = [1, 2, 3, 4, 5, 6].map((purok) => ({ value: String(purok), 
 const fieldLabelClass = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
 
 function normalizedOptionValue(fieldName: string, option: string) {
-  if (fieldName === "witnessOfficialId") return initialOfficials.find((official) => official.status === "Current" && official.name === option)?.id ?? option
+  if (fieldName === "witnessOfficialId") return currentOfficials.find((official) => official.status === "Current" && official.name === option)?.id ?? option
   if (fieldName === "services" || fieldName === "connectionType" || fieldName === "classification" || fieldName === "assistanceType" || fieldName === "transactionType") return option.toLowerCase()
   if (fieldName === "isJobstartBeneficiary") return option === "Yes" ? "true" : "false"
   if (fieldName === "parts") return ({ "Applicant sheet": "applicant_sheet", Oath: "oath", Certification: "certification" } as Record<string, string>)[option] ?? option
@@ -75,6 +77,13 @@ function getDefaultToday(value: unknown) {
 
 export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initialDocumentType, onSaved, onDraftRemoved, onPrint }: Props) {
   const form = useNewIssuanceForm(initialResidentId ?? "")
+  const lookupsQuery = useQuery({ queryKey: ["issuance-lookups"], queryFn: () => issuanceApi.getLookups(), enabled: open, staleTime: 60_000 })
+  const officialsQuery = useQuery({ queryKey: ["issuance-officials"], queryFn: () => issuanceApi.getOfficials(), enabled: open, staleTime: 60_000 })
+  currentOfficials = (officialsQuery.data ?? []).map((official) => ({ ...official, status: "Current" as const }))
+  const availableSignatories = currentOfficials.filter((official) => signatoryPositions.includes(official.position))
+  signatoryRules.available = availableSignatories.length > 0
+  const knownStreets = lookupsQuery.data?.streets ?? []
+  const knownAssociations = lookupsQuery.data?.associations ?? []
   const [residents, setResidents] = useState<ResidentRecord[]>([])
   const [residentQuery, setResidentQuery] = useState("")
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
@@ -157,7 +166,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       ? { officialReceiptNo: "", isFree: false, dateOfPayment: localIsoDate(), certifiedBy: "" }
       : identityDocuments.includes(nextCode) ? { officialReceiptNo: "", isFree: false } : undefined)
     const signatoryDefault = documentConfig[nextCode].signatoryDefault
-    const signatory = signatoryDefault ? initialOfficials.find((official) => official.status === "Current" && official.position === signatoryDefault) : undefined
+    const signatory = signatoryDefault ? currentOfficials.find((official) => official.status === "Current" && official.position === signatoryDefault) : undefined
     form.setValue("signatoryOfficialId", signatory?.id)
     form.clearErrors()
     setSelectedSector("")
@@ -191,9 +200,20 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     if (key === "|" || appliedInitialRef.current === key) return
     appliedInitialRef.current = key
     if (initialDocumentType && initialDocumentType !== form.getValues("documentType")) applyDocumentType(initialDocumentType)
-    const resident = initialResidentId ? issuanceApi.getResident(initialResidentId) : undefined
-    if (resident) selectResident(resident, initialDocumentType)
+    if (initialResidentId) void issuanceApi.fetchResident(initialResidentId).then((resident) => { if (resident) selectResident(resident, initialDocumentType) })
   }, [open, initialResidentId, initialDocumentType])
+
+  // The picture is a separate request. Until it arrives the resident carries a marker so "photo on file" counts.
+  const selectedResidentId = selectedResident?.id
+  const selectedPhoto = selectedResident?.photoUrl
+  useEffect(() => {
+    if (!selectedResidentId || selectedPhoto !== PHOTO_ON_FILE) return
+    let active = true
+    void issuanceApi.loadResidentPhoto(selectedResidentId).then((url) => {
+      if (active && url) setSelectedResident((current) => current && current.id === selectedResidentId ? { ...current, photoUrl: url } : current)
+    })
+    return () => { active = false }
+  }, [selectedResidentId, selectedPhoto])
 
   function setDetail(name: string, value: unknown) {
     const current = form.getValues("details") as unknown as Record<string, unknown>
@@ -248,7 +268,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         ? (payment as unknown as Record<string, unknown> | undefined)?.[paymentKeyOf(field.name)]
         : field.name === "purpose" ? form.watch("purposeText")
         : field.name === "remarks" ? form.watch("remarks")
-        : field.name === "idNumber" && documentType === "BARANGAY_ID" ? selectedResident?.idNumber?.split("-").slice(-1)[0] ?? issuanceApi.getNextBarangayIdNumber()
+        : field.name === "idNumber" && documentType === "BARANGAY_ID" ? String((details as unknown as Record<string, unknown>).idNumber ?? selectedResident?.idNumber ?? "")
         : field.name === "sector" ? selectedSector
         : field.name === "for" ? ((details as unknown as Record<string, unknown>).forSelf === false ? "Someone else" : "Myself")
         : field.name === "relationship" ? (details as unknown as Record<string, unknown>).beneficiaryRelationship
@@ -280,7 +300,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       } else if (field.name === "validUntil") { setValidUntilEdited(true); setDetail(field.name, nextValue) }
       else setDetail(field.name, nextValue)
     }
-    const fieldOptions = field.name === "associationName" ? knownAssociations : field.name === "witnessOfficialId" ? initialOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
+    const fieldOptions = field.name === "associationName" ? knownAssociations : field.name === "witnessOfficialId" ? currentOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
     const missingNow = attempted && Boolean(field.required) && !fieldHasValue(field)
     const invalid = Boolean(fieldError) || missingNow
     const describedBy = fieldError || missingNow ? `${fieldId}-error` : undefined
@@ -306,8 +326,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
           return <CheckField key={option} variant="box" id={option === field.options?.[0] ? fieldId : undefined} label={option} checked={checked} disabled={Boolean(field.maxSelected && current.length >= field.maxSelected && !checked)} invalid={invalid} describedBy={describedBy} onChange={(next) => onValueChange(next ? [...current, optionKey] as unknown as string : current.filter((item) => item !== optionKey) as unknown as string)} />
         })}
       </fieldset>
-    } else if (field.name === "idNumber" && documentType === "BARANGAY_ID") {
-      control = <input id={fieldId} value={String(value)} readOnly className={cn(formControlClass, "bg-muted/50")} />
     } else if (field.type === "textarea") {
       control = <textarea id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive", "h-auto py-2")} aria-invalid={invalid} aria-describedby={describedBy} rows={2} />
     } else if (field.type === "date") {
@@ -666,12 +684,12 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       value = field.name === "isFree" ? paymentValues?.isFree ? "Yes" : "No" : paymentValues?.[paymentKeyOf(field.name)]
     } else if (field.name === "purpose") value = form.getValues("purposeText")
     else if (field.name === "remarks") value = form.getValues("remarks")
-    else if (field.name === "idNumber" && documentType === "BARANGAY_ID") value = selectedResident?.idNumber?.split("-").slice(-1)[0] ?? issuanceApi.getNextBarangayIdNumber()
+    else if (field.name === "idNumber" && documentType === "BARANGAY_ID") value = (detailValues.idNumber as string | undefined) ?? selectedResident?.idNumber ?? ""
     else if (field.name === "sector") value = selectedSector
     else if (field.name === "sectorIdNumber") value = form.getValues("sectors")?.[0]?.idNumber
     else if (field.name === "for") value = detailValues.forSelf === false ? "Someone else" : "Myself"
     else if (field.name === "relationship") value = detailValues.beneficiaryRelationship
-    else if (field.name === "witnessOfficialId") value = initialOfficials.find((official) => official.id === detailValues.witnessOfficialId)?.name
+    else if (field.name === "witnessOfficialId") value = currentOfficials.find((official) => official.id === detailValues.witnessOfficialId)?.name
     else value = detailValues[field.name]
     if (Array.isArray(value)) return value.join(", ")
     if (typeof value === "boolean") return value ? "Yes" : "No"
@@ -701,7 +719,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     { label: "Civil status", value: selectedResident?.civilStatus ?? "" },
     ...(needsPhoto ? [{ label: "Photo", value: selectedResident && (residentUpdates.photoUrl || selectedResident.photoUrl) ? "Taken" : "" }] : []),
     { label: "Date on document", value: issueDate },
-    ...(config.signatoryMode === "select" ? [{ label: "Signatory", value: initialOfficials.find((official) => official.id === form.watch("signatoryOfficialId"))?.name ?? "________________________" }] : []),
+    ...(config.signatoryMode === "select" ? [{ label: "Signatory", value: currentOfficials.find((official) => official.id === form.watch("signatoryOfficialId"))?.name ?? "________________________" }] : []),
     ...config.fields.map((field) => ({ label: field.label, value: previewValue(field) })),
     ...(config.residentNeeds.includes("residentSince") ? [{ label: documentType === "RESIDENCY" ? "Residing since" : "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (documentType === "RESIDENCY") return source.residentSinceBirth || source.residentSince === 0 ? "Since birth" : source.residentSince === undefined ? "" : String(source.residentSince); if (source.residentSinceBirth) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return !source.residentSince ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
   ]
