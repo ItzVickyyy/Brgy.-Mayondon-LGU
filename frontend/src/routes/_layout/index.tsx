@@ -14,6 +14,7 @@ import { ActivityService, DashboardService } from "@/client"
 import { ErrorState, LoadingState } from "@/components/Common/FeedbackState"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
+import { activityTitle } from "@/lib/activity"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -68,34 +69,6 @@ function dateLabel(value: string) {
 function expiryText(daysLeft: number) {
   if (daysLeft <= 0) return "Expires today"
   return daysLeft === 1 ? "Expires in 1 day" : `Expires in ${daysLeft} days`
-}
-
-const activityTitles: Record<string, string> = {
-  "resident.create": "Resident added",
-  "resident.update": "Resident updated",
-  "resident.archive": "Resident archived",
-  "resident.restore": "Resident restored",
-  "resident.photo_set": "Resident photo added",
-  "resident.photo_remove": "Resident photo removed",
-  "issuance.issue": "Document issued",
-  "issuance.correct": "Correction started",
-  "issuance.void": "Document voided",
-  "issuance.view_sensitive": "Restricted detail viewed",
-  "official.create": "Official added",
-  "official.update": "Official updated",
-  "user.create": "Account created",
-  "user.update": "Account updated",
-  "user.role_change": "Account role changed",
-  "user.password_change": "Password changed",
-  "user.update_self": "Own account updated",
-  "user.delete": "Account deleted",
-  "user.delete_self": "Own account deleted",
-}
-
-function activityTitle(action: string) {
-  if (activityTitles[action]) return activityTitles[action]
-  const words = action.replace(/[._]/g, " ")
-  return words.charAt(0).toUpperCase() + words.slice(1)
 }
 
 function SummaryCard({
