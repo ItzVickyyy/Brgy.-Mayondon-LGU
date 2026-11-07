@@ -28,7 +28,10 @@ SessionDep = Annotated[Session, Depends(get_db)]
 TokenDep = Annotated[str, Depends(reusable_oauth2)]
 
 
-def get_current_user(session: SessionDep, token: TokenDep) -> User:
+def get_current_user_allow_temporary(session: SessionDep, token: TokenDep) -> User:
+    """Resolve the signed-in user even while a password change is required.
+
+    Only "read me" and "change my own password" may use this."""
     try:
         payload = jwt.decode(
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
@@ -52,7 +55,24 @@ def get_current_user(session: SessionDep, token: TokenDep) -> User:
     return user
 
 
+def get_current_user(
+    user: Annotated[User, Depends(get_current_user_allow_temporary)],
+) -> User:
+    """Resolve the signed-in user and refuse every request until a temporary
+    password has been replaced (D-12)."""
+    if user.must_change_password:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "code": "password_change_required",
+                "message": "You must change your temporary password first.",
+            },
+        )
+    return user
+
+
 CurrentUser = Annotated[User, Depends(get_current_user)]
+CurrentUserAllowTemporary = Annotated[User, Depends(get_current_user_allow_temporary)]
 
 
 def require_permission(permission: Permission) -> Callable[[User], User]:
