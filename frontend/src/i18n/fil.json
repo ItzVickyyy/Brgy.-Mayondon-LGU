@@ -640,5 +640,109 @@
       "enterName": "Maglagay ng pangalan.",
       "itemMissing": "Nawawala ang napiling item sa listahan."
     }
+  },
+  "issuances": {
+    "title": "Pamamahala ng mga Isyu ng Dokumento",
+    "subtitle": "Maghanda ng mga Barangay ID at sertipiko, mag-print ng mga talaan, at suriin ang mga nakaraang isyu.",
+    "printingSetup": "Setup sa pag-print",
+    "newIssuance": "Bagong Isyu",
+    "print": "I-print",
+    "dismissMessage": "Isara ang mensahe",
+    "printSetup": {
+      "title": "Setup sa pag-print",
+      "description": "Iayon ang tinipang teksto sa mga pre-printed na porma. Nakaimbak lamang sa computer na ito."
+    },
+    "history": {
+      "title": "Kasaysayan ng mga Isyu",
+      "description": "Maghanap at mag-filter ng mga talaan ng isyu.",
+      "resetFilters": "I-reset ang mga filter",
+      "filters": {
+        "search": "Maghanap",
+        "searchPlaceholder": "Maghanap ayon sa reference o pangalan ng residente",
+        "documentType": "Uri ng dokumento",
+        "allDocumentTypes": "Lahat ng uri ng dokumento",
+        "status": "Katayuan",
+        "allStatuses": "Lahat ng katayuan",
+        "datedFrom": "Petsa mula",
+        "datedTo": "Petsa hanggang"
+      },
+      "dateRangeInvalid": "Mas huli ang araw ng \"Petsa mula\" kaysa sa araw ng \"Petsa hanggang\". Pakiayos ang mga petsa.",
+      "loading": "Nilo-load ang mga isyu...",
+      "loadError": "Hindi ma-load ang mga isyu",
+      "loadErrorDescription": "Suriin ang koneksyon at subukang muli.",
+      "dismissError": "Isara ang mensahe",
+      "summary": {
+        "totalIssued": "Kabuuang naisyu",
+        "totalIssuedHint": "Lahat ng naitalang isyu",
+        "latest": "Pinakahuling isyu",
+        "latestNone": "Wala pa",
+        "latestHint": "Petsa ng pinakabagong talaan",
+        "mostIssued": "Pinakamaraming naisyung dokumento",
+        "mostIssuedNone": "Wala pang talaan"
+      },
+      "status": {
+        "issued": "Naisyu",
+        "draft": "Nakabinbin",
+        "voided": "Na-void"
+      },
+      "columns": {
+        "resident": "Residente",
+        "document": "Dokumento",
+        "purpose": "Layunin",
+        "dateIssued": "Petsa ng isyu",
+        "validUntil": "Balido hanggang",
+        "status": "Katayuan",
+        "actions": "Mga aksyon"
+      },
+      "notNumbered": "Wala pang numero",
+      "expired": "Nag-expire na",
+      "empty": {
+        "title": "Walang nahanap na talaan",
+        "description": "Subukan ang ibang paghahanap o uri ng dokumento, o gumawa ng bagong isyu."
+      },
+      "actions": {
+        "view": "Tingnan",
+        "void": "I-void ang isyu",
+        "continueDraft": "Ituloy ang draft",
+        "correct": "Itama at i-edit",
+        "reprint": "I-reprint",
+        "discard": "Itapon ang draft"
+      },
+      "confirm": {
+        "voidTitle": "I-void ang isyu?",
+        "voidDescription": "I-void ang {{reference}}? Mananatili ito sa kasaysayan at hindi na maaaring i-edit. Kailangan ng dahilan.",
+        "voidConfirm": "I-void ang isyu",
+        "correctTitle": "Gumawa ng correction draft?",
+        "correctDescription": "Gumawa ng bagong na-eedit na draft mula sa naisyung dokumentong ito? Mananatiling naisyu ang orihinal hanggang i-void ito ng administrator.",
+        "correctConfirm": "Gumawa ng correction draft",
+        "discardTitle": "Itapon ang draft?",
+        "discardDescription": "Itapon ang nakabinbing draft na ito? Made-delete ito.",
+        "discardConfirm": "Itapon ang draft"
+      },
+      "notices": {
+        "correctionCreated": "Nakagawa ng correction draft para sa {{reference}}.",
+        "correctionCreatedDocument": "Nakagawa ng correction draft para sa dokumentong ito.",
+        "voided": "Na-void ang {{reference}}.",
+        "voidedDocument": "Na-void ang dokumento.",
+        "discarded": "Naitapon ang draft."
+      },
+      "details": {
+        "draftNotNumbered": "Draft, wala pang numero",
+        "loading": "Nilo-load ang mga detalye...",
+        "loadError": "Hindi ma-load ang mga detalye",
+        "close": "Isara",
+        "status": "Katayuan",
+        "documentDate": "Petsa ng dokumento",
+        "validUntil": "Balido hanggang",
+        "purpose": "Layunin",
+        "remarks": "Mga remark",
+        "address": "Tirahan",
+        "receiptNo": "Blg. ng resibo",
+        "freeOfCharge": "Libre",
+        "issuedAt": "Naisyu noong",
+        "correctionReason": "Dahilan ng pagtatama",
+        "voidReason": "Dahilan ng pag-void"
+      }
+    }
   }
 }

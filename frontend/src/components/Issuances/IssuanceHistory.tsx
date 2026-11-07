@@ -4,8 +4,18 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
-import { CalendarDays, FileCheck2, FilePenLine, FileText, Printer, Search, X } from "lucide-react"
+import type { ParseKeys, TFunction } from "i18next"
+import {
+  CalendarDays,
+  FileCheck2,
+  FilePenLine,
+  FileText,
+  Printer,
+  Search,
+  X,
+} from "lucide-react"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import type { IssuanceListItem, IssuancePublic } from "@/client"
 import { DashboardService, IssuancesService, LookupsService } from "@/client"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
@@ -19,6 +29,7 @@ import { RowActions } from "@/components/Common/RowActions"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { SummaryCard } from "@/components/Issuances/IssuanceLayout"
+import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -31,21 +42,44 @@ import {
 } from "@/components/ui/dialog"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
-import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { cn } from "@/lib/utils"
 
 type StatusFilter = "all" | "issued" | "draft" | "voided"
-type PendingAction = { item: IssuanceListItem; action: "void" | "discard" | "correct" }
+type PendingAction = {
+  item: IssuanceListItem
+  action: "void" | "discard" | "correct"
+}
 
 const PAGE_SIZE = 10
+const historyColumns = [
+  "resident",
+  "document",
+  "purpose",
+  "dateIssued",
+  "validUntil",
+  "status",
+  "actions",
+] as const
 const filterLabelClass =
   "flex min-w-0 flex-col gap-1.5 text-xs font-medium text-muted-foreground"
 
-const statusText: Record<string, string> = {
+// The API status word -> the English key `statusStyles` is looked up by, and
+// the translation key for the shown label. Unknown statuses show as stored.
+const statusStyleKey: Record<string, string> = {
   issued: "Issued",
   draft: "Pending",
   voided: "Voided",
+}
+const statusLabelKeys = {
+  issued: "issuances.history.status.issued",
+  draft: "issuances.history.status.draft",
+  voided: "issuances.history.status.voided",
+} as const satisfies Record<string, ParseKeys>
+
+function statusLabel(status: string, t: TFunction) {
+  const key = statusLabelKeys[status as keyof typeof statusLabelKeys]
+  return key ? t(key) : status
 }
 
 function manilaToday() {
@@ -78,6 +112,7 @@ function IssuanceDetailsDialog({
   purposeName: string
   onClose: () => void
 }) {
+  const { t } = useTranslation()
   const detailQuery = useQuery({
     queryKey: ["issuance", item?.id],
     enabled: item !== null,
@@ -98,53 +133,60 @@ function IssuanceDetailsDialog({
             <DialogHeader>
               <DialogTitle>{documentName}</DialogTitle>
               <DialogDescription>
-                {item.reference_no ?? "Draft, not yet numbered"} ·{" "}
-                {item.resident_name}
+                {item.reference_no ??
+                  t("issuances.history.details.draftNotNumbered")}{" "}
+                · {item.resident_name}
               </DialogDescription>
             </DialogHeader>
             {detailQuery.isLoading ? (
-              <LoadingState title="Loading details..." />
+              <LoadingState title={t("issuances.history.details.loading")} />
             ) : detailQuery.isError || !detail ? (
               <ErrorState
-                title="Could not load details"
+                title={t("issuances.history.details.loadError")}
                 onRetry={() => detailQuery.refetch()}
               />
             ) : (
               <dl className="divide-y">
                 <DetailRow
-                  label="Status"
-                  value={statusText[detail.status] ?? detail.status}
+                  label={t("issuances.history.details.status")}
+                  value={statusLabel(detail.status, t)}
                 />
                 <DetailRow
-                  label="Document date"
+                  label={t("issuances.history.details.documentDate")}
                   value={formatBusinessDate(detail.issue_date)}
                 />
                 <DetailRow
-                  label="Valid until"
+                  label={t("issuances.history.details.validUntil")}
                   value={
                     detail.expires_on
                       ? formatBusinessDate(detail.expires_on)
                       : null
                   }
                 />
-                <DetailRow label="Purpose" value={purposeName} />
-                <DetailRow label="Remarks" value={detail.remarks} />
                 <DetailRow
-                  label="Address"
+                  label={t("issuances.history.details.purpose")}
+                  value={purposeName}
+                />
+                <DetailRow
+                  label={t("issuances.history.details.remarks")}
+                  value={detail.remarks}
+                />
+                <DetailRow
+                  label={t("issuances.history.details.address")}
                   value={detail.snapshot?.address_line}
                 />
                 <DetailRow
-                  label="Receipt no."
+                  label={t("issuances.history.details.receiptNo")}
                   value={
                     detail.payment
                       ? detail.payment.is_free
-                        ? "Free of charge"
+                        ? t("issuances.history.details.freeOfCharge")
                         : detail.payment.official_receipt_no
                       : null
                   }
                 />
                 <DetailRow
-                  label="Issued at"
+                  label={t("issuances.history.details.issuedAt")}
                   value={
                     detail.issued_at
                       ? momentFormat.format(new Date(detail.issued_at))
@@ -153,18 +195,21 @@ function IssuanceDetailsDialog({
                 />
                 {detail.correction_reason ? (
                   <DetailRow
-                    label="Correction reason"
+                    label={t("issuances.history.details.correctionReason")}
                     value={detail.correction_reason}
                   />
                 ) : null}
                 {detail.void_reason ? (
-                  <DetailRow label="Void reason" value={detail.void_reason} />
+                  <DetailRow
+                    label={t("issuances.history.details.voidReason")}
+                    value={detail.void_reason}
+                  />
                 ) : null}
               </dl>
             )}
             <DialogFooter>
               <Button type="button" variant="outline" onClick={onClose}>
-                Close
+                {t("issuances.history.details.close")}
               </Button>
             </DialogFooter>
           </>
@@ -183,6 +228,7 @@ export function IssuanceHistory({
   onContinueDraft: (id: string) => void
   onPrint: (item: IssuanceListItem) => Promise<string | void> | string | void
 }) {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
   const queryClient = useQueryClient()
@@ -300,20 +346,31 @@ export function IssuanceHistory({
         })
         return undefined
       }
-      if (action === "correct") return await issuanceApi.correctIssuance(item.id, reason)
+      if (action === "correct")
+        return await issuanceApi.correctIssuance(item.id, reason)
       await IssuancesService.discardDraft({ path: { issuance_id: item.id } })
       return undefined
     },
     onSuccess: (createdDraft, { item, action }) => {
       setErrorNotice("")
       if (action === "correct" && createdDraft) {
-        onNotice("A correction draft was created for " + (item.reference_no ?? "this document") + ".")
+        onNotice(
+          item.reference_no
+            ? t("issuances.history.notices.correctionCreated", {
+                reference: item.reference_no,
+              })
+            : t("issuances.history.notices.correctionCreatedDocument"),
+        )
         onContinueDraft(createdDraft.id)
       } else {
         onNotice(
           action === "void"
-            ? (item.reference_no ?? "The document") + " was voided."
-            : "The draft was discarded.",
+            ? item.reference_no
+              ? t("issuances.history.notices.voided", {
+                  reference: item.reference_no,
+                })
+              : t("issuances.history.notices.voidedDocument")
+            : t("issuances.history.notices.discarded"),
         )
       }
       refresh()
@@ -335,21 +392,29 @@ export function IssuanceHistory({
       <div className="print:hidden grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <SummaryCard
           icon={FileCheck2}
-          label="Total issued"
+          label={t("issuances.history.summary.totalIssued")}
           value={overallQuery.data ? overallQuery.data.total_issued : "—"}
-          hint="All recorded issuances"
+          hint={t("issuances.history.summary.totalIssuedHint")}
         />
         <SummaryCard
           icon={CalendarDays}
-          label="Latest issuance"
-          value={latest ? formatBusinessDate(latest.issue_date) : "None yet"}
-          hint="Most recent record date"
+          label={t("issuances.history.summary.latest")}
+          value={
+            latest
+              ? formatBusinessDate(latest.issue_date)
+              : t("issuances.history.summary.latestNone")
+          }
+          hint={t("issuances.history.summary.latestHint")}
         />
         <SummaryCard
           icon={FileText}
-          label="Most issued document"
+          label={t("issuances.history.summary.mostIssued")}
           value={topType && topType.count > 0 ? topType.count : 0}
-          hint={topType && topType.count > 0 ? topType.name : "No records yet"}
+          hint={
+            topType && topType.count > 0
+              ? topType.name
+              : t("issuances.history.summary.mostIssuedNone")
+          }
         />
       </div>
 
@@ -364,7 +429,7 @@ export function IssuanceHistory({
             size="icon"
             className="size-8"
             onClick={() => setErrorNotice("")}
-            aria-label="Dismiss message"
+            aria-label={t("issuances.history.dismissError")}
           >
             <X aria-hidden="true" />
           </Button>
@@ -375,9 +440,11 @@ export function IssuanceHistory({
         <div className="flex flex-col gap-4 border-b p-4 sm:p-5">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <h2 className="font-semibold tracking-tight">Issuance History</h2>
+              <h2 className="font-semibold tracking-tight">
+                {t("issuances.history.title")}
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Search and filter issuance records.
+                {t("issuances.history.description")}
               </p>
             </div>
             {hasFilters ? (
@@ -394,7 +461,7 @@ export function IssuanceHistory({
                 }}
               >
                 <X aria-hidden="true" />
-                Reset filters
+                {t("issuances.history.resetFilters")}
               </Button>
             ) : null}
           </div>
@@ -402,7 +469,7 @@ export function IssuanceHistory({
             <label
               className={`${filterLabelClass} sm:col-span-2 xl:col-span-1`}
             >
-              <span>Search</span>
+              <span>{t("issuances.history.filters.search")}</span>
               <span className="relative block">
                 <Search
                   className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -411,19 +478,21 @@ export function IssuanceHistory({
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search by reference or resident name"
+                  placeholder={t("issuances.history.filters.searchPlaceholder")}
                   className={cn(formControlClass, "pl-9")}
                 />
               </span>
             </label>
             <label className={filterLabelClass}>
-              <span>Document type</span>
+              <span>{t("issuances.history.filters.documentType")}</span>
               <select
                 value={typeFilter}
                 onChange={(event) => setTypeFilter(event.target.value)}
                 className={formControlClass}
               >
-                <option value="">All document types</option>
+                <option value="">
+                  {t("issuances.history.filters.allDocumentTypes")}
+                </option>
                 {documentTypes.map((type) => (
                   <option key={type.id} value={type.id}>
                     {type.name}
@@ -432,7 +501,7 @@ export function IssuanceHistory({
               </select>
             </label>
             <label className={filterLabelClass}>
-              <span>Status</span>
+              <span>{t("issuances.history.filters.status")}</span>
               <select
                 value={statusFilter}
                 onChange={(event) =>
@@ -440,14 +509,16 @@ export function IssuanceHistory({
                 }
                 className={formControlClass}
               >
-                <option value="all">All statuses</option>
-                <option value="issued">Issued</option>
-                <option value="draft">Pending</option>
-                <option value="voided">Voided</option>
+                <option value="all">
+                  {t("issuances.history.filters.allStatuses")}
+                </option>
+                <option value="issued">{statusLabel("issued", t)}</option>
+                <option value="draft">{statusLabel("draft", t)}</option>
+                <option value="voided">{statusLabel("voided", t)}</option>
               </select>
             </label>
             <label className={filterLabelClass}>
-              <span>Dated from</span>
+              <span>{t("issuances.history.filters.datedFrom")}</span>
               <input
                 type="date"
                 value={dateFrom}
@@ -457,7 +528,7 @@ export function IssuanceHistory({
               />
             </label>
             <label className={filterLabelClass}>
-              <span>Dated to</span>
+              <span>{t("issuances.history.filters.datedTo")}</span>
               <input
                 type="date"
                 value={dateTo}
@@ -470,18 +541,17 @@ export function IssuanceHistory({
           </div>
           {dateRangeInvalid ? (
             <p role="alert" className="mt-2 text-sm text-destructive">
-              The "Dated from" day is after the "Dated to" day. Please correct
-              the dates.
+              {t("issuances.history.dateRangeInvalid")}
             </p>
           ) : null}
         </div>
 
         {historyQuery.isLoading ? (
-          <LoadingState title="Loading issuances..." />
+          <LoadingState title={t("issuances.history.loading")} />
         ) : historyQuery.isError ? (
           <ErrorState
-            title="Could not load issuances"
-            description="Check your connection and try again."
+            title={t("issuances.history.loadError")}
+            description={t("issuances.history.loadErrorDescription")}
             onRetry={() => historyQuery.refetch()}
           />
         ) : (
@@ -490,20 +560,12 @@ export function IssuanceHistory({
               <table className="w-full min-w-[1000px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    {[
-                      "Resident",
-                      "Document",
-                      "Purpose",
-                      "Date issued",
-                      "Valid until",
-                      "Status",
-                      "Actions",
-                    ].map((label) => (
+                    {historyColumns.map((column) => (
                       <th
-                        key={label}
-                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${label === "Actions" ? "text-right" : ""}`}
+                        key={column}
+                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "text-right" : ""}`}
                       >
-                        {label}
+                        {t(`issuances.history.columns.${column}`)}
                       </th>
                     ))}
                   </tr>
@@ -520,7 +582,8 @@ export function IssuanceHistory({
                       "MARGINALIZED_SECTOR",
                       "ASSISTANCE",
                     ].includes(item.document_type_code)
-                    const label = statusText[item.status] ?? item.status
+                    const styleKey = statusStyleKey[item.status] ?? item.status
+                    const label = statusLabel(item.status, t)
                     const expired = Boolean(
                       isIssued && item.expires_on && item.expires_on < today,
                     )
@@ -535,7 +598,8 @@ export function IssuanceHistory({
                         <td className="px-4 py-3 align-middle sm:px-5">
                           <p className="font-semibold">{item.resident_name}</p>
                           <p className="mt-1 font-mono text-xs text-muted-foreground">
-                            {item.reference_no ?? "Not numbered yet"}
+                            {item.reference_no ??
+                              t("issuances.history.notNumbered")}
                           </p>
                         </td>
                         <td className="max-w-xs px-4 py-3 align-middle sm:px-5">
@@ -558,7 +622,7 @@ export function IssuanceHistory({
                                   variant="outline"
                                   className={statusStyles.Expired}
                                 >
-                                  Expired
+                                  {t("issuances.history.expired")}
                                 </Badge>
                               ) : null}
                             </div>
@@ -569,7 +633,7 @@ export function IssuanceHistory({
                         <td className="px-4 py-3 align-middle sm:px-5">
                           <Badge
                             variant="outline"
-                            className={statusStyles[label]}
+                            className={statusStyles[styleKey]}
                           >
                             {label}
                           </Badge>
@@ -579,13 +643,13 @@ export function IssuanceHistory({
                             name={item.resident_name}
                             isAdmin={isAdmin}
                             primary={{
-                              label: "View",
+                              label: t("issuances.history.actions.view"),
                               variant: "outline",
                               onSelect: () => setViewItem(item),
                             }}
                             items={[
                               {
-                                label: "Void issuance",
+                                label: t("issuances.history.actions.void"),
                                 adminOnly: true,
                                 hidden: !isIssued,
                                 destructive: true,
@@ -593,21 +657,39 @@ export function IssuanceHistory({
                                   setPending({ item, action: "void" }),
                               },
                               {
-                                label: "Continue draft",
+                                label: t(
+                                  "issuances.history.actions.continueDraft",
+                                ),
                                 hidden: !isDraft,
-                                icon: <FilePenLine aria-hidden="true" className="size-4" />,
+                                icon: (
+                                  <FilePenLine
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
                                 onSelect: () => onContinueDraft(item.id),
                               },
                               {
-                                label: "Correct & edit",
+                                label: t("issuances.history.actions.correct"),
                                 hidden: !isIssued,
-                                icon: <FilePenLine aria-hidden="true" className="size-4" />,
-                                onSelect: () => setPending({ item, action: "correct" }),
+                                icon: (
+                                  <FilePenLine
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
+                                onSelect: () =>
+                                  setPending({ item, action: "correct" }),
                               },
                               {
-                                label: "Reprint",
+                                label: t("issuances.history.actions.reprint"),
                                 hidden: !isIssued || !canReprint,
-                                icon: <Printer aria-hidden="true" className="size-4" />,
+                                icon: (
+                                  <Printer
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
                                 onSelect: async () => {
                                   try {
                                     const message = await onPrint(item)
@@ -618,7 +700,7 @@ export function IssuanceHistory({
                                 },
                               },
                               {
-                                label: "Discard draft",
+                                label: t("issuances.history.actions.discard"),
                                 hidden: !isDraft,
                                 destructive: true,
                                 onSelect: () =>
@@ -634,8 +716,8 @@ export function IssuanceHistory({
               </table>
               {items.length === 0 ? (
                 <EmptyState
-                  title="No records found"
-                  description="Try a different search or document type, or create a new issuance."
+                  title={t("issuances.history.empty.title")}
+                  description={t("issuances.history.empty.description")}
                 />
               ) : null}
             </div>
@@ -670,21 +752,37 @@ export function IssuanceHistory({
         onOpenChange={(open) => {
           if (!open) setPending(null)
         }}
-        title={pending?.action === "void" ? "Void issuance?" : pending?.action === "correct" ? "Create correction draft?" : "Discard draft?"}
+        title={
+          pending?.action === "void"
+            ? t("issuances.history.confirm.voidTitle")
+            : pending?.action === "correct"
+              ? t("issuances.history.confirm.correctTitle")
+              : t("issuances.history.confirm.discardTitle")
+        }
         description={
           pending
             ? pending.action === "void"
-              ? `Void ${pending.item.reference_no}? It stays in the history and cannot be edited. A reason is required.`
+              ? t("issuances.history.confirm.voidDescription", {
+                  reference: pending.item.reference_no,
+                })
               : pending.action === "correct"
-                ? "Create a new editable draft from this issued document? The original remains issued until an administrator voids it."
-                : "Discard this pending draft? It will be deleted."
+                ? t("issuances.history.confirm.correctDescription")
+                : t("issuances.history.confirm.discardDescription")
             : ""
         }
         confirmLabel={
-          pending?.action === "void" ? "Void issuance" : pending?.action === "correct" ? "Create correction draft" : "Discard draft"
+          pending?.action === "void"
+            ? t("issuances.history.confirm.voidConfirm")
+            : pending?.action === "correct"
+              ? t("issuances.history.confirm.correctConfirm")
+              : t("issuances.history.confirm.discardConfirm")
         }
         destructive={pending?.action !== "correct"}
-        reason={pending?.action === "void" || pending?.action === "correct" ? "required" : "none"}
+        reason={
+          pending?.action === "void" || pending?.action === "correct"
+            ? "required"
+            : "none"
+        }
         onConfirm={(reason) => {
           if (!pending) return
           actionMutation.mutate({ ...pending, reason })

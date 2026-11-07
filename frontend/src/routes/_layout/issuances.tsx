@@ -13,6 +13,7 @@ import {
   X,
 } from "lucide-react"
 import { Fragment, useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { formControlClass } from "@/components/Common/formStyles"
 import {
@@ -87,6 +88,7 @@ function getPreselectedType(): DocumentCode | undefined {
 }
 
 function IssuancesManagement() {
+  const { t } = useTranslation()
   const [isIssuanceModalOpen, setIsIssuanceModalOpen] = useState(false)
   const [isSimplifiedDialogOpen, setIsSimplifiedDialogOpen] = useState(() => Boolean(getPreselectedResident()))
   const [initialDraftId, setInitialDraftId] = useState("")
@@ -490,17 +492,16 @@ function IssuancesManagement() {
       <header className="print:hidden flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            Issuance Management
+            {t("issuances.title")}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
-            Prepare Barangay IDs and certificates, print records, and review
-            past issuances.
+            {t("issuances.subtitle")}
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button type="button" variant="outline" className="min-h-11 w-full sm:w-auto" onClick={() => setPrintSetupOpen(true)}>
             <Settings2 aria-hidden="true" />
-            Printing setup
+            {t("issuances.printingSetup")}
           </Button>
           <Button
             size="default"
@@ -509,7 +510,7 @@ function IssuancesManagement() {
             onClick={() => setIsSimplifiedDialogOpen(true)}
           >
             <Plus aria-hidden="true" />
-            New Issuance
+            {t("issuances.newIssuance")}
           </Button>
         </div>
       </header>
@@ -524,8 +525,8 @@ function IssuancesManagement() {
             aria-hidden="true"
           />
           <p className="flex-1">{notice}</p>
-          {noticePrintRecord && notice.includes(noticePrintRecord.id) ? <Button type="button" variant="outline" size="sm" onClick={() => printNow(noticePrintRecord)}><Printer aria-hidden="true" />Print</Button> : null}
-          <Button variant="ghost" size="icon" className="size-11" onClick={() => { setNotice(""); setNoticePrintRecord(null) }} aria-label="Dismiss message">
+          {noticePrintRecord && notice.includes(noticePrintRecord.id) ? <Button type="button" variant="outline" size="sm" onClick={() => printNow(noticePrintRecord)}><Printer aria-hidden="true" />{t("issuances.print")}</Button> : null}
+          <Button variant="ghost" size="icon" className="size-11" onClick={() => { setNotice(""); setNoticePrintRecord(null) }} aria-label={t("issuances.dismissMessage")}>
             <X aria-hidden="true" />
           </Button>
         </div>
@@ -762,8 +763,8 @@ function IssuancesManagement() {
       <Dialog open={printSetupOpen} onOpenChange={setPrintSetupOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle>Printing setup</DialogTitle>
-            <DialogDescription>Line the typed text up with the pre-printed forms. Saved on this computer only.</DialogDescription>
+            <DialogTitle>{t("issuances.printSetup.title")}</DialogTitle>
+            <DialogDescription>{t("issuances.printSetup.description")}</DialogDescription>
           </DialogHeader>
           <CalibrationPanel />
         </DialogContent>

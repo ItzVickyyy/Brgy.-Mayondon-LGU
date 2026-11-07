@@ -640,5 +640,109 @@
       "enterName": "Enter a name.",
       "itemMissing": "The selected list item is missing."
     }
+  },
+  "issuances": {
+    "title": "Issuance Management",
+    "subtitle": "Prepare Barangay IDs and certificates, print records, and review past issuances.",
+    "printingSetup": "Printing setup",
+    "newIssuance": "New Issuance",
+    "print": "Print",
+    "dismissMessage": "Dismiss message",
+    "printSetup": {
+      "title": "Printing setup",
+      "description": "Line the typed text up with the pre-printed forms. Saved on this computer only."
+    },
+    "history": {
+      "title": "Issuance History",
+      "description": "Search and filter issuance records.",
+      "resetFilters": "Reset filters",
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Search by reference or resident name",
+        "documentType": "Document type",
+        "allDocumentTypes": "All document types",
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "datedFrom": "Dated from",
+        "datedTo": "Dated to"
+      },
+      "dateRangeInvalid": "The \"Dated from\" day is after the \"Dated to\" day. Please correct the dates.",
+      "loading": "Loading issuances...",
+      "loadError": "Could not load issuances",
+      "loadErrorDescription": "Check your connection and try again.",
+      "dismissError": "Dismiss message",
+      "summary": {
+        "totalIssued": "Total issued",
+        "totalIssuedHint": "All recorded issuances",
+        "latest": "Latest issuance",
+        "latestNone": "None yet",
+        "latestHint": "Most recent record date",
+        "mostIssued": "Most issued document",
+        "mostIssuedNone": "No records yet"
+      },
+      "status": {
+        "issued": "Issued",
+        "draft": "Pending",
+        "voided": "Voided"
+      },
+      "columns": {
+        "resident": "Resident",
+        "document": "Document",
+        "purpose": "Purpose",
+        "dateIssued": "Date issued",
+        "validUntil": "Valid until",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "notNumbered": "Not numbered yet",
+      "expired": "Expired",
+      "empty": {
+        "title": "No records found",
+        "description": "Try a different search or document type, or create a new issuance."
+      },
+      "actions": {
+        "view": "View",
+        "void": "Void issuance",
+        "continueDraft": "Continue draft",
+        "correct": "Correct & edit",
+        "reprint": "Reprint",
+        "discard": "Discard draft"
+      },
+      "confirm": {
+        "voidTitle": "Void issuance?",
+        "voidDescription": "Void {{reference}}? It stays in the history and cannot be edited. A reason is required.",
+        "voidConfirm": "Void issuance",
+        "correctTitle": "Create correction draft?",
+        "correctDescription": "Create a new editable draft from this issued document? The original remains issued until an administrator voids it.",
+        "correctConfirm": "Create correction draft",
+        "discardTitle": "Discard draft?",
+        "discardDescription": "Discard this pending draft? It will be deleted.",
+        "discardConfirm": "Discard draft"
+      },
+      "notices": {
+        "correctionCreated": "A correction draft was created for {{reference}}.",
+        "correctionCreatedDocument": "A correction draft was created for this document.",
+        "voided": "{{reference}} was voided.",
+        "voidedDocument": "The document was voided.",
+        "discarded": "The draft was discarded."
+      },
+      "details": {
+        "draftNotNumbered": "Draft, not yet numbered",
+        "loading": "Loading details...",
+        "loadError": "Could not load details",
+        "close": "Close",
+        "status": "Status",
+        "documentDate": "Document date",
+        "validUntil": "Valid until",
+        "purpose": "Purpose",
+        "remarks": "Remarks",
+        "address": "Address",
+        "receiptNo": "Receipt no.",
+        "freeOfCharge": "Free of charge",
+        "issuedAt": "Issued at",
+        "correctionReason": "Correction reason",
+        "voidReason": "Void reason"
+      }
+    }
   }
 }
