@@ -166,7 +166,7 @@ Scripts (run from the repo root with Compose running):
 
 # Restore: first make a fresh backup of the current database, then restore the chosen dump
 .\scripts\backup-db.ps1
-.\scripts\restore-db.ps1 -BackupFile ".\backups\mayondon-db-YYYYMMDD-HHMMSS.dump"
+.\scripts\restore-db.ps1 -BackupFile ".\backups\mayondon-db-YYYYMMDD-HHMMSS-fff.dump"
 
 # Verify backup and restore using a temporary database, never the app database
 .\scripts\test-backup-restore.ps1
