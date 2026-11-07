@@ -44,8 +44,8 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
     onSuccess: (_result, variables) => {
       showSuccessToast(
         variables.active
-          ? "User account reactivated"
-          : "User account deactivated",
+          ? t("admin.users.notifications.reactivated")
+          : t("admin.users.notifications.deactivated"),
       )
       setPendingActive(null)
       setOpen(false)

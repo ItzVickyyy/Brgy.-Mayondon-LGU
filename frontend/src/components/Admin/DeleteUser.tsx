@@ -39,7 +39,7 @@ const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
   const mutation = useMutation({
     mutationFn: deleteUser,
     onSuccess: () => {
-      showSuccessToast("The user was deleted successfully")
+      showSuccessToast(t("admin.users.notifications.deleted"))
       setIsOpen(false)
       onSuccess()
     },

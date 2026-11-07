@@ -1245,6 +1245,13 @@
         "deactivateDescription": "Deactivate {{name}}'s account? Their existing records and issuance history will remain.",
         "reactivateConfirm": "Reactivate account",
         "deactivateConfirm": "Deactivate account"
+      },
+      "notifications": {
+        "created": "User created successfully",
+        "deleted": "The user was deleted successfully",
+        "updated": "User updated successfully",
+        "reactivated": "User account reactivated",
+        "deactivated": "User account deactivated"
       }
     },
     "officials": {

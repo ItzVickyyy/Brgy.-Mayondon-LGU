@@ -89,7 +89,7 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
     mutationFn: (data: FormData) =>
       UsersService.updateUser({ path: { user_id: user.id }, body: data }),
     onSuccess: () => {
-      showSuccessToast("User updated successfully")
+      showSuccessToast(t("admin.users.notifications.updated"))
       setIsOpen(false)
       onSuccess()
     },
