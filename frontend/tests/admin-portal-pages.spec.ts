@@ -50,7 +50,7 @@ test("Officials page starts with an empty officials list", async ({ page }) => {
 test("Officials search filters results", async ({ page }) => {
   await page.goto("/officials")
   await page
-    .getByPlaceholder("Search officials...")
+    .getByPlaceholder("Search name or position")
     .fill("no-official-matches-this")
   await expect(page.getByText("No matching officials")).toBeVisible()
 })
@@ -85,7 +85,7 @@ test("User account form offers Staff and System Administrator roles", async ({
 }) => {
   await page.goto("/admin")
   await page.getByRole("button", { name: "Add User" }).click()
-  const role = page.getByLabel("Role")
+  const role = page.getByLabel("Role", { exact: true })
   await expect(role).toBeVisible()
   await expect(role.locator("option")).toHaveText([
     "Staff",
