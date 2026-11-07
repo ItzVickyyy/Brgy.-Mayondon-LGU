@@ -38,7 +38,7 @@ const formSchema = z
 
 type FormData = z.infer<typeof formSchema>
 
-const ChangePassword = () => {
+const ChangePassword = ({ forced = false }: { forced?: boolean }) => {
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -55,6 +55,11 @@ const ChangePassword = () => {
     mutationFn: (data: UpdatePassword) =>
       UsersService.updatePasswordMe({ body: data }),
     onSuccess: () => {
+      if (forced) {
+        localStorage.removeItem("access_token")
+        window.location.assign("/login?passwordChanged=1")
+        return
+      }
       showSuccessToast("Password updated successfully")
       form.reset()
     },
@@ -67,7 +72,19 @@ const ChangePassword = () => {
 
   return (
     <div className="max-w-md">
-      <h3 className="text-lg font-semibold py-4">Change Password</h3>
+      {forced ? (
+        <div className="mb-2 space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight">
+            Change your password
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Your System Administrator gave you a temporary password. Set a new
+            password to continue using the system.
+          </p>
+        </div>
+      ) : (
+        <h3 className="py-4 text-lg font-semibold">Change Password</h3>
+      )}
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}

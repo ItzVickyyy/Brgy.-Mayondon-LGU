@@ -30,6 +30,14 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
               You
             </Badge>
           )}
+          {row.original.must_change_password && (
+            <Badge
+              variant="outline"
+              className="border-brand/30 bg-brand/10 text-brand"
+            >
+              Temporary password
+            </Badge>
+          )}
         </div>
       )
     },

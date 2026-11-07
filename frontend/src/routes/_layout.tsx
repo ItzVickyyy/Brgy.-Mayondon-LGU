@@ -28,7 +28,10 @@ export const Route = createFileRoute("/_layout")({
     if (!isLoggedIn()) throw redirect({ to: "/login" })
 
     try {
-      await UsersService.readUserMe()
+      const response = await UsersService.readUserMe()
+      if (response.data.must_change_password) {
+        throw redirect({ to: "/change-password" })
+      }
     } catch (error) {
       if (error && typeof error === "object" && "status" in error) {
         const status = error.status

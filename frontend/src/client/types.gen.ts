@@ -1945,6 +1945,10 @@ export type UserPublic = {
     is_superuser?: boolean;
     role?: UserRole;
     /**
+     * Must Change Password
+     */
+    must_change_password: boolean;
+    /**
      * Full Name
      */
     full_name?: string | null;
