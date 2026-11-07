@@ -19,6 +19,7 @@ import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { activityTitle } from "@/lib/activity"
+import { formatLocaleDate } from "@/lib/locale"
 
 export const Route = createFileRoute("/_layout/activity-log")({
   component: ActivityLog,
@@ -69,17 +70,15 @@ function moduleLabel(value: string | null, t: TFunction) {
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
-const timestampFormat = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "2-digit",
-  year: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  timeZone: "Asia/Manila",
-})
-
 function formatTimestamp(value: string) {
-  return timestampFormat.format(new Date(value))
+  return formatLocaleDate(new Date(value), {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "Asia/Manila",
+  })
 }
 
 // Details only hold field names, ids and reference numbers. Shown as plain text.

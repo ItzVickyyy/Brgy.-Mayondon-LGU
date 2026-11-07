@@ -16,6 +16,7 @@ import { ErrorState, LoadingState } from "@/components/Common/FeedbackState"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { activityTitle } from "@/lib/activity"
+import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -41,30 +42,21 @@ const periods: Period[] = [
   "overall",
 ]
 
-const dateFormat = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "2-digit",
-  year: "numeric",
-})
-const timeFormat = new Intl.DateTimeFormat("en-PH", {
-  timeZone: "Asia/Manila",
-  dateStyle: "medium",
-  timeStyle: "short",
-})
-
 // "2026-11" -> "Nov 26"; the year is two digits so a long range still fits.
 function monthLabel(value: string) {
   const [year, month] = value.split("-").map(Number)
-  const name = new Date(year, month - 1, 1).toLocaleDateString("en-US", {
-    month: "short",
-  })
+  const name = formatLocaleDate(new Date(year, month - 1, 1), { month: "short" })
   return `${name} ${String(year).slice(-2)}`
 }
 
 // "2026-12-06" is a business date, not a moment: format it without time zones.
 function dateLabel(value: string) {
   const [year, month, day] = value.split("-").map(Number)
-  return dateFormat.format(new Date(year, month - 1, day))
+  return formatLocaleDate(new Date(year, month - 1, day), {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  })
 }
 
 function SummaryCard({
@@ -142,7 +134,7 @@ function Dashboard() {
   const expiring = dashboard?.expiring ?? []
   const activities = activityQuery.data?.data ?? []
   const number = (value: number | undefined) =>
-    value === undefined ? "–" : String(value)
+    value === undefined ? "–" : formatLocaleNumber(value)
   const expiryText = (daysLeft: number) =>
     daysLeft <= 0
       ? t("dashboard.expiring.today")
@@ -455,7 +447,11 @@ function Dashboard() {
                   <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
                 </div>
                 <span className="shrink-0 text-xs text-muted-foreground">
-                  {timeFormat.format(new Date(activity.occurred_at))}
+                  {formatLocaleDate(new Date(activity.occurred_at), {
+                    timeZone: "Asia/Manila",
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                  })}
                 </span>
               </div>
             )

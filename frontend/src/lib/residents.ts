@@ -2,6 +2,7 @@ import { AxiosError } from "axios"
 
 import type { LookupItem, ResidentPublic } from "@/client"
 import i18n from "@/i18n"
+import { formatLocaleDate } from "@/lib/locale"
 
 export const civilStatuses = [
   "Single",
@@ -15,16 +16,14 @@ export const suffixes = ["Jr.", "Sr.", "II", "III", "IV", "V"] as const
 // What "resident type" means is still an open question (D-48); the column is free text.
 export const residentTypes = ["Existing resident", "New / renting resident"]
 
-const dateFormat = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "2-digit",
-  year: "numeric",
-})
-
 // "2026-12-06" is a business date, not a moment: format it without time zones.
 export function formatBusinessDate(value: string) {
   const [year, month, day] = value.split("-").map(Number)
-  return dateFormat.format(new Date(year, month - 1, day))
+  return formatLocaleDate(new Date(year, month - 1, day), {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  })
 }
 
 export function streetNameMap(streets: LookupItem[] | undefined) {

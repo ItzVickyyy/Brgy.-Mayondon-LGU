@@ -43,6 +43,7 @@ import {
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
+import { formatLocaleDate } from "@/lib/locale"
 import { cn } from "@/lib/utils"
 
 type StatusFilter = "all" | "issued" | "draft" | "voided"
@@ -85,12 +86,6 @@ function statusLabel(status: string, t: TFunction) {
 function manilaToday() {
   return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" })
 }
-
-const momentFormat = new Intl.DateTimeFormat("en-US", {
-  dateStyle: "medium",
-  timeStyle: "short",
-  timeZone: "Asia/Manila",
-})
 
 function DetailRow({ label, value }: { label: string; value?: string | null }) {
   return (
@@ -189,7 +184,11 @@ function IssuanceDetailsDialog({
                   label={t("issuances.history.details.issuedAt")}
                   value={
                     detail.issued_at
-                      ? momentFormat.format(new Date(detail.issued_at))
+                      ? formatLocaleDate(new Date(detail.issued_at), {
+                          dateStyle: "medium",
+                          timeStyle: "short",
+                          timeZone: "Asia/Manila",
+                        })
                       : null
                   }
                 />

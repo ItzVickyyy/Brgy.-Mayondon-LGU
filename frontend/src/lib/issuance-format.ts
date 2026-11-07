@@ -30,11 +30,13 @@ export function formatPrintedName(
   return [first, middleInitial, last, ext].filter(Boolean).join(" ").toUpperCase()
 }
 
+import { formatLocaleDate } from "@/lib/locale"
+
 export function formatPaperDate(value: string): string {
   if (!value) return ""
   const date = new Date(`${value}T00:00:00`)
   if (Number.isNaN(date.getTime())) return value
-  return date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+  return formatLocaleDate(date, { month: "long", day: "numeric", year: "numeric" })
 }
 
 export function getDateParts(value: string): { day: string; month: string } {
@@ -43,7 +45,7 @@ export function getDateParts(value: string): { day: string; month: string } {
   if (Number.isNaN(date.getTime())) return { day: "", month: "" }
   return {
     day: String(date.getDate()),
-    month: date.toLocaleDateString("en-US", { month: "long" }),
+    month: formatLocaleDate(date, { month: "long" }),
   }
 }
 
