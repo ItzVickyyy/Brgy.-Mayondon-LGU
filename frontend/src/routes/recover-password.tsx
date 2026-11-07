@@ -7,8 +7,8 @@ import {
 } from "@tanstack/react-router"
 import type { TFunction } from "i18next"
 import { useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { z } from "zod"
 
 import { LoginService } from "@/client"
