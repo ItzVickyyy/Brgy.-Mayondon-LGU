@@ -130,7 +130,9 @@ function Dashboard() {
   const activityQuery = useQuery({
     queryKey: ["dashboard-activity"],
     queryFn: async () =>
-      (await ActivityService.listActivity({ query: { limit: 5 } })).data,
+      (await ActivityService.listActivity({
+          query: { limit: 5, exclude_module: "auth" },
+        })).data,
   })
   const dashboard = dashboardQuery.data
   const summary = dashboard?.summary

@@ -34,6 +34,7 @@ const moduleLabels: Record<string, string> = {
   users: "User Accounts",
   officials: "Officials",
   lookups: "Streets and Associations",
+  auth: "Sign-ins",
 }
 
 const outcomeLabels: Record<string, string> = {

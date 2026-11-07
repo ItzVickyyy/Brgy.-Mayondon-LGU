@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
@@ -8,6 +8,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app import crud
 from app.api.deps import CurrentUser, SessionDep, require_admin
 from app.core import security
+from app.core.audit import record_audit_event
 from app.core.config import settings
 from app.core.password_recovery import is_password_recovery_rate_limited
 from app.models import (
@@ -37,13 +38,47 @@ def login_access_token(
     """
     OAuth2 compatible token login, get an access token for future requests
     """
-    user = crud.authenticate(
-        session=session, email=form_data.username.strip().lower(), password=form_data.password
+    email = form_data.username.strip().lower()
+    existing = crud.get_user_by_email(session=session, email=email)
+    was_locked = bool(
+        existing
+        and existing.locked_until is not None
+        and (
+            existing.locked_until
+            if existing.locked_until.tzinfo
+            else existing.locked_until.replace(tzinfo=UTC)
+        )
+        > datetime.now(UTC)
     )
+    user = crud.authenticate(session=session, email=email, password=form_data.password)
     if not user:
+        # Only known accounts are recorded, so anonymous guessing cannot fill the
+        # log. The typed email and password are never stored.
+        if existing:
+            record_audit_event(
+                session,
+                action="auth.login_failed",
+                actor=existing,
+                outcome="failed",
+                module="auth",
+                details={"reason": "locked" if was_locked else "incorrect_password"},
+                commit=True,
+            )
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
+        record_audit_event(
+            session,
+            action="auth.login_failed",
+            actor=user,
+            outcome="denied",
+            module="auth",
+            details={"reason": "inactive"},
+            commit=True,
+        )
         raise HTTPException(status_code=400, detail="Inactive user")
+    record_audit_event(
+        session, action="auth.login", actor=user, module="auth", commit=True
+    )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     return Token(
         access_token=security.create_access_token(

@@ -35,6 +35,8 @@ def _me(client: TestClient, headers: Headers) -> dict:
 
 
 def _list(client: TestClient, headers: Headers, **params: object) -> dict:
+    # Sign-ins are logged too (module "auth"); these tests are about record activity.
+    params.setdefault("exclude_module", "auth")
     r = client.get(f"{ACT}/", headers=headers, params={"limit": 200, **params})
     assert r.status_code == 200, r.text
     return r.json()
@@ -195,8 +197,8 @@ def test_options_are_limited_to_what_the_user_may_see(
     me = _me(client, staff_token_headers)
     _staff_resident(client, staff_token_headers, street_id)
     mine = client.get(f"{ACT}/options", headers=staff_token_headers).json()
-    assert mine["modules"] == ["records"]
-    assert mine["actions"] == ["resident.create"]
+    assert mine["modules"] == ["auth", "records"]
+    assert mine["actions"] == ["auth.login", "resident.create"]
     assert mine["outcomes"] == ["success", "failed", "denied"]
     assert mine["actors"] == []  # staff get no list of colleagues
 

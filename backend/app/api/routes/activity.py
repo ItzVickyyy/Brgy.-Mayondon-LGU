@@ -56,6 +56,13 @@ def list_activity(
         ),
     ] = None,
     module: Annotated[str | None, Query(max_length=60)] = None,
+    exclude_module: Annotated[
+        str | None,
+        Query(
+            max_length=60,
+            description="Leave out one module, e.g. auth to hide sign-ins",
+        ),
+    ] = None,
     action: Annotated[str | None, Query(max_length=80)] = None,
     outcome: Literal["success", "failed", "denied"] | None = None,
     actor_user_id: uuid.UUID | None = None,
@@ -84,6 +91,8 @@ def list_activity(
         stmt = stmt.where(AuditLog.actor_user_id == user.id)
     if module:
         stmt = stmt.where(AuditLog.module == module)
+    if exclude_module:
+        stmt = stmt.where(col(AuditLog.module).is_distinct_from(exclude_module))
     if action:
         stmt = stmt.where(AuditLog.action == action)
     if outcome:

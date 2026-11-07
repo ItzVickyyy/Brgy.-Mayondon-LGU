@@ -1601,7 +1601,7 @@ export type ResidentPublic = {
      */
     has_photo: boolean;
     /**
-     * Latest Barangay ID status
+     * Id Status
      */
     id_status: 'none' | 'valid' | 'expiring_soon' | 'expired';
     /**
@@ -3562,6 +3562,12 @@ export type activityListActivityData = {
          * Module
          */
         module?: string | null;
+        /**
+         * Exclude Module
+         *
+         * Leave out one module, e.g. auth to hide sign-ins
+         */
+        exclude_module?: string | null;
         /**
          * Action
          */

@@ -5,6 +5,7 @@ import {
   Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -58,16 +59,26 @@ function RecoverPassword() {
   })
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
+  const [offlineNotice, setOfflineNotice] = useState<string | null>(null)
+
   const recoverPassword = async (data: FormData) => {
-    await LoginService.recoverPassword({
+    const response = await LoginService.recoverPassword({
       body: { email: data.email },
     })
+    return response.data
   }
 
   const mutation = useMutation({
     mutationFn: recoverPassword,
-    onSuccess: () => {
-      showSuccessToast("Password recovery email sent successfully")
+    onSuccess: (response) => {
+      // When the installation has no email, the server says so. Show that message
+      // instead of a success toast so nobody waits for an email that never comes.
+      if (response?.message?.toLowerCase().includes("unavailable")) {
+        setOfflineNotice(response.message)
+        return
+      }
+      setOfflineNotice(null)
+      showSuccessToast("If that email is registered, a recovery link was sent")
       form.reset()
     },
     onError: handleError.bind(showErrorToast),
@@ -88,6 +99,16 @@ function RecoverPassword() {
           <div className="flex flex-col items-center gap-2 text-center">
             <h1 className="text-2xl font-bold">Password Recovery</h1>
           </div>
+
+          {offlineNotice ? (
+            <p
+              role="status"
+              className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+            >
+              {offlineNotice} Ask the System Administrator to set a temporary
+              password for you.
+            </p>
+          ) : null}
 
           <div className="grid gap-4">
             <FormField
