@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { type UserPublic, UsersService } from "@/client"
+import { formControlClass } from "@/components/Common/formStyles"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -29,6 +30,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
+import useAuth from "@/hooks/useAuth"
 import { handleError } from "@/utils"
 
 const formSchema = z
@@ -41,6 +43,7 @@ const formSchema = z
       .optional()
       .or(z.literal("")),
     confirm_password: z.string().optional(),
+    // Existing API role flag. Do not treat is_active as pending/rejected status.
     is_superuser: z.boolean().optional(),
     is_active: z.boolean().optional(),
   })
@@ -54,12 +57,16 @@ type FormData = z.infer<typeof formSchema>
 interface EditUserProps {
   user: UserPublic
   onSuccess: () => void
+  protectRoleAndStatus?: boolean
+  asPrimaryButton?: boolean
 }
 
-const EditUser = ({ user, onSuccess }: EditUserProps) => {
+const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButton = false }: EditUserProps) => {
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { user: currentUser } = useAuth()
+  const isEditingSelf = currentUser?.id === user.id
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -93,18 +100,26 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
     if (!submitData.password) {
       delete submitData.password
     }
+    // Preserve the selected role instead of forcing every account to Admin.
     mutation.mutate(submitData)
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuItem
-        onSelect={(e) => e.preventDefault()}
-        onClick={() => setIsOpen(true)}
-      >
-        <Pencil />
-        Edit User
-      </DropdownMenuItem>
+      {asPrimaryButton ? (
+        <Button type="button" variant="outline" size="sm" onClick={() => setIsOpen(true)}>
+          <Pencil aria-hidden="true" />
+          Edit
+        </Button>
+      ) : (
+        <DropdownMenuItem
+          onSelect={(e) => e.preventDefault()}
+          onClick={() => setIsOpen(true)}
+        >
+          <Pencil />
+          Edit User
+        </DropdownMenuItem>
+      )}
       <DialogContent className="sm:max-w-md">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -115,6 +130,13 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+              {!isEditingSelf ? (
+                <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground">
+                  Give this temporary password to the user in person. It is not
+                  stored in readable form, and the user must change it at first
+                  sign-in.
+                </p>
+              ) : null}
               <FormField
                 control={form.control}
                 name="email"
@@ -155,7 +177,9 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Set Password</FormLabel>
+                    <FormLabel>
+                      {isEditingSelf ? "Set password" : "Temporary password"}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Password"
@@ -190,14 +214,22 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                 control={form.control}
                 name="is_superuser"
                 render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <select
+                        className={formControlClass}
+                        disabled={protectRoleAndStatus}
+                        value={field.value ? "admin" : "staff"}
+                        onChange={(event) =>
+                          field.onChange(event.target.value === "admin")
+                        }
+                      >
+                        <option value="staff">Staff</option>
+                        <option value="admin">System Administrator</option>
+                      </select>
                     </FormControl>
-                    <FormLabel className="font-normal">Is admin?</FormLabel>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -209,6 +241,7 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
                   <FormItem className="flex items-center gap-3 space-y-0">
                     <FormControl>
                       <Checkbox
+                        disabled={protectRoleAndStatus}
                         checked={field.value}
                         onCheckedChange={field.onChange}
                       />
@@ -221,11 +254,11 @@ const EditUser = ({ user, onSuccess }: EditUserProps) => {
 
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline" disabled={mutation.isPending}>
+                <Button variant="outline" className="min-h-11" disabled={mutation.isPending}>
                   Cancel
                 </Button>
               </DialogClose>
-              <LoadingButton type="submit" loading={mutation.isPending}>
+              <LoadingButton className="min-h-11" type="submit" loading={mutation.isPending}>
                 Save
               </LoadingButton>
             </DialogFooter>

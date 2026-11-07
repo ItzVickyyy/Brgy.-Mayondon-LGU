@@ -26,14 +26,14 @@ test("Inputs are visible, empty and editable", async ({ page }) => {
 test("Log In button is visible", async ({ page }) => {
   await page.goto("/login")
 
-  await expect(page.getByRole("button", { name: "Log In" })).toBeVisible()
+  await expect(page.getByRole("button", { name: "Sign in" })).toBeVisible()
 })
 
 test("Forgot Password link is visible", async ({ page }) => {
   await page.goto("/login")
 
   await expect(
-    page.getByRole("link", { name: "Forgot your password?" }),
+    page.getByRole("link", { name: "Forgot password?" }),
   ).toBeVisible()
 })
 
@@ -41,20 +41,18 @@ test("Log in with valid email and password ", async ({ page }) => {
   await page.goto("/login")
 
   await fillForm(page, firstSuperuser, firstSuperuserPassword)
-  await page.getByRole("button", { name: "Log In" }).click()
+  await page.getByRole("button", { name: "Sign in" }).click()
 
   await page.waitForURL("/")
 
-  await expect(
-    page.getByText("Welcome back, nice to see you again!"),
-  ).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible()
 })
 
 test("Log in with invalid email", async ({ page }) => {
   await page.goto("/login")
 
   await fillForm(page, "invalidemail", firstSuperuserPassword)
-  await page.getByRole("button", { name: "Log In" }).click()
+  await page.getByRole("button", { name: "Sign in" }).click()
 
   await expect(page.getByText("Invalid email address")).toBeVisible()
 })
@@ -64,7 +62,7 @@ test("Log in with invalid password", async ({ page }) => {
 
   await page.goto("/login")
   await fillForm(page, firstSuperuser, password)
-  await page.getByRole("button", { name: "Log In" }).click()
+  await page.getByRole("button", { name: "Sign in" }).click()
 
   await expect(page.getByText("Incorrect email or password")).toBeVisible()
 })
@@ -73,16 +71,18 @@ test("Successful log out", async ({ page }) => {
   await page.goto("/login")
 
   await fillForm(page, firstSuperuser, firstSuperuserPassword)
-  await page.getByRole("button", { name: "Log In" }).click()
+  await page.getByRole("button", { name: "Sign in" }).click()
 
   await page.waitForURL("/")
 
-  await expect(
-    page.getByText("Welcome back, nice to see you again!"),
-  ).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible()
 
-  await page.getByTestId("user-menu").click()
-  await page.getByRole("menuitem", { name: "Log out" }).click()
+  await page.getByRole("button", { name: "User menu" }).click()
+  await page.getByRole("menuitem", { name: "Logout" }).click()
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Log out" })
+    .click()
   await page.waitForURL("/login")
 })
 
@@ -90,28 +90,32 @@ test("Logged-out user cannot access protected routes", async ({ page }) => {
   await page.goto("/login")
 
   await fillForm(page, firstSuperuser, firstSuperuserPassword)
-  await page.getByRole("button", { name: "Log In" }).click()
+  await page.getByRole("button", { name: "Sign in" }).click()
 
   await page.waitForURL("/")
 
-  await expect(
-    page.getByText("Welcome back, nice to see you again!"),
-  ).toBeVisible()
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible()
 
-  await page.getByTestId("user-menu").click()
-  await page.getByRole("menuitem", { name: "Log out" }).click()
+  await page.getByRole("button", { name: "User menu" }).click()
+  await page.getByRole("menuitem", { name: "Logout" }).click()
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Log out" })
+    .click()
   await page.waitForURL("/login")
 
-  await page.goto("/settings")
-  await page.waitForURL("/welcome")
+  await page.goto("/")
+  await page.waitForURL("/login")
 })
 
-test("Redirects to /login when token is wrong", async ({ page }) => {
-  await page.goto("/settings")
-  await page.evaluate(() => {
+test("Redirects to /login and clears an invalid token", async ({ page }) => {
+  await page.addInitScript(() => {
     localStorage.setItem("access_token", "invalid_token")
   })
-  await page.goto("/settings")
+  await page.goto("/")
   await page.waitForURL("/login")
   await expect(page).toHaveURL("/login")
+  await expect
+    .poll(() => page.evaluate(() => localStorage.getItem("access_token")))
+    .toBeNull()
 })

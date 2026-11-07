@@ -31,9 +31,9 @@ Last updated: November 7, 2026
 |---|---|---|---|---|---|
 | D-10 | Brief: **six staff accounts, all full access.** Prototype: **Staff vs System Administrator** with restrictions. Does the client approve the split? If not, the prototype's role UI and access matrix must be removed or reduced. | Present the matrix to the client (the team already decided to) and record the answer | Client | V1 / Test | Open |
 | D-11 | **Staff self-registration with admin approval** vs the brief/README rule of *no public sign-up; admin creates accounts*. Who is the System Administrator and who may approve/disable accounts? | Drop self-registration unless the client asks; admin-created accounts match the brief and need no email | Client / Team | V1 | **Closed** (Nov 7, 2026): owner decided no self-registration, admin creates accounts; UI removed on `draft/admin-portal` (commit "Remove self-registration UI (D-11)"). Not a client approval |
-| D-12 | **Account setup and password recovery offline.** Email is disabled, so the reset flow does not work. What is the local procedure (admin sets a temporary password? written recovery code?) and who owns it? | Admin-managed temporary password with forced change | Client / Team | Test | **Closed** (owner decision Nov 7, 2026; implemented Nov 7, 2026). The System Administrator sets a temporary password and gives it to the user in person; the user must change it before accessing other pages or protected API operations. No email or recovery codes. This is not a client approval. |
+| D-12 | **Account setup and password recovery offline.** Email is disabled, so the reset flow does not work. What is the local procedure (admin sets a temporary password? written recovery code?) and who owns it? | Admin-managed temporary password with forced change | Client / Team | Test | **Decided; action pending** (owner, Nov 7, 2026): the System Administrator sets a temporary password; the user must change it at next sign-in. Not a client approval. Mark **Closed** once shipped (step 9 remainder) |
 | D-25 | Even if all six keep "full access": may staff **delete, export, import, manage accounts, back up/restore**? Proposed: staff cannot import, archive, void, or restore | Decide per action, not per person | Client | Test | Open |
-| D-39 | Backend authorization is **not implemented** for roles, account status (`pending/active/rejected/inactive`), or audit logging; role is only `is_superuser`. Decide the model, then implement and test direct-API access. | Build after D-10/D-11 are settled. **Account-status part no longer needed** (D-11, Nov 7, 2026: no pending/rejected accounts, no `status` column). Role model (D-10) and audit logging remain; sign-in audit is done | Team | Data | Open (reduced scope) |
+| D-39 | Backend authorization: **role (`admin`/`staff`) is implemented and enforced on the user-account API** (see [05](05-Roles-Security-and-Privacy.md) A2). Still not implemented: audit logging. **Account status (`pending/active/rejected/inactive`) is no longer needed** (D-11, Nov 7, 2026: no pending or rejected accounts, no `status` column). Endpoints for records, issuance, reports and backup must use `require_permission` when they are built, and each needs direct-API tests. | Build the rest after D-10 is settled; sign-in audit is done | Team | Data | Partly done (reduced scope) |
 
 ## C. Scope, documents and printing
 
@@ -60,6 +60,7 @@ Last updated: November 7, 2026
 | D-45 | **"Print" on an ID row:** should it reprint an existing ID, or start a new issuance as it does now (it opens New Issuance for the ID type)? | Keep starting a new issuance until D-44 is settled | Client / Team | Test | Open |
 | D-46 | **Real barangay contact email.** `frontend/src/config/barangay-profile.ts` holds `barangay.mayondon@example.com` with a "TODO confirm with barangay" comment. No example addresses may appear in placeholders (see [10](10-Decisions-Already-Made.md)). | Ask the barangay for the official address | Client | V1 | Open |
 | D-47 | **Client-approved dark/light palette.** Dark mode was changed in Nov 2026 (new `brand` token, lighter dark `primary`) for contrast, not from a client brief; not checked in a real browser in both modes. Related to D-28. | Show both modes to the client and record the answer in [03](03-Design-and-UI.md) section 5 | Client | Test | Open |
+| D-48 | **Resident type values.** The prototype's resident record has a `resident_type` field, but no document lists its allowed values or says what the office uses it for. Needed to decide whether the column stays and what it is constrained to. | Ask the office what categories their masterlist uses | Client | Test | Open |
 
 ## D. Deployment, backup and operations
 
@@ -125,6 +126,10 @@ Answers to items above, recorded when made. Decision maker is the project team u
 ### Nov 5, 2026 - design and scope changes by the project owner
 
 These were made in code on `draft/admin-portal` and are recorded as settled in [10-Decisions-Already-Made.md](10-Decisions-Already-Made.md). They answer no numbered question above, but they change the rows noted: PhilHealth Certification removed (touches D-13); Purpose note and Referred by (c/o) removed from the form and print (touches D-14 and D-23); Barangay IDs merged into Records Management and issued through Issuance Management (touches D-18); dark-mode `brand` token added (opens D-47). New open questions: D-43 to D-47.
+
+### Nov 5, 2026 - database design gaps settled by the project owner
+
+Photo storage, ID number history, health-condition access, date and time zone handling, derived values, account deletion and the audit table design are settled in [09](09-Issuance-Form-Data-Map.md) and listed as items 20 to 25 in [10](10-Decisions-Already-Made.md). They narrow D-24, D-26 and D-39 (design chosen, nothing built) and do not close them. New open question: D-48. D-43 (ID numbering rule) still decides how the next ID number is assigned.
 
 ### D-06 follow-up (proposed, not yet decided)
 

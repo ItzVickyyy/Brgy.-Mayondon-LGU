@@ -4,6 +4,7 @@ import {
   Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
+import { ArrowRight } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -33,6 +34,34 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>
 
+function getLoginErrorMessage(error: unknown): string {
+  const candidate = error as {
+    message?: unknown
+    body?: { detail?: unknown; message?: unknown }
+    detail?: unknown
+    status?: unknown
+  } | null
+  const apiMessage = [
+    candidate?.body?.detail,
+    candidate?.body?.message,
+    candidate?.detail,
+    candidate?.message,
+  ].find((value): value is string => typeof value === "string")
+  const normalized = apiMessage?.toLowerCase() ?? ""
+
+  if (
+    normalized.includes("incorrect") ||
+    normalized.includes("invalid credentials") ||
+    normalized.includes("wrong password")
+  ) {
+    return "The email address or password is incorrect. Please check your credentials and try again."
+  }
+  if (candidate?.status === 401) {
+    return "The email address or password is incorrect. Please check your credentials and try again."
+  }
+  return "We could not sign you in. Please try again or contact the System Administrator if the problem continues."
+}
+
 export const Route = createFileRoute("/login")({
   component: Login,
   beforeLoad: async () => {
@@ -53,6 +82,11 @@ export const Route = createFileRoute("/login")({
 
 function Login() {
   const { loginMutation } = useAuth()
+  const loginErrorMessage = loginMutation.error
+    ? getLoginErrorMessage(loginMutation.error)
+    : null
+  const passwordChangedNotice =
+    new URLSearchParams(window.location.search).get("passwordChanged") === "1"
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
@@ -75,25 +109,45 @@ function Login() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-6"
         >
-          <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-2xl font-bold">Login to your account</h1>
-            <p className="text-muted-foreground text-sm">
-              Authorized barangay personnel only
+          <div className="flex flex-col gap-1">
+            <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
+            <p className="text-sm text-muted-foreground">
+              Sign in to access the barangay personnel portal.
             </p>
           </div>
 
-          <div className="grid gap-4">
+          {passwordChangedNotice ? (
+            <p
+              role="status"
+              className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground"
+            >
+              Your password has been changed. Sign in again.
+            </p>
+          ) : null}
+
+          {loginErrorMessage ? (
+            <p
+              role="alert"
+              className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+            >
+              {loginErrorMessage}
+            </p>
+          ) : null}
+
+          <div className="grid gap-5">
             <FormField
               control={form.control}
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>Email address</FormLabel>
                   <FormControl>
                     <Input
                       data-testid="email-input"
-                      placeholder="name@example.com"
+                      placeholder="Enter your email address"
                       type="email"
+                      autoComplete="username"
+                      className="h-11"
                       {...field}
                     />
                   </FormControl>
@@ -111,15 +165,17 @@ function Login() {
                     <FormLabel>Password</FormLabel>
                     <RouterLink
                       to="/recover-password"
-                      className="ml-auto text-sm underline-offset-4 hover:underline"
+                      className="ml-auto text-sm font-medium text-brand underline-offset-4 hover:underline"
                     >
-                      Forgot your password?
+                      Forgot password?
                     </RouterLink>
                   </div>
                   <FormControl>
                     <PasswordInput
                       data-testid="password-input"
-                      placeholder="Password"
+                      placeholder="Enter your password"
+                      autoComplete="current-password"
+                      className="h-11"
                       {...field}
                     />
                   </FormControl>
@@ -128,16 +184,15 @@ function Login() {
               )}
             />
 
-            <LoadingButton type="submit" loading={loginMutation.isPending}>
-              Log In
+            <LoadingButton
+              type="submit"
+              className="h-11 w-full"
+              loading={loginMutation.isPending}
+            >
+              Sign in <ArrowRight className="ml-2 size-4" />
             </LoadingButton>
           </div>
         </form>
-        <div className="text-center text-sm">
-          <RouterLink to="/welcome" className="underline underline-offset-4">
-            Back to public information
-          </RouterLink>
-        </div>
       </Form>
     </AuthLayout>
   )

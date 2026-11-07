@@ -4,7 +4,7 @@ The client's problem, goals, scope, features and requirements. Combines the fina
 
 **Status:** The Creative Brief was signed by the professor and is the **approved planning baseline**. Client sign-off of the brief and of the local-network architecture is not recorded **(D-02)**. Anything marked *Proposed* below is **not** a client requirement yet. Undecided items are tagged `(D-xx)` and listed in [08-Open-Decisions.md](08-Open-Decisions.md).
 
-Last updated: November 5, 2026 (reflects the revised brief supplied October 27, 2026)
+Last updated: November 7, 2026 (reflects the revised brief supplied October 27, 2026)
 
 ## 1. Status labels (use consistently)
 
@@ -195,7 +195,7 @@ The instructor's Final Project Guide governs academic dates and wins on conflict
 | 2026-10-19/20 | Offline-first, local-network operation preferred | Client interviews; recorded in brief |
 | 2026-10-25 | Replace Vercel/Supabase hosting direction with Docker Compose + local PostgreSQL | Project team |
 | 2026-10-27 | Print only variable details onto existing pre-printed forms (overlay), never recreate the form | Client description; team |
-| 2026-10-28 | Admin/Staff split and staff self-registration with admin approval are **intentional proposals** to take to the client | Project team |
+| 2026-10-28 | Admin/Staff split and staff self-registration with admin approval are **intentional proposals** to take to the client (self-registration dropped Nov 7, 2026, D-11) | Project team |
 | 2026-11-07 | No staff self-registration: only an administrator creates accounts (D-11). Offline password reset: the System Administrator sets a temporary password and the user must change it at next sign-in (D-12). Owner design decisions, **not** client approvals | Project owner |
 | 2026-11-01 | Remove on-screen sample/prototype banners; all data remains fictional | Project team |
 | 2026-11-01 | Branches: `master` = docs; `draft/admin-portal` = UI and code, and the Version 1 demo runs from it; `Foundation` frozen as a read-only reference (D-08) | Project team |

@@ -2,28 +2,14 @@ import { expect, test } from "@playwright/test"
 
 test.use({ storageState: { cookies: [], origins: [] } })
 
-test("Public landing page shows barangay information and staff login", async ({
-  page,
-}) => {
+test("The old /welcome address goes to staff login", async ({ page }) => {
   await page.goto("/welcome")
-
-  await expect(
-    page.getByRole("heading", { name: "Barangay Mayondon LGU" }),
-  ).toBeVisible()
-  await expect(
-    page.getByRole("heading", { name: "Announcements" }),
-  ).toBeVisible()
-  await expect(
-    page.getByRole("heading", { name: "Contact Information" }),
-  ).toBeVisible()
-  await expect(
-    page.getByRole("link", { name: "Staff Login" }).first(),
-  ).toHaveAttribute("href", "/login")
+  await expect(page).toHaveURL(/login$/)
 })
 
-test("Unauthenticated visitors to the dashboard reach public information", async ({
+test("Unauthenticated visitors to the dashboard reach staff login", async ({
   page,
 }) => {
   await page.goto("/")
-  await expect(page).toHaveURL(/welcome$/)
+  await expect(page).toHaveURL(/login$/)
 })

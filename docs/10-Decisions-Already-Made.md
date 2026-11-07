@@ -20,8 +20,21 @@ Last updated: November 7, 2026. Synthetic data only: never write real names, ID 
 | 10 | **Management Reports always shows three summary cards** (Documents Issued, Records Expiring, Masterlist Imports) with zero values, not a "No report data yet" message. | Reports round | Consistent layout before data exists |
 | 11 | **No sample or example email addresses** in placeholders or seed text (`name@example.com`, `user@example.com` were removed). | Placeholder cleanup | They look like real data |
 | 12 | The User Accounts table shows whatever the database holds, including the seeded first admin (`FIRST_SUPERUSER`). That row is deployment data, not code. To replace it: create a real admin, then delete the seed account (the last active admin cannot be deleted). | Same | See [05](05-Roles-Security-and-Privacy.md) A6 |
-| 20 | **No staff self-registration.** There is no Request Access, Pending Approval or Pending Registrations page, no sidebar badge and no dashboard card. Only an administrator creates accounts. No account `status` column; `/users/signup` stays disabled (D-11). | Nov 7, 2026 | Owner decision (not a client approval). Matches the brief: no public sign-up |
-| 21 | **Offline password reset is an administrator-set temporary password with forced change at next sign-in.** No email, no recovery codes (D-12). | Nov 7, 2026 | Owner decision (not a client approval). Implemented Nov 7, 2026: the administrator gives the temporary password to the user in person; access to other pages and protected API operations is blocked until the user changes it. The user is signed out and signs in again. Email cannot work offline. |
+
+## Database design (settled Nov 5, 2026)
+
+Full wording and reasons are in [09](09-Issuance-Form-Data-Map.md), *Settled design decisions*. Design decisions by the owner, not client approvals. Do not undo them without asking.
+
+| # | Decision | Reason |
+|---|---|---|
+| 20 | **Resident photos are stored in the database** (`resident_photos`, `bytea`), with no `photo_url` column and no photo files on disk. | The backup script only dumps PostgreSQL; photos must never leave the host |
+| 21 | `residents.id_number` is the current ID number. Each ID card (new, renewal, replacement) is its own issuance row with its own `id_number`. | History is never overwritten |
+| 22 | **No "sensitive read" permission.** The health condition is masked in lists, returned only on the single record to `issuance.write`, and each read is audited. | Staff must enter and print it, so a permission they all hold restricts nothing |
+| 23 | Business dates are `date` and "today" is computed in `Asia/Manila`, not UTC. Age and ID status are computed, never stored. | The Docker host runs on UTC |
+| 24 | An account that issued a document is deactivated, never deleted (`ON DELETE RESTRICT`). `audit_log` is append only. | Keeps issuance history |
+| 25 | Sex and civil status are `CHECK`-constrained text. Residents use `suffix`. | Short fixed lists; matches the form contract |
+| 26 | `docs/09` is the authority for the schema. The groupmate's SQL script is input, not the schema: its seed lists, one-to-one detail tables and multi-select tables are reused; its cascading deletes, file-path photos, server-date defaults and `r.*` view are not. | One design, built with SQLModel and Alembic, not a second competing schema |
+| 27 | The first migration (`b4e8d2a61c37`) removed the template `item` table, cleared stale password-recovery rate-limit rows, and added `document_types`, `sectors`, `id_types`, `issuance_purposes`, `tricycle_associations`, `streets`, `officials` and the append-only `audit_log`. | Foundation for residents and issuance. Lookup values are seeded from office lists; System Administrators can maintain Streets and Tricycle Associations in Records Management. `audit_log` blocks UPDATE, DELETE and TRUNCATE, except clearing `actor_user_id` when an account is deleted |
 
 ## Printing
 
@@ -48,3 +61,10 @@ Last updated: November 7, 2026. Synthetic data only: never write real names, ID 
 - ID records, residents and the issuance store are separate empty in-memory samples; real data must share resident ids.
 
 Open questions that remain (ID numbering, ID card layout, reprint behaviour, real contact email, approved palette) are D-43 to D-47 in [08-Open-Decisions.md](08-Open-Decisions.md).
+
+## Accounts (decided Nov 7, 2026)
+
+| # | Decision | Date | Reason |
+|---|---|---|---|
+| 28 | **No staff self-registration.** There is no Request Access, Pending Approval or Pending Registrations page, no sidebar badge and no dashboard card. Only an administrator creates accounts. No account `status` column; `/users/signup` stays disabled (D-11). | Nov 7, 2026 | Owner decision (not a client approval). Matches the brief: no public sign-up |
+| 29 | **Offline password reset is an administrator-set temporary password with forced change at next sign-in.** No email, no recovery codes (D-12). | Nov 7, 2026 | Owner decision (not a client approval). Forced change not built yet; email cannot work offline |

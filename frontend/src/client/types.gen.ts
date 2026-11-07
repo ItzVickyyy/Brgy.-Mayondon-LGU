@@ -5,6 +5,315 @@ export type ClientOptions = {
 };
 
 /**
+ * AccountActivityPublic
+ */
+export type AccountActivityPublic = {
+    period: PeriodInfo;
+    /**
+     * Data
+     */
+    data: Array<AccountActivityRow>;
+};
+
+/**
+ * AccountActivityRow
+ */
+export type AccountActivityRow = {
+    /**
+     * User Id
+     */
+    user_id: string;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Full Name
+     */
+    full_name: string | null;
+    /**
+     * Role
+     */
+    role: string;
+    /**
+     * Is Active
+     */
+    is_active: boolean;
+    /**
+     * Documents Issued
+     */
+    documents_issued: number;
+    /**
+     * Records Changed
+     */
+    records_changed: number;
+    /**
+     * Last Activity
+     */
+    last_activity: string | null;
+};
+
+/**
+ * ActivityActor
+ */
+export type ActivityActor = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Email
+     */
+    email: string;
+};
+
+/**
+ * ActivityItem
+ */
+export type ActivityItem = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Occurred At
+     */
+    occurred_at: string;
+    /**
+     * Actor User Id
+     */
+    actor_user_id: string | null;
+    /**
+     * Actor Email
+     */
+    actor_email: string | null;
+    /**
+     * Is Own
+     */
+    is_own: boolean;
+    /**
+     * Action
+     */
+    action: string;
+    /**
+     * Module
+     */
+    module: string | null;
+    /**
+     * Record Type
+     */
+    record_type: string | null;
+    /**
+     * Record Id
+     */
+    record_id: string | null;
+    /**
+     * Outcome
+     */
+    outcome: string;
+    /**
+     * Reason
+     */
+    reason: string | null;
+    /**
+     * Details
+     */
+    details: {
+        [key: string]: unknown;
+    } | null;
+};
+
+/**
+ * ActivityOptions
+ *
+ * Values for the filter drop-downs, limited to what the user may see.
+ */
+export type ActivityOptions = {
+    /**
+     * Modules
+     */
+    modules: Array<string>;
+    /**
+     * Actions
+     */
+    actions: Array<string>;
+    /**
+     * Outcomes
+     */
+    outcomes: Array<string>;
+    /**
+     * Actors
+     */
+    actors: Array<ActivityActor>;
+};
+
+/**
+ * ActivityPublic
+ */
+export type ActivityPublic = {
+    /**
+     * Data
+     */
+    data: Array<ActivityItem>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * ArchiveRequest
+ */
+export type ArchiveRequest = {
+    /**
+     * Reason
+     */
+    reason: string;
+};
+
+/**
+ * AssistanceIn
+ */
+export type AssistanceIn = {
+    /**
+     * Assistance Type
+     */
+    assistance_type: 'financial' | 'medical' | 'burial';
+    /**
+     * For Self
+     */
+    for_self?: boolean;
+    /**
+     * Beneficiary Name
+     */
+    beneficiary_name?: string | null;
+    /**
+     * Beneficiary Relationship
+     */
+    beneficiary_relationship?: string | null;
+};
+
+/**
+ * AssistancePublic
+ */
+export type AssistancePublic = {
+    /**
+     * Assistance Type
+     */
+    assistance_type: string;
+    /**
+     * For Self
+     */
+    for_self: boolean;
+    /**
+     * Beneficiary Name
+     */
+    beneficiary_name: string | null;
+    /**
+     * Beneficiary Relationship
+     */
+    beneficiary_relationship: string | null;
+};
+
+/**
+ * BarangayIdIn
+ */
+export type BarangayIdIn = {
+    /**
+     * Transaction Type
+     */
+    transaction_type: 'new' | 'renewal' | 'replacement';
+    /**
+     * Valid Until
+     */
+    valid_until: string;
+    /**
+     * Id Number
+     */
+    id_number?: string | null;
+};
+
+/**
+ * BarangayIdListItem
+ *
+ * The latest issued ID card of one resident (Records Management tab).
+ */
+export type BarangayIdListItem = {
+    /**
+     * Issuance Id
+     */
+    issuance_id: string;
+    /**
+     * Reference No
+     */
+    reference_no: string;
+    /**
+     * Resident Id
+     */
+    resident_id: string;
+    /**
+     * Resident Name
+     */
+    resident_name: string;
+    /**
+     * Resident Status
+     */
+    resident_status: string;
+    /**
+     * Id Number
+     */
+    id_number: string;
+    /**
+     * Transaction Type
+     */
+    transaction_type: string;
+    /**
+     * Issue Date
+     */
+    issue_date: string;
+    /**
+     * Valid Until
+     */
+    valid_until: string;
+    /**
+     * Status
+     */
+    status: 'valid' | 'expiring_soon' | 'expired';
+};
+
+/**
+ * BarangayIdPublic
+ */
+export type BarangayIdPublic = {
+    /**
+     * Transaction Type
+     */
+    transaction_type: string;
+    /**
+     * Valid Until
+     */
+    valid_until: string;
+    /**
+     * Id Number
+     */
+    id_number: string | null;
+};
+
+/**
+ * BarangayIdsPublic
+ */
+export type BarangayIdsPublic = {
+    /**
+     * Data
+     */
+    data: Array<BarangayIdListItem>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
  * Body_login-login_access_token
  */
 export type Body_login_login_access_token = {
@@ -35,6 +344,236 @@ export type Body_login_login_access_token = {
 };
 
 /**
+ * DashboardPublic
+ */
+export type DashboardPublic = {
+    period: PeriodInfo;
+    summary: DashboardSummary;
+    /**
+     * Issuances Over Time
+     */
+    issuances_over_time: Array<MonthCount>;
+    /**
+     * By Document Type
+     */
+    by_document_type: Array<DocumentTypeCount>;
+    /**
+     * Total Issued
+     */
+    total_issued: number;
+    /**
+     * Expiring
+     */
+    expiring: Array<ExpiringItem>;
+};
+
+/**
+ * DashboardSummary
+ */
+export type DashboardSummary = {
+    /**
+     * Documents Issued This Month
+     */
+    documents_issued_this_month: number;
+    /**
+     * Clearances Expiring
+     */
+    clearances_expiring: number;
+    /**
+     * Barangay Ids Expiring
+     */
+    barangay_ids_expiring: number;
+    /**
+     * Clearance Window Days
+     */
+    clearance_window_days: number;
+    /**
+     * Id Window Days
+     */
+    id_window_days: number;
+    /**
+     * Open Drafts
+     */
+    open_drafts: number;
+};
+
+/**
+ * DocumentTypeCount
+ */
+export type DocumentTypeCount = {
+    /**
+     * Document Type Id
+     */
+    document_type_id: number;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * DocumentTypePublic
+ */
+export type DocumentTypePublic = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Category
+     */
+    category: string;
+    /**
+     * Print Mode
+     */
+    print_mode: string;
+    /**
+     * Validity Months
+     */
+    validity_months: number | null;
+    /**
+     * One Per Resident
+     */
+    one_per_resident: boolean;
+    /**
+     * Signatory Default Position
+     */
+    signatory_default_position: string | null;
+};
+
+/**
+ * ExpiringItem
+ */
+export type ExpiringItem = {
+    /**
+     * Kind
+     */
+    kind: 'clearance' | 'barangay_id';
+    /**
+     * Issuance Id
+     */
+    issuance_id: string;
+    /**
+     * Reference No
+     */
+    reference_no: string;
+    /**
+     * Resident Id
+     */
+    resident_id: string;
+    /**
+     * Resident Name
+     */
+    resident_name: string;
+    /**
+     * Expires On
+     */
+    expires_on: string;
+    /**
+     * Days Left
+     */
+    days_left: number;
+    /**
+     * Status
+     */
+    status: 'expiring_soon' | 'expired';
+};
+
+/**
+ * ExpiringPublic
+ */
+export type ExpiringPublic = {
+    /**
+     * Data
+     */
+    data: Array<ExpiringItem>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * FranchiseIn
+ */
+export type FranchiseIn = {
+    /**
+     * Association Id
+     */
+    association_id: number;
+    /**
+     * Make
+     */
+    make: string;
+    /**
+     * Body Type
+     */
+    body_type: string;
+    /**
+     * Motor Number
+     */
+    motor_number: string;
+    /**
+     * Color
+     */
+    color: string;
+    /**
+     * Plate Number
+     */
+    plate_number: string;
+};
+
+/**
+ * FranchisePublic
+ */
+export type FranchisePublic = {
+    /**
+     * Tricycle Id
+     */
+    tricycle_id: number;
+    /**
+     * Association Id
+     */
+    association_id: number;
+    /**
+     * Make
+     */
+    make: string;
+    /**
+     * Body Type
+     */
+    body_type: string;
+    /**
+     * Motor Number
+     */
+    motor_number: string;
+    /**
+     * Color
+     */
+    color: string;
+    /**
+     * Plate Number
+     */
+    plate_number: string;
+};
+
+/**
  * HTTPValidationError
  */
 export type HTTPValidationError = {
@@ -45,71 +584,529 @@ export type HTTPValidationError = {
 };
 
 /**
- * ItemCreate
+ * IdStatusCounts
  */
-export type ItemCreate = {
+export type IdStatusCounts = {
     /**
-     * Title
+     * Valid
      */
-    title: string;
+    valid: number;
     /**
-     * Description
+     * Expiring Soon
      */
-    description?: string | null;
+    expiring_soon: number;
+    /**
+     * Expired
+     */
+    expired: number;
+    /**
+     * Total
+     */
+    total: number;
 };
 
 /**
- * ItemPublic
+ * IdentificationIn
  */
-export type ItemPublic = {
+export type IdentificationIn = {
     /**
-     * Title
+     * Id Type Id
      */
-    title: string;
+    id_type_id: number;
     /**
-     * Description
+     * Id Number
      */
-    description?: string | null;
+    id_number: string;
+    /**
+     * Place Of Issue
+     */
+    place_of_issue?: string;
+    /**
+     * Date Of Issue
+     */
+    date_of_issue?: string | null;
+};
+
+/**
+ * IdentificationPublic
+ */
+export type IdentificationPublic = {
+    /**
+     * Id Type Id
+     */
+    id_type_id: number;
+    /**
+     * Id Number
+     */
+    id_number: string;
+    /**
+     * Place Of Issue
+     */
+    place_of_issue: string;
+    /**
+     * Date Of Issue
+     */
+    date_of_issue: string;
+};
+
+/**
+ * IndigencyIn
+ */
+export type IndigencyIn = {
+    /**
+     * Addressed To Office
+     */
+    addressed_to_office: string;
+    /**
+     * Requested By
+     */
+    requested_by?: string | null;
+};
+
+/**
+ * IndigencyPublic
+ */
+export type IndigencyPublic = {
+    /**
+     * Addressed To Office
+     */
+    addressed_to_office: string;
+    /**
+     * Requested By
+     */
+    requested_by: string | null;
+};
+
+/**
+ * IssuanceCreate
+ */
+export type IssuanceCreate = {
+    /**
+     * Document Type Id
+     */
+    document_type_id: number;
+    /**
+     * Resident Id
+     */
+    resident_id: string;
+    /**
+     * Issue Date
+     */
+    issue_date?: string | null;
+    /**
+     * Purpose Id
+     */
+    purpose_id?: number | null;
+    /**
+     * Remarks
+     */
+    remarks?: string | null;
+    /**
+     * Signatory Official Id
+     */
+    signatory_official_id?: string | null;
+    identification?: IdentificationIn | null;
+    payment?: PaymentIn | null;
+    /**
+     * Sectors
+     */
+    sectors?: Array<SectorIn> | null;
+    utility?: UtilityIn | null;
+    indigency?: IndigencyIn | null;
+    franchise?: FranchiseIn | null;
+    marginalized?: MarginalizedIn | null;
+    assistance?: AssistanceIn | null;
+    jobseeker?: JobseekerIn | null;
+    barangay_id?: BarangayIdIn | null;
+};
+
+/**
+ * IssuanceListItem
+ */
+export type IssuanceListItem = {
     /**
      * Id
      */
     id: string;
     /**
-     * Owner Id
+     * Reference No
      */
-    owner_id: string;
+    reference_no: string | null;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Document Type Id
+     */
+    document_type_id: number;
+    /**
+     * Document Type Code
+     */
+    document_type_code: string;
+    /**
+     * Resident Id
+     */
+    resident_id: string;
+    /**
+     * Resident Name
+     */
+    resident_name: string;
+    /**
+     * Issue Date
+     */
+    issue_date: string;
+    /**
+     * Purpose Id
+     */
+    purpose_id: number | null;
+    /**
+     * Expires On
+     */
+    expires_on: string | null;
+    /**
+     * Issued At
+     */
+    issued_at: string | null;
+    /**
+     * Corrects Issuance Id
+     */
+    corrects_issuance_id: string | null;
     /**
      * Created At
      */
-    created_at?: string | null;
+    created_at: string;
 };
 
 /**
- * ItemUpdate
+ * IssuancePublic
  */
-export type ItemUpdate = {
+export type IssuancePublic = {
     /**
-     * Title
+     * Id
      */
-    title?: string | null;
+    id: string;
     /**
-     * Description
+     * Reference No
      */
-    description?: string | null;
+    reference_no: string | null;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Document Type Id
+     */
+    document_type_id: number;
+    /**
+     * Document Type Code
+     */
+    document_type_code: string;
+    /**
+     * Resident Id
+     */
+    resident_id: string;
+    /**
+     * Resident Name
+     */
+    resident_name: string;
+    /**
+     * Issue Date
+     */
+    issue_date: string;
+    /**
+     * Purpose Id
+     */
+    purpose_id: number | null;
+    /**
+     * Expires On
+     */
+    expires_on: string | null;
+    /**
+     * Issued At
+     */
+    issued_at: string | null;
+    /**
+     * Corrects Issuance Id
+     */
+    corrects_issuance_id: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Remarks
+     */
+    remarks: string | null;
+    /**
+     * Signatory Official Id
+     */
+    signatory_official_id: string | null;
+    /**
+     * Issued By User Id
+     */
+    issued_by_user_id: string | null;
+    /**
+     * Correction Reason
+     */
+    correction_reason: string | null;
+    /**
+     * Void Reason
+     */
+    void_reason: string | null;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+    identification?: IdentificationPublic | null;
+    payment?: PaymentPublic | null;
+    /**
+     * Sectors
+     */
+    sectors?: Array<SectorPublic>;
+    utility?: UtilityPublic | null;
+    indigency?: IndigencyPublic | null;
+    franchise?: FranchisePublic | null;
+    marginalized?: MarginalizedPublic | null;
+    assistance?: AssistancePublic | null;
+    jobseeker?: JobseekerPublic | null;
+    barangay_id?: BarangayIdPublic | null;
+    snapshot?: SnapshotPublic | null;
 };
 
 /**
- * ItemsPublic
+ * IssuanceTypeRow
  */
-export type ItemsPublic = {
+export type IssuanceTypeRow = {
+    /**
+     * Document Type Id
+     */
+    document_type_id: number;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Issued
+     */
+    issued: number;
+    /**
+     * Voided
+     */
+    voided: number;
+    /**
+     * Corrections
+     */
+    corrections: number;
+    /**
+     * Share Percent
+     */
+    share_percent: number | null;
+    /**
+     * Previous Issued
+     */
+    previous_issued: number | null;
+    /**
+     * Change Percent
+     */
+    change_percent: number | null;
+};
+
+/**
+ * IssuanceUpdate
+ *
+ * Only the fields sent change. A section sent as ``null`` is removed.
+ *
+ * The document type and the resident cannot change: start a new draft.
+ */
+export type IssuanceUpdate = {
+    /**
+     * Issue Date
+     */
+    issue_date?: string | null;
+    /**
+     * Purpose Id
+     */
+    purpose_id?: number | null;
+    /**
+     * Remarks
+     */
+    remarks?: string | null;
+    /**
+     * Signatory Official Id
+     */
+    signatory_official_id?: string | null;
+    identification?: IdentificationIn | null;
+    payment?: PaymentIn | null;
+    /**
+     * Sectors
+     */
+    sectors?: Array<SectorIn> | null;
+    utility?: UtilityIn | null;
+    indigency?: IndigencyIn | null;
+    franchise?: FranchiseIn | null;
+    marginalized?: MarginalizedIn | null;
+    assistance?: AssistanceIn | null;
+    jobseeker?: JobseekerIn | null;
+    barangay_id?: BarangayIdIn | null;
+};
+
+/**
+ * IssuancesByPurposePublic
+ */
+export type IssuancesByPurposePublic = {
+    period: PeriodInfo;
     /**
      * Data
      */
-    data: Array<ItemPublic>;
+    data: Array<PurposeRow>;
+    /**
+     * Total Issued
+     */
+    total_issued: number;
+};
+
+/**
+ * IssuancesByTypePublic
+ */
+export type IssuancesByTypePublic = {
+    period: PeriodInfo;
+    /**
+     * Data
+     */
+    data: Array<IssuanceTypeRow>;
+    /**
+     * Total Issued
+     */
+    total_issued: number;
+    /**
+     * Total Voided
+     */
+    total_voided: number;
+    /**
+     * Total Corrections
+     */
+    total_corrections: number;
+};
+
+/**
+ * IssuancesPublic
+ */
+export type IssuancesPublic = {
+    /**
+     * Data
+     */
+    data: Array<IssuanceListItem>;
     /**
      * Count
      */
     count: number;
+};
+
+/**
+ * IssueRequest
+ *
+ * Optional body of ``POST /issuances/{id}/issue``.
+ */
+export type IssueRequest = {
+    /**
+     * Purpose Name
+     */
+    purpose_name?: string | null;
+};
+
+/**
+ * JobseekerIn
+ */
+export type JobseekerIn = {
+    /**
+     * Educational Attainment
+     */
+    educational_attainment: string;
+    /**
+     * Course
+     */
+    course?: string;
+    /**
+     * Is Jobstart Beneficiary
+     */
+    is_jobstart_beneficiary?: boolean;
+    /**
+     * Witness Official Id
+     */
+    witness_official_id?: string | null;
+};
+
+/**
+ * JobseekerPublic
+ */
+export type JobseekerPublic = {
+    /**
+     * Educational Attainment
+     */
+    educational_attainment: string;
+    /**
+     * Course
+     */
+    course: string;
+    /**
+     * Is Jobstart Beneficiary
+     */
+    is_jobstart_beneficiary: boolean;
+    /**
+     * Witness Official Id
+     */
+    witness_official_id: string | null;
+};
+
+/**
+ * LookupItem
+ */
+export type LookupItem = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * LookupNameIn
+ *
+ * Body for adding or renaming a street or tricycle association.
+ */
+export type LookupNameIn = {
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
+ * MarginalizedIn
+ */
+export type MarginalizedIn = {
+    /**
+     * Health Condition
+     */
+    health_condition: string;
+};
+
+/**
+ * MarginalizedPublic
+ */
+export type MarginalizedPublic = {
+    /**
+     * Health Condition
+     */
+    health_condition: string;
 };
 
 /**
@@ -120,6 +1117,20 @@ export type Message = {
      * Message
      */
     message: string;
+};
+
+/**
+ * MonthCount
+ */
+export type MonthCount = {
+    /**
+     * Month
+     */
+    month: string;
+    /**
+     * Count
+     */
+    count: number;
 };
 
 /**
@@ -134,6 +1145,185 @@ export type NewPassword = {
      * New Password
      */
     new_password: string;
+};
+
+/**
+ * OfficialCreate
+ */
+export type OfficialCreate = {
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Position
+     */
+    position: string;
+    /**
+     * Term Start
+     */
+    term_start: string;
+    /**
+     * Term End
+     */
+    term_end?: string | null;
+    /**
+     * Is Elected
+     */
+    is_elected?: boolean;
+    /**
+     * Is Current
+     */
+    is_current?: boolean;
+};
+
+/**
+ * OfficialPublic
+ */
+export type OfficialPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Position
+     */
+    position: string;
+    /**
+     * Term Start
+     */
+    term_start: string;
+    /**
+     * Term End
+     */
+    term_end: string | null;
+    /**
+     * Is Elected
+     */
+    is_elected: boolean;
+    /**
+     * Is Current
+     */
+    is_current: boolean;
+};
+
+/**
+ * OfficialUpdate
+ *
+ * Partial update. Send ``term_end: null`` to clear the end date.
+ *
+ * There is no delete: set ``is_current`` to false instead, because issued
+ * documents will point at the official.
+ */
+export type OfficialUpdate = {
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * Position
+     */
+    position?: string | null;
+    /**
+     * Term Start
+     */
+    term_start?: string | null;
+    /**
+     * Term End
+     */
+    term_end?: string | null;
+    /**
+     * Is Elected
+     */
+    is_elected?: boolean | null;
+    /**
+     * Is Current
+     */
+    is_current?: boolean | null;
+};
+
+/**
+ * PasswordRecoveryRequest
+ */
+export type PasswordRecoveryRequest = {
+    /**
+     * Email
+     */
+    email: string;
+};
+
+/**
+ * PaymentIn
+ */
+export type PaymentIn = {
+    /**
+     * Is Free
+     */
+    is_free?: boolean;
+    /**
+     * Official Receipt No
+     */
+    official_receipt_no?: string | null;
+    /**
+     * Date Of Payment
+     */
+    date_of_payment?: string | null;
+    /**
+     * Certified By
+     */
+    certified_by?: string | null;
+};
+
+/**
+ * PaymentPublic
+ */
+export type PaymentPublic = {
+    /**
+     * Is Free
+     */
+    is_free: boolean;
+    /**
+     * Official Receipt No
+     */
+    official_receipt_no: string;
+    /**
+     * Date Of Payment
+     */
+    date_of_payment: string;
+    /**
+     * Certified By
+     */
+    certified_by: string | null;
+};
+
+/**
+ * PeriodInfo
+ */
+export type PeriodInfo = {
+    /**
+     * Period
+     */
+    period: string;
+    /**
+     * Start
+     */
+    start: string | null;
+    /**
+     * End
+     */
+    end: string;
+    /**
+     * Previous Start
+     */
+    previous_start: string | null;
+    /**
+     * Previous End
+     */
+    previous_end: string | null;
 };
 
 /**
@@ -156,6 +1346,482 @@ export type PrivateUserCreate = {
      * Is Verified
      */
     is_verified?: boolean;
+};
+
+/**
+ * PurposeRow
+ */
+export type PurposeRow = {
+    /**
+     * Purpose Id
+     */
+    purpose_id: number | null;
+    /**
+     * Purpose
+     */
+    purpose: string;
+    /**
+     * Issued
+     */
+    issued: number;
+    /**
+     * Share Percent
+     */
+    share_percent: number | null;
+};
+
+/**
+ * ReasonRequest
+ */
+export type ReasonRequest = {
+    /**
+     * Reason
+     */
+    reason: string;
+};
+
+/**
+ * RecordsOverview
+ */
+export type RecordsOverview = {
+    /**
+     * Residents Active
+     */
+    residents_active: number;
+    /**
+     * Residents Archived
+     */
+    residents_archived: number;
+    /**
+     * Residents By Sector
+     */
+    residents_by_sector: Array<SectorCount>;
+    ids_by_status: IdStatusCounts;
+};
+
+/**
+ * ReportSummary
+ */
+export type ReportSummary = {
+    period: PeriodInfo;
+    /**
+     * Documents Issued
+     */
+    documents_issued: number;
+    /**
+     * Records Expiring
+     */
+    records_expiring: number;
+};
+
+/**
+ * ResidentCreate
+ */
+export type ResidentCreate = {
+    /**
+     * First Name
+     */
+    first_name: string;
+    /**
+     * Middle Name
+     */
+    middle_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name: string;
+    /**
+     * Suffix
+     */
+    suffix?: 'Jr.' | 'Sr.' | 'II' | 'III' | 'IV' | 'V' | null;
+    /**
+     * Birthdate
+     */
+    birthdate?: string | null;
+    /**
+     * Birth Place
+     */
+    birth_place?: string | null;
+    /**
+     * Sex
+     */
+    sex?: 'Male' | 'Female' | null;
+    /**
+     * Civil Status
+     */
+    civil_status?: 'Single' | 'Married' | 'Legally Separated' | 'Widow/Widower' | null;
+    /**
+     * House Number
+     */
+    house_number?: string | null;
+    /**
+     * Street Id
+     */
+    street_id?: number | null;
+    /**
+     * Purok
+     */
+    purok?: number | null;
+    /**
+     * Resident Since Year
+     */
+    resident_since_year?: number | null;
+    /**
+     * Resident Since Birth
+     */
+    resident_since_birth?: boolean;
+    /**
+     * Resident Type
+     */
+    resident_type?: string | null;
+    /**
+     * Id Number
+     */
+    id_number?: string | null;
+    /**
+     * Voter Registration
+     */
+    voter_registration?: 'registered' | 'unregistered' | null;
+    /**
+     * Emergency Contact Name
+     */
+    emergency_contact_name?: string | null;
+    /**
+     * Emergency Contact Address
+     */
+    emergency_contact_address?: string | null;
+    /**
+     * Emergency Contact Phone
+     */
+    emergency_contact_phone?: string | null;
+    /**
+     * Sector Ids
+     */
+    sector_ids?: Array<number>;
+};
+
+/**
+ * ResidentPublic
+ */
+export type ResidentPublic = {
+    /**
+     * First Name
+     */
+    first_name: string;
+    /**
+     * Middle Name
+     */
+    middle_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name: string;
+    /**
+     * Suffix
+     */
+    suffix?: 'Jr.' | 'Sr.' | 'II' | 'III' | 'IV' | 'V' | null;
+    /**
+     * Birthdate
+     */
+    birthdate?: string | null;
+    /**
+     * Birth Place
+     */
+    birth_place?: string | null;
+    /**
+     * Sex
+     */
+    sex?: 'Male' | 'Female' | null;
+    /**
+     * Civil Status
+     */
+    civil_status?: 'Single' | 'Married' | 'Legally Separated' | 'Widow/Widower' | null;
+    /**
+     * House Number
+     */
+    house_number?: string | null;
+    /**
+     * Street Id
+     */
+    street_id?: number | null;
+    /**
+     * Purok
+     */
+    purok?: number | null;
+    /**
+     * Resident Since Year
+     */
+    resident_since_year?: number | null;
+    /**
+     * Resident Since Birth
+     */
+    resident_since_birth?: boolean;
+    /**
+     * Resident Type
+     */
+    resident_type?: string | null;
+    /**
+     * Id Number
+     */
+    id_number?: string | null;
+    /**
+     * Voter Registration
+     */
+    voter_registration?: 'registered' | 'unregistered' | null;
+    /**
+     * Emergency Contact Name
+     */
+    emergency_contact_name?: string | null;
+    /**
+     * Emergency Contact Address
+     */
+    emergency_contact_address?: string | null;
+    /**
+     * Emergency Contact Phone
+     */
+    emergency_contact_phone?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Age
+     */
+    age: number | null;
+    /**
+     * Sector Ids
+     */
+    sector_ids: Array<number>;
+    /**
+     * Has Photo
+     */
+    has_photo: boolean;
+    /**
+     * Id Status
+     */
+    id_status: 'none' | 'valid' | 'expiring_soon' | 'expired';
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Archive Reason
+     */
+    archive_reason: string | null;
+    /**
+     * Archived At
+     */
+    archived_at: string | null;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Updated At
+     */
+    updated_at: string;
+};
+
+/**
+ * ResidentUpdate
+ *
+ * Every field optional; only the fields sent are changed.
+ */
+export type ResidentUpdate = {
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Middle Name
+     */
+    middle_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Suffix
+     */
+    suffix?: 'Jr.' | 'Sr.' | 'II' | 'III' | 'IV' | 'V' | null;
+    /**
+     * Birthdate
+     */
+    birthdate?: string | null;
+    /**
+     * Birth Place
+     */
+    birth_place?: string | null;
+    /**
+     * Sex
+     */
+    sex?: 'Male' | 'Female' | null;
+    /**
+     * Civil Status
+     */
+    civil_status?: 'Single' | 'Married' | 'Legally Separated' | 'Widow/Widower' | null;
+    /**
+     * House Number
+     */
+    house_number?: string | null;
+    /**
+     * Street Id
+     */
+    street_id?: number | null;
+    /**
+     * Purok
+     */
+    purok?: number | null;
+    /**
+     * Resident Since Year
+     */
+    resident_since_year?: number | null;
+    /**
+     * Resident Since Birth
+     */
+    resident_since_birth?: boolean | null;
+    /**
+     * Resident Type
+     */
+    resident_type?: string | null;
+    /**
+     * Id Number
+     */
+    id_number?: string | null;
+    /**
+     * Voter Registration
+     */
+    voter_registration?: 'registered' | 'unregistered' | null;
+    /**
+     * Emergency Contact Name
+     */
+    emergency_contact_name?: string | null;
+    /**
+     * Emergency Contact Address
+     */
+    emergency_contact_address?: string | null;
+    /**
+     * Emergency Contact Phone
+     */
+    emergency_contact_phone?: string | null;
+    /**
+     * Sector Ids
+     */
+    sector_ids?: Array<number> | null;
+};
+
+/**
+ * ResidentsPublic
+ */
+export type ResidentsPublic = {
+    /**
+     * Data
+     */
+    data: Array<ResidentPublic>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * SectorCount
+ */
+export type SectorCount = {
+    /**
+     * Sector Id
+     */
+    sector_id: number;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Residents
+     */
+    residents: number;
+};
+
+/**
+ * SectorIn
+ */
+export type SectorIn = {
+    /**
+     * Sector Id
+     */
+    sector_id: number;
+    /**
+     * Sector Id Number
+     */
+    sector_id_number?: string | null;
+};
+
+/**
+ * SectorPublic
+ */
+export type SectorPublic = {
+    /**
+     * Sector Id
+     */
+    sector_id: number;
+    /**
+     * Sector Id Number
+     */
+    sector_id_number: string | null;
+};
+
+/**
+ * SnapshotPublic
+ */
+export type SnapshotPublic = {
+    /**
+     * Full Name
+     */
+    full_name: string;
+    /**
+     * Address Line
+     */
+    address_line: string | null;
+    /**
+     * Birth Date
+     */
+    birth_date: string | null;
+    /**
+     * Birth Place
+     */
+    birth_place: string | null;
+    /**
+     * Sex
+     */
+    sex: string | null;
+    /**
+     * Civil Status
+     */
+    civil_status: string | null;
+    /**
+     * Resident Since Year
+     */
+    resident_since_year: number | null;
+    /**
+     * Resident Since Birth
+     */
+    resident_since_birth: boolean;
+    /**
+     * Emergency Contact Name
+     */
+    emergency_contact_name?: string | null;
+    /**
+     * Emergency Contact Address
+     */
+    emergency_contact_address?: string | null;
+    /**
+     * Emergency Contact Phone
+     */
+    emergency_contact_phone?: string | null;
 };
 
 /**
@@ -202,10 +1868,59 @@ export type UserCreate = {
      * Is Superuser
      */
     is_superuser?: boolean;
+    role?: UserRole;
     /**
      * Full Name
      */
     full_name?: string | null;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Middle Name
+     */
+    middle_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Extension Name
+     */
+    extension_name?: string | null;
+    /**
+     * Sex
+     */
+    sex?: string | null;
+    /**
+     * Civil Status
+     */
+    civil_status?: string | null;
+    /**
+     * Birthdate
+     */
+    birthdate?: string | null;
+    /**
+     * Birthplace
+     */
+    birthplace?: string | null;
+    /**
+     * Phone Number
+     */
+    phone_number?: string | null;
+    /**
+     * Address
+     */
+    address?: string | null;
+    /**
+     * Governing Lgu
+     */
+    governing_lgu?: string | null;
+    /**
+     * Profile Photo Url
+     */
+    profile_photo_url?: string | null;
     /**
      * Password
      */
@@ -228,10 +1943,63 @@ export type UserPublic = {
      * Is Superuser
      */
     is_superuser?: boolean;
+    role?: UserRole;
+    /**
+     * Must Change Password
+     */
+    must_change_password?: boolean;
     /**
      * Full Name
      */
     full_name?: string | null;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Middle Name
+     */
+    middle_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Extension Name
+     */
+    extension_name?: string | null;
+    /**
+     * Sex
+     */
+    sex?: string | null;
+    /**
+     * Civil Status
+     */
+    civil_status?: string | null;
+    /**
+     * Birthdate
+     */
+    birthdate?: string | null;
+    /**
+     * Birthplace
+     */
+    birthplace?: string | null;
+    /**
+     * Phone Number
+     */
+    phone_number?: string | null;
+    /**
+     * Address
+     */
+    address?: string | null;
+    /**
+     * Governing Lgu
+     */
+    governing_lgu?: string | null;
+    /**
+     * Profile Photo Url
+     */
+    profile_photo_url?: string | null;
     /**
      * Id
      */
@@ -261,6 +2029,13 @@ export type UserRegister = {
 };
 
 /**
+ * UserRole
+ *
+ * Account roles. ``admin`` is shown in the UI as System Administrator.
+ */
+export type UserRole = 'admin' | 'staff';
+
+/**
  * UserUpdate
  */
 export type UserUpdate = {
@@ -276,6 +2051,7 @@ export type UserUpdate = {
      * Is Superuser
      */
     is_superuser?: boolean | null;
+    role?: UserRole | null;
     /**
      * Full Name
      */
@@ -298,6 +2074,54 @@ export type UserUpdateMe = {
      * Email
      */
     email?: string | null;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Middle Name
+     */
+    middle_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Extension Name
+     */
+    extension_name?: string | null;
+    /**
+     * Sex
+     */
+    sex?: string | null;
+    /**
+     * Civil Status
+     */
+    civil_status?: string | null;
+    /**
+     * Birthdate
+     */
+    birthdate?: string | null;
+    /**
+     * Birthplace
+     */
+    birthplace?: string | null;
+    /**
+     * Phone Number
+     */
+    phone_number?: string | null;
+    /**
+     * Address
+     */
+    address?: string | null;
+    /**
+     * Governing Lgu
+     */
+    governing_lgu?: string | null;
+    /**
+     * Profile Photo Url
+     */
+    profile_photo_url?: string | null;
 };
 
 /**
@@ -312,6 +2136,58 @@ export type UsersPublic = {
      * Count
      */
     count: number;
+};
+
+/**
+ * UtilityIn
+ */
+export type UtilityIn = {
+    /**
+     * Has Electric
+     */
+    has_electric?: boolean;
+    /**
+     * Has Water
+     */
+    has_water?: boolean;
+    /**
+     * Connection Type
+     */
+    connection_type: 'new' | 'reconnection';
+    /**
+     * Classification
+     */
+    classification: 'residential' | 'commercial';
+    /**
+     * Location
+     */
+    location: string;
+};
+
+/**
+ * UtilityPublic
+ */
+export type UtilityPublic = {
+    /**
+     * Has Electric
+     */
+    has_electric: boolean;
+    /**
+     * Has Water
+     */
+    has_water: boolean;
+    /**
+     * Connection Type
+     */
+    connection_type: string;
+    /**
+     * Classification
+     */
+    classification: string;
+    /**
+     * Location
+     */
+    location: string;
 };
 
 /**
@@ -384,9 +2260,7 @@ export type loginTestTokenResponses = {
 export type loginTestTokenResponse = loginTestTokenResponses[keyof loginTestTokenResponses];
 
 export type loginRecoverPasswordData = {
-    body: {
-        email: string;
-    };
+    body: PasswordRecoveryRequest;
     path?: never;
     query?: never;
     url: '/api/v1/password-recovery';
@@ -434,36 +2308,6 @@ export type loginResetPasswordResponses = {
 };
 
 export type loginResetPasswordResponse = loginResetPasswordResponses[keyof loginResetPasswordResponses];
-
-export type loginRecoverPasswordHtmlContentData = {
-    body?: never;
-    path: {
-        /**
-         * Email
-         */
-        email: string;
-    };
-    query?: never;
-    url: '/api/v1/password-recovery-html-content/{email}';
-};
-
-export type loginRecoverPasswordHtmlContentErrors = {
-    /**
-     * Validation Error
-     */
-    422: HTTPValidationError;
-};
-
-export type loginRecoverPasswordHtmlContentError = loginRecoverPasswordHtmlContentErrors[keyof loginRecoverPasswordHtmlContentErrors];
-
-export type loginRecoverPasswordHtmlContentResponses = {
-    /**
-     * Successful Response
-     */
-    200: string;
-};
-
-export type loginRecoverPasswordHtmlContentResponse = loginRecoverPasswordHtmlContentResponses[keyof loginRecoverPasswordHtmlContentResponses];
 
 export type usersReadUsersData = {
     body?: never;
@@ -721,6 +2565,1321 @@ export type usersUpdateUserResponses = {
 
 export type usersUpdateUserResponse = usersUpdateUserResponses[keyof usersUpdateUserResponses];
 
+export type residentsListResidentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         *
+         * Name search
+         */
+        q?: string | null;
+        /**
+         * Status
+         */
+        status?: 'active' | 'archived' | 'all';
+        /**
+         * Sector Id
+         */
+        sector_id?: number | null;
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/residents/';
+};
+
+export type residentsListResidentsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsListResidentsError = residentsListResidentsErrors[keyof residentsListResidentsErrors];
+
+export type residentsListResidentsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentsPublic;
+};
+
+export type residentsListResidentsResponse = residentsListResidentsResponses[keyof residentsListResidentsResponses];
+
+export type residentsCreateResidentData = {
+    body: ResidentCreate;
+    path?: never;
+    query?: {
+        /**
+         * Confirm Duplicate
+         *
+         * Set true after the clerk confirms a namesake
+         */
+        confirm_duplicate?: boolean;
+    };
+    url: '/api/v1/residents/';
+};
+
+export type residentsCreateResidentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsCreateResidentError = residentsCreateResidentErrors[keyof residentsCreateResidentErrors];
+
+export type residentsCreateResidentResponses = {
+    /**
+     * Successful Response
+     */
+    201: ResidentPublic;
+};
+
+export type residentsCreateResidentResponse = residentsCreateResidentResponses[keyof residentsCreateResidentResponses];
+
+export type residentsReadResidentData = {
+    body?: never;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}';
+};
+
+export type residentsReadResidentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsReadResidentError = residentsReadResidentErrors[keyof residentsReadResidentErrors];
+
+export type residentsReadResidentResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentPublic;
+};
+
+export type residentsReadResidentResponse = residentsReadResidentResponses[keyof residentsReadResidentResponses];
+
+export type residentsUpdateResidentData = {
+    body: ResidentUpdate;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}';
+};
+
+export type residentsUpdateResidentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsUpdateResidentError = residentsUpdateResidentErrors[keyof residentsUpdateResidentErrors];
+
+export type residentsUpdateResidentResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentPublic;
+};
+
+export type residentsUpdateResidentResponse = residentsUpdateResidentResponses[keyof residentsUpdateResidentResponses];
+
+export type residentsArchiveResidentData = {
+    body: ArchiveRequest;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}/archive';
+};
+
+export type residentsArchiveResidentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsArchiveResidentError = residentsArchiveResidentErrors[keyof residentsArchiveResidentErrors];
+
+export type residentsArchiveResidentResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentPublic;
+};
+
+export type residentsArchiveResidentResponse = residentsArchiveResidentResponses[keyof residentsArchiveResidentResponses];
+
+export type residentsRestoreResidentData = {
+    body?: never;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}/restore';
+};
+
+export type residentsRestoreResidentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsRestoreResidentError = residentsRestoreResidentErrors[keyof residentsRestoreResidentErrors];
+
+export type residentsRestoreResidentResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentPublic;
+};
+
+export type residentsRestoreResidentResponse = residentsRestoreResidentResponses[keyof residentsRestoreResidentResponses];
+
+export type residentsDeletePhotoData = {
+    body?: never;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}/photo';
+};
+
+export type residentsDeletePhotoErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsDeletePhotoError = residentsDeletePhotoErrors[keyof residentsDeletePhotoErrors];
+
+export type residentsDeletePhotoResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentPublic;
+};
+
+export type residentsDeletePhotoResponse = residentsDeletePhotoResponses[keyof residentsDeletePhotoResponses];
+
+export type residentsGetPhotoData = {
+    body?: never;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}/photo';
+};
+
+export type residentsGetPhotoErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsGetPhotoError = residentsGetPhotoErrors[keyof residentsGetPhotoErrors];
+
+export type residentsGetPhotoResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type residentsPutPhotoData = {
+    body?: never;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}/photo';
+};
+
+export type residentsPutPhotoErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsPutPhotoError = residentsPutPhotoErrors[keyof residentsPutPhotoErrors];
+
+export type residentsPutPhotoResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentPublic;
+};
+
+export type residentsPutPhotoResponse = residentsPutPhotoResponses[keyof residentsPutPhotoResponses];
+
+export type lookupsListDocumentTypesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/document-types';
+};
+
+export type lookupsListDocumentTypesResponses = {
+    /**
+     * Response Lookups-List Document Types
+     *
+     * Successful Response
+     */
+    200: Array<DocumentTypePublic>;
+};
+
+export type lookupsListDocumentTypesResponse = lookupsListDocumentTypesResponses[keyof lookupsListDocumentTypesResponses];
+
+export type lookupsListSectorsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/sectors';
+};
+
+export type lookupsListSectorsResponses = {
+    /**
+     * Response Lookups-List Sectors
+     *
+     * Successful Response
+     */
+    200: Array<LookupItem>;
+};
+
+export type lookupsListSectorsResponse = lookupsListSectorsResponses[keyof lookupsListSectorsResponses];
+
+export type lookupsListIdTypesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/id-types';
+};
+
+export type lookupsListIdTypesResponses = {
+    /**
+     * Response Lookups-List Id Types
+     *
+     * Successful Response
+     */
+    200: Array<LookupItem>;
+};
+
+export type lookupsListIdTypesResponse = lookupsListIdTypesResponses[keyof lookupsListIdTypesResponses];
+
+export type lookupsListIssuancePurposesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/issuance-purposes';
+};
+
+export type lookupsListIssuancePurposesResponses = {
+    /**
+     * Response Lookups-List Issuance Purposes
+     *
+     * Successful Response
+     */
+    200: Array<LookupItem>;
+};
+
+export type lookupsListIssuancePurposesResponse = lookupsListIssuancePurposesResponses[keyof lookupsListIssuancePurposesResponses];
+
+export type lookupsListStreetsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/streets';
+};
+
+export type lookupsListStreetsResponses = {
+    /**
+     * Response Lookups-List Streets
+     *
+     * Successful Response
+     */
+    200: Array<LookupItem>;
+};
+
+export type lookupsListStreetsResponse = lookupsListStreetsResponses[keyof lookupsListStreetsResponses];
+
+export type lookupsCreateStreetData = {
+    body: LookupNameIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/streets';
+};
+
+export type lookupsCreateStreetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsCreateStreetError = lookupsCreateStreetErrors[keyof lookupsCreateStreetErrors];
+
+export type lookupsCreateStreetResponses = {
+    /**
+     * Successful Response
+     */
+    201: LookupItem;
+};
+
+export type lookupsCreateStreetResponse = lookupsCreateStreetResponses[keyof lookupsCreateStreetResponses];
+
+export type lookupsListTricycleAssociationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/tricycle-associations';
+};
+
+export type lookupsListTricycleAssociationsResponses = {
+    /**
+     * Response Lookups-List Tricycle Associations
+     *
+     * Successful Response
+     */
+    200: Array<LookupItem>;
+};
+
+export type lookupsListTricycleAssociationsResponse = lookupsListTricycleAssociationsResponses[keyof lookupsListTricycleAssociationsResponses];
+
+export type lookupsCreateTricycleAssociationData = {
+    body: LookupNameIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/tricycle-associations';
+};
+
+export type lookupsCreateTricycleAssociationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsCreateTricycleAssociationError = lookupsCreateTricycleAssociationErrors[keyof lookupsCreateTricycleAssociationErrors];
+
+export type lookupsCreateTricycleAssociationResponses = {
+    /**
+     * Successful Response
+     */
+    201: LookupItem;
+};
+
+export type lookupsCreateTricycleAssociationResponse = lookupsCreateTricycleAssociationResponses[keyof lookupsCreateTricycleAssociationResponses];
+
+export type lookupsDeleteStreetData = {
+    body?: never;
+    path: {
+        /**
+         * Street Id
+         */
+        street_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/streets/{street_id}';
+};
+
+export type lookupsDeleteStreetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsDeleteStreetError = lookupsDeleteStreetErrors[keyof lookupsDeleteStreetErrors];
+
+export type lookupsDeleteStreetResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type lookupsDeleteStreetResponse = lookupsDeleteStreetResponses[keyof lookupsDeleteStreetResponses];
+
+export type lookupsRenameStreetData = {
+    body: LookupNameIn;
+    path: {
+        /**
+         * Street Id
+         */
+        street_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/streets/{street_id}';
+};
+
+export type lookupsRenameStreetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsRenameStreetError = lookupsRenameStreetErrors[keyof lookupsRenameStreetErrors];
+
+export type lookupsRenameStreetResponses = {
+    /**
+     * Successful Response
+     */
+    200: LookupItem;
+};
+
+export type lookupsRenameStreetResponse = lookupsRenameStreetResponses[keyof lookupsRenameStreetResponses];
+
+export type lookupsDeleteTricycleAssociationData = {
+    body?: never;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/tricycle-associations/{item_id}';
+};
+
+export type lookupsDeleteTricycleAssociationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsDeleteTricycleAssociationError = lookupsDeleteTricycleAssociationErrors[keyof lookupsDeleteTricycleAssociationErrors];
+
+export type lookupsDeleteTricycleAssociationResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type lookupsDeleteTricycleAssociationResponse = lookupsDeleteTricycleAssociationResponses[keyof lookupsDeleteTricycleAssociationResponses];
+
+export type lookupsRenameTricycleAssociationData = {
+    body: LookupNameIn;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/tricycle-associations/{item_id}';
+};
+
+export type lookupsRenameTricycleAssociationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsRenameTricycleAssociationError = lookupsRenameTricycleAssociationErrors[keyof lookupsRenameTricycleAssociationErrors];
+
+export type lookupsRenameTricycleAssociationResponses = {
+    /**
+     * Successful Response
+     */
+    200: LookupItem;
+};
+
+export type lookupsRenameTricycleAssociationResponse = lookupsRenameTricycleAssociationResponses[keyof lookupsRenameTricycleAssociationResponses];
+
+export type officialsListOfficialsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Status
+         */
+        status?: 'current' | 'former' | 'all';
+    };
+    url: '/api/v1/officials/';
+};
+
+export type officialsListOfficialsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type officialsListOfficialsError = officialsListOfficialsErrors[keyof officialsListOfficialsErrors];
+
+export type officialsListOfficialsResponses = {
+    /**
+     * Response Officials-List Officials
+     *
+     * Successful Response
+     */
+    200: Array<OfficialPublic>;
+};
+
+export type officialsListOfficialsResponse = officialsListOfficialsResponses[keyof officialsListOfficialsResponses];
+
+export type officialsCreateOfficialData = {
+    body: OfficialCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/officials/';
+};
+
+export type officialsCreateOfficialErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type officialsCreateOfficialError = officialsCreateOfficialErrors[keyof officialsCreateOfficialErrors];
+
+export type officialsCreateOfficialResponses = {
+    /**
+     * Successful Response
+     */
+    201: OfficialPublic;
+};
+
+export type officialsCreateOfficialResponse = officialsCreateOfficialResponses[keyof officialsCreateOfficialResponses];
+
+export type officialsGetOfficialData = {
+    body?: never;
+    path: {
+        /**
+         * Official Id
+         */
+        official_id: string;
+    };
+    query?: never;
+    url: '/api/v1/officials/{official_id}';
+};
+
+export type officialsGetOfficialErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type officialsGetOfficialError = officialsGetOfficialErrors[keyof officialsGetOfficialErrors];
+
+export type officialsGetOfficialResponses = {
+    /**
+     * Successful Response
+     */
+    200: OfficialPublic;
+};
+
+export type officialsGetOfficialResponse = officialsGetOfficialResponses[keyof officialsGetOfficialResponses];
+
+export type officialsUpdateOfficialData = {
+    body: OfficialUpdate;
+    path: {
+        /**
+         * Official Id
+         */
+        official_id: string;
+    };
+    query?: never;
+    url: '/api/v1/officials/{official_id}';
+};
+
+export type officialsUpdateOfficialErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type officialsUpdateOfficialError = officialsUpdateOfficialErrors[keyof officialsUpdateOfficialErrors];
+
+export type officialsUpdateOfficialResponses = {
+    /**
+     * Successful Response
+     */
+    200: OfficialPublic;
+};
+
+export type officialsUpdateOfficialResponse = officialsUpdateOfficialResponses[keyof officialsUpdateOfficialResponses];
+
+export type issuancesListIssuancesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         *
+         * Reference number or resident name words
+         */
+        q?: string | null;
+        /**
+         * Status
+         */
+        status?: 'draft' | 'issued' | 'voided' | 'all';
+        /**
+         * Document Type Id
+         */
+        document_type_id?: number | null;
+        /**
+         * Resident Id
+         */
+        resident_id?: string | null;
+        /**
+         * Date From
+         *
+         * Only issuances dated on or after this day (issue_date)
+         */
+        date_from?: string | null;
+        /**
+         * Date To
+         *
+         * Only issuances dated on or before this day (issue_date)
+         */
+        date_to?: string | null;
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/issuances/';
+};
+
+export type issuancesListIssuancesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type issuancesListIssuancesError = issuancesListIssuancesErrors[keyof issuancesListIssuancesErrors];
+
+export type issuancesListIssuancesResponses = {
+    /**
+     * Successful Response
+     */
+    200: IssuancesPublic;
+};
+
+export type issuancesListIssuancesResponse = issuancesListIssuancesResponses[keyof issuancesListIssuancesResponses];
+
+export type issuancesCreateIssuanceData = {
+    body: IssuanceCreate;
+    path?: never;
+    query?: never;
+    url: '/api/v1/issuances/';
+};
+
+export type issuancesCreateIssuanceErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type issuancesCreateIssuanceError = issuancesCreateIssuanceErrors[keyof issuancesCreateIssuanceErrors];
+
+export type issuancesCreateIssuanceResponses = {
+    /**
+     * Successful Response
+     */
+    201: IssuancePublic;
+};
+
+export type issuancesCreateIssuanceResponse = issuancesCreateIssuanceResponses[keyof issuancesCreateIssuanceResponses];
+
+export type issuancesDiscardDraftData = {
+    body?: never;
+    path: {
+        /**
+         * Issuance Id
+         */
+        issuance_id: string;
+    };
+    query?: never;
+    url: '/api/v1/issuances/{issuance_id}';
+};
+
+export type issuancesDiscardDraftErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type issuancesDiscardDraftError = issuancesDiscardDraftErrors[keyof issuancesDiscardDraftErrors];
+
+export type issuancesDiscardDraftResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type issuancesDiscardDraftResponse = issuancesDiscardDraftResponses[keyof issuancesDiscardDraftResponses];
+
+export type issuancesGetIssuanceData = {
+    body?: never;
+    path: {
+        /**
+         * Issuance Id
+         */
+        issuance_id: string;
+    };
+    query?: never;
+    url: '/api/v1/issuances/{issuance_id}';
+};
+
+export type issuancesGetIssuanceErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type issuancesGetIssuanceError = issuancesGetIssuanceErrors[keyof issuancesGetIssuanceErrors];
+
+export type issuancesGetIssuanceResponses = {
+    /**
+     * Successful Response
+     */
+    200: IssuancePublic;
+};
+
+export type issuancesGetIssuanceResponse = issuancesGetIssuanceResponses[keyof issuancesGetIssuanceResponses];
+
+export type issuancesUpdateDraftData = {
+    body: IssuanceUpdate;
+    path: {
+        /**
+         * Issuance Id
+         */
+        issuance_id: string;
+    };
+    query?: never;
+    url: '/api/v1/issuances/{issuance_id}';
+};
+
+export type issuancesUpdateDraftErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type issuancesUpdateDraftError = issuancesUpdateDraftErrors[keyof issuancesUpdateDraftErrors];
+
+export type issuancesUpdateDraftResponses = {
+    /**
+     * Successful Response
+     */
+    200: IssuancePublic;
+};
+
+export type issuancesUpdateDraftResponse = issuancesUpdateDraftResponses[keyof issuancesUpdateDraftResponses];
+
+export type issuancesIssueData = {
+    /**
+     * Body
+     */
+    body?: IssueRequest | null;
+    path: {
+        /**
+         * Issuance Id
+         */
+        issuance_id: string;
+    };
+    query?: never;
+    url: '/api/v1/issuances/{issuance_id}/issue';
+};
+
+export type issuancesIssueErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type issuancesIssueError = issuancesIssueErrors[keyof issuancesIssueErrors];
+
+export type issuancesIssueResponses = {
+    /**
+     * Successful Response
+     */
+    200: IssuancePublic;
+};
+
+export type issuancesIssueResponse = issuancesIssueResponses[keyof issuancesIssueResponses];
+
+export type issuancesCorrectData = {
+    body: ReasonRequest;
+    path: {
+        /**
+         * Issuance Id
+         */
+        issuance_id: string;
+    };
+    query?: never;
+    url: '/api/v1/issuances/{issuance_id}/correct';
+};
+
+export type issuancesCorrectErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type issuancesCorrectError = issuancesCorrectErrors[keyof issuancesCorrectErrors];
+
+export type issuancesCorrectResponses = {
+    /**
+     * Successful Response
+     */
+    201: IssuancePublic;
+};
+
+export type issuancesCorrectResponse = issuancesCorrectResponses[keyof issuancesCorrectResponses];
+
+export type issuancesVoidData = {
+    body: ReasonRequest;
+    path: {
+        /**
+         * Issuance Id
+         */
+        issuance_id: string;
+    };
+    query?: never;
+    url: '/api/v1/issuances/{issuance_id}/void';
+};
+
+export type issuancesVoidErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type issuancesVoidError = issuancesVoidErrors[keyof issuancesVoidErrors];
+
+export type issuancesVoidResponses = {
+    /**
+     * Successful Response
+     */
+    200: IssuancePublic;
+};
+
+export type issuancesVoidResponse = issuancesVoidResponses[keyof issuancesVoidResponses];
+
+export type barangayIdsListBarangayIdsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         *
+         * Name words, ID number or reference
+         */
+        q?: string | null;
+        /**
+         * Status
+         */
+        status?: 'valid' | 'expiring_soon' | 'expired' | 'all';
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/barangay-ids/';
+};
+
+export type barangayIdsListBarangayIdsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type barangayIdsListBarangayIdsError = barangayIdsListBarangayIdsErrors[keyof barangayIdsListBarangayIdsErrors];
+
+export type barangayIdsListBarangayIdsResponses = {
+    /**
+     * Successful Response
+     */
+    200: BarangayIdsPublic;
+};
+
+export type barangayIdsListBarangayIdsResponse = barangayIdsListBarangayIdsResponses[keyof barangayIdsListBarangayIdsResponses];
+
+export type activityListActivityData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         *
+         * Words matched against person, action, module, record and reason
+         */
+        q?: string | null;
+        /**
+         * Module
+         */
+        module?: string | null;
+        /**
+         * Exclude Module
+         *
+         * Leave out one module, e.g. auth to hide sign-ins
+         */
+        exclude_module?: string | null;
+        /**
+         * Action
+         */
+        action?: string | null;
+        /**
+         * Outcome
+         */
+        outcome?: 'success' | 'failed' | 'denied' | null;
+        /**
+         * Actor User Id
+         */
+        actor_user_id?: string | null;
+        /**
+         * Record Type
+         */
+        record_type?: string | null;
+        /**
+         * Record Id
+         */
+        record_id?: string | null;
+        /**
+         * Date From
+         *
+         * Manila date, inclusive
+         */
+        date_from?: string | null;
+        /**
+         * Date To
+         *
+         * Manila date, inclusive
+         */
+        date_to?: string | null;
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/activity/';
+};
+
+export type activityListActivityErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type activityListActivityError = activityListActivityErrors[keyof activityListActivityErrors];
+
+export type activityListActivityResponses = {
+    /**
+     * Successful Response
+     */
+    200: ActivityPublic;
+};
+
+export type activityListActivityResponse = activityListActivityResponses[keyof activityListActivityResponses];
+
+export type activityActivityOptionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/activity/options';
+};
+
+export type activityActivityOptionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ActivityOptions;
+};
+
+export type activityActivityOptionsResponse = activityActivityOptionsResponses[keyof activityActivityOptionsResponses];
+
+export type dashboardDashboardData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Period
+         *
+         * Reporting period for the charts
+         */
+        period?: 'today' | 'week' | 'month' | 'quarter' | '3months' | '6months' | 'year' | 'overall';
+    };
+    url: '/api/v1/dashboard/';
+};
+
+export type dashboardDashboardErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type dashboardDashboardError = dashboardDashboardErrors[keyof dashboardDashboardErrors];
+
+export type dashboardDashboardResponses = {
+    /**
+     * Successful Response
+     */
+    200: DashboardPublic;
+};
+
+export type dashboardDashboardResponse = dashboardDashboardResponses[keyof dashboardDashboardResponses];
+
+export type reportsSummaryData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Period
+         *
+         * Reporting period, to date
+         */
+        period?: 'today' | 'week' | 'month' | 'quarter' | '3months' | '6months' | 'year' | 'overall';
+    };
+    url: '/api/v1/reports/summary';
+};
+
+export type reportsSummaryErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsSummaryError = reportsSummaryErrors[keyof reportsSummaryErrors];
+
+export type reportsSummaryResponses = {
+    /**
+     * Successful Response
+     */
+    200: ReportSummary;
+};
+
+export type reportsSummaryResponse = reportsSummaryResponses[keyof reportsSummaryResponses];
+
+export type reportsIssuancesByTypeData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Period
+         *
+         * Reporting period, to date
+         */
+        period?: 'today' | 'week' | 'month' | 'quarter' | '3months' | '6months' | 'year' | 'overall';
+    };
+    url: '/api/v1/reports/issuances-by-type';
+};
+
+export type reportsIssuancesByTypeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsIssuancesByTypeError = reportsIssuancesByTypeErrors[keyof reportsIssuancesByTypeErrors];
+
+export type reportsIssuancesByTypeResponses = {
+    /**
+     * Successful Response
+     */
+    200: IssuancesByTypePublic;
+};
+
+export type reportsIssuancesByTypeResponse = reportsIssuancesByTypeResponses[keyof reportsIssuancesByTypeResponses];
+
+export type reportsIssuancesByPurposeData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Period
+         *
+         * Reporting period, to date
+         */
+        period?: 'today' | 'week' | 'month' | 'quarter' | '3months' | '6months' | 'year' | 'overall';
+    };
+    url: '/api/v1/reports/issuances-by-purpose';
+};
+
+export type reportsIssuancesByPurposeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsIssuancesByPurposeError = reportsIssuancesByPurposeErrors[keyof reportsIssuancesByPurposeErrors];
+
+export type reportsIssuancesByPurposeResponses = {
+    /**
+     * Successful Response
+     */
+    200: IssuancesByPurposePublic;
+};
+
+export type reportsIssuancesByPurposeResponse = reportsIssuancesByPurposeResponses[keyof reportsIssuancesByPurposeResponses];
+
+export type reportsExpiringData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Kind
+         */
+        kind?: 'clearance' | 'barangay_id' | null;
+        /**
+         * Status
+         */
+        status?: 'expiring_soon' | 'expired' | 'all';
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/reports/expiring';
+};
+
+export type reportsExpiringErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsExpiringError = reportsExpiringErrors[keyof reportsExpiringErrors];
+
+export type reportsExpiringResponses = {
+    /**
+     * Successful Response
+     */
+    200: ExpiringPublic;
+};
+
+export type reportsExpiringResponse = reportsExpiringResponses[keyof reportsExpiringResponses];
+
+export type reportsAccountActivityData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Period
+         *
+         * Reporting period, to date
+         */
+        period?: 'today' | 'week' | 'month' | 'quarter' | '3months' | '6months' | 'year' | 'overall';
+    };
+    url: '/api/v1/reports/account-activity';
+};
+
+export type reportsAccountActivityErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsAccountActivityError = reportsAccountActivityErrors[keyof reportsAccountActivityErrors];
+
+export type reportsAccountActivityResponses = {
+    /**
+     * Successful Response
+     */
+    200: AccountActivityPublic;
+};
+
+export type reportsAccountActivityResponse = reportsAccountActivityResponses[keyof reportsAccountActivityResponses];
+
+export type reportsRecordsOverviewData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/reports/records-overview';
+};
+
+export type reportsRecordsOverviewResponses = {
+    /**
+     * Successful Response
+     */
+    200: RecordsOverview;
+};
+
+export type reportsRecordsOverviewResponse = reportsRecordsOverviewResponses[keyof reportsRecordsOverviewResponses];
+
 export type utilsTestEmailData = {
     body?: never;
     path?: never;
@@ -769,155 +3928,6 @@ export type utilsHealthCheckResponses = {
 
 export type utilsHealthCheckResponse = utilsHealthCheckResponses[keyof utilsHealthCheckResponses];
 
-export type itemsReadItemsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Skip
-         */
-        skip?: number;
-        /**
-         * Limit
-         */
-        limit?: number;
-    };
-    url: '/api/v1/items/';
-};
-
-export type itemsReadItemsErrors = {
-    /**
-     * Validation Error
-     */
-    422: HTTPValidationError;
-};
-
-export type itemsReadItemsError = itemsReadItemsErrors[keyof itemsReadItemsErrors];
-
-export type itemsReadItemsResponses = {
-    /**
-     * Successful Response
-     */
-    200: ItemsPublic;
-};
-
-export type itemsReadItemsResponse = itemsReadItemsResponses[keyof itemsReadItemsResponses];
-
-export type itemsCreateItemData = {
-    body: ItemCreate;
-    path?: never;
-    query?: never;
-    url: '/api/v1/items/';
-};
-
-export type itemsCreateItemErrors = {
-    /**
-     * Validation Error
-     */
-    422: HTTPValidationError;
-};
-
-export type itemsCreateItemError = itemsCreateItemErrors[keyof itemsCreateItemErrors];
-
-export type itemsCreateItemResponses = {
-    /**
-     * Successful Response
-     */
-    200: ItemPublic;
-};
-
-export type itemsCreateItemResponse = itemsCreateItemResponses[keyof itemsCreateItemResponses];
-
-export type itemsDeleteItemData = {
-    body?: never;
-    path: {
-        /**
-         * Id
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/v1/items/{id}';
-};
-
-export type itemsDeleteItemErrors = {
-    /**
-     * Validation Error
-     */
-    422: HTTPValidationError;
-};
-
-export type itemsDeleteItemError = itemsDeleteItemErrors[keyof itemsDeleteItemErrors];
-
-export type itemsDeleteItemResponses = {
-    /**
-     * Successful Response
-     */
-    200: Message;
-};
-
-export type itemsDeleteItemResponse = itemsDeleteItemResponses[keyof itemsDeleteItemResponses];
-
-export type itemsReadItemData = {
-    body?: never;
-    path: {
-        /**
-         * Id
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/v1/items/{id}';
-};
-
-export type itemsReadItemErrors = {
-    /**
-     * Validation Error
-     */
-    422: HTTPValidationError;
-};
-
-export type itemsReadItemError = itemsReadItemErrors[keyof itemsReadItemErrors];
-
-export type itemsReadItemResponses = {
-    /**
-     * Successful Response
-     */
-    200: ItemPublic;
-};
-
-export type itemsReadItemResponse = itemsReadItemResponses[keyof itemsReadItemResponses];
-
-export type itemsUpdateItemData = {
-    body: ItemUpdate;
-    path: {
-        /**
-         * Id
-         */
-        id: string;
-    };
-    query?: never;
-    url: '/api/v1/items/{id}';
-};
-
-export type itemsUpdateItemErrors = {
-    /**
-     * Validation Error
-     */
-    422: HTTPValidationError;
-};
-
-export type itemsUpdateItemError = itemsUpdateItemErrors[keyof itemsUpdateItemErrors];
-
-export type itemsUpdateItemResponses = {
-    /**
-     * Successful Response
-     */
-    200: ItemPublic;
-};
-
-export type itemsUpdateItemResponse = itemsUpdateItemResponses[keyof itemsUpdateItemResponses];
-
 export type privateCreateUserData = {
     body: PrivateUserCreate;
     path?: never;
@@ -942,3 +3952,33 @@ export type privateCreateUserResponses = {
 };
 
 export type privateCreateUserResponse = privateCreateUserResponses[keyof privateCreateUserResponses];
+
+export type loginRecoverPasswordHtmlContentData = {
+    body?: never;
+    path: {
+        /**
+         * Email
+         */
+        email: string;
+    };
+    query?: never;
+    url: '/api/v1/password-recovery-html-content/{email}';
+};
+
+export type loginRecoverPasswordHtmlContentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type loginRecoverPasswordHtmlContentError = loginRecoverPasswordHtmlContentErrors[keyof loginRecoverPasswordHtmlContentErrors];
+
+export type loginRecoverPasswordHtmlContentResponses = {
+    /**
+     * Successful Response
+     */
+    200: string;
+};
+
+export type loginRecoverPasswordHtmlContentResponse = loginRecoverPasswordHtmlContentResponses[keyof loginRecoverPasswordHtmlContentResponses];
