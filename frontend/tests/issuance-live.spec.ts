@@ -1,7 +1,10 @@
 import { expect, test } from "@playwright/test"
 import {
+  ActivityService,
+  DashboardService,
   LookupsService,
   OfficialsService,
+  ReportsService,
   ResidentsService,
   UsersService,
 } from "@/client"
@@ -774,4 +777,90 @@ test("staff: resident search finds by name, street and house number", async () =
   expect(await ids(`Livesearchme Check${run} 12`)).toContain(resident.id)
   expect(await ids(`Livesearchme Check${run} nomatchword`)).toEqual([])
   useToken(adminToken)
+})
+
+// ------------------------------- Dashboard, Reports and Activity Log (by role)
+// These are the calls the three pages make, run with the real client.
+
+test("admin: dashboard and every report the Reports page uses load", async () => {
+  useToken(adminToken)
+  for (const period of ["month", "year"] as const) {
+    expect(
+      (await DashboardService.dashboard({ query: { period } })).data,
+    ).toBeTruthy()
+    expect(
+      (await ReportsService.summary({ query: { period } })).data,
+    ).toBeTruthy()
+    const accounts = await ReportsService.accountActivity({ query: { period } })
+    expect(Array.isArray(accounts.data.data)).toBe(true)
+    const purposes = await ReportsService.issuancesByPurpose({
+      query: { period },
+    })
+    expect(Array.isArray(purposes.data.data)).toBe(true)
+  }
+  // Everything issued above falls in this year, so the year report is not empty.
+  const byType = await ReportsService.issuancesByType({
+    query: { period: "year" },
+  })
+  expect(byType.data.data.length).toBeGreaterThan(0)
+  const expiring = await ReportsService.expiring({
+    query: { status: "all", limit: 200 },
+  })
+  expect(Array.isArray(expiring.data.data)).toBe(true)
+})
+
+test("staff: can open the dashboard but every report is refused", async () => {
+  useToken(staffToken)
+  expect(
+    (await DashboardService.dashboard({ query: { period: "month" } })).data,
+  ).toBeTruthy()
+  for (const call of [
+    () => ReportsService.summary({ query: { period: "month" } }),
+    () => ReportsService.issuancesByType({ query: { period: "month" } }),
+    () => ReportsService.issuancesByPurpose({ query: { period: "month" } }),
+    () => ReportsService.accountActivity({ query: { period: "month" } }),
+    () => ReportsService.expiring({ query: { status: "all", limit: 200 } }),
+  ]) {
+    expect(await statusOf(call())).toBe(403)
+  }
+})
+
+test("activity log: staff see only their own rows, admin sees everyone's", async () => {
+  useToken(staffToken)
+  const mine = (await ActivityService.listActivity({ query: { limit: 200 } }))
+    .data
+  expect(mine.count).toBeGreaterThan(0)
+  expect(mine.data.every((row) => row.is_own)).toBe(true)
+  expect(mine.data.some((row) => row.action === "issuance.issue")).toBe(true)
+  const staffId = mine.data[0].actor_user_id as string
+
+  // Asking for someone else's rows is refused, not shown as empty.
+  const me = (await UsersService.readUserMe()).data
+  expect(me.id).toBe(staffId)
+  const otherId = "00000000-0000-4000-8000-000000000000"
+  expect(
+    await statusOf(
+      ActivityService.listActivity({ query: { actor_user_id: otherId } }),
+    ),
+  ).toBe(403)
+  // The filter drop-downs hold only this person.
+  const options = (await ActivityService.activityOptions()).data
+  expect(JSON.stringify(options)).not.toContain(email)
+
+  useToken(adminToken)
+  const everyone = (
+    await ActivityService.listActivity({ query: { limit: 200 } })
+  ).data
+  expect(everyone.data.some((row) => row.actor_user_id === staffId)).toBe(true)
+  expect(everyone.data.some((row) => row.is_own)).toBe(true)
+  expect(everyone.data.some((row) => !row.is_own)).toBe(true)
+  const onlyStaff = (
+    await ActivityService.listActivity({
+      query: { actor_user_id: staffId, limit: 200 },
+    })
+  ).data
+  expect(onlyStaff.data.length).toBeGreaterThan(0)
+  expect(onlyStaff.data.every((row) => row.actor_user_id === staffId)).toBe(
+    true,
+  )
 })
