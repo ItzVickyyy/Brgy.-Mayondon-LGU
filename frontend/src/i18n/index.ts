@@ -26,7 +26,9 @@ function readStoredLanguage(): Language {
 }
 
 function applyDocumentLanguage(language: string) {
-  document.documentElement.lang = language
+  if (typeof document !== "undefined") {
+    document.documentElement.lang = language
+  }
 }
 
 export function setLanguage(language: Language) {
