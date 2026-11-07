@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import type { ParseKeys } from "i18next"
 import { Save, ShieldCheck, Upload, UserRound } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -35,9 +36,9 @@ type ProfileForm = {
 
 const profileFields: {
   key: keyof ProfileForm
-  label: string
+  label: ParseKeys
   type?: string
-  placeholder?: string
+  placeholder?: ParseKeys
 }[] = [
   { key: "first_name", label: "account.fields.firstName", placeholder: "account.placeholders.firstName" },
   {
