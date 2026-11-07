@@ -1,8 +1,8 @@
 import i18n from "i18next"
 import { initReactI18next } from "react-i18next"
 
-import en from "./en.json"
-import fil from "./fil.json"
+import en from "./en.json" with { type: "json" }
+import fil from "./fil.json" with { type: "json" }
 
 export const LANGUAGES = ["en", "fil"] as const
 export type Language = (typeof LANGUAGES)[number]
