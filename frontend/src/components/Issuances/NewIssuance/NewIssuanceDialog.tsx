@@ -19,6 +19,7 @@ import { DocumentTypePicker } from "./DocumentTypePicker"
 import { PhotoCapture } from "./PhotoCapture"
 import { useTranslation } from "react-i18next"
 import { documentName, fieldHelp, fieldLabel, fieldOptionLabel, validationMessage } from "@/lib/issuanceLabels"
+import { civilStatusLabel, sexLabel } from "@/lib/residentLabels"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
@@ -58,7 +59,7 @@ type PaymentKey = "officialReceiptNo" | "isFree" | "dateOfPayment" | "certifiedB
 const paymentKeyOf = (fieldName: string): PaymentKey => (fieldName === "isFree" || fieldName === "dateOfPayment" || fieldName === "certifiedBy" ? fieldName : "officialReceiptNo")
 const nameExtensions = ["None", "Jr.", "Sr.", "II", "III", "IV", "V"]
 const civilStatusChoices = ["Single", "Married", "Legally Separated", "Widow/Widower"]
-const purokChoices = [1, 2, 3, 4, 5, 6].map((purok) => ({ value: String(purok), label: `Purok ${purok}` }))
+const purokNumbers = [1, 2, 3, 4, 5, 6]
 const fieldLabelClass = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
 
 function normalizedOptionValue(fieldName: string, option: string) {
@@ -80,6 +81,9 @@ function getDefaultToday(value: unknown) {
 
 export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initialDocumentType, initialDraftId, onSaved, onDraftRemoved, onPrint }: Props) {
   const { t } = useTranslation()
+  const purokChoices = purokNumbers.map((purok) => ({ value: String(purok), label: t("issuances.new.resident.purokN", { n: purok }) }))
+  const nameExtensionOptions = nameExtensions.map((extension) => ({ value: extension, label: extension === "None" ? t("issuances.new.resident.none") : extension }))
+  const civilStatusOptions = civilStatusChoices.map((status) => ({ value: status, label: civilStatusLabel(status, t) }))
   const form = useNewIssuanceForm(initialResidentId ?? "")
   const lookupsQuery = useQuery({ queryKey: ["issuance-lookups"], queryFn: () => issuanceApi.getLookups(), enabled: open, staleTime: 60_000 })
   const officialsQuery = useQuery({ queryKey: ["issuance-officials"], queryFn: () => issuanceApi.getOfficials(), enabled: open, staleTime: 60_000 })
@@ -687,9 +691,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       const failure = error as { code?: string; message?: string }
       if (!editingResident && failure.code === "possible_duplicate") {
         setQuickDuplicateSignature(JSON.stringify(quickAdd))
-        setFormError("A resident with the same name and birthdate may already exist. Review the details before choosing Save anyway.")
+        setFormError(t("issuances.new.resident.errors.duplicate"))
       } else {
-        setFormError(failure.message || (editingResident ? "Unable to update this resident." : "Unable to add this resident."))
+        setFormError(failure.message || (editingResident ? t("issuances.new.resident.errors.updateFailed") : t("issuances.new.resident.errors.addFailed")))
       }
     } finally {
       setQuickSaving(false)
@@ -697,7 +701,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   }
 
   const quickError = (key: keyof typeof quickMissing) => quickAttempted && quickMissing[key]
-    ? <span id={`quickadd-${key}-error`} role="alert" className="text-xs font-normal text-destructive">Please fill this in.</span>
+    ? <span id={`quickadd-${key}-error`} role="alert" className="text-xs font-normal text-destructive">{t("issuances.new.resident.errors.fillThis")}</span>
     : null
   const quickInvalid = (key: keyof typeof quickMissing) => quickAttempted && quickMissing[key]
 
@@ -727,43 +731,43 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     if (need === "residentSince") {
       const sinceBirth = Boolean(residentUpdates.residentSinceBirth ?? selectedResident.residentSinceBirth)
       return <div key={need} className="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        <label className={fieldLabelClass}>Living here since (year)<input id="resident-missing-residentSince" type="number" min="1900" max={new Date().getFullYear()} placeholder="Example: 2005" value={sinceBirth ? "" : String(residentUpdates.residentSince ?? "")} onChange={(event) => patch({ residentSince: event.target.value ? Number(event.target.value) : undefined, residentSinceBirth: false })} className={formControlClass} disabled={sinceBirth} /></label>
-        <CheckField label="Lived here since birth" checked={sinceBirth} onChange={(checked) => patch({ residentSinceBirth: checked, residentSince: checked ? 0 : undefined })} />
+        <label className={fieldLabelClass}>{t("issuances.new.resident.fields.livingSince")}<input id="resident-missing-residentSince" type="number" min="1900" max={new Date().getFullYear()} placeholder={t("issuances.new.resident.yearExample")} value={sinceBirth ? "" : String(residentUpdates.residentSince ?? "")} onChange={(event) => patch({ residentSince: event.target.value ? Number(event.target.value) : undefined, residentSinceBirth: false })} className={formControlClass} disabled={sinceBirth} /></label>
+        <CheckField label={t("issuances.new.resident.fields.sinceBirth")} checked={sinceBirth} onChange={(checked) => patch({ residentSinceBirth: checked, residentSince: checked ? 0 : undefined })} />
       </div>
     }
     if (need === "address") {
       return <div key={need} className="space-y-2">
-        <p className="text-sm font-medium">Home address</p>
+        <p className="text-sm font-medium">{t("issuances.new.resident.missing.homeAddress")}</p>
         <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)]">
-          <label className={fieldLabelClass}>House number<input id="resident-missing-address-houseNumber" value={addressParts.houseNumber} onChange={(event) => updateAddress({ houseNumber: event.target.value })} className={formControlClass} autoComplete="off" /></label>
-          <div className={fieldLabelClass}><label htmlFor="resident-missing-address-street">Street</label><ComboField id="resident-missing-address-street" value={addressParts.street} options={knownStreets} onChange={(next) => updateAddress({ street: next })} /></div>
-          <div className={fieldLabelClass}><label htmlFor="resident-missing-address-purok">Purok</label><SelectField id="resident-missing-address-purok" value={String(addressParts.purok)} options={purokChoices} onChange={(next) => updateAddress({ purok: Number(next) })} /></div>
+          <label className={fieldLabelClass}>{t("issuances.new.resident.fields.houseNumber")}<input id="resident-missing-address-houseNumber" value={addressParts.houseNumber} onChange={(event) => updateAddress({ houseNumber: event.target.value })} className={formControlClass} autoComplete="off" /></label>
+          <div className={fieldLabelClass}><label htmlFor="resident-missing-address-street">{t("issuances.new.resident.fields.street")}</label><ComboField id="resident-missing-address-street" value={addressParts.street} options={knownStreets} onChange={(next) => updateAddress({ street: next })} /></div>
+          <div className={fieldLabelClass}><label htmlFor="resident-missing-address-purok">{t("issuances.new.resident.fields.purok")}</label><SelectField id="resident-missing-address-purok" value={String(addressParts.purok)} options={purokChoices} onChange={(next) => updateAddress({ purok: Number(next) })} /></div>
         </div>
       </div>
     }
     if (need === "emergencyContact") {
       const current = { name: "", address: "", phone: "", ...selectedResident.emergencyContact, ...residentUpdates.emergencyContact }
       return <div key={need} className="space-y-2">
-        <p className="text-sm font-medium">Person to contact in an emergency</p>
+        <p className="text-sm font-medium">{t("issuances.new.resident.missing.emergencyTitle")}</p>
         <div className="grid gap-3 sm:grid-cols-3">
-          {(["name", "address", "phone"] as const).map((part) => <label key={part} className={fieldLabelClass}>{part === "phone" ? "Contact number" : part === "name" ? "Full name" : "Address"}<input id={part === "name" ? "resident-missing-emergencyContact" : undefined} value={current[part]} onChange={(event) => patch({ emergencyContact: { ...current, [part]: event.target.value } })} className={formControlClass} autoComplete="off" /></label>)}
+          {(["name", "address", "phone"] as const).map((part) => <label key={part} className={fieldLabelClass}>{part === "phone" ? t("issuances.new.resident.missing.contactNumber") : part === "name" ? t("issuances.new.resident.missing.fullName") : t("issuances.new.resident.missing.address")}<input id={part === "name" ? "resident-missing-emergencyContact" : undefined} value={current[part]} onChange={(event) => patch({ emergencyContact: { ...current, [part]: event.target.value } })} className={formControlClass} autoComplete="off" /></label>)}
         </div>
       </div>
     }
     if (need === "birthDate") {
-      return <div key={need} className={fieldLabelClass}><label htmlFor="resident-missing-birthDate">Birthdate</label><DateField id="resident-missing-birthDate" value={String(updates.birthdate ?? "")} max={localIsoDate()} startView="years" showToday={false} placeholder="Choose the birthdate" onChange={(next) => patch({ birthdate: next })} /></div>
+      return <div key={need} className={fieldLabelClass}><label htmlFor="resident-missing-birthDate">{t("issuances.new.resident.fields.birthdate")}</label><DateField id="resident-missing-birthDate" value={String(updates.birthdate ?? "")} max={localIsoDate()} startView="years" showToday={false} placeholder={t("issuances.new.resident.chooseBirthdate")} onChange={(next) => patch({ birthdate: next })} /></div>
     }
     if (need === "sex") {
-      return <div key={need} className={fieldLabelClass}><span id="resident-missing-sex-label">Sex</span><ChoiceRow id="resident-missing-sex" label="Sex" value={String(updates.sex ?? "")} options={["Male", "Female"]} onChange={(next) => patch({ sex: next })} /></div>
+      return <div key={need} className={fieldLabelClass}><span id="resident-missing-sex-label">{t("issuances.new.resident.fields.sex")}</span><ChoiceRow id="resident-missing-sex" label={t("issuances.new.resident.fields.sex")} value={String(updates.sex ?? "")} options={["Male", "Female"]} optionLabel={(option) => sexLabel(option, t)} onChange={(next) => patch({ sex: next })} /></div>
     }
     if (need === "civilStatus" || need === "sector") {
       const key = need
-      const choices = need === "civilStatus" ? civilStatusChoices : ["STUDENT", "Senior Citizens", "Person with Disabilities (PWD)", "Solo Parents"]
+      const choices = need === "civilStatus" ? civilStatusOptions : ["STUDENT", "Senior Citizens", "Person with Disabilities (PWD)", "Solo Parents"]
       const current = need === "sector" ? (residentUpdates.sectors?.[0] ?? "") : String(updates[key] ?? "")
-      return <div key={need} className={fieldLabelClass}><label htmlFor={`resident-missing-${need}`}>{need === "civilStatus" ? "Civil status" : "Sector"}</label><SelectField id={`resident-missing-${need}`} value={current} options={choices} onChange={(next) => patch({ [key]: need === "sector" ? [next] : next })} /></div>
+      return <div key={need} className={fieldLabelClass}><label htmlFor={`resident-missing-${need}`}>{need === "civilStatus" ? t("issuances.new.resident.fields.civilStatus") : t("issuances.new.resident.fields.sector")}</label><SelectField id={`resident-missing-${need}`} value={current} options={choices} onChange={(next) => patch({ [key]: need === "sector" ? [next] : next })} /></div>
     }
     const key = need === "birthPlace" ? "birthplace" : need
-    const label = need === "birthPlace" ? "Place of birth" : need
+    const label = need === "birthPlace" ? t("issuances.new.resident.fields.placeOfBirth") : need
     return <label key={need} className={fieldLabelClass}>{label}<input id={`resident-missing-${need}`} value={String(updates[key] ?? "")} onChange={(event) => patch({ [key]: event.target.value })} className={formControlClass} autoComplete="off" /></label>
   }
 
@@ -779,18 +783,18 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       if (field.name === "idType") value = field.options?.[Number(value ?? 0) - 1] ?? ""
     } else if (field.group === "payment") {
       const paymentValues = payment as unknown as Record<string, unknown> | undefined
-      value = field.name === "isFree" ? paymentValues?.isFree ? "Yes" : "No" : paymentValues?.[paymentKeyOf(field.name)]
+      value = field.name === "isFree" ? paymentValues?.isFree ? t("issuances.new.options.Yes") : t("issuances.new.options.No") : paymentValues?.[paymentKeyOf(field.name)]
     } else if (field.name === "purpose") value = form.getValues("purposeText")
     else if (field.name === "remarks") value = form.getValues("remarks")
     else if (field.name === "idNumber" && documentType === "BARANGAY_ID") value = (detailValues.idNumber as string | undefined) ?? selectedResident?.idNumber ?? ""
     else if (field.name === "sector") value = selectedSector
     else if (field.name === "sectorIdNumber") value = form.getValues("sectors")?.[0]?.idNumber
-    else if (field.name === "for") value = detailValues.forSelf === false ? "Someone else" : "Myself"
+    else if (field.name === "for") value = detailValues.forSelf === false ? t("issuances.new.options.Someone else") : t("issuances.new.options.Myself")
     else if (field.name === "relationship") value = detailValues.beneficiaryRelationship
     else if (field.name === "witnessOfficialId") value = currentOfficials.find((official) => official.id === detailValues.witnessOfficialId)?.name
     else value = detailValues[field.name]
     if (Array.isArray(value)) return value.join(", ")
-    if (typeof value === "boolean") return value ? "Yes" : "No"
+    if (typeof value === "boolean") return value ? t("issuances.new.options.Yes") : t("issuances.new.options.No")
     return value == null ? "" : String(value)
   }
 
@@ -813,16 +817,31 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     { label: "Address", value: selectedResident ? getResidentAddress(selectedResident) : "" },
     { label: "Birthdate", value: selectedResident?.birthdate ?? "" },
     { label: "Birthplace", value: selectedResident?.birthplace ?? "" },
-    { label: "Sex", value: selectedResident?.sex ?? "" },
-    { label: "Civil status", value: selectedResident?.civilStatus ?? "" },
-    ...(needsPhoto ? [{ label: "Photo", value: selectedResident && (residentUpdates.photoUrl || selectedResident.photoUrl) ? "Taken" : "" }] : []),
+    { label: "Sex", value: selectedResident?.sex ? sexLabel(selectedResident.sex, t) : "" },
+    { label: "Civil status", value: selectedResident?.civilStatus ? civilStatusLabel(selectedResident.civilStatus, t) : "" },
+    ...(needsPhoto ? [{ label: "Photo", value: selectedResident && (residentUpdates.photoUrl || selectedResident.photoUrl) ? t("issuances.new.previewRows.taken") : "" }] : []),
     { label: "Date on document", value: issueDate },
     ...(config.signatoryMode === "select" ? [{ label: "Signatory", value: currentOfficials.find((official) => official.id === form.watch("signatoryOfficialId"))?.name ?? "________________________" }] : []),
     ...config.fields.map((field) => ({ label: field.label, value: previewValue(field) })),
-    ...(config.residentNeeds.includes("residentSince") ? [{ label: documentType === "RESIDENCY" ? "Residing since" : "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (documentType === "RESIDENCY") return source.residentSinceBirth || source.residentSince === 0 ? "Since birth" : source.residentSince === undefined ? "" : String(source.residentSince); if (source.residentSinceBirth) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return !source.residentSince ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
+    ...(config.residentNeeds.includes("residentSince") ? [{ label: documentType === "RESIDENCY" ? "Residing since" : "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (documentType === "RESIDENCY") return source.residentSinceBirth || source.residentSince === 0 ? t("issuances.new.previewRows.sinceBirth") : source.residentSince === undefined ? "" : String(source.residentSince); if (source.residentSinceBirth) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return !source.residentSince ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
   ]
 
-  const previewRows = Array.from(new Map(previewRowsRaw.map((row) => [row.label, row])).values())
+  const previewLabels: Record<string, string> = {
+    Resident: t("issuances.new.previewRows.resident"),
+    "Resident number": t("issuances.new.previewRows.residentNumber"),
+    Address: t("issuances.new.previewRows.address"),
+    Birthdate: t("issuances.new.previewRows.birthdate"),
+    Birthplace: t("issuances.new.previewRows.birthplace"),
+    Sex: t("issuances.new.previewRows.sex"),
+    "Civil status": t("issuances.new.previewRows.civilStatus"),
+    Photo: t("issuances.new.previewRows.photo"),
+    "Date on document": t("issuances.new.previewRows.dateOnDocument"),
+    Signatory: t("issuances.new.previewRows.signatory"),
+    "Years of residency": t("issuances.new.previewRows.yearsOfResidency"),
+    "Resident record": t("issuances.new.previewRows.residentRecord"),
+  }
+  const previewLabel = (label: string) => previewLabels[label] ?? fieldLabel(label, t)
+  const previewRows = Array.from(new Map(previewRowsRaw.map((row) => [row.label, row])).values()).map((row) => ({ ...row, label: previewLabel(row.label) }))
 
   const residentMissingLabels: { name: string; label: string }[] = (selectedResident ? getMissingResidentFields(selectedResident, documentType).filter((need) => {
       if (need === "address") return !residentUpdates.address && (!selectedResident.houseNumber?.trim() || !selectedResident.street?.trim() || !selectedResident.purok)
@@ -835,13 +854,13 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       if (need === "photo") return !residentUpdates.photoUrl && !selectedResident.photoUrl
       if (need === "emergencyContact") return !residentUpdates.emergencyContact?.name || !residentUpdates.emergencyContact.address || !residentUpdates.emergencyContact.phone
       return false
-    }).map((need) => ({ name: need, label: ({ address: "Resident address", birthDate: "Birthdate", birthPlace: "Birthplace", civilStatus: "Civil status", sex: "Sex", residentSince: "Residing since", sector: "Sector", photo: "Photo", emergencyContact: "Emergency contact" } as Record<string, string>)[need] ?? need })) : [])
+    }).map((need) => ({ name: need, label: ({ address: t("issuances.new.resident.need.address"), birthDate: t("issuances.new.resident.need.birthDate"), birthPlace: t("issuances.new.resident.need.birthPlace"), civilStatus: t("issuances.new.resident.need.civilStatus"), sex: t("issuances.new.resident.need.sex"), residentSince: t("issuances.new.resident.need.residentSince"), sector: t("issuances.new.resident.need.sector"), photo: t("issuances.new.resident.need.photo"), emergencyContact: t("issuances.new.resident.need.emergencyContact") } as Record<string, string>)[need] ?? need })) : [])
 
   const missingPreviewLabels = [
-    ...(!selectedResident ? [{ name: "resident-search", label: "Resident record" }] : []),
-    ...config.fields.filter((field) => fieldVisible(field) && field.required && !fieldHasValue(field)).map((field) => ({ name: field.name, label: field.label })),
-    ...(!issueDate ? [{ name: "date", label: "Date on document" }] : []),
-    ...(config.signatoryMode === "select" && availableSignatories.length > 0 && !form.watch("signatoryOfficialId") ? [{ name: "signatoryOfficialId", label: "Signatory" }] : []),
+    ...(!selectedResident ? [{ name: "resident-search", label: previewLabel("Resident record") }] : []),
+    ...config.fields.filter((field) => fieldVisible(field) && field.required && !fieldHasValue(field)).map((field) => ({ name: field.name, label: fieldLabel(field.label, t) })),
+    ...(!issueDate ? [{ name: "date", label: previewLabel("Date on document") }] : []),
+    ...(config.signatoryMode === "select" && availableSignatories.length > 0 && !form.watch("signatoryOfficialId") ? [{ name: "signatoryOfficialId", label: previewLabel("Signatory") }] : []),
     ...residentMissingLabels,
   ]
 
@@ -926,56 +945,56 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
               </div>
             </IssuanceSection>
 
-            <IssuanceSection id="issuance-step-resident" step={2} title="Who is it for?" description={selectedResident && !editingResident ? "You can edit this resident or choose someone else." : editingResident ? "Update this resident's information, then save your changes." : "Type the person's name and select them from the list, or fill in the form below if they are not listed."} done={residentDone}>
+            <IssuanceSection id="issuance-step-resident" step={2} title={t("issuances.new.resident.title")} description={selectedResident && !editingResident ? t("issuances.new.resident.descriptionChosen") : editingResident ? t("issuances.new.resident.descriptionEditing") : t("issuances.new.resident.descriptionSearch")} done={residentDone}>
               {selectedResident && !editingResident ? <div className="flex items-start justify-between gap-3 rounded-lg border border-emerald-600/40 bg-emerald-500/5 p-4">
                 <div className="flex min-w-0 items-start gap-3">
                   <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
                   <div className="min-w-0">
                     <p className="text-base font-semibold">{selectedResident.name}</p>
                     <p className="mt-0.5 text-sm">{getResidentAddress(selectedResident)}</p>
-                    <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? `${calculateAge(selectedResident.birthdate, issueDate)} years old` : "Birthdate not recorded"} · {selectedResident.civilStatus || "Civil status not recorded"} · {selectedResident.id}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? t("issuances.new.resident.yearsOld", { age: calculateAge(selectedResident.birthdate, issueDate) }) : t("issuances.new.resident.birthdateNotRecorded")} · {selectedResident.civilStatus ? civilStatusLabel(selectedResident.civilStatus, t) : t("issuances.new.resident.civilStatusNotRecorded")} · {selectedResident.id}</p>
                   </div>
                 </div>
-                <div className="flex shrink-0 flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>Edit resident</Button><Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); setEditingResident(false); form.setValue("residentId", ""); setResidentQuery(""); setQuickAdd(emptyQuickAdd); setQuickAttempted(false); setQuickDuplicateSignature(null); setFormError("") }}>Choose someone else</Button></div>
+                <div className="flex shrink-0 flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); setEditingResident(false); form.setValue("residentId", ""); setResidentQuery(""); setQuickAdd(emptyQuickAdd); setQuickAttempted(false); setQuickDuplicateSignature(null); setFormError("") }}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
               </div> : <div className="space-y-3">
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3.5 top-3.5 size-5 text-muted-foreground" aria-hidden="true" />
-                  <input id="issuance-resident-search" value={residentQuery} onChange={(event) => { setResidentQuery(event.target.value); setActiveResidentMatch(0) }} onKeyDown={(event) => { if (event.key === "ArrowDown" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, matches.length - 1)) } if (event.key === "ArrowUp" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) } if (event.key === "Enter" && matches[activeResidentMatch]) { event.preventDefault(); selectResident(matches[activeResidentMatch]) } if (event.key === "Escape" && residentQuery) { event.preventDefault(); event.stopPropagation(); setResidentQuery("") } }} placeholder="Type the person's name…" autoComplete="off" className={cn(formControlClass, "h-12 pl-11 text-base")} aria-label="Search resident" role="combobox" aria-autocomplete="list" aria-expanded={matches.length > 0} aria-controls="issuance-resident-results" aria-activedescendant={matches[activeResidentMatch] ? `issuance-resident-option-${matches[activeResidentMatch].id}` : undefined} />
+                  <input id="issuance-resident-search" value={residentQuery} onChange={(event) => { setResidentQuery(event.target.value); setActiveResidentMatch(0) }} onKeyDown={(event) => { if (event.key === "ArrowDown" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.min(index + 1, matches.length - 1)) } if (event.key === "ArrowUp" && matches.length) { event.preventDefault(); setActiveResidentMatch((index) => Math.max(index - 1, 0)) } if (event.key === "Enter" && matches[activeResidentMatch]) { event.preventDefault(); selectResident(matches[activeResidentMatch]) } if (event.key === "Escape" && residentQuery) { event.preventDefault(); event.stopPropagation(); setResidentQuery("") } }} placeholder={t("issuances.new.resident.searchPlaceholder")} autoComplete="off" className={cn(formControlClass, "h-12 pl-11 text-base")} aria-label={t("issuances.new.resident.searchLabel")} role="combobox" aria-autocomplete="list" aria-expanded={matches.length > 0} aria-controls="issuance-resident-results" aria-activedescendant={matches[activeResidentMatch] ? `issuance-resident-option-${matches[activeResidentMatch].id}` : undefined} />
                 </div>
                 {matches.length ? <div id="issuance-resident-results" role="listbox" className="overflow-hidden rounded-lg border shadow-xs">{matches.map((resident, index) => <button type="button" key={resident.id} id={`issuance-resident-option-${resident.id}`} role="option" aria-selected={activeResidentMatch === index} disabled={resident.status === "Archived"} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} className={cn("flex min-h-14 w-full flex-col items-start justify-center border-b px-4 py-2 text-left last:border-b-0 hover:bg-muted", activeResidentMatch === index && "bg-muted", resident.status === "Archived" && "cursor-not-allowed opacity-50")}>
-                  <span className="text-base font-medium">{resident.name}{resident.status === "Archived" ? <span className="ml-2 text-xs font-normal text-muted-foreground">Archived</span> : null}</span>
+                  <span className="text-base font-medium">{resident.name}{resident.status === "Archived" ? <span className="ml-2 text-xs font-normal text-muted-foreground">{t("issuances.new.resident.archived")}</span> : null}</span>
                   <span className="text-sm text-muted-foreground">{getResidentAddress(resident)}</span>
-                </button>)}</div> : residentQuery.trim() ? <p className="rounded-lg border border-dashed p-4 text-sm">No one found with that name. Check the spelling, or add them as a new resident in the form below.</p> : null}
+                </button>)}</div> : residentQuery.trim() ? <p className="rounded-lg border border-dashed p-4 text-sm">{t("issuances.new.resident.noOneFound")}</p> : null}
                 <fieldset disabled={quickSaving} className="min-w-0 space-y-4 rounded-lg border bg-muted/30 p-4">
-                  <div className="flex items-baseline justify-between gap-2"><p className="font-semibold">{editingResident ? "Edit resident details" : "Add a new resident"}</p><span className="text-xs text-muted-foreground"><span className="text-destructive">*</span> must be filled in</span></div>
+                  <div className="flex items-baseline justify-between gap-2"><p className="font-semibold">{editingResident ? t("issuances.new.resident.editDetails") : t("issuances.new.resident.addNew")}</p><span className="text-xs text-muted-foreground"><span className="text-destructive">*</span> {t("issuances.new.resident.mustBeFilled")}</span></div>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_7.5rem]">
-                    <label className={fieldLabelClass}><span>First name <span className="text-destructive">*</span></span><input id="quickadd-firstName" value={quickAdd.firstName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, firstName: event.target.value }))} className={cn(formControlClass, quickInvalid("firstName") && "border-destructive")} aria-invalid={quickInvalid("firstName") || undefined} autoComplete="off" />{quickError("firstName")}</label>
-                    <label className={fieldLabelClass}>Middle name<input value={quickAdd.middleName ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, middleName: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
-                    <label className={fieldLabelClass}><span>Last name <span className="text-destructive">*</span></span><input id="quickadd-lastName" value={quickAdd.lastName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, lastName: event.target.value }))} className={cn(formControlClass, quickInvalid("lastName") && "border-destructive")} aria-invalid={quickInvalid("lastName") || undefined} autoComplete="off" />{quickError("lastName")}</label>
-                    <div className={fieldLabelClass}><label htmlFor="quickadd-suffix">Extension</label><SelectField id="quickadd-suffix" value={quickAdd.suffix || "None"} onChange={(next) => setQuickAdd((previous) => ({ ...previous, suffix: next === "None" ? "" : next }))} options={nameExtensions} /></div>
+                    <label className={fieldLabelClass}><span>{t("issuances.new.resident.fields.firstName")} <span className="text-destructive">*</span></span><input id="quickadd-firstName" value={quickAdd.firstName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, firstName: event.target.value }))} className={cn(formControlClass, quickInvalid("firstName") && "border-destructive")} aria-invalid={quickInvalid("firstName") || undefined} autoComplete="off" />{quickError("firstName")}</label>
+                    <label className={fieldLabelClass}>{t("issuances.new.resident.fields.middleName")}<input value={quickAdd.middleName ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, middleName: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
+                    <label className={fieldLabelClass}><span>{t("issuances.new.resident.fields.lastName")} <span className="text-destructive">*</span></span><input id="quickadd-lastName" value={quickAdd.lastName} onChange={(event) => setQuickAdd((previous) => ({ ...previous, lastName: event.target.value }))} className={cn(formControlClass, quickInvalid("lastName") && "border-destructive")} aria-invalid={quickInvalid("lastName") || undefined} autoComplete="off" />{quickError("lastName")}</label>
+                    <div className={fieldLabelClass}><label htmlFor="quickadd-suffix">{t("issuances.new.resident.fields.extension")}</label><SelectField id="quickadd-suffix" value={quickAdd.suffix || "None"} onChange={(next) => setQuickAdd((previous) => ({ ...previous, suffix: next === "None" ? "" : next }))} options={nameExtensionOptions} /></div>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,1.5fr)_minmax(0,1fr)_minmax(0,1.1fr)]">
-                    <div className={fieldLabelClass}><label htmlFor="quickadd-birthdate">Birthdate <span className="text-destructive">*</span></label><DateField id="quickadd-birthdate" value={quickAdd.birthdate} max={localIsoDate()} startView="years" showToday={false} placeholder="Choose the birthdate" invalid={quickInvalid("birthdate")} describedBy={quickInvalid("birthdate") ? "quickadd-birthdate-error" : undefined} onChange={(next) => setQuickAdd((previous) => ({ ...previous, birthdate: next }))} />{quickError("birthdate")}</div>
-                    <label className={fieldLabelClass}><span>Place of birth{birthplaceRequired ? <span className="text-destructive"> *</span> : null}</span><input id="quickadd-birthplace" value={quickAdd.birthplace ?? ""} placeholder="Example: Los Baños, Laguna" onChange={(event) => setQuickAdd((previous) => ({ ...previous, birthplace: event.target.value }))} className={cn(formControlClass, quickInvalid("birthplace") && "border-destructive")} aria-invalid={quickInvalid("birthplace") || undefined} autoComplete="off" />{quickError("birthplace")}</label>
-                    <div className={fieldLabelClass}><span id="quickadd-sex-label">Sex{sexRequired ? <span className="text-destructive"> *</span> : null}</span><ChoiceRow id="quickadd-sex" label="Sex" value={quickAdd.sex} options={["Male", "Female"]} onChange={(next) => setQuickAdd((previous) => ({ ...previous, sex: next as "Male" | "Female" | "" }))} />{quickError("sex")}</div>
-                    <div className={fieldLabelClass}><label htmlFor="quickadd-civil">Civil status</label><SelectField id="quickadd-civil" value={quickAdd.civilStatus} onChange={(next) => setQuickAdd((previous) => ({ ...previous, civilStatus: next }))} options={civilStatusChoices} /></div>
+                    <div className={fieldLabelClass}><label htmlFor="quickadd-birthdate">{t("issuances.new.resident.fields.birthdate")} <span className="text-destructive">*</span></label><DateField id="quickadd-birthdate" value={quickAdd.birthdate} max={localIsoDate()} startView="years" showToday={false} placeholder={t("issuances.new.resident.chooseBirthdate")} invalid={quickInvalid("birthdate")} describedBy={quickInvalid("birthdate") ? "quickadd-birthdate-error" : undefined} onChange={(next) => setQuickAdd((previous) => ({ ...previous, birthdate: next }))} />{quickError("birthdate")}</div>
+                    <label className={fieldLabelClass}><span>{t("issuances.new.resident.fields.placeOfBirth")}{birthplaceRequired ? <span className="text-destructive"> *</span> : null}</span><input id="quickadd-birthplace" value={quickAdd.birthplace ?? ""} placeholder={t("issuances.new.resident.birthplaceExample")} onChange={(event) => setQuickAdd((previous) => ({ ...previous, birthplace: event.target.value }))} className={cn(formControlClass, quickInvalid("birthplace") && "border-destructive")} aria-invalid={quickInvalid("birthplace") || undefined} autoComplete="off" />{quickError("birthplace")}</label>
+                    <div className={fieldLabelClass}><span id="quickadd-sex-label">{t("issuances.new.resident.fields.sex")}{sexRequired ? <span className="text-destructive"> *</span> : null}</span><ChoiceRow id="quickadd-sex" label={t("issuances.new.resident.fields.sex")} value={quickAdd.sex} options={["Male", "Female"]} optionLabel={(option) => sexLabel(option, t)} onChange={(next) => setQuickAdd((previous) => ({ ...previous, sex: next as "Male" | "Female" | "" }))} />{quickError("sex")}</div>
+                    <div className={fieldLabelClass}><label htmlFor="quickadd-civil">{t("issuances.new.resident.fields.civilStatus")}</label><SelectField id="quickadd-civil" value={quickAdd.civilStatus} onChange={(next) => setQuickAdd((previous) => ({ ...previous, civilStatus: next }))} options={civilStatusOptions} /></div>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)]">
-                    <label className={fieldLabelClass}><span>House number <span className="text-destructive">*</span></span><input id="quickadd-houseNumber" value={quickAdd.houseNumber ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, houseNumber: event.target.value }))} className={cn(formControlClass, quickInvalid("houseNumber") && "border-destructive")} aria-invalid={quickInvalid("houseNumber") || undefined} autoComplete="off" />{quickError("houseNumber")}</label>
-                    <div className={fieldLabelClass}><label htmlFor="quickadd-street">Street <span className="text-destructive">*</span></label><ComboField id="quickadd-street" value={quickAdd.street} options={knownStreets} invalid={quickInvalid("street")} describedBy={quickInvalid("street") ? "quickadd-street-error" : undefined} onChange={(next) => setQuickAdd((previous) => ({ ...previous, street: next }))} />{quickError("street")}</div>
-                    <div className={fieldLabelClass}><label htmlFor="quickadd-purok">Purok</label><SelectField id="quickadd-purok" value={String(quickAdd.purok)} onChange={(next) => setQuickAdd((previous) => ({ ...previous, purok: Number(next) }))} options={purokChoices} /></div>
+                    <label className={fieldLabelClass}><span>{t("issuances.new.resident.fields.houseNumber")} <span className="text-destructive">*</span></span><input id="quickadd-houseNumber" value={quickAdd.houseNumber ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, houseNumber: event.target.value }))} className={cn(formControlClass, quickInvalid("houseNumber") && "border-destructive")} aria-invalid={quickInvalid("houseNumber") || undefined} autoComplete="off" />{quickError("houseNumber")}</label>
+                    <div className={fieldLabelClass}><label htmlFor="quickadd-street">{t("issuances.new.resident.fields.street")} <span className="text-destructive">*</span></label><ComboField id="quickadd-street" value={quickAdd.street} options={knownStreets} invalid={quickInvalid("street")} describedBy={quickInvalid("street") ? "quickadd-street-error" : undefined} onChange={(next) => setQuickAdd((previous) => ({ ...previous, street: next }))} />{quickError("street")}</div>
+                    <div className={fieldLabelClass}><label htmlFor="quickadd-purok">{t("issuances.new.resident.fields.purok")}</label><SelectField id="quickadd-purok" value={String(quickAdd.purok)} onChange={(next) => setQuickAdd((previous) => ({ ...previous, purok: Number(next) }))} options={purokChoices} /></div>
                   </div>
                   <div className="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-                    <label className={fieldLabelClass}>Living here since (year)<input type="number" min="1900" max={new Date().getFullYear()} placeholder="Example: 2005" value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: event.target.value ? Number(event.target.value) : undefined }))} className={formControlClass} /></label>
-                    <CheckField label="Lived here since birth" checked={quickAdd.residentSinceBirth} onChange={(checked) => setQuickAdd((previous) => ({ ...previous, residentSinceBirth: checked, residentSinceYear: undefined }))} />
+                    <label className={fieldLabelClass}>{t("issuances.new.resident.fields.livingSince")}<input type="number" min="1900" max={new Date().getFullYear()} placeholder={t("issuances.new.resident.yearExample")} value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: event.target.value ? Number(event.target.value) : undefined }))} className={formControlClass} /></label>
+                    <CheckField label={t("issuances.new.resident.fields.sinceBirth")} checked={quickAdd.residentSinceBirth} onChange={(checked) => setQuickAdd((previous) => ({ ...previous, residentSinceBirth: checked, residentSinceYear: undefined }))} />
                   </div>
-                  <div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues() || quickSaving} onClick={() => { if (editingResident && selectedResident) { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }) } else setQuickAdd(emptyQuickAdd); setQuickAttempted(false); setQuickDuplicateSignature(null) }}>{editingResident ? "Reset changes" : "Clear"}</Button>{!editingResident && quickDuplicateSignature === JSON.stringify(quickAdd) ? <Button type="button" variant="outline" disabled={quickSaving} onClick={() => void createResident(true)}>{quickSaving ? "Saving…" : "Save anyway"}</Button> : null}<Button type="button" disabled={quickSaving} onClick={() => void createResident()}>{quickSaving ? "Saving…" : editingResident ? "Save changes" : "Save and select"}</Button></div>
+                  <div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues() || quickSaving} onClick={() => { if (editingResident && selectedResident) { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }) } else setQuickAdd(emptyQuickAdd); setQuickAttempted(false); setQuickDuplicateSignature(null) }}>{editingResident ? t("issuances.new.resident.buttons.resetChanges") : t("issuances.new.resident.buttons.clear")}</Button>{!editingResident && quickDuplicateSignature === JSON.stringify(quickAdd) ? <Button type="button" variant="outline" disabled={quickSaving} onClick={() => void createResident(true)}>{quickSaving ? t("issuances.new.resident.buttons.saving") : t("issuances.new.resident.buttons.saveAnyway")}</Button> : null}<Button type="button" disabled={quickSaving} onClick={() => void createResident()}>{quickSaving ? t("issuances.new.resident.buttons.saving") : editingResident ? t("issuances.new.resident.buttons.saveChanges") : t("issuances.new.resident.buttons.saveAndSelect")}</Button></div>
                 </fieldset>
               </div>}
               {selectedResident && neededFromRecord.length ? <div className="space-y-4 rounded-lg border border-amber-500/40 bg-amber-500/5 p-4">
                 <div>
-                  <p className="font-semibold">A few details are missing</p>
-                  <p className="text-sm text-muted-foreground">Please fill them in. They will be saved to {selectedResident.firstName}'s record.</p>
+                  <p className="font-semibold">{t("issuances.new.resident.missing.title")}</p>
+                  <p className="text-sm text-muted-foreground">{t("issuances.new.resident.missing.body", { name: selectedResident.firstName })}</p>
                 </div>
                 {neededFromRecord.map(renderResidentNeed)}
               </div> : null}

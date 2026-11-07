@@ -1023,7 +1023,96 @@
         },
         "firstPhotoSlow": "The first photo of the day can take a few seconds."
       },
-      "complete": "(complete)"
+      "complete": "(complete)",
+      "resident": {
+        "title": "Who is it for?",
+        "descriptionChosen": "You can edit this resident or choose someone else.",
+        "descriptionEditing": "Update this resident's information, then save your changes.",
+        "descriptionSearch": "Type the person's name and select them from the list, or fill in the form below if they are not listed.",
+        "yearsOld": "{{age}} years old",
+        "birthdateNotRecorded": "Birthdate not recorded",
+        "civilStatusNotRecorded": "Civil status not recorded",
+        "editResident": "Edit resident",
+        "chooseSomeoneElse": "Choose someone else",
+        "searchPlaceholder": "Type the person's name…",
+        "searchLabel": "Search resident",
+        "archived": "Archived",
+        "noOneFound": "No one found with that name. Check the spelling, or add them as a new resident in the form below.",
+        "editDetails": "Edit resident details",
+        "addNew": "Add a new resident",
+        "mustBeFilled": "must be filled in",
+        "purokN": "Purok {{n}}",
+        "none": "None",
+        "chooseBirthdate": "Choose the birthdate",
+        "birthplaceExample": "Example: Los Baños, Laguna",
+        "yearExample": "Example: 2005",
+        "fields": {
+          "firstName": "First name",
+          "middleName": "Middle name",
+          "lastName": "Last name",
+          "extension": "Extension",
+          "birthdate": "Birthdate",
+          "placeOfBirth": "Place of birth",
+          "sex": "Sex",
+          "civilStatus": "Civil status",
+          "houseNumber": "House number",
+          "street": "Street",
+          "purok": "Purok",
+          "livingSince": "Living here since (year)",
+          "sinceBirth": "Lived here since birth",
+          "sector": "Sector"
+        },
+        "buttons": {
+          "resetChanges": "Reset changes",
+          "clear": "Clear",
+          "saving": "Saving…",
+          "saveAnyway": "Save anyway",
+          "saveChanges": "Save changes",
+          "saveAndSelect": "Save and select"
+        },
+        "missing": {
+          "title": "A few details are missing",
+          "body": "Please fill them in. They will be saved to {{name}}'s record.",
+          "homeAddress": "Home address",
+          "emergencyTitle": "Person to contact in an emergency",
+          "contactNumber": "Contact number",
+          "fullName": "Full name",
+          "address": "Address"
+        },
+        "errors": {
+          "fillThis": "Please fill this in.",
+          "duplicate": "A resident with the same name and birthdate may already exist. Review the details before choosing Save anyway.",
+          "updateFailed": "Unable to update this resident.",
+          "addFailed": "Unable to add this resident."
+        },
+        "need": {
+          "address": "Resident address",
+          "birthDate": "Birthdate",
+          "birthPlace": "Birthplace",
+          "civilStatus": "Civil status",
+          "sex": "Sex",
+          "residentSince": "Residing since",
+          "sector": "Sector",
+          "photo": "Photo",
+          "emergencyContact": "Emergency contact"
+        }
+      },
+      "previewRows": {
+        "resident": "Resident",
+        "residentNumber": "Resident number",
+        "address": "Address",
+        "birthdate": "Birthdate",
+        "birthplace": "Birthplace",
+        "sex": "Sex",
+        "civilStatus": "Civil status",
+        "photo": "Photo",
+        "taken": "Taken",
+        "dateOnDocument": "Date on document",
+        "signatory": "Signatory",
+        "yearsOfResidency": "Years of residency",
+        "sinceBirth": "Since birth",
+        "residentRecord": "Resident record"
+      }
     }
   }
 }

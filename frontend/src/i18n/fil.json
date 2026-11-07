@@ -1023,7 +1023,96 @@
           "tooLarge": "Masyadong malaki ang larawang ito. Pumili ng mas mababa sa 15 MB."
         }
       },
-      "complete": "(kumpleto)"
+      "complete": "(kumpleto)",
+      "resident": {
+        "title": "Para kanino ito?",
+        "descriptionChosen": "Maaari mong i-edit ang residenteng ito o pumili ng iba.",
+        "descriptionEditing": "I-update ang impormasyon ng residente, pagkatapos ay i-save ang mga pagbabago.",
+        "descriptionSearch": "I-type ang pangalan ng tao at piliin siya sa listahan, o punan ang form sa ibaba kung wala siya sa listahan.",
+        "yearsOld": "{{age}} taong gulang",
+        "birthdateNotRecorded": "Hindi naitala ang petsa ng kapanganakan",
+        "civilStatusNotRecorded": "Hindi naitala ang katayuang sibil",
+        "editResident": "I-edit ang residente",
+        "chooseSomeoneElse": "Pumili ng iba",
+        "searchPlaceholder": "I-type ang pangalan ng tao…",
+        "searchLabel": "Maghanap ng residente",
+        "archived": "Naka-archive",
+        "noOneFound": "Walang nakitang may ganitong pangalan. Suriin ang baybay, o idagdag siya bilang bagong residente sa form sa ibaba.",
+        "editDetails": "I-edit ang mga detalye ng residente",
+        "addNew": "Magdagdag ng bagong residente",
+        "mustBeFilled": "kailangang punan",
+        "purokN": "Purok {{n}}",
+        "none": "Wala",
+        "chooseBirthdate": "Piliin ang petsa ng kapanganakan",
+        "birthplaceExample": "Halimbawa: Los Baños, Laguna",
+        "yearExample": "Halimbawa: 2005",
+        "fields": {
+          "firstName": "Unang pangalan",
+          "middleName": "Gitnang pangalan",
+          "lastName": "Apelyido",
+          "extension": "Hulapi",
+          "birthdate": "Petsa ng kapanganakan",
+          "placeOfBirth": "Lugar ng kapanganakan",
+          "sex": "Kasarian",
+          "civilStatus": "Katayuang sibil",
+          "houseNumber": "Numero ng bahay",
+          "street": "Kalye",
+          "purok": "Purok",
+          "livingSince": "Nakatira rito mula (taon)",
+          "sinceBirth": "Dito na nakatira mula pagkapanganak",
+          "sector": "Sektor"
+        },
+        "buttons": {
+          "resetChanges": "I-reset ang mga pagbabago",
+          "clear": "Burahin",
+          "saving": "Sine-save…",
+          "saveAnyway": "I-save pa rin",
+          "saveChanges": "I-save ang mga pagbabago",
+          "saveAndSelect": "I-save at piliin"
+        },
+        "missing": {
+          "title": "May ilang detalyeng kulang",
+          "body": "Pakipunan ang mga ito. Ise-save ang mga ito sa talaan ni {{name}}.",
+          "homeAddress": "Tirahan",
+          "emergencyTitle": "Taong makokontak sa oras ng emergency",
+          "contactNumber": "Numero ng contact",
+          "fullName": "Buong pangalan",
+          "address": "Tirahan"
+        },
+        "errors": {
+          "fillThis": "Pakipunan ito.",
+          "duplicate": "Maaaring mayroon nang residenteng may parehong pangalan at petsa ng kapanganakan. Suriin ang mga detalye bago piliin ang I-save pa rin.",
+          "updateFailed": "Hindi ma-update ang residenteng ito.",
+          "addFailed": "Hindi maidagdag ang residenteng ito."
+        },
+        "need": {
+          "address": "Tirahan ng residente",
+          "birthDate": "Petsa ng kapanganakan",
+          "birthPlace": "Lugar ng kapanganakan",
+          "civilStatus": "Katayuang sibil",
+          "sex": "Kasarian",
+          "residentSince": "Naninirahan mula noong",
+          "sector": "Sektor",
+          "photo": "Litrato",
+          "emergencyContact": "Contact sa oras ng emergency"
+        }
+      },
+      "previewRows": {
+        "resident": "Residente",
+        "residentNumber": "Numero ng residente",
+        "address": "Tirahan",
+        "birthdate": "Petsa ng kapanganakan",
+        "birthplace": "Lugar ng kapanganakan",
+        "sex": "Kasarian",
+        "civilStatus": "Katayuang sibil",
+        "photo": "Litrato",
+        "taken": "Nakuha na",
+        "dateOnDocument": "Petsa sa dokumento",
+        "signatory": "Lumalagda",
+        "yearsOfResidency": "Taon ng paninirahan",
+        "sinceBirth": "Mula pagkapanganak",
+        "residentRecord": "Talaan ng residente"
+      }
     }
   }
 }

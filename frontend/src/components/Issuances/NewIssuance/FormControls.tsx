@@ -509,6 +509,8 @@ type ChoiceRowProps = {
   onChange: (value: string) => void
   options: readonly string[]
   label: string
+  /** Shown text for an option. The value passed to onChange stays the option itself. */
+  optionLabel?: (option: string) => string
 }
 
 /** Two or three big buttons in a row (for example Male / Female). */
@@ -518,6 +520,7 @@ export function ChoiceRow({
   onChange,
   options,
   label,
+  optionLabel,
 }: ChoiceRowProps) {
   const name = useId()
   return (
@@ -548,7 +551,7 @@ export function ChoiceRow({
               onChange={() => onChange(option)}
               className="sr-only"
             />
-            {option}
+            {optionLabel ? optionLabel(option) : option}
           </label>
         )
       })}
