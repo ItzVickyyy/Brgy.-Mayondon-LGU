@@ -14,7 +14,7 @@ Last updated: November 5, 2026
 
 ### A1. What the client approved vs what the team proposes
 
-The signed brief says **six staff accounts, all with full access**. The prototype instead proposes **Staff** and **System Administrator** roles, plus staff self-registration with admin approval. The team confirmed (Oct 28) these are *intentional proposals* to take to the client. They are **not** a client-approved permissions policy **(D-10, D-11)**.
+The signed brief says **six staff accounts, all with full access**. The prototype instead proposes **Staff** and **System Administrator** roles, There is no staff self-registration: only an administrator creates accounts (owner decision, Nov 7, 2026, **D-11**). The team confirmed (Oct 28) that the Staff/System Administrator split is an *intentional proposal* to take to the client. It is **not** a client-approved permissions policy **(D-10)**.
 
 ### A2. Proposed roles
 
@@ -38,15 +38,15 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 | Records Management, Barangay IDs: override validity rules | No | Allowed |
 | Activity Log | Own activity | All users, with filters |
 | My Account, User Settings | Allowed | Allowed |
-| Officials, User Accounts, Pending Registrations | No | Allowed |
+| Officials, User Accounts | No | Allowed |
 | Management Reports | No | Allowed |
 | Backup and Restore | No; manual-backup permission to confirm | Allowed |
 
 If the client keeps "six accounts, full access", still review whether deletion, export, account administration and sensitive-data access should be restricted **(D-25)**.
 
-### A4. Account status (planned, not implemented)
+### A4. Account status (not needed)
 
-Suggested backend fields: `role` (`admin` | `staff`) and `status` (`pending`, `active`, `rejected`, `inactive`). The current `is_active` boolean cannot represent pending or rejected. Do **not** implement approval with only a frontend label or component state. The prototype's pending/approved/rejected examples are fictional.
+No account `status` column is planned. Accounts are created only by the System Administrator, so there is no pending or rejected state (D-11, decided Nov 7, 2026). The existing `is_active` boolean is enough to disable an account. `/users/signup` stays disabled (`USERS_OPEN_REGISTRATION=False`). Do not add approval endpoints.
 
 ### A5. Audit history (planned, not implemented)
 
@@ -57,8 +57,8 @@ Append-only history for sensitive actions: who, when, affected record, reason wh
 - First administrator is provisioned through controlled initial setup (`FIRST_SUPERUSER` in `.env`). There is **no public sign-up**; an admin creates accounts. The User Accounts table shows whatever the database holds, including this seeded account; it is deployment data, not code. **Before real use, create a real admin in User Accounts, then delete the seed account** (the app refuses to delete the last active admin).
 - Use **individual** accounts, not shared ones.
 - Disable access when staff leave or no longer need it, while preserving required issuance history.
-- Account setup and password reset by email **will not work offline** (no SMTP). A client-approved local procedure is required so staff are never locked out **(D-12)**.
-- Who may approve or disable accounts, and who the System Administrator is, are undecided **(D-11)**.
+- Account setup and password reset by email **will not work offline** (no SMTP). The local procedure is decided (owner decision, Nov 7, 2026, **D-12**): the System Administrator sets a temporary password in User Accounts, gives it to the user in person, and the user must change it at next sign-in. No email and no recovery codes. The forced-change step is not built yet.
+- Only the System Administrator creates, disables or re-enables accounts **(D-11)**. Who holds that role in the barangay office is still for the client to name.
 
 ---
 

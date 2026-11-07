@@ -99,12 +99,12 @@ Confirm any change to this list with the client before coding.
 
 ### Proposed additions beyond the brief (NOT approved)
 
-These exist in the Admin portal prototype or design drafts. The team has marked the role split and registration flow as intentional proposals; the client has not approved them.
+These exist in the Admin portal prototype or design drafts. The team has marked the role split as an intentional proposal; the client has not approved it. The self-registration flow was removed (D-11, decided Nov 7, 2026).
 
 | Proposal | Conflicts with / extends the brief | Decision |
 |---|---|---|
 | Staff vs System Administrator roles | Brief says all six accounts have full access | D-10 |
-| Staff self-registration ("Request Access") with admin approval | Brief and README say no public sign-up; admin creates accounts | D-11 |
+| ~~Staff self-registration ("Request Access") with admin approval~~ | Removed. Accounts are created only by the System Administrator (D-11, decided Nov 7, 2026). | D-11 |
 | Officials management (separate from accounts) | Not listed in brief | D-23 |
 | Activity Log / audit history | Not listed in brief | D-24 |
 | Management Reports | Not listed in brief | D-21 |
@@ -136,7 +136,7 @@ The team asked the barangay contact about the DILG Local Government Unit Support
 
 | ID | Requirement | Draft acceptance criteria | Status |
 |---|---|---|---|
-| FR-001 | Staff login | Only approved office accounts can sign in; no public sign-up | Brief; account model pending (D-10, D-11) |
+| FR-001 | Staff login | Only accounts created by the System Administrator can sign in; no public sign-up | Brief; D-11 decided Nov 7, 2026; role model pending (D-10) |
 | FR-002 | Dashboard | Show issuance counts and clearances/IDs nearing expiry | Brief |
 | FR-003 | Resident records | Add, edit, search, retrieve and import approved masterlist fields | Brief; field mapping pending (D-19) |
 | FR-004 | Family and sector details | Store only where the approved workflow requires | Brief; fields pending (D-20) |
@@ -196,6 +196,7 @@ The instructor's Final Project Guide governs academic dates and wins on conflict
 | 2026-10-25 | Replace Vercel/Supabase hosting direction with Docker Compose + local PostgreSQL | Project team |
 | 2026-10-27 | Print only variable details onto existing pre-printed forms (overlay), never recreate the form | Client description; team |
 | 2026-10-28 | Admin/Staff split and staff self-registration with admin approval are **intentional proposals** to take to the client | Project team |
+| 2026-11-07 | No staff self-registration: only an administrator creates accounts (D-11). Offline password reset: the System Administrator sets a temporary password and the user must change it at next sign-in (D-12). Owner design decisions, **not** client approvals | Project owner |
 | 2026-11-01 | Remove on-screen sample/prototype banners; all data remains fictional | Project team |
 | 2026-11-01 | Branches: `master` = docs; `draft/admin-portal` = UI and code, and the Version 1 demo runs from it; `Foundation` frozen as a read-only reference (D-08) | Project team |
 | 2026-11-01 | The design was coded directly as the `draft/admin-portal` prototype; no wireframes, separate mockups, mobile mockups or client feedback exist yet (D-06) | Project team (fact, not an approval) |
