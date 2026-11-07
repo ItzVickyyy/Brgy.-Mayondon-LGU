@@ -535,7 +535,7 @@ export function MyAccountModal({
                         </p>
                       </div>
                       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                        {[
+                        {([
                           {
                             key: "address_line",
                             label: "account.addressFields.street",
@@ -566,7 +566,7 @@ export function MyAccountModal({
                             label: "account.addressFields.zipCode",
                             placeholder: "account.addressPlaceholders.zipCode",
                           },
-                        ].map((field) => (
+                        ] as const).map((field) => (
                           <div key={field.key}>
                             <Label
                               htmlFor={field.key}
