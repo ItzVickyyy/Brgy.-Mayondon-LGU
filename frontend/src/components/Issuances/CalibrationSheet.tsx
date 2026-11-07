@@ -16,7 +16,7 @@ export function CalibrationSheet({ templateId, offset = { x: 0, y: 0 }, preview 
       <style>{printOverlayCss}</style>
       {pages.map((page) => (
         <div className="print-overlay-page" key={page.page} data-page={page.page}>
-          <svg width={`${widthPt}pt`} height={`${heightPt}pt`} viewBox={`0 0 ${widthPt} ${heightPt}`} style={{ position: "absolute", left: 0, top: 0 }}>
+          <svg role="img" aria-label="Printing calibration grid" width={`${widthPt}pt`} height={`${heightPt}pt`} viewBox={`0 0 ${widthPt} ${heightPt}`} style={{ position: "absolute", left: 0, top: 0 }}>
             {page.vLines.map((x) => <line key={`v${x}`} x1={x} y1={0} x2={x} y2={heightPt} stroke={grid} strokeWidth={x % 72 === 0 ? 0.6 : 0.25} />)}
             {page.hLines.map((y) => <line key={`h${y}`} x1={0} y1={y} x2={widthPt} y2={y} stroke={grid} strokeWidth={y % 72 === 0 ? 0.6 : 0.25} />)}
             {page.vLines.filter((x) => x % 72 === 0 && x > 0).map((x) => <text key={`vt${x}`} x={x + 2} y={9} fontSize={6} fill="#374151">{x}</text>)}

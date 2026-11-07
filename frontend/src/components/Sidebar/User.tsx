@@ -7,6 +7,10 @@ import {
   UserRound,
 } from "lucide-react"
 import { useState } from "react"
+import {
+  HelpDialog,
+  LearnMoreDialog,
+} from "@/components/Common/InfoDialogs"
 import { MyAccountModal } from "@/components/Settings/MyAccountModal"
 import { Button } from "@/components/ui/button"
 import {
@@ -42,6 +46,8 @@ export function User({
     "English" | "Filipino"
   >("English")
   const [logoutOpen, setLogoutOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [learnOpen, setLearnOpen] = useState(false)
 
   if (!user) return null
 
@@ -134,11 +140,7 @@ export function User({
             <DropdownMenuItem
               onSelect={() => {
                 handleMenuClick()
-                window.open(
-                  "https://www.dilg.gov.ph/",
-                  "_blank",
-                  "noopener,noreferrer",
-                )
+                setHelpOpen(true)
               }}
             >
               <CircleHelp className="size-4" />
@@ -147,11 +149,7 @@ export function User({
             <DropdownMenuItem
               onSelect={() => {
                 handleMenuClick()
-                window.open(
-                  "https://www.dilg.gov.ph/",
-                  "_blank",
-                  "noopener,noreferrer",
-                )
+                setLearnOpen(true)
               }}
             >
               <Info className="size-4" />
@@ -175,6 +173,8 @@ export function User({
         onOpenChange={setAccountOpen}
         user={user}
       />
+      <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
+      <LearnMoreDialog open={learnOpen} onOpenChange={setLearnOpen} />
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

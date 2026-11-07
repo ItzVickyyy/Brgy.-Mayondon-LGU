@@ -29,19 +29,11 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 Los Baños, Laguna
               </p>
             </div>
-            <p className="pt-1 text-xs font-semibold uppercase tracking-[0.22em] text-muted-foreground sm:text-sm">
-              Authorized Personnel Portal
-            </p>
           </header>
 
           <section className="rounded-xl border bg-card p-6 shadow-sm sm:p-8">
             {children}
           </section>
-
-          <p className="mx-auto mt-5 flex max-w-sm items-center justify-center gap-2 text-center text-xs leading-5 text-muted-foreground">
-            <span aria-hidden="true">◇</span>
-            For authorized barangay office personnel only.
-          </p>
         </div>
       </main>
 

@@ -6,6 +6,10 @@ import { tanstackRouter } from "@tanstack/router-plugin/vite"
 import react from "@vitejs/plugin-react-swc"
 import { defineConfig, type Plugin } from "vite"
 
+const packageJson = JSON.parse(
+  fs.readFileSync(path.resolve(import.meta.dirname, "package.json"), "utf-8"),
+) as { version: string }
+
 // The photo step removes the background from resident photos on this computer, so the files of the
 // MediaPipe selfie-segmentation package (model + WebAssembly, Apache-2.0, about 12 MB) are served
 // from our own server at /vision/selfie-segmentation/. Nothing is fetched from the internet and no
@@ -45,6 +49,10 @@ function selfieSegmentationAssets(): Plugin {
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  define: {
+    __APP_VERSION__: JSON.stringify(packageJson.version),
+    __BUILD_DATE__: JSON.stringify(new Date().toISOString().slice(0, 10)),
+  },
   build: {
     // Local/self-hosted builds share the frontend with FastAPI. On Vercel set
     // VITE_BUILD_OUT_DIR=dist in the frontend project settings.

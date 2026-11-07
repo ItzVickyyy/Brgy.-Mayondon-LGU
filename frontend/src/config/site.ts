@@ -9,7 +9,7 @@ export const SITE = {
   fullName: "Barangay Mayondon LGU",
   /** Location line */
   location: "Los Baños, Laguna",
-  /** TODO: rename once the system is decided (see docs/ROADMAP.md) */
+  /** Name of the system shown in headings */
   systemName: "Barangay Mayondon LGU System",
   /** Official logo from the repository's public assets folder. */
   logo: "/assets/images/Barangay%20Mayondon%20Logo.png" as string | null,
