@@ -1812,5 +1812,23 @@
       "description": "Something went wrong. Please try again.",
       "home": "Go Home"
     }
+  },
+  "apiErrors": {
+    "generic": "Something went wrong.",
+    "requestFailed": "Request failed.",
+    "forbidden": "You do not have permission to do that.",
+    "issuance": {
+      "missingSections": "Please fill in: {{sections}}.",
+      "missingResidentFields": "The resident record is missing: {{fields}}.",
+      "possibleDuplicate": "A resident with the same name and birthdate is already on file. Search for them above instead of adding them again.",
+      "tricycleMismatch": "This plate or motor number is already on file with different tricycle details. Check the numbers, make, color and association.",
+      "tricycleConflict": "The plate number and the motor number belong to two different tricycles on file. Check both numbers.",
+      "correctionInProgress": "A correction for this document is already open. Finish or discard that draft first.",
+      "idAlreadyExists": "This resident already has a Barangay ID. Choose Renewal or Replacement instead.",
+      "noEarlierId": "This resident has no earlier Barangay ID. Choose New instead.",
+      "idNumberRequired": "Type the Barangay ID number for this card.",
+      "idNumberInUse": "This ID number is already used by another resident.",
+      "invalidValidUntil": "The “Valid until” date must be after the issue date."
+    }
   }
 }

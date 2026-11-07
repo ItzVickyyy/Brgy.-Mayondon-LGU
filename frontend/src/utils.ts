@@ -1,22 +1,23 @@
 import { AxiosError } from "axios"
 
+import i18n from "@/i18n"
+
 function extractErrorMessage(err: Error): string {
   if (err instanceof AxiosError) {
-    const errDetail = (err.response?.data as any)?.detail
+    const errDetail = (err.response?.data as { detail?: unknown } | undefined)?.detail
     if (Array.isArray(errDetail) && errDetail.length > 0) {
-      return errDetail[0].msg
+      const first = errDetail[0] as { msg?: unknown }
+      return typeof first.msg === "string" ? first.msg : i18n.t("apiErrors.requestFailed")
     }
-    if (typeof errDetail === "string") {
-      return errDetail
-    }
-    return err.message
+    if (typeof errDetail === "string") return errDetail
+    if (err.response?.status === 403) return i18n.t("apiErrors.forbidden")
+    return err.message || i18n.t("apiErrors.generic")
   }
-  return "Something went wrong."
+  return i18n.t("apiErrors.generic")
 }
 
 export const handleError = function (this: (msg: string) => void, err: Error) {
-  const errorMessage = extractErrorMessage(err)
-  this(errorMessage)
+  this(extractErrorMessage(err))
 }
 
 export const getInitials = (name: string): string => {

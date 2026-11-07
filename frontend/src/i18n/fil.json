@@ -1812,5 +1812,23 @@
       "description": "May nangyaring error. Pakisubukan muli.",
       "home": "Bumalik sa Home"
     }
+  },
+  "apiErrors": {
+    "generic": "May naganap na error. Pakisubukang muli.",
+    "requestFailed": "Hindi naiproseso ang kahilingan.",
+    "forbidden": "Wala kang pahintulot na gawin ito.",
+    "issuance": {
+      "missingSections": "Pakikumpleto ang mga sumusunod: {{sections}}.",
+      "missingResidentFields": "May kulang na impormasyon sa rekord ng residente: {{fields}}.",
+      "possibleDuplicate": "May nakatala nang residente na kapareho ang pangalan at petsa ng kapanganakan. Hanapin muna siya sa listahan sa halip na magdagdag ng panibagong rekord.",
+      "tricycleMismatch": "Nakatala na ang plate number o motor number na ito kasama ng ibang detalye ng traysikel. Suriin ang mga numero, tatak, kulay, at asosasyon.",
+      "tricycleConflict": "Magkaibang traysikel ang nakatala para sa plate number at motor number. Suriin ang dalawang numero.",
+      "correctionInProgress": "May bukas nang pagwawasto para sa dokumentong ito. Kumpletuhin o itapon muna ang draft.",
+      "idAlreadyExists": "May Barangay ID na ang residenteng ito. Piliin ang Renewal o Replacement.",
+      "noEarlierId": "Wala pang naunang Barangay ID ang residenteng ito. Piliin ang New.",
+      "idNumberRequired": "Ilagay ang Barangay ID number para sa card na ito.",
+      "idNumberInUse": "Ginagamit na ng ibang residente ang ID number na ito.",
+      "invalidValidUntil": "Dapat mas huli sa petsa ng pag-isyu ang petsang “Valid until”."
+    }
   }
 }

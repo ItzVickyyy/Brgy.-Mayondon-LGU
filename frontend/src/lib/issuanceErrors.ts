@@ -1,4 +1,5 @@
 import { readApiError } from "@/lib/residents"
+import i18n from "@/i18n"
 
 const fieldWords: Record<string, string> = {
   birthdate: "birthdate",
@@ -40,27 +41,27 @@ export function issuanceErrorMessage(error: unknown): string {
   const body = (detail ?? {}) as Record<string, unknown>
   switch (code) {
     case "missing_sections":
-      return `Please fill in: ${list(body.sections, sectionWords)}.`
+      return i18n.t("apiErrors.issuance.missingSections", { sections: list(body.sections, sectionWords) })
     case "missing_resident_fields":
-      return `The resident record is missing: ${list(body.fields, fieldWords)}.`
+      return i18n.t("apiErrors.issuance.missingResidentFields", { fields: list(body.fields, fieldWords) })
     case "possible_duplicate":
-      return "A resident with the same name and birthdate is already on file. Search for them above instead of adding them again."
+      return i18n.t("apiErrors.issuance.possibleDuplicate")
     case "tricycle_mismatch":
-      return "This plate or motor number is already on file with different tricycle details. Check the numbers, make, color and association."
+      return i18n.t("apiErrors.issuance.tricycleMismatch")
     case "tricycle_conflict":
-      return "The plate number and the motor number belong to two different tricycles on file. Check both numbers."
+      return i18n.t("apiErrors.issuance.tricycleConflict")
     case "correction_in_progress":
-      return "A correction for this document is already open. Finish or discard that draft first."
+      return i18n.t("apiErrors.issuance.correctionInProgress")
     case "id_already_exists":
-      return "This resident already has a Barangay ID. Choose Renewal or Replacement instead."
+      return i18n.t("apiErrors.issuance.idAlreadyExists")
     case "no_earlier_id":
-      return "This resident has no earlier Barangay ID. Choose New instead."
+      return i18n.t("apiErrors.issuance.noEarlierId")
     case "id_number_required":
-      return "Type the Barangay ID number for this card."
+      return i18n.t("apiErrors.issuance.idNumberRequired")
     case "id_number_in_use":
-      return "This ID number is already used by another resident."
+      return i18n.t("apiErrors.issuance.idNumberInUse")
     case "invalid_valid_until":
-      return "The “Valid until” date must be after the issue date."
+      return i18n.t("apiErrors.issuance.invalidValidUntil")
     case "id_number_taken":
       return "This ID number is already used by another resident."
     default:

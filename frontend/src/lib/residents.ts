@@ -1,6 +1,7 @@
 import { AxiosError } from "axios"
 
 import type { LookupItem, ResidentPublic } from "@/client"
+import i18n from "@/i18n"
 
 export const civilStatuses = [
   "Single",
@@ -78,8 +79,8 @@ export function readApiError(error: unknown): ApiError {
       }
     }
     if (error.response?.status === 403)
-      return { code: null, message: "You do not have permission to do that." }
+      return { code: null, message: i18n.t("apiErrors.forbidden") }
     return { code: null, message: error.message }
   }
-  return { code: null, message: "Something went wrong." }
+  return { code: null, message: i18n.t("apiErrors.generic") }
 }
