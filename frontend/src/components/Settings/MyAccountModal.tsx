@@ -68,7 +68,7 @@ const profileFields: {
 
 const contactFields: {
   key: keyof ProfileForm
-  label: string
+  label: ParseKeys
   type?: string
   placeholder?: string
 }[] = [
@@ -518,7 +518,7 @@ export function MyAccountModal({
                               onChange={(event) =>
                                 updateField(field.key, event.target.value)
                               }
-                              placeholder={field.placeholder ? t(field.placeholder) : undefined}
+                              placeholder={field.placeholder}
                               maxLength={255}
                               className="min-h-11 bg-background"
                             />
