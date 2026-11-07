@@ -1,3 +1,5 @@
+import i18n from "@/i18n"
+
 /**
  * Single source of truth for the client's branding.
  * The official logo asset is stored under /public/assets/images.
@@ -16,5 +18,24 @@ export const SITE = {
   developedBy: "BSIT-WMAD, Laguna State Polytechnic University – Los Baños",
 } as const
 
-/** Builds a consistent browser-tab title: "Dashboard | Brgy. Mayondon" */
-export const pageTitle = (page: string) => `${page} | ${SITE.shortName}`
+const PAGE_TITLE_KEYS = {
+  "Activity Log": "common.pageTitles.activityLog",
+  "User Accounts": "common.pageTitles.userAccounts",
+  "Backup and Restore": "common.pageTitles.backupRestore",
+  Dashboard: "common.pageTitles.dashboard",
+  "Issuances Management": "common.pageTitles.issuances",
+  Officials: "common.pageTitles.officials",
+  "Records Management": "common.pageTitles.records",
+  "Management Reports": "common.pageTitles.reports",
+  "Change Password": "common.pageTitles.changePassword",
+  "Log In": "common.pageTitles.login",
+  "Recover Password": "common.pageTitles.recoverPassword",
+  "Reset Password": "common.pageTitles.resetPassword",
+} as const
+
+/** Builds a localized browser-tab title, such as "Dashboard | Brgy. Mayondon". */
+export const pageTitle = (page: string) => {
+  const key = PAGE_TITLE_KEYS[page as keyof typeof PAGE_TITLE_KEYS]
+  const localizedPage = key ? i18n.t(key) : page
+  return `${localizedPage} | ${SITE.shortName}`
+}

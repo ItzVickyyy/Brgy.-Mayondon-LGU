@@ -1780,6 +1780,20 @@
         "retention": "Pagpapanatili, pagwawasto, at mga tanong",
         "retentionText": "Ang tagal ng pag-iingat ng mga talaan at paraan ng paghiling ng pagwawasto ng mga residente ay susunod sa mga prosesong aaprubahan ng barangay alinsunod sa Data Privacy Act. Magtanong sa System Administrator para sa detalye."
       }
+    },
+    "pageTitles": {
+      "activityLog": "Talaan ng Aktibidad",
+      "userAccounts": "Mga Account ng User",
+      "backupRestore": "Backup at Restore",
+      "dashboard": "Dashboard",
+      "issuances": "Pamamahala ng Pag-isyu",
+      "officials": "Mga Opisyal",
+      "records": "Pamamahala ng mga Talaan",
+      "reports": "Mga Ulat sa Pamamahala",
+      "changePassword": "Palitan ang Password",
+      "login": "Mag-log in",
+      "recoverPassword": "Pag-recover ng Password",
+      "resetPassword": "I-reset ang Password"
     }
   }
 }

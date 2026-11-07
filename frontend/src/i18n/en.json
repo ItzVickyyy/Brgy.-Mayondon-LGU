@@ -1780,6 +1780,20 @@
         "retention": "Retention, corrections and questions",
         "retentionText": "How long records are kept and how residents may ask for corrections will follow the procedures the barangay approves under the Data Privacy Act. Ask the System Administrator for details."
       }
+    },
+    "pageTitles": {
+      "activityLog": "Activity Log",
+      "userAccounts": "User Accounts",
+      "backupRestore": "Backup and Restore",
+      "dashboard": "Dashboard",
+      "issuances": "Issuances Management",
+      "officials": "Officials",
+      "records": "Records Management",
+      "reports": "Management Reports",
+      "changePassword": "Change Password",
+      "login": "Log In",
+      "recoverPassword": "Recover Password",
+      "resetPassword": "Reset Password"
     }
   }
 }
