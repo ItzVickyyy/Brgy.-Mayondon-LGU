@@ -69,7 +69,7 @@ def test_staff_and_admin_read_seeded_lookups(
             assert len(items) == count
             assert set(items[0]) == {"id", "name"}
             names = [i["name"] for i in items]
-            assert names == sorted(names)
+            assert names == sorted(names, key=str.casefold)
         r = client.get(f"{LK}/document-types", headers=headers)
         assert r.status_code == 200
         kinds = {d["code"]: d for d in r.json()}
