@@ -1,4 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table"
+import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 
 import type { UserPublic } from "@/client"
 import type { DataTableFeatures } from "@/components/Common/DataTable"
@@ -12,10 +14,12 @@ export type UserTableData = UserPublic & {
   isLastActiveAdmin: boolean
 }
 
-export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
+export function useUserColumns(): ColumnDef<DataTableFeatures, UserTableData>[] {
+  const { t } = useTranslation()
+  return useMemo<ColumnDef<DataTableFeatures, UserTableData>[]>(() => [
   {
     accessorKey: "full_name",
-    header: "Name",
+    header: t("admin.users.columns.name"),
     cell: ({ row }) => {
       const fullName = row.original.full_name
       return (
@@ -23,11 +27,11 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
           <span
             className={cn("font-medium", !fullName && "text-muted-foreground")}
           >
-            {fullName || "N/A"}
+            {fullName || t("admin.users.na")}
           </span>
           {row.original.isCurrentUser && (
             <Badge variant="outline" className="text-xs">
-              You
+              {t("admin.users.you")}
             </Badge>
           )}
           {row.original.must_change_password && (
@@ -35,7 +39,7 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
               variant="outline"
               className="border-brand/30 bg-brand/10 text-brand"
             >
-              Temporary password
+              {t("admin.users.tempPassword")}
             </Badge>
           )}
         </div>
@@ -44,36 +48,37 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
   },
   {
     accessorKey: "email",
-    header: "Email / Username",
+    header: t("admin.users.columns.email"),
     cell: ({ row }) => (
       <span className="text-muted-foreground">{row.original.email}</span>
     ),
   },
   {
     id: "role",
-    header: "Role",
+    header: t("admin.users.columns.role"),
     cell: ({ row }) => (
       <Badge variant="outline" className={row.original.is_superuser ? "border-brand/30 bg-brand/10 text-brand" : "border-border bg-muted text-muted-foreground"}>
-        {row.original.is_superuser ? "System Administrator" : "Staff"}
+        {row.original.is_superuser ? t("admin.users.roleAdmin") : t("admin.users.roleStaff")}
       </Badge>
     ),
   },
   {
     accessorKey: "is_active",
-    header: "Status",
+    header: t("admin.users.columns.status"),
     cell: ({ row }) => (
       <Badge variant="outline" className={statusStyles[row.original.is_active ? "Active" : "Inactive"]}>
-        {row.original.is_active ? "Active" : "Inactive"}
+        {row.original.is_active ? t("admin.users.active") : t("admin.users.inactive")}
       </Badge>
     ),
   },
   {
     id: "actions",
-    header: () => <span className="block text-right">Actions</span>,
+    header: () => <span className="block text-right">{t("admin.users.columns.actions")}</span>,
     cell: ({ row }) => (
       <div className="flex justify-end">
         <UserActionsMenu key={row.original.id} user={row.original} />
       </div>
     ),
   },
-]
+  ], [t])
+}

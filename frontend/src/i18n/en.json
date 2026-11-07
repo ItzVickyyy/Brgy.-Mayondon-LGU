@@ -1158,5 +1158,94 @@
         }
       }
     }
+  },
+  "admin": {
+    "users": {
+      "title": "User Accounts",
+      "subtitle": "Manage system users and their access roles.",
+      "listTitle": "User Accounts List",
+      "listDescription": "Manage system user access, roles, and account status.",
+      "loading": "Loading user accounts...",
+      "loadError": {
+        "title": "Unable to load user accounts",
+        "description": "Check your connection and try again."
+      },
+      "empty": {
+        "title": "No user accounts found",
+        "description": "Add a user account to get started."
+      },
+      "noMatch": {
+        "title": "No matching user accounts",
+        "description": "Try a different search, role, or status filter."
+      },
+      "searchLabel": "Search user accounts",
+      "searchPlaceholder": "Search name or email",
+      "filterRole": "Filter by role",
+      "allRoles": "All roles",
+      "roleAdmin": "System Administrator",
+      "roleStaff": "Staff",
+      "filterStatus": "Filter by account status",
+      "allStatuses": "All statuses",
+      "active": "Active",
+      "inactive": "Inactive",
+      "columns": {
+        "name": "Name",
+        "email": "Email / Username",
+        "role": "Role",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "na": "N/A",
+      "you": "You",
+      "tempPassword": "Temporary password",
+      "form": {
+        "addButton": "Add User",
+        "addTitle": "Add User",
+        "addDescription": "Fill in the form below to add a new user to the system.",
+        "tempNotice": "Give this temporary password to the user in person. It is not stored in readable form, and the user must change it at first sign-in.",
+        "email": "Email",
+        "emailPlaceholder": "Email",
+        "fullName": "Full Name",
+        "fullNamePlaceholder": "Full name",
+        "tempPasswordLabel": "Temporary password",
+        "setPassword": "Set password",
+        "confirmPassword": "Confirm Password",
+        "passwordPlaceholder": "Password",
+        "role": "Role",
+        "isActive": "Is active?",
+        "cancel": "Cancel",
+        "save": "Save",
+        "editTitle": "Edit User",
+        "editDescription": "Update the user details below.",
+        "edit": "Edit",
+        "validation": {
+          "email": "Invalid email address",
+          "passwordRequired": "Password is required",
+          "passwordMin": "Password must be at least 12 characters",
+          "confirmRequired": "Please confirm your password",
+          "mismatch": "The passwords don't match"
+        }
+      },
+      "delete": {
+        "menu": "Delete User",
+        "title": "Delete User",
+        "before": "All items associated with this user will also be",
+        "strong": "permanently deleted.",
+        "after": "Are you sure? You will not be able to undo this action.",
+        "confirm": "Delete"
+      },
+      "actions": {
+        "moreFor": "More actions for {{name}}",
+        "deactivate": "Deactivate",
+        "reactivate": "Reactivate",
+        "cannotDeactivateLast": "Cannot deactivate the last active System Administrator",
+        "reactivateTitle": "Reactivate user account?",
+        "deactivateTitle": "Deactivate user account?",
+        "reactivateDescription": "Reactivate {{name}}'s account so they can sign in again?",
+        "deactivateDescription": "Deactivate {{name}}'s account? Their existing records and issuance history will remain.",
+        "reactivateConfirm": "Reactivate account",
+        "deactivateConfirm": "Deactivate account"
+      }
+    }
   }
 }

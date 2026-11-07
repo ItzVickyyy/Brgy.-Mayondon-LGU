@@ -1158,5 +1158,94 @@
         }
       }
     }
+  },
+  "admin": {
+    "users": {
+      "title": "Mga Account ng User",
+      "subtitle": "Pamahalaan ang mga user ng sistema at ang kanilang mga tungkulin sa pag-access.",
+      "listTitle": "Listahan ng mga Account ng User",
+      "listDescription": "Pamahalaan ang access, tungkulin, at katayuan ng account ng mga user ng sistema.",
+      "loading": "Nilo-load ang mga account ng user...",
+      "loadError": {
+        "title": "Hindi ma-load ang mga account ng user",
+        "description": "Suriin ang iyong koneksyon at subukan muli."
+      },
+      "empty": {
+        "title": "Walang nakitang account ng user",
+        "description": "Magdagdag ng account ng user para magsimula."
+      },
+      "noMatch": {
+        "title": "Walang tumutugmang account ng user",
+        "description": "Subukan ang ibang paghahanap, tungkulin, o filter ng katayuan."
+      },
+      "searchLabel": "Maghanap ng mga account ng user",
+      "searchPlaceholder": "Maghanap ng pangalan o email",
+      "filterRole": "I-filter ayon sa tungkulin",
+      "allRoles": "Lahat ng tungkulin",
+      "roleAdmin": "System Administrator",
+      "roleStaff": "Staff",
+      "filterStatus": "I-filter ayon sa katayuan ng account",
+      "allStatuses": "Lahat ng katayuan",
+      "active": "Aktibo",
+      "inactive": "Hindi aktibo",
+      "columns": {
+        "name": "Pangalan",
+        "email": "Email / Username",
+        "role": "Tungkulin",
+        "status": "Katayuan",
+        "actions": "Mga Aksyon"
+      },
+      "na": "Wala",
+      "you": "Ikaw",
+      "tempPassword": "Pansamantalang password",
+      "form": {
+        "addButton": "Magdagdag ng User",
+        "addTitle": "Magdagdag ng User",
+        "addDescription": "Punan ang form sa ibaba para magdagdag ng bagong user sa sistema.",
+        "tempNotice": "Ibigay nang personal sa user ang pansamantalang password na ito. Hindi ito naka-save sa nababasang anyo, at kailangang palitan ito ng user sa unang pag-sign in.",
+        "email": "Email",
+        "emailPlaceholder": "Email",
+        "fullName": "Buong Pangalan",
+        "fullNamePlaceholder": "Buong pangalan",
+        "tempPasswordLabel": "Pansamantalang password",
+        "setPassword": "Itakda ang password",
+        "confirmPassword": "Kumpirmahin ang Password",
+        "passwordPlaceholder": "Password",
+        "role": "Tungkulin",
+        "isActive": "Aktibo ba?",
+        "cancel": "Kanselahin",
+        "save": "I-save",
+        "editTitle": "I-edit ang User",
+        "editDescription": "I-update ang mga detalye ng user sa ibaba.",
+        "edit": "I-edit",
+        "validation": {
+          "email": "Hindi wastong email address",
+          "passwordRequired": "Kailangan ang password",
+          "passwordMin": "Dapat hindi bababa sa 12 character ang password",
+          "confirmRequired": "Pakikumpirma ang iyong password",
+          "mismatch": "Hindi magkatugma ang mga password"
+        }
+      },
+      "delete": {
+        "menu": "Burahin ang User",
+        "title": "Burahin ang User",
+        "before": "Ang lahat ng item na kaugnay ng user na ito ay",
+        "strong": "permanente ring buburahin.",
+        "after": "Sigurado ka ba? Hindi mo na ito mababawi.",
+        "confirm": "Burahin"
+      },
+      "actions": {
+        "moreFor": "Iba pang aksyon para kay {{name}}",
+        "deactivate": "I-deactivate",
+        "reactivate": "I-reactivate",
+        "cannotDeactivateLast": "Hindi ma-deactivate ang huling aktibong System Administrator",
+        "reactivateTitle": "I-reactivate ang account ng user?",
+        "deactivateTitle": "I-deactivate ang account ng user?",
+        "reactivateDescription": "I-reactivate ang account ni {{name}} para makapag-sign in siyang muli?",
+        "deactivateDescription": "I-deactivate ang account ni {{name}}? Mananatili ang kanyang mga talaan at kasaysayan ng pag-isyu.",
+        "reactivateConfirm": "I-reactivate ang account",
+        "deactivateConfirm": "I-deactivate ang account"
+      }
+    }
   }
 }

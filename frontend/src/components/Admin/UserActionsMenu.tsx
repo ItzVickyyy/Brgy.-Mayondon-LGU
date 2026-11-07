@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { EllipsisVertical, UserRoundCheck, UserRoundX } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { type UserPublic, UsersService } from "@/client"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
@@ -27,6 +28,7 @@ interface UserActionsMenuProps {
 }
 
 export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [pendingActive, setPendingActive] = useState<boolean | null>(null)
   const { user: currentUser } = useAuth()
@@ -70,7 +72,7 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
             <Button
               variant="outline"
               size="icon"
-              aria-label={`More actions for ${user.full_name || user.email}`}
+              aria-label={t("admin.users.actions.moreFor", { name: user.full_name || user.email })}
             >
               <EllipsisVertical aria-hidden="true" />
             </Button>
@@ -81,7 +83,7 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
               disabled={user.is_active && user.isLastActiveAdmin}
               title={
                 user.is_active && user.isLastActiveAdmin
-                  ? "Cannot deactivate the last active System Administrator"
+                  ? t("admin.users.actions.cannotDeactivateLast")
                   : undefined
               }
               onSelect={() => setPendingActive(!user.is_active)}
@@ -91,7 +93,7 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
               ) : (
                 <UserRoundCheck aria-hidden="true" />
               )}
-              {user.is_active ? "Deactivate" : "Reactivate"}
+              {user.is_active ? t("admin.users.actions.deactivate") : t("admin.users.actions.reactivate")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -102,13 +104,13 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
         onOpenChange={(nextOpen) => {
           if (!nextOpen) setPendingActive(null)
         }}
-        title={pendingActive ? "Reactivate user account?" : "Deactivate user account?"}
+        title={pendingActive ? t("admin.users.actions.reactivateTitle") : t("admin.users.actions.deactivateTitle")}
         description={
           pendingActive
-            ? `Reactivate ${user.full_name || user.email}'s account so they can sign in again?`
-            : `Deactivate ${user.full_name || user.email}'s account? Their existing records and issuance history will remain.`
+            ? t("admin.users.actions.reactivateDescription", { name: user.full_name || user.email })
+            : t("admin.users.actions.deactivateDescription", { name: user.full_name || user.email })
         }
-        confirmLabel={pendingActive ? "Reactivate account" : "Deactivate account"}
+        confirmLabel={pendingActive ? t("admin.users.actions.reactivateConfirm") : t("admin.users.actions.deactivateConfirm")}
         destructive={pendingActive === false}
         onConfirm={() => {
           if (pendingActive === null) return

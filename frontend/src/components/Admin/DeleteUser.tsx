@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 
 import { UsersService } from "@/client"
 import { Button } from "@/components/ui/button"
@@ -25,6 +26,7 @@ interface DeleteUserProps {
 }
 
 const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -59,23 +61,23 @@ const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
         onClick={() => setIsOpen(true)}
       >
         <Trash2 />
-        Delete User
+        {t("admin.users.delete.menu")}
       </DropdownMenuItem>
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>
-            <DialogTitle>Delete User</DialogTitle>
+            <DialogTitle>{t("admin.users.delete.title")}</DialogTitle>
             <DialogDescription>
-              All items associated with this user will also be{" "}
-              <strong>permanently deleted.</strong> Are you sure? You will not
-              be able to undo this action.
+              {t("admin.users.delete.before")}{" "}
+              <strong>{t("admin.users.delete.strong")}</strong>{" "}
+              {t("admin.users.delete.after")}
             </DialogDescription>
           </DialogHeader>
 
           <DialogFooter className="mt-4">
             <DialogClose asChild>
               <Button variant="outline" className="min-h-11" disabled={mutation.isPending}>
-                Cancel
+                {t("admin.users.form.cancel")}
               </Button>
             </DialogClose>
             <LoadingButton
@@ -84,7 +86,7 @@ const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
               type="submit"
               loading={mutation.isPending}
             >
-              Delete
+              {t("admin.users.delete.confirm")}
             </LoadingButton>
           </DialogFooter>
         </form>

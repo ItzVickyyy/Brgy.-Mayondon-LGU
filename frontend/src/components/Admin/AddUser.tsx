@@ -1,8 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import type { TFunction } from "i18next"
 import { Plus } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { z } from "zod"
 
 import { type UserCreate, UsersService } from "@/client"
@@ -32,29 +34,32 @@ import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
-const formSchema = z
+const buildSchema = (t: TFunction) =>
+  z
   .object({
-    email: z.email({ message: "Invalid email address" }),
+    email: z.email({ message: t("admin.users.form.validation.email") }),
     full_name: z.string().optional(),
     password: z
       .string()
-      .min(1, { message: "Password is required" })
-      .min(12, { message: "Password must be at least 12 characters" }),
+      .min(1, { message: t("admin.users.form.validation.passwordRequired") })
+      .min(12, { message: t("admin.users.form.validation.passwordMin") }),
     confirm_password: z
       .string()
-      .min(1, { message: "Please confirm your password" }),
+      .min(1, { message: t("admin.users.form.validation.confirmRequired") }),
     // Existing API role flag. A pending/rejected workflow needs a separate backend status field.
     is_superuser: z.boolean(),
     is_active: z.boolean(),
   })
   .refine((data) => data.password === data.confirm_password, {
-    message: "The passwords don't match",
+    message: t("admin.users.form.validation.mismatch"),
     path: ["confirm_password"],
   })
 
-type FormData = z.infer<typeof formSchema>
+type FormData = z.infer<ReturnType<typeof buildSchema>>
 
 const AddUser = () => {
+  const { t } = useTranslation()
+  const formSchema = useMemo(() => buildSchema(t), [t])
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -99,23 +104,21 @@ const AddUser = () => {
       <DialogTrigger asChild>
         <Button className="min-h-11">
           <Plus className="mr-2" />
-          Add User
+          {t("admin.users.form.addButton")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add User</DialogTitle>
+          <DialogTitle>{t("admin.users.form.addTitle")}</DialogTitle>
           <DialogDescription>
-            Fill in the form below to add a new user to the system.
+            {t("admin.users.form.addDescription")}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid gap-4 py-4">
               <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground">
-                Give this temporary password to the user in person. It is not
-                stored in readable form, and the user must change it at first
-                sign-in.
+                {t("admin.users.form.tempNotice")}
               </p>
               <FormField
                 control={form.control}
@@ -123,11 +126,11 @@ const AddUser = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Email <span className="text-destructive">*</span>
+                      {t("admin.users.form.email")} <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Email"
+                        placeholder={t("admin.users.form.emailPlaceholder")}
                         type="email"
                         {...field}
                         required
@@ -143,9 +146,9 @@ const AddUser = () => {
                 name="full_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>{t("admin.users.form.fullName")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Full name" type="text" {...field} />
+                      <Input placeholder={t("admin.users.form.fullNamePlaceholder")} type="text" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -158,11 +161,11 @@ const AddUser = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Temporary password <span className="text-destructive">*</span>
+                      {t("admin.users.form.tempPasswordLabel")} <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Password"
+                        placeholder={t("admin.users.form.passwordPlaceholder")}
                         type="password"
                         {...field}
                         required
@@ -179,12 +182,12 @@ const AddUser = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Confirm Password{" "}
+                      {t("admin.users.form.confirmPassword")}{" "}
                       <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Password"
+                        placeholder={t("admin.users.form.passwordPlaceholder")}
                         type="password"
                         {...field}
                         required
@@ -200,7 +203,7 @@ const AddUser = () => {
                 name="is_superuser"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Role</FormLabel>
+                    <FormLabel>{t("admin.users.form.role")}</FormLabel>
                     <FormControl>
                       <select
                         className={formControlClass}
@@ -209,8 +212,8 @@ const AddUser = () => {
                           field.onChange(event.target.value === "admin")
                         }
                       >
-                        <option value="staff">Staff</option>
-                        <option value="admin">System Administrator</option>
+                        <option value="staff">{t("admin.users.roleStaff")}</option>
+                        <option value="admin">{t("admin.users.roleAdmin")}</option>
                       </select>
                     </FormControl>
                     <FormMessage />
@@ -229,7 +232,7 @@ const AddUser = () => {
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel className="font-normal">Is active?</FormLabel>
+                    <FormLabel className="font-normal">{t("admin.users.form.isActive")}</FormLabel>
                   </FormItem>
                 )}
               />
@@ -238,11 +241,11 @@ const AddUser = () => {
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline" className="min-h-11" disabled={mutation.isPending}>
-                  Cancel
+                  {t("admin.users.form.cancel")}
                 </Button>
               </DialogClose>
               <LoadingButton className="min-h-11" type="submit" loading={mutation.isPending}>
-                Save
+                {t("admin.users.form.save")}
               </LoadingButton>
             </DialogFooter>
           </form>

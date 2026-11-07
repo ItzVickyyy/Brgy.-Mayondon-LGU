@@ -2,10 +2,11 @@ import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import { Search } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { type UserPublic, UsersService } from "@/client"
 import AddUser from "@/components/Admin/AddUser"
-import { columns, type UserTableData } from "@/components/Admin/columns"
+import { type UserTableData, useUserColumns } from "@/components/Admin/columns"
 import { DataTable } from "@/components/Common/DataTable"
 import { formControlClass } from "@/components/Common/formStyles"
 import { EmptyState, ErrorState, LoadingState } from "@/components/Common/FeedbackState"
@@ -28,6 +29,8 @@ export const Route = createFileRoute("/_layout/admin")({
 })
 
 function UsersTable() {
+  const { t } = useTranslation()
+  const columns = useUserColumns()
   const { user: currentUser } = useAuth()
   const [search, setSearch] = useState("")
   const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "staff">("all")
@@ -39,12 +42,12 @@ function UsersTable() {
     refetch,
   } = useQuery(getUsersQueryOptions())
 
-  if (isLoading) return <LoadingState title="Loading user accounts..." />
+  if (isLoading) return <LoadingState title={t("admin.users.loading")} />
   if (isError) {
     return (
       <ErrorState
-        title="Unable to load user accounts"
-        description="Check your connection and try again."
+        title={t("admin.users.loadError.title")}
+        description={t("admin.users.loadError.description")}
         onRetry={() => void refetch()}
       />
     )
@@ -85,8 +88,8 @@ function UsersTable() {
   if (tableData.length === 0) {
     return (
       <EmptyState
-        title="No user accounts found"
-        description="Add a user account to get started."
+        title={t("admin.users.empty.title")}
+        description={t("admin.users.empty.description")}
       />
     )
   }
@@ -95,43 +98,44 @@ function UsersTable() {
     <div className="flex flex-col gap-3">
       <div className="flex flex-col gap-2 border-b p-4 sm:flex-row sm:flex-wrap sm:items-center sm:p-5">
         <label className="relative block min-w-0 flex-1 sm:max-w-sm">
-          <span className="sr-only">Search user accounts</span>
+          <span className="sr-only">{t("admin.users.searchLabel")}</span>
           <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search name or email"
+            placeholder={t("admin.users.searchPlaceholder")}
             className={`${formControlClass} pl-9`}
           />
         </label>
         <label className="sm:w-52">
-          <span className="sr-only">Filter by role</span>
+          <span className="sr-only">{t("admin.users.filterRole")}</span>
           <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as "all" | "admin" | "staff")} className={formControlClass}>
-            <option value="all">All roles</option>
-            <option value="admin">System Administrator</option>
-            <option value="staff">Staff</option>
+            <option value="all">{t("admin.users.allRoles")}</option>
+            <option value="admin">{t("admin.users.roleAdmin")}</option>
+            <option value="staff">{t("admin.users.roleStaff")}</option>
           </select>
         </label>
         <label className="sm:w-44">
-          <span className="sr-only">Filter by account status</span>
+          <span className="sr-only">{t("admin.users.filterStatus")}</span>
           <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "all" | "active" | "inactive")} className={formControlClass}>
-            <option value="all">All statuses</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
+            <option value="all">{t("admin.users.allStatuses")}</option>
+            <option value="active">{t("admin.users.active")}</option>
+            <option value="inactive">{t("admin.users.inactive")}</option>
           </select>
         </label>
       </div>
       <DataTable
         columns={columns}
         data={visibleData}
-        emptyTitle="No matching user accounts"
-        emptyDescription="Try a different search, role, or status filter."
+        emptyTitle={t("admin.users.noMatch.title")}
+        emptyDescription={t("admin.users.noMatch.description")}
       />
     </div>
   )
 }
 
 function Admin() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   if (!isSystemAdministrator(user)) return <NoPermission />
 
@@ -140,19 +144,19 @@ function Admin() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            User Accounts
+            {t("admin.users.title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Manage system users and their access roles.
+            {t("admin.users.subtitle")}
           </p>
         </div>
         <AddUser />
       </div>
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="border-b p-4 sm:p-5">
-          <h2 className="font-semibold tracking-tight">User Accounts List</h2>
+          <h2 className="font-semibold tracking-tight">{t("admin.users.listTitle")}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage system user access, roles, and account status.
+            {t("admin.users.listDescription")}
           </p>
         </div>
         <UsersTable />

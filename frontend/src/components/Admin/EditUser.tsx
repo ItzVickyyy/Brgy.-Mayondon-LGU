@@ -1,7 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Pencil } from "lucide-react"
-import { useState } from "react"
+import type { TFunction } from "i18next"
+import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -33,13 +35,14 @@ import useCustomToast from "@/hooks/useCustomToast"
 import useAuth from "@/hooks/useAuth"
 import { handleError } from "@/utils"
 
-const formSchema = z
+const buildSchema = (t: TFunction) =>
+  z
   .object({
-    email: z.email({ message: "Invalid email address" }),
+    email: z.email({ message: t("admin.users.form.validation.email") }),
     full_name: z.string().optional(),
     password: z
       .string()
-      .min(12, { message: "Password must be at least 12 characters" })
+      .min(12, { message: t("admin.users.form.validation.passwordMin") })
       .optional()
       .or(z.literal("")),
     confirm_password: z.string().optional(),
@@ -48,11 +51,11 @@ const formSchema = z
     is_active: z.boolean().optional(),
   })
   .refine((data) => !data.password || data.password === data.confirm_password, {
-    message: "The passwords don't match",
+    message: t("admin.users.form.validation.mismatch"),
     path: ["confirm_password"],
   })
 
-type FormData = z.infer<typeof formSchema>
+type FormData = z.infer<ReturnType<typeof buildSchema>>
 
 interface EditUserProps {
   user: UserPublic
@@ -62,6 +65,8 @@ interface EditUserProps {
 }
 
 const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButton = false }: EditUserProps) => {
+  const { t } = useTranslation()
+  const formSchema = useMemo(() => buildSchema(t), [t])
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -109,7 +114,7 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
       {asPrimaryButton ? (
         <Button type="button" variant="outline" size="sm" onClick={() => setIsOpen(true)}>
           <Pencil aria-hidden="true" />
-          Edit
+          {t("admin.users.form.edit")}
         </Button>
       ) : (
         <DropdownMenuItem
@@ -117,24 +122,22 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
           onClick={() => setIsOpen(true)}
         >
           <Pencil />
-          Edit User
+          {t("admin.users.form.editTitle")}
         </DropdownMenuItem>
       )}
       <DialogContent className="sm:max-w-md">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <DialogHeader>
-              <DialogTitle>Edit User</DialogTitle>
+              <DialogTitle>{t("admin.users.form.editTitle")}</DialogTitle>
               <DialogDescription>
-                Update the user details below.
+                {t("admin.users.form.editDescription")}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               {!isEditingSelf ? (
                 <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground">
-                  Give this temporary password to the user in person. It is not
-                  stored in readable form, and the user must change it at first
-                  sign-in.
+                  {t("admin.users.form.tempNotice")}
                 </p>
               ) : null}
               <FormField
@@ -143,11 +146,11 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Email <span className="text-destructive">*</span>
+                      {t("admin.users.form.email")} <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Email"
+                        placeholder={t("admin.users.form.emailPlaceholder")}
                         type="email"
                         {...field}
                         required
@@ -163,9 +166,9 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                 name="full_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Full Name</FormLabel>
+                    <FormLabel>{t("admin.users.form.fullName")}</FormLabel>
                     <FormControl>
-                      <Input placeholder="Full name" type="text" {...field} />
+                      <Input placeholder={t("admin.users.form.fullNamePlaceholder")} type="text" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -178,11 +181,11 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      {isEditingSelf ? "Set password" : "Temporary password"}
+                      {isEditingSelf ? t("admin.users.form.setPassword") : t("admin.users.form.tempPasswordLabel")}
                     </FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Password"
+                        placeholder={t("admin.users.form.passwordPlaceholder")}
                         type="password"
                         {...field}
                       />
@@ -197,10 +200,10 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                 name="confirm_password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
+                    <FormLabel>{t("admin.users.form.confirmPassword")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Password"
+                        placeholder={t("admin.users.form.passwordPlaceholder")}
                         type="password"
                         {...field}
                       />
@@ -215,7 +218,7 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                 name="is_superuser"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Role</FormLabel>
+                    <FormLabel>{t("admin.users.form.role")}</FormLabel>
                     <FormControl>
                       <select
                         className={formControlClass}
@@ -225,8 +228,8 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                           field.onChange(event.target.value === "admin")
                         }
                       >
-                        <option value="staff">Staff</option>
-                        <option value="admin">System Administrator</option>
+                        <option value="staff">{t("admin.users.roleStaff")}</option>
+                        <option value="admin">{t("admin.users.roleAdmin")}</option>
                       </select>
                     </FormControl>
                     <FormMessage />
@@ -246,7 +249,7 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel className="font-normal">Is active?</FormLabel>
+                    <FormLabel className="font-normal">{t("admin.users.form.isActive")}</FormLabel>
                   </FormItem>
                 )}
               />
@@ -255,11 +258,11 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
             <DialogFooter>
               <DialogClose asChild>
                 <Button variant="outline" className="min-h-11" disabled={mutation.isPending}>
-                  Cancel
+                  {t("admin.users.form.cancel")}
                 </Button>
               </DialogClose>
               <LoadingButton className="min-h-11" type="submit" loading={mutation.isPending}>
-                Save
+                {t("admin.users.form.save")}
               </LoadingButton>
             </DialogFooter>
           </form>
