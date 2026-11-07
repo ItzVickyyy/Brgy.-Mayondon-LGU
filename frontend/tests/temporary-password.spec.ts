@@ -19,7 +19,7 @@ test("temporary password forces a change before the user can access the system",
 
   const userRow = page.getByRole("row").filter({ hasText: email })
   await expect(userRow).toBeVisible()
-  await expect(userRow.getByText("Temporary password")).toBeVisible()
+  await expect(userRow.getByText("Temporary password", { exact: true })).toBeVisible()
 
   await page.getByRole("button", { name: "User menu" }).click()
   await page.getByRole("menuitem", { name: "Logout" }).click()
