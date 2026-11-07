@@ -1,7 +1,13 @@
 // Checks that the English and Filipino strings stay in step. No browser needed.
 import { expect, test } from "@playwright/test"
-import en from "../src/i18n/en.json" with { type: "json" }
-import fil from "../src/i18n/fil.json" with { type: "json" }
+import { readFileSync } from "node:fs"
+
+const en = JSON.parse(
+  readFileSync(new URL("../src/i18n/en.json", import.meta.url), "utf8"),
+)
+const fil = JSON.parse(
+  readFileSync(new URL("../src/i18n/fil.json", import.meta.url), "utf8"),
+)
 
 function flatten(value: unknown, prefix = ""): Record<string, string> {
   if (typeof value === "string") return { [prefix]: value }
