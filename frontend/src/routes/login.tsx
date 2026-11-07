@@ -49,15 +49,6 @@ function getLoginErrorMessage(error: unknown): string {
   ].find((value): value is string => typeof value === "string")
   const normalized = apiMessage?.toLowerCase() ?? ""
 
-  if (normalized.includes("pending") && normalized.includes("approval")) {
-    return "Your account is pending approval. Please wait for the System Administrator to review your request."
-  }
-  if (
-    normalized.includes("not approved") ||
-    normalized.includes("rejected")
-  ) {
-    return "Your access request has not been approved. Contact the System Administrator for assistance."
-  }
   if (
     normalized.includes("incorrect") ||
     normalized.includes("invalid credentials") ||
