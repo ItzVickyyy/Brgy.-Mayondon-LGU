@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
+import type { TFunction } from "i18next"
 import { Search, UserRound, UserRoundPlus } from "lucide-react"
 import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import {
   type OfficialCreate,
@@ -113,8 +115,16 @@ const positionRank: Record<string, number> = {
   "Administrative Assistant": 6,
 }
 
-function formatTermDate(value: string | null) {
-  if (!value) return "No end date"
+const columnIds = ["name", "position", "term", "status", "actions"] as const
+
+function statusLabel(status: OfficialRecord["status"], t: TFunction) {
+  return status === "Current"
+    ? t("admin.officials.statusCurrent")
+    : t("admin.officials.statusFormer")
+}
+
+function formatTermDate(value: string | null, noEndDate: string) {
+  if (!value) return noEndDate
   const parsed = new Date(`${value}T00:00:00`)
   return Number.isNaN(parsed.getTime())
     ? value
@@ -122,6 +132,8 @@ function formatTermDate(value: string | null) {
 }
 
 function OfficialsManagement() {
+  const { t } = useTranslation()
+  const noEndDate = t("admin.officials.noEndDate")
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
   const queryClient = useQueryClient()
@@ -153,15 +165,13 @@ function OfficialsManagement() {
   const [termStart, setTermStart] = useState("2026-11-01")
   const [termEnd, setTermEnd] = useState("2029-10-31")
   const [error, setError] = useState("")
-  const [notice, setNotice] = useState("")
+  const [notice, setNotice] = useState<"" | "added" | "updated">("")
 
   const mutation = useMutation({
     mutationFn: saveChange,
     onSuccess: (_result, change) => {
       setError("")
-      setNotice(
-        change.kind === "create" ? "Official added." : "Official updated.",
-      )
+      setNotice(change.kind === "create" ? "added" : "updated")
       setFormOpen(false)
       setEndTermOfficial(null)
       // The issuance form keeps its own copy of the officials list; drop it so
@@ -185,6 +195,7 @@ function OfficialsManagement() {
           official.name,
           official.position,
           official.status,
+          statusLabel(official.status, t),
         ].some((value) => value.toLowerCase().includes(query))
         return (
           matchesSearch &&
@@ -196,7 +207,7 @@ function OfficialsManagement() {
           (positionRank[a.position] ?? 99) - (positionRank[b.position] ?? 99) ||
           a.name.localeCompare(b.name),
       )
-  }, [officials, search, statusFilter])
+  }, [officials, search, statusFilter, t])
   const officialPagination = usePagination(
     filteredOfficials,
     10,
@@ -234,7 +245,7 @@ function OfficialsManagement() {
     const trimmed = name.trim()
     if (!trimmed) return
     if (termEnd && termEnd < termStart) {
-      setError("The term end cannot be before the term start.")
+      setError(t("admin.officials.errors.termEndBeforeStart"))
       return
     }
     setError("")
@@ -255,7 +266,7 @@ function OfficialsManagement() {
   function endTerm() {
     if (!endTermOfficial) return
     if (termEndDate < endTermOfficial.termStart) {
-      setError("The term end cannot be before the term start.")
+      setError(t("admin.officials.errors.termEndBeforeStart"))
       return
     }
     setError("")
@@ -286,15 +297,15 @@ function OfficialsManagement() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            Officials
+            {t("admin.officials.title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Maintain the list of barangay officials and their terms.
+            {t("admin.officials.subtitle")}
           </p>
         </div>
         <Button onClick={openAddForm}>
           <UserRoundPlus aria-hidden="true" />
-          Add Official
+          {t("admin.officials.addButton")}
         </Button>
       </div>
 
@@ -303,7 +314,9 @@ function OfficialsManagement() {
           role="status"
           className="rounded-lg border bg-card p-3 text-sm font-medium"
         >
-          {notice}
+          {notice === "added"
+            ? t("admin.officials.noticeAdded")
+            : t("admin.officials.noticeUpdated")}
         </p>
       ) : null}
       {error && !formOpen && !endTermOfficial ? (
@@ -322,15 +335,19 @@ function OfficialsManagement() {
               <UserRound className="size-5" aria-hidden="true" />
             </div>
             <div>
-              <h2 className="font-semibold tracking-tight">Officials List</h2>
+              <h2 className="font-semibold tracking-tight">
+                {t("admin.officials.listTitle")}
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Search officials and review their term status.
+                {t("admin.officials.listDescription")}
               </p>
             </div>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row">
             <label className="relative block min-w-0 flex-1 sm:max-w-sm">
-              <span className="sr-only">Search officials</span>
+              <span className="sr-only">
+                {t("admin.officials.searchLabel")}
+              </span>
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
@@ -338,12 +355,14 @@ function OfficialsManagement() {
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search name or position"
+                placeholder={t("admin.officials.searchPlaceholder")}
                 className={`${formControlClass} pl-9`}
               />
             </label>
             <label className="sm:w-44">
-              <span className="sr-only">Filter by status</span>
+              <span className="sr-only">
+                {t("admin.officials.filterStatus")}
+              </span>
               <select
                 value={statusFilter}
                 onChange={(event) =>
@@ -353,9 +372,9 @@ function OfficialsManagement() {
                 }
                 className={formControlClass}
               >
-                <option>Current</option>
-                <option>Former</option>
-                <option value="all">All statuses</option>
+                <option value="Current">{statusLabel("Current", t)}</option>
+                <option value="Former">{statusLabel("Former", t)}</option>
+                <option value="all">{t("admin.officials.allStatuses")}</option>
               </select>
             </label>
           </div>
@@ -365,20 +384,18 @@ function OfficialsManagement() {
           <table className="w-full min-w-[800px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                {["Name", "Position", "Term", "Status", "Actions"].map(
-                  (label) => (
-                    <th
-                      key={label}
-                      className={
-                        label === "Actions"
-                          ? "px-4 py-3 text-right font-medium sm:px-5"
-                          : "px-4 py-3 align-middle font-medium sm:px-5"
-                      }
-                    >
-                      {label}
-                    </th>
-                  ),
-                )}
+                {columnIds.map((id) => (
+                  <th
+                    key={id}
+                    className={
+                      id === "actions"
+                        ? "px-4 py-3 text-right font-medium sm:px-5"
+                        : "px-4 py-3 align-middle font-medium sm:px-5"
+                    }
+                  >
+                    {t(`admin.officials.columns.${id}`)}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -394,15 +411,15 @@ function OfficialsManagement() {
                     {official.position}
                   </td>
                   <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
-                    {formatTermDate(official.termStart)} –{" "}
-                    {formatTermDate(official.termEnd)}
+                    {formatTermDate(official.termStart, noEndDate)} –{" "}
+                    {formatTermDate(official.termEnd, noEndDate)}
                   </td>
                   <td className="px-4 py-3 align-middle sm:px-5">
                     <Badge
                       variant="outline"
                       className={statusStyles[official.status]}
                     >
-                      {official.status}
+                      {statusLabel(official.status, t)}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 align-middle sm:px-5">
@@ -412,19 +429,19 @@ function OfficialsManagement() {
                       primary={
                         official.status === "Current"
                           ? {
-                              label: "Edit",
+                              label: t("admin.officials.actions.edit"),
                               variant: "outline",
                               onSelect: () => openEditForm(official),
                             }
                           : {
-                              label: "View",
+                              label: t("admin.officials.actions.view"),
                               variant: "outline",
                               onSelect: () => setViewOfficial(official),
                             }
                       }
                       items={[
                         {
-                          label: "End term / mark as former",
+                          label: t("admin.officials.actions.endTerm"),
                           hidden: official.status !== "Current",
                           destructive: true,
                           onSelect: () => {
@@ -434,7 +451,7 @@ function OfficialsManagement() {
                           },
                         },
                         {
-                          label: "Reinstate",
+                          label: t("admin.officials.actions.reinstate"),
                           hidden: official.status !== "Former",
                           disabled: mutation.isPending,
                           onSelect: () => reinstate(official),
@@ -447,12 +464,12 @@ function OfficialsManagement() {
             </tbody>
           </table>
           {officialsQuery.isLoading ? (
-            <LoadingState title="Loading officials..." />
+            <LoadingState title={t("admin.officials.loading")} />
           ) : null}
           {officialsQuery.isError ? (
             <ErrorState
-              title="Could not load officials"
-              description="Check your connection and try again."
+              title={t("admin.officials.loadError.title")}
+              description={t("admin.officials.loadError.description")}
               onRetry={() => void officialsQuery.refetch()}
             />
           ) : null}
@@ -460,11 +477,11 @@ function OfficialsManagement() {
           !officialsQuery.isError &&
           filteredOfficials.length === 0 ? (
             <EmptyState
-              title="No matching officials"
+              title={t("admin.officials.noMatch.title")}
               description={
                 officials.length === 0
-                  ? "No officials have been added yet. Add the current officials so signatories and witnesses can be chosen when issuing documents."
-                  : "Try a different name, position, or status."
+                  ? t("admin.officials.noMatch.descriptionEmpty")
+                  : t("admin.officials.noMatch.descriptionFilter")
               }
             />
           ) : null}
@@ -488,15 +505,17 @@ function OfficialsManagement() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingOfficial ? "Edit Official" : "Add Official"}
+              {editingOfficial
+                ? t("admin.officials.form.editTitle")
+                : t("admin.officials.form.addTitle")}
             </DialogTitle>
             <DialogDescription>
-              Maintain the official name, position, and term dates.
+              {t("admin.officials.form.description")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4">
             <label className="flex flex-col gap-2 text-sm font-medium">
-              Full name
+              {t("admin.officials.form.fullName")}
               <input
                 value={name}
                 onChange={(event) => setName(event.target.value)}
@@ -505,7 +524,7 @@ function OfficialsManagement() {
               />
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium">
-              Position
+              {t("admin.officials.form.position")}
               <select
                 value={position}
                 onChange={(event) => setPosition(event.target.value)}
@@ -520,7 +539,7 @@ function OfficialsManagement() {
               </select>
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium">
-              Term start
+              {t("admin.officials.form.termStart")}
               <input
                 type="date"
                 value={termStart}
@@ -530,7 +549,7 @@ function OfficialsManagement() {
               />
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium">
-              Term end
+              {t("admin.officials.form.termEnd")}
               <input
                 type="date"
                 value={termEnd}
@@ -548,7 +567,7 @@ function OfficialsManagement() {
               disabled={mutation.isPending}
               onClick={() => setFormOpen(false)}
             >
-              Cancel
+              {t("admin.officials.form.cancel")}
             </Button>
             <Button
               type="button"
@@ -558,10 +577,10 @@ function OfficialsManagement() {
               onClick={saveOfficial}
             >
               {mutation.isPending
-                ? "Saving..."
+                ? t("admin.officials.form.saving")
                 : editingOfficial
-                  ? "Save changes"
-                  : "Add Official"}
+                  ? t("admin.officials.form.saveChanges")
+                  : t("admin.officials.form.add")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -575,15 +594,17 @@ function OfficialsManagement() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>End official term?</DialogTitle>
+            <DialogTitle>{t("admin.officials.endTerm.title")}</DialogTitle>
             <DialogDescription>
               {endTermOfficial
-                ? `Mark ${endTermOfficial.name} as a former official. The record will remain for history.`
-                : "Confirm the end of this official term."}
+                ? t("admin.officials.endTerm.description", {
+                    name: endTermOfficial.name,
+                  })
+                : t("admin.officials.endTerm.descriptionFallback")}
             </DialogDescription>
           </DialogHeader>
           <label className="flex flex-col gap-2 text-sm font-medium">
-            Term end date
+            {t("admin.officials.endTerm.dateLabel")}
             <input
               type="date"
               value={termEndDate}
@@ -600,7 +621,7 @@ function OfficialsManagement() {
               disabled={mutation.isPending}
               onClick={() => setEndTermOfficial(null)}
             >
-              Cancel
+              {t("admin.officials.form.cancel")}
             </Button>
             <Button
               type="button"
@@ -608,7 +629,9 @@ function OfficialsManagement() {
               disabled={mutation.isPending || !termEndDate}
               onClick={endTerm}
             >
-              {mutation.isPending ? "Saving..." : "End term"}
+              {mutation.isPending
+                ? t("admin.officials.form.saving")
+                : t("admin.officials.endTerm.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -622,31 +645,37 @@ function OfficialsManagement() {
       >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Official details</DialogTitle>
+            <DialogTitle>{t("admin.officials.view.title")}</DialogTitle>
             <DialogDescription>
-              Historical reference for this official.
+              {t("admin.officials.view.description")}
             </DialogDescription>
           </DialogHeader>
           {viewOfficial ? (
             <div className="grid gap-3 text-sm">
               <p>
-                <span className="text-muted-foreground">Name: </span>
+                <span className="text-muted-foreground">
+                  {t("admin.officials.view.name")}:{" "}
+                </span>
                 {viewOfficial.name}
               </p>
               <p>
-                <span className="text-muted-foreground">Position: </span>
+                <span className="text-muted-foreground">
+                  {t("admin.officials.view.position")}:{" "}
+                </span>
                 {viewOfficial.position}
               </p>
               <p>
-                <span className="text-muted-foreground">Term: </span>
-                {formatTermDate(viewOfficial.termStart)} –{" "}
-                {formatTermDate(viewOfficial.termEnd)}
+                <span className="text-muted-foreground">
+                  {t("admin.officials.view.term")}:{" "}
+                </span>
+                {formatTermDate(viewOfficial.termStart, noEndDate)} –{" "}
+                {formatTermDate(viewOfficial.termEnd, noEndDate)}
               </p>
               <Badge
                 variant="outline"
                 className={statusStyles[viewOfficial.status]}
               >
-                {viewOfficial.status}
+                {statusLabel(viewOfficial.status, t)}
               </Badge>
             </div>
           ) : null}
@@ -656,7 +685,7 @@ function OfficialsManagement() {
               variant="outline"
               onClick={() => setViewOfficial(null)}
             >
-              Close
+              {t("admin.officials.view.close")}
             </Button>
           </DialogFooter>
         </DialogContent>

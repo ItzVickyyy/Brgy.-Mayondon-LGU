@@ -1246,6 +1246,76 @@
         "reactivateConfirm": "I-reactivate ang account",
         "deactivateConfirm": "I-deactivate ang account"
       }
+    },
+    "officials": {
+      "title": "Mga Opisyal",
+      "subtitle": "Panatilihin ang listahan ng mga opisyal ng barangay at ng kanilang termino.",
+      "addButton": "Magdagdag ng Opisyal",
+      "noticeAdded": "Naidagdag na ang opisyal.",
+      "noticeUpdated": "Na-update na ang opisyal.",
+      "listTitle": "Listahan ng mga Opisyal",
+      "listDescription": "Maghanap ng mga opisyal at suriin ang katayuan ng kanilang termino.",
+      "searchLabel": "Maghanap ng mga opisyal",
+      "searchPlaceholder": "Hanapin ang pangalan o posisyon",
+      "filterStatus": "I-filter ayon sa katayuan",
+      "statusCurrent": "Kasalukuyan",
+      "statusFormer": "Dating opisyal",
+      "allStatuses": "Lahat ng katayuan",
+      "noEndDate": "Walang petsa ng pagtatapos",
+      "columns": {
+        "name": "Pangalan",
+        "position": "Posisyon",
+        "term": "Termino",
+        "status": "Katayuan",
+        "actions": "Mga Aksyon"
+      },
+      "actions": {
+        "edit": "I-edit",
+        "view": "Tingnan",
+        "endTerm": "Tapusin ang termino / markahan bilang dating opisyal",
+        "reinstate": "Ibalik"
+      },
+      "loading": "Nilo-load ang mga opisyal...",
+      "loadError": {
+        "title": "Hindi ma-load ang mga opisyal",
+        "description": "Suriin ang iyong koneksyon at subukang muli."
+      },
+      "noMatch": {
+        "title": "Walang tumutugmang opisyal",
+        "descriptionEmpty": "Wala pang naidagdag na opisyal. Idagdag ang mga kasalukuyang opisyal para mapili ang mga lumalagda at saksi sa pag-isyu ng mga dokumento.",
+        "descriptionFilter": "Subukan ang ibang pangalan, posisyon, o katayuan."
+      },
+      "form": {
+        "editTitle": "I-edit ang Opisyal",
+        "addTitle": "Magdagdag ng Opisyal",
+        "description": "Panatilihin ang pangalan, posisyon, at mga petsa ng termino ng opisyal.",
+        "fullName": "Buong pangalan",
+        "position": "Posisyon",
+        "termStart": "Simula ng termino",
+        "termEnd": "Katapusan ng termino",
+        "cancel": "Kanselahin",
+        "saving": "Sine-save...",
+        "saveChanges": "I-save ang mga pagbabago",
+        "add": "Magdagdag ng Opisyal"
+      },
+      "endTerm": {
+        "title": "Tapusin ang termino ng opisyal?",
+        "description": "Markahan si {{name}} bilang dating opisyal. Mananatili ang talaan para sa kasaysayan.",
+        "descriptionFallback": "Kumpirmahin ang pagtatapos ng termino ng opisyal na ito.",
+        "dateLabel": "Petsa ng pagtatapos ng termino",
+        "confirm": "Tapusin ang termino"
+      },
+      "errors": {
+        "termEndBeforeStart": "Hindi puwedeng mauna ang katapusan ng termino sa simula nito."
+      },
+      "view": {
+        "title": "Mga detalye ng opisyal",
+        "description": "Sanggunian sa kasaysayan para sa opisyal na ito.",
+        "name": "Pangalan",
+        "position": "Posisyon",
+        "term": "Termino",
+        "close": "Isara"
+      }
     }
   }
 }

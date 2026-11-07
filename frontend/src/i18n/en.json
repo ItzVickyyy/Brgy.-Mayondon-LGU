@@ -1246,6 +1246,76 @@
         "reactivateConfirm": "Reactivate account",
         "deactivateConfirm": "Deactivate account"
       }
+    },
+    "officials": {
+      "title": "Officials",
+      "subtitle": "Maintain the list of barangay officials and their terms.",
+      "addButton": "Add Official",
+      "noticeAdded": "Official added.",
+      "noticeUpdated": "Official updated.",
+      "listTitle": "Officials List",
+      "listDescription": "Search officials and review their term status.",
+      "searchLabel": "Search officials",
+      "searchPlaceholder": "Search name or position",
+      "filterStatus": "Filter by status",
+      "statusCurrent": "Current",
+      "statusFormer": "Former",
+      "allStatuses": "All statuses",
+      "noEndDate": "No end date",
+      "columns": {
+        "name": "Name",
+        "position": "Position",
+        "term": "Term",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "actions": {
+        "edit": "Edit",
+        "view": "View",
+        "endTerm": "End term / mark as former",
+        "reinstate": "Reinstate"
+      },
+      "loading": "Loading officials...",
+      "loadError": {
+        "title": "Could not load officials",
+        "description": "Check your connection and try again."
+      },
+      "noMatch": {
+        "title": "No matching officials",
+        "descriptionEmpty": "No officials have been added yet. Add the current officials so signatories and witnesses can be chosen when issuing documents.",
+        "descriptionFilter": "Try a different name, position, or status."
+      },
+      "form": {
+        "editTitle": "Edit Official",
+        "addTitle": "Add Official",
+        "description": "Maintain the official name, position, and term dates.",
+        "fullName": "Full name",
+        "position": "Position",
+        "termStart": "Term start",
+        "termEnd": "Term end",
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "saveChanges": "Save changes",
+        "add": "Add Official"
+      },
+      "endTerm": {
+        "title": "End official term?",
+        "description": "Mark {{name}} as a former official. The record will remain for history.",
+        "descriptionFallback": "Confirm the end of this official term.",
+        "dateLabel": "Term end date",
+        "confirm": "End term"
+      },
+      "errors": {
+        "termEndBeforeStart": "The term end cannot be before the term start."
+      },
+      "view": {
+        "title": "Official details",
+        "description": "Historical reference for this official.",
+        "name": "Name",
+        "position": "Position",
+        "term": "Term",
+        "close": "Close"
+      }
     }
   }
 }
