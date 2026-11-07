@@ -89,9 +89,7 @@ test.describe("Admin user management", () => {
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
     const userRow = page.getByRole("row").filter({ hasText: email })
-    await userRow.getByRole("button", { name: /^More actions for/ }).click()
-
-    await page.getByRole("menuitem", { name: "Edit User" }).click()
+    await userRow.getByRole("button", { name: "Edit", exact: true }).click()
 
     await page.getByPlaceholder("Full name").fill(updatedName)
     await page.getByRole("button", { name: "Save" }).click()
