@@ -40,7 +40,7 @@ const buildSchema = (t: TFunction) =>
       path: ["confirm_password"],
     })
 
-type FormData = z.infer<typeof formSchema>
+type FormData = z.infer<ReturnType<typeof buildSchema>>
 
 const ChangePassword = ({ forced = false }: { forced?: boolean }) => {
   const { t } = useTranslation()

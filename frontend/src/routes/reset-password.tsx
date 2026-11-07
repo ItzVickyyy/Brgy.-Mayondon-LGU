@@ -49,7 +49,7 @@ const buildSchema = (t: TFunction) =>
       path: ["confirm_password"],
     })
 
-type FormData = z.infer<typeof formSchema>
+type FormData = z.infer<ReturnType<typeof buildSchema>>
 
 export const Route = createFileRoute("/reset-password")({
   component: ResetPassword,

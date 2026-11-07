@@ -33,7 +33,7 @@ const buildSchema = (t: TFunction) =>
     email: z.email({ message: t("password.validation.invalidEmail") }),
   })
 
-type FormData = z.infer<typeof formSchema>
+type FormData = z.infer<ReturnType<typeof buildSchema>>
 
 export const Route = createFileRoute("/recover-password")({
   component: RecoverPassword,

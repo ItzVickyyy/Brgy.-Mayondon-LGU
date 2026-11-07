@@ -449,7 +449,7 @@ export function MyAccountModal({
                             htmlFor={field.key}
                             className="mb-1.5 block text-xs font-medium"
                           >
-                            {field.label}
+                            {t(field.label)}
                           </Label>
                           <Input
                             id={field.key}
@@ -473,7 +473,7 @@ export function MyAccountModal({
                               htmlFor={field.key}
                               className="mb-1.5 block text-xs font-medium"
                             >
-                              {field.label}
+                              {t(field.label)}
                             </Label>
                             <Input
                               id={field.key}
@@ -508,7 +508,7 @@ export function MyAccountModal({
                               htmlFor={field.key}
                               className="mb-1.5 block text-xs font-medium"
                             >
-                              {field.label}
+                              {t(field.label)}
                             </Label>
                             <Input
                               id={field.key}
@@ -571,7 +571,7 @@ export function MyAccountModal({
                               htmlFor={field.key}
                               className="mb-1.5 block text-xs font-medium"
                             >
-                              {field.label}
+                              {t(field.label)}
                             </Label>
                             <Input
                               id={field.key}
