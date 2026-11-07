@@ -1,3 +1,4 @@
+import type { ParseKeys } from "i18next"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -14,7 +15,7 @@ function Section({ title, children }: { title: string; children: ReactNode }) { 
 function DraftNotice() { const { t } = useTranslation(); return <p role="note" className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs font-medium text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200">{t("common.dialogs.draftNotice")}</p> }
 export function ShortcutsList() {
  const { t } = useTranslation()
- return <ul className="grid gap-2">{SHORTCUTS.map((item,index)=><li key={item.description} className="flex items-center justify-between gap-4 rounded-md border px-3 py-2"><span className="text-muted-foreground">{t(`common.dialogs.shortcutItems.${index}`)}</span><span className="flex shrink-0 items-center gap-1">{item.keys.map((key,keyIndex)=>key==="then"||key==="+"?<span key={`${key}-${keyIndex}`} className="text-xs text-muted-foreground">{key}</span>:<kbd key={`${key}-${keyIndex}`} className="min-w-6 rounded border bg-muted px-1.5 py-0.5 text-center font-mono text-xs">{key}</kbd>)}</span></li>)}</ul>
+ return <ul className="grid gap-2">{SHORTCUTS.map((item,index)=><li key={item.description} className="flex items-center justify-between gap-4 rounded-md border px-3 py-2"><span className="text-muted-foreground">{t(`common.dialogs.shortcutItems.${index}` as ParseKeys)}</span><span className="flex shrink-0 items-center gap-1">{item.keys.map((key,keyIndex)=>key==="then"||key==="+"?<span key={`${key}-${keyIndex}`} className="text-xs text-muted-foreground">{key}</span>:<kbd key={`${key}-${keyIndex}`} className="min-w-6 rounded border bg-muted px-1.5 py-0.5 text-center font-mono text-xs">{key}</kbd>)}</span></li>)}</ul>
 }
 export function ShortcutsDialog(props:DialogProps){const {t}=useTranslation();return <InfoDialog {...props} title={t("common.dialogs.shortcutsTitle")} description={t("common.dialogs.shortcutsDescription")}><ShortcutsList/></InfoDialog>}
 export function HelpDialog(props:DialogProps){const {t}=useTranslation();return <InfoDialog {...props} title={t("common.dialogs.helpTitle")} description={t("common.dialogs.helpDescription")}>
