@@ -988,7 +988,17 @@
         "today": "Ngayon",
         "openCalendar": "Buksan ang kalendaryo",
         "closeCalendar": "Isara ang kalendaryo",
-        "calendar": "Kalendaryo"
+        "calendar": "Kalendaryo",
+        "chooseYear": "Pumili ng taon",
+        "weekdays": {
+          "sun": "Li",
+          "mon": "Lu",
+          "tue": "Ma",
+          "wed": "Mi",
+          "thu": "Hu",
+          "fri": "Bi",
+          "sat": "Sa"
+        }
       },
       "photoCapture": {
         "removing": "Inaalis ang background. Nananatili ito sa computer na ito.",
@@ -1804,7 +1814,10 @@
     },
     "toast": {
       "success": "Matagumpay!",
-      "error": "May nangyaring error!"
+      "error": "May nangyaring error!",
+      "myAccountUpdated": "Matagumpay na na-update ang Aking Account",
+      "passwordUpdated": "Matagumpay na na-update ang password",
+      "recoveryLinkSent": "Kung nakarehistro ang email na iyon, may ipinadalang link sa pagbawi"
     },
     "errorPage": {
       "code": "Error",

@@ -5,6 +5,11 @@ export function getLocale(): string {
   return i18n.language === "fil" ? "fil-PH" : "en-PH"
 }
 
+/** Like getLocale(), but keeps `englishLocale` for English so English output never changes. */
+export function getLocaleOr(englishLocale: string): string {
+  return i18n.language === "fil" ? "fil-PH" : englishLocale
+}
+
 export function formatLocaleDate(
   value: Date,
   options: Intl.DateTimeFormatOptions,

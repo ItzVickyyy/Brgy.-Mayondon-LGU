@@ -188,7 +188,7 @@ export function MyAccountModal({
     mutationFn: (data: UserUpdateMe) =>
       UsersService.updateUserMe({ body: data }),
     onSuccess: () => {
-      showSuccessToast("My Account updated successfully")
+      showSuccessToast(t("common.toast.myAccountUpdated"))
       setIsEditing(false)
       queryClient.invalidateQueries({ queryKey: ["currentUser"] })
       queryClient.invalidateQueries()

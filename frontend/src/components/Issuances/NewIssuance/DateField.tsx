@@ -10,11 +10,24 @@ import {
 import { useTranslation } from "react-i18next"
 import { formControlClass } from "@/components/Common/formStyles"
 import { formatPaperDate, monthNames } from "@/lib/issuance-format"
+import { formatLocaleDate } from "@/lib/locale"
 import { cn } from "@/lib/utils"
 import { panelClass, useClickOutside, useOpenUpward } from "./popover"
 
-const weekdays = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
-const monthShort = monthNames.map((name) => name.slice(0, 3))
+const weekdayKeys = [
+  "issuances.new.date.weekdays.sun",
+  "issuances.new.date.weekdays.mon",
+  "issuances.new.date.weekdays.tue",
+  "issuances.new.date.weekdays.wed",
+  "issuances.new.date.weekdays.thu",
+  "issuances.new.date.weekdays.fri",
+  "issuances.new.date.weekdays.sat",
+] as const
+
+// Shown month names follow the language; typed dates are still read with the
+// English `monthNames` (see the parser above), so stored values never change.
+const shownMonthName = (index: number) =>
+  formatLocaleDate(new Date(2000, index, 1), { month: "long" })
 
 function pad(value: number) {
   return String(value).padStart(2, "0")
@@ -220,7 +233,7 @@ function Calendar({
             view === "months" && "bg-muted",
           )}
         >
-          {monthNames[cursor.month]}
+          {shownMonthName(cursor.month)}
         </button>
         <button
           type="button"
@@ -253,7 +266,9 @@ function Calendar({
     const anchor = isIso(value) ? isoToDate(value).getFullYear() : cursor.year
     body = (
       <div>
-        <p className="px-3 pt-2 text-xs text-muted-foreground">Choose a year</p>
+        <p className="px-3 pt-2 text-xs text-muted-foreground">
+          {t("issuances.new.date.chooseYear")}
+        </p>
         <div
           ref={yearsRef}
           className="relative grid max-h-60 grid-cols-4 gap-1 overflow-y-auto p-2"
@@ -290,7 +305,8 @@ function Calendar({
           {t("issuances.new.date.chooseMonth")}
         </p>
         <div className="grid grid-cols-3 gap-1 p-2">
-          {monthShort.map((name, index) => {
+          {monthNames.map((_, index) => {
+            const name = shownMonthName(index).slice(0, 3)
             const first = toIso(cursor.year, index, 1)
             const last = toIso(cursor.year, index, 28)
             const disabled = Boolean(
@@ -344,12 +360,12 @@ function Calendar({
     body = (
       <div className="p-2">
         <div className="grid grid-cols-7 pb-1">
-          {weekdays.map((name) => (
+          {weekdayKeys.map((key) => (
             <span
-              key={name}
+              key={key}
               className="flex h-8 items-center justify-center text-xs font-medium text-muted-foreground"
             >
-              {name}
+              {t(key)}
             </span>
           ))}
         </div>

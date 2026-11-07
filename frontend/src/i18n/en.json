@@ -988,7 +988,17 @@
         "today": "Today",
         "openCalendar": "Open calendar",
         "closeCalendar": "Close calendar",
-        "calendar": "Calendar"
+        "calendar": "Calendar",
+        "chooseYear": "Choose a year",
+        "weekdays": {
+          "sun": "Su",
+          "mon": "Mo",
+          "tue": "Tu",
+          "wed": "We",
+          "thu": "Th",
+          "fri": "Fr",
+          "sat": "Sa"
+        }
       },
       "photoCapture": {
         "removing": "Removing the background. This stays on this computer.",
@@ -1804,7 +1814,10 @@
     },
     "toast": {
       "success": "Success!",
-      "error": "Something went wrong!"
+      "error": "Something went wrong!",
+      "myAccountUpdated": "My Account updated successfully",
+      "passwordUpdated": "Password updated successfully",
+      "recoveryLinkSent": "If that email is registered, a recovery link was sent"
     },
     "errorPage": {
       "code": "Error",

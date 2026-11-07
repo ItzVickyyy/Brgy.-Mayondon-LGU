@@ -8,6 +8,7 @@ import {
   Sun,
 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { UsersService } from "@/client"
 import { Footer } from "@/components/Common/Footer"
 import { KeyboardShortcuts } from "@/components/Common/KeyboardShortcuts"
@@ -21,6 +22,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
+import { getLocale } from "@/lib/locale"
 
 export const Route = createFileRoute("/_layout")({
   component: Layout,
@@ -46,6 +48,8 @@ export const Route = createFileRoute("/_layout")({
 })
 
 function Layout() {
+  // Subscribes this component to language changes so the clock is re-formatted.
+  useTranslation()
   const [now, setNow] = useState(() => new Date())
   const { theme, setTheme } = useTheme()
   const { user: currentUser } = useAuth()
@@ -68,7 +72,7 @@ function Layout() {
     else await document.documentElement.requestFullscreen()
   }
 
-  const dateText = new Intl.DateTimeFormat("en-PH", {
+  const dateText = new Intl.DateTimeFormat(getLocale(), {
     month: "long",
     day: "numeric",
     year: "numeric",
@@ -78,7 +82,7 @@ function Layout() {
     /,\s*(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/,
     " ($1)",
   )
-  const timeText = new Intl.DateTimeFormat("en-PH", {
+  const timeText = new Intl.DateTimeFormat(getLocale(), {
     hour: "2-digit",
     minute: "2-digit",
     second: "2-digit",

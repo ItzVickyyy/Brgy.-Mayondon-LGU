@@ -83,7 +83,7 @@ function RecoverPassword() {
         return
       }
       setOfflineNotice(null)
-      showSuccessToast("If that email is registered, a recovery link was sent")
+      showSuccessToast(t("common.toast.recoveryLinkSent"))
       form.reset()
     },
     onError: handleError.bind(showErrorToast),

@@ -66,7 +66,7 @@ const ChangePassword = ({ forced = false }: { forced?: boolean }) => {
         window.location.assign("/login?passwordChanged=1")
         return
       }
-      showSuccessToast("Password updated successfully")
+      showSuccessToast(t("common.toast.passwordUpdated"))
       form.reset()
     },
     onError: handleError.bind(showErrorToast),

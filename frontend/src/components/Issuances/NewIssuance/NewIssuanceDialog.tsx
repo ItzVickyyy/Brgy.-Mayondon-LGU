@@ -19,6 +19,7 @@ import { DocumentTypePicker } from "./DocumentTypePicker"
 import { PhotoCapture } from "./PhotoCapture"
 import { useTranslation } from "react-i18next"
 import { documentName, fieldHelp, fieldLabel, fieldOptionLabel, validationMessage } from "@/lib/issuanceLabels"
+import { getLocaleOr } from "@/lib/locale"
 import { civilStatusLabel, sexLabel } from "@/lib/residentLabels"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
@@ -1044,7 +1045,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
             {remaining ? <button type="button" onClick={goToFirstMissing} className="inline-flex min-h-9 items-center gap-1.5 self-start text-amber-700 dark:text-amber-400 underline-offset-4 hover:underline"><CircleAlert className="size-4" aria-hidden="true" />{t("issuances.new.footer.stillNeeded", { count: remaining })}</button> : <span className="inline-flex min-h-9 items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400"><CheckCircle2 className="size-4" aria-hidden="true" />{t("issuances.new.footer.ready")}</span>}
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="autosave-status">
               <span className={cn("size-2 rounded-full", autoSave.state === "saved" ? "bg-emerald-500" : autoSave.state === "saving" ? "animate-pulse bg-amber-500" : autoSave.state === "error" ? "bg-destructive" : "bg-muted-foreground/40")} aria-hidden="true" />
-              {autoSave.state === "saving" ? t("issuances.new.footer.saving") : autoSave.state === "saved" ? t("issuances.new.footer.saved", { time: autoSave.at?.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) }) : autoSave.state === "error" ? t("issuances.new.footer.saveError") : selectedResident ? t("issuances.new.footer.autoWithResident") : t("issuances.new.footer.autoNoResident")}
+              {autoSave.state === "saving" ? t("issuances.new.footer.saving") : autoSave.state === "saved" ? t("issuances.new.footer.saved", { time: autoSave.at?.toLocaleTimeString(getLocaleOr("en-US"), { hour: "numeric", minute: "2-digit" }) }) : autoSave.state === "error" ? t("issuances.new.footer.saveError") : selectedResident ? t("issuances.new.footer.autoWithResident") : t("issuances.new.footer.autoNoResident")}
               <span className="ml-2 hidden items-center gap-1 xl:inline-flex"><Keyboard className="size-3.5" aria-hidden="true" />{t("issuances.new.footer.shortcut")}</span>
             </span>
           </div>

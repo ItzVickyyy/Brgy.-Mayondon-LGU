@@ -38,6 +38,7 @@ import {
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { getLocaleOr } from "@/lib/locale"
 import { readApiError } from "@/lib/residents"
 
 type OfficialRecord = {
@@ -128,7 +129,10 @@ function formatTermDate(value: string | null, noEndDate: string) {
   const parsed = new Date(`${value}T00:00:00`)
   return Number.isNaN(parsed.getTime())
     ? value
-    : parsed.toLocaleDateString("en-US", { month: "short", year: "numeric" })
+    : parsed.toLocaleDateString(getLocaleOr("en-US"), {
+        month: "short",
+        year: "numeric",
+      })
 }
 
 function OfficialsManagement() {
