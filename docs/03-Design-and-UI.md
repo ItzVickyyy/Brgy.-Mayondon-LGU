@@ -44,6 +44,7 @@ flowchart TD
     J --> J3["User Accounts"]
     J3 --> J4["Create Staff Account"]
     J3 --> J5["Edit / Deactivate Staff"]
+    E --> I3["Change your password (forced after a temporary password)"]
     E --> J8["Activity Log (role-filtered)"]
     J --> J9["Management Reports"]
     J --> J10["Backup and Restore"]
@@ -87,7 +88,7 @@ One page at `/records` (heading "Records Management") with four tabs: **Resident
 Separate from login accounts. Proposed fields: full name, position, term start/end, active/inactive, optional photo. Prefer archive/inactive for former officials. Adding an official must never create a login account. Not in the brief **(D-23)**.
 
 ### User Accounts and Registration (proposed)
-Admin creates active Staff accounts directly. Staff self-registration creates a *pending* account that only Admin can approve or reject; pending and rejected accounts must not reach protected pages or APIs. No public Admin registration; the first Admin is provisioned through controlled initial setup **(D-11)**.
+Only the System Administrator creates accounts (active Staff accounts directly). There is no self-registration, no Request Access page and no pending or rejected account state **(D-11, decided Nov 7, 2026)**. The first Admin is provisioned through controlled initial setup. When an administrator sets a password for another user, it is a temporary password: the form warns that it must be given to the user in person, the User Accounts table shows a "Temporary password" badge, and the user is sent to the `/change-password` screen at next sign-in. That screen sits outside the sidebar layout and blocks every other page until the password is changed; the user is then signed out and signs in again **(D-12, shipped Nov 7, 2026)**.
 
 ### Activity Log (proposed)
 Shared page. Staff see own activity; Admin searches and filters across users. Capture actor, action, module, record reference, timestamp, outcome and reason where required. Never log passwords, tokens or unnecessary resident data. Ordinary users cannot edit or delete audit history **(D-24)**.
@@ -155,8 +156,8 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 - The account form maps **System Administrator → `is_superuser = true`** and **Staff → `is_superuser = false`**. The backend now has a `role` field (`admin` / `staff`); the form still sends `is_superuser`, which the API maps to the role. There is no pending or rejected state and none is planned (D-11).
 - Backup/Restore screen is a concept (manual backup, proposed schedule controls, sample history, restore confirmation layout). It does not run any backup or restore.
 - Account profile, password change and account management use the existing foundation functionality.
-- The footer shows branding only; Terms of Use and Privacy Policy are not implemented. Any legal text must be marked "Draft, pending barangay review".
-- A public `/welcome` landing page with placeholder announcements and contact details exists from earlier work. Public content is **out of scope**. **Decision (Nov 1, 2026, D-27):** remove the public landing direction; entry goes to staff login. Placeholder contact details are never shown as facts. The code change is still owed on `draft/admin-portal`.
+- The footer opens Version, Terms of Use and Privacy Policy popups. The legal text is a draft and is marked "Draft, pending barangay review"; it is not approved **(D-38)**.
+- A public `/welcome` landing page with placeholder announcements and contact details exists from earlier work. Public content is **out of scope**. **Decision (Nov 1, 2026, D-27):** remove the public landing direction; entry goes to staff login. Placeholder contact details are never shown as facts. Done: `/welcome` now only redirects to `/login`.
 
 **Design status:** the prototype was coded directly instead of being designed in Figma or similar, so wireframes, separate mockups, mobile mockups and client feedback do not exist (D-06; see section 8).
 
@@ -174,7 +175,7 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 | Auto-filled printing on existing formats | Overlay printing implemented for six templates; calibration dialog | Calibrate on real paper/printer; templates for Residency, Jobseeker and Barangay ID |
 | Scheduled and manual backup/restore | Concept screen exists; no automation | Wire to approved scripts; define schedule/destination; test restore |
 | Fully offline LAN use | Deployment foundation exists | Test host startup, other-PC access, printers, firewall, recovery offline |
-| Public features excluded | Welcome page still has placeholder content | Remove public/announcement direction; go to staff login (D-27, decided Nov 1; code change pending) |
+| Public features excluded | Welcome page removed (redirects to login) | Public/announcement direction removed; entry goes to staff login (D-27, done by Nov 7) |
 
 ## 8. Week 14 checklist
 

@@ -67,4 +67,4 @@ Open questions that remain (ID numbering, ID card layout, reprint behaviour, rea
 | # | Decision | Date | Reason |
 |---|---|---|---|
 | 28 | **No staff self-registration.** There is no Request Access, Pending Approval or Pending Registrations page, no sidebar badge and no dashboard card. Only an administrator creates accounts. No account `status` column; `/users/signup` stays disabled (D-11). | Nov 7, 2026 | Owner decision (not a client approval). Matches the brief: no public sign-up |
-| 29 | **Offline password reset is an administrator-set temporary password with forced change at next sign-in.** No email, no recovery codes (D-12). | Nov 7, 2026 | Owner decision (not a client approval). Forced change not built yet; email cannot work offline |
+| 29 | **Offline password reset is an administrator-set temporary password with forced change at next sign-in.** No email, no recovery codes (D-12). | Nov 7, 2026 | Owner decision (not a client approval). Built Nov 7, 2026: the administrator gives the temporary password to the user in person, and every other page and protected API operation is refused until the user changes it. Email cannot work offline |
