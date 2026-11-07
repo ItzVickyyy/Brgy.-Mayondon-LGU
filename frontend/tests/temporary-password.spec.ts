@@ -10,7 +10,7 @@ test("temporary password forces a change before the user can access the system",
 
   await page.goto("/admin")
   await page.getByRole("button", { name: "Add User" }).click()
-  await page.getByPlaceholder("Email").fill(email)
+  await page.getByPlaceholder("Email", { exact: true }).fill(email)
   await page.getByPlaceholder("Full name").fill("Temporary Password Test")
   await page.getByPlaceholder("Password").first().fill(temporaryPassword)
   await page.getByPlaceholder("Password").last().fill(temporaryPassword)
