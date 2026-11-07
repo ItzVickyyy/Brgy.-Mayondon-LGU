@@ -7,6 +7,7 @@ from sqlmodel import col, func, select
 from app import crud
 from app.api.deps import (
     CurrentUser,
+    CurrentUserAllowTemporary,
     SessionDep,
     require_permission,
 )
@@ -79,7 +80,7 @@ def create_user(*, session: SessionDep, user_in: UserCreate, current_user: Curre
             detail="The user with this email already exists in the system.",
         )
 
-    user = crud.create_user(session=session, user_create=user_in)
+    user = crud.create_user(session=session, user_create=user_in, temporary=True)
     record_admin_action(actor_id=current_user.id, action="user.create", target_type="user", target_id=user.id)
     record_audit_event(
         session,
@@ -89,6 +90,15 @@ def create_user(*, session: SessionDep, user_in: UserCreate, current_user: Curre
         record_type="user",
         record_id=user.id,
         details={"role": str(user.role)},
+    )
+    record_audit_event(
+        session,
+        action="user.temp_password_set",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=user.id,
+        details={"reason": "account_created"},
         commit=True,
     )
     if settings.emails_enabled and user_in.email:
@@ -139,7 +149,7 @@ def update_user_me(
 
 @router.patch("/me/password", response_model=Message)
 def update_password_me(
-    *, session: SessionDep, body: UpdatePassword, current_user: CurrentUser
+    *, session: SessionDep, body: UpdatePassword, current_user: CurrentUserAllowTemporary
 ) -> Any:
     """
     Update own password.
@@ -153,6 +163,8 @@ def update_password_me(
         )
     hashed_password = get_password_hash(body.new_password)
     current_user.hashed_password = hashed_password
+    replaced_temporary = current_user.must_change_password
+    current_user.must_change_password = False
     # A password change releases any failed-login lockout for this account.
     current_user.failed_login_attempts = 0
     current_user.locked_until = None
@@ -164,13 +176,14 @@ def update_password_me(
         module="users",
         record_type="user",
         record_id=current_user.id,
+        details={"replaced_temporary": True} if replaced_temporary else None,
     )
     session.commit()
     return Message(message="Password updated successfully")
 
 
 @router.get("/me", response_model=UserPublic)
-def read_user_me(current_user: CurrentUser) -> Any:
+def read_user_me(current_user: CurrentUserAllowTemporary) -> Any:
     """
     Get current user.
     """
@@ -295,7 +308,18 @@ def update_user(
         )
 
     changed_fields = sorted(user_in.model_dump(exclude_unset=True))
-    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
+    # A password an administrator types for ANOTHER account is temporary.
+    temporary = bool(user_in.password) and db_user.id != current_user.id
+    if temporary:
+        verified, _ = verify_password(user_in.password, db_user.hashed_password)
+        if verified:
+            raise HTTPException(
+                status_code=400,
+                detail="The temporary password must differ from the current one.",
+            )
+    db_user = crud.update_user(
+        session=session, db_user=db_user, user_in=user_in, temporary=temporary
+    )
     record_admin_action(actor_id=current_user.id, action="user.update", target_type="user", target_id=db_user.id)
     record_audit_event(
         session,
@@ -306,6 +330,16 @@ def update_user(
         record_id=db_user.id,
         details={"fields": changed_fields},
     )
+    if temporary:
+        record_audit_event(
+            session,
+            action="user.temp_password_set",
+            actor=current_user,
+            module="users",
+            record_type="user",
+            record_id=db_user.id,
+            details={"reason": "password_reset"},
+        )
     if db_user.role != previous_role:
         record_admin_action(actor_id=current_user.id, action="user.role_change", target_type="user", target_id=db_user.id)
         record_audit_event(

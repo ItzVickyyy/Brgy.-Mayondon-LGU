@@ -9,9 +9,17 @@ from app.core.security import get_password_hash, verify_password
 from app.models import User, UserCreate, UserRole, UserUpdate
 
 
-def create_user(*, session: Session, user_create: UserCreate) -> User:
+def create_user(
+    *, session: Session, user_create: UserCreate, temporary: bool = False
+) -> User:
+    """Create a user. ``temporary`` marks the password as one an administrator
+    typed, so the user must change it at first sign-in (D-12)."""
     db_obj = User.model_validate(
-        user_create, update={"hashed_password": get_password_hash(user_create.password)}
+        user_create,
+        update={
+            "hashed_password": get_password_hash(user_create.password),
+            "must_change_password": temporary,
+        },
     )
     session.add(db_obj)
     session.commit()
@@ -19,13 +27,23 @@ def create_user(*, session: Session, user_create: UserCreate) -> User:
     return db_obj
 
 
-def update_user(*, session: Session, db_user: User, user_in: UserUpdate) -> Any:
+def update_user(
+    *,
+    session: Session,
+    db_user: User,
+    user_in: UserUpdate,
+    temporary: bool = False,
+) -> Any:
+    """Update a user. A new password is temporary only when ``temporary`` is
+    true (an administrator resetting another account); any other password
+    change clears the forced-change flag."""
     user_data = user_in.model_dump(exclude_unset=True)
     extra_data = {}
     if "password" in user_data:
         password = user_data["password"]
         hashed_password = get_password_hash(password)
         extra_data["hashed_password"] = hashed_password
+        extra_data["must_change_password"] = temporary
         # A password change should also release any failed-login lockout.
         db_user.failed_login_attempts = 0
         db_user.locked_until = None
