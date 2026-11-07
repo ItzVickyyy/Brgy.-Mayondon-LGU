@@ -1,7 +1,17 @@
-# Backup the local PostgreSQL database to a file outside Docker.
+# Back up the local PostgreSQL database to a file outside Docker.
 # Run from the repository root in PowerShell with Docker Compose running.
+# MAYONDON_DATABASE_NAME is an optional override used by the isolated smoke test.
 
 $ErrorActionPreference = "Stop"
+
+$databaseName = if ([string]::IsNullOrWhiteSpace($env:MAYONDON_DATABASE_NAME)) {
+    "app"
+} else {
+    $env:MAYONDON_DATABASE_NAME
+}
+if ($databaseName -notmatch "^[A-Za-z0-9_]+$") {
+    throw "MAYONDON_DATABASE_NAME may contain only letters, numbers, and underscores."
+}
 
 $containerId = (docker compose -f compose.yml ps -q db).Trim()
 if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($containerId)) {
@@ -11,13 +21,14 @@ if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($containerId)) {
 $backupDirectory = Join-Path (Get-Location) "backups"
 New-Item -ItemType Directory -Path $backupDirectory -Force | Out-Null
 
-$timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+# Milliseconds prevent two backups created in the same second from overwriting.
+$timestamp = Get-Date -Format "yyyyMMdd-HHmmss-fff"
 $fileName = "mayondon-db-$timestamp.dump"
 $containerPath = "/tmp/$fileName"
 $backupPath = Join-Path $backupDirectory $fileName
 
-Write-Host "Creating PostgreSQL custom-format backup..."
-docker compose -f compose.yml exec -T db pg_dump -U postgres -d app -Fc -f $containerPath
+Write-Host "Creating PostgreSQL custom-format backup of database '$databaseName'..."
+docker compose -f compose.yml exec -T db pg_dump -U postgres -d $databaseName -Fc -f $containerPath
 if ($LASTEXITCODE -ne 0) {
     docker compose -f compose.yml exec -T db rm -f $containerPath
     throw "pg_dump failed. No backup was confirmed."
