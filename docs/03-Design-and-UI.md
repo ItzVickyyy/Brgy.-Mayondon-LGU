@@ -87,7 +87,7 @@ One page at `/records` (heading "Records Management") with four tabs: **Resident
 Separate from login accounts. Proposed fields: full name, position, term start/end, active/inactive, optional photo. Prefer archive/inactive for former officials. Adding an official must never create a login account. Not in the brief **(D-23)**.
 
 ### User Accounts and Registration (proposed)
-Only the System Administrator creates accounts (active Staff accounts directly). There is no self-registration, no Request Access page and no pending or rejected account state **(D-11, decided Nov 7, 2026)**. The first Admin is provisioned through controlled initial setup.
+Only the System Administrator creates accounts (active Staff accounts directly). There is no self-registration, no Request Access page and no pending or rejected account state **(D-11, decided Nov 7, 2026)**. The first Admin is provisioned through controlled initial setup. When an administrator sets a temporary password, the User Accounts form warns that it must be given to the user in person. The account is marked **Temporary password** until the user changes it; the user is then signed out and must sign in again. A forced-change screen at `/change-password` blocks access to other pages and protected API operations until the password is changed **(D-12, shipped Nov 7, 2026)**.
 
 ### Activity Log (proposed)
 Shared page. Staff see own activity; Admin searches and filters across users. Capture actor, action, module, record reference, timestamp, outcome and reason where required. Never log passwords, tokens or unnecessary resident data. Ordinary users cannot edit or delete audit history **(D-24)**.
