@@ -439,3 +439,194 @@ test("staff: cannot reach the user list", async () => {
   expect(await statusOf(UsersService.readUsers())).toBe(403)
   useToken(adminToken)
 })
+
+// ------------------------------------------------- staff: clerk-facing rules
+// Each check asserts the exact sentence a clerk would read in the dialog.
+
+const nextYear = new Date().getFullYear() + 1
+
+function idInput(
+  residentId: string,
+  transactionType: "new" | "renewal" | "replacement",
+  options: { idNumber?: string; validUntil?: string } = {},
+): IssuanceInput {
+  return {
+    documentType: "BARANGAY_ID",
+    issueDate: today,
+    residentId,
+    status: "issued",
+    details: {
+      type: "BARANGAY_ID",
+      transactionType,
+      validUntil: options.validUntil ?? `${nextYear}-12-31`,
+      idNumber: options.idNumber,
+    },
+  }
+}
+
+function franchiseInput(
+  residentId: string,
+  tricycle: { plate: string; motor: string; color?: string },
+): IssuanceInput {
+  const { input } = inputs(residentId).FRANCHISE_CLEARANCE
+  if (input.details.type !== "FRANCHISE_CLEARANCE") throw new Error("fixture")
+  return {
+    ...input,
+    details: {
+      ...input.details,
+      plateNumber: tricycle.plate,
+      motorNumber: tricycle.motor,
+      color: tricycle.color ?? input.details.color,
+    },
+  }
+}
+
+const idNumber = `LIVE-ID-${run}`.toUpperCase()
+let idResidentId = ""
+
+test("staff: a new Barangay ID needs a typed ID number", async () => {
+  useToken(staffToken)
+  const resident = await newResident("idnumber")
+  idResidentId = resident.id
+  await expect(
+    issuanceApi.createIssuance(idInput(resident.id, "new")),
+  ).rejects.toMatchObject({
+    message: "Type the Barangay ID number for this card.",
+  })
+})
+
+test("staff: renewal is refused when the resident has no earlier ID", async () => {
+  useToken(staffToken)
+  await expect(
+    issuanceApi.createIssuance(idInput(idResidentId, "renewal")),
+  ).rejects.toMatchObject({
+    message: "This resident has no earlier Barangay ID. Choose New instead.",
+  })
+})
+
+test("staff: the 'valid until' date must be after the issue date", async () => {
+  useToken(staffToken)
+  await expect(
+    issuanceApi.createIssuance(
+      idInput(idResidentId, "new", { idNumber, validUntil: today }),
+    ),
+  ).rejects.toMatchObject({
+    message: "The “Valid until” date must be after the issue date.",
+  })
+})
+
+test("staff: issue a new ID, refuse a second new one, then renew", async () => {
+  useToken(staffToken)
+  const first = await issuanceApi.createIssuance(
+    idInput(idResidentId, "new", { idNumber }),
+  )
+  expect(first.status).toBe("issued")
+  await expect(
+    issuanceApi.createIssuance(idInput(idResidentId, "new", { idNumber })),
+  ).rejects.toMatchObject({
+    message:
+      "This resident already has a Barangay ID. Choose Renewal or Replacement instead.",
+  })
+  const renewal = await issuanceApi.createIssuance(
+    idInput(idResidentId, "renewal", { validUntil: `${nextYear + 1}-12-31` }),
+  )
+  expect(renewal.status).toBe("issued")
+})
+
+test("staff: an ID number cannot be reused by another resident", async () => {
+  useToken(staffToken)
+  const other = await newResident("idclash")
+  await expect(
+    issuanceApi.createIssuance(idInput(other.id, "new", { idNumber })),
+  ).rejects.toMatchObject({
+    message: "This ID number is already used by another resident.",
+  })
+})
+
+test("staff: tricycle plate and motor numbers are protected", async () => {
+  useToken(staffToken)
+  // The admin run above registered this tricycle (Blue). Same numbers with a
+  // different color must be refused.
+  const knownPlate = `LV-${run}`.toUpperCase()
+  const knownMotor = `MOTOR-${run}`.toUpperCase()
+  const mismatchOwner = await newResident("trimismatch")
+  await expect(
+    issuanceApi.createIssuance(
+      franchiseInput(mismatchOwner.id, {
+        plate: knownPlate,
+        motor: knownMotor,
+        color: "Red",
+      }),
+    ),
+  ).rejects.toMatchObject({
+    message:
+      "This plate or motor number is already on file with different tricycle details. Check the numbers, make, color and association.",
+  })
+
+  // Register a second tricycle, then mix one number from each.
+  const second = {
+    plate: `ST2-${run}`.toUpperCase(),
+    motor: `STM2-${run}`.toUpperCase(),
+  }
+  const owner = await newResident("tricycle2")
+  expect(
+    (await issuanceApi.createIssuance(franchiseInput(owner.id, second))).status,
+  ).toBe("issued")
+  const mixer = await newResident("trimixed")
+  await expect(
+    issuanceApi.createIssuance(
+      franchiseInput(mixer.id, { plate: knownPlate, motor: second.motor }),
+    ),
+  ).rejects.toMatchObject({
+    message:
+      "The plate number and the motor number belong to two different tricycles on file. Check both numbers.",
+  })
+})
+
+test("staff: a resident with missing details is told what to add", async () => {
+  useToken(staffToken)
+  // Created straight through the API so it has no house number, street or purok.
+  const bare = (
+    await ResidentsService.createResident({
+      body: {
+        first_name: "Livebare",
+        last_name: `Check${run}`,
+        sex: "Female",
+        civil_status: "Single",
+        resident_since_birth: true,
+      },
+    })
+  ).data
+  const { input } = inputs(bare.id).RESIDENCY
+  let message = ""
+  try {
+    await issuanceApi.createIssuance(input)
+  } catch (error) {
+    message = (error as Error).message
+  }
+  // Required fields depend on the document: Residency needs the address, not
+  // the birthdate.
+  expect(message).toContain("The resident record is missing:")
+  expect(message).toContain("house number")
+  expect(message).toContain("street")
+  expect(message).toContain("purok")
+  expect(message).not.toContain("birthdate")
+})
+
+test("staff: can edit a resident through the adapter", async () => {
+  useToken(staffToken)
+  const resident = await newResident("editme")
+  const updated = await issuanceApi.updateResident(resident.id, {
+    civilStatus: "Married",
+    houseNumber: "99",
+  })
+  expect(updated.civilStatus).toBe("Married")
+  expect(updated.houseNumber).toBe("99")
+  await expect(
+    issuanceApi.updateResident(resident.id, {
+      street: `Unlisted Edit Street ${run}`,
+    }),
+  ).rejects.toMatchObject({
+    message: expect.stringContaining("Ask the administrator"),
+  })
+})
