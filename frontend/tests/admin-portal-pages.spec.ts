@@ -80,36 +80,6 @@ test("Barangay IDs route redirects to the Records Management ID tab", async ({
   await expect(page.getByText("No ID records match your search")).toBeVisible()
 })
 
-test("Request Access presents the staff access form", async ({
-  page,
-}) => {
-  await page.goto("/request-access")
-  await expect(
-    page.getByRole("heading", { name: "Request Staff Access" }),
-  ).toBeVisible()
-  await page.getByLabel("Full name").fill("Sample Applicant")
-  await page.getByLabel("Barangay office email").fill("sample@example.test")
-  await page.getByLabel("Position or office assignment").fill("Office Staff")
-  await page.getByRole("button", { name: "Preview Request" }).click()
-  await expect(page.getByRole("status")).toContainText(
-    "Your request was sent to the System Administrator",
-  )
-})
-
-test("Pending Approval shows account status guidance", async ({
-  page,
-}) => {
-  await page.goto("/pending-approval")
-  await expect(
-    page.getByText("Your account is awaiting approval."),
-  ).toBeVisible()
-  await expect(
-    page.getByText(
-      "Your request was not approved. Please contact the System Administrator.",
-    ),
-  ).toBeVisible()
-})
-
 test("User account form offers Staff and System Administrator roles", async ({
   page,
 }) => {
@@ -123,15 +93,6 @@ test("User account form offers Staff and System Administrator roles", async ({
   ])
 })
 
-test("Pending Registrations starts with an empty list", async ({ page }) => {
-  await page.goto("/pending-registrations")
-  await expect(
-    page.getByRole("heading", { name: "Pending Registrations" }),
-  ).toBeVisible()
-  await expect(page.getByText("No registrations found")).toBeVisible()
-})
-
-
 test("Application pages do not display sample or prototype notices", async ({
   page,
 }) => {
@@ -143,11 +104,8 @@ test("Application pages do not display sample or prototype notices", async ({
     "/officials",
     "/activity-log",
     "/admin",
-    "/pending-registrations",
     "/reports",
     "/backup-restore",
-    "/request-access",
-    "/pending-approval",
     "/login",
   ]
 

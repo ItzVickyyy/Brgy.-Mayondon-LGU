@@ -2,7 +2,6 @@ import {
   Activity,
   BarChart3,
   BookUser,
-  Clock3,
   DatabaseBackup,
   FileCheck2,
   LayoutDashboard,
@@ -14,7 +13,6 @@ import { Logo } from "@/components/Common/Logo"
 import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
-import { useRegistrations } from "@/lib/registration-store"
 import { type Item, Main } from "./Main"
 
 type NavigationItem = Item & { adminOnly?: boolean }
@@ -59,13 +57,6 @@ const items: NavigationItem[] = [
     section: "Administration",
   },
   {
-    icon: Clock3,
-    title: "Pending Registrations",
-    path: "/pending-registrations",
-    adminOnly: true,
-    section: "Administration",
-  },
-  {
     icon: BarChart3,
     title: "Management Reports",
     path: "/reports",
@@ -83,15 +74,9 @@ const items: NavigationItem[] = [
 
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
-  const registrations = useRegistrations()
-  const pendingCount = registrations.filter((row) => row.status === "Pending").length
-  const visibleItems = items
-    .map((item) =>
-      item.path === "/pending-registrations"
-        ? { ...item, badge: pendingCount }
-        : item,
-    )
-    .filter((item) => !item.adminOnly || isSystemAdministrator(currentUser))
+  const visibleItems = items.filter(
+    (item) => !item.adminOnly || isSystemAdministrator(currentUser),
+  )
 
   return (
     <Sidebar collapsible="icon">

@@ -211,21 +211,12 @@ function Dashboard() {
           description={`Due within ${summary?.id_window_days ?? 30} days`}
           icon={IdCard}
         />
-        {isAdmin ? (
-          <SummaryCard
-            title="Pending Registrations"
-            value="–"
-            description="Not connected yet"
-            icon={Users}
-          />
-        ) : (
-          <SummaryCard
-            title="Pending Document Requests"
-            value={number(summary?.open_drafts)}
-            description="Drafts not yet issued"
-            icon={Users}
-          />
-        )}
+        <SummaryCard
+          title="Pending Document Requests"
+          value={number(summary?.open_drafts)}
+          description="Drafts not yet issued"
+          icon={Users}
+        />
       </section>
 
       <section aria-label="Quick actions">
