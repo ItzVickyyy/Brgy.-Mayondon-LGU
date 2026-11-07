@@ -10,6 +10,7 @@ import {
 import { useEffect, useState } from "react"
 import { UsersService } from "@/client"
 import { Footer } from "@/components/Common/Footer"
+import { KeyboardShortcuts } from "@/components/Common/KeyboardShortcuts"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
 import { User } from "@/components/Sidebar/User"
 import { useTheme } from "@/components/theme-provider"
@@ -24,7 +25,7 @@ import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 export const Route = createFileRoute("/_layout")({
   component: Layout,
   beforeLoad: async () => {
-    if (!isLoggedIn()) throw redirect({ to: "/welcome" })
+    if (!isLoggedIn()) throw redirect({ to: "/login" })
 
     try {
       await UsersService.readUserMe()
@@ -82,6 +83,7 @@ function Layout() {
 
   return (
     <SidebarProvider>
+      <KeyboardShortcuts />
       <AppSidebar />
       <SidebarInset>
         <a

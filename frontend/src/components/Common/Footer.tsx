@@ -1,7 +1,23 @@
+import { useState } from "react"
+
+import {
+  PrivacyDialog,
+  TermsDialog,
+  VersionDialog,
+} from "@/components/Common/InfoDialogs"
 import { SITE } from "@/config/site"
+
+type Popup = "version" | "terms" | "privacy" | null
+
+const linkClass =
+  "rounded-sm text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 export function Footer() {
   const currentYear = new Date().getFullYear()
+  const [popup, setPopup] = useState<Popup>(null)
+  const close = (open: boolean) => {
+    if (!open) setPopup(null)
+  }
 
   return (
     <footer className="border-t px-4 py-4 sm:px-6">
@@ -9,7 +25,36 @@ export function Footer() {
         <p className="text-sm text-muted-foreground">
           © {currentYear} {SITE.fullName}, {SITE.location}
         </p>
+        <nav
+          aria-label="Footer"
+          className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:justify-end"
+        >
+          <button
+            type="button"
+            className={linkClass}
+            onClick={() => setPopup("version")}
+          >
+            Version
+          </button>
+          <button
+            type="button"
+            className={linkClass}
+            onClick={() => setPopup("terms")}
+          >
+            Terms of Use
+          </button>
+          <button
+            type="button"
+            className={linkClass}
+            onClick={() => setPopup("privacy")}
+          >
+            Privacy Policy
+          </button>
+        </nav>
       </div>
+      <VersionDialog open={popup === "version"} onOpenChange={close} />
+      <TermsDialog open={popup === "terms"} onOpenChange={close} />
+      <PrivacyDialog open={popup === "privacy"} onOpenChange={close} />
     </footer>
   )
 }

@@ -505,6 +505,7 @@ function IssuancesManagement() {
           <Button
             size="default"
             className="min-h-11 w-full sm:w-auto"
+            data-shortcut="new-issuance"
             onClick={() => setIsSimplifiedDialogOpen(true)}
           >
             <Plus aria-hidden="true" />

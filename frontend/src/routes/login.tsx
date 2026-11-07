@@ -190,24 +190,6 @@ function Login() {
               Sign in <ArrowRight className="ml-2 size-4" />
             </LoadingButton>
           </div>
-          <p className="text-center text-sm text-muted-foreground">
-            Need staff access?{" "}
-            <RouterLink
-              to="/request-access"
-              className="font-medium text-brand underline-offset-4 hover:underline"
-            >
-              Request access
-            </RouterLink>
-          </p>
-          <p className="text-center text-sm text-muted-foreground">
-            Account pending or not approved?{" "}
-            <RouterLink
-              to="/pending-approval"
-              className="font-medium text-brand underline-offset-4 hover:underline"
-            >
-              Request Access
-            </RouterLink>
-          </p>
         </form>
       </Form>
     </AuthLayout>
