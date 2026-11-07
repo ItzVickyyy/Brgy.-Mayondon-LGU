@@ -67,14 +67,18 @@ export function readApiError(error: unknown): ApiError {
       }
     }
     if (detail && typeof detail === "object") {
-      const code = (detail as { code?: unknown }).code
+      const body = detail as { code?: unknown; message?: unknown }
+      const code = body.code
+      const serverMessage = body.message
       return {
         detail,
         code: typeof code === "string" ? code : null,
         message:
-          typeof code === "string"
-            ? code.replace(/_/g, " ")
-            : "Request failed.",
+          typeof serverMessage === "string"
+            ? serverMessage
+            : typeof code === "string"
+              ? code.replace(/_/g, " ")
+              : i18n.t("apiErrors.requestFailed"),
       }
     }
     if (error.response?.status === 403)
