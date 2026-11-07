@@ -30,6 +30,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
+import useAuth from "@/hooks/useAuth"
 import { handleError } from "@/utils"
 
 const formSchema = z
@@ -64,6 +65,8 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
   const [isOpen, setIsOpen] = useState(false)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
+  const { user: currentUser } = useAuth()
+  const isEditingSelf = currentUser?.id === user.id
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -127,6 +130,13 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
+              {!isEditingSelf ? (
+                <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground">
+                  Give this temporary password to the user in person. It is not
+                  stored in readable form, and the user must change it at first
+                  sign-in.
+                </p>
+              ) : null}
               <FormField
                 control={form.control}
                 name="email"
@@ -167,7 +177,9 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                 name="password"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Set Password</FormLabel>
+                    <FormLabel>
+                      {isEditingSelf ? "Set password" : "Temporary password"}
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Password"

@@ -85,6 +85,8 @@ function Login() {
   const loginErrorMessage = loginMutation.error
     ? getLoginErrorMessage(loginMutation.error)
     : null
+  const passwordChangedNotice =
+    new URLSearchParams(window.location.search).get("passwordChanged") === "1"
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onBlur",
@@ -113,6 +115,15 @@ function Login() {
               Sign in to access the barangay personnel portal.
             </p>
           </div>
+
+          {passwordChangedNotice ? (
+            <p
+              role="status"
+              className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground"
+            >
+              Your password has been changed. Sign in again.
+            </p>
+          ) : null}
 
           {loginErrorMessage ? (
             <p

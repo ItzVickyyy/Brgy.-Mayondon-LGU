@@ -348,7 +348,23 @@ test("staff: an admin creates a staff account and it can sign in", async () => {
       role: "staff",
     },
   })
-  staffToken = await login(staffEmail, staffPassword)
+  const temporaryToken = await login(staffEmail, staffPassword)
+  const passwordChange = await fetch(
+    `${baseURL}/api/v1/users/me/password`,
+    {
+      method: "PATCH",
+      headers: {
+        Authorization: `Bearer ${temporaryToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        current_password: staffPassword,
+        new_password: `${staffPassword}-Changed!`,
+      }),
+    },
+  )
+  expect(passwordChange.status, "change temporary staff password").toBe(200)
+  staffToken = await login(staffEmail, `${staffPassword}-Changed!`)
   useToken(staffToken)
 })
 

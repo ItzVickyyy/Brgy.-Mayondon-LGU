@@ -20,6 +20,7 @@ const activityTitles: Record<string, string> = {
   "user.update": "Account updated",
   "user.role_change": "Account role changed",
   "user.password_change": "Password changed",
+  "user.temp_password_set": "Temporary password set",
   "user.update_self": "Own account updated",
   "user.delete": "Account deleted",
   "user.delete_self": "Own account deleted",

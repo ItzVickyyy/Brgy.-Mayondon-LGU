@@ -112,6 +112,11 @@ const AddUser = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid gap-4 py-4">
+              <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground">
+                Give this temporary password to the user in person. It is not
+                stored in readable form, and the user must change it at first
+                sign-in.
+              </p>
               <FormField
                 control={form.control}
                 name="email"
@@ -153,7 +158,7 @@ const AddUser = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Set Password <span className="text-destructive">*</span>
+                      Temporary password <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
