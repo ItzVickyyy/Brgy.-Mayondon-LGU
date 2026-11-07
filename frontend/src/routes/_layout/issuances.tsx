@@ -383,7 +383,7 @@ function IssuancesManagement() {
     setNoticePrintRecord(null)
     const storedId = record?.fields.mockIssuanceId
     if (!storedId) {
-      setNotice("This record was made with the old form and has no saved print data. Use New Issuance to issue it again.")
+      setNotice(t("issuances.printing.notices.oldForm"))
       return
     }
     setNotice(await printStoredIssuance(storedId))

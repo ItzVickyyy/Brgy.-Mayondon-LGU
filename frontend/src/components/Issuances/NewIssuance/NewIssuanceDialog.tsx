@@ -1032,11 +1032,11 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
             <div className="lg:hidden">
               <button type="button" className="flex min-h-10 items-center gap-2 text-sm font-medium" aria-expanded={previewOpen} onClick={() => setPreviewOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", previewOpen && "rotate-180")} />{t("issuances.new.preview")}</button>
-              {previewOpen ? <div className="mt-2 rounded-xl border bg-card"><PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={attempted ? missingPreviewLabels : []} showMissing={attempted} printingPaused /></div> : null}
+              {previewOpen ? <div className="mt-2 rounded-xl border bg-card"><PrintSummaryPanel type={config.name} typeLabel={documentName(documentType, t)} currentDate={issueDate} structuredRows={previewRows} missingLabels={attempted ? missingPreviewLabels : []} showMissing={attempted} printingPaused /></div> : null}
             </div>
           </div>
           <aside aria-label={t("issuances.new.preview")} className="hidden min-h-0 overflow-y-auto border-l bg-card lg:block">
-            <PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={attempted ? missingPreviewLabels : []} showMissing={attempted} printingPaused />
+            <PrintSummaryPanel type={config.name} typeLabel={documentName(documentType, t)} currentDate={issueDate} structuredRows={previewRows} missingLabels={attempted ? missingPreviewLabels : []} showMissing={attempted} printingPaused />
           </aside>
         </div>
         <DialogFooter className="shrink-0 items-center gap-2 border-t px-5 py-3 sm:justify-between">

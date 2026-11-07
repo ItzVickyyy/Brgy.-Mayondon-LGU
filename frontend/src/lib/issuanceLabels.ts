@@ -159,6 +159,20 @@ const validationKeys = {
 export const validationMessage = (message: string, t: TFunction) =>
   lookup(validationKeys, message, t)
 
+// Messages from lib/print/loadPrintData.ts. Unknown messages are shown as is.
+const printMessageKeys = {
+  "This issuance could not be found, so it cannot be printed.":
+    "issuances.printing.notices.notFound",
+  "This document type has no print template yet, so it cannot be printed from here.":
+    "issuances.printing.notices.noTemplate",
+} as const satisfies Record<string, ParseKeys>
+
+export function printMessage(message: string, t: TFunction) {
+  const voided = /^(.+) was voided and cannot be printed\.$/.exec(message)
+  if (voided) return t("issuances.printing.notices.voided", { ref: voided[1] })
+  return lookup(printMessageKeys, message, t)
+}
+
 // Messages from lib/photo-upload.ts.
 const photoUploadKeys = {
   "Please choose a JPG, PNG or WebP picture.":

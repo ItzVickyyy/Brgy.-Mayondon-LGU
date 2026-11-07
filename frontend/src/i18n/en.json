@@ -1113,6 +1113,50 @@
         "sinceBirth": "Since birth",
         "residentRecord": "Resident record"
       }
+    },
+    "printing": {
+      "summary": {
+        "willPrint": "Will print",
+        "missingWord": "Missing",
+        "missingCount": "Missing ({{total}})",
+        "allComplete": "All required fields are complete.",
+        "ready": "Ready to issue",
+        "previewOnly": "Preview only. The document prints after it is issued.",
+        "afterPrinting": "After printing: {{steps}}",
+        "stepsClearance": "Resident signs and thumbmarks; apply the dry seal.",
+        "stepsAssistance": "Kagawad signs.",
+        "stepsOther": "Apply the dry seal."
+      },
+      "notices": {
+        "busy": "A print is already in progress.",
+        "opened": "Opened the print dialog. Load the pre-printed form, print at 100% scale with no headers or footers, and use Print again for another copy.",
+        "unable": "Unable to prepare this document for printing.",
+        "oldForm": "This record was made with the old form and has no saved print data. Use New Issuance to issue it again.",
+        "notFound": "This issuance could not be found, so it cannot be printed.",
+        "voided": "{{ref}} was voided and cannot be printed.",
+        "noTemplate": "This document type has no print template yet, so it cannot be printed from here."
+      },
+      "calibration": {
+        "intro": "Print the calibration sheet on plain paper at 100% scale (no headers, footers or fit-to-page), then hold it against the pre-printed form. Adjust the offset until the red boxes sit on the blanks.",
+        "form": "Form",
+        "shiftRight": "Shift right (pt)",
+        "shiftDown": "Shift down (pt)",
+        "units": "72 pt = 1 inch, about 2.8 pt = 1 mm. Limit {{max}} pt either way.",
+        "save": "Save offset",
+        "printSheet": "Print calibration sheet",
+        "reset": "Reset to 0",
+        "saved": "Saved on this computer.",
+        "saveFailed": "Could not save: browser storage is unavailable.",
+        "gridLabel": "Printing calibration grid",
+        "templates": {
+          "clearance": "Barangay Clearance",
+          "franchise": "Franchise Clearance",
+          "utility": "Electrical and Water",
+          "indigency": "Indigency",
+          "marginalized": "Marginalized Sector",
+          "assistance": "Assistance Certification"
+        }
+      }
     }
   }
 }

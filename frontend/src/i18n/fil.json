@@ -1113,6 +1113,50 @@
         "sinceBirth": "Mula pagkapanganak",
         "residentRecord": "Talaan ng residente"
       }
+    },
+    "printing": {
+      "summary": {
+        "willPrint": "Ipi-print",
+        "missingWord": "Kulang",
+        "missingCount": "Kulang ({{total}})",
+        "allComplete": "Kumpleto na ang lahat ng kailangang field.",
+        "ready": "Handa nang i-isyu",
+        "previewOnly": "Preview lamang. Ipi-print ang dokumento pagkatapos itong i-isyu.",
+        "afterPrinting": "Pagkatapos mag-print: {{steps}}",
+        "stepsClearance": "Pipirma at magtatatak ng hinlalaki ang residente; ilagay ang dry seal.",
+        "stepsAssistance": "Pipirma ang Kagawad.",
+        "stepsOther": "Ilagay ang dry seal."
+      },
+      "notices": {
+        "busy": "May isinasagawa nang pag-print.",
+        "opened": "Nabuksan na ang print dialog. Ilagay ang pre-printed na form, mag-print sa 100% na scale nang walang header o footer, at pindutin muli ang Print para sa isa pang kopya.",
+        "unable": "Hindi maihanda ang dokumentong ito para sa pag-print.",
+        "oldForm": "Ginawa ang talaang ito gamit ang lumang form at walang naka-save na datos sa pag-print. Gamitin ang Bagong Isyu para i-isyu itong muli.",
+        "notFound": "Hindi makita ang isyung ito, kaya hindi ito mapi-print.",
+        "voided": "Ang {{ref}} ay na-void at hindi na mapi-print.",
+        "noTemplate": "Wala pang print template ang uri ng dokumentong ito, kaya hindi ito mapi-print mula rito."
+      },
+      "calibration": {
+        "intro": "I-print ang calibration sheet sa plain na papel sa 100% na scale (walang header, footer o fit-to-page), pagkatapos ay idikit ito sa pre-printed na form. Ayusin ang offset hanggang ang mga pulang kahon ay nasa mga patlang.",
+        "form": "Form",
+        "shiftRight": "Ilipat pakanan (pt)",
+        "shiftDown": "Ilipat pababa (pt)",
+        "units": "72 pt = 1 pulgada, humigit-kumulang 2.8 pt = 1 mm. Hanggang {{max}} pt sa bawat direksyon.",
+        "save": "I-save ang offset",
+        "printSheet": "I-print ang calibration sheet",
+        "reset": "I-reset sa 0",
+        "saved": "Na-save sa computer na ito.",
+        "saveFailed": "Hindi ma-save: hindi magagamit ang storage ng browser.",
+        "gridLabel": "Calibration grid sa pag-print",
+        "templates": {
+          "clearance": "Barangay Clearance",
+          "franchise": "Franchise Clearance",
+          "utility": "Kuryente at Tubig",
+          "indigency": "Indigency",
+          "marginalized": "Marginalized Sector",
+          "assistance": "Sertipikasyon ng Tulong"
+        }
+      }
     }
   }
 }

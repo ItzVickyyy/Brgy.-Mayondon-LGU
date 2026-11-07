@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -6,13 +7,9 @@ import { CalibrationSheet } from "@/components/Issuances/CalibrationSheet"
 import { MAX_OFFSET_PT, clampOffset, getOffset, saveOffset } from "@/lib/print/calibration"
 import { printTemplates, type PrintTemplateId } from "@/lib/print/templates"
 
-const labels: Record<PrintTemplateId, string> = {
-  clearance: "Barangay Clearance", franchise: "Franchise Clearance", utility: "Electrical and Water", indigency: "Indigency",
-  marginalized: "Marginalized Sector", assistance: "Assistance Certification",
-}
-
 /** Offset editor + calibration sheet button. Mounted by step 5 (e.g. in a "Printing" settings dialog). */
 export function CalibrationPanel() {
+  const { t } = useTranslation()
   const [templateId, setTemplateId] = useState<PrintTemplateId>("clearance")
   const [offset, setOffset] = useState(() => getOffset("clearance"))
   const [printing, setPrinting] = useState(false)
@@ -29,25 +26,25 @@ export function CalibrationPanel() {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">Print the calibration sheet on plain paper at 100% scale (no headers, footers or fit-to-page), then hold it against the pre-printed form. Adjust the offset until the red boxes sit on the blanks.</p>
+      <p className="text-sm text-muted-foreground">{t("issuances.printing.calibration.intro")}</p>
       <div className="space-y-2">
-        <Label htmlFor="calibration-template">Form</Label>
+        <Label htmlFor="calibration-template">{t("issuances.printing.calibration.form")}</Label>
         <select id="calibration-template" className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm" value={templateId} onChange={(e) => choose(e.target.value as PrintTemplateId)}>
-          {(Object.keys(printTemplates) as PrintTemplateId[]).map((id) => <option key={id} value={id}>{labels[id]}</option>)}
+          {(Object.keys(printTemplates) as PrintTemplateId[]).map((id) => <option key={id} value={id}>{t(`issuances.printing.calibration.templates.${id}`)}</option>)}
         </select>
       </div>
       <div className="grid grid-cols-2 gap-3">
-        <div className="space-y-2"><Label htmlFor="calibration-x">Shift right (pt)</Label><Input id="calibration-x" type="number" step="0.5" min={-MAX_OFFSET_PT} max={MAX_OFFSET_PT} value={offset.x} onChange={(e) => change("x", e.target.value)} /></div>
-        <div className="space-y-2"><Label htmlFor="calibration-y">Shift down (pt)</Label><Input id="calibration-y" type="number" step="0.5" min={-MAX_OFFSET_PT} max={MAX_OFFSET_PT} value={offset.y} onChange={(e) => change("y", e.target.value)} /></div>
+        <div className="space-y-2"><Label htmlFor="calibration-x">{t("issuances.printing.calibration.shiftRight")}</Label><Input id="calibration-x" type="number" step="0.5" min={-MAX_OFFSET_PT} max={MAX_OFFSET_PT} value={offset.x} onChange={(e) => change("x", e.target.value)} /></div>
+        <div className="space-y-2"><Label htmlFor="calibration-y">{t("issuances.printing.calibration.shiftDown")}</Label><Input id="calibration-y" type="number" step="0.5" min={-MAX_OFFSET_PT} max={MAX_OFFSET_PT} value={offset.y} onChange={(e) => change("y", e.target.value)} /></div>
       </div>
-      <p className="text-xs text-muted-foreground">72 pt = 1 inch, about 2.8 pt = 1 mm. Limit {MAX_OFFSET_PT} pt either way.</p>
+      <p className="text-xs text-muted-foreground">{t("issuances.printing.calibration.units", { max: MAX_OFFSET_PT })}</p>
       <div className="flex flex-wrap gap-2">
-        <Button type="button" onClick={save}>Save offset</Button>
-        <Button type="button" variant="outline" onClick={printSheet} disabled={printing}>Print calibration sheet</Button>
-        <Button type="button" variant="ghost" onClick={() => { setOffset({ x: 0, y: 0 }); setSaved(null) }}>Reset to 0</Button>
+        <Button type="button" onClick={save}>{t("issuances.printing.calibration.save")}</Button>
+        <Button type="button" variant="outline" onClick={printSheet} disabled={printing}>{t("issuances.printing.calibration.printSheet")}</Button>
+        <Button type="button" variant="ghost" onClick={() => { setOffset({ x: 0, y: 0 }); setSaved(null) }}>{t("issuances.printing.calibration.reset")}</Button>
       </div>
-      {saved === true && <p className="text-sm">Saved on this computer.</p>}
-      {saved === false && <p className="text-sm text-destructive">Could not save: browser storage is unavailable.</p>}
+      {saved === true && <p className="text-sm">{t("issuances.printing.calibration.saved")}</p>}
+      {saved === false && <p className="text-sm text-destructive">{t("issuances.printing.calibration.saveFailed")}</p>}
       {printing && <CalibrationSheet templateId={templateId} offset={clampOffset(offset)} />}
     </div>
   )

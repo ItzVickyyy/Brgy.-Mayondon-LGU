@@ -1,5 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { PrintOverlay } from "@/components/Issuances/PrintOverlay"
+import { printMessage } from "@/lib/issuanceLabels"
 import type { PrintData } from "@/lib/print/buildPrintData"
 import { getOffset } from "@/lib/print/calibration"
 import { loadPrintData } from "@/lib/print/loadPrintData"
@@ -34,6 +36,7 @@ export function usePrintIssuance(): {
   print: (issuanceId: string) => Promise<string>
   overlay: ReactNode
 } {
+  const { t } = useTranslation()
   const [data, setData] = useState<PrintData | null>(null)
   const busy = useRef(false)
   const done = useRef<(() => void) | null>(null)
@@ -55,25 +58,28 @@ export function usePrintIssuance(): {
     }
   }, [data])
 
-  const print = useCallback(async (issuanceId: string) => {
-    if (busy.current) return "A print is already in progress."
-    busy.current = true
-    try {
-      const result = await loadPrintData(issuanceId)
-      if (!result.ok) return result.message
-      await new Promise<void>((resolve) => {
-        done.current = resolve
-        setData(result.data)
-      })
-      return "Opened the print dialog. Load the pre-printed form, print at 100% scale with no headers or footers, and use Print again for another copy."
-    } catch (error) {
-      return error instanceof Error
-        ? error.message
-        : "Unable to prepare this document for printing."
-    } finally {
-      busy.current = false
-    }
-  }, [])
+  const print = useCallback(
+    async (issuanceId: string) => {
+      if (busy.current) return t("issuances.printing.notices.busy")
+      busy.current = true
+      try {
+        const result = await loadPrintData(issuanceId)
+        if (!result.ok) return printMessage(result.message, t)
+        await new Promise<void>((resolve) => {
+          done.current = resolve
+          setData(result.data)
+        })
+        return t("issuances.printing.notices.opened")
+      } catch (error) {
+        return error instanceof Error
+          ? error.message
+          : t("issuances.printing.notices.unable")
+      } finally {
+        busy.current = false
+      }
+    },
+    [t],
+  )
 
   return {
     print,
