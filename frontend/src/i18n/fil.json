@@ -1316,6 +1316,138 @@
         "term": "Termino",
         "close": "Isara"
       }
+    },
+    "reports": {
+      "title": "Mga Ulat ng Pamamahala",
+      "subtitle": "Suriin ang pag-isyu ng mga dokumento at ang aktibidad sa mga talaan ng residente.",
+      "dismiss": "Isara ang mensahe",
+      "total": "Kabuuan",
+      "loading": "Nilo-load ang ulat...",
+      "periods": {
+        "week": "Linggong ito",
+        "month": "Buwang ito",
+        "quarter": "Kuwarter na ito",
+        "year": "Taong ito"
+      },
+      "kinds": {
+        "clearance": "Barangay Clearance",
+        "barangay_id": "Barangay ID"
+      },
+      "expiryStatus": {
+        "expiring_soon": "Malapit nang mag-expire",
+        "expired": "Nag-expire na"
+      },
+      "roles": {
+        "admin": "System Administrator",
+        "staff": "Staff"
+      },
+      "days": {
+        "today": "mag-e-expire ngayon",
+        "in_one": "sa loob ng {{count}} araw",
+        "in_other": "sa loob ng {{count}} araw",
+        "ago_one": "nag-expire {{count}} araw na ang nakalipas",
+        "ago_other": "nag-expire {{count}} araw na ang nakalipas"
+      },
+      "stats": {
+        "issued": "Mga Dokumentong Naisyu",
+        "expiring": "Mga Talaang Mag-e-expire",
+        "expiringDescription": "Malapit nang mag-expire o nag-expire na",
+        "imports": "Mga Import ng Masterlist",
+        "importsDescription": "Hindi pa konektado"
+      },
+      "summaryError": "Hindi ma-load ang mga buod na bilang",
+      "generate": {
+        "title": "Gumawa ng ulat",
+        "description": "Pumili ng uri ng ulat at panahon ng pag-uulat para makita ang kabuuang resulta.",
+        "reportType": "Uri ng ulat",
+        "period": "Panahon ng pag-uulat",
+        "preview": "I-preview ang Ulat",
+        "export": "I-export",
+        "print": "I-print"
+      },
+      "reportTypes": {
+        "issuances": "Mga isyu ayon sa uri ng dokumento",
+        "purpose": "Mga isyu ayon sa layunin",
+        "expiry": "Mga talaang mag-e-expire",
+        "imports": "Buod ng import ng masterlist",
+        "accounts": "Aktibidad ng account"
+      },
+      "previewArea": {
+        "title": "Lugar ng preview ng ulat",
+        "description": "Lalabas dito ang mga resulta ng napiling ulat."
+      },
+      "loadFailed": {
+        "title": "Hindi ma-load ang ulat na ito",
+        "description": "Suriin ang iyong koneksyon at subukang muli."
+      },
+      "issuances": {
+        "title": "Mga isyu ayon sa uri ng dokumento · {{period}}",
+        "columns": {
+          "type": "Uri ng dokumento",
+          "issued": "Naisyu",
+          "voided": "Na-void",
+          "share": "Bahagi",
+          "change": "kumpara sa nakaraang panahon"
+        },
+        "empty": {
+          "title": "Walang datos ng uri ng dokumento",
+          "description": "Walang magagamit na talaan ng isyu para sa ulat na ito."
+        }
+      },
+      "purpose": {
+        "title": "Mga isyu ayon sa layunin · {{period}}",
+        "columns": {
+          "purpose": "Layunin",
+          "issued": "Naisyu",
+          "share": "Bahagi"
+        },
+        "empty": {
+          "title": "Walang datos ng layunin",
+          "description": "Walang magagamit na layunin ng isyu para sa ulat na ito."
+        }
+      },
+      "expiry": {
+        "title": "Mga talaang mag-e-expire · simula ngayon",
+        "columns": {
+          "resident": "Residente",
+          "record": "Talaan",
+          "reference": "Sanggunian",
+          "expires": "Mag-e-expire",
+          "status": "Katayuan"
+        },
+        "total": "Kabuuan: {{total}} talaan",
+        "showing": " (ipinapakita ang unang {{shown}})",
+        "csvRecords": "talaan",
+        "empty": {
+          "title": "Walang talaang mag-e-expire",
+          "description": "Walang talaang maipapakita para sa ulat na ito."
+        }
+      },
+      "imports": {
+        "title": "Hindi pa magagamit ang import ng masterlist",
+        "description": "Hindi pa nagagawa ang pag-import ng masterlist, kaya wala pang kasaysayan ng import na maiuulat."
+      },
+      "accounts": {
+        "title": "Aktibidad ng account · {{period}}",
+        "columns": {
+          "user": "User",
+          "role": "Tungkulin",
+          "issued": "Mga dokumentong naisyu",
+          "changed": "Mga talaang idinagdag / in-edit",
+          "last": "Huling aktibidad"
+        },
+        "empty": {
+          "title": "Walang aktibidad ng account",
+          "description": "Lalabas dito ang aktibidad ng account kapag may magagamit nang talaan."
+        }
+      },
+      "notices": {
+        "previewBeforeExport": "I-preview muna ang ulat bago mag-export.",
+        "importsNothing": "Hindi pa magagamit ang import ng masterlist, kaya walang maie-export.",
+        "notLoaded": "Hindi pa tapos mag-load ang ulat, kaya hindi pa ito maie-export.",
+        "csvStarted": "Nagsimula na ang pag-export ng CSV para sa ipinapakitang ulat.",
+        "previewBeforePrint": "I-preview muna ang ulat bago mag-print."
+      }
     }
   }
 }

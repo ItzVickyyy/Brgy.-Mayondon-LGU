@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
+import type { ParseKeys, TFunction } from "i18next"
 import {
   BarChart3,
   CheckCircle2,
@@ -10,6 +11,7 @@ import {
   X,
 } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { ReportsService } from "@/client"
 import {
@@ -39,26 +41,45 @@ export const Route = createFileRoute("/_layout/reports")({
 type Period = "week" | "month" | "quarter" | "year"
 type ReportType = "issuances" | "purpose" | "expiry" | "imports" | "accounts"
 
-const periodLabel: Record<Period, string> = {
-  week: "This week",
-  month: "This month",
-  quarter: "This quarter",
-  year: "This year",
-}
+type NoticeKey =
+  | "previewBeforeExport"
+  | "importsNothing"
+  | "notLoaded"
+  | "csvStarted"
+  | "previewBeforePrint"
 
-const kindLabel: Record<string, string> = {
-  clearance: "Barangay Clearance",
-  barangay_id: "Barangay ID",
-}
+const periodKeys = {
+  week: "admin.reports.periods.week",
+  month: "admin.reports.periods.month",
+  quarter: "admin.reports.periods.quarter",
+  year: "admin.reports.periods.year",
+} as const satisfies Record<Period, ParseKeys>
 
-const expiryStatusLabel: Record<string, string> = {
+const kindKeys = {
+  clearance: "admin.reports.kinds.clearance",
+  barangay_id: "admin.reports.kinds.barangay_id",
+} as const satisfies Record<string, ParseKeys>
+
+const expiryStatusKeys = {
+  expiring_soon: "admin.reports.expiryStatus.expiring_soon",
+  expired: "admin.reports.expiryStatus.expired",
+} as const satisfies Record<string, ParseKeys>
+
+// The badge style is looked up by the English status word.
+const expiryStatusStyleKey: Record<string, string> = {
   expiring_soon: "Expiring soon",
   expired: "Expired",
 }
 
-const roleLabel: Record<string, string> = {
-  admin: "System Administrator",
-  staff: "Staff",
+const roleKeys = {
+  admin: "admin.reports.roles.admin",
+  staff: "admin.reports.roles.staff",
+} as const satisfies Record<string, ParseKeys>
+
+// A value with no entry is shown exactly as the API returned it.
+function labelOf(keys: Record<string, ParseKeys>, value: string, t: TFunction) {
+  const key = keys[value]
+  return key ? t(key) : value
 }
 
 const dateFormat = new Intl.DateTimeFormat("en-US", {
@@ -95,14 +116,14 @@ function formatChange(value: number | null) {
   return `${value > 0 ? "+" : ""}${value.toFixed(1)}%`
 }
 
-function daysText(daysLeft: number) {
-  if (daysLeft === 0) return "expires today"
-  if (daysLeft > 0) return `in ${daysLeft} ${daysLeft === 1 ? "day" : "days"}`
-  const ago = Math.abs(daysLeft)
-  return `expired ${ago} ${ago === 1 ? "day" : "days"} ago`
+function daysText(daysLeft: number, t: TFunction) {
+  if (daysLeft === 0) return t("admin.reports.days.today")
+  if (daysLeft > 0) return t("admin.reports.days.in", { count: daysLeft })
+  return t("admin.reports.days.ago", { count: Math.abs(daysLeft) })
 }
 
 function Reports() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
   const [period, setPeriod] = useState<Period>("month")
@@ -112,7 +133,7 @@ function Reports() {
     report: ReportType
     period: Period
   } | null>(null)
-  const [notice, setNotice] = useState("")
+  const [notice, setNotice] = useState<NoticeKey | "">("")
 
   const summaryQuery = useQuery({
     queryKey: ["reports-summary", period],
@@ -179,7 +200,7 @@ function Reports() {
 
   if (!isAdmin) return <NoPermission />
 
-  const appliedPeriodText = periodLabel[applied?.period ?? period]
+  const appliedPeriodText = t(periodKeys[applied?.period ?? period])
 
   function previewReport() {
     setApplied({ report, period })
@@ -191,7 +212,13 @@ function Reports() {
     if (applied.report === "issuances") {
       if (!typeQuery.data) return null
       return [
-        ["Document type", "Issued", "Voided", "Share", "vs previous period"],
+        [
+          t("admin.reports.issuances.columns.type"),
+          t("admin.reports.issuances.columns.issued"),
+          t("admin.reports.issuances.columns.voided"),
+          t("admin.reports.issuances.columns.share"),
+          t("admin.reports.issuances.columns.change"),
+        ],
         ...typeRows.map((row) => [
           row.name,
           row.issued,
@@ -200,7 +227,7 @@ function Reports() {
           formatChange(row.change_percent),
         ]),
         [
-          "Total",
+          t("admin.reports.total"),
           typeQuery.data.total_issued,
           typeQuery.data.total_voided,
           "",
@@ -211,48 +238,64 @@ function Reports() {
     if (applied.report === "purpose") {
       if (!purposeQuery.data) return null
       return [
-        ["Purpose", "Issued", "Share"],
+        [
+          t("admin.reports.purpose.columns.purpose"),
+          t("admin.reports.purpose.columns.issued"),
+          t("admin.reports.purpose.columns.share"),
+        ],
         ...purposeRows.map((row) => [
           row.purpose,
           row.issued,
           formatShare(row.share_percent),
         ]),
-        ["Total", purposeQuery.data.total_issued, ""],
+        [t("admin.reports.total"), purposeQuery.data.total_issued, ""],
       ]
     }
     if (applied.report === "expiry") {
       if (!expiryQuery.data) return null
       return [
-        ["Resident", "Record", "Reference", "Expires", "Status"],
+        [
+          t("admin.reports.expiry.columns.resident"),
+          t("admin.reports.expiry.columns.record"),
+          t("admin.reports.expiry.columns.reference"),
+          t("admin.reports.expiry.columns.expires"),
+          t("admin.reports.expiry.columns.status"),
+        ],
         ...expiringRows.map((row) => [
           row.resident_name,
-          kindLabel[row.kind] ?? row.kind,
+          labelOf(kindKeys, row.kind, t),
           row.reference_no,
           formatReportDate(row.expires_on),
-          expiryStatusLabel[row.status] ?? row.status,
+          labelOf(expiryStatusKeys, row.status, t),
         ]),
-        ["Total", expiringRows.length, "records", "", ""],
+        [
+          t("admin.reports.total"),
+          expiringRows.length,
+          t("admin.reports.expiry.csvRecords"),
+          "",
+          "",
+        ],
       ]
     }
     if (applied.report === "accounts") {
       if (!accountQuery.data) return null
       return [
         [
-          "User",
-          "Role",
-          "Documents issued",
-          "Records added / edited",
-          "Last activity",
+          t("admin.reports.accounts.columns.user"),
+          t("admin.reports.accounts.columns.role"),
+          t("admin.reports.accounts.columns.issued"),
+          t("admin.reports.accounts.columns.changed"),
+          t("admin.reports.accounts.columns.last"),
         ],
         ...accountRows.map((row) => [
           row.full_name || row.email,
-          roleLabel[row.role] ?? row.role,
+          labelOf(roleKeys, row.role, t),
           row.documents_issued,
           row.records_changed,
           formatMoment(row.last_activity),
         ]),
         [
-          "Total",
+          t("admin.reports.total"),
           "",
           accountRows.reduce((total, row) => total + row.documents_issued, 0),
           accountRows.reduce((total, row) => total + row.records_changed, 0),
@@ -265,20 +308,16 @@ function Reports() {
 
   function exportReport() {
     if (!applied) {
-      setNotice("Preview a report before exporting.")
+      setNotice("previewBeforeExport")
       return
     }
     if (applied.report === "imports") {
-      setNotice(
-        "Masterlist imports are not available yet, so there is nothing to export.",
-      )
+      setNotice("importsNothing")
       return
     }
     const csvRows = buildCsvRows()
     if (!csvRows) {
-      setNotice(
-        "The report has not finished loading, so it cannot be exported yet.",
-      )
+      setNotice("notLoaded")
       return
     }
     const csv = csvRows
@@ -293,12 +332,12 @@ function Reports() {
     link.download = `management-report-${applied.report}-${applied.period}.csv`
     link.click()
     URL.revokeObjectURL(url)
-    setNotice("CSV export started for the displayed report.")
+    setNotice("csvStarted")
   }
 
   function printReport() {
     if (!applied) {
-      setNotice("Preview a report before printing.")
+      setNotice("previewBeforePrint")
       return
     }
     window.print()
@@ -317,9 +356,11 @@ function Reports() {
             className="mx-auto size-8 text-muted-foreground"
             aria-hidden="true"
           />
-          <p className="mt-3 font-medium">Report preview area</p>
+          <p className="mt-3 font-medium">
+            {t("admin.reports.previewArea.title")}
+          </p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Results for the selected report will appear here.
+            {t("admin.reports.previewArea.description")}
           </p>
         </div>
       )
@@ -327,35 +368,32 @@ function Reports() {
 
     const loadFailed = (retry: () => void) => (
       <ErrorState
-        title="Could not load this report"
-        description="Check your connection and try again."
+        title={t("admin.reports.loadFailed.title")}
+        description={t("admin.reports.loadFailed.description")}
         onRetry={retry}
       />
     )
 
     if (applied.report === "issuances") {
-      if (typeQuery.isLoading) return <LoadingState title="Loading report..." />
+      if (typeQuery.isLoading)
+        return <LoadingState title={t("admin.reports.loading")} />
       if (typeQuery.isError || !typeQuery.data)
         return loadFailed(() => typeQuery.refetch())
       return (
         <div className="overflow-x-auto">
           <h3 className="mb-3 font-semibold tracking-tight">
-            Issuances by document type · {appliedPeriodText}
+            {t("admin.reports.issuances.title", { period: appliedPeriodText })}
           </h3>
           <table className="w-full min-w-[760px] text-left text-sm">
             <thead className={thead}>
               <tr>
-                {[
-                  "Document type",
-                  "Issued",
-                  "Voided",
-                  "Share",
-                  "vs previous period",
-                ].map((label) => (
-                  <th key={label} className={th}>
-                    {label}
-                  </th>
-                ))}
+                {(["type", "issued", "voided", "share", "change"] as const).map(
+                  (id) => (
+                    <th key={id} className={th}>
+                      {t(`admin.reports.issuances.columns.${id}`)}
+                    </th>
+                  ),
+                )}
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -374,7 +412,7 @@ function Reports() {
             </tbody>
             <tfoot>
               <tr className="border-t bg-muted/30 font-semibold">
-                <td className={td}>Total</td>
+                <td className={td}>{t("admin.reports.total")}</td>
                 <td className={td}>{typeQuery.data.total_issued}</td>
                 <td className={td}>{typeQuery.data.total_voided}</td>
                 <td className={td}>—</td>
@@ -384,8 +422,8 @@ function Reports() {
           </table>
           {typeRows.length === 0 ? (
             <EmptyState
-              title="No document-type data"
-              description="No issuance records are available for this report."
+              title={t("admin.reports.issuances.empty.title")}
+              description={t("admin.reports.issuances.empty.description")}
             />
           ) : null}
           <TablePagination
@@ -402,20 +440,20 @@ function Reports() {
 
     if (applied.report === "purpose") {
       if (purposeQuery.isLoading)
-        return <LoadingState title="Loading report..." />
+        return <LoadingState title={t("admin.reports.loading")} />
       if (purposeQuery.isError || !purposeQuery.data)
         return loadFailed(() => purposeQuery.refetch())
       return (
         <div className="overflow-x-auto">
           <h3 className="mb-3 font-semibold tracking-tight">
-            Issuances by purpose · {appliedPeriodText}
+            {t("admin.reports.purpose.title", { period: appliedPeriodText })}
           </h3>
           <table className="w-full min-w-[560px] text-left text-sm">
             <thead className={thead}>
               <tr>
-                {["Purpose", "Issued", "Share"].map((label) => (
-                  <th key={label} className={th}>
-                    {label}
+                {(["purpose", "issued", "share"] as const).map((id) => (
+                  <th key={id} className={th}>
+                    {t(`admin.reports.purpose.columns.${id}`)}
                   </th>
                 ))}
               </tr>
@@ -434,7 +472,7 @@ function Reports() {
             </tbody>
             <tfoot>
               <tr className="border-t bg-muted/30 font-semibold">
-                <td className={td}>Total</td>
+                <td className={td}>{t("admin.reports.total")}</td>
                 <td className={td}>{purposeQuery.data.total_issued}</td>
                 <td className={td}>—</td>
               </tr>
@@ -442,8 +480,8 @@ function Reports() {
           </table>
           {purposeRows.length === 0 ? (
             <EmptyState
-              title="No purpose data"
-              description="No issuance purposes are available for this report."
+              title={t("admin.reports.purpose.empty.title")}
+              description={t("admin.reports.purpose.empty.description")}
             />
           ) : null}
           <TablePagination
@@ -460,29 +498,35 @@ function Reports() {
 
     if (applied.report === "expiry") {
       if (expiryQuery.isLoading)
-        return <LoadingState title="Loading report..." />
+        return <LoadingState title={t("admin.reports.loading")} />
       if (expiryQuery.isError || !expiryQuery.data)
         return loadFailed(() => expiryQuery.refetch())
       return (
         <div className="overflow-x-auto">
           <h3 className="mb-3 font-semibold tracking-tight">
-            Expiring records · as of today
+            {t("admin.reports.expiry.title")}
           </h3>
           <table className="w-full min-w-[800px] text-left text-sm">
             <thead className={thead}>
               <tr>
-                {["Resident", "Record", "Reference", "Expires", "Status"].map(
-                  (label) => (
-                    <th key={label} className={th}>
-                      {label}
-                    </th>
-                  ),
-                )}
+                {(
+                  [
+                    "resident",
+                    "record",
+                    "reference",
+                    "expires",
+                    "status",
+                  ] as const
+                ).map((id) => (
+                  <th key={id} className={th}>
+                    {t(`admin.reports.expiry.columns.${id}`)}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y">
               {expiringPagination.paginatedItems.map((row) => {
-                const statusText = expiryStatusLabel[row.status] ?? row.status
+                const statusText = labelOf(expiryStatusKeys, row.status, t)
                 return (
                   <tr
                     key={row.issuance_id}
@@ -491,18 +535,22 @@ function Reports() {
                     <td className={`${td} font-semibold`}>
                       {row.resident_name}
                     </td>
-                    <td className={td}>{kindLabel[row.kind] ?? row.kind}</td>
+                    <td className={td}>{labelOf(kindKeys, row.kind, t)}</td>
                     <td className={`${td} font-mono`}>{row.reference_no}</td>
                     <td className={td}>
                       <p>{formatReportDate(row.expires_on)}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        {daysText(row.days_left)}
+                        {daysText(row.days_left, t)}
                       </p>
                     </td>
                     <td className={td}>
                       <Badge
                         variant="outline"
-                        className={statusStyles[statusText]}
+                        className={
+                          statusStyles[
+                            expiryStatusStyleKey[row.status] ?? row.status
+                          ]
+                        }
                       >
                         {statusText}
                       </Badge>
@@ -514,9 +562,13 @@ function Reports() {
             <tfoot>
               <tr className="border-t bg-muted/30 font-semibold">
                 <td className={td} colSpan={5}>
-                  Total: {expiryQuery.data.count} records
+                  {t("admin.reports.expiry.total", {
+                    total: expiryQuery.data.count,
+                  })}
                   {expiryQuery.data.count > expiringRows.length
-                    ? ` (showing the first ${expiringRows.length})`
+                    ? t("admin.reports.expiry.showing", {
+                        shown: expiringRows.length,
+                      })
                     : ""}
                 </td>
               </tr>
@@ -524,8 +576,8 @@ function Reports() {
           </table>
           {expiringRows.length === 0 ? (
             <EmptyState
-              title="No expiring records"
-              description="There are no records to display for this report."
+              title={t("admin.reports.expiry.empty.title")}
+              description={t("admin.reports.expiry.empty.description")}
             />
           ) : null}
           <TablePagination
@@ -543,35 +595,31 @@ function Reports() {
     if (applied.report === "imports") {
       return (
         <EmptyState
-          title="Masterlist imports are not available yet"
-          description="Importing a masterlist has not been built, so there is no import history to report."
+          title={t("admin.reports.imports.title")}
+          description={t("admin.reports.imports.description")}
         />
       )
     }
 
     if (accountQuery.isLoading)
-      return <LoadingState title="Loading report..." />
+      return <LoadingState title={t("admin.reports.loading")} />
     if (accountQuery.isError || !accountQuery.data)
       return loadFailed(() => accountQuery.refetch())
     return (
       <div className="overflow-x-auto">
         <h3 className="mb-3 font-semibold tracking-tight">
-          Account activity · {appliedPeriodText}
+          {t("admin.reports.accounts.title", { period: appliedPeriodText })}
         </h3>
         <table className="w-full min-w-[800px] text-left text-sm">
           <thead className={thead}>
             <tr>
-              {[
-                "User",
-                "Role",
-                "Documents issued",
-                "Records added / edited",
-                "Last activity",
-              ].map((label) => (
-                <th key={label} className={th}>
-                  {label}
-                </th>
-              ))}
+              {(["user", "role", "issued", "changed", "last"] as const).map(
+                (id) => (
+                  <th key={id} className={th}>
+                    {t(`admin.reports.accounts.columns.${id}`)}
+                  </th>
+                ),
+              )}
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -597,7 +645,7 @@ function Reports() {
                         : statusStyles.Inactive
                     }
                   >
-                    {roleLabel[row.role] ?? row.role}
+                    {labelOf(roleKeys, row.role, t)}
                   </Badge>
                 </td>
                 <td className={`${td} tabular-nums`}>{row.documents_issued}</td>
@@ -609,7 +657,7 @@ function Reports() {
           <tfoot>
             <tr className="border-t bg-muted/30 font-semibold">
               <td className={td} colSpan={2}>
-                Total
+                {t("admin.reports.total")}
               </td>
               <td className={td}>
                 {accountRows.reduce(
@@ -629,8 +677,8 @@ function Reports() {
         </table>
         {accountRows.length === 0 ? (
           <EmptyState
-            title="No account activity"
-            description="Account activity will appear here when records are available."
+            title={t("admin.reports.accounts.empty.title")}
+            description={t("admin.reports.accounts.empty.description")}
           />
         ) : null}
         <TablePagination
@@ -650,10 +698,10 @@ function Reports() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            Management Reports
+            {t("admin.reports.title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Review document issuance and resident-record activity.
+            {t("admin.reports.subtitle")}
           </p>
         </div>
       </div>
@@ -667,12 +715,12 @@ function Reports() {
             className="mt-0.5 size-4 shrink-0 text-brand"
             aria-hidden="true"
           />
-          <p className="flex-1">{notice}</p>
+          <p className="flex-1">{t(`admin.reports.notices.${notice}`)}</p>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setNotice("")}
-            aria-label="Dismiss message"
+            aria-label={t("admin.reports.dismiss")}
           >
             <X aria-hidden="true" />
           </Button>
@@ -682,26 +730,26 @@ function Reports() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard
           icon={FileCheck2}
-          label="Documents Issued"
+          label={t("admin.reports.stats.issued")}
           value={summaryQuery.data?.documents_issued ?? "—"}
-          description={periodLabel[period]}
+          description={t(periodKeys[period])}
         />
         <StatCard
           icon={Clock3}
-          label="Records Expiring"
+          label={t("admin.reports.stats.expiring")}
           value={summaryQuery.data?.records_expiring ?? "—"}
-          description="Expiring soon or already expired"
+          description={t("admin.reports.stats.expiringDescription")}
         />
         <StatCard
           icon={FileUp}
-          label="Masterlist Imports"
+          label={t("admin.reports.stats.imports")}
           value="—"
-          description="Not connected yet"
+          description={t("admin.reports.stats.importsDescription")}
         />
       </div>
       {summaryQuery.isError ? (
         <ErrorState
-          title="Could not load the summary figures"
+          title={t("admin.reports.summaryError")}
           onRetry={() => summaryQuery.refetch()}
         />
       ) : null}
@@ -709,15 +757,16 @@ function Reports() {
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-col gap-4 border-b p-4 sm:p-5">
           <div>
-            <h2 className="font-semibold tracking-tight">Generate a report</h2>
+            <h2 className="font-semibold tracking-tight">
+              {t("admin.reports.generate.title")}
+            </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Choose a report type and reporting period to preview aggregate
-              results.
+              {t("admin.reports.generate.description")}
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
             <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
-              Report type
+              {t("admin.reports.generate.reportType")}
               <select
                 value={report}
                 onChange={(event) => {
@@ -726,15 +775,25 @@ function Reports() {
                 }}
                 className={`${formControlClass} min-w-52 font-normal`}
               >
-                <option value="issuances">Issuances by document type</option>
-                <option value="purpose">Issuances by purpose</option>
-                <option value="expiry">Expiring records</option>
-                <option value="imports">Masterlist import summary</option>
-                <option value="accounts">Account activity</option>
+                <option value="issuances">
+                  {t("admin.reports.reportTypes.issuances")}
+                </option>
+                <option value="purpose">
+                  {t("admin.reports.reportTypes.purpose")}
+                </option>
+                <option value="expiry">
+                  {t("admin.reports.reportTypes.expiry")}
+                </option>
+                <option value="imports">
+                  {t("admin.reports.reportTypes.imports")}
+                </option>
+                <option value="accounts">
+                  {t("admin.reports.reportTypes.accounts")}
+                </option>
               </select>
             </label>
             <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
-              Reporting period
+              {t("admin.reports.generate.period")}
               <select
                 value={period}
                 onChange={(event) => {
@@ -743,22 +802,22 @@ function Reports() {
                 }}
                 className={`${formControlClass} min-w-40 font-normal`}
               >
-                <option value="week">This week</option>
-                <option value="month">This month</option>
-                <option value="quarter">This quarter</option>
-                <option value="year">This year</option>
+                <option value="week">{t(periodKeys.week)}</option>
+                <option value="month">{t(periodKeys.month)}</option>
+                <option value="quarter">{t(periodKeys.quarter)}</option>
+                <option value="year">{t(periodKeys.year)}</option>
               </select>
             </label>
             <Button onClick={previewReport}>
               <BarChart3 aria-hidden="true" />
-              Preview Report
+              {t("admin.reports.generate.preview")}
             </Button>
             <Button variant="outline" onClick={exportReport}>
               <Download aria-hidden="true" />
-              Export
+              {t("admin.reports.generate.export")}
             </Button>
             <Button variant="outline" onClick={printReport}>
-              Print
+              {t("admin.reports.generate.print")}
             </Button>
           </div>
         </div>

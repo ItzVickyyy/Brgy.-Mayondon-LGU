@@ -1316,6 +1316,138 @@
         "term": "Term",
         "close": "Close"
       }
+    },
+    "reports": {
+      "title": "Management Reports",
+      "subtitle": "Review document issuance and resident-record activity.",
+      "dismiss": "Dismiss message",
+      "total": "Total",
+      "loading": "Loading report...",
+      "periods": {
+        "week": "This week",
+        "month": "This month",
+        "quarter": "This quarter",
+        "year": "This year"
+      },
+      "kinds": {
+        "clearance": "Barangay Clearance",
+        "barangay_id": "Barangay ID"
+      },
+      "expiryStatus": {
+        "expiring_soon": "Expiring soon",
+        "expired": "Expired"
+      },
+      "roles": {
+        "admin": "System Administrator",
+        "staff": "Staff"
+      },
+      "days": {
+        "today": "expires today",
+        "in_one": "in {{count}} day",
+        "in_other": "in {{count}} days",
+        "ago_one": "expired {{count}} day ago",
+        "ago_other": "expired {{count}} days ago"
+      },
+      "stats": {
+        "issued": "Documents Issued",
+        "expiring": "Records Expiring",
+        "expiringDescription": "Expiring soon or already expired",
+        "imports": "Masterlist Imports",
+        "importsDescription": "Not connected yet"
+      },
+      "summaryError": "Could not load the summary figures",
+      "generate": {
+        "title": "Generate a report",
+        "description": "Choose a report type and reporting period to preview aggregate results.",
+        "reportType": "Report type",
+        "period": "Reporting period",
+        "preview": "Preview Report",
+        "export": "Export",
+        "print": "Print"
+      },
+      "reportTypes": {
+        "issuances": "Issuances by document type",
+        "purpose": "Issuances by purpose",
+        "expiry": "Expiring records",
+        "imports": "Masterlist import summary",
+        "accounts": "Account activity"
+      },
+      "previewArea": {
+        "title": "Report preview area",
+        "description": "Results for the selected report will appear here."
+      },
+      "loadFailed": {
+        "title": "Could not load this report",
+        "description": "Check your connection and try again."
+      },
+      "issuances": {
+        "title": "Issuances by document type · {{period}}",
+        "columns": {
+          "type": "Document type",
+          "issued": "Issued",
+          "voided": "Voided",
+          "share": "Share",
+          "change": "vs previous period"
+        },
+        "empty": {
+          "title": "No document-type data",
+          "description": "No issuance records are available for this report."
+        }
+      },
+      "purpose": {
+        "title": "Issuances by purpose · {{period}}",
+        "columns": {
+          "purpose": "Purpose",
+          "issued": "Issued",
+          "share": "Share"
+        },
+        "empty": {
+          "title": "No purpose data",
+          "description": "No issuance purposes are available for this report."
+        }
+      },
+      "expiry": {
+        "title": "Expiring records · as of today",
+        "columns": {
+          "resident": "Resident",
+          "record": "Record",
+          "reference": "Reference",
+          "expires": "Expires",
+          "status": "Status"
+        },
+        "total": "Total: {{total}} records",
+        "showing": " (showing the first {{shown}})",
+        "csvRecords": "records",
+        "empty": {
+          "title": "No expiring records",
+          "description": "There are no records to display for this report."
+        }
+      },
+      "imports": {
+        "title": "Masterlist imports are not available yet",
+        "description": "Importing a masterlist has not been built, so there is no import history to report."
+      },
+      "accounts": {
+        "title": "Account activity · {{period}}",
+        "columns": {
+          "user": "User",
+          "role": "Role",
+          "issued": "Documents issued",
+          "changed": "Records added / edited",
+          "last": "Last activity"
+        },
+        "empty": {
+          "title": "No account activity",
+          "description": "Account activity will appear here when records are available."
+        }
+      },
+      "notices": {
+        "previewBeforeExport": "Preview a report before exporting.",
+        "importsNothing": "Masterlist imports are not available yet, so there is nothing to export.",
+        "notLoaded": "The report has not finished loading, so it cannot be exported yet.",
+        "csvStarted": "CSV export started for the displayed report.",
+        "previewBeforePrint": "Preview a report before printing."
+      }
     }
   }
 }
