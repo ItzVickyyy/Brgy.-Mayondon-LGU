@@ -1947,7 +1947,7 @@ export type UserPublic = {
     /**
      * Must Change Password
      */
-    must_change_password: boolean;
+    must_change_password?: boolean;
     /**
      * Full Name
      */

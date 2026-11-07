@@ -14,7 +14,7 @@ export const Route = createFileRoute("/change-password")({
     let mustChangePassword = false
     try {
       const response = await UsersService.readUserMe()
-      mustChangePassword = response.data.must_change_password
+      mustChangePassword = response.data.must_change_password === true
     } catch (error) {
       if (error && typeof error === "object" && "status" in error) {
         const status = error.status
