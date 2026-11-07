@@ -84,7 +84,7 @@ const contactFields: {
   },
   {
     key: "address",
-    label: "Address",
+    label: "account.fields.address",
     placeholder: "account.placeholders.address",
   },
 ]
@@ -238,10 +238,10 @@ export function MyAccountModal({
             </span>
             <div>
               <DialogTitle className="text-base font-semibold">
-                My Account
+                {t("account.myAccount.title")}
               </DialogTitle>
               <p className="mt-1 text-sm text-muted-foreground">
-                Manage your personal details, contact information, and security.
+                {t("account.myAccount.description")}
               </p>
             </div>
           </div>
@@ -298,7 +298,7 @@ export function MyAccountModal({
                           t("account.nameNotProvided")}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Profile photo
+                        {t("account.profilePhoto")}
                       </p>
                     </div>
                   </div>
