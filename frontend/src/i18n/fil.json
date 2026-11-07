@@ -54,5 +54,187 @@
     "version": "Bersyon",
     "terms": "Mga Tuntunin ng Paggamit",
     "privacy": "Patakaran sa Privacy"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "Pangkalahatang tanaw sa pag-isyu ng dokumento, mga malapit nang mag-expire, at mga gawaing nangangailangan ng pansin.",
+    "period": {
+      "label": "Panahon",
+      "ariaLabel": "Panahon ng ulat sa dashboard",
+      "today": "Ngayong Araw",
+      "week": "Ngayong Linggo",
+      "month": "Ngayong Buwan",
+      "3months": "Nakaraang 3 Buwan",
+      "6months": "Nakaraang 6 na Buwan",
+      "year": "Ngayong Taon",
+      "overall": "Lahat ng Panahon"
+    },
+    "loading": "Nilo-load ang dashboard...",
+    "loadError": {
+      "title": "Hindi ma-load ang dashboard",
+      "description": "Suriin ang iyong koneksyon at subukan muli."
+    },
+    "summary": {
+      "ariaLabel": "Buod ng mga estadistika",
+      "issuedThisMonth": {
+        "title": "Mga Dokumentong Naisyu Ngayong Buwan",
+        "description": "Kabuuan ngayong buwan"
+      },
+      "clearancesExpiring": {
+        "title": "Mga Clearance na Mag-e-expire sa Loob ng 30 Araw",
+        "description": "Mag-e-expire sa loob ng {{days}} araw"
+      },
+      "idsExpiring": {
+        "title": "Mga Barangay ID na Mag-e-expire sa Loob ng 30 Araw",
+        "description": "Mag-e-expire sa loob ng {{days}} araw"
+      },
+      "pending": {
+        "title": "Mga Nakabinbing Kahilingan sa Dokumento",
+        "description": "Mga draft na hindi pa naisyu"
+      }
+    },
+    "quickActions": {
+      "ariaLabel": "Mabilis na aksyon",
+      "title": "Mabilis na Aksyon",
+      "findResident": {
+        "title": "Maghanap ng residente",
+        "description": "Hanapin ang mga talaan ng residente at ID"
+      },
+      "createIssuance": {
+        "title": "Gumawa ng pag-isyu",
+        "description": "Magsimula ng bagong kahilingan sa dokumento"
+      },
+      "reviewHistory": {
+        "title": "Suriin ang kasaysayan ng pag-isyu",
+        "description": "Hanapin ang mga naunang talaan ng dokumento"
+      },
+      "viewActivity": {
+        "title": "Tingnan ang aktibidad",
+        "description": "Suriin ang mga kamakailang aksyon sa opisina"
+      }
+    },
+    "overTime": {
+      "title": "Mga Naisyung Dokumento sa Paglipas ng Panahon",
+      "description": "Buwanang dami ng naisyu",
+      "empty": "Wala pang kasaysayan ng pag-isyu.",
+      "note": "Binibilang ang mga dokumentong may bisa ayon sa petsa ng pag-isyu. Hindi binibilang ang mga dokumentong na-void."
+    },
+    "byType": {
+      "title": "Mga Naisyu ayon sa Uri ng Dokumento",
+      "description": "Hatian para sa napiling panahon ng ulat",
+      "empty": "Walang talaan ng pag-isyu sa panahong ito.",
+      "total": "Kabuuan"
+    },
+    "expiring": {
+      "title": "Mga ID at Clearance na Mag-e-expire",
+      "description": "Mga talaang maaaring mangailangan ng pansin sa lalong madaling panahon",
+      "clearance": "Barangay Clearance",
+      "id": "Barangay ID",
+      "line": "{{kind}} · {{reference}} · Petsa ng expiry: {{date}}",
+      "today": "Mag-e-expire ngayon",
+      "inDays_one": "Mag-e-expire sa loob ng {{count}} araw",
+      "inDays_other": "Mag-e-expire sa loob ng {{count}} araw",
+      "empty": "Walang talaang malapit nang mag-expire.",
+      "openHistory": "Buksan ang kasaysayan ng pag-isyu"
+    },
+    "recent": {
+      "title": "Mga Kamakailang Aktibidad",
+      "descriptionAdmin": "Kamakailang aktibidad sa buong sistema",
+      "descriptionStaff": "Ang iyong kamakailang aktibidad",
+      "you": "Ikaw",
+      "deletedAccount": "Binurang account",
+      "loadError": "Hindi ma-load ang kamakailang aktibidad.",
+      "empty": "Wala pang naitalang aktibidad.",
+      "note": "Lalabas dito ang kasaysayan ng aktibidad habang naitatala ang mga aksyon."
+    }
+  },
+  "activity": {
+    "title": "Talaan ng Aktibidad",
+    "subtitleAdmin": "Suriin ang aktibidad sa lahat ng account ng user.",
+    "subtitleStaff": "Suriin ang aktibidad na kaugnay ng iyong account.",
+    "sectionDescription": "Tingnan kung sino ang gumawa ng ano, kailan, at kung nagtagumpay ang aksyon.",
+    "filters": {
+      "search": "Hanapin",
+      "searchPlaceholder": "Hanapin ang aksyon, talaan, o module",
+      "module": "Module",
+      "allModules": "Lahat ng module",
+      "outcome": "Resulta",
+      "allOutcomes": "Lahat ng resulta",
+      "user": "User",
+      "allUsers": "Lahat ng user",
+      "from": "Mula",
+      "to": "Hanggang",
+      "startDateAria": "Petsa ng simula",
+      "endDateAria": "Petsa ng pagtatapos"
+    },
+    "checkDates": {
+      "title": "Suriin ang mga petsa",
+      "description": "Mas huli ang petsa ng simula kaysa sa petsa ng pagtatapos."
+    },
+    "loading": "Nilo-load ang aktibidad...",
+    "loadError": {
+      "title": "Hindi ma-load ang talaan ng aktibidad",
+      "description": "Suriin ang iyong koneksyon at subukan muli."
+    },
+    "columns": {
+      "dateTime": "Petsa at oras",
+      "user": "User",
+      "action": "Aksyon",
+      "module": "Module",
+      "record": "Talaan",
+      "outcome": "Resulta"
+    },
+    "empty": {
+      "title": "Walang katugmang aktibidad",
+      "description": "Subukan ang ibang salitang hahanapin o ibang filter."
+    },
+    "you": "Ikaw",
+    "modules": {
+      "records": "Mga Talaan ng Residente",
+      "issuance": "Mga Pag-isyu",
+      "users": "Mga Account ng User",
+      "officials": "Mga Opisyal",
+      "lookups": "Mga Kalye at Asosasyon",
+      "auth": "Mga Sign-in"
+    },
+    "outcomes": {
+      "success": "Matagumpay",
+      "failed": "Nabigo",
+      "denied": "Tinanggihan"
+    },
+    "actions": {
+      "resident": {
+        "create": "Naidagdag ang residente",
+        "update": "Na-update ang residente",
+        "archive": "Na-archive ang residente",
+        "restore": "Naibalik ang residente",
+        "photo_set": "Naidagdag ang larawan ng residente",
+        "photo_remove": "Naalis ang larawan ng residente"
+      },
+      "issuance": {
+        "issue": "Naisyu ang dokumento",
+        "correct": "Nagsimula ang pagwawasto",
+        "void": "Na-void ang dokumento",
+        "view_sensitive": "Tiningnan ang pinaghihigpitang detalye"
+      },
+      "official": {
+        "create": "Naidagdag ang opisyal",
+        "update": "Na-update ang opisyal"
+      },
+      "auth": {
+        "login": "Nag-sign in",
+        "login_failed": "Nabigo ang pag-sign in"
+      },
+      "user": {
+        "create": "Nagawa ang account",
+        "update": "Na-update ang account",
+        "role_change": "Binago ang tungkulin ng account",
+        "password_change": "Napalitan ang password",
+        "temp_password_set": "Naitakda ang pansamantalang password",
+        "update_self": "Na-update ang sariling account",
+        "delete": "Binura ang account",
+        "delete_self": "Binura ang sariling account"
+      }
+    }
   }
 }

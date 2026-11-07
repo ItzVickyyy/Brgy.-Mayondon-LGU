@@ -54,5 +54,187 @@
     "version": "Version",
     "terms": "Terms of Use",
     "privacy": "Privacy Policy"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "subtitle": "An overview of document issuance, upcoming expiries, and work requiring attention.",
+    "period": {
+      "label": "Period",
+      "ariaLabel": "Dashboard reporting period",
+      "today": "Today",
+      "week": "This Week",
+      "month": "This Month",
+      "3months": "Past 3 Months",
+      "6months": "Past 6 Months",
+      "year": "This Year",
+      "overall": "Overall"
+    },
+    "loading": "Loading dashboard...",
+    "loadError": {
+      "title": "Unable to load the dashboard",
+      "description": "Check your connection and try again."
+    },
+    "summary": {
+      "ariaLabel": "Summary statistics",
+      "issuedThisMonth": {
+        "title": "Documents Issued This Month",
+        "description": "Total this month"
+      },
+      "clearancesExpiring": {
+        "title": "Clearances Expiring in 30 Days",
+        "description": "Due within {{days}} days"
+      },
+      "idsExpiring": {
+        "title": "Barangay IDs Expiring in 30 Days",
+        "description": "Due within {{days}} days"
+      },
+      "pending": {
+        "title": "Pending Document Requests",
+        "description": "Drafts not yet issued"
+      }
+    },
+    "quickActions": {
+      "ariaLabel": "Quick actions",
+      "title": "Quick Actions",
+      "findResident": {
+        "title": "Find a resident",
+        "description": "Search resident and ID records"
+      },
+      "createIssuance": {
+        "title": "Create an issuance",
+        "description": "Start a new document request"
+      },
+      "reviewHistory": {
+        "title": "Review issuance history",
+        "description": "Find previous document records"
+      },
+      "viewActivity": {
+        "title": "View dashboard activity",
+        "description": "Review recent office actions"
+      }
+    },
+    "overTime": {
+      "title": "Document Issuances Over Time",
+      "description": "Monthly issuance volume",
+      "empty": "No issuance history yet.",
+      "note": "Counts documents currently in force by issue date. Voided documents are not counted."
+    },
+    "byType": {
+      "title": "Issuances by Document Type",
+      "description": "Distribution for the selected reporting period",
+      "empty": "No issuance records in this period.",
+      "total": "Total"
+    },
+    "expiring": {
+      "title": "Expiring IDs and Clearances",
+      "description": "Records that may need attention soon",
+      "clearance": "Barangay Clearance",
+      "id": "Barangay ID",
+      "line": "{{kind}} · {{reference}} · Expiry date: {{date}}",
+      "today": "Expires today",
+      "inDays_one": "Expires in {{count}} day",
+      "inDays_other": "Expires in {{count}} days",
+      "empty": "No records are expiring soon.",
+      "openHistory": "Open issuance history"
+    },
+    "recent": {
+      "title": "Recent Activities",
+      "descriptionAdmin": "Recent system-wide activity",
+      "descriptionStaff": "Your recent activity",
+      "you": "You",
+      "deletedAccount": "Deleted account",
+      "loadError": "Recent activity could not be loaded.",
+      "empty": "No activity recorded yet.",
+      "note": "Activity history appears here as actions are recorded."
+    }
+  },
+  "activity": {
+    "title": "Activity Log",
+    "subtitleAdmin": "Review activity across user accounts.",
+    "subtitleStaff": "Review activity associated with your account.",
+    "sectionDescription": "Review who did what, when, and whether the action succeeded.",
+    "filters": {
+      "search": "Search",
+      "searchPlaceholder": "Search action, record, or module",
+      "module": "Module",
+      "allModules": "All modules",
+      "outcome": "Outcome",
+      "allOutcomes": "All outcomes",
+      "user": "User",
+      "allUsers": "All users",
+      "from": "From",
+      "to": "To",
+      "startDateAria": "Start date",
+      "endDateAria": "End date"
+    },
+    "checkDates": {
+      "title": "Check the dates",
+      "description": "The start date is after the end date."
+    },
+    "loading": "Loading activity...",
+    "loadError": {
+      "title": "Could not load the activity log",
+      "description": "Check your connection and try again."
+    },
+    "columns": {
+      "dateTime": "Date & time",
+      "user": "User",
+      "action": "Action",
+      "module": "Module",
+      "record": "Record",
+      "outcome": "Outcome"
+    },
+    "empty": {
+      "title": "No matching activity",
+      "description": "Try a different search term or filter."
+    },
+    "you": "You",
+    "modules": {
+      "records": "Resident Records",
+      "issuance": "Issuances",
+      "users": "User Accounts",
+      "officials": "Officials",
+      "lookups": "Streets and Associations",
+      "auth": "Sign-ins"
+    },
+    "outcomes": {
+      "success": "Success",
+      "failed": "Failed",
+      "denied": "Denied"
+    },
+    "actions": {
+      "resident": {
+        "create": "Resident added",
+        "update": "Resident updated",
+        "archive": "Resident archived",
+        "restore": "Resident restored",
+        "photo_set": "Resident photo added",
+        "photo_remove": "Resident photo removed"
+      },
+      "issuance": {
+        "issue": "Document issued",
+        "correct": "Correction started",
+        "void": "Document voided",
+        "view_sensitive": "Restricted detail viewed"
+      },
+      "official": {
+        "create": "Official added",
+        "update": "Official updated"
+      },
+      "auth": {
+        "login": "Signed in",
+        "login_failed": "Sign-in failed"
+      },
+      "user": {
+        "create": "Account created",
+        "update": "Account updated",
+        "role_change": "Account role changed",
+        "password_change": "Password changed",
+        "temp_password_set": "Temporary password set",
+        "update_self": "Own account updated",
+        "delete": "Account deleted",
+        "delete_self": "Own account deleted"
+      }
+    }
   }
 }

@@ -9,6 +9,7 @@ import {
   Users,
 } from "lucide-react"
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { ActivityService, DashboardService } from "@/client"
 import { ErrorState, LoadingState } from "@/components/Common/FeedbackState"
@@ -30,15 +31,15 @@ type Period =
   | "year"
   | "overall"
 
-const periodLabels: Record<Period, string> = {
-  today: "Today",
-  week: "This Week",
-  month: "This Month",
-  "3months": "Past 3 Months",
-  "6months": "Past 6 Months",
-  year: "This Year",
-  overall: "Overall",
-}
+const periods: Period[] = [
+  "today",
+  "week",
+  "month",
+  "3months",
+  "6months",
+  "year",
+  "overall",
+]
 
 const dateFormat = new Intl.DateTimeFormat("en-US", {
   month: "short",
@@ -64,11 +65,6 @@ function monthLabel(value: string) {
 function dateLabel(value: string) {
   const [year, month, day] = value.split("-").map(Number)
   return dateFormat.format(new Date(year, month - 1, day))
-}
-
-function expiryText(daysLeft: number) {
-  if (daysLeft <= 0) return "Expires today"
-  return daysLeft === 1 ? "Expires in 1 day" : `Expires in ${daysLeft} days`
 }
 
 function SummaryCard({
@@ -118,6 +114,7 @@ function SectionHeading({
 }
 
 function Dashboard() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const isAdmin = Boolean(user?.is_superuser)
   const [period, setPeriod] = useState<Period>("overall")
@@ -130,9 +127,11 @@ function Dashboard() {
   const activityQuery = useQuery({
     queryKey: ["dashboard-activity"],
     queryFn: async () =>
-      (await ActivityService.listActivity({
+      (
+        await ActivityService.listActivity({
           query: { limit: 5, exclude_module: "auth" },
-        })).data,
+        })
+      ).data,
   })
   const dashboard = dashboardQuery.data
   const summary = dashboard?.summary
@@ -144,17 +143,50 @@ function Dashboard() {
   const activities = activityQuery.data?.data ?? []
   const number = (value: number | undefined) =>
     value === undefined ? "–" : String(value)
+  const expiryText = (daysLeft: number) =>
+    daysLeft <= 0
+      ? t("dashboard.expiring.today")
+      : t("dashboard.expiring.inDays", { count: daysLeft })
+  const quickActions = [
+    {
+      key: "findResident",
+      title: t("dashboard.quickActions.findResident.title"),
+      description: t("dashboard.quickActions.findResident.description"),
+      to: "/records",
+      icon: Users,
+    },
+    {
+      key: "createIssuance",
+      title: t("dashboard.quickActions.createIssuance.title"),
+      description: t("dashboard.quickActions.createIssuance.description"),
+      to: "/issuances",
+      icon: FileCheck2,
+    },
+    {
+      key: "reviewHistory",
+      title: t("dashboard.quickActions.reviewHistory.title"),
+      description: t("dashboard.quickActions.reviewHistory.description"),
+      to: "/issuances",
+      icon: CalendarDays,
+    },
+    {
+      key: "viewActivity",
+      title: t("dashboard.quickActions.viewActivity.title"),
+      description: t("dashboard.quickActions.viewActivity.description"),
+      to: "/activity-log",
+      icon: Activity,
+    },
+  ] as const
 
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            Dashboard
+            {t("dashboard.title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            An overview of document issuance, upcoming expiries, and work
-            requiring attention.
+            {t("dashboard.subtitle")}
           </p>
         </div>
         <label className="flex items-center gap-2 self-start text-sm sm:self-auto">
@@ -162,16 +194,18 @@ function Dashboard() {
             className="size-4 text-muted-foreground"
             aria-hidden="true"
           />
-          <span className="text-muted-foreground">Period</span>
+          <span className="text-muted-foreground">
+            {t("dashboard.period.label")}
+          </span>
           <select
-            aria-label="Dashboard reporting period"
+            aria-label={t("dashboard.period.ariaLabel")}
             value={period}
             onChange={(event) => setPeriod(event.target.value as Period)}
             className="min-h-11 rounded-md border bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            {Object.entries(periodLabels).map(([value, label]) => (
+            {periods.map((value) => (
               <option key={value} value={value}>
-                {label}
+                {t(`dashboard.period.${value}`)}
               </option>
             ))}
           </select>
@@ -179,78 +213,57 @@ function Dashboard() {
       </div>
 
       {dashboardQuery.isLoading ? (
-        <LoadingState title="Loading dashboard..." />
+        <LoadingState title={t("dashboard.loading")} />
       ) : null}
       {dashboardQuery.isError ? (
         <ErrorState
-          title="Unable to load the dashboard"
-          description="Check your connection and try again."
+          title={t("dashboard.loadError.title")}
+          description={t("dashboard.loadError.description")}
           onRetry={() => void dashboardQuery.refetch()}
         />
       ) : null}
 
       <section
-        aria-label="Summary statistics"
+        aria-label={t("dashboard.summary.ariaLabel")}
         className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         <SummaryCard
-          title="Documents Issued This Month"
+          title={t("dashboard.summary.issuedThisMonth.title")}
           value={number(summary?.documents_issued_this_month)}
-          description="Total this month"
+          description={t("dashboard.summary.issuedThisMonth.description")}
           icon={FileCheck2}
         />
         <SummaryCard
-          title="Clearances Expiring in 30 Days"
+          title={t("dashboard.summary.clearancesExpiring.title")}
           value={number(summary?.clearances_expiring)}
-          description={`Due within ${summary?.clearance_window_days ?? 30} days`}
+          description={t("dashboard.summary.clearancesExpiring.description", {
+            days: summary?.clearance_window_days ?? 30,
+          })}
           icon={Clock3}
         />
         <SummaryCard
-          title="Barangay IDs Expiring in 30 Days"
+          title={t("dashboard.summary.idsExpiring.title")}
           value={number(summary?.barangay_ids_expiring)}
-          description={`Due within ${summary?.id_window_days ?? 30} days`}
+          description={t("dashboard.summary.idsExpiring.description", {
+            days: summary?.id_window_days ?? 30,
+          })}
           icon={IdCard}
         />
         <SummaryCard
-          title="Pending Document Requests"
+          title={t("dashboard.summary.pending.title")}
           value={number(summary?.open_drafts)}
-          description="Drafts not yet issued"
+          description={t("dashboard.summary.pending.description")}
           icon={Users}
         />
       </section>
 
-      <section aria-label="Quick actions">
+      <section aria-label={t("dashboard.quickActions.ariaLabel")}>
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <SectionHeading title="Quick Actions" />
+          <SectionHeading title={t("dashboard.quickActions.title")} />
           <div className="mt-3 flex flex-col gap-3 lg:flex-row">
-            {[
-              {
-                title: "Find a resident",
-                description: "Search resident and ID records",
-                to: "/records",
-                icon: Users,
-              },
-              {
-                title: "Create an issuance",
-                description: "Start a new document request",
-                to: "/issuances",
-                icon: FileCheck2,
-              },
-              {
-                title: "Review issuance history",
-                description: "Find previous document records",
-                to: "/issuances",
-                icon: CalendarDays,
-              },
-              {
-                title: "View dashboard activity",
-                description: "Review recent office actions",
-                to: "/activity-log",
-                icon: Activity,
-              },
-            ].map((item) => (
+            {quickActions.map((item) => (
               <Link
-                key={item.title}
+                key={item.key}
                 to={item.to}
                 className="group flex min-h-16 items-center gap-3 rounded-xl border border-brand/25 bg-brand/5 p-3 transition-colors hover:border-brand/50 hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-1"
               >
@@ -276,8 +289,8 @@ function Dashboard() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex flex-col items-start gap-2">
               <SectionHeading
-                title="Document Issuances Over Time"
-                description="Monthly issuance volume"
+                title={t("dashboard.overTime.title")}
+                description={t("dashboard.overTime.description")}
               />
             </div>
           </div>
@@ -301,21 +314,20 @@ function Dashboard() {
             ))}
             {months.length === 0 && !dashboardQuery.isLoading ? (
               <p className="w-full self-center text-center text-sm text-muted-foreground">
-                No issuance history yet.
+                {t("dashboard.overTime.empty")}
               </p>
             ) : null}
           </div>
           <p className="mt-3 text-xs text-muted-foreground">
-            Counts documents currently in force by issue date. Voided documents
-            are not counted.
+            {t("dashboard.overTime.note")}
           </p>
         </article>
 
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col items-start gap-2">
             <SectionHeading
-              title="Issuances by Document Type"
-              description="Distribution for the selected reporting period"
+              title={t("dashboard.byType.title")}
+              description={t("dashboard.byType.description")}
             />
           </div>
           <div className="mt-5 space-y-4">
@@ -339,12 +351,14 @@ function Dashboard() {
             ))}
             {totalByType === 0 && !dashboardQuery.isLoading ? (
               <p className="text-sm text-muted-foreground">
-                No issuance records in this period.
+                {t("dashboard.byType.empty")}
               </p>
             ) : null}
           </div>
           <div className="mt-5 flex items-center justify-between border-t pt-4 text-sm">
-            <span className="text-muted-foreground">Total</span>
+            <span className="text-muted-foreground">
+              {t("dashboard.byType.total")}
+            </span>
             <span className="font-semibold tabular-nums">{totalByType}</span>
           </div>
         </article>
@@ -354,8 +368,8 @@ function Dashboard() {
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col items-start gap-2">
             <SectionHeading
-              title="Expiring IDs and Clearances"
-              description="Records that may need attention soon"
+              title={t("dashboard.expiring.title")}
+              description={t("dashboard.expiring.description")}
             />
           </div>
           <div className="mt-4 divide-y">
@@ -367,11 +381,14 @@ function Dashboard() {
                 <div>
                   <p className="font-medium">{item.resident_name}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    {item.kind === "clearance"
-                      ? "Barangay Clearance"
-                      : "Barangay ID"}{" "}
-                    · {item.reference_no} · Expiry date:{" "}
-                    {dateLabel(item.expires_on)}
+                    {t("dashboard.expiring.line", {
+                      kind:
+                        item.kind === "clearance"
+                          ? t("dashboard.expiring.clearance")
+                          : t("dashboard.expiring.id"),
+                      reference: item.reference_no,
+                      date: dateLabel(item.expires_on),
+                    })}
                   </p>
                 </div>
                 <span className="inline-flex min-h-8 items-center self-start rounded-full border px-3 text-xs font-semibold sm:self-center">
@@ -381,7 +398,7 @@ function Dashboard() {
             ))}
             {expiring.length === 0 && !dashboardQuery.isLoading ? (
               <p className="py-3 text-sm text-muted-foreground">
-                No records are expiring soon.
+                {t("dashboard.expiring.empty")}
               </p>
             ) : null}
           </div>
@@ -389,7 +406,7 @@ function Dashboard() {
             to="/issuances"
             className="mt-3 inline-flex min-h-11 items-center font-semibold text-brand hover:underline"
           >
-            Open issuance history
+            {t("dashboard.expiring.openHistory")}
           </Link>
         </article>
       </section>
@@ -402,11 +419,11 @@ function Dashboard() {
           <div>
             <div className="flex flex-col items-start gap-2">
               <SectionHeading
-                title="Recent Activities"
+                title={t("dashboard.recent.title")}
                 description={
                   isAdmin
-                    ? "Recent system-wide activity"
-                    : "Your recent activity"
+                    ? t("dashboard.recent.descriptionAdmin")
+                    : t("dashboard.recent.descriptionStaff")
                 }
               />
             </div>
@@ -420,8 +437,8 @@ function Dashboard() {
                 : null
             const who = isAdmin
               ? activity.is_own
-                ? "You"
-                : (activity.actor_email ?? "Deleted account")
+                ? t("dashboard.recent.you")
+                : (activity.actor_email ?? t("dashboard.recent.deletedAccount"))
               : null
             const detail =
               [who, reference].filter(Boolean).join(" · ") ||
@@ -433,7 +450,7 @@ function Dashboard() {
               >
                 <div>
                   <p className="text-sm font-medium">
-                    {activityTitle(activity.action)}
+                    {activityTitle(activity.action, t)}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
                 </div>
@@ -445,19 +462,19 @@ function Dashboard() {
           })}
           {activityQuery.isError ? (
             <p className="py-3 text-sm text-muted-foreground">
-              Recent activity could not be loaded.
+              {t("dashboard.recent.loadError")}
             </p>
           ) : null}
           {activities.length === 0 &&
           !activityQuery.isLoading &&
           !activityQuery.isError ? (
             <p className="py-3 text-sm text-muted-foreground">
-              No activity recorded yet.
+              {t("dashboard.recent.empty")}
             </p>
           ) : null}
         </div>
         <p className="mt-2 text-xs text-muted-foreground">
-          Activity history appears here as actions are recorded.
+          {t("dashboard.recent.note")}
         </p>
       </section>
     </div>

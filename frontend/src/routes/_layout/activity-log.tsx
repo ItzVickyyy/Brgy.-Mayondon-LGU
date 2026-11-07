@@ -1,7 +1,9 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
+import type { ParseKeys, TFunction } from "i18next"
 import { Search } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { ActivityService } from "@/client"
 import {
@@ -28,24 +30,42 @@ const PAGE_SIZE = 10
 const filterLabelClass =
   "flex min-w-0 flex-col gap-1.5 text-xs font-medium text-muted-foreground"
 
-const moduleLabels: Record<string, string> = {
-  records: "Resident Records",
-  issuance: "Issuances",
-  users: "User Accounts",
-  officials: "Officials",
-  lookups: "Streets and Associations",
-  auth: "Sign-ins",
-}
+// Outcomes the API reports; the label comes from the language files.
+const outcomes = ["success", "failed", "denied"] as const
+type Outcome = (typeof outcomes)[number]
 
-const outcomeLabels: Record<string, string> = {
+// statusStyles is keyed by the English status word, not by the shown label.
+const outcomeStyleKey: Record<Outcome, string> = {
   success: "Success",
   failed: "Failed",
   denied: "Denied",
 }
 
-function moduleLabel(value: string | null) {
+const moduleKeys = {
+  records: "activity.modules.records",
+  issuance: "activity.modules.issuance",
+  users: "activity.modules.users",
+  officials: "activity.modules.officials",
+  lookups: "activity.modules.lookups",
+  auth: "activity.modules.auth",
+} as const satisfies Record<string, ParseKeys>
+
+type ActivityColumn =
+  | "dateTime"
+  | "user"
+  | "action"
+  | "module"
+  | "record"
+  | "outcome"
+
+function isOutcome(value: string): value is Outcome {
+  return (outcomes as readonly string[]).includes(value)
+}
+
+function moduleLabel(value: string | null, t: TFunction) {
   if (!value) return "—"
-  if (moduleLabels[value]) return moduleLabels[value]
+  const key = (moduleKeys as Record<string, ParseKeys>)[value]
+  if (key) return t(key)
   return value.charAt(0).toUpperCase() + value.slice(1)
 }
 
@@ -78,6 +98,7 @@ function shortId(value: string) {
 }
 
 function ActivityLog() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
   const [search, setSearch] = useState("")
@@ -156,6 +177,14 @@ function ActivityLog() {
   const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const start = total ? pageIndex * PAGE_SIZE + 1 : 0
   const end = Math.min((pageIndex + 1) * PAGE_SIZE, total)
+  const columns: ActivityColumn[] = [
+    "dateTime",
+    ...(isAdmin ? (["user"] as const) : []),
+    "action",
+    "module",
+    "record",
+    "outcome",
+  ]
   const modules = optionsQuery.data?.modules ?? []
   const actors = optionsQuery.data?.actors ?? []
 
@@ -164,12 +193,12 @@ function ActivityLog() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            Activity Log
+            {t("activity.title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {isAdmin
-              ? "Review activity across user accounts."
-              : "Review activity associated with your account."}
+              ? t("activity.subtitleAdmin")
+              : t("activity.subtitleStaff")}
           </p>
         </div>
       </div>
@@ -177,9 +206,11 @@ function ActivityLog() {
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-col gap-3 border-b p-4 sm:p-5">
           <div>
-            <h2 className="font-semibold tracking-tight">Activity Log</h2>
+            <h2 className="font-semibold tracking-tight">
+              {t("activity.title")}
+            </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Review who did what, when, and whether the action succeeded.
+              {t("activity.sectionDescription")}
             </p>
           </div>
           <div
@@ -188,7 +219,7 @@ function ActivityLog() {
             <label
               className={`${filterLabelClass} sm:col-span-2 xl:col-span-1`}
             >
-              <span>Search</span>
+              <span>{t("activity.filters.search")}</span>
               <span className="relative block">
                 <Search
                   className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
@@ -197,50 +228,50 @@ function ActivityLog() {
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search action, record, or module"
+                  placeholder={t("activity.filters.searchPlaceholder")}
                   className={`${formControlClass} pl-9`}
                 />
               </span>
             </label>
             <label className={filterLabelClass}>
-              <span>Module</span>
+              <span>{t("activity.filters.module")}</span>
               <select
                 value={moduleFilter}
                 onChange={(event) => setModuleFilter(event.target.value)}
                 className={formControlClass}
               >
-                <option value="all">All modules</option>
+                <option value="all">{t("activity.filters.allModules")}</option>
                 {modules.map((value) => (
                   <option key={value} value={value}>
-                    {moduleLabel(value)}
+                    {moduleLabel(value, t)}
                   </option>
                 ))}
               </select>
             </label>
             <label className={filterLabelClass}>
-              <span>Outcome</span>
+              <span>{t("activity.filters.outcome")}</span>
               <select
                 value={outcomeFilter}
                 onChange={(event) => setOutcomeFilter(event.target.value)}
                 className={formControlClass}
               >
-                <option value="all">All outcomes</option>
-                {Object.entries(outcomeLabels).map(([value, label]) => (
+                <option value="all">{t("activity.filters.allOutcomes")}</option>
+                {outcomes.map((value) => (
                   <option key={value} value={value}>
-                    {label}
+                    {t(`activity.outcomes.${value}`)}
                   </option>
                 ))}
               </select>
             </label>
             {isAdmin ? (
               <label className={filterLabelClass}>
-                <span>User</span>
+                <span>{t("activity.filters.user")}</span>
                 <select
                   value={actorFilter}
                   onChange={(event) => setActorFilter(event.target.value)}
                   className={formControlClass}
                 >
-                  <option value="all">All users</option>
+                  <option value="all">{t("activity.filters.allUsers")}</option>
                   {actors.map((actor) => (
                     <option key={actor.id} value={actor.id}>
                       {actor.email}
@@ -250,9 +281,9 @@ function ActivityLog() {
               </label>
             ) : null}
             <label className={filterLabelClass}>
-              <span>From</span>
+              <span>{t("activity.filters.from")}</span>
               <input
-                aria-label="Start date"
+                aria-label={t("activity.filters.startDateAria")}
                 type="date"
                 value={startDate}
                 onChange={(event) => setStartDate(event.target.value)}
@@ -260,9 +291,9 @@ function ActivityLog() {
               />
             </label>
             <label className={filterLabelClass}>
-              <span>To</span>
+              <span>{t("activity.filters.to")}</span>
               <input
-                aria-label="End date"
+                aria-label={t("activity.filters.endDateAria")}
                 type="date"
                 value={endDate}
                 onChange={(event) => setEndDate(event.target.value)}
@@ -274,15 +305,15 @@ function ActivityLog() {
 
         {rangeInvalid ? (
           <EmptyState
-            title="Check the dates"
-            description="The start date is after the end date."
+            title={t("activity.checkDates.title")}
+            description={t("activity.checkDates.description")}
           />
         ) : activityQuery.isLoading ? (
-          <LoadingState title="Loading activity..." />
+          <LoadingState title={t("activity.loading")} />
         ) : activityQuery.isError ? (
           <ErrorState
-            title="Could not load the activity log"
-            description="Check your connection and try again."
+            title={t("activity.loadError.title")}
+            description={t("activity.loadError.description")}
             onRetry={() => activityQuery.refetch()}
           />
         ) : (
@@ -291,26 +322,19 @@ function ActivityLog() {
               <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    {[
-                      "Date & time",
-                      ...(isAdmin ? ["User"] : []),
-                      "Action",
-                      "Module",
-                      "Record",
-                      "Outcome",
-                    ].map((item) => (
+                    {columns.map((item) => (
                       <th
                         key={item}
                         className="px-4 py-3 align-middle font-medium sm:px-5"
                       >
-                        {item}
+                        {t(`activity.columns.${item}`)}
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y">
                   {items.map((row) => {
-                    const outcome = outcomeLabels[row.outcome] ?? row.outcome
+                    const known = isOutcome(row.outcome)
                     const details = detailsText(row.details)
                     return (
                       <tr
@@ -322,12 +346,14 @@ function ActivityLog() {
                         </td>
                         {isAdmin ? (
                           <td className="px-4 py-3 align-middle font-medium sm:px-5">
-                            {row.is_own ? "You" : (row.actor_email ?? "—")}
+                            {row.is_own
+                              ? t("activity.you")
+                              : (row.actor_email ?? "—")}
                           </td>
                         ) : null}
                         <td className="px-4 py-3 align-middle sm:px-5">
                           <p className="font-medium">
-                            {activityTitle(row.action)}
+                            {activityTitle(row.action, t)}
                           </p>
                           {row.reason ? (
                             <p className="mt-1 max-w-xs text-xs text-muted-foreground">
@@ -341,7 +367,7 @@ function ActivityLog() {
                           ) : null}
                         </td>
                         <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">
-                          {moduleLabel(row.module)}
+                          {moduleLabel(row.module, t)}
                         </td>
                         <td className="px-4 py-3 align-middle sm:px-5">
                           {row.record_id ? (
@@ -355,9 +381,17 @@ function ActivityLog() {
                         <td className="px-4 py-3 align-middle sm:px-5">
                           <Badge
                             variant="outline"
-                            className={statusStyles[outcome]}
+                            className={
+                              known
+                                ? statusStyles[
+                                    outcomeStyleKey[row.outcome as Outcome]
+                                  ]
+                                : undefined
+                            }
                           >
-                            {outcome}
+                            {known
+                              ? t(`activity.outcomes.${row.outcome as Outcome}`)
+                              : row.outcome}
                           </Badge>
                         </td>
                       </tr>
@@ -367,8 +401,8 @@ function ActivityLog() {
               </table>
               {items.length === 0 ? (
                 <EmptyState
-                  title="No matching activity"
-                  description="Try a different search term or filter."
+                  title={t("activity.empty.title")}
+                  description={t("activity.empty.description")}
                 />
               ) : null}
             </div>
