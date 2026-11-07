@@ -4,7 +4,7 @@ from enum import StrEnum
 from typing import Self
 
 from pydantic import EmailStr, model_validator
-from sqlalchemy import CheckConstraint, DateTime, Enum
+from sqlalchemy import CheckConstraint, DateTime, Enum, false
 from sqlmodel import Field, SQLModel
 
 
@@ -137,6 +137,12 @@ class User(UserBase, table=True):
     created_at: datetime | None = Field(default_factory=get_datetime_utc)
     failed_login_attempts: int = Field(default=0, nullable=False)
     locked_until: datetime | None = Field(default=None, nullable=True)
+    # True while the password is a temporary one set by an administrator (D-12).
+    # Not part of any create/update model, so clients can never set or clear it.
+    must_change_password: bool = Field(
+        default=False,
+        sa_column_kwargs={"server_default": false()},
+    )
 
 
 class PasswordRecoveryRateLimit(SQLModel, table=True):
@@ -149,6 +155,7 @@ class PasswordRecoveryRateLimit(SQLModel, table=True):
 class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime | None = None
+    must_change_password: bool = False
 
 
 class UsersPublic(SQLModel):
