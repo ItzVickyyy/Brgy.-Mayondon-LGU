@@ -4,8 +4,11 @@ import {
   Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
+import type { TFunction } from "i18next"
 import { ArrowRight } from "lucide-react"
+import { useMemo } from "react"
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { z } from "zod"
 
 import type { Body_login_login_access_token as AccessToken } from "@/client"
@@ -24,17 +27,9 @@ import { PasswordInput } from "@/components/ui/password-input"
 import { pageTitle } from "@/config/site"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 
-const formSchema = z.object({
-  username: z.email({ message: "Invalid email address" }),
-  password: z
-    .string()
-    .min(1, { message: "Password is required" })
-    .min(8, { message: "Password must be at least 8 characters" }),
-}) satisfies z.ZodType<AccessToken>
+type FormData = { username: string; password: string }
 
-type FormData = z.infer<typeof formSchema>
-
-function getLoginErrorMessage(error: unknown): string {
+function getLoginErrorMessage(error: unknown, t: TFunction): string {
   const candidate = error as {
     message?: unknown
     body?: { detail?: unknown; message?: unknown }
@@ -54,12 +49,12 @@ function getLoginErrorMessage(error: unknown): string {
     normalized.includes("invalid credentials") ||
     normalized.includes("wrong password")
   ) {
-    return "The email address or password is incorrect. Please check your credentials and try again."
+    return t("login.errorIncorrect")
   }
   if (candidate?.status === 401) {
-    return "The email address or password is incorrect. Please check your credentials and try again."
+    return t("login.errorIncorrect")
   }
-  return "We could not sign you in. Please try again or contact the System Administrator if the problem continues."
+  return t("login.errorGeneric")
 }
 
 export const Route = createFileRoute("/login")({
@@ -81,9 +76,21 @@ export const Route = createFileRoute("/login")({
 })
 
 function Login() {
+  const { t } = useTranslation()
   const { loginMutation } = useAuth()
+  const formSchema = useMemo(
+    () =>
+      z.object({
+        username: z.email({ message: t("login.invalidEmail") }),
+        password: z
+          .string()
+          .min(1, { message: t("login.passwordRequired") })
+          .min(8, { message: t("login.passwordTooShort") }),
+      }) satisfies z.ZodType<AccessToken>,
+    [t],
+  )
   const loginErrorMessage = loginMutation.error
-    ? getLoginErrorMessage(loginMutation.error)
+    ? getLoginErrorMessage(loginMutation.error, t)
     : null
   const passwordChangedNotice =
     new URLSearchParams(window.location.search).get("passwordChanged") === "1"
@@ -110,9 +117,11 @@ function Login() {
           className="flex flex-col gap-6"
         >
           <div className="flex flex-col gap-1">
-            <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {t("login.title")}
+            </h1>
             <p className="text-sm text-muted-foreground">
-              Sign in to access the barangay personnel portal.
+              {t("login.subtitle")}
             </p>
           </div>
 
@@ -121,7 +130,7 @@ function Login() {
               role="status"
               className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground"
             >
-              Your password has been changed. Sign in again.
+              {t("login.passwordChanged")}
             </p>
           ) : null}
 
@@ -140,11 +149,11 @@ function Login() {
               name="username"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email address</FormLabel>
+                  <FormLabel>{t("login.emailLabel")}</FormLabel>
                   <FormControl>
                     <Input
                       data-testid="email-input"
-                      placeholder="Enter your email address"
+                      placeholder={t("login.emailPlaceholder")}
                       type="email"
                       autoComplete="username"
                       className="h-11"
@@ -162,18 +171,18 @@ function Login() {
               render={({ field }) => (
                 <FormItem>
                   <div className="flex items-center">
-                    <FormLabel>Password</FormLabel>
+                    <FormLabel>{t("login.passwordLabel")}</FormLabel>
                     <RouterLink
                       to="/recover-password"
                       className="ml-auto text-sm font-medium text-brand underline-offset-4 hover:underline"
                     >
-                      Forgot password?
+                      {t("login.forgotPassword")}
                     </RouterLink>
                   </div>
                   <FormControl>
                     <PasswordInput
                       data-testid="password-input"
-                      placeholder="Enter your password"
+                      placeholder={t("login.passwordPlaceholder")}
                       autoComplete="current-password"
                       className="h-11"
                       {...field}
@@ -189,7 +198,7 @@ function Login() {
               className="h-11 w-full"
               loading={loginMutation.isPending}
             >
-              Sign in <ArrowRight className="ml-2 size-4" />
+              {t("login.submit")} <ArrowRight className="ml-2 size-4" />
             </LoadingButton>
           </div>
         </form>

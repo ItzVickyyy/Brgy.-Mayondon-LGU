@@ -1,0 +1,58 @@
+{
+  "language": {
+    "label": "Wika",
+    "english": "English",
+    "filipino": "Filipino"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "activityLog": "Talaan ng Aktibidad",
+    "issuances": "Pamamahala ng Pag-isyu",
+    "records": "Pamamahala ng mga Talaan",
+    "officials": "Mga Opisyal",
+    "userAccounts": "Mga Account ng User",
+    "reports": "Mga Ulat sa Pamamahala",
+    "backupRestore": "Backup at Pagpapanumbalik",
+    "sections": {
+      "workspace": "Workspace",
+      "recordsAndDocuments": "Mga Talaan at Dokumento",
+      "administration": "Pangangasiwa"
+    }
+  },
+  "userMenu": {
+    "ariaLabel": "Menu ng user",
+    "fallbackName": "User",
+    "myAccount": "Aking Account",
+    "getHelp": "Humingi ng tulong",
+    "learnMore": "Alamin pa",
+    "logout": "Mag-logout"
+  },
+  "logoutDialog": {
+    "title": "Mag-log out?",
+    "message": "Sigurado ka bang gusto mong mag-log out sa iyong account?",
+    "cancel": "Kanselahin",
+    "confirm": "Mag-log out"
+  },
+  "login": {
+    "title": "Maligayang pagbabalik",
+    "subtitle": "Mag-sign in para mapasok ang portal ng mga tauhan ng barangay.",
+    "passwordChanged": "Napalitan na ang iyong password. Mag-sign in muli.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "Ilagay ang iyong email address",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Ilagay ang iyong password",
+    "forgotPassword": "Nakalimutan ang password?",
+    "submit": "Mag-sign in",
+    "invalidEmail": "Hindi wastong email address",
+    "passwordRequired": "Kailangan ang password",
+    "passwordTooShort": "Ang password ay dapat may hindi bababa sa 8 character",
+    "errorIncorrect": "Mali ang email address o password. Pakisuri ang iyong mga detalye at subukan muli.",
+    "errorGeneric": "Hindi ka namin nai-sign in. Pakisubukan muli o makipag-ugnayan sa System Administrator kung magpapatuloy ang problema."
+  },
+  "footer": {
+    "ariaLabel": "Footer",
+    "version": "Bersyon",
+    "terms": "Mga Tuntunin ng Paggamit",
+    "privacy": "Patakaran sa Privacy"
+  }
+}

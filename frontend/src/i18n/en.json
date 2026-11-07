@@ -1,0 +1,58 @@
+{
+  "language": {
+    "label": "Language",
+    "english": "English",
+    "filipino": "Filipino"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "activityLog": "Activity Log",
+    "issuances": "Issuance Management",
+    "records": "Records Management",
+    "officials": "Officials",
+    "userAccounts": "User Accounts",
+    "reports": "Management Reports",
+    "backupRestore": "Backup and Restore",
+    "sections": {
+      "workspace": "Workspace",
+      "recordsAndDocuments": "Records and Documents",
+      "administration": "Administration"
+    }
+  },
+  "userMenu": {
+    "ariaLabel": "User menu",
+    "fallbackName": "User",
+    "myAccount": "My Account",
+    "getHelp": "Get help",
+    "learnMore": "Learn more",
+    "logout": "Logout"
+  },
+  "logoutDialog": {
+    "title": "Log out?",
+    "message": "Are you sure you want to log out of your account?",
+    "cancel": "Cancel",
+    "confirm": "Log out"
+  },
+  "login": {
+    "title": "Welcome back",
+    "subtitle": "Sign in to access the barangay personnel portal.",
+    "passwordChanged": "Your password has been changed. Sign in again.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "Enter your email address",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "forgotPassword": "Forgot password?",
+    "submit": "Sign in",
+    "invalidEmail": "Invalid email address",
+    "passwordRequired": "Password is required",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "errorIncorrect": "The email address or password is incorrect. Please check your credentials and try again.",
+    "errorGeneric": "We could not sign you in. Please try again or contact the System Administrator if the problem continues."
+  },
+  "footer": {
+    "ariaLabel": "Footer",
+    "version": "Version",
+    "terms": "Terms of Use",
+    "privacy": "Privacy Policy"
+  }
+}

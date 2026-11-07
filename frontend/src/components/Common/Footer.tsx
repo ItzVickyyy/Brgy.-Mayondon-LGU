@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import {
   PrivacyDialog,
@@ -13,6 +14,7 @@ const linkClass =
   "rounded-sm text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
 
 export function Footer() {
+  const { t } = useTranslation()
   const currentYear = new Date().getFullYear()
   const [popup, setPopup] = useState<Popup>(null)
   const close = (open: boolean) => {
@@ -26,7 +28,7 @@ export function Footer() {
           © {currentYear} {SITE.fullName}, {SITE.location}
         </p>
         <nav
-          aria-label="Footer"
+          aria-label={t("footer.ariaLabel")}
           className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:justify-end"
         >
           <button
@@ -34,21 +36,21 @@ export function Footer() {
             className={linkClass}
             onClick={() => setPopup("version")}
           >
-            Version
+            {t("footer.version")}
           </button>
           <button
             type="button"
             className={linkClass}
             onClick={() => setPopup("terms")}
           >
-            Terms of Use
+            {t("footer.terms")}
           </button>
           <button
             type="button"
             className={linkClass}
             onClick={() => setPopup("privacy")}
           >
-            Privacy Policy
+            {t("footer.privacy")}
           </button>
         </nav>
       </div>

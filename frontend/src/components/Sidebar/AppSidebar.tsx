@@ -1,3 +1,4 @@
+import type { ParseKeys } from "i18next"
 import {
   Activity,
   BarChart3,
@@ -8,6 +9,7 @@ import {
   ShieldCheck,
   Users,
 } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Logo } from "@/components/Common/Logo"
 import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar"
@@ -15,68 +17,79 @@ import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { type Item, Main } from "./Main"
 
-type NavigationItem = Item & { adminOnly?: boolean }
+type TranslationKey = ParseKeys
+
+type NavigationItem = Omit<Item, "title" | "section"> & {
+  titleKey: TranslationKey
+  sectionKey: TranslationKey
+  adminOnly?: boolean
+}
 
 const items: NavigationItem[] = [
   {
     icon: LayoutDashboard,
-    title: "Dashboard",
+    titleKey: "nav.dashboard",
     path: "/",
-    section: "Workspace",
+    sectionKey: "nav.sections.workspace",
   },
   {
     icon: Activity,
-    title: "Activity Log",
+    titleKey: "nav.activityLog",
     path: "/activity-log",
-    section: "Workspace",
+    sectionKey: "nav.sections.workspace",
   },
   {
     icon: FileCheck2,
-    title: "Issuance Management",
+    titleKey: "nav.issuances",
     path: "/issuances",
-    section: "Records and Documents",
+    sectionKey: "nav.sections.recordsAndDocuments",
   },
   {
     icon: Users,
-    title: "Records Management",
+    titleKey: "nav.records",
     path: "/records",
-    section: "Records and Documents",
+    sectionKey: "nav.sections.recordsAndDocuments",
   },
   {
     icon: BookUser,
-    title: "Officials",
+    titleKey: "nav.officials",
     path: "/officials",
     adminOnly: true,
-    section: "Administration",
+    sectionKey: "nav.sections.administration",
   },
   {
     icon: ShieldCheck,
-    title: "User Accounts",
+    titleKey: "nav.userAccounts",
     path: "/admin",
     adminOnly: true,
-    section: "Administration",
+    sectionKey: "nav.sections.administration",
   },
   {
     icon: BarChart3,
-    title: "Management Reports",
+    titleKey: "nav.reports",
     path: "/reports",
     adminOnly: true,
-    section: "Administration",
+    sectionKey: "nav.sections.administration",
   },
   {
     icon: DatabaseBackup,
-    title: "Backup and Restore",
+    titleKey: "nav.backupRestore",
     path: "/backup-restore",
     adminOnly: true,
-    section: "Administration",
+    sectionKey: "nav.sections.administration",
   },
 ]
 
 export function AppSidebar() {
   const { user: currentUser } = useAuth()
-  const visibleItems = items.filter(
-    (item) => !item.adminOnly || isSystemAdministrator(currentUser),
-  )
+  const { t } = useTranslation()
+  const visibleItems: Item[] = items
+    .filter((item) => !item.adminOnly || isSystemAdministrator(currentUser))
+    .map(({ titleKey, sectionKey, ...item }) => ({
+      ...item,
+      title: t(titleKey),
+      section: t(sectionKey),
+    }))
 
   return (
     <Sidebar collapsible="icon">

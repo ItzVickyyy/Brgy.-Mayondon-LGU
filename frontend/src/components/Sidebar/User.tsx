@@ -7,10 +7,8 @@ import {
   UserRound,
 } from "lucide-react"
 import { useState } from "react"
-import {
-  HelpDialog,
-  LearnMoreDialog,
-} from "@/components/Common/InfoDialogs"
+import { useTranslation } from "react-i18next"
+import { HelpDialog, LearnMoreDialog } from "@/components/Common/InfoDialogs"
 import { MyAccountModal } from "@/components/Settings/MyAccountModal"
 import { Button } from "@/components/ui/button"
 import {
@@ -31,6 +29,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { useSidebar } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
+import { LANGUAGES, type Language, setLanguage } from "@/i18n"
 
 export function User({
   user,
@@ -42,9 +41,9 @@ export function User({
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
   const [accountOpen, setAccountOpen] = useState(false)
-  const [selectedLanguage, setSelectedLanguage] = useState<
-    "English" | "Filipino"
-  >("English")
+  const { t, i18n } = useTranslation()
+  const selectedLanguage: Language =
+    i18n.resolvedLanguage === "fil" ? "fil" : "en"
   const [logoutOpen, setLogoutOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [learnOpen, setLearnOpen] = useState(false)
@@ -73,8 +72,8 @@ export function User({
                   ? "min-h-11 w-auto max-w-[280px] min-w-0 justify-start gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted/70"
                   : "h-auto w-full min-w-0 justify-start gap-2 rounded-lg px-2 py-2 text-left group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:min-w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
               }
-              aria-label="User menu"
-              title={user?.full_name || user?.email || "User menu"}
+              aria-label={t("userMenu.ariaLabel")}
+              title={user?.full_name || user?.email || t("userMenu.ariaLabel")}
             >
               <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand/20 bg-brand/10 text-brand">
                 {user?.profile_photo_url ? (
@@ -95,7 +94,7 @@ export function User({
                 }
               >
                 <span className="block truncate text-sm font-medium">
-                  {user?.full_name || user?.email || "User"}
+                  {user?.full_name || user?.email || t("userMenu.fallbackName")}
                 </span>
                 <span className="block truncate text-xs font-normal text-muted-foreground">
                   {user?.email || ""}
@@ -111,23 +110,30 @@ export function User({
           >
             <DropdownMenuItem onSelect={() => setAccountOpen(true)}>
               <UserRound className="size-4" />
-              My Account
+              {t("userMenu.myAccount")}
             </DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger className="gap-2 data-[state=open]:text-foreground">
                 <Languages className="size-4 text-muted-foreground" />
-                Language
+                {t("language.label")}
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="w-44">
-                {(["English", "Filipino"] as const).map((language) => {
+                {LANGUAGES.map((language) => {
                   const selected = selectedLanguage === language
                   return (
                     <DropdownMenuItem
                       key={language}
-                      onSelect={() => setSelectedLanguage(language)}
+                      lang={language}
+                      onSelect={() => setLanguage(language)}
                       className="gap-2 px-3 py-2"
                     >
-                      <span className="flex-1">{language}</span>
+                      <span className="flex-1">
+                        {t(
+                          language === "en"
+                            ? "language.english"
+                            : "language.filipino",
+                        )}
+                      </span>
                       {selected ? (
                         <Check className="size-4 text-brand" />
                       ) : null}
@@ -144,7 +150,7 @@ export function User({
               }}
             >
               <CircleHelp className="size-4" />
-              Get help
+              {t("userMenu.getHelp")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={() => {
@@ -153,7 +159,7 @@ export function User({
               }}
             >
               <Info className="size-4" />
-              Learn more
+              {t("userMenu.learnMore")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
@@ -163,7 +169,7 @@ export function User({
               }}
             >
               <LogOut className="size-4" />
-              Logout
+              {t("userMenu.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -178,10 +184,10 @@ export function User({
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Log out?</DialogTitle>
+            <DialogTitle>{t("logoutDialog.title")}</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            Are you sure you want to log out of your account?
+            {t("logoutDialog.message")}
           </p>
           <div className="flex justify-end gap-2">
             <Button
@@ -189,7 +195,7 @@ export function User({
               variant="outline"
               onClick={() => setLogoutOpen(false)}
             >
-              Cancel
+              {t("logoutDialog.cancel")}
             </Button>
             <Button
               type="button"
@@ -199,7 +205,7 @@ export function User({
                 void logout()
               }}
             >
-              Log out
+              {t("logoutDialog.confirm")}
             </Button>
           </div>
         </DialogContent>
