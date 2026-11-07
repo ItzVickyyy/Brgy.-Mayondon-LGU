@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
 
 export const Route = createFileRoute("/_layout/reports")({
   component: Reports,
@@ -82,38 +83,36 @@ function labelOf(keys: Record<string, ParseKeys>, value: string, t: TFunction) {
   return key ? t(key) : value
 }
 
-const dateFormat = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "2-digit",
-  year: "numeric",
-})
-
-const dateTimeFormat = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "2-digit",
-  year: "numeric",
-  hour: "numeric",
-  minute: "2-digit",
-  timeZone: "Asia/Manila",
-})
-
 // Business dates ("YYYY-MM-DD") are formatted without time zones.
 function formatReportDate(value: string) {
   const [year, month, day] = value.split("-").map(Number)
-  return dateFormat.format(new Date(year, month - 1, day))
+  return formatLocaleDate(new Date(year, month - 1, day), {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  })
 }
 
 function formatMoment(value: string | null) {
-  return value ? dateTimeFormat.format(new Date(value)) : "—"
+  return value
+    ? formatLocaleDate(new Date(value), {
+        month: "short",
+        day: "2-digit",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: "Asia/Manila",
+      })
+    : "—"
 }
 
 function formatShare(value: number | null) {
-  return value === null ? "—" : `${value.toFixed(1)}%`
+  return value === null ? "—" : `${formatLocaleNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
 }
 
 function formatChange(value: number | null) {
   if (value === null) return "—"
-  return `${value > 0 ? "+" : ""}${value.toFixed(1)}%`
+  return `${value > 0 ? "+" : ""}${formatLocaleNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
 }
 
 function daysText(daysLeft: number, t: TFunction) {
