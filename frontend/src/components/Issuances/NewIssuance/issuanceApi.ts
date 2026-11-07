@@ -113,7 +113,16 @@ const nameOf = (items: LookupItem[], id: number | null | undefined) =>
 const text = (value: string | undefined | null) => (value ?? "").trim()
 const orNull = (value: string | undefined | null) => text(value) || null
 
+/**
+ * A street or tricycle association that staff typed but cannot add. Its message
+ * is already written for the clerk, so fail() must not replace it.
+ */
+class NotOnListError extends Error {
+  status = 403
+}
+
 function fail(error: unknown, fallback?: string): never {
+  if (error instanceof NotOnListError) throw error
   const message = issuanceErrorMessage(error)
   const status =
     error instanceof AxiosError ? error.response?.status : undefined
@@ -222,7 +231,7 @@ async function streetIdFor(
     return created.data.id
   } catch (error) {
     if (error instanceof AxiosError && error.response?.status === 403) {
-      throw new Error(
+      throw new NotOnListError(
         `“${typed}” is not on the street list yet. Ask the administrator to add it, or choose a street from the list.`,
       )
     }
@@ -246,7 +255,7 @@ async function associationIdFor(
     return created.data.id
   } catch (error) {
     if (error instanceof AxiosError && error.response?.status === 403) {
-      throw new Error(
+      throw new NotOnListError(
         `“${typed}” is not on the tricycle association list yet. Ask the administrator to add it, or choose one from the list.`,
       )
     }
@@ -1056,7 +1065,8 @@ export const issuanceApi = {
         body: await toUpdateBody(input, data),
       })
       const purposeName = text(input.purposeText)
-      const needsName = !input.purposeId && purposeName && !purposeIdFor(input, data)
+      const needsName =
+        !input.purposeId && purposeName && !purposeIdFor(input, data)
       const issued = await IssuancesService.issue({
         path: { issuance_id: id },
         body: needsName ? { purpose_name: purposeName } : undefined,

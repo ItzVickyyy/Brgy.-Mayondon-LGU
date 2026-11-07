@@ -1,5 +1,10 @@
 import { expect, test } from "@playwright/test"
-import { LookupsService, OfficialsService, ResidentsService } from "@/client"
+import {
+  LookupsService,
+  OfficialsService,
+  ResidentsService,
+  UsersService,
+} from "@/client"
 import { client } from "@/client/client.gen"
 import type { DocumentCode } from "@/components/Issuances/NewIssuance/documentConfig"
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
@@ -306,4 +311,131 @@ test("a resident can only get one First-Time Jobseeker document", async () => {
   await expect(issuanceApi.createIssuance(again)).rejects.toMatchObject({
     status: 409,
   })
+})
+
+// ------------------------------------------------------------ staff account
+// Clerks are Staff, so everything below runs with a Staff token.
+
+const staffEmail = `live-staff-${run}@example.com`
+const staffPassword = `Staff-${run}-Pw-12345!`
+let staffToken = ""
+let adminToken = ""
+
+/** The HTTP status of a failed call, or 0 when it unexpectedly succeeds. */
+async function statusOf(call: Promise<unknown>) {
+  try {
+    await call
+    return 0
+  } catch (error) {
+    const caught = error as {
+      status?: number
+      response?: { status?: number }
+    }
+    return caught.status ?? caught.response?.status ?? -1
+  }
+}
+
+test("staff: an admin creates a staff account and it can sign in", async () => {
+  adminToken = token
+  await UsersService.createUser({
+    body: {
+      email: staffEmail,
+      password: staffPassword,
+      full_name: "Live Staff",
+      role: "staff",
+    },
+  })
+  staffToken = await login(staffEmail, staffPassword)
+  useToken(staffToken)
+})
+
+test("staff: can register a resident and issue a document", async () => {
+  useToken(staffToken)
+  const resident = await newResident("staffissue")
+  const { input } = inputs(resident.id).RESIDENCY
+  const result = await issuanceApi.createIssuance(input)
+  expect(result.status).toBe("issued")
+})
+
+test("staff: can read the officials list used for signatories", async () => {
+  useToken(staffToken)
+  const officials = await issuanceApi.getOfficials()
+  expect(officials.map((official) => official.id)).toEqual(
+    expect.arrayContaining([signatoryId, witnessId]),
+  )
+})
+
+test("staff: an unknown street gets a clear 'ask the administrator' message", async () => {
+  useToken(staffToken)
+  const attempt = issuanceApi.createResident({
+    firstName: "Livestreet",
+    lastName: `Check${run}`,
+    birthdate: "1991-02-03",
+    sex: "Male",
+    civilStatus: "Single",
+    street: `Not A Listed Street ${run}`,
+    purok: 1,
+    residentSinceBirth: true,
+  })
+  await expect(attempt).rejects.toMatchObject({
+    message: expect.stringContaining("Ask the administrator"),
+  })
+})
+
+test("staff: an unknown tricycle association gets the same clear message", async () => {
+  useToken(staffToken)
+  const resident = await newResident("staffassoc")
+  const { input } = inputs(resident.id).FRANCHISE_CLEARANCE
+  if (input.details.type !== "FRANCHISE_CLEARANCE") throw new Error("fixture")
+  const attempt = issuanceApi.createIssuance({
+    ...input,
+    details: {
+      ...input.details,
+      associationName: `Not A Listed Association ${run}`,
+      plateNumber: `ST-${run}`.toUpperCase(),
+      motorNumber: `STM-${run}`,
+    },
+  })
+  await expect(attempt).rejects.toMatchObject({
+    message: expect.stringContaining("Ask the administrator"),
+  })
+})
+
+test("staff: cannot void an issued document", async () => {
+  useToken(staffToken)
+  const id = issuedIds.BARANGAY_CLEARANCE
+  expect(id).toBeTruthy()
+  expect(
+    await statusOf(issuanceApi.voidIssuance(id, "Staff should not void")),
+  ).toBe(403)
+  expect((await issuanceApi.getIssuance(id))?.status).toBe("issued")
+})
+
+test("staff: cannot add officials or streets", async () => {
+  useToken(staffToken)
+  expect(
+    await statusOf(
+      OfficialsService.createOfficial({
+        body: {
+          full_name: "Live Intruder",
+          position: "Barangay Clerk",
+          term_start: today,
+          term_end: null,
+          is_elected: false,
+          is_current: true,
+        },
+      }),
+    ),
+  ).toBe(403)
+  expect(
+    await statusOf(
+      LookupsService.createStreet({ body: { name: `Staff Street ${run}` } }),
+    ),
+  ).toBe(403)
+})
+
+test("staff: cannot reach the user list", async () => {
+  useToken(staffToken)
+  expect(await statusOf(UsersService.readUsers())).toBe(403)
+  useToken(adminToken)
 })
