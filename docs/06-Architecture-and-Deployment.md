@@ -105,7 +105,7 @@ Documented assumption: a **Windows 10/11 64-bit** PC that can stay on during off
 
 Before going offline, on a trusted development computer:
 
-1. Clone/update the repo and check out `draft/admin-portal`, the branch the Version 1 demo runs from **(D-08, decided Nov 1, 2026)**.
+1. Clone/update the repo and check out `master`, the branch the Version 1 demo runs from since `draft/admin-portal` was merged into it on Nov 7, 2026 **(D-08)**.
 2. Install and start Docker Desktop once.
 3. Download images and build the app image while online.
 4. Test the full setup with fictional data.

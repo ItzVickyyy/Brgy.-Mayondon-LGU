@@ -197,6 +197,7 @@ The instructor's Final Project Guide governs academic dates and wins on conflict
 | 2026-10-27 | Print only variable details onto existing pre-printed forms (overlay), never recreate the form | Client description; team |
 | 2026-10-28 | Admin/Staff split and staff self-registration with admin approval are **intentional proposals** to take to the client (self-registration dropped Nov 7, 2026, D-11) | Project team |
 | 2026-11-07 | No staff self-registration: only an administrator creates accounts (D-11). Offline password reset: the System Administrator sets a temporary password and the user must change it at next sign-in (D-12). Owner design decisions, **not** client approvals | Project owner |
+| 2026-11-07 | `draft/admin-portal` was merged into `master` (PR #9): `master` now holds code and docs and the Version 1 demo runs from it. Supersedes the Nov 1 branch split for new work (D-08) | Project owner |
 | 2026-11-01 | Remove on-screen sample/prototype banners; all data remains fictional | Project team |
 | 2026-11-01 | Branches: `master` = docs; `draft/admin-portal` = UI and code, and the Version 1 demo runs from it; `Foundation` frozen as a read-only reference (D-08) | Project team |
 | 2026-11-01 | The design was coded directly as the `draft/admin-portal` prototype; no wireframes, separate mockups, mobile mockups or client feedback exist yet (D-06) | Project team (fact, not an approval) |

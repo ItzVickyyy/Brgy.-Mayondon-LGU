@@ -11,7 +11,7 @@ Last updated: November 5, 2026
 1. [01-Project-and-Schedule.md](01-Project-and-Schedule.md) — status, milestones, instructor requirements.
 2. [02-Requirements-and-Scope.md](02-Requirements-and-Scope.md) — what the client asked for.
 3. [06-Architecture-and-Deployment.md](06-Architecture-and-Deployment.md) — stack, architecture, offline LAN deployment.
-4. The root [README](../README.md) — setup commands and project layout. (`frontend/src/config/site.ts` still points to a non-existent `docs/ROADMAP.md`; **D-09** decided Nov 1, 2026: fix it in the next code commit on `draft/admin-portal`.)
+4. The root [README](../README.md) — setup commands and project layout. (`frontend/src/config/site.ts` still points to a non-existent `docs/ROADMAP.md`; **D-09** is done: the pointer has been removed from the code.)
 
 Run locally: section 9 below. Package for the office LAN: [06-Architecture-and-Deployment.md](06-Architecture-and-Deployment.md) (preparation only until built and tested offline on the target network).
 
@@ -45,8 +45,12 @@ Until the architecture is validated at the client site:
 > - The planned `production` branch is still not created.
 >
 > The root README was updated to match.
+>
+> **Update Nov 7, 2026 (D-08):** the owner merged `draft/admin-portal` into `master` (pull request #9, merge commit `18f4a02`). `master` now holds the application code **and** the documentation, and the Version 1 demo runs from `master`. `draft/admin-portal` is not ahead of `master`. The interim arrangement below was written for the time before that merge and **no longer applies** (rules 1 to 4 and the file-ownership table); it is kept as history. Until the team decides otherwise, use the workflow in the next paragraph. The **Branch sync check** workflow still encodes the old rules, so a push to `master` that changes anything outside `docs/` and `README.md` will fail it until the workflow is changed or retired. That change is not made yet.
+>
+> **Working now:** cut a short-lived `feature/`, `fix/`, `docs/` or `chore/` branch from `master`, open a pull request, and merge it after the checks pass. Code and documentation may change in the same pull request.
 
-### Interim arrangement (enforced by CI)
+### Interim arrangement (superseded on Nov 7, 2026; kept as history)
 
 | Branch | Holds | Never changes |
 |---|---|---|
@@ -156,7 +160,7 @@ Optional: VS Code. You do not need Node.js or a separate PostgreSQL install. Ver
 
 ### 9.2 Steps
 
-1. **Open the project.** `git clone https://github.com/ItzVickyyy/Brgy.-Mayondon-LGU.git`, open the folder in a terminal, and check `Get-Location`, `git branch --show-current`, `git status`. Inspect local changes before switching or pulling anything. *(Use `draft/admin-portal` for code and the demo; `master` is for docs. D-08 decided Nov 1, 2026. The old guide said `Foundation`; ignore that.)*
+1. **Open the project.** `git clone https://github.com/ItzVickyyy/Brgy.-Mayondon-LGU.git`, open the folder in a terminal, and check `Get-Location`, `git branch --show-current`, `git status`. Inspect local changes before switching or pulling anything. *(Use `master` for code, docs and the demo since the Nov 7, 2026 merge; see section 4. The old guide said `Foundation`; ignore that.)*
 2. **Create `.env`** from the repo root (only if missing):
    `if (-not (Test-Path .env)) { Copy-Item .env.example .env }`
    Review it; the database URL and `POSTGRES_PASSWORD` must match. The `changethis` placeholders warn and are for local setup only — never deploy with them, commit `.env` or share it.

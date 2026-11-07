@@ -47,9 +47,10 @@ cd frontend && bun run lint && bun run build     # lint + type-check + build
 Read [`docs/07-Developer-Guide.md`](docs/07-Developer-Guide.md) for the full team workflow,
 branching strategy, review checklist, testing guidance, and developer roles.
 
-**Current branch policy (decided November 1, 2026):**
-- `master` holds documentation and planning (`docs/`, this README).
-- `draft/admin-portal` holds the admin portal UI and supporting code. **The Version 1 demo runs from this branch.**
+**Current branch policy (updated November 7, 2026):**
+- On November 7, 2026 `draft/admin-portal` was merged into `master` (pull request #9). **`master` now holds the application code and the documentation, and the Version 1 demo runs from it.**
+- `draft/admin-portal` is not ahead of `master`. Do not start new work on it unless the team decides to keep using it.
+- Until the team decides otherwise, make changes on a short-lived `feature/`, `fix/`, `docs/` or `chore/` branch cut from `master` and open a pull request.
 - `Foundation` is frozen as a read-only reference. Do not commit to, rename or delete it.
 - Do not create the planned `production` branch unless the team explicitly
   reviews and changes the branch plan. See
