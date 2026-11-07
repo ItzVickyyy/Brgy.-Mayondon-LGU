@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - Foundation
+      - master
       - draft/admin-portal
   pull_request:
     branches:
       - Foundation
+      - master
       - draft/admin-portal
   workflow_dispatch:
 

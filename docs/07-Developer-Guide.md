@@ -46,7 +46,7 @@ Until the architecture is validated at the client site:
 >
 > The root README was updated to match.
 >
-> **Update Nov 7, 2026 (D-08):** the owner merged `draft/admin-portal` into `master` (pull request #9, merge commit `18f4a02`). `master` now holds the application code **and** the documentation, and the Version 1 demo runs from `master`. `draft/admin-portal` is not ahead of `master`. The interim arrangement below was written for the time before that merge and **no longer applies** (rules 1 to 4 and the file-ownership table); it is kept as history. Until the team decides otherwise, use the workflow in the next paragraph. The **Branch sync check** workflow still encodes the old rules, so a push to `master` that changes anything outside `docs/` and `README.md` will fail it until the workflow is changed or retired. That change is not made yet.
+> **Update Nov 7, 2026 (D-08):** the owner merged `draft/admin-portal` into `master` (pull request #9, merge commit `18f4a02`). `master` now holds the application code **and** the documentation, and the Version 1 demo runs from `master`. `draft/admin-portal` is not ahead of `master`. The interim arrangement below was written for the time before that merge and **no longer applies** (rules 1 to 4 and the file-ownership table); it is kept as history. Until the team decides otherwise, use the workflow in the next paragraph. The **Branch sync check** workflow enforced those old rules and would have failed any code change on `master`, so it was **retired on Nov 7, 2026** (the file `.github/workflows/branch-sync-check.yml` is deleted). The **Verify offline deployment** workflow now also runs on pushes and pull requests for `master`.
 >
 > **Working now:** cut a short-lived `feature/`, `fix/`, `docs/` or `chore/` branch from `master`, open a pull request, and merge it after the checks pass. Code and documentation may change in the same pull request.
 
@@ -54,7 +54,7 @@ Until the architecture is validated at the client site:
 
 | Branch | Holds | Never changes |
 |---|---|---|
-| `master` | Documentation and planning: everything in `docs/`, the root `README.md`, and the branch-sync workflow | Application code, tests, lock files, other workflows |
+| `master` | Documentation and planning: everything in `docs/`, the root `README.md`, and the branch-sync workflow (retired Nov 7, 2026) | Application code, tests, lock files, other workflows |
 | `draft/admin-portal` | Admin portal UI, layout, design, and the code and tests that support it | `docs/` and the root `README.md` |
 
 1. Edit documentation **only on `master`**; edit application code **only on `draft/admin-portal`**.
@@ -69,7 +69,7 @@ Until the architecture is validated at the client site:
 3. Do **not** merge `draft/admin-portal` into `master` under this interim arrangement.
 4. If a change needs both docs and code: docs first on `master`, merge `master` into `draft/admin-portal`, then make the code change.
 
-The **Branch sync check** workflow (`.github/workflows/branch-sync-check.yml`) runs on every push to either branch. It fails if a branch changes files it does not own or if merging the two would conflict. A warning means `draft/admin-portal` is behind `master`; run the merge above.
+The **Branch sync check** workflow (`.github/workflows/branch-sync-check.yml`, **deleted Nov 7, 2026**) used to run on every push to either branch. It failed if a branch changed files it did not own or if merging the two would conflict, and warned when `draft/admin-portal` was behind `master`.
 
 ### Planned workflow (after client approval and team review)
 
