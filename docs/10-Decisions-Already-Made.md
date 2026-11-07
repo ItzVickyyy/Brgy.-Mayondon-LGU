@@ -2,7 +2,7 @@
 
 **For AI assistants and new contributors: read this file first.** These are changes the project owner already made on `draft/admin-portal`. Do not bring back anything listed as removed, and do not "fix" a legacy item unless the owner asks. If you think a decision is wrong, say so and ask; do not change it silently.
 
-Last updated: November 5, 2026. Synthetic data only: never write real names, ID numbers or photos into docs, code or tests.
+Last updated: November 7, 2026. Synthetic data only: never write real names, ID numbers or photos into docs, code or tests.
 
 ## Removed or settled
 
@@ -20,6 +20,8 @@ Last updated: November 5, 2026. Synthetic data only: never write real names, ID 
 | 10 | **Management Reports always shows three summary cards** (Documents Issued, Records Expiring, Masterlist Imports) with zero values, not a "No report data yet" message. | Reports round | Consistent layout before data exists |
 | 11 | **No sample or example email addresses** in placeholders or seed text (`name@example.com`, `user@example.com` were removed). | Placeholder cleanup | They look like real data |
 | 12 | The User Accounts table shows whatever the database holds, including the seeded first admin (`FIRST_SUPERUSER`). That row is deployment data, not code. To replace it: create a real admin, then delete the seed account (the last active admin cannot be deleted). | Same | See [05](05-Roles-Security-and-Privacy.md) A6 |
+| 20 | **No staff self-registration.** There is no Request Access, Pending Approval or Pending Registrations page, no sidebar badge and no dashboard card. Only an administrator creates accounts. No account `status` column; `/users/signup` stays disabled (D-11). | Nov 7, 2026 | Owner decision (not a client approval). Matches the brief: no public sign-up |
+| 21 | **Offline password reset is an administrator-set temporary password with forced change at next sign-in.** No email, no recovery codes (D-12). | Nov 7, 2026 | Owner decision (not a client approval). Forced change not built yet; email cannot work offline |
 
 ## Printing
 

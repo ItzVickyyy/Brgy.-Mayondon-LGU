@@ -15,8 +15,6 @@ Based on the October 19–20 interviews and the final Creative Brief ([02-Requir
 ```mermaid
 flowchart TD
     A["System Entry"] --> B["Staff Login"]
-    A --> C["Request Access (proposed, D-11)"]
-    C --> D["Pending / Rejected Status Messages"]
     B --> E["Dashboard"]
 
     E --> F["Records Management"]
@@ -46,8 +44,6 @@ flowchart TD
     J --> J3["User Accounts"]
     J3 --> J4["Create Staff Account"]
     J3 --> J5["Edit / Deactivate Staff"]
-    J --> J6["Pending Registrations"]
-    J6 --> J7["Approve / Reject Registration"]
     E --> J8["Activity Log (role-filtered)"]
     J --> J9["Management Reports"]
     J --> J10["Backup and Restore"]
@@ -60,7 +56,7 @@ This is the proposed information architecture, not a statement that every page e
 **Workspace:** Dashboard · Activity Log
 **Records and Documents:** Records Management · Issuance Management
 **User menu:** My Account (account information, Change Password) · User Settings (appearance preferences)
-**Administration — System Administrator only (proposed):** Officials · User Accounts · Pending Registrations · Management Reports · Backup and Restore
+**Administration — System Administrator only (proposed):** Officials · User Accounts · Management Reports · Backup and Restore
 
 Staff see only their own activity; administrators see everyone's with filters. Administrator-only routes show a friendly restricted-access screen for Staff. **That is usability, not security:** the backend must enforce every protected operation ([05-Roles-Security-and-Privacy.md](05-Roles-Security-and-Privacy.md)).
 
@@ -68,7 +64,7 @@ Staff see only their own activity; administrators see everyone's with filters. A
 
 ### Dashboard
 - Page title and short description of the system's purpose.
-- Summary Statistics: documents issued this month; clearances expiring in 30 days; Barangay IDs expiring in 30 days; a role-specific pending card (Pending Registrations for Admin, Pending Document Requests for Staff). Values read 0 until real data exists. Use real database values only once connected, and never present invented figures as barangay statistics. Keep the existing issuance-over-time and issuance-by-document-type charts.
+- Summary Statistics: documents issued this month; clearances expiring in 30 days; Barangay IDs expiring in 30 days; a Pending Document Requests card (drafts not yet issued) for both roles. Values read 0 until real data exists. Use real database values only once connected, and never present invented figures as barangay statistics. Keep the existing issuance-over-time and issuance-by-document-type charts.
 - **Quick Actions** sit directly under Summary Statistics (horizontal row on wide screens, stacked on small ones; no subtitle, short cards): Find a resident (`/records`), Create an issuance (`/issuances`), Review issuance history (`/issuances`), View dashboard activity (`/activity-log`). Cards use the theme colour only, with a stronger tint, border and icon chip; **do not add per-card colours** (see [10-Decisions-Already-Made.md](10-Decisions-Already-Made.md)).
 - Recent activity: own actions for Staff; system-wide for Admin if approved.
 - *Superseded:* earlier population / household / registered-voter / demographics cards were removed because they are outside the brief. Do not reintroduce unsupported population/voter management unless the client confirms it **(D-21)**.
@@ -91,7 +87,7 @@ One page at `/records` (heading "Records Management") with four tabs: **Resident
 Separate from login accounts. Proposed fields: full name, position, term start/end, active/inactive, optional photo. Prefer archive/inactive for former officials. Adding an official must never create a login account. Not in the brief **(D-23)**.
 
 ### User Accounts and Registration (proposed)
-Admin creates active Staff accounts directly. Staff self-registration creates a *pending* account that only Admin can approve or reject; pending and rejected accounts must not reach protected pages or APIs. No public Admin registration; the first Admin is provisioned through controlled initial setup **(D-11)**.
+Only the System Administrator creates accounts (active Staff accounts directly). There is no self-registration, no Request Access page and no pending or rejected account state **(D-11, decided Nov 7, 2026)**. The first Admin is provisioned through controlled initial setup.
 
 ### Activity Log (proposed)
 Shared page. Staff see own activity; Admin searches and filters across users. Capture actor, action, module, record reference, timestamp, outcome and reason where required. Never log passwords, tokens or unnecessary resident data. Ordinary users cannot edit or delete audit history **(D-24)**.
@@ -146,7 +142,7 @@ Base radius `0.625rem`. The sidebar primary stays at its earlier values. These d
 
 ## 6. Admin portal prototype — what exists
 
-Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Management, Issuance Management, Officials, User Management, Activity Log (`/activity-log`), Pending Registrations (`/pending-registrations`), Reports (`/reports`) and Backup and Restore (`/backup-restore`), plus Request Access and Pending Approval screens. Records Management (`/records`) holds both resident and Barangay ID records; `/barangay-ids` only redirects to it. The former separate My Activity route and the unused Items route were removed.
+Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Management, Issuance Management, Officials, User Management, Activity Log (`/activity-log`), Reports (`/reports`) and Backup and Restore (`/backup-restore`). Records Management (`/records`) holds both resident and Barangay ID records; `/barangay-ids` only redirects to it. The former separate My Activity route and the unused Items route were removed.
 
 **Everything below is prototype-only:**
 
@@ -156,8 +152,7 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 - The Document Management resident selector uses hard-coded sample residents; purposes are hard-coded.
 - **Printing is implemented for six templates** (Clearance, Franchise, Electrical/Water, Indigency, Marginalized Sector, Assistance certification) as typed values on pre-printed forms, with a Printing setup dialog for calibration. Residency, First-Time Jobseekers and Barangay ID have no template. Details: [04-Documents-and-Printing.md](04-Documents-and-Printing.md). Not yet verified on a real printer.
 - Masterlist import shows a file-selection area and planned validation summary; parsing, mapping, preview, duplicate detection and import are not implemented.
-- Request Access / Pending Approval / Pending Registrations do not submit, save, approve, reject or create accounts. Sidebar pending counts are fictional.
-- The account form maps **System Administrator → `is_superuser = true`** and **Staff → `is_superuser = false`**. No separate backend role enum exists, and `is_active` cannot represent pending/rejected.
+- The account form maps **System Administrator → `is_superuser = true`** and **Staff → `is_superuser = false`**. No separate backend role enum exists. There is no pending or rejected state and none is planned (D-11).
 - Backup/Restore screen is a concept (manual backup, proposed schedule controls, sample history, restore confirmation layout). It does not run any backup or restore.
 - Account profile, password change and account management use the existing foundation functionality.
 - The footer shows branding only; Terms of Use and Privacy Policy are not implemented. Any legal text must be marked "Draft, pending barangay review".
@@ -202,7 +197,7 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 4. Review form fields and print layouts with the barangay.
 5. Review mobile and desktop layouts with the client.
 6. Run `cd frontend && bun run lint && bun run build` and the Playwright suite; review route, navigation and role-related failures.
-7. Manually check dashboard, sidebar, login, request-access, pending-approval, pending-registrations and user-account flows at **375px, 768px and 1280px**.
+7. Manually check dashboard, sidebar, login and user-account flows at **375px, 768px and 1280px**.
 8. Test Staff and System Administrator views separately, including direct navigation to restricted routes.
 9. Confirm role and authorization behavior **in the backend**, and audit logging, before any real data.
 10. Replace fictional data only after an approved data plan exists. Do not claim client approval based on the prototype.

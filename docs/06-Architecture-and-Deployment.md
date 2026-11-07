@@ -143,7 +143,7 @@ docker compose -f compose.yml exec backend alembic upgrade head
 docker compose -f compose.yml exec backend python app/initial_data.py
 ```
 
-If the admin already exists, the script is **not** a password reset; use the approved recovery procedure **(D-12)**. Check `Invoke-WebRequest http://localhost:8000/api/v1/utils/health-check/`, then open `http://localhost:8000` and confirm login and pages load. A healthy endpoint alone does not mean deployment is complete.
+If the admin already exists, the script is **not** a password reset; use the recovery procedure in docs/05 (administrator-set temporary password, **D-12**). Check `Invoke-WebRequest http://localhost:8000/api/v1/utils/health-check/`, then open `http://localhost:8000` and confirm login and pages load. A healthy endpoint alone does not mean deployment is complete.
 
 ## 7. Let office computers connect
 
