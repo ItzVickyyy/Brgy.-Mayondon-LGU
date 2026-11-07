@@ -18,7 +18,7 @@ export function EmptyState({ title, description }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center gap-2 p-8 text-center">
       <Inbox className="size-6 text-muted-foreground" aria-hidden="true" />
-      <p className="text-base font-medium">{title ?? t("common.feedback.error")}</p>
+      <p className="text-base font-medium">{title}</p>
       {description ? (
         <p className="max-w-md text-sm text-muted-foreground">{description}</p>
       ) : null}

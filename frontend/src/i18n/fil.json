@@ -1659,5 +1659,127 @@
       "submit": "I-reset ang Password"
     },
     "email": "Email"
+  },
+  "common": {
+    "confirm": {
+      "confirm": "Kumpirmahin",
+      "cancel": "Kanselahin",
+      "reason": "Dahilan",
+      "required": "kinakailangan",
+      "optional": "opsyonal",
+      "placeholder": "Ilagay ang dahilan",
+      "minReason": "Maglagay ng hindi bababa sa 3 character."
+    },
+    "feedback": {
+      "loading": "Nilo-load...",
+      "error": "May nangyaring error",
+      "retry": "Subukan muli"
+    },
+    "notFound": {
+      "oops": "Naku!",
+      "description": "Hindi makita ang pahinang hinahanap mo.",
+      "back": "Bumalik"
+    },
+    "permission": {
+      "title": "Limitado ang access",
+      "description": "Wala kang pahintulot na tingnan ang pahinang ito. Kontakin ang System Administrator kung sa tingin mo ay kailangan mo ng access.",
+      "back": "Bumalik sa Dashboard"
+    },
+    "pagination": {
+      "showing": "Ipinapakita ang {{start}}–{{end}} sa {{total}}",
+      "label": "Pagination",
+      "previous": "Nakaraan",
+      "previousPage": "Nakaraang pahina",
+      "page": "Pahina {{current}} ng {{total}}",
+      "next": "Susunod",
+      "nextPage": "Susunod na pahina"
+    },
+    "table": {
+      "emptyTitle": "Walang nahanap na resulta",
+      "emptyDescription": "Walang mga talaang ipapakita."
+    },
+    "rowActions": {
+      "more": "Higit pang aksyon para kay {{name}}"
+    },
+    "dialogs": {
+      "shortcutsTitle": "Mga keyboard shortcut",
+      "shortcutsDescription": "Hindi gagana ang mga shortcut habang nagta-type ka sa isang field.",
+      "helpTitle": "Humingi ng tulong",
+      "helpDescription": "Gumagana ang lahat ng narito kahit walang koneksyon sa internet.",
+      "learnTitle": "Tungkol sa sistemang ito",
+      "versionTitle": "Bersyon",
+      "versionStatus": "Prototype. Hindi pa aprubado para sa totoong datos.",
+      "termsTitle": "Mga Tuntunin ng Paggamit",
+      "privacyTitle": "Patakaran sa Privacy",
+      "draftNotice": "Draft ito at naghihintay ng pagsusuri ng barangay. Hindi pa ito aprubado ng barangay.",
+      "shortcutItems": [
+        "Ipakita ang listahan ng mga keyboard shortcut",
+        "Pumunta sa search box sa pahina",
+        "Pumunta sa Dashboard",
+        "Pumunta sa Pamamahala ng mga Talaan",
+        "Pumunta sa Pamamahala ng Pag-isyu",
+        "Pumunta sa Talaan ng Aktibidad",
+        "Magsimula ng Bagong Pag-isyu sa pahina ng Pag-isyu",
+        "Ipakita o itago ang sidebar",
+        "Pumunta sa susunod na control",
+        "Pumunta sa naunang control",
+        "Isara ang window o i-clear ang paghahanap"
+      ],
+      "help": {
+        "signing": "Pag-sign in at pag-sign out",
+        "signingText": "Mag-sign in gamit ang email address at password na ibinigay ng System Administrator. Para mag-sign out, buksan ang profile menu sa kanang itaas at piliin ang Logout.",
+        "finding": "Paghahanap ng residente",
+        "findingText": "Buksan ang Pamamahala ng mga Talaan at ilagay ang pangalan, tirahan, o ID number sa search box. Pindutin ang / upang pumunta sa search box.",
+        "issuing": "Pag-isyu ng dokumento",
+        "issuingText": "Buksan ang Pamamahala ng Pag-isyu, piliin ang Bagong Pag-isyu, piliin ang residente at uri ng dokumento, suriin ang mga detalye, pagkatapos ay i-isyu at i-print sa pre-printed form.",
+        "problems": "Mga karaniwang problema",
+        "forgot": "Nakalimutan ang password:",
+        "forgotText": "hilingin sa System Administrator na magtakda ng pansamantalang password para sa iyo.",
+        "noPermission": "Walang pahintulot sa isang pahina:",
+        "noPermissionText": "para lamang sa System Administrator ang pahinang iyon.",
+        "load": "Hindi naglo-load ang pahina:",
+        "loadText": "tingnan kung nakabukas ang computer sa opisina na nagho-host ng sistema at nakakonekta ka sa network ng opisina.",
+        "contact": "Sino ang dapat kontakin",
+        "contactText": "Magtanong sa System Administrator sa tanggapan ng barangay.",
+        "shortcuts": "Mga keyboard shortcut"
+      },
+      "learn": {
+        "what": "Ano ito",
+        "whatText": "Sistema ito para lamang sa mga tauhan ng tanggapan ng barangay. Iniingatan nito ang mga talaan ng residente, naghahanda at nagpi-print ng mga dokumento sa pre-printed forms ng barangay, nagtatago ng kasaysayan ng pag-isyu kasama ang mga Barangay ID card, at nagpapakita ng mga buod at ulat para sa opisina.",
+        "not": "Ano ang hindi nito saklaw",
+        "notText": "Hindi ito pampublikong website. Walang account ang mga residente at hindi sila maaaring mag-apply o magbayad online. Hindi nito pinapalitan ang mga dokumentong iniisyu ng ibang ahensya.",
+        "how": "Paano ito gumagana",
+        "howText": "Tumatakbo ito sa computer sa tanggapan ng barangay at ginagamit sa network ng opisina. Nananatili sa computer na iyon ang datos at mga larawan ng residente.",
+        "built": "Binuo ng"
+      },
+      "version": {
+        "version": "Bersyon",
+        "builtOn": "Ginawa noong",
+        "status": "Katayuan"
+      },
+      "terms": {
+        "who": "Sino ang maaaring gumamit ng sistemang ito",
+        "whoText": "Mga tauhan lamang ng tanggapan ng barangay na may account na ginawa ng System Administrator. Huwag ibahagi ang iyong account o password.",
+        "use": "Paano ito gamitin",
+        "use1": "Gamitin lamang ang impormasyon ng residente para sa trabaho sa tanggapan ng barangay.",
+        "use2": "Suriin ang bawat detalye bago mag-isyu o mag-print ng dokumento.",
+        "use3": "Huwag baguhin ang mga naisyung talaan. Ang mga pagwawasto ay ginagawa nang may dahilan at itinatala sa kasaysayan.",
+        "use4": "Mag-sign out kapag aalis ka sa computer.",
+        "activity": "Itinatala ang aktibidad",
+        "activityText": "Itinatala ang pag-isyu, pagwawasto, at pagbabago sa account kasama ang iyong pangalan at oras upang masuri ito ng opisina."
+      },
+      "privacy": {
+        "kept": "Anong impormasyon ang iniingatan",
+        "keptText": "Mga detalye ng residente na kailangan para sa mga dokumento ng barangay, mga larawan ng residente, kasaysayan ng pag-isyu, at mga tala ng aktibidad ng tauhan.",
+        "why": "Bakit ito iniingatan",
+        "whyText": "Upang ihanda at i-print ang mga dokumentong iniisyu ng barangay at mapanatili ang wastong talaan ng mga ito.",
+        "who": "Sino ang makakakita nito",
+        "whoText": "Mga naka-sign in na tauhan ng tanggapan ng barangay. May karagdagang access ang System Administrator upang pamahalaan ang mga account at talaan.",
+        "where": "Saan ito iniingatan",
+        "whereText": "Sa computer ng tanggapan ng barangay. Hindi ina-upload sa internet ang datos at mga larawan ng residente.",
+        "retention": "Pagpapanatili, pagwawasto, at mga tanong",
+        "retentionText": "Ang tagal ng pag-iingat ng mga talaan at paraan ng paghiling ng pagwawasto ng mga residente ay susunod sa mga prosesong aaprubahan ng barangay alinsunod sa Data Privacy Act. Magtanong sa System Administrator para sa detalye."
+      }
+    }
   }
 }

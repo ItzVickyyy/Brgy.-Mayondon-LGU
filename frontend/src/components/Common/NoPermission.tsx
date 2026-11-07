@@ -15,13 +15,13 @@ export function NoPermission() {
         />
       </div>
       <div>
-        <h1 className="text-2xl font-bold tracking-tight"{t("common.permission.title")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{t("common.permission.title")}</h1>
         <p className="mt-2 text-base text-muted-foreground">
           {t("common.permission.description")}
         </p>
       </div>
       <Button asChild className="min-h-11">
-        <RouterLink to="/"{t("common.permission.back")}</RouterLink>
+        <RouterLink to="/">{t("common.permission.back")}</RouterLink>
       </Button>
     </main>
   )

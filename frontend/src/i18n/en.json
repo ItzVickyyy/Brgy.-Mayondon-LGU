@@ -1659,5 +1659,127 @@
       "submit": "Reset Password"
     },
     "email": "Email"
+  },
+  "common": {
+    "confirm": {
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "reason": "Reason",
+      "required": "required",
+      "optional": "optional",
+      "placeholder": "Enter a reason",
+      "minReason": "Enter at least 3 characters."
+    },
+    "feedback": {
+      "loading": "Loading...",
+      "error": "Something went wrong",
+      "retry": "Retry"
+    },
+    "notFound": {
+      "oops": "Oops!",
+      "description": "The page you are looking for was not found.",
+      "back": "Go Back"
+    },
+    "permission": {
+      "title": "Access restricted",
+      "description": "You do not have permission to view this page. Contact the System Administrator if you believe you need access.",
+      "back": "Back to Dashboard"
+    },
+    "pagination": {
+      "showing": "Showing {{start}}–{{end}} of {{total}}",
+      "label": "Pagination",
+      "previous": "Previous",
+      "previousPage": "Previous page",
+      "page": "Page {{current}} of {{total}}",
+      "next": "Next",
+      "nextPage": "Next page"
+    },
+    "table": {
+      "emptyTitle": "No results found",
+      "emptyDescription": "There are no records to display."
+    },
+    "rowActions": {
+      "more": "More actions for {{name}}"
+    },
+    "dialogs": {
+      "shortcutsTitle": "Keyboard shortcuts",
+      "shortcutsDescription": "Shortcuts do not work while you are typing in a box.",
+      "helpTitle": "Get help",
+      "helpDescription": "Everything here works without an internet connection.",
+      "learnTitle": "About this system",
+      "versionTitle": "Version",
+      "versionStatus": "Prototype. Not yet approved for real data.",
+      "termsTitle": "Terms of Use",
+      "privacyTitle": "Privacy Policy",
+      "draftNotice": "Draft, pending barangay review. This text is not yet approved by the barangay.",
+      "shortcutItems": [
+        "Show this list of keyboard shortcuts",
+        "Jump to the search box on the page",
+        "Go to Dashboard",
+        "Go to Records Management",
+        "Go to Issuance Management",
+        "Go to Activity Log",
+        "Start a New Issuance (on the Issuance page)",
+        "Show or hide the sidebar",
+        "Move to the next control",
+        "Move to the previous control",
+        "Close a window or clear the search"
+      ],
+      "help": {
+        "signing": "Signing in and out",
+        "signingText": "Sign in with the email address and password the System Administrator gave you. To sign out, open the profile menu at the top right and choose Logout.",
+        "finding": "Finding a resident",
+        "findingText": "Open Records Management and type a name, address or ID number in the search box. Press / to jump to the search box.",
+        "issuing": "Issuing a document",
+        "issuingText": "Open Issuance Management, choose New Issuance, pick the resident and the document type, check the details, then issue and print it on the pre-printed form.",
+        "problems": "Common problems",
+        "forgot": "Forgot your password:",
+        "forgotText": "ask the System Administrator to set a temporary password for you.",
+        "noPermission": "A page says you have no permission:",
+        "noPermissionText": "that page is for System Administrators only.",
+        "load": "The page will not load:",
+        "loadText": "check that the office computer that hosts the system is on and that you are on the office network.",
+        "contact": "Who to contact",
+        "contactText": "Ask your System Administrator at the barangay office.",
+        "shortcuts": "Keyboard shortcuts"
+      },
+      "learn": {
+        "what": "What it is",
+        "whatText": "A staff-only system for the barangay office. It keeps resident records, prepares and prints documents on the barangay's pre-printed forms, keeps issuance history including Barangay ID cards, and shows summaries and reports for office use.",
+        "not": "What it is not",
+        "notText": "It is not a public website. Residents do not have accounts, apply online or pay online. It does not replace documents issued by other agencies.",
+        "how": "How it runs",
+        "howText": "It runs on a computer in the barangay office and is used over the office network. Resident data and photos stay on that computer.",
+        "built": "Built by"
+      },
+      "version": {
+        "version": "Version",
+        "builtOn": "Built on",
+        "status": "Status"
+      },
+      "terms": {
+        "who": "Who may use this system",
+        "whoText": "Only barangay office personnel with an account created by the System Administrator. Do not share your account or password.",
+        "use": "How to use it",
+        "use1": "Use resident information only for barangay office work.",
+        "use2": "Check every detail before issuing or printing a document.",
+        "use3": "Do not alter issued records. Corrections are made with a reason and are kept in the history.",
+        "use4": "Sign out when you leave the computer.",
+        "activity": "Activity is recorded",
+        "activityText": "Issuing, correcting and account changes are recorded with your name and the time, so the office can review them."
+      },
+      "privacy": {
+        "kept": "What is kept",
+        "keptText": "Resident details needed for barangay documents, resident photos, issuance history and staff activity records.",
+        "why": "Why it is kept",
+        "whyText": "To prepare and print the documents the barangay issues and to keep an accurate record of them.",
+        "who": "Who can see it",
+        "whoText": "Signed-in barangay office personnel. The System Administrator has extra access to manage accounts and records.",
+        "where": "Where it is kept",
+        "whereText": "On the barangay office computer. Resident data and photos are not uploaded to the internet.",
+        "retention": "Retention, corrections and questions",
+        "retentionText": "How long records are kept and how residents may ask for corrections will follow the procedures the barangay approves under the Data Privacy Act. Ask the System Administrator for details."
+      }
+    }
   }
 }
