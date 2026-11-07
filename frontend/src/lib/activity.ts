@@ -14,6 +14,8 @@ const activityTitles: Record<string, string> = {
   "issuance.view_sensitive": "Restricted detail viewed",
   "official.create": "Official added",
   "official.update": "Official updated",
+  "auth.login": "Signed in",
+  "auth.login_failed": "Sign-in failed",
   "user.create": "Account created",
   "user.update": "Account updated",
   "user.role_change": "Account role changed",
