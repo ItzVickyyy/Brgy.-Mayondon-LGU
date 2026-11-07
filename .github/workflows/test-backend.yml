@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     env:
-      # Avoid the PostgreSQL service port already used on GitHub-hosted runners.
+      # The database is published on 5433 for host-side migration and tests.
       POSTGRES_PORT: "5433"
     steps:
       - name: Checkout
@@ -36,6 +36,8 @@ jobs:
           uvx --from pip-audit pip-audit -r /tmp/requirements.txt
       # .env is intentionally not tracked; use placeholders for local CI.
       - run: cp .env.example .env
+      - name: Configure host database port
+        run: sed -i 's/localhost:5432/localhost:5433/' .env
       - run: docker compose down -v --remove-orphans
       - run: docker compose up -d --wait db mailpit
       - name: Migrate DB
