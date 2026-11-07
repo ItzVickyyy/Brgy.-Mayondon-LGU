@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { Save, ShieldCheck, Upload, UserRound } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { UsersService, type UserUpdateMe } from "@/client"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
@@ -38,29 +39,29 @@ const profileFields: {
   type?: string
   placeholder?: string
 }[] = [
-  { key: "first_name", label: "First Name", placeholder: "Enter first name" },
+  { key: "first_name", label: "account.fields.firstName", placeholder: "account.placeholders.firstName" },
   {
     key: "middle_name",
-    label: "Middle Name",
-    placeholder: "Enter middle name or initial",
+    label: "account.fields.middleName",
+    placeholder: "account.placeholders.middleName",
   },
-  { key: "last_name", label: "Last Name", placeholder: "Enter last name" },
+  { key: "last_name", label: "account.fields.lastName", placeholder: "account.placeholders.lastName" },
   {
     key: "extension_name",
-    label: "Extension Name",
-    placeholder: "Jr., Sr., III, etc.",
+    label: "account.fields.extensionName",
+    placeholder: "account.placeholders.extensionName",
   },
-  { key: "sex", label: "Sex", placeholder: "Enter sex" },
+  { key: "sex", label: "account.fields.sex", placeholder: "account.placeholders.sex" },
   {
     key: "civil_status",
-    label: "Civil Status",
-    placeholder: "Enter civil status",
+    label: "account.fields.civilStatus",
+    placeholder: "account.placeholders.civilStatus",
   },
-  { key: "birthdate", label: "Birthdate", type: "date" },
+  { key: "birthdate", label: "account.fields.birthdate", type: "date" },
   {
     key: "birthplace",
-    label: "Birthplace",
-    placeholder: "City or municipality",
+    label: "account.fields.birthplace",
+    placeholder: "account.placeholders.birthplace",
   },
 ]
 
@@ -72,19 +73,19 @@ const contactFields: {
 }[] = [
   {
     key: "email",
-    label: "Email",
+    label: "account.fields.email",
     type: "email",
   },
   {
     key: "phone_number",
-    label: "Phone Number",
+    label: "account.fields.phoneNumber",
     type: "tel",
     placeholder: "09XX XXX XXXX",
   },
   {
     key: "address",
     label: "Address",
-    placeholder: "House no., street, barangay, city",
+    placeholder: "account.placeholders.address",
   },
 ]
 
@@ -107,11 +108,12 @@ function getProfileForm(user: any): ProfileForm {
 }
 
 function AccountField({ label, value }: { label: string; value: string }) {
+  const { t } = useTranslation()
   return (
     <div className="min-w-0 space-y-1.5">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p className="break-words text-sm font-medium leading-5">
-        {value || "Not provided"}
+        {value || t("account.notProvided")}
       </p>
     </div>
   )
@@ -141,6 +143,7 @@ export function MyAccountModal({
   onOpenChange: (open: boolean) => void
   user: any
 }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const [form, setForm] = useState<ProfileForm>(() => getProfileForm(user))
@@ -221,9 +224,9 @@ export function MyAccountModal({
     mutation.mutate(payload as unknown as UserUpdateMe)
   }
 
-  const status = user?.is_active === false ? "Inactive" : "Active"
-  const role = user?.is_superuser ? "System Administrator" : "Staff"
-  const username = user?.username || user?.email || "Not provided"
+  const status = user?.is_active === false ? t("account.status.inactive") : t("account.status.active")
+  const role = user?.is_superuser ? t("account.roles.admin") : t("account.roles.staff")
+  const username = user?.username || user?.email || t("account.notProvided")
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -250,30 +253,30 @@ export function MyAccountModal({
               <>
                 <section>
                   <SectionHeading
-                    title="Account Information"
-                    description="Your account status and assigned access level."
+                    title={t("account.sections.information")}
+                    description={t("account.sections.informationDescription")}
                   />
                   <div className="grid grid-cols-2 gap-x-3 gap-y-4 rounded-xl border bg-muted/20 px-4 py-3.5 sm:grid-cols-4 sm:gap-x-3 sm:gap-y-2 xl:grid-cols-[0.8fr_1.25fr_1fr_1.7fr]">
-                    <AccountField label="Status" value={status} />
-                    <AccountField label="Username" value={username} />
-                    <AccountField label="Role" value={role} />
+                    <AccountField label={t("account.status.label")} value={status} />
+                    <AccountField label={t("account.username")} value={username} />
+                    <AccountField label={t("account.role")} value={role} />
                     <AccountField
-                      label="Governing LGU"
+                      label={t("account.governingLgu")}
                       value="Brgy. Mayondon Los Baños, Laguna"
                     />
                   </div>
                 </section>
                 <section>
                   <SectionHeading
-                    title="Personal Information"
-                    description="Your profile and personal details."
+                    title={t("account.sections.personal")}
+                    description={t("account.sections.personalDescription")}
                   />
                   <div className="flex items-center gap-4 rounded-xl border bg-muted/10 p-4">
                     <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-full border bg-background text-muted-foreground">
                       {previewPhoto ? (
                         <img
                           src={previewPhoto}
-                          alt="Profile"
+                          alt={t("account.profilePhoto")}
                           className="size-full object-cover"
                           onError={() => setPreviewPhoto("")}
                         />
@@ -292,7 +295,7 @@ export function MyAccountModal({
                           .filter(Boolean)
                           .join(" ") ||
                           user?.full_name ||
-                          "Name not provided"}
+                          t("account.nameNotProvided")}
                       </p>
                       <p className="mt-1 text-xs text-muted-foreground">
                         Profile photo
@@ -303,7 +306,7 @@ export function MyAccountModal({
                     {profileFields.map((field) => (
                       <AccountField
                         key={field.key}
-                        label={field.label}
+                        label={t(field.label)}
                         value={form[field.key]}
                       />
                     ))}
@@ -311,18 +314,18 @@ export function MyAccountModal({
                 </section>
                 <section>
                   <SectionHeading
-                    title="Contact Information"
-                    description="These details help the office reach you when needed."
+                    title={t("account.sections.contact")}
+                    description={t("account.sections.contactDescription")}
                   />
                   <div className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2">
-                    <AccountField label="Email" value={form.email} />
+                    <AccountField label={t("account.fields.email")} value={form.email} />
                     <AccountField
-                      label="Phone Number"
+                      label={t("account.fields.phoneNumber")}
                       value={form.phone_number}
                     />
                     <div className="sm:col-span-2">
                       <AccountField
-                        label="Residential Address"
+                        label={t("account.residentialAddress")}
                         value={form.address}
                       />
                     </div>
@@ -330,8 +333,8 @@ export function MyAccountModal({
                 </section>
                 <section>
                   <SectionHeading
-                    title="Security"
-                    description="Protect your account and sign-in credentials."
+                    title={t("account.sections.security")}
+                    description={t("account.sections.securityDescription")}
                   />
                   <div className="flex items-center gap-3 rounded-xl border p-4 sm:p-5">
                     <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
@@ -339,10 +342,10 @@ export function MyAccountModal({
                     </span>
                     <div>
                       <h4 className="text-sm font-semibold">
-                        Password & Sign-in
+                        {t("account.passwordSignIn")}
                       </h4>
                       <p className="mt-1 text-xs text-muted-foreground">
-                        Manage your password from edit mode.
+                        {t("account.passwordManage")}
                       </p>
                     </div>
                   </div>
@@ -352,15 +355,15 @@ export function MyAccountModal({
               <>
                 <section>
                   <SectionHeading
-                    title="Account Information"
-                    description="Your account status and assigned access level."
+                    title={t("account.sections.information")}
+                    description={t("account.sections.informationDescription")}
                   />
                   <div className="grid grid-cols-2 gap-x-3 gap-y-4 rounded-xl border bg-muted/20 px-4 py-3.5 sm:grid-cols-4 sm:gap-x-3 sm:gap-y-2 xl:grid-cols-[0.8fr_1.25fr_1fr_1.7fr]">
-                    <AccountField label="Status" value={status} />
-                    <AccountField label="Username" value={username} />
-                    <AccountField label="Role" value={role} />
+                    <AccountField label={t("account.status.label")} value={status} />
+                    <AccountField label={t("account.username")} value={username} />
+                    <AccountField label={t("account.role")} value={role} />
                     <AccountField
-                      label="Governing LGU"
+                      label={t("account.governingLgu")}
                       value="Brgy. Mayondon Los Baños, Laguna"
                     />
                   </div>
@@ -368,15 +371,15 @@ export function MyAccountModal({
 
                 <section>
                   <SectionHeading
-                    title="Personal Information"
-                    description="Keep your personal details accurate and up to date."
+                    title={t("account.sections.personal")}
+                    description={t("account.sections.personalEditDescription")}
                   />
                   <div className="mb-4 rounded-xl border bg-muted/10 p-4 sm:p-5">
                     <Label
                       htmlFor="profile_photo_file"
                       className="mb-2 block text-xs font-medium"
                     >
-                      Profile Photo
+                      {t("account.profilePhoto")}
                     </Label>
                     <label
                       htmlFor="profile_photo_file"
@@ -400,7 +403,7 @@ export function MyAccountModal({
                         {previewPhoto ? (
                           <img
                             src={previewPhoto}
-                            alt="Profile preview"
+                            alt={t("account.profilePhotoPreview")}
                             className="size-full object-cover"
                             onError={() => setPreviewPhoto("")}
                           />
@@ -411,15 +414,14 @@ export function MyAccountModal({
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium">
                           {selectedPhotoName ||
-                            "Choose a photo or drag it here"}
+                            t("account.photoChoose")}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Click to browse files. JPG, PNG, or WEBP images
-                          recommended.
+                          {t("account.photoBrowseHint")}
                         </p>
                       </div>
                       <span className="inline-flex shrink-0 items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm font-medium">
-                        <Upload className="size-4" /> Browse files
+                        <Upload className="size-4" /> {t("account.browseFiles")}
                       </span>
                       <input
                         id="profile_photo_file"
@@ -436,9 +438,7 @@ export function MyAccountModal({
                       />
                     </label>
                     <p className="mt-2 text-xs text-muted-foreground">
-                      Photo selection and preview are available in this form.
-                      Uploading and saving the image to your account will be
-                      connected later.
+                      {t("account.photoPreviewNote")}
                     </p>
                   </div>
                   <div className="rounded-xl border p-4 sm:p-5">
@@ -458,7 +458,7 @@ export function MyAccountModal({
                             onChange={(event) =>
                               updateField(field.key, event.target.value)
                             }
-                            placeholder={field.placeholder}
+                            placeholder={field.placeholder ? t(field.placeholder) : undefined}
                             maxLength={255}
                             className="min-h-11 bg-background"
                           />
@@ -482,7 +482,7 @@ export function MyAccountModal({
                               onChange={(event) =>
                                 updateField(field.key, event.target.value)
                               }
-                              placeholder={field.placeholder}
+                              placeholder={field.placeholder ? t(field.placeholder) : undefined}
                               maxLength={255}
                               className="min-h-11 bg-background"
                             />
@@ -495,8 +495,8 @@ export function MyAccountModal({
 
                 <section>
                   <SectionHeading
-                    title="Contact Information"
-                    description="These details help the office reach you when needed."
+                    title={t("account.sections.contact")}
+                    description={t("account.sections.contactDescription")}
                   />
                   <div className="rounded-xl border p-4 sm:p-5">
                     <div className="grid gap-4 sm:grid-cols-2">
@@ -517,7 +517,7 @@ export function MyAccountModal({
                               onChange={(event) =>
                                 updateField(field.key, event.target.value)
                               }
-                              placeholder={field.placeholder}
+                              placeholder={field.placeholder ? t(field.placeholder) : undefined}
                               maxLength={255}
                               className="min-h-11 bg-background"
                             />
@@ -527,43 +527,43 @@ export function MyAccountModal({
                     <div className="mt-5 border-t pt-5">
                       <div className="mb-3">
                         <h4 className="text-sm font-semibold">
-                          Residential Address
+                          {t("account.residentialAddress")}
                         </h4>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Enter each part of the address in its own field.
+                          {t("account.addressPartsHint")}
                         </p>
                       </div>
                       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                         {[
                           {
                             key: "address_line",
-                            label: "House/Lot/Block No. and Street",
-                            placeholder: "House no., street name",
+                            label: "account.addressFields.street",
+                            placeholder: "account.addressPlaceholders.street",
                           },
                           {
                             key: "purok_sitio",
-                            label: "Purok / Sitio / Subdivision",
-                            placeholder: "Purok, sitio, or subdivision",
+                            label: "account.addressFields.purok",
+                            placeholder: "account.addressPlaceholders.purok",
                           },
                           {
                             key: "barangay",
-                            label: "Barangay",
-                            placeholder: "Barangay name",
+                            label: "account.addressFields.barangay",
+                            placeholder: "account.addressPlaceholders.barangay",
                           },
                           {
                             key: "municipality_city",
-                            label: "Municipality / City",
-                            placeholder: "Municipality or city",
+                            label: "account.addressFields.city",
+                            placeholder: "account.addressPlaceholders.city",
                           },
                           {
                             key: "province",
-                            label: "Province",
-                            placeholder: "Province name",
+                            label: "account.addressFields.province",
+                            placeholder: "account.addressPlaceholders.province",
                           },
                           {
                             key: "zip_code",
-                            label: "ZIP Code",
-                            placeholder: "ZIP code",
+                            label: "account.addressFields.zipCode",
+                            placeholder: "account.addressPlaceholders.zipCode",
                           },
                         ].map((field) => (
                           <div key={field.key}>
@@ -586,7 +586,7 @@ export function MyAccountModal({
                                   [field.key]: event.target.value,
                                 }))
                               }
-                              placeholder={field.placeholder}
+                              placeholder={field.placeholder ? t(field.placeholder) : undefined}
                               maxLength={field.key === "zip_code" ? 10 : 255}
                               className="min-h-11 bg-background"
                             />
@@ -599,8 +599,8 @@ export function MyAccountModal({
 
                 <section>
                   <SectionHeading
-                    title="Security"
-                    description="Protect your account and sign-in credentials."
+                    title={t("account.sections.security")}
+                    description={t("account.sections.securityDescription")}
                   />
                   <div className="rounded-xl border p-4 sm:p-5">
                     <div className="mb-4 flex items-start gap-3">
@@ -609,10 +609,10 @@ export function MyAccountModal({
                       </span>
                       <div>
                         <h4 className="text-sm font-semibold">
-                          Password & Sign-in
+                          {t("account.passwordSignIn")}
                         </h4>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Update your password to help keep your account secure.
+                          {t("account.passwordUpdate")}
                         </p>
                       </div>
                     </div>
@@ -627,7 +627,7 @@ export function MyAccountModal({
 
           <div className="flex shrink-0 flex-col-reverse gap-2 border-t bg-background px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-7">
             <p className="text-xs text-muted-foreground">
-              Account status and role can only be changed by an administrator.
+              {t("account.footerNote")}
             </p>
             <div className="flex justify-end gap-2">
               {!isEditing ? (
@@ -637,7 +637,7 @@ export function MyAccountModal({
                     variant="outline"
                     onClick={() => onOpenChange(false)}
                   >
-                    Close
+                    {t("account.actions.close")}
                   </Button>
                   <Button
                     type="button"
@@ -645,7 +645,7 @@ export function MyAccountModal({
                     className="gap-2"
                   >
                     <UserRound className="size-4" />
-                    Edit Account
+                    {t("account.actions.edit")}
                   </Button>
                 </>
               ) : (
@@ -668,7 +668,7 @@ export function MyAccountModal({
                     }}
                     disabled={mutation.isPending}
                   >
-                    Cancel Edit
+                    {t("account.actions.cancelEdit")}
                   </Button>
                   <Button
                     type="button"
@@ -676,7 +676,7 @@ export function MyAccountModal({
                     onClick={() => onOpenChange(false)}
                     disabled={mutation.isPending}
                   >
-                    Close
+                    {t("account.actions.close")}
                   </Button>
                   <Button
                     type="button"
@@ -685,7 +685,7 @@ export function MyAccountModal({
                     className="gap-2"
                   >
                     <Save className="size-4" />
-                    {mutation.isPending ? "Saving..." : "Save Changes"}
+                    {mutation.isPending ? t("account.actions.saving") : t("account.actions.saveChanges")}
                   </Button>
                 </>
               )}

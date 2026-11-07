@@ -1539,5 +1539,125 @@
         "restoreConfirmed": "Nakumpirma na ang kahilingang mag-restore."
       }
     }
+  },
+  "account": {
+    "myAccount": {
+      "title": "Aking Account",
+      "description": "Pamahalaan ang iyong personal na detalye, impormasyon sa pakikipag-ugnayan, at seguridad."
+    },
+    "sections": {
+      "information": "Impormasyon ng Account",
+      "informationDescription": "Katayuan ng iyong account at nakatalagang antas ng access.",
+      "personal": "Personal na Impormasyon",
+      "personalDescription": "Iyong profile at mga personal na detalye.",
+      "personalEditDescription": "Panatilihing tama at napapanahon ang iyong mga personal na detalye.",
+      "contact": "Impormasyon sa Pakikipag-ugnayan",
+      "contactDescription": "Makakatulong ang mga detalyeng ito upang makontak ka ng tanggapan.",
+      "security": "Seguridad",
+      "securityDescription": "Protektahan ang iyong account at mga detalye sa pag-sign in."
+    },
+    "status": {
+      "label": "Katayuan",
+      "active": "Aktibo",
+      "inactive": "Hindi aktibo"
+    },
+    "username": "Username",
+    "role": "Tungkulin",
+    "roles": {
+      "admin": "System Administrator",
+      "staff": "Staff"
+    },
+    "governingLgu": "Namamahalang LGU",
+    "fields": {
+      "firstName": "Pangalan",
+      "middleName": "Gitnang pangalan",
+      "lastName": "Apelyido",
+      "extensionName": "Karugtong ng pangalan",
+      "sex": "Kasarian",
+      "civilStatus": "Katayuang sibil",
+      "birthdate": "Petsa ng kapanganakan",
+      "birthplace": "Lugar ng kapanganakan",
+      "email": "Email",
+      "phoneNumber": "Numero ng telepono",
+      "address": "Tirahan"
+    },
+    "placeholders": {
+      "firstName": "Ilagay ang pangalan",
+      "middleName": "Ilagay ang gitnang pangalan o inisyal",
+      "lastName": "Ilagay ang apelyido",
+      "extensionName": "Jr., Sr., III, atbp.",
+      "sex": "Ilagay ang kasarian",
+      "civilStatus": "Ilagay ang katayuang sibil",
+      "birthplace": "Lungsod o munisipalidad",
+      "address": "House no., kalye, barangay, lungsod"
+    },
+    "notProvided": "Hindi ibinigay",
+    "nameNotProvided": "Hindi ibinigay ang pangalan",
+    "profilePhoto": "Litrato sa Profile",
+    "profilePhotoPreview": "Preview ng litrato sa profile",
+    "photoChoose": "Pumili ng litrato o i-drag ito rito",
+    "photoBrowseHint": "I-click upang pumili ng file. Inirerekomenda ang JPG, PNG, o WEBP.",
+    "browseFiles": "Mag-browse ng mga file",
+    "photoPreviewNote": "Maaari kang pumili at mag-preview ng litrato sa form na ito. Hindi pa nakakonekta ang pag-upload at pag-save ng litrato sa iyong account.",
+    "residentialAddress": "Tirahan",
+    "addressPartsHint": "Ilagay ang bawat bahagi ng tirahan sa sarili nitong field.",
+    "addressFields": {
+      "street": "House/Lot/Block No. at Kalye",
+      "purok": "Purok / Sitio / Subdivision",
+      "barangay": "Barangay",
+      "city": "Munisipalidad / Lungsod",
+      "province": "Probinsya",
+      "zipCode": "ZIP Code"
+    },
+    "addressPlaceholders": {
+      "street": "House no. at pangalan ng kalye",
+      "purok": "Purok, sitio, o subdivision",
+      "barangay": "Pangalan ng barangay",
+      "city": "Munisipalidad o lungsod",
+      "province": "Pangalan ng probinsya",
+      "zipCode": "ZIP code"
+    },
+    "passwordSignIn": "Password at Pag-sign in",
+    "passwordManage": "Pamahalaan ang iyong password sa edit mode.",
+    "passwordUpdate": "I-update ang iyong password upang mapanatiling ligtas ang iyong account.",
+    "footerNote": "Administrator lamang ang maaaring magbago ng katayuan at tungkulin ng account.",
+    "actions": {
+      "close": "Isara",
+      "edit": "I-edit ang Account",
+      "cancelEdit": "Kanselahin ang Pag-edit",
+      "saving": "Sine-save...",
+      "saveChanges": "I-save ang mga Pagbabago"
+    }
+  },
+  "password": {
+    "changeTitle": "Palitan ang Password",
+    "forced": {
+      "title": "Palitan ang iyong password",
+      "description": "Binigyan ka ng System Administrator ng pansamantalang password. Magtakda ng bagong password upang magpatuloy sa paggamit ng sistema."
+    },
+    "current": "Kasalukuyang Password",
+    "new": "Bagong Password",
+    "confirm": "Kumpirmahin ang Password",
+    "update": "I-update ang Password",
+    "validation": {
+      "required": "Kailangan ang password",
+      "currentMin": "Dapat may hindi bababa sa 8 character ang password",
+      "newMin": "Dapat may hindi bababa sa 12 character ang bagong password",
+      "confirmRequired": "Kailangang kumpirmahin ang password",
+      "mismatch": "Hindi magkatugma ang mga password",
+      "invalidEmail": "Hindi wastong email address"
+    },
+    "recovery": {
+      "title": "Pag-recover ng Password",
+      "offlineHelp": "Hilingin sa System Administrator na magtakda ng pansamantalang password para sa iyo.",
+      "continue": "Magpatuloy",
+      "remember": "Naalala mo na ba ang iyong password?",
+      "login": "Mag-log in"
+    },
+    "reset": {
+      "title": "I-reset ang Password",
+      "submit": "I-reset ang Password"
+    },
+    "email": "Email"
   }
 }

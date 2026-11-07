@@ -5,7 +5,9 @@ import {
   Link as RouterLink,
   redirect,
 } from "@tanstack/react-router"
-import { useState } from "react"
+import type { TFunction } from "i18next"
+import { useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
 
@@ -26,9 +28,10 @@ import { isLoggedIn } from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
-const formSchema = z.object({
-  email: z.email({ message: "Invalid email address" }),
-})
+const buildSchema = (t: TFunction) =>
+  z.object({
+    email: z.email({ message: t("password.validation.invalidEmail") }),
+  })
 
 type FormData = z.infer<typeof formSchema>
 
@@ -51,6 +54,8 @@ export const Route = createFileRoute("/recover-password")({
 })
 
 function RecoverPassword() {
+  const { t } = useTranslation()
+  const formSchema = useMemo(() => buildSchema(t), [t])
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -97,7 +102,7 @@ function RecoverPassword() {
           className="flex flex-col gap-6"
         >
           <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-2xl font-bold">Password Recovery</h1>
+            <h1 className="text-2xl font-bold">{t("password.recovery.title")}</h1>
           </div>
 
           {offlineNotice ? (
@@ -105,8 +110,7 @@ function RecoverPassword() {
               role="status"
               className="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
             >
-              {offlineNotice} Ask the System Administrator to set a temporary
-              password for you.
+              {offlineNotice} {t("password.recovery.offlineHelp")}
             </p>
           ) : null}
 
@@ -116,7 +120,7 @@ function RecoverPassword() {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel>{t("password.email")}</FormLabel>
                   <FormControl>
                     <Input
                       data-testid="email-input"
@@ -134,14 +138,14 @@ function RecoverPassword() {
               className="w-full"
               loading={mutation.isPending}
             >
-              Continue
+              {t("password.recovery.continue")}
             </LoadingButton>
           </div>
 
           <div className="text-center text-sm">
-            Remember your password?{" "}
+            {t("password.recovery.remember")}{" "}
             <RouterLink to="/login" className="underline underline-offset-4">
-              Log in
+              {t("password.recovery.login")}
             </RouterLink>
           </div>
         </form>

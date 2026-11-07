@@ -1539,5 +1539,125 @@
         "restoreConfirmed": "Restore request confirmed."
       }
     }
+  },
+  "account": {
+    "myAccount": {
+      "title": "My Account",
+      "description": "Manage your personal details, contact information, and security."
+    },
+    "sections": {
+      "information": "Account Information",
+      "informationDescription": "Your account status and assigned access level.",
+      "personal": "Personal Information",
+      "personalDescription": "Your profile and personal details.",
+      "personalEditDescription": "Keep your personal details accurate and up to date.",
+      "contact": "Contact Information",
+      "contactDescription": "These details help the office reach you when needed.",
+      "security": "Security",
+      "securityDescription": "Protect your account and sign-in credentials."
+    },
+    "status": {
+      "label": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "username": "Username",
+    "role": "Role",
+    "roles": {
+      "admin": "System Administrator",
+      "staff": "Staff"
+    },
+    "governingLgu": "Governing LGU",
+    "fields": {
+      "firstName": "First Name",
+      "middleName": "Middle Name",
+      "lastName": "Last Name",
+      "extensionName": "Extension Name",
+      "sex": "Sex",
+      "civilStatus": "Civil Status",
+      "birthdate": "Birthdate",
+      "birthplace": "Birthplace",
+      "email": "Email",
+      "phoneNumber": "Phone Number",
+      "address": "Address"
+    },
+    "placeholders": {
+      "firstName": "Enter first name",
+      "middleName": "Enter middle name or initial",
+      "lastName": "Enter last name",
+      "extensionName": "Jr., Sr., III, etc.",
+      "sex": "Enter sex",
+      "civilStatus": "Enter civil status",
+      "birthplace": "City or municipality",
+      "address": "House no., street, barangay, city"
+    },
+    "notProvided": "Not provided",
+    "nameNotProvided": "Name not provided",
+    "profilePhoto": "Profile Photo",
+    "profilePhotoPreview": "Profile photo preview",
+    "photoChoose": "Choose a photo or drag it here",
+    "photoBrowseHint": "Click to browse files. JPG, PNG, or WEBP images recommended.",
+    "browseFiles": "Browse files",
+    "photoPreviewNote": "Photo selection and preview are available in this form. Uploading and saving the image to your account will be connected later.",
+    "residentialAddress": "Residential Address",
+    "addressPartsHint": "Enter each part of the address in its own field.",
+    "addressFields": {
+      "street": "House/Lot/Block No. and Street",
+      "purok": "Purok / Sitio / Subdivision",
+      "barangay": "Barangay",
+      "city": "Municipality / City",
+      "province": "Province",
+      "zipCode": "ZIP Code"
+    },
+    "addressPlaceholders": {
+      "street": "House no., street name",
+      "purok": "Purok, sitio, or subdivision",
+      "barangay": "Barangay name",
+      "city": "Municipality or city",
+      "province": "Province name",
+      "zipCode": "ZIP code"
+    },
+    "passwordSignIn": "Password & Sign-in",
+    "passwordManage": "Manage your password from edit mode.",
+    "passwordUpdate": "Update your password to help keep your account secure.",
+    "footerNote": "Account status and role can only be changed by an administrator.",
+    "actions": {
+      "close": "Close",
+      "edit": "Edit Account",
+      "cancelEdit": "Cancel Edit",
+      "saving": "Saving...",
+      "saveChanges": "Save Changes"
+    }
+  },
+  "password": {
+    "changeTitle": "Change Password",
+    "forced": {
+      "title": "Change your password",
+      "description": "Your System Administrator gave you a temporary password. Set a new password to continue using the system."
+    },
+    "current": "Current Password",
+    "new": "New Password",
+    "confirm": "Confirm Password",
+    "update": "Update Password",
+    "validation": {
+      "required": "Password is required",
+      "currentMin": "Password must be at least 8 characters",
+      "newMin": "New password must be at least 12 characters",
+      "confirmRequired": "Password confirmation is required",
+      "mismatch": "The passwords don't match",
+      "invalidEmail": "Invalid email address"
+    },
+    "recovery": {
+      "title": "Password Recovery",
+      "offlineHelp": "Ask the System Administrator to set a temporary password for you.",
+      "continue": "Continue",
+      "remember": "Remember your password?",
+      "login": "Log in"
+    },
+    "reset": {
+      "title": "Reset Password",
+      "submit": "Reset Password"
+    },
+    "email": "Email"
   }
 }
