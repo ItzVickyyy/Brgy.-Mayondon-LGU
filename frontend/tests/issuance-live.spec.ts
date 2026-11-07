@@ -630,3 +630,148 @@ test("staff: can edit a resident through the adapter", async () => {
     message: expect.stringContaining("Ask the administrator"),
   })
 })
+
+// -------------------------------------- staff: corrections, archive, search
+// Same idea: each check asserts what the clerk or admin would actually read.
+
+test("staff: a correction opens a draft, blocks a second one, and issues", async () => {
+  useToken(staffToken)
+  const resident = await newResident("correct")
+  const original = await issuanceApi.createIssuance(
+    inputs(resident.id).BARANGAY_CLEARANCE.input,
+  )
+  expect(original.status).toBe("issued")
+
+  const draft = await issuanceApi.correctIssuance(original.id, "Wrong purpose")
+  expect(draft.status).toBe("draft")
+  expect(draft.correctsIssuanceId).toBe(original.id)
+  expect(draft.correctionReason).toBe("Wrong purpose")
+
+  // A second correction while one is open: the sentence the clerk reads.
+  await expect(
+    issuanceApi.correctIssuance(original.id, "Another try"),
+  ).rejects.toMatchObject({
+    status: 409,
+    message:
+      "A correction for this document is already open. Finish or discard that draft first.",
+  })
+
+  // Issuing the draft keeps the link and leaves the original alone.
+  const { input } = inputs(resident.id).BARANGAY_CLEARANCE
+  const fixed = await issuanceApi.issueDraft(draft.id, {
+    ...input,
+    purposeText: "Scholarship",
+  })
+  expect(fixed.status).toBe("issued")
+  expect(fixed.correctsIssuanceId).toBe(original.id)
+  expect(fixed.id).toBe(draft.id)
+  expect((await issuanceApi.getIssuance(original.id))?.status).toBe("issued")
+})
+
+test("staff: a draft cannot be corrected, only issued documents can", async () => {
+  useToken(staffToken)
+  const resident = await newResident("correctdraft")
+  const draft = await issuanceApi.createIssuance({
+    ...inputs(resident.id).RESIDENCY.input,
+    status: "draft",
+  })
+  await expect(
+    issuanceApi.correctIssuance(draft.id, "Not valid"),
+  ).rejects.toMatchObject({
+    status: 409,
+    message: "Only an issued document can be corrected",
+  })
+  await issuanceApi.deleteDraft(draft.id)
+})
+
+test("archived resident: staff cannot archive, admin can, and nothing new can be issued", async () => {
+  useToken(staffToken)
+  const resident = await newResident("archive")
+  const issued = await issuanceApi.createIssuance(
+    inputs(resident.id).RESIDENCY.input,
+  )
+  expect(issued.status).toBe("issued")
+
+  // Staff are refused and the resident stays active.
+  expect(
+    await statusOf(
+      ResidentsService.archiveResident({
+        path: { resident_id: resident.id },
+        body: { reason: "Staff should not archive" },
+      }),
+    ),
+  ).toBe(403)
+  expect(
+    (
+      await issuanceApi.searchResidents(
+        `${resident.firstName} ${resident.lastName}`,
+      )
+    ).map((r) => r.id),
+  ).toContain(resident.id)
+
+  // Admin archives.
+  useToken(adminToken)
+  await ResidentsService.archiveResident({
+    path: { resident_id: resident.id },
+    body: { reason: "Moved away (live test)" },
+  })
+
+  useToken(staffToken)
+  // Gone from the search box a clerk uses.
+  expect(
+    (
+      await issuanceApi.searchResidents(
+        `${resident.firstName} ${resident.lastName}`,
+      )
+    ).map((r) => r.id),
+  ).not.toContain(resident.id)
+  // No new document, no correction, no edit.
+  await expect(
+    issuanceApi.createIssuance(inputs(resident.id).RESIDENCY.input),
+  ).rejects.toMatchObject({
+    status: 409,
+    message: "An archived resident cannot receive documents",
+  })
+  await expect(
+    issuanceApi.correctIssuance(issued.id, "Resident is archived"),
+  ).rejects.toMatchObject({
+    status: 409,
+    message: "An archived resident cannot receive documents",
+  })
+  await expect(
+    issuanceApi.updateResident(resident.id, { houseNumber: "7" }),
+  ).rejects.toMatchObject({
+    message: "Archived residents cannot be edited; restore first",
+  })
+
+  // Admin restores and the clerk can work again.
+  useToken(adminToken)
+  await ResidentsService.restoreResident({
+    path: { resident_id: resident.id },
+  })
+  useToken(staffToken)
+  expect(
+    (
+      await issuanceApi.searchResidents(
+        `${resident.firstName} ${resident.lastName}`,
+      )
+    ).map((r) => r.id),
+  ).toContain(resident.id)
+  const again = await issuanceApi.createIssuance(
+    inputs(resident.id).RESIDENCY.input,
+  )
+  expect(again.status).toBe("issued")
+})
+
+test("staff: resident search finds by name, street and house number", async () => {
+  useToken(staffToken)
+  const resident = await newResident("searchme")
+  const ids = async (query: string) =>
+    (await issuanceApi.searchResidents(query)).map((r) => r.id)
+  expect(await ids(`Livesearchme Check${run}`)).toContain(resident.id)
+  expect(await ids(`livesearchme CHECK${run}`)).toContain(resident.id) // any case
+  expect(await ids(`Livesearchme Live Test Street`)).toContain(resident.id)
+  expect(await ids(`Livesearchme Check${run} 12`)).toContain(resident.id)
+  expect(await ids(`Livesearchme Check${run} nomatchword`)).toEqual([])
+  useToken(adminToken)
+})
