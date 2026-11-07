@@ -1,16 +1,33 @@
 param(
     [Parameter(Mandatory = $true)]
-    [string]$BackupFile
+    [string]$BackupFile,
+
+    # Optional explicit confirmation for automated recovery tests.
+    # Without this parameter, the script always prompts interactively.
+    [string]$Confirmation
 )
 
-# Restore a PostgreSQL custom-format backup into the current local database.
+# Restore a PostgreSQL custom-format backup into the selected local database.
 # This can replace existing database objects and data. Back up the current DB first.
+# MAYONDON_DATABASE_NAME is an optional override used by the isolated smoke test.
 
 $ErrorActionPreference = "Stop"
 
-$resolvedBackup = Resolve-Path -LiteralPath $BackupFile
+$resolvedBackup = (Resolve-Path -LiteralPath $BackupFile).ProviderPath
 if (-not (Test-Path -LiteralPath $resolvedBackup -PathType Leaf)) {
     throw "Backup file not found: $BackupFile"
+}
+if ((Get-Item -LiteralPath $resolvedBackup).Length -le 0) {
+    throw "The selected backup file is empty."
+}
+
+$databaseName = if ([string]::IsNullOrWhiteSpace($env:MAYONDON_DATABASE_NAME)) {
+    "app"
+} else {
+    $env:MAYONDON_DATABASE_NAME
+}
+if ($databaseName -notmatch "^[A-Za-z0-9_]+$") {
+    throw "MAYONDON_DATABASE_NAME may contain only letters, numbers, and underscores."
 }
 
 $containerId = (docker compose -f compose.yml ps -q db).Trim()
@@ -18,15 +35,17 @@ if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($containerId)) {
     throw "The database container is not running. Start it with 'docker compose -f compose.yml up -d db' first."
 }
 
-Write-Warning "RESTORE WARNING: this operation can replace current application database objects and data."
+Write-Warning "RESTORE WARNING: this operation can replace current database objects and data in '$databaseName'."
 Write-Host "Backup selected: $resolvedBackup"
-$confirmation = Read-Host "Type RESTORE to continue"
-if ($confirmation -cne "RESTORE") {
+if ([string]::IsNullOrWhiteSpace($Confirmation)) {
+    $Confirmation = Read-Host "Type RESTORE to continue"
+}
+if ($Confirmation -cne "RESTORE") {
     Write-Host "Restore cancelled. No changes were made."
     exit 0
 }
 
-$containerPath = "/tmp/mayondon-restore.dump"
+$containerPath = "/tmp/mayondon-restore-$([guid]::NewGuid().ToString('N')).dump"
 docker cp "$resolvedBackup" "$($containerId):$containerPath"
 if ($LASTEXITCODE -ne 0) {
     throw "Copying the backup into the database container failed."
@@ -48,7 +67,7 @@ if ($LASTEXITCODE -ne 0) {
 
 $restoreSucceeded = $false
 try {
-    docker compose -f compose.yml exec -T db pg_restore --exit-on-error -U postgres -d app --clean --if-exists --no-owner --no-privileges $containerPath
+    docker compose -f compose.yml exec -T db pg_restore --exit-on-error -U postgres -d $databaseName --clean --if-exists --no-owner --no-privileges $containerPath
     if ($LASTEXITCODE -ne 0) {
         throw "pg_restore reported an error. The backend will remain stopped until the database is checked."
     }
@@ -56,6 +75,9 @@ try {
 }
 finally {
     docker compose -f compose.yml exec -T db rm -f $containerPath
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning "The restore finished, but the temporary container file could not be removed."
+    }
 }
 
 if ($restoreSucceeded) {
