@@ -236,5 +236,164 @@
         "delete_self": "Own account deleted"
       }
     }
+  },
+  "records": {
+    "title": "Records Management",
+    "subtitle": "Search and maintain resident information, family and sector details, and Barangay ID records. New and renewed IDs are issued from Issuance Management.",
+    "addResident": "Add Resident",
+    "tabsAria": "Records Management views",
+    "tabs": {
+      "residents": "Residents",
+      "barangayIds": "Barangay IDs",
+      "familySector": "Family & Sector Details",
+      "lookupLists": "Lookup Lists",
+      "import": "Import Masterlist"
+    },
+    "dismissMessage": "Dismiss message",
+    "dismissError": "Dismiss error",
+    "stats": {
+      "records": {
+        "label": "Resident Records",
+        "description": "Matching the current search and filter"
+      },
+      "validId": {
+        "label": "Residents with Valid ID",
+        "description": "Latest Barangay ID is still valid"
+      },
+      "removal": {
+        "label": "Record Removal",
+        "value": "Archive",
+        "description": "Prefer inactive status over permanent deletion"
+      }
+    },
+    "list": {
+      "title": "Resident List",
+      "description": "Find a resident, confirm identity, and choose the next action.",
+      "searchLabel": "Search resident records",
+      "searchPlaceholder": "Search name, address, or ID number...",
+      "statusFilterLabel": "Filter by record status",
+      "statusActive": "Active",
+      "statusArchived": "Archived",
+      "statusAll": "All statuses",
+      "loading": "Loading residents...",
+      "loadError": {
+        "title": "Could not load residents",
+        "description": "Check your connection and try again."
+      },
+      "columns": {
+        "resident": "Resident",
+        "birthdate": "Birthdate / Age",
+        "address": "Address",
+        "type": "Resident type",
+        "idStatus": "ID status",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "empty": {
+        "title": "No matching residents",
+        "description": "Try a different name, address, ID number, or filter."
+      }
+    },
+    "ageYears": "{{age}} yrs",
+    "idStatus": {
+      "none": "None",
+      "valid": "Valid",
+      "expiring_soon": "Expiring soon",
+      "expired": "Expired"
+    },
+    "status": {
+      "active": "Active",
+      "archived": "Archived"
+    },
+    "actions": {
+      "viewProfile": "View profile",
+      "editDetails": "Edit details",
+      "newIssuance": "New issuance",
+      "archive": "Archive",
+      "restore": "Restore from archive"
+    },
+    "familySector": {
+      "title": "Family, Beneficiary, and Marginalized-Sector Details",
+      "description": "Manage family and sector details associated with resident records.",
+      "family": {
+        "title": "Family Details",
+        "description": "Household reference, family members, and relationships."
+      },
+      "beneficiary": {
+        "title": "Beneficiary Details",
+        "description": "Beneficiary information used by approved barangay forms."
+      },
+      "sector": {
+        "title": "Marginalized-Sector Details",
+        "description": "Sector classifications associated with resident records."
+      },
+      "unavailable": "Not available yet",
+      "unavailableHint": "This screen has not been built yet."
+    },
+    "import": {
+      "title": "Import Existing Masterlist",
+      "description": "Prepare a controlled import from client-provided spreadsheets. Validate the file and preview changes before anything is saved.",
+      "notAvailable": "Importing is not available yet. Nothing on this screen is uploaded or saved, and no resident records are created.",
+      "stepsAria": "Masterlist import steps",
+      "steps": {
+        "select": "Select file",
+        "map": "Map columns",
+        "preview": "Preview",
+        "results": "Results"
+      },
+      "chooseFile": "Choose a masterlist file",
+      "formats": "Supported formats: CSV, XLSX, XLS",
+      "mapTitle": "Map spreadsheet columns",
+      "mapDescription": "Match each resident field to a column in the selected masterlist.",
+      "fields": {
+        "fullName": "Full name",
+        "address": "Complete address",
+        "residentType": "Resident type",
+        "idNumber": "Barangay ID number"
+      },
+      "chooseColumn": "Choose source column",
+      "previewTitle": "Preview before import",
+      "previewDescription": "Review the mapped fields and validation summary before confirming.",
+      "previewColumns": {
+        "field": "Field",
+        "source": "Source column",
+        "validation": "Validation"
+      },
+      "validation": {
+        "required": "Required",
+        "reviewFormat": "Review format",
+        "checkValues": "Check allowed values",
+        "checkDuplicates": "Check duplicates"
+      },
+      "resultLabels": {
+        "imported": "Imported",
+        "updated": "Updated",
+        "skipped": "Skipped",
+        "failed": "Failed"
+      },
+      "pending": "Pending",
+      "previous": "Previous step",
+      "continue": "Continue",
+      "reviewResults": "Review results"
+    },
+    "archiveDialog": {
+      "title": "Archive resident record?",
+      "description": "Archive {{name}}? The record will remain in history.",
+      "fallback": "Confirm archive.",
+      "confirm": "Archive record"
+    },
+    "restoreDialog": {
+      "title": "Restore resident record?",
+      "description": "Restore {{name}} to active records?",
+      "fallback": "Confirm restore.",
+      "confirm": "Restore record"
+    },
+    "notices": {
+      "archived": "{{name}} was archived.",
+      "restored": "{{name}} was restored.",
+      "added": "{{name}} was added.",
+      "updated": "{{name}} was updated.",
+      "photoFailed": "{{message}} Photo upload failed: {{error}}"
+    }
   }
 }

@@ -236,5 +236,164 @@
         "delete_self": "Binura ang sariling account"
       }
     }
+  },
+  "records": {
+    "title": "Pamamahala ng mga Talaan",
+    "subtitle": "Hanapin at pamahalaan ang impormasyon ng mga residente, detalye ng pamilya at sektor, at mga talaan ng Barangay ID. Ang bago at na-renew na ID ay iniisyu mula sa Pamamahala ng Pag-isyu.",
+    "addResident": "Magdagdag ng Residente",
+    "tabsAria": "Mga tanaw ng Pamamahala ng mga Talaan",
+    "tabs": {
+      "residents": "Mga Residente",
+      "barangayIds": "Mga Barangay ID",
+      "familySector": "Detalye ng Pamilya at Sektor",
+      "lookupLists": "Mga Listahan",
+      "import": "Mag-import ng Masterlist"
+    },
+    "dismissMessage": "Isara ang mensahe",
+    "dismissError": "Isara ang error",
+    "stats": {
+      "records": {
+        "label": "Mga Talaan ng Residente",
+        "description": "Tugma sa kasalukuyang paghahanap at filter"
+      },
+      "validId": {
+        "label": "Mga Residenteng May Wastong ID",
+        "description": "May bisa pa ang pinakahuling Barangay ID"
+      },
+      "removal": {
+        "label": "Pag-alis ng Talaan",
+        "value": "I-archive",
+        "description": "Mas mainam ang hindi aktibong katayuan kaysa permanenteng pagbura"
+      }
+    },
+    "list": {
+      "title": "Listahan ng mga Residente",
+      "description": "Maghanap ng residente, kumpirmahin ang pagkakakilanlan, at piliin ang susunod na aksyon.",
+      "searchLabel": "Hanapin ang mga talaan ng residente",
+      "searchPlaceholder": "Hanapin ang pangalan, tirahan, o numero ng ID...",
+      "statusFilterLabel": "I-filter ayon sa katayuan ng talaan",
+      "statusActive": "Aktibo",
+      "statusArchived": "Naka-archive",
+      "statusAll": "Lahat ng katayuan",
+      "loading": "Nilo-load ang mga residente...",
+      "loadError": {
+        "title": "Hindi ma-load ang mga residente",
+        "description": "Suriin ang iyong koneksyon at subukan muli."
+      },
+      "columns": {
+        "resident": "Residente",
+        "birthdate": "Petsa ng Kapanganakan / Edad",
+        "address": "Tirahan",
+        "type": "Uri ng residente",
+        "idStatus": "Katayuan ng ID",
+        "status": "Katayuan",
+        "actions": "Mga Aksyon"
+      },
+      "empty": {
+        "title": "Walang katugmang residente",
+        "description": "Subukan ang ibang pangalan, tirahan, numero ng ID, o filter."
+      }
+    },
+    "ageYears": "{{age}} taong gulang",
+    "idStatus": {
+      "none": "Wala",
+      "valid": "May bisa",
+      "expiring_soon": "Malapit nang mag-expire",
+      "expired": "Expired na"
+    },
+    "status": {
+      "active": "Aktibo",
+      "archived": "Naka-archive"
+    },
+    "actions": {
+      "viewProfile": "Tingnan ang profile",
+      "editDetails": "I-edit ang mga detalye",
+      "newIssuance": "Bagong pag-isyu",
+      "archive": "I-archive",
+      "restore": "Ibalik mula sa archive"
+    },
+    "familySector": {
+      "title": "Mga Detalye ng Pamilya, Benepisyaryo, at Marginalized na Sektor",
+      "description": "Pamahalaan ang mga detalye ng pamilya at sektor na kaugnay ng mga talaan ng residente.",
+      "family": {
+        "title": "Mga Detalye ng Pamilya",
+        "description": "Sanggunian ng sambahayan, mga miyembro ng pamilya, at mga ugnayan."
+      },
+      "beneficiary": {
+        "title": "Mga Detalye ng Benepisyaryo",
+        "description": "Impormasyon ng benepisyaryo na ginagamit ng mga aprubadong porma ng barangay."
+      },
+      "sector": {
+        "title": "Mga Detalye ng Marginalized na Sektor",
+        "description": "Mga klasipikasyon ng sektor na kaugnay ng mga talaan ng residente."
+      },
+      "unavailable": "Wala pa",
+      "unavailableHint": "Hindi pa nagagawa ang screen na ito."
+    },
+    "import": {
+      "title": "Mag-import ng Umiiral na Masterlist",
+      "description": "Maghanda ng kontroladong pag-import mula sa mga spreadsheet na ibinigay ng kliyente. Suriin ang file at i-preview ang mga pagbabago bago may mai-save.",
+      "notAvailable": "Hindi pa available ang pag-import. Walang ina-upload o sine-save sa screen na ito, at walang nagagawang talaan ng residente.",
+      "stepsAria": "Mga hakbang sa pag-import ng masterlist",
+      "steps": {
+        "select": "Pumili ng file",
+        "map": "I-map ang mga column",
+        "preview": "Preview",
+        "results": "Mga resulta"
+      },
+      "chooseFile": "Pumili ng file ng masterlist",
+      "formats": "Mga sinusuportahang format: CSV, XLSX, XLS",
+      "mapTitle": "I-map ang mga column ng spreadsheet",
+      "mapDescription": "Itugma ang bawat field ng residente sa isang column sa napiling masterlist.",
+      "fields": {
+        "fullName": "Buong pangalan",
+        "address": "Kumpletong tirahan",
+        "residentType": "Uri ng residente",
+        "idNumber": "Numero ng Barangay ID"
+      },
+      "chooseColumn": "Pumili ng source column",
+      "previewTitle": "Preview bago mag-import",
+      "previewDescription": "Suriin ang mga na-map na field at buod ng pagsusuri bago kumpirmahin.",
+      "previewColumns": {
+        "field": "Field",
+        "source": "Source column",
+        "validation": "Pagsusuri"
+      },
+      "validation": {
+        "required": "Kailangan",
+        "reviewFormat": "Suriin ang format",
+        "checkValues": "Suriin ang mga pinapayagang halaga",
+        "checkDuplicates": "Suriin kung may doble"
+      },
+      "resultLabels": {
+        "imported": "Na-import",
+        "updated": "Na-update",
+        "skipped": "Nilaktawan",
+        "failed": "Nabigo"
+      },
+      "pending": "Nakabinbin",
+      "previous": "Nakaraang hakbang",
+      "continue": "Magpatuloy",
+      "reviewResults": "Suriin ang mga resulta"
+    },
+    "archiveDialog": {
+      "title": "I-archive ang talaan ng residente?",
+      "description": "I-archive si {{name}}? Mananatili ang talaan sa kasaysayan.",
+      "fallback": "Kumpirmahin ang pag-archive.",
+      "confirm": "I-archive ang talaan"
+    },
+    "restoreDialog": {
+      "title": "Ibalik ang talaan ng residente?",
+      "description": "Ibalik si {{name}} sa mga aktibong talaan?",
+      "fallback": "Kumpirmahin ang pagbabalik.",
+      "confirm": "Ibalik ang talaan"
+    },
+    "notices": {
+      "archived": "Na-archive si {{name}}.",
+      "restored": "Naibalik si {{name}}.",
+      "added": "Naidagdag si {{name}}.",
+      "updated": "Na-update si {{name}}.",
+      "photoFailed": "{{message}} Nabigo ang pag-upload ng larawan: {{error}}"
+    }
   }
 }

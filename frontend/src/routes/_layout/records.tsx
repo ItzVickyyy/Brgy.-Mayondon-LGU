@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
   BarangayIdsService,
   LookupsService,
@@ -65,14 +66,50 @@ type View = "residents" | "barangay-ids" | "family-sector" | "lists" | "import"
 const inputClass = formControlClass
 const PAGE_SIZE = 10
 
-const idStatusLabels: Record<ResidentPublic["id_status"], string> = {
+// statusStyles is keyed by the English status word, not by the shown label.
+const idStatusStyleKey: Record<ResidentPublic["id_status"], string> = {
   none: "None",
   valid: "Valid",
   expiring_soon: "Expiring soon",
   expired: "Expired",
 }
 
+type ResidentColumn =
+  | "resident"
+  | "birthdate"
+  | "address"
+  | "type"
+  | "idStatus"
+  | "status"
+  | "actions"
+
+const residentColumns: ResidentColumn[] = [
+  "resident",
+  "birthdate",
+  "address",
+  "type",
+  "idStatus",
+  "status",
+  "actions",
+]
+
+const familySectorCards = [
+  { key: "family", icon: Users },
+  { key: "beneficiary", icon: UserRound },
+  { key: "sector", icon: FileUp },
+] as const
+
+const importSteps = ["select", "map", "preview", "results"] as const
+const importFields = [
+  { key: "fullName", source: "Name", validation: "required" },
+  { key: "address", source: "Address", validation: "reviewFormat" },
+  { key: "residentType", source: "Resident Type", validation: "checkValues" },
+  { key: "idNumber", source: "ID Number", validation: "checkDuplicates" },
+] as const
+const importResults = ["imported", "updated", "skipped", "failed"] as const
+
 function RecordsManagement() {
+  const { t } = useTranslation()
   const initialView = Route.useSearch().view
   const queryClient = useQueryClient()
   const [view, setView] = useState<View>(initialView ?? "residents")
@@ -194,7 +231,7 @@ function RecordsManagement() {
         })
       ).data,
     onSuccess: (resident) => {
-      setNotice(`${resident.full_name} was archived.`)
+      setNotice(t("records.notices.archived", { name: resident.full_name }))
       setErrorNotice("")
       refreshResidents()
     },
@@ -212,7 +249,7 @@ function RecordsManagement() {
         })
       ).data,
     onSuccess: (resident) => {
-      setNotice(`${resident.full_name} was restored.`)
+      setNotice(t("records.notices.restored", { name: resident.full_name }))
       setErrorNotice("")
       refreshResidents()
     },
@@ -230,13 +267,13 @@ function RecordsManagement() {
   }
 
   const tabs: { id: View; label: string }[] = [
-    { id: "residents", label: "Residents" },
-    { id: "barangay-ids", label: "Barangay IDs" },
-    { id: "family-sector", label: "Family & Sector Details" },
+    { id: "residents", label: t("records.tabs.residents") },
+    { id: "barangay-ids", label: t("records.tabs.barangayIds") },
+    { id: "family-sector", label: t("records.tabs.familySector") },
     ...(isAdmin
       ? [
-          { id: "lists" as const, label: "Lookup Lists" },
-          { id: "import" as const, label: "Import Masterlist" },
+          { id: "lists" as const, label: t("records.tabs.lookupLists") },
+          { id: "import" as const, label: t("records.tabs.import") },
         ]
       : []),
   ]
@@ -246,24 +283,22 @@ function RecordsManagement() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            Records Management
+            {t("records.title")}
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-            Search and maintain resident information, family and sector details,
-            and Barangay ID records. New and renewed IDs are issued from
-            Issuance Management.
+            {t("records.subtitle")}
           </p>
         </div>
         <Button className="min-h-11" onClick={() => openForm(null)}>
           <UserRound aria-hidden="true" />
-          Add Resident
+          {t("records.addResident")}
         </Button>
       </div>
 
       <div
         className="flex flex-wrap gap-2 border-b pb-3"
         role="tablist"
-        aria-label="Records Management views"
+        aria-label={t("records.tabsAria")}
       >
         {tabs.map((tab) => (
           <Button
@@ -298,7 +333,7 @@ function RecordsManagement() {
             size="icon"
             className="size-11"
             onClick={() => setNotice("")}
-            aria-label="Dismiss message"
+            aria-label={t("records.dismissMessage")}
           >
             <X aria-hidden="true" />
           </Button>
@@ -316,7 +351,7 @@ function RecordsManagement() {
             size="icon"
             className="size-11"
             onClick={() => setErrorNotice("")}
-            aria-label="Dismiss error"
+            aria-label={t("records.dismissError")}
           >
             <X aria-hidden="true" />
           </Button>
@@ -328,35 +363,39 @@ function RecordsManagement() {
           <div className="grid gap-4 sm:grid-cols-3">
             <StatCard
               icon={Users}
-              label="Resident Records"
+              label={t("records.stats.records.label")}
               value={residentsQuery.data ? String(total) : "—"}
-              description="Matching the current search and filter"
+              description={t("records.stats.records.description")}
             />
             <StatCard
               icon={CreditCard}
-              label="Residents with Valid ID"
+              label={t("records.stats.validId.label")}
               value={validIds}
-              description="Latest Barangay ID is still valid"
+              description={t("records.stats.validId.description")}
             />
             <StatCard
               icon={Archive}
-              label="Record Removal"
-              value="Archive"
-              description="Prefer inactive status over permanent deletion"
+              label={t("records.stats.removal.label")}
+              value={t("records.stats.removal.value")}
+              description={t("records.stats.removal.description")}
             />
           </div>
 
           <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
             <div className="flex flex-col gap-3 border-b p-4 sm:p-5">
               <div>
-                <h2 className="font-semibold tracking-tight">Resident List</h2>
+                <h2 className="font-semibold tracking-tight">
+                  {t("records.list.title")}
+                </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Find a resident, confirm identity, and choose the next action.
+                  {t("records.list.description")}
                 </p>
               </div>
               <div className="flex flex-col gap-2 sm:flex-row">
                 <label className="relative block min-w-0 flex-1 sm:max-w-sm">
-                  <span className="sr-only">Search resident records</span>
+                  <span className="sr-only">
+                    {t("records.list.searchLabel")}
+                  </span>
                   <Search
                     className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                     aria-hidden="true"
@@ -364,12 +403,14 @@ function RecordsManagement() {
                   <input
                     value={search}
                     onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search name, address, or ID number..."
+                    placeholder={t("records.list.searchPlaceholder")}
                     className={`${inputClass} pl-9`}
                   />
                 </label>
                 <label className="sm:w-44">
-                  <span className="sr-only">Filter by record status</span>
+                  <span className="sr-only">
+                    {t("records.list.statusFilterLabel")}
+                  </span>
                   <select
                     value={statusFilter}
                     onChange={(event) =>
@@ -379,19 +420,23 @@ function RecordsManagement() {
                     }
                     className={inputClass}
                   >
-                    <option value="active">Active</option>
-                    <option value="archived">Archived</option>
-                    <option value="all">All statuses</option>
+                    <option value="active">
+                      {t("records.list.statusActive")}
+                    </option>
+                    <option value="archived">
+                      {t("records.list.statusArchived")}
+                    </option>
+                    <option value="all">{t("records.list.statusAll")}</option>
                   </select>
                 </label>
               </div>
             </div>
             {residentsQuery.isLoading ? (
-              <LoadingState title="Loading residents..." />
+              <LoadingState title={t("records.list.loading")} />
             ) : residentsQuery.isError ? (
               <ErrorState
-                title="Could not load residents"
-                description="Check your connection and try again."
+                title={t("records.list.loadError.title")}
+                description={t("records.list.loadError.description")}
                 onRetry={() => residentsQuery.refetch()}
               />
             ) : (
@@ -400,20 +445,12 @@ function RecordsManagement() {
                   <table className="w-full min-w-[960px] text-left text-sm">
                     <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                       <tr>
-                        {[
-                          "Resident",
-                          "Birthdate / Age",
-                          "Address",
-                          "Resident type",
-                          "ID status",
-                          "Status",
-                          "Actions",
-                        ].map((label) => (
+                        {residentColumns.map((column) => (
                           <th
-                            key={label}
-                            className={`px-4 py-3 align-middle font-medium sm:px-5 ${label === "Actions" ? "text-right" : ""}`}
+                            key={column}
+                            className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "text-right" : ""}`}
                           >
-                            {label}
+                            {t(`records.list.columns.${column}`)}
                           </th>
                         ))}
                       </tr>
@@ -421,7 +458,7 @@ function RecordsManagement() {
                     <tbody className="divide-y">
                       {residents.map((resident) => {
                         const archived = resident.status === "archived"
-                        const statusText = archived ? "Archived" : "Active"
+                        const statusKey = archived ? "archived" : "active"
                         const address = residentAddress(resident, streetNames)
                         return (
                           <tr
@@ -444,7 +481,7 @@ function RecordsManagement() {
                             </td>
                             <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
                               {resident.birthdate
-                                ? `${formatBusinessDate(resident.birthdate)}${resident.age !== null ? ` · ${resident.age} yrs` : ""}`
+                                ? `${formatBusinessDate(resident.birthdate)}${resident.age !== null ? ` · ${t("records.ageYears", { age: resident.age })}` : ""}`
                                 : "—"}
                             </td>
                             <td
@@ -461,19 +498,21 @@ function RecordsManagement() {
                                 variant="outline"
                                 className={
                                   statusStyles[
-                                    idStatusLabels[resident.id_status]
+                                    idStatusStyleKey[resident.id_status]
                                   ]
                                 }
                               >
-                                {idStatusLabels[resident.id_status]}
+                                {t(`records.idStatus.${resident.id_status}`)}
                               </Badge>
                             </td>
                             <td className="px-4 py-3 align-middle sm:px-5">
                               <Badge
                                 variant="outline"
-                                className={statusStyles[statusText]}
+                                className={
+                                  statusStyles[archived ? "Archived" : "Active"]
+                                }
                               >
-                                {statusText}
+                                {t(`records.status.${statusKey}`)}
                               </Badge>
                             </td>
                             <td className="px-4 py-3 align-middle sm:px-5">
@@ -481,7 +520,7 @@ function RecordsManagement() {
                                 name={resident.full_name}
                                 isAdmin={isAdmin}
                                 primary={{
-                                  label: "View profile",
+                                  label: t("records.actions.viewProfile"),
                                   variant: "outline",
                                   onSelect: () => {
                                     setSelectedResident(resident)
@@ -490,12 +529,12 @@ function RecordsManagement() {
                                 }}
                                 items={[
                                   {
-                                    label: "Edit details",
+                                    label: t("records.actions.editDetails"),
                                     hidden: archived,
                                     onSelect: () => openForm(resident),
                                   },
                                   {
-                                    label: "New issuance",
+                                    label: t("records.actions.newIssuance"),
                                     hidden: archived,
                                     onSelect: () =>
                                       window.location.assign(
@@ -503,14 +542,14 @@ function RecordsManagement() {
                                       ),
                                   },
                                   {
-                                    label: "Archive",
+                                    label: t("records.actions.archive"),
                                     adminOnly: true,
                                     hidden: archived,
                                     destructive: true,
                                     onSelect: () => setArchiveTarget(resident),
                                   },
                                   {
-                                    label: "Restore from archive",
+                                    label: t("records.actions.restore"),
                                     adminOnly: true,
                                     hidden: !archived,
                                     onSelect: () => setRestoreTarget(resident),
@@ -525,8 +564,8 @@ function RecordsManagement() {
                   </table>
                   {residents.length === 0 ? (
                     <EmptyState
-                      title="No matching residents"
-                      description="Try a different name, address, ID number, or filter."
+                      title={t("records.list.empty.title")}
+                      description={t("records.list.empty.description")}
                     />
                   ) : null}
                 </div>
@@ -556,55 +595,37 @@ function RecordsManagement() {
             </span>
             <div>
               <h2 className="font-semibold tracking-tight">
-                Family, Beneficiary, and Marginalized-Sector Details
+                {t("records.familySector.title")}
               </h2>
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Manage family and sector details associated with resident
-                records.
+                {t("records.familySector.description")}
               </p>
             </div>
           </div>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {[
-              {
-                title: "Family Details",
-                description:
-                  "Household reference, family members, and relationships.",
-                icon: Users,
-              },
-              {
-                title: "Beneficiary Details",
-                description:
-                  "Beneficiary information used by approved barangay forms.",
-                icon: UserRound,
-              },
-              {
-                title: "Marginalized-Sector Details",
-                description:
-                  "Sector classifications associated with resident records.",
-                icon: FileUp,
-              },
-            ].map((item) => (
+            {familySectorCards.map((item) => (
               <article
-                key={item.title}
+                key={item.key}
                 className="flex min-h-36 flex-col rounded-xl border bg-background p-4 transition-colors hover:border-brand/40"
               >
                 <div className="flex items-center gap-2">
                   <span className="rounded-lg bg-brand/10 p-2.5 text-brand">
                     <item.icon className="size-5" aria-hidden="true" />
                   </span>
-                  <h3 className="font-semibold">{item.title}</h3>
+                  <h3 className="font-semibold">
+                    {t(`records.familySector.${item.key}.title`)}
+                  </h3>
                 </div>
                 <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">
-                  {item.description}
+                  {t(`records.familySector.${item.key}.description`)}
                 </p>
                 <Button
                   variant="outline"
                   className="mt-4 min-h-11 self-start"
                   disabled
-                  title="This screen has not been built yet."
+                  title={t("records.familySector.unavailableHint")}
                 >
-                  Not available yet
+                  {t("records.familySector.unavailable")}
                 </Button>
               </article>
             ))}
@@ -619,10 +640,9 @@ function RecordsManagement() {
               <FileUp className="size-5" aria-hidden="true" />
             </span>
             <div>
-              <h2 className="font-semibold">Import Existing Masterlist</h2>
+              <h2 className="font-semibold">{t("records.import.title")}</h2>
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Prepare a controlled import from client-provided spreadsheets.
-                Validate the file and preview changes before anything is saved.
+                {t("records.import.description")}
               </p>
             </div>
           </div>
@@ -630,36 +650,33 @@ function RecordsManagement() {
             role="status"
             className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm font-medium text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
           >
-            Importing is not available yet. Nothing on this screen is uploaded
-            or saved, and no resident records are created.
+            {t("records.import.notAvailable")}
           </p>
           <fieldset
             className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4"
-            aria-label="Masterlist import steps"
+            aria-label={t("records.import.stepsAria")}
           >
-            {["Select file", "Map columns", "Preview", "Results"].map(
-              (label, index) => (
-                <Button
-                  key={label}
-                  type="button"
-                  variant={importStep === index ? "default" : "outline"}
-                  className="min-h-11"
-                  aria-current={importStep === index ? "step" : undefined}
-                  onClick={() => setImportStep(index)}
-                >
-                  {index + 1}. {label}
-                </Button>
-              ),
-            )}
+            {importSteps.map((step, index) => (
+              <Button
+                key={step}
+                type="button"
+                variant={importStep === index ? "default" : "outline"}
+                className="min-h-11"
+                aria-current={importStep === index ? "step" : undefined}
+                onClick={() => setImportStep(index)}
+              >
+                {index + 1}. {t(`records.import.steps.${step}`)}
+              </Button>
+            ))}
           </fieldset>
           {importStep === 0 ? (
             <label className="mt-4 flex min-h-36 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 text-center hover:border-brand/50 hover:bg-muted/30">
               <Upload className="size-7 text-brand" aria-hidden="true" />
               <span className="font-semibold">
-                {selectedFile || "Choose a masterlist file"}
+                {selectedFile || t("records.import.chooseFile")}
               </span>
               <span className="text-sm text-muted-foreground">
-                Supported formats: CSV, XLSX, XLS
+                {t("records.import.formats")}
               </span>
               <input
                 type="file"
@@ -674,25 +691,19 @@ function RecordsManagement() {
           ) : null}
           {importStep === 1 ? (
             <div className="mt-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-              <h3 className="font-semibold">Map spreadsheet columns</h3>
+              <h3 className="font-semibold">{t("records.import.mapTitle")}</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Match each resident field to a column in the selected
-                masterlist.
+                {t("records.import.mapDescription")}
               </p>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {[
-                  "Full name",
-                  "Complete address",
-                  "Resident type",
-                  "Barangay ID number",
-                ].map((field) => (
+                {importFields.map((field) => (
                   <label
-                    key={field}
+                    key={field.key}
                     className="flex flex-col gap-2 text-sm font-medium"
                   >
-                    {field}
+                    {t(`records.import.fields.${field.key}`)}
                     <select className={cn(inputClass, "font-normal")}>
-                      <option>Choose source column</option>
+                      <option>{t("records.import.chooseColumn")}</option>
                       <option>Name</option>
                       <option>Address</option>
                       <option>Resident Type</option>
@@ -706,44 +717,42 @@ function RecordsManagement() {
           {importStep === 2 ? (
             <div className="mt-4 overflow-x-auto rounded-xl border">
               <div className="border-b p-4">
-                <h3 className="font-semibold">Preview before import</h3>
+                <h3 className="font-semibold">
+                  {t("records.import.previewTitle")}
+                </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Review the mapped fields and validation summary before
-                  confirming.
+                  {t("records.import.previewDescription")}
                 </p>
               </div>
               <table className="w-full min-w-[560px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    {["Field", "Source column", "Validation"].map((label) => (
-                      <th
-                        key={label}
-                        className="px-4 py-3 align-middle font-medium sm:px-5"
-                      >
-                        {label}
-                      </th>
-                    ))}
+                    {(["field", "source", "validation"] as const).map(
+                      (column) => (
+                        <th
+                          key={column}
+                          className="px-4 py-3 align-middle font-medium sm:px-5"
+                        >
+                          {t(`records.import.previewColumns.${column}`)}
+                        </th>
+                      ),
+                    )}
                   </tr>
                 </thead>
                 <tbody>
-                  {[
-                    ["Full name", "Name", "Required"],
-                    ["Complete address", "Address", "Review format"],
-                    ["Resident type", "Resident Type", "Check allowed values"],
-                    ["Barangay ID number", "ID Number", "Check duplicates"],
-                  ].map((row) => (
+                  {importFields.map((row) => (
                     <tr
-                      key={row[0]}
+                      key={row.key}
                       className="transition-colors hover:bg-muted/30"
                     >
                       <td className="px-4 py-3 align-middle font-medium sm:px-5">
-                        {row[0]}
+                        {t(`records.import.fields.${row.key}`)}
                       </td>
                       <td className="px-4 py-3 align-middle sm:px-5">
-                        {row[1]}
+                        {row.source}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {row[2]}
+                        {t(`records.import.validation.${row.validation}`)}
                       </td>
                     </tr>
                   ))}
@@ -753,18 +762,17 @@ function RecordsManagement() {
           ) : null}
           {importStep === 3 ? (
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {[
-                ["Imported", "Pending"],
-                ["Updated", "Pending"],
-                ["Skipped", "Pending"],
-                ["Failed", "Pending"],
-              ].map(([label, value]) => (
+              {importResults.map((result) => (
                 <div
-                  key={label}
+                  key={result}
                   className="rounded-xl border bg-card p-4 shadow-sm sm:p-5"
                 >
-                  <p className="text-sm text-muted-foreground">{label}</p>
-                  <p className="mt-2 text-xl font-semibold">{value}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t(`records.import.resultLabels.${result}`)}
+                  </p>
+                  <p className="mt-2 text-xl font-semibold">
+                    {t("records.import.pending")}
+                  </p>
                 </div>
               ))}
             </div>
@@ -777,7 +785,7 @@ function RecordsManagement() {
               disabled={importStep === 0}
               onClick={() => setImportStep((step) => Math.max(0, step - 1))}
             >
-              Previous step
+              {t("records.import.previous")}
             </Button>
             <Button
               className="min-h-11"
@@ -785,7 +793,9 @@ function RecordsManagement() {
               disabled={importStep === 3 || (importStep === 0 && !selectedFile)}
               onClick={() => setImportStep((step) => Math.min(3, step + 1))}
             >
-              {importStep === 2 ? "Review results" : "Continue"}
+              {importStep === 2
+                ? t("records.import.reviewResults")
+                : t("records.import.continue")}
             </Button>
           </div>
         </section>
@@ -796,13 +806,15 @@ function RecordsManagement() {
         onOpenChange={(open) => {
           if (!open) setArchiveTarget(null)
         }}
-        title="Archive resident record?"
+        title={t("records.archiveDialog.title")}
         description={
           archiveTarget
-            ? `Archive ${archiveTarget.full_name}? The record will remain in history.`
-            : "Confirm archive."
+            ? t("records.archiveDialog.description", {
+                name: archiveTarget.full_name,
+              })
+            : t("records.archiveDialog.fallback")
         }
-        confirmLabel="Archive record"
+        confirmLabel={t("records.archiveDialog.confirm")}
         destructive
         reason="required"
         onConfirm={(reason) => {
@@ -819,13 +831,15 @@ function RecordsManagement() {
         onOpenChange={(open) => {
           if (!open) setRestoreTarget(null)
         }}
-        title="Restore resident record?"
+        title={t("records.restoreDialog.title")}
         description={
           restoreTarget
-            ? `Restore ${restoreTarget.full_name} to active records?`
-            : "Confirm restore."
+            ? t("records.restoreDialog.description", {
+                name: restoreTarget.full_name,
+              })
+            : t("records.restoreDialog.fallback")
         }
-        confirmLabel="Restore record"
+        confirmLabel={t("records.restoreDialog.confirm")}
         onConfirm={() => {
           if (!restoreTarget) return
           restoreMutation.mutate(restoreTarget)
@@ -842,11 +856,14 @@ function RecordsManagement() {
           setFormOpen(false)
           const savedMessage =
             mode === "created"
-              ? `${saved.full_name} was added.`
-              : `${saved.full_name} was updated.`
+              ? t("records.notices.added", { name: saved.full_name })
+              : t("records.notices.updated", { name: saved.full_name })
           setNotice(
             photoError
-              ? `${savedMessage} Photo upload failed: ${photoError}`
+              ? t("records.notices.photoFailed", {
+                  message: savedMessage,
+                  error: photoError,
+                })
               : savedMessage,
           )
           setErrorNotice("")
