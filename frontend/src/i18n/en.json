@@ -1448,6 +1448,96 @@
         "csvStarted": "CSV export started for the displayed report.",
         "previewBeforePrint": "Preview a report before printing."
       }
+    },
+    "backup": {
+      "title": "Backup and Restore",
+      "subtitle": "Protect the barangay's local records and recover from data loss.",
+      "unavailable": {
+        "title": "Backups cannot be created or restored from this screen yet. The buttons here do not back up any data.",
+        "howTo": "To back up the database now, open PowerShell in the project folder and run <code>{{command}}</code>. The file is saved in the <code>{{folder}}</code> folder."
+      },
+      "dismiss": "Dismiss message",
+      "notAvailableTitle": "Not available yet",
+      "create": {
+        "title": "Create a Backup",
+        "subtitle": "Manual database backup",
+        "destination": "Destination",
+        "destinationValue": "Local backup folder / external drive",
+        "format": "File format",
+        "formatValue": "PostgreSQL custom archive (.dump)",
+        "last": "Last backup",
+        "lastNone": "No backups yet",
+        "button": "Create Backup"
+      },
+      "schedule": {
+        "title": "Backup Schedule",
+        "subtitle": "Set a recurring backup schedule",
+        "automatic": "Automatic backup",
+        "disabled": "Disabled",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "time": "Preferred time",
+        "keep": "Keep recent backups",
+        "copies": "{{n}} copies",
+        "save": "Save Schedule"
+      },
+      "history": {
+        "title": "Backup History",
+        "description": "Review available backup archives and recovery readiness.",
+        "lastToday": "Last backup today",
+        "lastAgo_one": "Last backup {{count}} day ago",
+        "lastAgo_other": "Last backup {{count}} days ago",
+        "columns": {
+          "backup": "Backup",
+          "created": "Created",
+          "type": "Type",
+          "size": "Size",
+          "location": "Location",
+          "check": "Check",
+          "actions": "Actions"
+        },
+        "by": "by {{name}}",
+        "empty": {
+          "title": "No backups found",
+          "description": "Create a backup to begin building recovery history."
+        }
+      },
+      "types": {
+        "Scheduled": "Scheduled",
+        "Manual": "Manual"
+      },
+      "locations": {
+        "External drive": "External drive",
+        "This computer only": "This computer only"
+      },
+      "statuses": {
+        "Verified": "Verified",
+        "Not checked": "Not checked",
+        "Failed": "Failed"
+      },
+      "actions": {
+        "restore": "Restore",
+        "verify": "Verify file",
+        "copy": "Copy to external drive",
+        "download": "Download copy"
+      },
+      "restore": {
+        "title": "Restore a Backup",
+        "description": "Restoring can replace current database contents. Choose the archive and confirm only after verifying the target system and backup.",
+        "archive": "Backup archive",
+        "prepare": "Prepare Restore",
+        "cancel": "Cancel Restore",
+        "confirmTitle": "Confirm restore",
+        "confirmDescription": "This action can replace the current database. Verify the selected archive and type <strong>{{word}}</strong> to confirm.",
+        "typeLabel": "Type {{word}} to continue",
+        "confirmButton": "Confirm Restore"
+      },
+      "notices": {
+        "verify": "File verification for {{name}} needs the backup service integration.",
+        "copy": "External-drive copy for {{name}} needs a configured drive destination.",
+        "download": "Download request for {{name}} needs a protected backup download endpoint.",
+        "restoreConfirmed": "Restore request confirmed."
+      }
     }
   }
 }

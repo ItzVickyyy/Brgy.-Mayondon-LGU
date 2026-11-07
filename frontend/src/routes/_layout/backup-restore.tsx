@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router"
+import type { ParseKeys, TFunction } from "i18next"
 import {
   CheckCircle2,
   Clock3,
@@ -9,6 +10,7 @@ import {
   X,
 } from "lucide-react"
 import { useState } from "react"
+import { Trans, useTranslation } from "react-i18next"
 
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
@@ -46,9 +48,49 @@ type BackupRecord = {
 
 const sampleBackups: BackupRecord[] = []
 
+const columnIds = [
+  "backup",
+  "created",
+  "type",
+  "size",
+  "location",
+  "check",
+  "actions",
+] as const
+
+// Stored values stay English; these maps give the label that is shown.
+const typeKeys = {
+  Scheduled: "admin.backup.types.Scheduled",
+  Manual: "admin.backup.types.Manual",
+} as const satisfies Record<BackupRecord["type"], ParseKeys>
+
+const locationKeys = {
+  "External drive": "admin.backup.locations.External drive",
+  "This computer only": "admin.backup.locations.This computer only",
+} as const satisfies Record<BackupRecord["location"], ParseKeys>
+
+const statusKeys = {
+  Verified: "admin.backup.statuses.Verified",
+  "Not checked": "admin.backup.statuses.Not checked",
+  Failed: "admin.backup.statuses.Failed",
+} as const satisfies Record<BackupStatus, ParseKeys>
+
+function labelOf(keys: Record<string, ParseKeys>, value: string, t: TFunction) {
+  const key = keys[value]
+  return key ? t(key) : value
+}
+
+type Notice =
+  | { key: "verify" | "copy" | "download"; name: string }
+  | { key: "restoreConfirmed"; name?: undefined }
+
+// The word the person must type; it is compared in code, so it is never translated.
+const RESTORE_WORD = "RESTORE"
+
 function BackupRestore() {
+  const { t } = useTranslation()
   const { user } = useAuth()
-  const [notice, setNotice] = useState("")
+  const [notice, setNotice] = useState<Notice | null>(null)
   const backups = sampleBackups
   const [confirmRestore, setConfirmRestore] = useState(false)
   const [selectedBackup, setSelectedBackup] = useState("")
@@ -75,10 +117,10 @@ function BackupRestore() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
-            Backup and Restore
+            {t("admin.backup.title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            Protect the barangay's local records and recover from data loss.
+            {t("admin.backup.subtitle")}
           </p>
         </div>
       </div>
@@ -87,15 +129,16 @@ function BackupRestore() {
         role="status"
         className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
       >
-        <p className="font-medium">
-          Backups cannot be created or restored from this screen yet. The
-          buttons here do not back up any data.
-        </p>
+        <p className="font-medium">{t("admin.backup.unavailable.title")}</p>
         <p className="mt-1">
-          To back up the database now, open PowerShell in the project folder and
-          run <code className="font-mono">.\scripts\backup-db.ps1</code>. The
-          file is saved in the <code className="font-mono">backups</code>{" "}
-          folder.
+          <Trans
+            i18nKey="admin.backup.unavailable.howTo"
+            values={{
+              command: ".\\scripts\\backup-db.ps1",
+              folder: "backups",
+            }}
+            components={{ code: <code className="font-mono" /> }}
+          />
         </p>
       </div>
 
@@ -108,13 +151,15 @@ function BackupRestore() {
             className="mt-0.5 size-4 shrink-0 text-brand"
             aria-hidden="true"
           />
-          <p className="flex-1">{notice}</p>
+          <p className="flex-1">
+            {t(`admin.backup.notices.${notice.key}`, { name: notice.name })}
+          </p>
           <Button
             variant="ghost"
             size="icon"
             className="size-11"
-            onClick={() => setNotice("")}
-            aria-label="Dismiss message"
+            onClick={() => setNotice(null)}
+            aria-label={t("admin.backup.dismiss")}
           >
             <X aria-hidden="true" />
           </Button>
@@ -128,39 +173,47 @@ function BackupRestore() {
               <DatabaseBackup className="size-5 text-brand" />
             </div>
             <div>
-              <h2 className="font-semibold">Create a Backup</h2>
+              <h2 className="font-semibold">
+                {t("admin.backup.create.title")}
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Manual database backup
+                {t("admin.backup.create.subtitle")}
               </p>
             </div>
           </div>
           <div className="mt-5 space-y-3 text-sm">
             <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Destination</span>
+              <span className="text-muted-foreground">
+                {t("admin.backup.create.destination")}
+              </span>
               <span className="text-right font-medium">
-                Local backup folder / external drive
+                {t("admin.backup.create.destinationValue")}
               </span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">File format</span>
+              <span className="text-muted-foreground">
+                {t("admin.backup.create.format")}
+              </span>
               <span className="font-medium">
-                PostgreSQL custom archive (.dump)
+                {t("admin.backup.create.formatValue")}
               </span>
             </div>
             <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Last backup</span>
+              <span className="text-muted-foreground">
+                {t("admin.backup.create.last")}
+              </span>
               <span className="font-medium">
-                {latestBackup?.date ?? "No backups yet"}
+                {latestBackup?.date ?? t("admin.backup.create.lastNone")}
               </span>
             </div>
           </div>
           <Button
             className="mt-5 min-h-11 w-full"
             disabled
-            title="Not available yet"
+            title={t("admin.backup.notAvailableTitle")}
           >
             <HardDriveDownload aria-hidden="true" />
-            Create Backup
+            {t("admin.backup.create.button")}
           </Button>
         </section>
 
@@ -170,23 +223,31 @@ function BackupRestore() {
               <Clock3 className="size-5 text-brand" />
             </div>
             <div>
-              <h2 className="font-semibold">Backup Schedule</h2>
+              <h2 className="font-semibold">
+                {t("admin.backup.schedule.title")}
+              </h2>
               <p className="mt-1 text-sm text-muted-foreground">
-                Set a recurring backup schedule
+                {t("admin.backup.schedule.subtitle")}
               </p>
             </div>
           </div>
           <div className="mt-5 space-y-3">
             <label className="flex items-center justify-between gap-3 text-sm">
-              <span>Automatic backup</span>
+              <span>{t("admin.backup.schedule.automatic")}</span>
               <select className={formControlClass} defaultValue="daily">
-                <option value="disabled">Disabled</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
+                <option value="disabled">
+                  {t("admin.backup.schedule.disabled")}
+                </option>
+                <option value="daily">
+                  {t("admin.backup.schedule.daily")}
+                </option>
+                <option value="weekly">
+                  {t("admin.backup.schedule.weekly")}
+                </option>
               </select>
             </label>
             <label className="flex items-center justify-between gap-3 text-sm">
-              <span>Preferred time</span>
+              <span>{t("admin.backup.schedule.time")}</span>
               <input
                 type="time"
                 defaultValue="17:00"
@@ -194,15 +255,23 @@ function BackupRestore() {
               />
             </label>
             <label className="flex items-center justify-between gap-3 text-sm">
-              <span>Keep recent backups</span>
+              <span>{t("admin.backup.schedule.keep")}</span>
               <select
                 className={`${formControlClass} max-w-40`}
                 defaultValue="7"
               >
-                <option value="3">3 copies</option>
-                <option value="7">7 copies</option>
-                <option value="14">14 copies</option>
-                <option value="30">30 copies</option>
+                <option value="3">
+                  {t("admin.backup.schedule.copies", { n: 3 })}
+                </option>
+                <option value="7">
+                  {t("admin.backup.schedule.copies", { n: 7 })}
+                </option>
+                <option value="14">
+                  {t("admin.backup.schedule.copies", { n: 14 })}
+                </option>
+                <option value="30">
+                  {t("admin.backup.schedule.copies", { n: 30 })}
+                </option>
               </select>
             </label>
           </div>
@@ -210,9 +279,9 @@ function BackupRestore() {
             variant="outline"
             className="mt-5 w-full"
             disabled
-            title="Not available yet"
+            title={t("admin.backup.notAvailableTitle")}
           >
-            Save Schedule
+            {t("admin.backup.schedule.save")}
           </Button>
         </section>
       </div>
@@ -220,9 +289,11 @@ function BackupRestore() {
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4 sm:p-5">
           <div>
-            <h2 className="font-semibold tracking-tight">Backup History</h2>
+            <h2 className="font-semibold tracking-tight">
+              {t("admin.backup.history.title")}
+            </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Review available backup archives and recovery readiness.
+              {t("admin.backup.history.description")}
             </p>
           </div>
           {latestBackup && daysSinceLatest !== null ? (
@@ -234,10 +305,9 @@ function BackupRestore() {
                   : statusStyles.Verified
               }
             >
-              Last backup{" "}
               {daysSinceLatest === 0
-                ? "today"
-                : `${daysSinceLatest} day${daysSinceLatest === 1 ? "" : "s"} ago`}
+                ? t("admin.backup.history.lastToday")
+                : t("admin.backup.history.lastAgo", { count: daysSinceLatest })}
             </Badge>
           ) : null}
         </div>
@@ -245,24 +315,16 @@ function BackupRestore() {
           <table className="w-full min-w-[1120px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                {[
-                  "Backup",
-                  "Created",
-                  "Type",
-                  "Size",
-                  "Location",
-                  "Check",
-                  "Actions",
-                ].map((label) => (
+                {columnIds.map((id) => (
                   <th
-                    key={label}
+                    key={id}
                     className={
-                      label === "Actions"
+                      id === "actions"
                         ? "px-4 py-3 text-right font-medium sm:px-5"
                         : "px-4 py-3 align-middle font-medium sm:px-5"
                     }
                   >
-                    {label}
+                    {t(`admin.backup.history.columns.${id}`)}
                   </th>
                 ))}
               </tr>
@@ -280,10 +342,12 @@ function BackupRestore() {
                     {backup.date}
                   </td>
                   <td className="px-4 py-3 align-middle sm:px-5">
-                    <p>{backup.type}</p>
+                    <p>{labelOf(typeKeys, backup.type, t)}</p>
                     {backup.createdBy ? (
                       <p className="mt-1 text-xs text-muted-foreground">
-                        by {backup.createdBy}
+                        {t("admin.backup.history.by", {
+                          name: backup.createdBy,
+                        })}
                       </p>
                     ) : null}
                   </td>
@@ -291,7 +355,7 @@ function BackupRestore() {
                     {backup.size}
                   </td>
                   <td className="px-4 py-3 align-middle sm:px-5">
-                    {backup.location}
+                    {labelOf(locationKeys, backup.location, t)}
                   </td>
                   <td className="px-4 py-3 align-middle sm:px-5">
                     <div className="flex flex-col items-start gap-1">
@@ -302,7 +366,7 @@ function BackupRestore() {
                         {backup.status === "Verified" ? (
                           <CheckCircle2 className="size-4" aria-hidden="true" />
                         ) : null}
-                        {backup.status}
+                        {labelOf(statusKeys, backup.status, t)}
                       </Badge>
                       {backup.failureReason ? (
                         <span className="max-w-52 text-xs text-muted-foreground">
@@ -318,7 +382,7 @@ function BackupRestore() {
                       primary={
                         backup.status === "Verified"
                           ? {
-                              label: "Restore",
+                              label: t("admin.backup.actions.restore"),
                               variant: "outline",
                               icon: <RotateCcw aria-hidden="true" />,
                               onSelect: () => {
@@ -331,28 +395,22 @@ function BackupRestore() {
                       }
                       items={[
                         {
-                          label: "Verify file",
+                          label: t("admin.backup.actions.verify"),
                           hidden: backup.status === "Verified",
                           onSelect: () =>
-                            setNotice(
-                              `File verification for ${backup.name} needs the backup service integration.`,
-                            ),
+                            setNotice({ key: "verify", name: backup.name }),
                         },
                         {
-                          label: "Copy to external drive",
+                          label: t("admin.backup.actions.copy"),
                           hidden: backup.location !== "This computer only",
                           onSelect: () =>
-                            setNotice(
-                              `External-drive copy for ${backup.name} needs a configured drive destination.`,
-                            ),
+                            setNotice({ key: "copy", name: backup.name }),
                         },
                         {
-                          label: "Download copy",
+                          label: t("admin.backup.actions.download"),
                           adminOnly: true,
                           onSelect: () =>
-                            setNotice(
-                              `Download request for ${backup.name} needs a protected backup download endpoint.`,
-                            ),
+                            setNotice({ key: "download", name: backup.name }),
                         },
                       ]}
                     />
@@ -363,8 +421,8 @@ function BackupRestore() {
           </table>
           {sortedBackups.length === 0 ? (
             <EmptyState
-              title="No backups found"
-              description="Create a backup to begin building recovery history."
+              title={t("admin.backup.history.empty.title")}
+              description={t("admin.backup.history.empty.description")}
             />
           ) : null}
         </div>
@@ -384,17 +442,15 @@ function BackupRestore() {
             <RotateCcw className="size-5 text-destructive" />
           </div>
           <div>
-            <h2 className="font-semibold">Restore a Backup</h2>
+            <h2 className="font-semibold">{t("admin.backup.restore.title")}</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Restoring can replace current database contents. Choose the
-              archive and confirm only after verifying the target system and
-              backup.
+              {t("admin.backup.restore.description")}
             </p>
           </div>
         </div>
         <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
           <label className="flex flex-col gap-2 text-sm font-medium">
-            Backup archive
+            {t("admin.backup.restore.archive")}
             <select
               value={selectedBackup}
               disabled={sortedBackups.length === 0}
@@ -421,26 +477,32 @@ function BackupRestore() {
             onClick={() => setConfirmRestore((value) => !value)}
           >
             <RotateCcw aria-hidden="true" />
-            {confirmRestore ? "Cancel Restore" : "Prepare Restore"}
+            {confirmRestore
+              ? t("admin.backup.restore.cancel")
+              : t("admin.backup.restore.prepare")}
           </Button>
         </div>
         {confirmRestore ? (
           <div className="mt-4 rounded-lg border border-destructive/40 bg-destructive/5 p-4">
-            <p className="font-semibold">Confirm restore</p>
+            <p className="font-semibold">
+              {t("admin.backup.restore.confirmTitle")}
+            </p>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              This action can replace the current database. Verify the selected
-              archive and type{" "}
-              <strong className="text-foreground">RESTORE</strong> to confirm.
+              <Trans
+                i18nKey="admin.backup.restore.confirmDescription"
+                values={{ word: RESTORE_WORD }}
+                components={{ strong: <strong className="text-foreground" /> }}
+              />
             </p>
             <p className="mt-3 rounded-md bg-background p-3 font-mono text-sm">
               {selectedBackup}
             </p>
             <label className="mt-4 block text-sm font-medium">
-              Type RESTORE to continue
+              {t("admin.backup.restore.typeLabel", { word: RESTORE_WORD })}
               <input
                 value={restoreConfirmation}
                 onChange={(event) => setRestoreConfirmation(event.target.value)}
-                placeholder="RESTORE"
+                placeholder={RESTORE_WORD}
                 autoComplete="off"
                 className={`${formControlClass} mt-2 sm:max-w-xs`}
               />
@@ -453,16 +515,16 @@ function BackupRestore() {
                 !sortedBackups.some(
                   (backup) => backup.name === selectedBackup,
                 ) ||
-                restoreConfirmation !== "RESTORE"
+                restoreConfirmation !== RESTORE_WORD
               }
               onClick={() => {
-                setNotice("Restore request confirmed.")
+                setNotice({ key: "restoreConfirmed" })
                 setConfirmRestore(false)
                 setRestoreConfirmation("")
               }}
             >
               <ShieldCheck aria-hidden="true" />
-              Confirm Restore
+              {t("admin.backup.restore.confirmButton")}
             </Button>
           </div>
         ) : null}
