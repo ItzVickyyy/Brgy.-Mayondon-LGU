@@ -16,7 +16,7 @@ Audit details hold field names and reference numbers, never personal values.
 """
 
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
@@ -516,9 +516,19 @@ def list_issuances(
     status: Literal["draft", "issued", "voided", "all"] = "all",
     document_type_id: int | None = None,
     resident_id: uuid.UUID | None = None,
+    date_from: Annotated[
+        date | None,
+        Query(description="Only issuances dated on or after this day (issue_date)"),
+    ] = None,
+    date_to: Annotated[
+        date | None,
+        Query(description="Only issuances dated on or before this day (issue_date)"),
+    ] = None,
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> Any:
+    if date_from is not None and date_to is not None and date_from > date_to:
+        raise HTTPException(status_code=422, detail="date_from cannot be after date_to")
     stmt = (
         select(Issuance, DocumentType.code, Resident)
         .join(DocumentType, col(DocumentType.id) == col(Issuance.document_type_id))
@@ -530,6 +540,10 @@ def list_issuances(
         stmt = stmt.where(Issuance.document_type_id == document_type_id)
     if resident_id is not None:
         stmt = stmt.where(Issuance.resident_id == resident_id)
+    if date_from is not None:
+        stmt = stmt.where(Issuance.issue_date >= date_from)
+    if date_to is not None:
+        stmt = stmt.where(Issuance.issue_date <= date_to)
     for word in (q or "").split():
         pattern = f"%{word}%"
         stmt = stmt.where(

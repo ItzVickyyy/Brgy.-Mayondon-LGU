@@ -1093,3 +1093,53 @@ def test_account_with_only_drafts_can_still_be_deleted(
 )
 def test_add_months(start: date, months: int, expected: date) -> None:
     assert add_months(start, months) == expected
+
+
+def test_history_can_be_filtered_by_issue_date(
+    client: TestClient, staff_token_headers: Headers, street_id: int
+) -> None:
+    res = _resident(client, staff_token_headers, street_id)
+    today = today_manila()
+    old_day = today - timedelta(days=40)
+    old = _clearance(
+        client, staff_token_headers, res["id"], issue_date=old_day.isoformat()
+    )
+    new = _clearance(client, staff_token_headers, res["id"])
+
+    def ids(**params: str) -> set[str]:
+        r = client.get(
+            f"{ISS}/",
+            headers=staff_token_headers,
+            params={"resident_id": res["id"], **params},
+        )
+        assert r.status_code == 200, r.text
+        return {row["id"] for row in r.json()["data"]}
+
+    assert ids() == {old["id"], new["id"]}
+    assert ids(date_from=today.isoformat()) == {new["id"]}
+    assert ids(date_to=(today - timedelta(days=1)).isoformat()) == {old["id"]}
+    # Both ends are inclusive.
+    assert ids(date_from=old_day.isoformat(), date_to=old_day.isoformat()) == {
+        old["id"]
+    }
+    assert ids(date_from=old_day.isoformat(), date_to=today.isoformat()) == {
+        old["id"],
+        new["id"],
+    }
+    far = (today - timedelta(days=400)).isoformat()
+    assert ids(date_to=far) == set()
+
+
+def test_history_date_range_must_be_in_order(
+    client: TestClient, staff_token_headers: Headers
+) -> None:
+    r = client.get(
+        f"{ISS}/",
+        headers=staff_token_headers,
+        params={"date_from": "2026-11-07", "date_to": "2026-11-01"},
+    )
+    assert r.status_code == 422
+    r = client.get(
+        f"{ISS}/", headers=staff_token_headers, params={"date_from": "not-a-date"}
+    )
+    assert r.status_code == 422

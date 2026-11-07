@@ -190,6 +190,8 @@ export function IssuanceHistory({
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
+  const [dateFrom, setDateFrom] = useState("")
+  const [dateTo, setDateTo] = useState("")
   const [pageIndex, setPageIndex] = useState(0)
   const [viewItem, setViewItem] = useState<IssuanceListItem | null>(null)
   const [pending, setPending] = useState<PendingAction | null>(null)
@@ -206,7 +208,7 @@ export function IssuanceHistory({
   // biome-ignore lint/correctness/useExhaustiveDependencies: the filters are the trigger.
   useEffect(() => {
     setPageIndex(0)
-  }, [debouncedSearch, typeFilter, statusFilter])
+  }, [debouncedSearch, typeFilter, statusFilter, dateFrom, dateTo])
 
   const documentTypesQuery = useQuery({
     queryKey: ["lookups", "document-types"],
@@ -224,12 +226,15 @@ export function IssuanceHistory({
     (purposesQuery.data ?? []).map((purpose) => [purpose.id, purpose.name]),
   )
 
+  const dateRangeInvalid = Boolean(dateFrom && dateTo && dateFrom > dateTo)
   const historyQuery = useQuery({
     queryKey: [
       "issuances",
       debouncedSearch,
       typeFilter,
       statusFilter,
+      dateFrom,
+      dateTo,
       pageIndex,
     ],
     queryFn: async () =>
@@ -239,12 +244,15 @@ export function IssuanceHistory({
             q: debouncedSearch || undefined,
             document_type_id: typeFilter ? Number(typeFilter) : undefined,
             status: statusFilter,
+            date_from: dateFrom || undefined,
+            date_to: dateTo || undefined,
             skip: pageIndex * PAGE_SIZE,
             limit: PAGE_SIZE,
           },
         })
       ).data,
     placeholderData: keepPreviousData,
+    enabled: !dateRangeInvalid,
   })
   const items = historyQuery.data?.data ?? []
   const total = historyQuery.data?.count ?? 0
@@ -314,7 +322,11 @@ export function IssuanceHistory({
   })
 
   const hasFilters =
-    search.trim() !== "" || typeFilter !== "" || statusFilter !== "all"
+    search.trim() !== "" ||
+    typeFilter !== "" ||
+    statusFilter !== "all" ||
+    dateFrom !== "" ||
+    dateTo !== ""
   const today = manilaToday()
   const latest = latestQuery.data
 
@@ -377,6 +389,8 @@ export function IssuanceHistory({
                   setSearch("")
                   setTypeFilter("")
                   setStatusFilter("all")
+                  setDateFrom("")
+                  setDateTo("")
                 }}
               >
                 <X aria-hidden="true" />
@@ -432,7 +446,34 @@ export function IssuanceHistory({
                 <option value="voided">Voided</option>
               </select>
             </label>
+            <label className={filterLabelClass}>
+              <span>Dated from</span>
+              <input
+                type="date"
+                value={dateFrom}
+                max={dateTo || manilaToday()}
+                onChange={(event) => setDateFrom(event.target.value)}
+                className={formControlClass}
+              />
+            </label>
+            <label className={filterLabelClass}>
+              <span>Dated to</span>
+              <input
+                type="date"
+                value={dateTo}
+                min={dateFrom || undefined}
+                max={manilaToday()}
+                onChange={(event) => setDateTo(event.target.value)}
+                className={formControlClass}
+              />
+            </label>
           </div>
+          {dateRangeInvalid ? (
+            <p role="alert" className="mt-2 text-sm text-destructive">
+              The "Dated from" day is after the "Dated to" day. Please correct
+              the dates.
+            </p>
+          ) : null}
         </div>
 
         {historyQuery.isLoading ? (

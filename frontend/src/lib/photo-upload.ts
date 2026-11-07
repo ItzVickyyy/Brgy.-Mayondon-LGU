@@ -5,7 +5,7 @@ export const PHOTO_UPLOAD_ACCEPT = "image/jpeg,image/png,image/webp"
 
 const allowedTypes = PHOTO_UPLOAD_ACCEPT.split(",")
 
-export const PHOTO_UPLOAD_OPEN_ERROR = "This picture could not be opened. Please choose a JPG or PNG photo."
+export const PHOTO_UPLOAD_OPEN_ERROR = "This picture could not be opened. Please choose a JPG, PNG or WebP photo."
 
 /** Returns a message the person can act on, or `null` when the file can be used. */
 export function validatePhotoFile(file: { type: string; size: number }): string | null {

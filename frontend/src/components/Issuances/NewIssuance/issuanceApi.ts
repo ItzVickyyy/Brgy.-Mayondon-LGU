@@ -323,7 +323,21 @@ async function toResidentUpdate(
   return update
 }
 
-/** Turns a picture from the camera or a file into PNG bytes under the 300 KB limit. */
+const PHOTO_MAX_BYTES = 307200
+
+function canvasBlob(
+  canvas: HTMLCanvasElement,
+  type: string,
+  quality?: number,
+): Promise<Blob | null> {
+  return new Promise((resolve) => canvas.toBlob(resolve, type, quality))
+}
+
+/**
+ * Turns a picture from the camera or a file into WebP (preferred, keeps the
+ * transparent cut-out and stays small) or PNG bytes under the 300 KB API limit.
+ * The API accepts only PNG and WebP, so JPG files are always re-encoded here.
+ */
 async function photoBlob(dataUrl: string): Promise<Blob> {
   const image = new Image()
   await new Promise<void>((resolve, reject) => {
@@ -339,10 +353,15 @@ async function photoBlob(dataUrl: string): Promise<Blob> {
     const context = canvas.getContext("2d")
     if (!context) throw new Error("The photo could not be processed.")
     context.drawImage(image, 0, 0, canvas.width, canvas.height)
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/png"),
-    )
-    if (blob && blob.size <= 307200) return blob
+    // Browsers that cannot write WebP return PNG instead, so check the type.
+    const webp = await canvasBlob(canvas, "image/webp", 0.92)
+    if (webp && webp.type === "image/webp" && webp.size <= PHOTO_MAX_BYTES) {
+      return webp
+    }
+    const png = await canvasBlob(canvas, "image/png")
+    if (png && png.type === "image/png" && png.size <= PHOTO_MAX_BYTES) {
+      return png
+    }
     scale *= 0.75
   }
   throw new Error("The photo is too large to save. Please take it again.")
@@ -354,7 +373,7 @@ async function savePhoto(residentId: string, dataUrl: string) {
     url: "/api/v1/residents/{resident_id}/photo",
     path: { resident_id: residentId },
     body: blob,
-    headers: { "Content-Type": "image/png" },
+    headers: { "Content-Type": blob.type },
     security: [{ scheme: "bearer", type: "http" }],
   })
 }
