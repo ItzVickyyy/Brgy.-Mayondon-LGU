@@ -34,7 +34,10 @@ ManageUser = Annotated[User, Depends(require_permission(Permission.LOOKUPS_MANAG
 
 
 def _names(session: Session, model: Any) -> list[LookupItem]:
-    rows = session.exec(select(model).order_by(col(model.name))).all()
+    # Sort case-insensitively while retaining a deterministic tie-breaker.
+    rows = session.exec(
+        select(model).order_by(sa_func.lower(model.name), col(model.name))
+    ).all()
     return [LookupItem(id=r.id, name=r.name) for r in rows]
 
 
