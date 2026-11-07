@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -40,22 +41,23 @@ type TablePaginationProps = {
 }
 
 export function TablePagination({ start, end, total, pageIndex, pageCount, onPageChange }: TablePaginationProps) {
+  const { t } = useTranslation()
   if (total === 0) return null
 
   return (
     <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-      <p className="text-sm text-muted-foreground" aria-live="polite">Showing {start}–{end} of {total}</p>
+      <p className="text-sm text-muted-foreground" aria-live="polite">{t("common.pagination.showing", { start, end, total })}</p>
       {pageCount > 1 ? (
-        <nav aria-label="Pagination" className="flex items-center justify-end gap-2">
+        <nav aria-label={t("common.pagination.label")} className="flex items-center justify-end gap-2">
           <Button type="button" variant="outline" className="min-h-11 gap-1 px-3" onClick={() => onPageChange(Math.max(0, pageIndex - 1))} disabled={pageIndex === 0}>
             <ChevronLeft className="size-4" aria-hidden="true" />
-            <span className="hidden sm:inline">Previous</span>
-            <span className="sr-only sm:hidden">Previous page</span>
+            <span className="hidden sm:inline">{t("common.pagination.previous")}</span>
+            <span className="sr-only sm:hidden">{t("common.pagination.previousPage")}</span>
           </Button>
-          <span className="min-w-[100px] text-center text-sm text-muted-foreground" aria-current="page" aria-live="polite">Page {pageIndex + 1} of {pageCount}</span>
+          <span className="min-w-[100px] text-center text-sm text-muted-foreground" aria-current="page" aria-live="polite">{t("common.pagination.page", { current: pageIndex + 1, total: pageCount })}</span>
           <Button type="button" variant="outline" className="min-h-11 gap-1 px-3" onClick={() => onPageChange(Math.min(pageCount - 1, pageIndex + 1))} disabled={pageIndex >= pageCount - 1}>
-            <span className="hidden sm:inline">Next</span>
-            <span className="sr-only sm:hidden">Next page</span>
+            <span className="hidden sm:inline">{t("common.pagination.next")}</span>
+            <span className="sr-only sm:hidden">{t("common.pagination.nextPage")}</span>
             <ChevronRight className="size-4" aria-hidden="true" />
           </Button>
         </nav>

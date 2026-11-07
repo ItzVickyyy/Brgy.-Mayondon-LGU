@@ -1659,47 +1659,5 @@
       "submit": "I-reset ang Password"
     },
     "email": "Email"
-  },
-  "common": {
-    "confirm": {
-      "confirm": "Kumpirmahin",
-      "cancel": "Kanselahin",
-      "reason": "Dahilan",
-      "required": "kinakailangan",
-      "optional": "opsyonal",
-      "placeholder": "Ilagay ang dahilan",
-      "minReason": "Maglagay ng hindi bababa sa 3 character."
-    },
-    "feedback": {
-      "loading": "Nilo-load...",
-      "error": "May nangyaring error",
-      "retry": "Subukan muli"
-    },
-    "notFound": {
-      "oops": "Naku!",
-      "description": "Hindi makita ang pahinang hinahanap mo.",
-      "back": "Bumalik"
-    },
-    "permission": {
-      "title": "Limitado ang access",
-      "description": "Wala kang pahintulot na tingnan ang pahinang ito. Kontakin ang System Administrator kung sa tingin mo ay kailangan mo ng access.",
-      "back": "Bumalik sa Dashboard"
-    },
-    "pagination": {
-      "showing": "Ipinapakita ang {{start}}–{{end}} sa {{total}}",
-      "label": "Pagination",
-      "previous": "Nakaraan",
-      "previousPage": "Nakaraang pahina",
-      "page": "Pahina {{current}} ng {{total}}",
-      "next": "Susunod",
-      "nextPage": "Susunod na pahina"
-    },
-    "table": {
-      "emptyTitle": "Walang nahanap na resulta",
-      "emptyDescription": "Walang mga talaang ipapakita."
-    },
-    "rowActions": {
-      "more": "Higit pang aksyon para kay {{name}}"
-    }
   }
 }

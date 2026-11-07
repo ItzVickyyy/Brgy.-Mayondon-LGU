@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import {
   type ColumnDef,
   createPaginatedRowModel,
@@ -35,9 +36,10 @@ interface DataTableProps<TData extends RowData> {
 export function DataTable<TData extends RowData>({
   columns,
   data,
-  emptyTitle = "No results found",
-  emptyDescription = "There are no records to display.",
+  emptyTitle,
+  emptyDescription,
 }: DataTableProps<TData>) {
+  const { t } = useTranslation()
   const table = useTable({
     features: dataTableFeatures,
     data,
@@ -81,7 +83,7 @@ export function DataTable<TData extends RowData>({
         </TableBody>
       </Table>
       {table.getRowModel().rows.length === 0 ? (
-        <EmptyState title={emptyTitle} description={emptyDescription} />
+        <EmptyState title={emptyTitle ?? t("common.table.emptyTitle")} description={emptyDescription ?? t("common.table.emptyDescription")} />
       ) : null}
 
       {data.length > 0 ? (

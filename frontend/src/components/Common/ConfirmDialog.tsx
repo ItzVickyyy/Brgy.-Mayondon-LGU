@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -27,12 +28,13 @@ export function ConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
+  confirmLabel,
+  cancelLabel,
   destructive = false,
   reason = "none",
   onConfirm,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation()
   const [reasonText, setReasonText] = useState("")
 
   useEffect(() => {
@@ -52,7 +54,7 @@ export function ConfirmDialog({
         {reason !== "none" ? (
           <div className="flex flex-col gap-2">
             <label htmlFor="confirm-reason" className="text-sm font-medium">
-              Reason {needsReason ? "(required)" : "(optional)"}
+              {t("common.confirm.reason")} {needsReason ? `(${t("common.confirm.required")})` : `(${t("common.confirm.optional")})`}
             </label>
             <textarea
               id="confirm-reason"
@@ -60,12 +62,12 @@ export function ConfirmDialog({
               onChange={(event) => setReasonText(event.target.value)}
               rows={3}
               className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              placeholder="Enter a reason"
+              placeholder={t("common.confirm.placeholder")}
               required={needsReason}
               aria-describedby={needsReason ? "confirm-reason-help" : undefined}
             />
             {needsReason && reasonText.trim().length > 0 && reasonText.trim().length < 3 ? (
-              <p id="confirm-reason-help" className="text-xs text-destructive">Enter at least 3 characters.</p>
+              <p id="confirm-reason-help" className="text-xs text-destructive">{t("common.confirm.minReason")}</p>
             ) : null}
           </div>
         ) : null}
@@ -75,7 +77,7 @@ export function ConfirmDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
           >
-            {cancelLabel}
+            {cancelLabel ?? t("common.confirm.cancel")}
           </Button>
           <Button
             type="button"
@@ -87,7 +89,7 @@ export function ConfirmDialog({
               onOpenChange(false)
             }}
           >
-            {confirmLabel}
+            {confirmLabel ?? t("common.confirm.confirm")}
           </Button>
         </DialogFooter>
       </DialogContent>

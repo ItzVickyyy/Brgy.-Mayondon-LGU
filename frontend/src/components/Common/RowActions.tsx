@@ -1,4 +1,5 @@
 import type { ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 import { EllipsisVertical } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -42,6 +43,7 @@ export function RowActions({
   primary,
   items = [],
 }: RowActionsProps) {
+  const { t } = useTranslation()
   const visibleItems = items.filter(
     (item) => !item.hidden && (!item.adminOnly || isAdmin),
   )
@@ -68,7 +70,7 @@ export function RowActions({
               type="button"
               variant="outline"
               size="icon"
-              aria-label={`More actions for ${name}`}
+              aria-label={t("common.rowActions.more", { name })}
             >
               <EllipsisVertical aria-hidden="true" />
             </Button>
