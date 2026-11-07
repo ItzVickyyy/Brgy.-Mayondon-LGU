@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { useTranslation } from "react-i18next"
 import { formControlClass } from "@/components/Common/formStyles"
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
@@ -85,7 +86,7 @@ export function SelectField({
   value,
   onChange,
   options,
-  placeholder = "Choose…",
+  placeholder,
   invalid,
   disabled,
   describedBy,
@@ -102,6 +103,7 @@ export function SelectField({
   const panelRef = useRef<HTMLDivElement>(null)
   const triggerRef = useRef<HTMLButtonElement>(null)
   const searchRef = useRef<HTMLInputElement>(null)
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [active, setActive] = useState(0)
@@ -195,7 +197,7 @@ export function SelectField({
         )}
       >
         <span className={cn("truncate", !selected && "text-muted-foreground")}>
-          {selected?.label ?? placeholder}
+          {selected?.label ?? placeholder ?? t("issuances.new.controls.choose")}
         </span>
         <ChevronDown
           className={cn(
@@ -232,8 +234,8 @@ export function SelectField({
                   setQuery(event.target.value)
                   setActive(0)
                 }}
-                placeholder="Type to search…"
-                aria-label="Search the choices"
+                placeholder={t("issuances.new.controls.typeToSearch")}
+                aria-label={t("issuances.new.controls.searchChoices")}
                 autoComplete="off"
                 role="combobox"
                 aria-expanded="true"
@@ -278,7 +280,7 @@ export function SelectField({
               ))
             ) : (
               <p className="px-3 py-3 text-sm text-muted-foreground">
-                Nothing matches “{query.trim()}”.
+                {t("issuances.new.controls.noMatch", { query: query.trim() })}
               </p>
             )}
           </div>
@@ -313,6 +315,7 @@ export function ComboField({
   describedBy,
   placeholder,
 }: ComboFieldProps) {
+  const { t } = useTranslation()
   const listId = useId()
   const wrapperRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -395,7 +398,7 @@ export function ComboField({
       <button
         type="button"
         tabIndex={-1}
-        aria-label="Show choices"
+        aria-label={t("issuances.new.controls.showChoices")}
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => setOpen((current) => !current)}
         className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground"

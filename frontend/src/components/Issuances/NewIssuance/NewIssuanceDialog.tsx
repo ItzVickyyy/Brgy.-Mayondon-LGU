@@ -17,6 +17,8 @@ import { popoverIsOpen } from "./popover"
 import { IssuanceSection } from "./IssuanceSection"
 import { DocumentTypePicker } from "./DocumentTypePicker"
 import { PhotoCapture } from "./PhotoCapture"
+import { useTranslation } from "react-i18next"
+import { documentName, fieldHelp, fieldLabel, fieldOptionLabel, validationMessage } from "@/lib/issuanceLabels"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
 
@@ -77,6 +79,7 @@ function getDefaultToday(value: unknown) {
 }
 
 export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initialDocumentType, initialDraftId, onSaved, onDraftRemoved, onPrint }: Props) {
+  const { t } = useTranslation()
   const form = useNewIssuanceForm(initialResidentId ?? "")
   const lookupsQuery = useQuery({ queryKey: ["issuance-lookups"], queryFn: () => issuanceApi.getLookups(), enabled: open, staleTime: 60_000 })
   const officialsQuery = useQuery({ queryKey: ["issuance-officials"], queryFn: () => issuanceApi.getOfficials(), enabled: open, staleTime: 60_000 })
@@ -245,7 +248,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   function readErrorMessage(node: unknown): string {
     if (typeof node !== "object" || node === null || !("message" in node)) return ""
     const message = (node as { message?: unknown }).message
-    return typeof message === "string" ? message : ""
+    return typeof message === "string" ? validationMessage(message, t) : ""
   }
 
   function getFieldError(field: DetailFieldConfig): string {
@@ -309,26 +312,26 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     const missingNow = attempted && Boolean(field.required) && !fieldHasValue(field)
     const invalid = Boolean(fieldError) || missingNow
     const describedBy = fieldError || missingNow ? `${fieldId}-error` : undefined
-    const labelText = <>{field.label}{field.required ? <span className="text-destructive"> *</span> : null}</>
-    const message = fieldError || (missingNow ? "Please fill this in." : "")
+    const labelText = <>{fieldLabel(field.label, t)}{field.required ? <span className="text-destructive"> *</span> : null}</>
+    const message = fieldError || (missingNow ? t("issuances.new.detailsStep.fillIn") : "")
     const messageNode = message ? <span id={`${fieldId}-error`} className="text-xs font-normal text-destructive" role="alert">{message}</span> : null
     if (field.type === "checkbox") {
       return <div key={field.name} className="flex min-h-11 items-center">
-        <CheckField id={fieldId} checked={Boolean(value)} onChange={(checked) => onValueChange(checked)} label={field.label} invalid={invalid} describedBy={describedBy} />
+        <CheckField id={fieldId} checked={Boolean(value)} onChange={(checked) => onValueChange(checked)} label={fieldLabel(field.label, t)} invalid={invalid} describedBy={describedBy} />
       </div>
     }
     let control: ReactNode
     if (field.type === "combobox") {
       control = <ComboField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} options={fieldOptions} invalid={invalid} describedBy={describedBy} />
     } else if (field.type === "select" || field.type === "radio") {
-      control = <SelectField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} options={fieldOptions.map((option) => ({ value: normalizedOptionValue(field.name, option), label: option }))} invalid={invalid} describedBy={describedBy} />
+      control = <SelectField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} options={fieldOptions.map((option) => ({ value: normalizedOptionValue(field.name, option), label: fieldOptionLabel(field.name, option, t) }))} invalid={invalid} describedBy={describedBy} />
     } else if (field.type === "multiselect") {
       const current = Array.isArray(value) ? value as string[] : []
       control = <fieldset aria-labelledby={`${fieldId}-label`} className="m-0 flex min-w-0 flex-wrap gap-2 border-0 p-0">
         {(field.options ?? []).map((option) => {
           const optionKey = normalizedOptionValue(field.name, option)
           const checked = current.includes(optionKey)
-          return <CheckField key={option} variant="box" id={option === field.options?.[0] ? fieldId : undefined} label={option} checked={checked} disabled={Boolean(field.maxSelected && current.length >= field.maxSelected && !checked)} invalid={invalid} describedBy={describedBy} onChange={(next) => onValueChange(next ? [...current, optionKey] as unknown as string : current.filter((item) => item !== optionKey) as unknown as string)} />
+          return <CheckField key={option} variant="box" id={option === field.options?.[0] ? fieldId : undefined} label={fieldOptionLabel(field.name, option, t)} checked={checked} disabled={Boolean(field.maxSelected && current.length >= field.maxSelected && !checked)} invalid={invalid} describedBy={describedBy} onChange={(next) => onValueChange(next ? [...current, optionKey] as unknown as string : current.filter((item) => item !== optionKey) as unknown as string)} />
         })}
       </fieldset>
     } else if (field.type === "textarea") {
@@ -342,7 +345,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       {field.type === "multiselect" ? <span id={`${fieldId}-label`}>{labelText}</span> : <label htmlFor={fieldId}>{labelText}</label>}
       {control}
       {messageNode}
-      {field.help ? <span className="text-xs font-normal text-muted-foreground">{field.help}</span> : null}
+      {field.help ? <span className="text-xs font-normal text-muted-foreground">{fieldHelp(field.help, t)}</span> : null}
     </div>
   }
 
@@ -377,7 +380,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         return record
       } catch (error) {
         setAutoSave({ state: "error" })
-        if (!auto) setFormError(error instanceof Error ? error.message : "Unable to save the draft.")
+        if (!auto) setFormError(error instanceof Error ? error.message : t("issuances.new.errors.saveDraft"))
         return null
       }
     }
@@ -397,14 +400,14 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       const record = await issuanceApi.getIssuance(initialDraftId)
       if (!active) return
       if (!record || record.status !== "draft") {
-        setFormError("This draft is no longer available. Refresh Issuance History and try again.")
+        setFormError(t("issuances.new.errors.draftGone"))
         setSaving(false)
         return
       }
       const resident = await issuanceApi.fetchResident(record.residentId)
       if (!active) return
       if (!resident) {
-        setFormError("The resident linked to this draft could not be loaded.")
+        setFormError(t("issuances.new.errors.residentLoad"))
         setSaving(false)
         return
       }
@@ -441,7 +444,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       setSaving(false)
     })().catch((error) => {
       if (!active) return
-      setFormError(error instanceof Error ? error.message : "The saved draft could not be opened.")
+      setFormError(error instanceof Error ? error.message : t("issuances.new.errors.draftOpen"))
       setSaving(false)
     })
     return () => { active = false }
@@ -472,7 +475,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
   async function saveDraft() {
     if (!selectedResident) {
-      setFormError("Select a resident before saving this draft.")
+      setFormError(t("issuances.new.errors.selectResidentDraft"))
       return
     }
     setSaving(true)
@@ -488,7 +491,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
   async function issue(andPrint = false) {
     if (!selectedResident) {
-      setFormError("Select a resident before issuing this document.")
+      setFormError(t("issuances.new.errors.selectResidentIssue"))
       return
     }
     const projectedResident = { ...selectedResident, ...residentUpdates } as ResidentRecord
@@ -496,7 +499,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     if (missingResidentFields.length) {
       setAttempted(true)
       const onlyPhoto = missingResidentFields.every((need) => need === "photo")
-      setFormError(onlyPhoto ? "Please take the resident's photo first. It is in the Photo step." : "Please fill in the missing details in the yellow box under Who is it for?")
+      setFormError(onlyPhoto ? t("issuances.new.errors.photoFirst") : t("issuances.new.errors.fillMissing"))
       const firstMissing = missingResidentFields[0]
       window.setTimeout(() => {
         const targetId = firstMissing === "address" ? "resident-missing-address-houseNumber" : `resident-missing-${firstMissing}`
@@ -508,7 +511,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     }
     if (missingPreviewLabels.length) {
       setAttempted(true)
-      setFormError(`Almost there. ${missingPreviewLabels.length === 1 ? "One item is" : `${missingPreviewLabels.length} items are`} still needed. We will take you to the first one.`)
+      setFormError(missingPreviewLabels.length === 1 ? t("issuances.new.errors.almostThereOne") : t("issuances.new.errors.almostThere", { count: missingPreviewLabels.length }))
       goToFirstMissing()
       return
     }
@@ -529,7 +532,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       const parsed = form.trigger()
       const valid = await parsed
       if (!valid) {
-        setFormError("Check the required fields marked above.")
+        setFormError(t("issuances.new.errors.checkRequired"))
         const firstMissing = config.fields.find((field) => fieldVisible(field) && field.required && !fieldHasValue(field))
         if (firstMissing) {
           const target = document.getElementById(`issuance-${firstMissing.name}`)
@@ -555,7 +558,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       onSaved(record)
       if (andPrint) handlePrint(record)
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to issue this document.")
+      setFormError(error instanceof Error ? error.message : t("issuances.new.errors.issue"))
     } finally {
       setSaving(false)
     }
@@ -891,34 +894,34 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       }}
     >
       <DialogHeader className="shrink-0 border-b px-5 py-4 pr-12">
-        <DialogTitle>New Issuance</DialogTitle>
-        <DialogDescription>Pick the document, find the resident, fill in the details. Everything on one screen.</DialogDescription>
+        <DialogTitle>{t("issuances.new.title")}</DialogTitle>
+        <DialogDescription>{t("issuances.new.description")}</DialogDescription>
       </DialogHeader>
       {successRecord ? <div className="flex flex-1 flex-col items-center justify-center gap-4 overflow-y-auto p-8 text-center" role="status">
         <CheckCircle2 className="size-12 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
         <div>
-          <p className="text-lg font-semibold">Issued: {successRecord.referenceNo}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{config.name} for {selectedResident?.name ?? "the resident"} was saved.</p>
+          <p className="text-lg font-semibold">{t("issuances.new.success.issued", { reference: successRecord.referenceNo })}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{selectedResident ? t("issuances.new.success.saved", { document: documentName(documentType, t), resident: selectedResident.name }) : t("issuances.new.success.savedNoResident", { document: documentName(documentType, t) })}</p>
           {printNotice ? <p role="status" className="mx-auto mt-3 max-w-md rounded-lg border bg-muted/50 px-3 py-2 text-sm">{printNotice}</p> : null}
         </div>
         <div className="flex flex-wrap justify-center gap-2">
-          <Button type="button" variant="outline" onClick={() => successRecord && handlePrint(successRecord)}><Printer className="size-4" />Print</Button>
-          <Button type="button" variant="outline" onClick={issueAnother}>Issue another for this resident</Button>
-          <Button type="button" onClick={() => { resetDialog(); onOpenChange(false) }}>Done</Button>
+          <Button type="button" variant="outline" onClick={() => successRecord && handlePrint(successRecord)}><Printer className="size-4" />{t("issuances.new.success.print")}</Button>
+          <Button type="button" variant="outline" onClick={issueAnother}>{t("issuances.new.success.issueAnother")}</Button>
+          <Button type="button" onClick={() => { resetDialog(); onOpenChange(false) }}>{t("issuances.new.success.done")}</Button>
         </div>
       </div> : <form noValidate className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => { event.preventDefault(); void issue() }} onKeyDown={(event) => { if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); void issue() } }}>
         <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_368px]">
           <div className="min-h-0 space-y-4 overflow-y-auto bg-muted/30 px-4 py-4 sm:px-5">
-            <IssuanceSection id="issuance-step-document" step={1} title="What are you issuing?" done>
+            <IssuanceSection id="issuance-step-document" step={1} title={t("issuances.new.documentStep.title")} done>
               <DocumentTypePicker value={documentType} onChange={changeDocumentType} />
               <div className="flex flex-wrap items-end gap-x-6 gap-y-2 border-t pt-4">
-                <div className={cn(fieldLabelClass, "w-full sm:w-64")}><label htmlFor="issuance-date">Date on document</label>
+                <div className={cn(fieldLabelClass, "w-full sm:w-64")}><label htmlFor="issuance-date">{t("issuances.new.documentStep.dateOnDocument")}</label>
                   <DateField id="issuance-date" value={issueDate} onChange={(nextDate) => { form.setValue("issueDate", nextDate, { shouldDirty: true }); if (documentType === "BARANGAY_ID" && !validUntilEdited && nextDate) { const validDate = new Date(`${nextDate}T00:00:00`); validDate.setFullYear(validDate.getFullYear() + 1); setDetail("validUntil", localIsoDate(validDate)) } }} />
                 </div>
                 <p className="flex flex-wrap items-center gap-x-4 gap-y-1 pb-3 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><Printer className="size-3.5" aria-hidden="true" />{config.printMode === "overlay" ? "Prints on the pre-printed form" : "Prints as a full page"}</span>
-                  {config.validityMonths ? <span className="inline-flex items-center gap-1"><Clock className="size-3.5" aria-hidden="true" />Valid for {config.validityMonths === 12 ? "1 year" : `${config.validityMonths} months`}</span> : null}
-                  {config.onePerResident ? <span>One per resident</span> : null}
+                  <span className="inline-flex items-center gap-1"><Printer className="size-3.5" aria-hidden="true" />{config.printMode === "overlay" ? t("issuances.new.documentStep.printsOverlay") : t("issuances.new.documentStep.printsFull")}</span>
+                  {config.validityMonths ? <span className="inline-flex items-center gap-1"><Clock className="size-3.5" aria-hidden="true" />{config.validityMonths === 12 ? t("issuances.new.documentStep.validForYear") : t("issuances.new.documentStep.validForMonths", { count: config.validityMonths })}</span> : null}
+                  {config.onePerResident ? <span>{t("issuances.new.documentStep.onePerResident")}</span> : null}
                 </p>
               </div>
             </IssuanceSection>
@@ -978,59 +981,59 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
               </div> : null}
             </IssuanceSection>
 
-            {needsPhoto ? <IssuanceSection id="issuance-step-photo" step={3} title="Photo" description="Capture the resident’s photo. It will appear in the photo box automatically." done={photoDone}>
+            {needsPhoto ? <IssuanceSection id="issuance-step-photo" step={3} title={t("issuances.new.photoStep.title")} description={t("issuances.new.photoStep.description")} done={photoDone}>
               <div className={fieldLabelClass}>
-                <span id="resident-missing-photo-label">Resident's photo <span className="text-destructive">*</span></span>
+                <span id="resident-missing-photo-label">{t("issuances.new.photoStep.label")} <span className="text-destructive">*</span></span>
                 <PhotoCapture id="resident-missing-photo" value={currentPhoto} onChange={(photoUrl) => selectedResident && !editingResident ? setResidentUpdates((previous) => ({ ...previous, photoUrl } as ResidentPatch)) : setQuickAdd((previous) => ({ ...previous, photoUrl }))} />
               </div>
             </IssuanceSection> : null}
 
-            <IssuanceSection id="issuance-step-details" step={detailsStep} title="Document details" description="Only the fields this document needs. Red asterisk means required." done={detailsDone}>
+            <IssuanceSection id="issuance-step-details" step={detailsStep} title={t("issuances.new.detailsStep.title")} description={t("issuances.new.detailsStep.description")} done={detailsDone}>
               {detailFields.length ? documentType === "INDIGENCY" ? (
                 <div className="grid items-start gap-x-4 gap-y-3 sm:grid-cols-2">
                   {detailFields.filter((field) => field.name === "sector").map((field) => <div key={field.name} className="sm:col-span-2">{renderField(field)}</div>)}
                   {detailFields.filter((field) => field.name === "purpose" || field.name === "addressedToOffice").map(renderField)}
                 </div>
-              ) : <div className="grid items-start gap-4 sm:grid-cols-2">{detailFields.map(renderField)}</div> : <p className="text-sm text-muted-foreground">This document needs no extra details.</p>}
+              ) : <div className="grid items-start gap-4 sm:grid-cols-2">{detailFields.map(renderField)}</div> : <p className="text-sm text-muted-foreground">{t("issuances.new.detailsStep.noExtra")}</p>}
               {config.signatoryMode === "select" ? <div className={fieldLabelClass}>
-                <label htmlFor="issuance-signatoryOfficialId">Signatory {availableSignatories.length > 0 ? <span className="text-destructive">*</span> : null}</label>
-                {availableSignatories.length > 0 ? <SelectField id="issuance-signatoryOfficialId" value={form.watch("signatoryOfficialId") ?? ""} onChange={(next) => form.setValue("signatoryOfficialId", next, { shouldDirty: true })} placeholder="Choose an official…" invalid={Boolean(readErrorMessage(form.formState.errors.signatoryOfficialId)) || (attempted && signatoryMissing)} describedBy={readErrorMessage(form.formState.errors.signatoryOfficialId) ? "issuance-signatory-error" : undefined} options={availableSignatories.map((official) => ({ value: official.id, label: `${official.name} · ${official.position}` }))} /> : <p className="rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">No officials are configured. The signature line will be left blank.</p>}
-                {readErrorMessage(form.formState.errors.signatoryOfficialId) ? <span id="issuance-signatory-error" role="alert" className="text-xs font-normal text-destructive">{readErrorMessage(form.formState.errors.signatoryOfficialId)}</span> : attempted && signatoryMissing ? <span role="alert" className="text-xs font-normal text-destructive">Please choose who signs this document.</span> : null}
+                <label htmlFor="issuance-signatoryOfficialId">{t("issuances.new.detailsStep.signatory")} {availableSignatories.length > 0 ? <span className="text-destructive">*</span> : null}</label>
+                {availableSignatories.length > 0 ? <SelectField id="issuance-signatoryOfficialId" value={form.watch("signatoryOfficialId") ?? ""} onChange={(next) => form.setValue("signatoryOfficialId", next, { shouldDirty: true })} placeholder={t("issuances.new.detailsStep.chooseOfficial")} invalid={Boolean(readErrorMessage(form.formState.errors.signatoryOfficialId)) || (attempted && signatoryMissing)} describedBy={readErrorMessage(form.formState.errors.signatoryOfficialId) ? "issuance-signatory-error" : undefined} options={availableSignatories.map((official) => ({ value: official.id, label: `${official.name} · ${official.position}` }))} /> : <p className="rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">{t("issuances.new.detailsStep.noOfficials")}</p>}
+                {readErrorMessage(form.formState.errors.signatoryOfficialId) ? <span id="issuance-signatory-error" role="alert" className="text-xs font-normal text-destructive">{readErrorMessage(form.formState.errors.signatoryOfficialId)}</span> : attempted && signatoryMissing ? <span role="alert" className="text-xs font-normal text-destructive">{t("issuances.new.detailsStep.chooseWhoSigns")}</span> : null}
               </div> : null}
-              {details.type === "FIRST_TIME_JOBSEEKER" && details.isJobstartBeneficiary ? <p className="text-sm text-muted-foreground">JobStart beneficiary selected. The Punong Barangay will determine eligibility.</p> : null}
+              {details.type === "FIRST_TIME_JOBSEEKER" && details.isJobstartBeneficiary ? <p className="text-sm text-muted-foreground">{t("issuances.new.detailsStep.jobstartNote")}</p> : null}
             </IssuanceSection>
 
-            {hasRequirements ? <IssuanceSection id="issuance-step-requirements" step={requirementsStep} title={fieldsByGroup("payment").length ? "ID presented & payment" : "ID presented"} description="Copy these from the resident's ID and the official receipt." done={requirementsDone}>
-              {fieldsByGroup("identity").length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Proof of identity</p><div className="grid gap-4 sm:grid-cols-2">{fieldsByGroup("identity").map(renderField)}</div></div> : null}
-              {fieldsByGroup("payment").length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Payment</p><div className="grid items-end gap-4 sm:grid-cols-2">{fieldsByGroup("payment").map(renderField)}</div></div> : null}
+            {hasRequirements ? <IssuanceSection id="issuance-step-requirements" step={requirementsStep} title={fieldsByGroup("payment").length ? t("issuances.new.requirementsStep.titleWithPayment") : t("issuances.new.requirementsStep.titleIdOnly")} description={t("issuances.new.requirementsStep.description")} done={requirementsDone}>
+              {fieldsByGroup("identity").length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("issuances.new.requirementsStep.proofOfIdentity")}</p><div className="grid gap-4 sm:grid-cols-2">{fieldsByGroup("identity").map(renderField)}</div></div> : null}
+              {fieldsByGroup("payment").length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("issuances.new.requirementsStep.payment")}</p><div className="grid items-end gap-4 sm:grid-cols-2">{fieldsByGroup("payment").map(renderField)}</div></div> : null}
             </IssuanceSection> : null}
 
-            {duplicate ? <p role="alert" className="rounded-md border border-destructive/40 bg-background p-3 text-sm">An issued First-Time Jobseeker certificate already exists: {duplicate.referenceNo}, dated {duplicate.issueDate}. An administrator must void it before another can be issued.</p> : null}
+            {duplicate ? <p role="alert" className="rounded-md border border-destructive/40 bg-background p-3 text-sm">{t("issuances.new.duplicate", { reference: duplicate.referenceNo, date: duplicate.issueDate })}</p> : null}
             {formError ? <p role="alert" className="rounded-md border border-destructive/40 bg-background p-3 text-sm text-destructive">{formError}</p> : null}
 
             <div className="lg:hidden">
-              <button type="button" className="flex min-h-10 items-center gap-2 text-sm font-medium" aria-expanded={previewOpen} onClick={() => setPreviewOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", previewOpen && "rotate-180")} />Preview of what will print</button>
+              <button type="button" className="flex min-h-10 items-center gap-2 text-sm font-medium" aria-expanded={previewOpen} onClick={() => setPreviewOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", previewOpen && "rotate-180")} />{t("issuances.new.preview")}</button>
               {previewOpen ? <div className="mt-2 rounded-xl border bg-card"><PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={attempted ? missingPreviewLabels : []} showMissing={attempted} printingPaused /></div> : null}
             </div>
           </div>
-          <aside aria-label="Preview of what will print" className="hidden min-h-0 overflow-y-auto border-l bg-card lg:block">
+          <aside aria-label={t("issuances.new.preview")} className="hidden min-h-0 overflow-y-auto border-l bg-card lg:block">
             <PrintSummaryPanel type={config.name} currentDate={issueDate} structuredRows={previewRows} missingLabels={attempted ? missingPreviewLabels : []} showMissing={attempted} printingPaused />
           </aside>
         </div>
         <DialogFooter className="shrink-0 items-center gap-2 border-t px-5 py-3 sm:justify-between">
           <div className="flex min-w-0 flex-col gap-0.5 text-sm" aria-live="polite">
-            {remaining ? <button type="button" onClick={goToFirstMissing} className="inline-flex min-h-9 items-center gap-1.5 self-start text-amber-700 dark:text-amber-400 underline-offset-4 hover:underline"><CircleAlert className="size-4" aria-hidden="true" />{remaining} {remaining === 1 ? "item" : "items"} still needed. Go to next</button> : <span className="inline-flex min-h-9 items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400"><CheckCircle2 className="size-4" aria-hidden="true" />Ready to issue</span>}
+            {remaining ? <button type="button" onClick={goToFirstMissing} className="inline-flex min-h-9 items-center gap-1.5 self-start text-amber-700 dark:text-amber-400 underline-offset-4 hover:underline"><CircleAlert className="size-4" aria-hidden="true" />{t("issuances.new.footer.stillNeeded", { count: remaining })}</button> : <span className="inline-flex min-h-9 items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400"><CheckCircle2 className="size-4" aria-hidden="true" />{t("issuances.new.footer.ready")}</span>}
             <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="autosave-status">
               <span className={cn("size-2 rounded-full", autoSave.state === "saved" ? "bg-emerald-500" : autoSave.state === "saving" ? "animate-pulse bg-amber-500" : autoSave.state === "error" ? "bg-destructive" : "bg-muted-foreground/40")} aria-hidden="true" />
-              {autoSave.state === "saving" ? "Saving draft…" : autoSave.state === "saved" ? `Draft saved automatically at ${autoSave.at?.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}` : autoSave.state === "error" ? "The draft could not be saved. What you typed is still here." : selectedResident ? "Saves as a draft automatically while you type" : "Saves as a draft automatically once you choose a person"}
-              <span className="ml-2 hidden items-center gap-1 xl:inline-flex"><Keyboard className="size-3.5" aria-hidden="true" />Ctrl + Enter to issue</span>
+              {autoSave.state === "saving" ? t("issuances.new.footer.saving") : autoSave.state === "saved" ? t("issuances.new.footer.saved", { time: autoSave.at?.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }) }) : autoSave.state === "error" ? t("issuances.new.footer.saveError") : selectedResident ? t("issuances.new.footer.autoWithResident") : t("issuances.new.footer.autoNoResident")}
+              <span className="ml-2 hidden items-center gap-1 xl:inline-flex"><Keyboard className="size-3.5" aria-hidden="true" />{t("issuances.new.footer.shortcut")}</span>
             </span>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={() => requestClose(false)}>Cancel</Button>
-            <Button type="button" variant="outline" disabled={saving} onClick={() => void saveDraft()}>Save draft &amp; close</Button>
-            <Button type="button" variant="outline" disabled={saving} onClick={() => void issue(true)}><Printer className="size-4" aria-hidden="true" />Issue &amp; print</Button>
-            <Button type="submit" disabled={saving}>{saving ? "Saving…" : "Issue"}</Button>
+            <Button type="button" variant="ghost" onClick={() => requestClose(false)}>{t("issuances.new.footer.cancel")}</Button>
+            <Button type="button" variant="outline" disabled={saving} onClick={() => void saveDraft()}>{t("issuances.new.footer.saveDraftClose")}</Button>
+            <Button type="button" variant="outline" disabled={saving} onClick={() => void issue(true)}><Printer className="size-4" aria-hidden="true" />{t("issuances.new.footer.issueAndPrint")}</Button>
+            <Button type="submit" disabled={saving}>{saving ? t("issuances.new.footer.savingButton") : t("issuances.new.footer.issue")}</Button>
           </div>
         </DialogFooter>
       </form>}
@@ -1038,26 +1041,26 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     <Dialog open={discardOpen} onOpenChange={setDiscardOpen}>
       <DialogContent className="sm:max-w-md" showCloseButton={false}>
         <DialogHeader>
-          <DialogTitle>Discard the changes to this issuance?</DialogTitle>
+          <DialogTitle>{t("issuances.new.discard.title")}</DialogTitle>
           <DialogDescription>
             {selectedResident
-              ? "A draft is saved automatically. You can keep it and finish later, or throw everything away."
-              : "What you typed so far has not been saved. If you leave now, it will be lost."}
+              ? t("issuances.new.discard.withDraft")
+              : t("issuances.new.discard.withoutDraft")}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:flex-nowrap sm:justify-end">
-          <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => setDiscardOpen(false)}>Keep editing</Button>
-          {selectedResident ? <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => void closeKeepingDraft()}>Close, keep draft</Button> : null}
-          <Button type="button" variant="destructive" className="w-full sm:w-auto" onClick={() => void discardAndClose()}>Discard changes</Button>
+          <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => setDiscardOpen(false)}>{t("issuances.new.discard.keepEditing")}</Button>
+          {selectedResident ? <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => void closeKeepingDraft()}>{t("issuances.new.discard.closeKeepDraft")}</Button> : null}
+          <Button type="button" variant="destructive" className="w-full sm:w-auto" onClick={() => void discardAndClose()}>{t("issuances.new.discard.discard")}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
     <ConfirmDialog
       open={pendingDocumentType !== null}
       onOpenChange={(nextOpen) => { if (!nextOpen) setPendingDocumentType(null) }}
-      title="Change document type?"
-      description="Details entered for the current document will be cleared. The resident and document date will stay."
-      confirmLabel="Change document"
+      title={t("issuances.new.changeType.title")}
+      description={t("issuances.new.changeType.description")}
+      confirmLabel={t("issuances.new.changeType.confirm")}
       onConfirm={() => {
         if (pendingDocumentType) applyDocumentType(pendingDocumentType)
         setPendingDocumentType(null)

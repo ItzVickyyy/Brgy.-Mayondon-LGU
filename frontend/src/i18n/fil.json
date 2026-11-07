@@ -743,6 +743,287 @@
         "correctionReason": "Dahilan ng pagtatama",
         "voidReason": "Dahilan ng pag-void"
       }
+    },
+    "new": {
+      "title": "Bagong Isyu",
+      "description": "Piliin ang dokumento, hanapin ang residente, at punan ang mga detalye. Lahat sa iisang screen.",
+      "documentStep": {
+        "title": "Anong dokumento ang ililista?",
+        "dateOnDocument": "Petsa sa dokumento",
+        "printsOverlay": "Ipi-print sa pre-printed na porma",
+        "printsFull": "Ipi-print bilang buong pahina",
+        "validForYear": "Balido sa loob ng 1 taon",
+        "validForMonths_one": "Balido sa loob ng {{count}} buwan",
+        "validForMonths_other": "Balido sa loob ng {{count}} buwan",
+        "onePerResident": "Isa lang bawat residente"
+      },
+      "groups": {
+        "clearance": "Mga Clearance",
+        "certification": "Mga Sertipikasyon",
+        "id": "ID"
+      },
+      "documents": {
+        "BARANGAY_CLEARANCE": {
+          "name": "Barangay Clearance",
+          "short": "Barangay Clearance",
+          "hint": "Trabaho, paaralan, utang"
+        },
+        "FRANCHISE_CLEARANCE": {
+          "name": "Franchise Clearance",
+          "short": "Franchise Clearance",
+          "hint": "Prangkisa ng traysikel"
+        },
+        "UTILITY_CLEARANCE": {
+          "name": "Clearance sa Kuryente at Tubig",
+          "short": "Kuryente at Tubig",
+          "hint": "Koneksyon ng utility"
+        },
+        "RESIDENCY": {
+          "name": "Sertipikasyon ng Paninirahan",
+          "short": "Paninirahan",
+          "hint": "Patunay ng paninirahan"
+        },
+        "INDIGENCY": {
+          "name": "Sertipiko ng Indigency",
+          "short": "Indigency",
+          "hint": "Tulong, waiver ng bayarin"
+        },
+        "ASSISTANCE": {
+          "name": "Sertipikasyon para sa Tulong",
+          "short": "Sertipikasyon para sa Tulong",
+          "hint": "Pinansyal, medikal, libing"
+        },
+        "MARGINALIZED_SECTOR": {
+          "name": "Marginalized Sector (Pagpapatunay)",
+          "short": "Marginalized Sector",
+          "hint": "Sertipikasyon ng sektor sa Filipino"
+        },
+        "FIRST_TIME_JOBSEEKER": {
+          "name": "First-Time Jobseeker",
+          "short": "First-Time Jobseeker",
+          "hint": "Unang aplikasyon sa trabaho"
+        },
+        "BARANGAY_ID": {
+          "name": "Barangay ID",
+          "short": "Barangay ID",
+          "hint": "Bago, renewal, kapalit"
+        }
+      },
+      "photoStep": {
+        "title": "Litrato",
+        "description": "Kunan ng litrato ang residente. Awtomatiko itong lalabas sa kahon ng litrato.",
+        "label": "Litrato ng residente"
+      },
+      "detailsStep": {
+        "title": "Mga detalye ng dokumento",
+        "description": "Mga field lang na kailangan ng dokumentong ito. Ang pulang asterisk ay nangangahulugang kailangan.",
+        "noExtra": "Walang karagdagang detalyeng kailangan ang dokumentong ito.",
+        "signatory": "Lumalagda",
+        "chooseOfficial": "Pumili ng opisyal…",
+        "noOfficials": "Walang naka-configure na opisyal. Mananatiling blangko ang linya ng lagda.",
+        "chooseWhoSigns": "Pakipili kung sino ang lalagda sa dokumentong ito.",
+        "jobstartNote": "Napili ang benepisyaryo ng JobStart. Ang Punong Barangay ang magpapasya kung kwalipikado.",
+        "fillIn": "Pakipunan ito."
+      },
+      "requirementsStep": {
+        "titleWithPayment": "Ipinakitang ID at bayad",
+        "titleIdOnly": "Ipinakitang ID",
+        "description": "Kopyahin ang mga ito mula sa ID ng residente at sa opisyal na resibo.",
+        "proofOfIdentity": "Patunay ng pagkakakilanlan",
+        "payment": "Bayad"
+      },
+      "duplicate": "May naisyu nang sertipiko ng First-Time Jobseeker: {{reference}}, may petsang {{date}}. Kailangan itong i-void ng administrator bago makapag-isyu ng isa pa.",
+      "preview": "Preview ng ipi-print",
+      "footer": {
+        "stillNeeded_one": "{{count}} aytem pa ang kailangan. Pumunta sa susunod",
+        "stillNeeded_other": "{{count}} aytem pa ang kailangan. Pumunta sa susunod",
+        "ready": "Handa nang i-isyu",
+        "saving": "Sine-save ang draft…",
+        "saved": "Awtomatikong na-save ang draft nang {{time}}",
+        "saveError": "Hindi ma-save ang draft. Nandito pa rin ang tinipa mo.",
+        "autoWithResident": "Awtomatikong sine-save bilang draft habang nagta-type",
+        "autoNoResident": "Awtomatikong sine-save bilang draft kapag may napili nang tao",
+        "shortcut": "Ctrl + Enter para i-isyu",
+        "cancel": "Kanselahin",
+        "saveDraftClose": "I-save ang draft at isara",
+        "issueAndPrint": "I-isyu at i-print",
+        "savingButton": "Sine-save…",
+        "issue": "I-isyu"
+      },
+      "success": {
+        "issued": "Naisyu: {{reference}}",
+        "saved": "Na-save ang {{document}} para kay {{resident}}.",
+        "savedNoResident": "Na-save ang {{document}} para sa residente.",
+        "print": "I-print",
+        "issueAnother": "Mag-isyu pa ng isa para sa residenteng ito",
+        "done": "Tapos na"
+      },
+      "discard": {
+        "title": "Itapon ang mga pagbabago sa isyung ito?",
+        "withDraft": "Awtomatikong sine-save ang draft. Maaari mo itong itabi at tapusin mamaya, o itapon ang lahat.",
+        "withoutDraft": "Hindi pa nase-save ang tinipa mo. Kung aalis ka ngayon, mawawala ito.",
+        "keepEditing": "Ituloy ang pag-edit",
+        "closeKeepDraft": "Isara, itabi ang draft",
+        "discard": "Itapon ang mga pagbabago"
+      },
+      "changeType": {
+        "title": "Palitan ang uri ng dokumento?",
+        "description": "Buburahin ang mga detalyeng inilagay para sa kasalukuyang dokumento. Mananatili ang residente at petsa ng dokumento.",
+        "confirm": "Palitan ang dokumento"
+      },
+      "errors": {
+        "selectResidentDraft": "Pumili ng residente bago i-save ang draft na ito.",
+        "selectResidentIssue": "Pumili ng residente bago i-isyu ang dokumentong ito.",
+        "photoFirst": "Kunan muna ng litrato ang residente. Nasa hakbang na Litrato ito.",
+        "fillMissing": "Pakipunan ang mga kulang na detalye sa dilaw na kahon sa ilalim ng Para kanino ito?",
+        "checkRequired": "Suriin ang mga kinakailangang field na may marka sa itaas.",
+        "saveDraft": "Hindi ma-save ang draft.",
+        "issue": "Hindi ma-isyu ang dokumentong ito.",
+        "draftGone": "Hindi na available ang draft na ito. I-refresh ang Kasaysayan ng mga Isyu at subukang muli.",
+        "residentLoad": "Hindi ma-load ang residenteng naka-link sa draft na ito.",
+        "draftOpen": "Hindi mabuksan ang na-save na draft.",
+        "almostThereOne": "Malapit na. May isang aytem pang kailangan. Dadalhin ka namin sa una.",
+        "almostThere": "Malapit na. {{count}} aytem pa ang kailangan. Dadalhin ka namin sa una."
+      },
+      "validation": {
+        "required": "Kailangan ang field na ito.",
+        "isoDate": "Gumamit ng wastong ISO na petsa (YYYY-MM-DD).",
+        "receiptRequired": "Kailangan ang numero ng opisyal na resibo maliban kung libre.",
+        "beneficiaryName": "Kailangan ang pangalan kapag para sa ibang tao ang tulong.",
+        "beneficiaryRelationship": "Kailangan ang ugnayan kapag para sa ibang tao ang tulong.",
+        "typeMismatch": "Dapat tumugma ang mga detalye sa napiling uri ng dokumento.",
+        "purposeRequired": "Kailangan ang layunin.",
+        "chooseSector": "Pumili ng sektor.",
+        "maxTwoSectors": "Pumili ng hindi hihigit sa dalawang sektor.",
+        "exactlyOneSector": "Pumili ng eksaktong isang sektor.",
+        "chooseSignatory": "Pumili ng lumalagda.",
+        "identityRequired": "Kailangan ang patunay ng pagkakakilanlan.",
+        "paymentRequired": "Kailangan ang mga detalye ng bayad."
+      },
+      "fieldLabels": {
+        "validId": "Balidong ID na ipinakita",
+        "idNumber": "Numero ng ID",
+        "placeOfIssue": "Lugar ng pag-isyu",
+        "dateOfIssue": "Petsa ng pag-isyu",
+        "idType": "Uri ng ID",
+        "ctcNumber": "Numero ng CTC",
+        "receiptNo": "Blg. ng opisyal na resibo",
+        "freeOfCharge": "Libre",
+        "dateOfPayment": "Petsa ng bayad",
+        "certifiedBy": "Pinatunayan ni (inisyal)",
+        "purpose": "Layunin",
+        "remarks": "Mga remark",
+        "association": "Asosasyon ng traysikel",
+        "make": "Gawa",
+        "bodyType": "Uri ng katawan",
+        "motorNo": "Blg. ng motor",
+        "color": "Kulay",
+        "plateNo": "Blg. ng plaka",
+        "service": "Serbisyo",
+        "connectionType": "Uri ng koneksyon",
+        "classification": "Klasipikasyon",
+        "location": "Lokasyon",
+        "residingSince": "Naninirahan mula noong",
+        "additionalStatement": "Karagdagang pahayag",
+        "sector": "Sektor",
+        "officeAddressedTo": "Opisinang pinatutungkulan",
+        "requestedBy": "Hiniling ni",
+        "assistanceRequested": "Tulong na hinihiling",
+        "for": "Para kanino",
+        "relationship": "Ugnayan",
+        "name": "Pangalan",
+        "healthCondition": "Kondisyong pangkalusugan",
+        "educationalAttainment": "Natapos na antas ng edukasyon",
+        "course": "Kurso",
+        "jobstart": "Benepisyaryo ng JobStart",
+        "partsToPrint": "Mga bahaging ipi-print",
+        "witness": "Saksi",
+        "transaction": "Transaksyon",
+        "barangayIdNumber": "Numero ng Barangay ID",
+        "validUntil": "Balido hanggang"
+      },
+      "fieldHelp": {
+        "stampBox": "Ipi-print sa kahon ng selyo.",
+        "requestedBy": "Kung may ibang humiling maliban sa residente lamang. Ipi-print pagkatapos ng \"Requested by:\".",
+        "barangayIdNumber": "I-type ang numerong nakaimprenta sa card. Iwanan ito kung ano ang nakikita para manatili ang kasalukuyang numero ng residente."
+      },
+      "options": {
+        "Electric": "Kuryente",
+        "Water": "Tubig",
+        "New": "Bago",
+        "Reconnection": "Muling koneksyon",
+        "Residential": "Residensyal",
+        "Commercial": "Komersyal",
+        "Myself": "Ako mismo",
+        "Someone else": "Ibang tao",
+        "Financial": "Pinansyal",
+        "Medical": "Medikal",
+        "Burial": "Libing",
+        "Yes": "Oo",
+        "No": "Hindi",
+        "Renewal": "Renewal",
+        "Replacement": "Kapalit",
+        "Applicant sheet": "Sheet ng aplikante",
+        "Oath": "Panunumpa",
+        "Certification": "Sertipikasyon",
+        "Elementary": "Elementarya",
+        "Junior High School": "Junior High School",
+        "Senior High School": "Senior High School",
+        "Vocational": "Bokasyonal",
+        "College": "Kolehiyo",
+        "Postgraduate": "Postgraduate"
+      },
+      "controls": {
+        "choose": "Pumili…",
+        "typeToSearch": "Mag-type para maghanap…",
+        "searchChoices": "Hanapin ang mga pagpipilian",
+        "showChoices": "Ipakita ang mga pagpipilian",
+        "noMatch": "Walang tumutugma sa “{{query}}”."
+      },
+      "date": {
+        "choose": "Pumili ng petsa",
+        "previousMonth": "Nakaraang buwan",
+        "nextMonth": "Susunod na buwan",
+        "chooseMonth": "Pumili ng buwan",
+        "today": "Ngayon",
+        "openCalendar": "Buksan ang kalendaryo",
+        "closeCalendar": "Isara ang kalendaryo",
+        "calendar": "Kalendaryo"
+      },
+      "photoCapture": {
+        "removing": "Inaalis ang background. Nananatili ito sa computer na ito.",
+        "fallback": "Hindi maalis ang background. Ginagamit ang orihinal na litrato.",
+        "ready": "Handa na ang litrato. Kumuha muli o mag-upload ng iba kung kailangan.",
+        "prompt": "Gamitin ang camera o mag-upload ng larawan ng mukha ng residente.",
+        "alt": "Residente, ulo at balikat",
+        "retake": "Kumuha muli ng litrato",
+        "take": "Kumuha ng litrato",
+        "upload": "Mag-upload ng litrato",
+        "chooseFile": "Pumili ng file ng larawan",
+        "keepOriginal": "Mukhang mali ang pagkaka-cut-out. Panatilihin ang orihinal na background.",
+        "dialogTitle": "Kumuha ng litrato",
+        "faceCamera": "Ipaharap ang residente sa camera at ilagay ang ulo at balikat sa loob ng frame.",
+        "preview": "Preview ng camera",
+        "starting": "Sinisimulan ang camera…",
+        "removingBackground": "Inaalis ang background…",
+        "camera": "Camera",
+        "cameraN": "Camera {{number}}",
+        "cancel": "Kanselahin",
+        "tryAgain": "Subukan muli",
+        "applying": "Inilalapat ang litrato…",
+        "firstPhotoSlow": "Maaaring tumagal nang ilang segundo ang unang litrato sa araw.",
+        "errors": {
+          "insecure": "Gumagana lang ang camera kapag binuksan ang sistemang ito sa mismong computer (localhost) o sa ligtas na https na address. Pakitanong sa system administrator.",
+          "blocked": "Naka-block ang camera. I-click ang icon ng camera sa tabi ng web address, piliin ang Allow, at subukang muli.",
+          "notFound": "Walang nakitang camera. Tiyaking nakasaksak ang camera, at subukang muli.",
+          "inUse": "Ginagamit ng ibang programa ang camera. Isara ito, at subukang muli.",
+          "generic": "Hindi masimulan ang camera. Pakisubukang muli.",
+          "fileType": "Pumili ng larawang JPG, PNG o WebP.",
+          "cannotOpen": "Hindi mabuksan ang larawang ito. Pumili ng litratong JPG, PNG o WebP.",
+          "tooLarge": "Masyadong malaki ang larawang ito. Pumili ng mas mababa sa 15 MB."
+        }
+      },
+      "complete": "(kumpleto)"
     }
   }
 }

@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react"
+import { useTranslation } from "react-i18next"
 import { formControlClass } from "@/components/Common/formStyles"
 import { formatPaperDate, monthNames } from "@/lib/issuance-format"
 import { cn } from "@/lib/utils"
@@ -114,6 +115,7 @@ function Calendar({
   const [view, setView] = useState<View>(
     startView === "years" && !isIso(value) ? "years" : "days",
   )
+  const { t } = useTranslation()
   const [cursor, setCursor] = useState(() => {
     const date = isoToDate(initial)
     return { year: date.getFullYear(), month: date.getMonth() }
@@ -201,7 +203,7 @@ function Calendar({
     <div className="flex items-center justify-between gap-1 border-b px-2 py-2">
       <button
         type="button"
-        aria-label="Previous month"
+        aria-label={t("issuances.new.date.previousMonth")}
         disabled={view !== "days"}
         onClick={() => shiftMonth(-1)}
         className="flex size-9 items-center justify-center rounded-md hover:bg-muted disabled:invisible"
@@ -234,7 +236,7 @@ function Calendar({
       </div>
       <button
         type="button"
-        aria-label="Next month"
+        aria-label={t("issuances.new.date.nextMonth")}
         disabled={view !== "days"}
         onClick={() => shiftMonth(1)}
         className="flex size-9 items-center justify-center rounded-md hover:bg-muted disabled:invisible"
@@ -285,7 +287,7 @@ function Calendar({
     body = (
       <div>
         <p className="px-3 pt-2 text-xs text-muted-foreground">
-          Choose a month
+          {t("issuances.new.date.chooseMonth")}
         </p>
         <div className="grid grid-cols-3 gap-1 p-2">
           {monthShort.map((name, index) => {
@@ -400,7 +402,7 @@ function Calendar({
             onClick={() => onSelect(today)}
             className="h-9 rounded-md px-3 text-sm font-medium text-brand hover:bg-muted"
           >
-            Today
+            {t("issuances.new.date.today")}
           </button>
         </div>
       ) : null}
@@ -441,10 +443,11 @@ export function DateField({
   describedBy,
   min,
   max,
-  placeholder = "Choose a date",
+  placeholder,
   startView = "days",
   showToday = true,
 }: DateFieldProps) {
+  const { t } = useTranslation()
   const wrapperRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -521,7 +524,7 @@ export function DateField({
         inputMode="text"
         autoComplete="off"
         value={typed ?? display}
-        placeholder={placeholder}
+        placeholder={placeholder ?? t("issuances.new.date.choose")}
         role="combobox"
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -544,7 +547,11 @@ export function DateField({
       <button
         type="button"
         tabIndex={-1}
-        aria-label={open ? "Close calendar" : "Open calendar"}
+        aria-label={
+          open
+            ? t("issuances.new.date.closeCalendar")
+            : t("issuances.new.date.openCalendar")
+        }
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => {
           if (open) setOpen(false)
@@ -562,7 +569,7 @@ export function DateField({
           ref={panelRef}
           id={`${id ?? "date"}-calendar`}
           role="dialog"
-          aria-label="Calendar"
+          aria-label={t("issuances.new.date.calendar")}
           data-popover-open="true"
           onMouseDown={(event) => {
             // Keep the text box focused unless a real control inside needs focus.

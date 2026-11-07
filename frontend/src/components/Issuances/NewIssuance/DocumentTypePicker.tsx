@@ -1,11 +1,9 @@
+import { useTranslation } from "react-i18next"
+import { documentShortName } from "@/lib/issuanceLabels"
 import { cn } from "@/lib/utils"
 import { type DocumentCode, documentConfigList } from "./documentConfig"
 
-const groups = [
-  { category: "clearance", label: "Clearances" },
-  { category: "certification", label: "Certifications" },
-  { category: "id", label: "ID" },
-] as const
+const groups = ["clearance", "certification", "id"] as const
 
 type Props = {
   value: DocumentCode
@@ -14,9 +12,11 @@ type Props = {
 
 /** Plain text choices, grouped in three short rows. One click picks a document. */
 export function DocumentTypePicker({ value, onChange }: Props) {
+  const { t } = useTranslation()
   return (
     <div className="space-y-2">
-      {groups.map(({ category, label }) => {
+      {groups.map((category) => {
+        const label = t(`issuances.new.groups.${category}`)
         const items = documentConfigList.filter(
           (item) => item.category === category,
         )
@@ -54,7 +54,7 @@ export function DocumentTypePicker({ value, onChange }: Props) {
                       onChange={() => onChange(item.code)}
                       className="sr-only"
                     />
-                    {item.shortName}
+                    {documentShortName(item.code, t)}
                   </label>
                 )
               })}

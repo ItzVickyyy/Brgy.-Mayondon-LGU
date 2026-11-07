@@ -1,5 +1,6 @@
 import { Check } from "lucide-react"
 import type { ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 
 type Props = {
@@ -22,6 +23,7 @@ export function IssuanceSection({
   aside,
   children,
 }: Props) {
+  const { t } = useTranslation()
   return (
     <section
       id={id}
@@ -43,7 +45,9 @@ export function IssuanceSection({
         <div className="min-w-0 flex-1">
           <h3 id={`${id}-title`} className="text-base font-semibold leading-8">
             {title}
-            {done ? <span className="sr-only"> (complete)</span> : null}
+            {done ? (
+              <span className="sr-only"> {t("issuances.new.complete")}</span>
+            ) : null}
           </h3>
           {description ? (
             <p className="-mt-1 text-sm text-muted-foreground">{description}</p>

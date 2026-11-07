@@ -743,6 +743,287 @@
         "correctionReason": "Correction reason",
         "voidReason": "Void reason"
       }
+    },
+    "new": {
+      "title": "New Issuance",
+      "description": "Pick the document, find the resident, fill in the details. Everything on one screen.",
+      "documentStep": {
+        "title": "What are you issuing?",
+        "dateOnDocument": "Date on document",
+        "printsOverlay": "Prints on the pre-printed form",
+        "printsFull": "Prints as a full page",
+        "validForYear": "Valid for 1 year",
+        "validForMonths_one": "Valid for {{count}} month",
+        "validForMonths_other": "Valid for {{count}} months",
+        "onePerResident": "One per resident"
+      },
+      "groups": {
+        "clearance": "Clearances",
+        "certification": "Certifications",
+        "id": "ID"
+      },
+      "documents": {
+        "BARANGAY_CLEARANCE": {
+          "name": "Barangay Clearance",
+          "short": "Barangay Clearance",
+          "hint": "Jobs, school, loans"
+        },
+        "FRANCHISE_CLEARANCE": {
+          "name": "Franchise Clearance",
+          "short": "Franchise Clearance",
+          "hint": "Tricycle franchise"
+        },
+        "UTILITY_CLEARANCE": {
+          "name": "Electrical and Water Clearance",
+          "short": "Electrical & Water",
+          "hint": "Utility connection"
+        },
+        "RESIDENCY": {
+          "name": "Certification of Residency",
+          "short": "Residency",
+          "hint": "Proof of residence"
+        },
+        "INDIGENCY": {
+          "name": "Certificate of Indigency",
+          "short": "Indigency",
+          "hint": "Assistance, fee waiver"
+        },
+        "ASSISTANCE": {
+          "name": "Assistance Certification",
+          "short": "Assistance Certification",
+          "hint": "Financial, medical, burial"
+        },
+        "MARGINALIZED_SECTOR": {
+          "name": "Marginalized Sector (Pagpapatunay)",
+          "short": "Marginalized Sector",
+          "hint": "Filipino sector certification"
+        },
+        "FIRST_TIME_JOBSEEKER": {
+          "name": "First-Time Jobseeker",
+          "short": "First-Time Jobseeker",
+          "hint": "First-time job application"
+        },
+        "BARANGAY_ID": {
+          "name": "Barangay ID",
+          "short": "Barangay ID",
+          "hint": "New ID, renewal, replacement"
+        }
+      },
+      "photoStep": {
+        "title": "Photo",
+        "description": "Capture the resident’s photo. It will appear in the photo box automatically.",
+        "label": "Resident's photo"
+      },
+      "detailsStep": {
+        "title": "Document details",
+        "description": "Only the fields this document needs. Red asterisk means required.",
+        "noExtra": "This document needs no extra details.",
+        "signatory": "Signatory",
+        "chooseOfficial": "Choose an official…",
+        "noOfficials": "No officials are configured. The signature line will be left blank.",
+        "chooseWhoSigns": "Please choose who signs this document.",
+        "jobstartNote": "JobStart beneficiary selected. The Punong Barangay will determine eligibility.",
+        "fillIn": "Please fill this in."
+      },
+      "requirementsStep": {
+        "titleWithPayment": "ID presented & payment",
+        "titleIdOnly": "ID presented",
+        "description": "Copy these from the resident's ID and the official receipt.",
+        "proofOfIdentity": "Proof of identity",
+        "payment": "Payment"
+      },
+      "duplicate": "An issued First-Time Jobseeker certificate already exists: {{reference}}, dated {{date}}. An administrator must void it before another can be issued.",
+      "preview": "Preview of what will print",
+      "footer": {
+        "stillNeeded_one": "{{count}} item still needed. Go to next",
+        "stillNeeded_other": "{{count}} items still needed. Go to next",
+        "ready": "Ready to issue",
+        "saving": "Saving draft…",
+        "saved": "Draft saved automatically at {{time}}",
+        "saveError": "The draft could not be saved. What you typed is still here.",
+        "autoWithResident": "Saves as a draft automatically while you type",
+        "autoNoResident": "Saves as a draft automatically once you choose a person",
+        "shortcut": "Ctrl + Enter to issue",
+        "cancel": "Cancel",
+        "saveDraftClose": "Save draft & close",
+        "issueAndPrint": "Issue & print",
+        "savingButton": "Saving…",
+        "issue": "Issue"
+      },
+      "success": {
+        "issued": "Issued: {{reference}}",
+        "saved": "{{document}} for {{resident}} was saved.",
+        "savedNoResident": "{{document}} for the resident was saved.",
+        "print": "Print",
+        "issueAnother": "Issue another for this resident",
+        "done": "Done"
+      },
+      "discard": {
+        "title": "Discard the changes to this issuance?",
+        "withDraft": "A draft is saved automatically. You can keep it and finish later, or throw everything away.",
+        "withoutDraft": "What you typed so far has not been saved. If you leave now, it will be lost.",
+        "keepEditing": "Keep editing",
+        "closeKeepDraft": "Close, keep draft",
+        "discard": "Discard changes"
+      },
+      "changeType": {
+        "title": "Change document type?",
+        "description": "Details entered for the current document will be cleared. The resident and document date will stay.",
+        "confirm": "Change document"
+      },
+      "errors": {
+        "selectResidentDraft": "Select a resident before saving this draft.",
+        "selectResidentIssue": "Select a resident before issuing this document.",
+        "photoFirst": "Please take the resident's photo first. It is in the Photo step.",
+        "fillMissing": "Please fill in the missing details in the yellow box under Who is it for?",
+        "checkRequired": "Check the required fields marked above.",
+        "saveDraft": "Unable to save the draft.",
+        "issue": "Unable to issue this document.",
+        "draftGone": "This draft is no longer available. Refresh Issuance History and try again.",
+        "residentLoad": "The resident linked to this draft could not be loaded.",
+        "draftOpen": "The saved draft could not be opened.",
+        "almostThereOne": "Almost there. One item is still needed. We will take you to the first one.",
+        "almostThere": "Almost there. {{count}} items are still needed. We will take you to the first one."
+      },
+      "validation": {
+        "required": "This field is required.",
+        "isoDate": "Use a valid ISO date (YYYY-MM-DD).",
+        "receiptRequired": "Official receipt number is required unless free of charge.",
+        "beneficiaryName": "Name is required when assistance is for someone else.",
+        "beneficiaryRelationship": "Relationship is required when assistance is for someone else.",
+        "typeMismatch": "Details must match the selected document type.",
+        "purposeRequired": "Purpose is required.",
+        "chooseSector": "Choose a sector.",
+        "maxTwoSectors": "Choose no more than two sectors.",
+        "exactlyOneSector": "Choose exactly one sector.",
+        "chooseSignatory": "Choose a signatory.",
+        "identityRequired": "Proof of identity is required.",
+        "paymentRequired": "Payment details are required."
+      },
+      "fieldLabels": {
+        "validId": "Valid ID presented",
+        "idNumber": "ID number",
+        "placeOfIssue": "Place of issue",
+        "dateOfIssue": "Date of issue",
+        "idType": "ID type",
+        "ctcNumber": "CTC number",
+        "receiptNo": "Official receipt no.",
+        "freeOfCharge": "Free of charge",
+        "dateOfPayment": "Date of payment",
+        "certifiedBy": "Certified by (initials)",
+        "purpose": "Purpose",
+        "remarks": "Remarks",
+        "association": "Tricycle association",
+        "make": "Make",
+        "bodyType": "Type of body",
+        "motorNo": "Motor no.",
+        "color": "Color",
+        "plateNo": "Plate no.",
+        "service": "Service",
+        "connectionType": "Type of connection",
+        "classification": "Classification",
+        "location": "Location",
+        "residingSince": "Residing since",
+        "additionalStatement": "Additional statement",
+        "sector": "Sector",
+        "officeAddressedTo": "Office addressed to",
+        "requestedBy": "Requested by",
+        "assistanceRequested": "Assistance requested",
+        "for": "For",
+        "relationship": "Relationship",
+        "name": "Name",
+        "healthCondition": "Health condition",
+        "educationalAttainment": "Educational attainment",
+        "course": "Course",
+        "jobstart": "JobStart beneficiary",
+        "partsToPrint": "Parts to print",
+        "witness": "Witness",
+        "transaction": "Transaction",
+        "barangayIdNumber": "Barangay ID number",
+        "validUntil": "Valid until"
+      },
+      "fieldHelp": {
+        "stampBox": "Printed in the stamp box.",
+        "requestedBy": "Only if someone other than the resident asked for it. Printed after \"Requested by:\".",
+        "barangayIdNumber": "Type the number printed on the card. Leave it as shown to keep the resident's current number."
+      },
+      "options": {
+        "Electric": "Electric",
+        "Water": "Water",
+        "New": "New",
+        "Reconnection": "Reconnection",
+        "Residential": "Residential",
+        "Commercial": "Commercial",
+        "Myself": "Myself",
+        "Someone else": "Someone else",
+        "Financial": "Financial",
+        "Medical": "Medical",
+        "Burial": "Burial",
+        "Yes": "Yes",
+        "No": "No",
+        "Renewal": "Renewal",
+        "Replacement": "Replacement",
+        "Applicant sheet": "Applicant sheet",
+        "Oath": "Oath",
+        "Certification": "Certification",
+        "Elementary": "Elementary",
+        "Junior High School": "Junior High School",
+        "Senior High School": "Senior High School",
+        "Vocational": "Vocational",
+        "College": "College",
+        "Postgraduate": "Postgraduate"
+      },
+      "controls": {
+        "choose": "Choose…",
+        "typeToSearch": "Type to search…",
+        "searchChoices": "Search the choices",
+        "showChoices": "Show choices",
+        "noMatch": "Nothing matches “{{query}}”."
+      },
+      "date": {
+        "choose": "Choose a date",
+        "previousMonth": "Previous month",
+        "nextMonth": "Next month",
+        "chooseMonth": "Choose a month",
+        "today": "Today",
+        "openCalendar": "Open calendar",
+        "closeCalendar": "Close calendar",
+        "calendar": "Calendar"
+      },
+      "photoCapture": {
+        "removing": "Removing the background. This stays on this computer.",
+        "fallback": "Background could not be removed. Using the original photo.",
+        "ready": "Photo ready. Retake or upload another if needed.",
+        "prompt": "Use the camera or upload a picture of the resident’s face.",
+        "alt": "Resident, head and shoulders",
+        "retake": "Retake photo",
+        "take": "Take photo",
+        "upload": "Upload photo",
+        "chooseFile": "Choose a picture file",
+        "keepOriginal": "The cut-out looks wrong. Keep the original background.",
+        "dialogTitle": "Take a photo",
+        "faceCamera": "Ask the resident to face the camera with the head and shoulders inside the frame.",
+        "preview": "Camera preview",
+        "starting": "Starting the camera…",
+        "removingBackground": "Removing background…",
+        "camera": "Camera",
+        "cameraN": "Camera {{number}}",
+        "cancel": "Cancel",
+        "tryAgain": "Try again",
+        "applying": "Applying photo…",
+        "errors": {
+          "insecure": "The camera only works when this system is opened on the same computer (localhost) or through a secure https address. Please ask the system administrator.",
+          "blocked": "The camera is blocked. Click the camera icon next to the web address, choose Allow, then try again.",
+          "notFound": "No camera was found. Check that the camera is plugged in, then try again.",
+          "inUse": "The camera is being used by another program. Close it, then try again.",
+          "generic": "The camera could not be started. Please try again.",
+          "fileType": "Please choose a JPG, PNG or WebP picture.",
+          "cannotOpen": "This picture could not be opened. Please choose a JPG, PNG or WebP photo.",
+          "tooLarge": "This picture is too large. Please choose one under 15 MB."
+        },
+        "firstPhotoSlow": "The first photo of the day can take a few seconds."
+      },
+      "complete": "(complete)"
     }
   }
 }
