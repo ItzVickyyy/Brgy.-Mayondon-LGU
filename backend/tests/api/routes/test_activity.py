@@ -277,13 +277,22 @@ def test_account_changes_are_logged_without_passwords(
         params={"record_id": uid, "module": "users"},
     )
     assert password not in r.text and new_password not in r.text
-    by_action = {row["action"]: row for row in r.json()["data"]}
+    rows = r.json()["data"]
+    by_action = {row["action"]: row for row in rows}
     assert set(by_action) == {
         "user.create",
+        "user.temp_password_set",
         "user.update",
         "user.role_change",
         "user.delete",
     }
+    # One temporary password at creation and one at the administrator's reset.
+    reasons = sorted(
+        row["details"]["reason"]
+        for row in rows
+        if row["action"] == "user.temp_password_set"
+    )
+    assert reasons == ["account_created", "password_reset"]
     assert by_action["user.create"]["details"] == {"role": "staff"}
     # Field names only; the model also marks is_superuser when the role is set.
     assert set(by_action["user.update"]["details"]["fields"]) >= {"password", "role"}
