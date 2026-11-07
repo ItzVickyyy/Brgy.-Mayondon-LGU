@@ -72,7 +72,7 @@ export const columns: ColumnDef<DataTableFeatures, UserTableData>[] = [
     header: () => <span className="block text-right">Actions</span>,
     cell: ({ row }) => (
       <div className="flex justify-end">
-        <UserActionsMenu user={row.original} />
+        <UserActionsMenu key={row.original.id} user={row.original} />
       </div>
     ),
   },
