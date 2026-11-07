@@ -3267,6 +3267,18 @@ export type issuancesListIssuancesData = {
          */
         resident_id?: string | null;
         /**
+         * Date From
+         *
+         * Only issuances dated on or after this day (issue_date)
+         */
+        date_from?: string | null;
+        /**
+         * Date To
+         *
+         * Only issuances dated on or before this day (issue_date)
+         */
+        date_to?: string | null;
+        /**
          * Skip
          */
         skip?: number;
