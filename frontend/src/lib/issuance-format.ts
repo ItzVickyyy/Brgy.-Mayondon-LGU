@@ -1,3 +1,5 @@
+import { formatLocaleDate } from "@/lib/locale"
+
 export function calculateAge(birthdate: string, asOfDate: string): string {
   if (!birthdate || !asOfDate) return ""
   const birth = new Date(`${birthdate}T00:00:00`)
@@ -29,8 +31,6 @@ export function formatPrintedName(
   const middleInitial = middle ? `${middle.replace(/\./g, "").charAt(0).toUpperCase()}.` : ""
   return [first, middleInitial, last, ext].filter(Boolean).join(" ").toUpperCase()
 }
-
-import { formatLocaleDate } from "@/lib/locale"
 
 export function formatPaperDate(value: string): string {
   if (!value) return ""
