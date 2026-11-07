@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 
 import { type UserCreate, UsersService } from "@/client"
+import { formControlClass } from "@/components/Common/formStyles"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -42,6 +43,7 @@ const formSchema = z
     confirm_password: z
       .string()
       .min(1, { message: "Please confirm your password" }),
+    // Existing API role flag. A pending/rejected workflow needs a separate backend status field.
     is_superuser: z.boolean(),
     is_active: z.boolean(),
   })
@@ -85,13 +87,17 @@ const AddUser = () => {
   })
 
   const onSubmit = (data: FormData) => {
-    mutation.mutate(data)
+    // confirm_password is a client-side validation field, not part of UserCreate.
+    // Keep the API payload limited to fields accepted by the backend schema.
+    const { confirm_password: _confirmPassword, ...userData } = data
+    // is_superuser is the existing API field for the System Administrator role.
+    mutation.mutate(userData)
   }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="my-4">
+        <Button className="min-h-11">
           <Plus className="mr-2" />
           Add User
         </Button>
@@ -106,6 +112,11 @@ const AddUser = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
             <div className="grid gap-4 py-4">
+              <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground">
+                Give this temporary password to the user in person. It is not
+                stored in readable form, and the user must change it at first
+                sign-in.
+              </p>
               <FormField
                 control={form.control}
                 name="email"
@@ -147,7 +158,7 @@ const AddUser = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      Set Password <span className="text-destructive">*</span>
+                      Temporary password <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -188,14 +199,21 @@ const AddUser = () => {
                 control={form.control}
                 name="is_superuser"
                 render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
                     <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <select
+                        className={formControlClass}
+                        value={field.value ? "admin" : "staff"}
+                        onChange={(event) =>
+                          field.onChange(event.target.value === "admin")
+                        }
+                      >
+                        <option value="staff">Staff</option>
+                        <option value="admin">System Administrator</option>
+                      </select>
                     </FormControl>
-                    <FormLabel className="font-normal">Is admin?</FormLabel>
+                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -219,11 +237,11 @@ const AddUser = () => {
 
             <DialogFooter>
               <DialogClose asChild>
-                <Button variant="outline" disabled={mutation.isPending}>
+                <Button variant="outline" className="min-h-11" disabled={mutation.isPending}>
                   Cancel
                 </Button>
               </DialogClose>
-              <LoadingButton type="submit" loading={mutation.isPending}>
+              <LoadingButton className="min-h-11" type="submit" loading={mutation.isPending}>
                 Save
               </LoadingButton>
             </DialogFooter>

@@ -20,6 +20,13 @@ client.setConfig({
 })
 
 const handleApiError = (error: Error) => {
+  if (error instanceof AxiosError) {
+    const responseData = error.response?.data as
+      | { detail?: { code?: string } }
+      | undefined
+    if (responseData?.detail?.code === "password_change_required") return
+  }
+
   if (
     error instanceof AxiosError &&
     [401, 403].includes(error.response?.status ?? 0)

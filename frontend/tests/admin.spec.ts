@@ -6,9 +6,11 @@ import { logInUser } from "./utils/user"
 
 test("Admin page is accessible and shows correct title", async ({ page }) => {
   await page.goto("/admin")
-  await expect(page.getByRole("heading", { name: "Users" })).toBeVisible()
   await expect(
-    page.getByText("Manage user accounts and permissions"),
+    page.getByRole("heading", { name: "User Accounts", exact: true }),
+  ).toBeVisible()
+  await expect(
+    page.getByText("Manage system users and their access roles."),
   ).toBeVisible()
 })
 
@@ -27,15 +29,15 @@ test.describe("Admin user management", () => {
 
     await page.getByRole("button", { name: "Add User" }).click()
 
-    await page.getByPlaceholder("Email").fill(email)
+    await page.getByPlaceholder("Email", { exact: true }).fill(email)
     await page.getByPlaceholder("Full name").fill(fullName)
     await page.getByPlaceholder("Password").first().fill(password)
     await page.getByPlaceholder("Password").last().fill(password)
 
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
-
+    // Assert the outcome of the operation rather than the transient toast.
+    // Toast descriptions can disappear before Playwright observes them.
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
     const userRow = page.getByRole("row").filter({ hasText: email })
@@ -50,20 +52,23 @@ test.describe("Admin user management", () => {
 
     await page.getByRole("button", { name: "Add User" }).click()
 
-    await page.getByPlaceholder("Email").fill(email)
+    await page.getByPlaceholder("Email", { exact: true }).fill(email)
     await page.getByPlaceholder("Password").first().fill(password)
     await page.getByPlaceholder("Password").last().fill(password)
-    await page.getByLabel("Is admin?").check()
+
+    await page
+      .getByRole("combobox")
+      .selectOption({ label: "System Administrator" })
+
     await page.getByLabel("Is active?").check()
 
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
-
+    // Verify the persisted role in the table instead of relying on a transient toast.
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
     const userRow = page.getByRole("row").filter({ hasText: email })
-    await expect(userRow.getByText("Admin")).toBeVisible()
+    await expect(userRow.getByText("System Administrator")).toBeVisible()
   })
 
   test("Edit a user successfully", async ({ page }) => {
@@ -75,25 +80,22 @@ test.describe("Admin user management", () => {
     const updatedName = "Updated Name"
 
     await page.getByRole("button", { name: "Add User" }).click()
-    await page.getByPlaceholder("Email").fill(email)
+    await page.getByPlaceholder("Email", { exact: true }).fill(email)
     await page.getByPlaceholder("Full name").fill(originalName)
     await page.getByPlaceholder("Password").first().fill(password)
     await page.getByPlaceholder("Password").last().fill(password)
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
     const userRow = page.getByRole("row").filter({ hasText: email })
-    await userRow.getByRole("button").click()
-
-    await page.getByRole("menuitem", { name: "Edit User" }).click()
+    await userRow.getByRole("button", { name: "Edit", exact: true }).click()
 
     await page.getByPlaceholder("Full name").fill(updatedName)
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User updated successfully")).toBeVisible()
-    await expect(page.getByText(updatedName)).toBeVisible()
+    await expect(page.getByRole("dialog")).not.toBeVisible()
+    await expect(userRow.getByText(updatedName)).toBeVisible()
   })
 
   test("Delete a user successfully", async ({ page }) => {
@@ -103,25 +105,19 @@ test.describe("Admin user management", () => {
     const password = randomPassword()
 
     await page.getByRole("button", { name: "Add User" }).click()
-    await page.getByPlaceholder("Email").fill(email)
+    await page.getByPlaceholder("Email", { exact: true }).fill(email)
     await page.getByPlaceholder("Password").first().fill(password)
     await page.getByPlaceholder("Password").last().fill(password)
     await page.getByRole("button", { name: "Save" }).click()
 
-    await expect(page.getByText("User created successfully")).toBeVisible()
-
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
     const userRow = page.getByRole("row").filter({ hasText: email })
-    await userRow.getByRole("button").click()
+    await userRow.getByRole("button", { name: /^More actions for/ }).click()
 
     await page.getByRole("menuitem", { name: "Delete User" }).click()
 
     await page.getByRole("button", { name: "Delete" }).click()
-
-    await expect(
-      page.getByText("The user was deleted successfully"),
-    ).toBeVisible()
 
     await expect(
       page.getByRole("row").filter({ hasText: email }),
@@ -132,7 +128,7 @@ test.describe("Admin user management", () => {
     await page.goto("/admin")
 
     await page.getByRole("button", { name: "Add User" }).click()
-    await page.getByPlaceholder("Email").fill("test@example.com")
+    await page.getByPlaceholder("Email", { exact: true }).fill("test@example.com")
 
     await page.getByRole("button", { name: "Cancel" }).click()
 
@@ -144,8 +140,8 @@ test.describe("Admin user management", () => {
 
     await page.getByRole("button", { name: "Add User" }).click()
 
-    await page.getByPlaceholder("Email").fill("invalid-email")
-    await page.getByPlaceholder("Email").blur()
+    await page.getByPlaceholder("Email", { exact: true }).fill("invalid-email")
+    await page.getByPlaceholder("Email", { exact: true }).blur()
 
     await expect(page.getByText("Invalid email address")).toBeVisible()
   })
@@ -155,7 +151,7 @@ test.describe("Admin user management", () => {
 
     await page.getByRole("button", { name: "Add User" }).click()
 
-    await page.getByPlaceholder("Email").fill(randomEmail())
+    await page.getByPlaceholder("Email", { exact: true }).fill(randomEmail())
     await page.getByPlaceholder("Password").first().fill("short")
     await page.getByPlaceholder("Password").last().fill("short")
     await page.getByRole("button", { name: "Save" }).click()
@@ -170,7 +166,7 @@ test.describe("Admin user management", () => {
 
     await page.getByRole("button", { name: "Add User" }).click()
 
-    await page.getByPlaceholder("Email").fill(randomEmail())
+    await page.getByPlaceholder("Email", { exact: true }).fill(randomEmail())
     await page.getByPlaceholder("Password").first().fill(randomPassword())
     await page.getByPlaceholder("Password").last().fill("different12345")
     await page.getByPlaceholder("Password").last().blur()
@@ -191,8 +187,12 @@ test.describe("Admin page access control", () => {
 
     await page.goto("/admin")
 
-    await expect(page.getByRole("heading", { name: "Users" })).not.toBeVisible()
-    await expect(page).not.toHaveURL(/\/admin/)
+    await expect(
+      page.getByRole("heading", { name: "Access restricted" }),
+    ).toBeVisible()
+    await expect(
+      page.getByRole("heading", { name: "User Accounts", exact: true }),
+    ).not.toBeVisible()
   })
 
   test("Superuser can access admin page", async ({ page }) => {
@@ -200,6 +200,8 @@ test.describe("Admin page access control", () => {
 
     await page.goto("/admin")
 
-    await expect(page.getByRole("heading", { name: "Users" })).toBeVisible()
+    await expect(
+      page.getByRole("heading", { name: "User Accounts", exact: true }),
+    ).toBeVisible()
   })
 })

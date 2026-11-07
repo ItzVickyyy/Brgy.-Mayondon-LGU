@@ -4,7 +4,7 @@ Who may do what, the security checklist, and the privacy safeguards for resident
 
 **Read this first:** this is a **checklist and plan, not proof the system is secure.** Record evidence for completed checks and track unresolved risks. Do not tick an item because a feature exists. Passing automated tests means the tested checks passed — nothing more. Undecided items are tagged `(D-xx)`; see [08-Open-Decisions.md](08-Open-Decisions.md).
 
-Last updated: November 5, 2026
+Last updated: November 7, 2026
 
 **Labels:** **Core** applies regardless of client features · **When applicable** only if that feature or deployment model is used · **Before deployment** must be verified on the real hosting/network before real users or data.
 
@@ -21,7 +21,7 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 - **Staff** — routine resident-record and document-issuance work; views and updates the records needed for duties; views their own activity.
 - **System Administrator** — routine work plus user accounts, access, system configuration, reports, backup/restore and administrative review.
 
-**Current implementation:** the API exposes `is_superuser`. The prototype maps System Administrator → `is_superuser = true` and Staff → `false`. This is a **UI/API mapping, not a role enum or a permission system.** A future backend should use a role enum `admin` / `staff` (UI label for `admin`: System Administrator). **Not implemented.**
+**Current implementation (backend):** each account has a `role` of `admin` (UI label: System Administrator) or `staff`, stored in the database with constraints that reject any other value. The legacy `is_superuser` flag is kept for older clients and is always equal to `role = admin` (the database enforces this; the API accepts either field and rejects a conflict). `backend/app/core/permissions.py` holds the role → permission matrix; implemented resident, lookup, official, issuance, activity, dashboard, report and user routes enforce their declared permissions with `require_permission`. The role is read from the database on every request, so a role change or deactivation applies immediately. `LOOKUPS_MANAGE` is admin-only and controls adding, renaming and deleting unused Streets and Tricycle Associations. Backup/restore routes are not implemented; there are no account approval states (D-11). This matrix is still a **proposal, not a client-approved policy (D-10)**.
 
 ### A3. Proposed access matrix
 
@@ -36,9 +36,12 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 | Records Management, Barangay IDs tab: list and view | Allowed | Allowed |
 | Barangay IDs: create, renew, print (done through Issuance Management, ID document type) | Allowed | Allowed |
 | Records Management, Barangay IDs: override validity rules | No | Allowed |
+| Marginalized Sector health condition (value) | Allowed on the single record only; masked in lists; each read is audited | Same |
 | Activity Log | Own activity | All users, with filters |
 | My Account, User Settings | Allowed | Allowed |
 | Officials, User Accounts | No | Allowed |
+| Streets and Tricycle Associations lists (add, rename, remove if unused; `LOOKUPS_MANAGE`) | No | Allowed |
+| Lookup lists and officials list (read, for the forms) | Allowed | Allowed |
 | Management Reports | No | Allowed |
 | Backup and Restore | No; manual-backup permission to confirm | Allowed |
 
@@ -48,16 +51,20 @@ If the client keeps "six accounts, full access", still review whether deletion, 
 
 No account `status` column is planned. Accounts are created only by the System Administrator, so there is no pending or rejected state (D-11, decided Nov 7, 2026). The existing `is_active` boolean is enough to disable an account. `/users/signup` stays disabled (`USERS_OPEN_REGISTRATION=False`). Do not add approval endpoints.
 
-### A5. Audit history (planned, not implemented)
+### A5. Audit history (design settled Nov 5, 2026; not implemented)
 
 Append-only history for sensitive actions: who, when, affected record, reason where required. Ordinary users cannot rewrite or delete entries; any retention/cleanup must be explicitly controlled and documented. Never log passwords, tokens, reset links or unnecessary resident data **(D-24)**.
 
+Design: an `audit_log` table whose rows cannot be updated or deleted (a database trigger rejects it), written in the same transaction as the change it records. The actor's email is copied into the row so history survives account changes. Columns are in [09](09-Issuance-Form-Data-Map.md). Reading the Marginalized Sector health condition is itself an audited action.
+
 ### A6. Account lifecycle
 
+- The system cannot be left without an administrator: the API refuses to demote, deactivate or delete the last active admin.
+- A first Staff account can be provisioned the same way with `FIRST_STAFF` and `FIRST_STAFF_PASSWORD` in `.env` (both or neither; created only if missing, never overwritten).
 - First administrator is provisioned through controlled initial setup (`FIRST_SUPERUSER` in `.env`). There is **no public sign-up**; an admin creates accounts. The User Accounts table shows whatever the database holds, including this seeded account; it is deployment data, not code. **Before real use, create a real admin in User Accounts, then delete the seed account** (the app refuses to delete the last active admin).
 - Use **individual** accounts, not shared ones.
-- Disable access when staff leave or no longer need it, while preserving required issuance history.
-- Account setup and password reset by email **will not work offline** (no SMTP). The local procedure is implemented (owner decision, Nov 7, 2026, **D-12**): the System Administrator sets a temporary password in User Accounts and gives it to the user in person. The user can sign in, but every protected page and API operation is refused until the password is changed; only reading the user's own account and changing their own password are allowed. After a successful change, the user is signed out and must sign in again. The Activity Log records `user.temp_password_set` and `user.password_change` without storing the password. No email and no recovery codes. This is an owner decision, not client approval.
+- Disable access when staff leave or no longer need it, while preserving required issuance history. Once records exist, an account that issued a document **cannot be deleted** (the API will answer 409); deactivate it instead. This applies when the issuance tables are built.
+- Account setup and password reset by email **will not work offline** (no SMTP). The local procedure is decided (owner decision, Nov 7, 2026, **D-12**): the System Administrator sets a temporary password in User Accounts, gives it to the user in person, and the user must change it at next sign-in. No email and no recovery codes. The forced-change step is not built yet.
 - Only the System Administrator creates, disables or re-enables accounts **(D-11)**. Who holds that role in the barangay office is still for the client to name.
 
 ---
@@ -170,4 +177,4 @@ These are **requirements to implement and verify, not claims that they exist.**
 
 ## Part E. Verification status
 
-**Current status: PENDING.** The hosting design changed on Oct 25 from Vercel + Supabase to a local Docker + PostgreSQL deployment on the office LAN, so the old Vercel/Supabase verification items **no longer apply** and have been removed from this checklist. What remains open is verification of the **actual LAN deployment** — see the acceptance checklist in [06-Architecture-and-Deployment.md](06-Architecture-and-Deployment.md). The team agreed (Oct 18) to pause further security code changes until the real hosting setup can be inspected; role/status/audit work is therefore **planned, not started** **(D-39)**.
+**Current status: PENDING.** The hosting design changed on Oct 25 from Vercel + Supabase to a local Docker + PostgreSQL deployment on the office LAN, so the old Vercel/Supabase verification items **no longer apply** and have been removed from this checklist. What remains open is verification of the **actual LAN deployment** — see the acceptance checklist in [06-Architecture-and-Deployment.md](06-Architecture-and-Deployment.md). The team agreed (Oct 18) to pause further security code changes until the real hosting setup can be inspected; `role` is now implemented and tested through the API; an append-only audit history remains **planned, not started** (no account `status`: D-11) **(D-39)**.

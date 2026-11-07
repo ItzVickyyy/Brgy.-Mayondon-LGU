@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 from pydantic import ValidationError
 
@@ -28,6 +30,48 @@ def test_warns_about_short_secret_key_in_development() -> None:
         settings = make_settings(SECRET_KEY="short-secret", FASTAPI_ENV="development")
 
     assert settings.SECRET_KEY == "short-secret"
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"SECRET_KEY": "replace-with-a-random-secret-at-least-32-bytes"},
+        {"FIRST_SUPERUSER_PASSWORD": "replace-with-a-strong-local-password"},
+        {
+            "DATABASE_URL": "postgresql://postgres:replace-with-a-strong-database-password@localhost:5432/app"
+        },
+        {"FIRST_SUPERUSER_PASSWORD": "changethis"},
+    ],
+)
+def test_rejects_placeholder_secrets_outside_development(
+    overrides: dict[str, object],
+) -> None:
+    with pytest.raises(ValidationError, match="still a placeholder"):
+        make_settings(**overrides)
+
+
+def test_warns_about_placeholder_secrets_in_development() -> None:
+    with pytest.warns(UserWarning, match="still a placeholder"):
+        make_settings(
+            FASTAPI_ENV="development",
+            FIRST_SUPERUSER_PASSWORD="replace-with-a-strong-local-password",
+        )
+
+
+def test_the_shipped_env_example_is_refused_outside_development() -> None:
+    values = dict(
+        line.split("=", 1)
+        for line in (Path(__file__).parents[2] / ".env.example")
+        .read_text(encoding="utf-8")
+        .splitlines()
+        if line and not line.startswith("#") and "=" in line
+    )
+    with pytest.raises(ValidationError, match="still a placeholder"):
+        make_settings(
+            SECRET_KEY=values["SECRET_KEY"],
+            FIRST_SUPERUSER_PASSWORD=values["FIRST_SUPERUSER_PASSWORD"],
+            DATABASE_URL=values["DATABASE_URL"],
+        )
 
 
 def test_accepts_secret_key_of_at_least_32_bytes() -> None:

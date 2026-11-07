@@ -1,0 +1,119 @@
+import { expect, test } from "@playwright/test"
+
+test("Dashboard page is accessible", async ({ page }) => {
+  await page.goto("/")
+  await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible()
+  await expect(
+    page.getByText(
+      "An overview of document issuance, upcoming expiries, and work requiring attention.",
+    ),
+  ).toBeVisible()
+})
+
+test("Issuances Management page is accessible", async ({ page }) => {
+  await page.goto("/issuances")
+  await expect(
+    page.getByRole("heading", { name: "Issuance Management" }),
+  ).toBeVisible()
+})
+
+test("Records Management page starts with an empty resident list", async ({
+  page,
+}) => {
+  await page.goto("/records")
+  await expect(
+    page.getByRole("heading", { name: "Records Management" }),
+  ).toBeVisible()
+  await expect(page.getByText("No matching residents")).toBeVisible()
+
+  const search = page.getByPlaceholder("Search name, address, or ID number...")
+  await search.fill("Resident One")
+  await expect(page.getByText("No matching residents")).toBeVisible()
+})
+
+test("Records Management search filters results", async ({ page }) => {
+  await page.goto("/records")
+  await page
+    .getByPlaceholder("Search name, address, or ID number...")
+    .fill("no-record-matches-this")
+  await expect(page.getByText("Resident One")).not.toBeVisible()
+})
+
+test("Officials page starts with an empty officials list", async ({ page }) => {
+  await page.goto("/officials")
+  await expect(
+    page.getByRole("heading", { name: "Officials", exact: true }),
+  ).toBeVisible()
+  await expect(page.getByText("No matching officials")).toBeVisible()
+})
+
+test("Officials search filters results", async ({ page }) => {
+  await page.goto("/officials")
+  await page
+    .getByPlaceholder("Search name or position")
+    .fill("no-official-matches-this")
+  await expect(page.getByText("No matching officials")).toBeVisible()
+})
+
+test("Dashboard uses document-focused summary cards without a data badge", async ({
+  page,
+}) => {
+  await page.goto("/")
+  await expect(page.getByText("Documents Issued This Month")).toBeVisible()
+  await expect(page.getByText("Clearances Expiring in 30 Days")).toBeVisible()
+  await expect(page.getByText("Barangay IDs Expiring in 30 Days")).toBeVisible()
+  await expect(page.getByText("Sample Data")).toHaveCount(0)
+})
+
+test("Barangay IDs route redirects to the Records Management ID tab", async ({
+  page,
+}) => {
+  await page.goto("/barangay-ids")
+  await expect(page).toHaveURL(/\/records\?view=barangay-ids/)
+  await expect(
+    page.getByRole("heading", { name: "Records Management" }),
+  ).toBeVisible()
+  await expect(page.getByRole("tab", { name: "Barangay IDs" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  )
+  await expect(page.getByText("No ID records match your search")).toBeVisible()
+})
+
+test("User account form offers Staff and System Administrator roles", async ({
+  page,
+}) => {
+  await page.goto("/admin")
+  await page.getByRole("button", { name: "Add User" }).click()
+  const role = page.getByLabel("Role", { exact: true })
+  await expect(role).toBeVisible()
+  await expect(role.locator("option")).toHaveText([
+    "Staff",
+    "System Administrator",
+  ])
+})
+
+test("Application pages do not display sample or prototype notices", async ({
+  page,
+}) => {
+  const routes = [
+    "/",
+    "/records",
+    "/issuances",
+    "/barangay-ids",
+    "/officials",
+    "/activity-log",
+    "/admin",
+    "/reports",
+    "/backup-restore",
+    "/login",
+  ]
+
+  for (const route of routes) {
+    await page.goto(route)
+    await expect(
+      page.getByText(/sample|prototype/i),
+      `Unexpected sample or prototype notice on ${route}`,
+    ).toHaveCount(0)
+  }
+})

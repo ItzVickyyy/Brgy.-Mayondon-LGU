@@ -2,29 +2,32 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlmodel import col, delete, func, select
+from sqlmodel import col, func, select
 
 from app import crud
 from app.api.deps import (
     CurrentUser,
+    CurrentUserAllowTemporary,
     SessionDep,
-    require_admin,
+    require_permission,
 )
-from app.core.audit import record_admin_action
+from app.core.audit import record_admin_action, record_audit_event
 from app.core.config import settings
+from app.core.permissions import Permission, has_permission, is_admin
 from app.core.security import get_password_hash, verify_password
 from app.models import (
-    Item,
     Message,
     UpdatePassword,
     User,
     UserCreate,
     UserPublic,
     UserRegister,
+    UserRole,
     UsersPublic,
     UserUpdate,
     UserUpdateMe,
 )
+from app.models_issuance import Issuance
 from app.utils import (
     generate_new_account_email,
     generate_password_reset_token,
@@ -33,10 +36,13 @@ from app.utils import (
 
 router = APIRouter(prefix="/users", tags=["users"])
 
+# Every account-management endpoint below requires this permission (admin only).
+require_user_admin = require_permission(Permission.USERS_MANAGE)
+
 
 @router.get(
     "/",
-    dependencies=[Depends(require_admin)],
+    dependencies=[Depends(require_user_admin)],
     response_model=UsersPublic,
 )
 def read_users(
@@ -61,7 +67,7 @@ def read_users(
 
 
 @router.post(
-    "/", dependencies=[Depends(require_admin)], response_model=UserPublic
+    "/", dependencies=[Depends(require_user_admin)], response_model=UserPublic
 )
 def create_user(*, session: SessionDep, user_in: UserCreate, current_user: CurrentUser) -> Any:
     """
@@ -74,8 +80,27 @@ def create_user(*, session: SessionDep, user_in: UserCreate, current_user: Curre
             detail="The user with this email already exists in the system.",
         )
 
-    user = crud.create_user(session=session, user_create=user_in)
+    user = crud.create_user(session=session, user_create=user_in, temporary=True)
     record_admin_action(actor_id=current_user.id, action="user.create", target_type="user", target_id=user.id)
+    record_audit_event(
+        session,
+        action="user.create",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=user.id,
+        details={"role": str(user.role)},
+    )
+    record_audit_event(
+        session,
+        action="user.temp_password_set",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=user.id,
+        details={"reason": "account_created"},
+        commit=True,
+    )
     if settings.emails_enabled and user_in.email:
         setup_token = generate_password_reset_token(
             email=user.email, hashed_password=user.hashed_password
@@ -108,6 +133,15 @@ def update_user_me(
     user_data = user_in.model_dump(exclude_unset=True)
     current_user.sqlmodel_update(user_data)
     session.add(current_user)
+    record_audit_event(
+        session,
+        action="user.update_self",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=current_user.id,
+        details={"fields": sorted(user_data)},
+    )
     session.commit()
     session.refresh(current_user)
     return current_user
@@ -115,7 +149,7 @@ def update_user_me(
 
 @router.patch("/me/password", response_model=Message)
 def update_password_me(
-    *, session: SessionDep, body: UpdatePassword, current_user: CurrentUser
+    *, session: SessionDep, body: UpdatePassword, current_user: CurrentUserAllowTemporary
 ) -> Any:
     """
     Update own password.
@@ -129,20 +163,43 @@ def update_password_me(
         )
     hashed_password = get_password_hash(body.new_password)
     current_user.hashed_password = hashed_password
+    replaced_temporary = current_user.must_change_password
+    current_user.must_change_password = False
     # A password change releases any failed-login lockout for this account.
     current_user.failed_login_attempts = 0
     current_user.locked_until = None
     session.add(current_user)
+    record_audit_event(
+        session,
+        action="user.password_change",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=current_user.id,
+        details={"replaced_temporary": True} if replaced_temporary else None,
+    )
     session.commit()
     return Message(message="Password updated successfully")
 
 
 @router.get("/me", response_model=UserPublic)
-def read_user_me(current_user: CurrentUser) -> Any:
+def read_user_me(current_user: CurrentUserAllowTemporary) -> Any:
     """
     Get current user.
     """
     return current_user
+
+
+def _require_no_issued_documents(session: SessionDep, user: User) -> None:
+    """An account that issued documents is deactivated, never deleted (decision 24)."""
+    if session.exec(
+        select(Issuance.id).where(Issuance.issued_by_user_id == user.id).limit(1)
+    ).first():
+        raise HTTPException(
+            status_code=409,
+            detail="This account has issued documents, so it cannot be deleted. "
+            "Deactivate it instead.",
+        )
 
 
 @router.delete("/me", response_model=Message)
@@ -150,10 +207,21 @@ def delete_user_me(session: SessionDep, current_user: CurrentUser) -> Any:
     """
     Delete own user.
     """
-    if current_user.is_superuser:
+    if is_admin(current_user):
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
+    _require_no_issued_documents(session, current_user)
+    # Same transaction as the delete: the actor link becomes NULL afterwards,
+    # and the email stays in the row.
+    record_audit_event(
+        session,
+        action="user.delete_self",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=current_user.id,
+    )
     session.delete(current_user)
     session.commit()
     return Message(message="User deleted successfully")
@@ -190,7 +258,7 @@ def read_user_by_id(
     user = session.get(User, user_id)
     if user == current_user:
         return user
-    if not current_user.is_superuser:
+    if not has_permission(current_user, Permission.USERS_MANAGE):
         raise HTTPException(
             status_code=403,
             detail="The user doesn't have enough privileges",
@@ -202,7 +270,7 @@ def read_user_by_id(
 
 @router.patch(
     "/{user_id}",
-    dependencies=[Depends(require_admin)],
+    dependencies=[Depends(require_user_admin)],
     response_model=UserPublic,
 )
 def update_user(
@@ -229,12 +297,65 @@ def update_user(
                 status_code=409, detail="User with this email already exists"
             )
 
-    db_user = crud.update_user(session=session, db_user=db_user, user_in=user_in)
+    previous_role = db_user.role
+    loses_admin = user_in.is_active is False or (
+        user_in.role is not None and user_in.role != UserRole.admin
+    )
+    if loses_admin and crud.is_last_active_admin(session=session, user=db_user):
+        raise HTTPException(
+            status_code=400,
+            detail="At least one active System Administrator must remain.",
+        )
+
+    changed_fields = sorted(user_in.model_dump(exclude_unset=True))
+    # A password an administrator types for ANOTHER account is temporary.
+    temporary = bool(user_in.password) and db_user.id != current_user.id
+    if temporary:
+        verified, _ = verify_password(user_in.password, db_user.hashed_password)
+        if verified:
+            raise HTTPException(
+                status_code=400,
+                detail="The temporary password must differ from the current one.",
+            )
+    db_user = crud.update_user(
+        session=session, db_user=db_user, user_in=user_in, temporary=temporary
+    )
     record_admin_action(actor_id=current_user.id, action="user.update", target_type="user", target_id=db_user.id)
+    record_audit_event(
+        session,
+        action="user.update",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=db_user.id,
+        details={"fields": changed_fields},
+    )
+    if temporary:
+        record_audit_event(
+            session,
+            action="user.temp_password_set",
+            actor=current_user,
+            module="users",
+            record_type="user",
+            record_id=db_user.id,
+            details={"reason": "password_reset"},
+        )
+    if db_user.role != previous_role:
+        record_admin_action(actor_id=current_user.id, action="user.role_change", target_type="user", target_id=db_user.id)
+        record_audit_event(
+            session,
+            action="user.role_change",
+            actor=current_user,
+            module="users",
+            record_type="user",
+            record_id=db_user.id,
+            details={"from": str(previous_role), "to": str(db_user.role)},
+        )
+    session.commit()
     return db_user
 
 
-@router.delete("/{user_id}", dependencies=[Depends(require_admin)])
+@router.delete("/{user_id}", dependencies=[Depends(require_user_admin)])
 def delete_user(
     session: SessionDep, current_user: CurrentUser, user_id: uuid.UUID
 ) -> Message:
@@ -248,8 +369,20 @@ def delete_user(
         raise HTTPException(
             status_code=403, detail="Super users are not allowed to delete themselves"
         )
-    statement = delete(Item).where(col(Item.owner_id) == user_id)
-    session.exec(statement)
+    if crud.is_last_active_admin(session=session, user=user):
+        raise HTTPException(
+            status_code=400,
+            detail="At least one active System Administrator must remain.",
+        )
+    _require_no_issued_documents(session, user)
+    record_audit_event(
+        session,
+        action="user.delete",
+        actor=current_user,
+        module="users",
+        record_type="user",
+        record_id=user_id,
+    )
     session.delete(user)
     session.commit()
     record_admin_action(actor_id=current_user.id, action="user.delete", target_type="user", target_id=user_id)

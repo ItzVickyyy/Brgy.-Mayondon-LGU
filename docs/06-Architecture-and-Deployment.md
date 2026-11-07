@@ -166,13 +166,18 @@ Scripts (run from the repo root with Compose running):
 
 # Restore: first make a fresh backup of the current database, then restore the chosen dump
 .\scripts\backup-db.ps1
-.\scripts\restore-db.ps1 -BackupFile ".\backups\mayondon-db-YYYYMMDD-HHMMSS.dump"
+.\scripts\restore-db.ps1 -BackupFile ".\backups\mayondon-db-YYYYMMDD-HHMMSS-fff.dump"
+
+# Verify backup and restore using a temporary database, never the app database
+.\scripts\test-backup-restore.ps1
 ```
 
 The backup script creates a timestamped PostgreSQL custom-format dump in `backups\`, copies it out of the container and removes the temporary copy. `backups\` is git-ignored because dumps may contain resident data. The restore script requires typing `RESTORE`, verifies PostgreSQL can read the archive **before** stopping the backend, uses `pg_restore --exit-on-error`, and restarts the backend only after success. After a restore, verify login, representative records, document generation and main workflows; do not assume success because the command finished. Use only a backup from a compatible application/database version.
 
+The PowerShell smoke test creates a uniquely named temporary database, inserts a test value, creates a dump, changes the value, restores the dump, and verifies that the original value returns. It then removes the temporary database and test dump. It never targets the application database. The Docker Compose CI workflow runs this test against a real PostgreSQL container. Run it on the intended Windows host before accepting the backup procedure. The restore script's optional `-Confirmation RESTORE` argument is intended for automated tests. Normal manual restores continue to prompt for confirmation.
+
 **Gaps vs the Creative Brief:**
-- The brief requires **scheduled and manual** backups to an **external drive**. Only manual scripts exist; **scheduling (e.g. Windows Task Scheduler) is not built**, and neither the scripts nor a restore have been executed on Windows.
+- The brief requires **scheduled and manual** backups to an **external drive**. Only manual scripts exist; **scheduling (e.g. Windows Task Scheduler) is not built**, and the scripts still need to be executed on the intended Windows host. The PowerShell dump/restore path is now exercised in CI against a real PostgreSQL container, but that does not replace Windows-host verification.
 - The Admin "Backup and Restore" screen is a design concept and runs nothing.
 - Needed: frequency, external-drive custody, retention, protection of backup files, restore responsibility, and a recorded recovery test **(D-35)**. A backup that stays only on the host does not survive disk failure, theft, ransomware or accidental deletion.
 

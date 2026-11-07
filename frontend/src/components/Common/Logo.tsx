@@ -22,7 +22,7 @@ function Mark({ className }: { className?: string }) {
     )
   }
   return (
-    <Landmark aria-hidden className={cn("size-6 text-primary", className)} />
+    <Landmark aria-hidden className={cn("size-6 text-brand", className)} />
   )
 }
 
