@@ -14,6 +14,7 @@ import {
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
+import DeleteUser from "./DeleteUser"
 import EditUser from "./EditUser"
 
 type UserActionData = UserPublic & {
@@ -75,6 +76,7 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DeleteUser id={user.id} onSuccess={() => setOpen(false)} />
             <DropdownMenuItem
               disabled={user.is_active && user.isLastActiveAdmin}
               title={
