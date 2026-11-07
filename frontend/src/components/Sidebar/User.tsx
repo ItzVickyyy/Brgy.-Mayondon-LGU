@@ -1,97 +1,209 @@
-import { Link as RouterLink } from "@tanstack/react-router"
-import { ChevronsUpDown, LogOut, Settings } from "lucide-react"
-
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import {
+  Check,
+  CircleHelp,
+  Info,
+  Languages,
+  LogOut,
+  UserRound,
+} from "lucide-react"
+import { useState } from "react"
+import {
+  HelpDialog,
+  LearnMoreDialog,
+} from "@/components/Common/InfoDialogs"
+import { MyAccountModal } from "@/components/Settings/MyAccountModal"
+import { Button } from "@/components/ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  useSidebar,
-} from "@/components/ui/sidebar"
+import { useSidebar } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
-import { getInitials } from "@/utils"
 
-interface UserInfoProps {
-  fullName?: string
-  email?: string
-}
-
-function UserInfo({ fullName, email }: UserInfoProps) {
-  return (
-    <div className="flex items-center gap-2.5 w-full min-w-0">
-      <Avatar className="size-8">
-        <AvatarFallback className="bg-zinc-600 text-white">
-          {getInitials(fullName || "User")}
-        </AvatarFallback>
-      </Avatar>
-      <div className="flex flex-col items-start min-w-0">
-        <p className="text-sm font-medium truncate w-full">{fullName}</p>
-        <p className="text-xs text-muted-foreground truncate w-full">{email}</p>
-      </div>
-    </div>
-  )
-}
-
-export function User({ user }: { user: any }) {
+export function User({
+  user,
+  compact = false,
+}: {
+  user: any
+  compact?: boolean
+}) {
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
+  const [accountOpen, setAccountOpen] = useState(false)
+  const [selectedLanguage, setSelectedLanguage] = useState<
+    "English" | "Filipino"
+  >("English")
+  const [logoutOpen, setLogoutOpen] = useState(false)
+  const [helpOpen, setHelpOpen] = useState(false)
+  const [learnOpen, setLearnOpen] = useState(false)
 
   if (!user) return null
 
   const handleMenuClick = () => {
-    if (isMobile) {
-      setOpenMobile(false)
-    }
-  }
-  const handleLogout = async () => {
-    logout()
+    if (isMobile) setOpenMobile(false)
   }
 
   return (
-    <SidebarMenu>
-      <SidebarMenuItem>
+    <>
+      <div
+        className={
+          compact
+            ? "w-auto min-w-0"
+            : "w-full px-2 group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:w-8 group-data-[collapsible=icon]:px-0"
+        }
+      >
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton
-              size="lg"
-              className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-              data-testid="user-menu"
+            <Button
+              variant="ghost"
+              className={
+                compact
+                  ? "min-h-11 w-auto max-w-[280px] min-w-0 justify-start gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted/70"
+                  : "h-auto w-full min-w-0 justify-start gap-2 rounded-lg px-2 py-2 text-left group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:min-w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
+              }
+              aria-label="User menu"
+              title={user?.full_name || user?.email || "User menu"}
             >
-              <UserInfo fullName={user?.full_name} email={user?.email} />
-              <ChevronsUpDown className="ml-auto size-4 text-muted-foreground" />
-            </SidebarMenuButton>
+              <span className="flex size-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-brand/20 bg-brand/10 text-brand">
+                {user?.profile_photo_url ? (
+                  <img
+                    src={user.profile_photo_url}
+                    alt=""
+                    className="size-full object-cover"
+                  />
+                ) : (
+                  <UserRound className="size-4" />
+                )}
+              </span>
+              <span
+                className={
+                  compact
+                    ? "min-w-0 flex-1"
+                    : "min-w-0 flex-1 group-data-[collapsible=icon]:hidden"
+                }
+              >
+                <span className="block truncate text-sm font-medium">
+                  {user?.full_name || user?.email || "User"}
+                </span>
+                <span className="block truncate text-xs font-normal text-muted-foreground">
+                  {user?.email || ""}
+                </span>
+              </span>
+            </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
-            side={isMobile ? "bottom" : "right"}
-            align="end"
-            sideOffset={4}
+            className="w-56"
+            side={compact ? "bottom" : "top"}
+            align={compact ? "end" : "start"}
+            sideOffset={8}
           >
-            <DropdownMenuLabel className="p-0 font-normal">
-              <UserInfo fullName={user?.full_name} email={user?.email} />
-            </DropdownMenuLabel>
+            <DropdownMenuItem onSelect={() => setAccountOpen(true)}>
+              <UserRound className="size-4" />
+              My Account
+            </DropdownMenuItem>
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger className="gap-2 data-[state=open]:text-foreground">
+                <Languages className="size-4 text-muted-foreground" />
+                Language
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-44">
+                {(["English", "Filipino"] as const).map((language) => {
+                  const selected = selectedLanguage === language
+                  return (
+                    <DropdownMenuItem
+                      key={language}
+                      onSelect={() => setSelectedLanguage(language)}
+                      className="gap-2 px-3 py-2"
+                    >
+                      <span className="flex-1">{language}</span>
+                      {selected ? (
+                        <Check className="size-4 text-brand" />
+                      ) : null}
+                    </DropdownMenuItem>
+                  )
+                })}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
             <DropdownMenuSeparator />
-            <RouterLink to="/settings" onClick={handleMenuClick}>
-              <DropdownMenuItem>
-                <Settings />
-                User Settings
-              </DropdownMenuItem>
-            </RouterLink>
-            <DropdownMenuItem onClick={handleLogout}>
-              <LogOut />
-              Log Out
+            <DropdownMenuItem
+              onSelect={() => {
+                handleMenuClick()
+                setHelpOpen(true)
+              }}
+            >
+              <CircleHelp className="size-4" />
+              Get help
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={() => {
+                handleMenuClick()
+                setLearnOpen(true)
+              }}
+            >
+              <Info className="size-4" />
+              Learn more
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onSelect={() => {
+                handleMenuClick()
+                setLogoutOpen(true)
+              }}
+            >
+              <LogOut className="size-4" />
+              Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      </SidebarMenuItem>
-    </SidebarMenu>
+      </div>
+      <MyAccountModal
+        open={accountOpen}
+        onOpenChange={setAccountOpen}
+        user={user}
+      />
+      <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
+      <LearnMoreDialog open={learnOpen} onOpenChange={setLearnOpen} />
+      <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Log out?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Are you sure you want to log out of your account?
+          </p>
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setLogoutOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={() => {
+                setLogoutOpen(false)
+                void logout()
+              }}
+            >
+              Log out
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

@@ -8,17 +8,36 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="bg-muted dark:bg-zinc-900 relative hidden lg:flex lg:items-center lg:justify-center">
-        <Logo variant="full" className="h-16" asLink={false} />
+    <div className="relative flex min-h-svh flex-col overflow-hidden bg-background">
+      <div className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
+        <Appearance />
       </div>
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-end">
-          <Appearance />
+
+      <main className="flex flex-1 items-center justify-center px-4 pb-10 pt-20 sm:px-6 sm:py-12">
+        <div className="w-full max-w-md">
+          <header className="mb-8 flex flex-col items-center gap-3 text-center">
+            <Logo
+              variant="icon"
+              className="size-28 sm:size-32"
+              asLink={false}
+            />
+            <div className="space-y-1">
+              <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
+                Brgy. Mayondon
+              </h2>
+              <p className="text-base text-muted-foreground">
+                Los Baños, Laguna
+              </p>
+            </div>
+          </header>
+
+          <section className="rounded-xl border bg-card p-6 shadow-sm sm:p-8">
+            {children}
+          </section>
         </div>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">{children}</div>
-        </div>
+      </main>
+
+      <div className="px-4 pb-4 sm:px-6">
         <Footer />
       </div>
     </div>

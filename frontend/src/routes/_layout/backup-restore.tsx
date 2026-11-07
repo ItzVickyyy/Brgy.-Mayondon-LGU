@@ -1,0 +1,472 @@
+import { createFileRoute } from "@tanstack/react-router"
+import {
+  CheckCircle2,
+  Clock3,
+  DatabaseBackup,
+  HardDriveDownload,
+  RotateCcw,
+  ShieldCheck,
+  X,
+} from "lucide-react"
+import { useState } from "react"
+
+import { EmptyState } from "@/components/Common/FeedbackState"
+import { formControlClass } from "@/components/Common/formStyles"
+import { NoPermission } from "@/components/Common/NoPermission"
+import { RowActions } from "@/components/Common/RowActions"
+import { statusStyles } from "@/components/Common/statusStyles"
+import {
+  TablePagination,
+  usePagination,
+} from "@/components/Common/TablePagination"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { pageTitle } from "@/config/site"
+import useAuth from "@/hooks/useAuth"
+import { isSystemAdministrator } from "@/lib/access"
+
+export const Route = createFileRoute("/_layout/backup-restore")({
+  component: BackupRestore,
+  head: () => ({ meta: [{ title: pageTitle("Backup and Restore") }] }),
+})
+
+type BackupStatus = "Verified" | "Not checked" | "Failed"
+
+type BackupRecord = {
+  name: string
+  createdAt: string
+  date: string
+  type: "Scheduled" | "Manual"
+  createdBy?: string
+  size: string
+  location: "External drive" | "This computer only"
+  status: BackupStatus
+  failureReason?: string
+}
+
+const sampleBackups: BackupRecord[] = []
+
+function BackupRestore() {
+  const { user } = useAuth()
+  const [notice, setNotice] = useState("")
+  const backups = sampleBackups
+  const [confirmRestore, setConfirmRestore] = useState(false)
+  const [selectedBackup, setSelectedBackup] = useState("")
+  const [restoreConfirmation, setRestoreConfirmation] = useState("")
+
+  const sortedBackups = [...backups].sort((a, b) =>
+    b.createdAt.localeCompare(a.createdAt),
+  )
+  const backupPagination = usePagination(sortedBackups, 10, backups.length)
+  const latestBackup = sortedBackups[0]
+  const daysSinceLatest = latestBackup
+    ? Math.max(
+        0,
+        Math.floor(
+          (Date.now() - new Date(latestBackup.createdAt).getTime()) / 86400000,
+        ),
+      )
+    : null
+
+  if (!isSystemAdministrator(user)) return <NoPermission />
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+            Backup and Restore
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Protect the barangay's local records and recover from data loss.
+          </p>
+        </div>
+      </div>
+
+      <div
+        role="status"
+        className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+      >
+        <p className="font-medium">
+          Backups cannot be created or restored from this screen yet. The
+          buttons here do not back up any data.
+        </p>
+        <p className="mt-1">
+          To back up the database now, open PowerShell in the project folder and
+          run <code className="font-mono">.\scripts\backup-db.ps1</code>. The
+          file is saved in the <code className="font-mono">backups</code>{" "}
+          folder.
+        </p>
+      </div>
+
+      {notice ? (
+        <div
+          role="status"
+          className="flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm"
+        >
+          <CheckCircle2
+            className="mt-0.5 size-4 shrink-0 text-brand"
+            aria-hidden="true"
+          />
+          <p className="flex-1">{notice}</p>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-11"
+            onClick={() => setNotice("")}
+            aria-label="Dismiss message"
+          >
+            <X aria-hidden="true" />
+          </Button>
+        </div>
+      ) : null}
+
+      <div className="grid gap-4 md:grid-cols-2">
+        <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-brand/10 p-2.5">
+              <DatabaseBackup className="size-5 text-brand" />
+            </div>
+            <div>
+              <h2 className="font-semibold">Create a Backup</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Manual database backup
+              </p>
+            </div>
+          </div>
+          <div className="mt-5 space-y-3 text-sm">
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">Destination</span>
+              <span className="text-right font-medium">
+                Local backup folder / external drive
+              </span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">File format</span>
+              <span className="font-medium">
+                PostgreSQL custom archive (.dump)
+              </span>
+            </div>
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">Last backup</span>
+              <span className="font-medium">
+                {latestBackup?.date ?? "No backups yet"}
+              </span>
+            </div>
+          </div>
+          <Button
+            className="mt-5 min-h-11 w-full"
+            disabled
+            title="Not available yet"
+          >
+            <HardDriveDownload aria-hidden="true" />
+            Create Backup
+          </Button>
+        </section>
+
+        <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-brand/10 p-2.5">
+              <Clock3 className="size-5 text-brand" />
+            </div>
+            <div>
+              <h2 className="font-semibold">Backup Schedule</h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Set a recurring backup schedule
+              </p>
+            </div>
+          </div>
+          <div className="mt-5 space-y-3">
+            <label className="flex items-center justify-between gap-3 text-sm">
+              <span>Automatic backup</span>
+              <select className={formControlClass} defaultValue="daily">
+                <option value="disabled">Disabled</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </label>
+            <label className="flex items-center justify-between gap-3 text-sm">
+              <span>Preferred time</span>
+              <input
+                type="time"
+                defaultValue="17:00"
+                className={`${formControlClass} max-w-40`}
+              />
+            </label>
+            <label className="flex items-center justify-between gap-3 text-sm">
+              <span>Keep recent backups</span>
+              <select
+                className={`${formControlClass} max-w-40`}
+                defaultValue="7"
+              >
+                <option value="3">3 copies</option>
+                <option value="7">7 copies</option>
+                <option value="14">14 copies</option>
+                <option value="30">30 copies</option>
+              </select>
+            </label>
+          </div>
+          <Button
+            variant="outline"
+            className="mt-5 w-full"
+            disabled
+            title="Not available yet"
+          >
+            Save Schedule
+          </Button>
+        </section>
+      </div>
+
+      <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4 sm:p-5">
+          <div>
+            <h2 className="font-semibold tracking-tight">Backup History</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Review available backup archives and recovery readiness.
+            </p>
+          </div>
+          {latestBackup && daysSinceLatest !== null ? (
+            <Badge
+              variant="outline"
+              className={
+                (daysSinceLatest ?? 0) > 1
+                  ? statusStyles["Expiring soon"]
+                  : statusStyles.Verified
+              }
+            >
+              Last backup{" "}
+              {daysSinceLatest === 0
+                ? "today"
+                : `${daysSinceLatest} day${daysSinceLatest === 1 ? "" : "s"} ago`}
+            </Badge>
+          ) : null}
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[1120px] text-left text-sm">
+            <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+              <tr>
+                {[
+                  "Backup",
+                  "Created",
+                  "Type",
+                  "Size",
+                  "Location",
+                  "Check",
+                  "Actions",
+                ].map((label) => (
+                  <th
+                    key={label}
+                    className={
+                      label === "Actions"
+                        ? "px-4 py-3 text-right font-medium sm:px-5"
+                        : "px-4 py-3 align-middle font-medium sm:px-5"
+                    }
+                  >
+                    {label}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {backupPagination.paginatedItems.map((backup) => (
+                <tr
+                  key={backup.name}
+                  className="transition-colors hover:bg-muted/30"
+                >
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    <span className="font-mono font-medium">{backup.name}</span>
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                    {backup.date}
+                  </td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    <p>{backup.type}</p>
+                    {backup.createdBy ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        by {backup.createdBy}
+                      </p>
+                    ) : null}
+                  </td>
+                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                    {backup.size}
+                  </td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    {backup.location}
+                  </td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    <div className="flex flex-col items-start gap-1">
+                      <Badge
+                        variant="outline"
+                        className={statusStyles[backup.status]}
+                      >
+                        {backup.status === "Verified" ? (
+                          <CheckCircle2 className="size-4" aria-hidden="true" />
+                        ) : null}
+                        {backup.status}
+                      </Badge>
+                      {backup.failureReason ? (
+                        <span className="max-w-52 text-xs text-muted-foreground">
+                          {backup.failureReason}
+                        </span>
+                      ) : null}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 align-middle sm:px-5">
+                    <RowActions
+                      name={backup.name}
+                      isAdmin
+                      primary={
+                        backup.status === "Verified"
+                          ? {
+                              label: "Restore",
+                              variant: "outline",
+                              icon: <RotateCcw aria-hidden="true" />,
+                              onSelect: () => {
+                                setSelectedBackup(backup.name)
+                                setRestoreConfirmation("")
+                                setConfirmRestore(true)
+                              },
+                            }
+                          : undefined
+                      }
+                      items={[
+                        {
+                          label: "Verify file",
+                          hidden: backup.status === "Verified",
+                          onSelect: () =>
+                            setNotice(
+                              `File verification for ${backup.name} needs the backup service integration.`,
+                            ),
+                        },
+                        {
+                          label: "Copy to external drive",
+                          hidden: backup.location !== "This computer only",
+                          onSelect: () =>
+                            setNotice(
+                              `External-drive copy for ${backup.name} needs a configured drive destination.`,
+                            ),
+                        },
+                        {
+                          label: "Download copy",
+                          adminOnly: true,
+                          onSelect: () =>
+                            setNotice(
+                              `Download request for ${backup.name} needs a protected backup download endpoint.`,
+                            ),
+                        },
+                      ]}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {sortedBackups.length === 0 ? (
+            <EmptyState
+              title="No backups found"
+              description="Create a backup to begin building recovery history."
+            />
+          ) : null}
+        </div>
+        <TablePagination
+          start={backupPagination.start}
+          end={backupPagination.end}
+          total={backupPagination.total}
+          pageIndex={backupPagination.pageIndex}
+          pageCount={backupPagination.pageCount}
+          onPageChange={backupPagination.setPageIndex}
+        />
+      </section>
+
+      <section className="rounded-xl border border-destructive/30 bg-card p-4 shadow-sm sm:p-5">
+        <div className="flex items-start gap-3">
+          <div className="rounded-lg bg-destructive/10 p-2.5">
+            <RotateCcw className="size-5 text-destructive" />
+          </div>
+          <div>
+            <h2 className="font-semibold">Restore a Backup</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Restoring can replace current database contents. Choose the
+              archive and confirm only after verifying the target system and
+              backup.
+            </p>
+          </div>
+        </div>
+        <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
+          <label className="flex flex-col gap-2 text-sm font-medium">
+            Backup archive
+            <select
+              value={selectedBackup}
+              disabled={sortedBackups.length === 0}
+              onChange={(event) => {
+                setSelectedBackup(event.target.value)
+                setConfirmRestore(false)
+                setRestoreConfirmation("")
+              }}
+              className={`${formControlClass} font-normal`}
+            >
+              {backups
+                .filter((backup) => backup.status === "Verified")
+                .map((backup) => (
+                  <option key={backup.name} value={backup.name}>
+                    {backup.name}
+                  </option>
+                ))}
+            </select>
+          </label>
+          <Button
+            variant="outline"
+            className="min-h-11 border-destructive/50 text-destructive hover:bg-destructive/5"
+            disabled={sortedBackups.length === 0}
+            onClick={() => setConfirmRestore((value) => !value)}
+          >
+            <RotateCcw aria-hidden="true" />
+            {confirmRestore ? "Cancel Restore" : "Prepare Restore"}
+          </Button>
+        </div>
+        {confirmRestore ? (
+          <div className="mt-4 rounded-lg border border-destructive/40 bg-destructive/5 p-4">
+            <p className="font-semibold">Confirm restore</p>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              This action can replace the current database. Verify the selected
+              archive and type{" "}
+              <strong className="text-foreground">RESTORE</strong> to confirm.
+            </p>
+            <p className="mt-3 rounded-md bg-background p-3 font-mono text-sm">
+              {selectedBackup}
+            </p>
+            <label className="mt-4 block text-sm font-medium">
+              Type RESTORE to continue
+              <input
+                value={restoreConfirmation}
+                onChange={(event) => setRestoreConfirmation(event.target.value)}
+                placeholder="RESTORE"
+                autoComplete="off"
+                className={`${formControlClass} mt-2 sm:max-w-xs`}
+              />
+            </label>
+            <Button
+              variant="destructive"
+              className="mt-4 min-h-11"
+              disabled={
+                !selectedBackup ||
+                !sortedBackups.some(
+                  (backup) => backup.name === selectedBackup,
+                ) ||
+                restoreConfirmation !== "RESTORE"
+              }
+              onClick={() => {
+                setNotice("Restore request confirmed.")
+                setConfirmRestore(false)
+                setRestoreConfirmation("")
+              }}
+            >
+              <ShieldCheck aria-hidden="true" />
+              Confirm Restore
+            </Button>
+          </div>
+        ) : null}
+      </section>
+    </div>
+  )
+}

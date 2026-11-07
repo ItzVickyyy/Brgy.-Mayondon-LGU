@@ -5,6 +5,7 @@ on:
     branches:
       - Foundation
       - master
+      - draft/admin-portal
   pull_request:
 permissions:
   contents: read
@@ -13,7 +14,7 @@ jobs:
 
   test-docker-compose:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       # Avoid the PostgreSQL service port already used on GitHub-hosted runners.
       POSTGRES_PORT: "5433"
@@ -38,4 +39,8 @@ jobs:
         run: curl http://localhost:8000/api/v1/utils/health-check
       - name: Test frontend is up
         run: curl http://localhost:8000
+      - name: Test PostgreSQL backup and restore scripts
+        run: pwsh -NoProfile -File ./scripts/test-backup-restore.ps1
+      - name: Wait for backend after restore smoke test
+        run: docker compose up -d --wait backend
       - run: docker compose down -v --remove-orphans

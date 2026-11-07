@@ -7,21 +7,8 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table"
-import {
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-} from "lucide-react"
-
-import { Button } from "@/components/ui/button"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { EmptyState } from "@/components/Common/FeedbackState"
+import { TablePagination } from "@/components/Common/TablePagination"
 import {
   Table,
   TableBody,
@@ -41,21 +28,26 @@ export type DataTableFeatures = typeof dataTableFeatures
 interface DataTableProps<TData extends RowData> {
   columns: ColumnDef<DataTableFeatures, TData>[]
   data: TData[]
+  emptyTitle?: string
+  emptyDescription?: string
 }
 
 export function DataTable<TData extends RowData>({
   columns,
   data,
+  emptyTitle = "No results found",
+  emptyDescription = "There are no records to display.",
 }: DataTableProps<TData>) {
   const table = useTable({
     features: dataTableFeatures,
     data,
     columns,
+    initialState: { pagination: { pageIndex: 0, pageSize: 10 } },
   })
 
   return (
     <div className="flex flex-col gap-4">
-      <Table>
+      <Table containerClassName="overflow-x-auto rounded-none border-0">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
@@ -85,116 +77,23 @@ export function DataTable<TData extends RowData>({
                 ))}
               </TableRow>
             ))
-          ) : (
-            <TableRow className="hover:bg-transparent">
-              <TableCell
-                colSpan={columns.length}
-                className="h-32 text-center text-muted-foreground"
-              >
-                No results found.
-              </TableCell>
-            </TableRow>
-          )}
+          ) : null}
         </TableBody>
       </Table>
+      {table.getRowModel().rows.length === 0 ? (
+        <EmptyState title={emptyTitle} description={emptyDescription} />
+      ) : null}
 
-      {table.getPageCount() > 1 && (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-3 sm:p-4 border-t bg-muted/20">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="text-sm text-muted-foreground">
-              Showing{" "}
-              {table.state.pagination.pageIndex *
-                table.state.pagination.pageSize +
-                1}{" "}
-              to{" "}
-              {Math.min(
-                (table.state.pagination.pageIndex + 1) *
-                  table.state.pagination.pageSize,
-                data.length,
-              )}{" "}
-              of{" "}
-              <span className="font-medium text-foreground">{data.length}</span>{" "}
-              entries
-            </div>
-            <div className="flex items-center gap-x-2">
-              <p className="text-sm text-muted-foreground">Rows per page</p>
-              <Select
-                value={`${table.state.pagination.pageSize}`}
-                onValueChange={(value) => {
-                  table.setPageSize(Number(value))
-                }}
-              >
-                <SelectTrigger className="h-8 w-[70px]">
-                  <SelectValue placeholder={table.state.pagination.pageSize} />
-                </SelectTrigger>
-                <SelectContent side="top">
-                  {[5, 10, 25, 50].map((pageSize) => (
-                    <SelectItem key={pageSize} value={`${pageSize}`}>
-                      {pageSize}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-x-6">
-            <div className="flex items-center gap-x-1 text-sm text-muted-foreground">
-              <span>Page</span>
-              <span className="font-medium text-foreground">
-                {table.state.pagination.pageIndex + 1}
-              </span>
-              <span>of</span>
-              <span className="font-medium text-foreground">
-                {table.getPageCount()}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-x-1">
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => table.setPageIndex(0)}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <span className="sr-only">Go to first page</span>
-                <ChevronsLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => table.previousPage()}
-                disabled={!table.getCanPreviousPage()}
-              >
-                <span className="sr-only">Go to previous page</span>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => table.nextPage()}
-                disabled={!table.getCanNextPage()}
-              >
-                <span className="sr-only">Go to next page</span>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 w-8 p-0"
-                onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                disabled={!table.getCanNextPage()}
-              >
-                <span className="sr-only">Go to last page</span>
-                <ChevronsRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {data.length > 0 ? (
+        <TablePagination
+          start={table.state.pagination.pageIndex * table.state.pagination.pageSize + 1}
+          end={Math.min((table.state.pagination.pageIndex + 1) * table.state.pagination.pageSize, data.length)}
+          total={data.length}
+          pageIndex={table.state.pagination.pageIndex}
+          pageCount={table.getPageCount()}
+          onPageChange={table.setPageIndex}
+        />
+      ) : null}
     </div>
   )
 }
