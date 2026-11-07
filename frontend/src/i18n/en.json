@@ -1794,6 +1794,16 @@
       "login": "Log In",
       "recoverPassword": "Recover Password",
       "resetPassword": "Reset Password"
+    },
+    "toast": {
+      "success": "Success!",
+      "error": "Something went wrong!"
+    },
+    "errorPage": {
+      "code": "Error",
+      "oops": "Oops!",
+      "description": "Something went wrong. Please try again.",
+      "home": "Go Home"
     }
   }
 }

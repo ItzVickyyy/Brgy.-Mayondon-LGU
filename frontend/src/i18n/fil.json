@@ -1794,6 +1794,16 @@
       "login": "Mag-log in",
       "recoverPassword": "Pag-recover ng Password",
       "resetPassword": "I-reset ang Password"
+    },
+    "toast": {
+      "success": "Matagumpay!",
+      "error": "May nangyaring error!"
+    },
+    "errorPage": {
+      "code": "Error",
+      "oops": "Naku!",
+      "description": "May nangyaring error. Pakisubukan muli.",
+      "home": "Bumalik sa Home"
     }
   }
 }
