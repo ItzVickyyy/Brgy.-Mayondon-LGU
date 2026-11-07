@@ -1659,5 +1659,47 @@
       "submit": "Reset Password"
     },
     "email": "Email"
+  },
+  "common": {
+    "confirm": {
+      "confirm": "Confirm",
+      "cancel": "Cancel",
+      "reason": "Reason",
+      "required": "required",
+      "optional": "optional",
+      "placeholder": "Enter a reason",
+      "minReason": "Enter at least 3 characters."
+    },
+    "feedback": {
+      "loading": "Loading...",
+      "error": "Something went wrong",
+      "retry": "Retry"
+    },
+    "notFound": {
+      "oops": "Oops!",
+      "description": "The page you are looking for was not found.",
+      "back": "Go Back"
+    },
+    "permission": {
+      "title": "Access restricted",
+      "description": "You do not have permission to view this page. Contact the System Administrator if you believe you need access.",
+      "back": "Back to Dashboard"
+    },
+    "pagination": {
+      "showing": "Showing {{start}}–{{end}} of {{total}}",
+      "label": "Pagination",
+      "previous": "Previous",
+      "previousPage": "Previous page",
+      "page": "Page {{current}} of {{total}}",
+      "next": "Next",
+      "nextPage": "Next page"
+    },
+    "table": {
+      "emptyTitle": "No results found",
+      "emptyDescription": "There are no records to display."
+    },
+    "rowActions": {
+      "more": "More actions for {{name}}"
+    }
   }
 }
