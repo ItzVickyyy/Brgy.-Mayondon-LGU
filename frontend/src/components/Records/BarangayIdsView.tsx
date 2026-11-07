@@ -1,4 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
+import type { TFunction } from "i18next"
 import {
   CalendarClock,
   Clock3,
@@ -8,6 +9,7 @@ import {
   Search,
 } from "lucide-react"
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 import type { BarangayIdListItem } from "@/client"
 import { BarangayIdsService } from "@/client"
 import {
@@ -29,17 +31,29 @@ type StatusFilter = "all" | BarangayIdListItem["status"]
 
 const PAGE_SIZE = 10
 
-const statusLabels: Record<BarangayIdListItem["status"], string> = {
+// statusStyles is keyed by the English status word, not by the shown label.
+const statusStyleKey: Record<BarangayIdListItem["status"], string> = {
   valid: "Valid",
   expiring_soon: "Expiring soon",
   expired: "Expired",
 }
 
-const transactionLabels: Record<string, string> = {
-  new: "New",
-  renewal: "Renewal",
-  replacement: "Replacement",
+const transactionTypes = ["new", "renewal", "replacement"] as const
+type TransactionType = (typeof transactionTypes)[number]
+
+function isTransactionType(value: string): value is TransactionType {
+  return (transactionTypes as readonly string[]).includes(value)
 }
+
+const idColumns = [
+  "resident",
+  "idNumber",
+  "card",
+  "issued",
+  "validUntil",
+  "status",
+  "actions",
+] as const
 
 /** Today's business date in Manila, as YYYY-MM-DD. */
 function manilaToday() {
@@ -51,14 +65,14 @@ function dayNumber(value: string) {
   return Math.round(Date.UTC(year, month - 1, day) / 86400000)
 }
 
-function expiryRelative(validUntil: string) {
+function expiryRelative(validUntil: string, t: TFunction) {
   const days = dayNumber(validUntil) - dayNumber(manilaToday())
-  if (days === 0) return "today"
-  if (days > 0) return `in ${days} day${days === 1 ? "" : "s"}`
+  if (days === 0) return t("records.ids.relative.today")
+  if (days > 0) return t("records.ids.relative.inDays", { count: days })
   const ago = Math.abs(days)
-  if (ago < 30) return `expired ${ago} day${ago === 1 ? "" : "s"} ago`
+  if (ago < 30) return t("records.ids.relative.daysAgo", { count: ago })
   const months = Math.floor(ago / 30)
-  return `expired ${months} month${months === 1 ? "" : "s"} ago`
+  return t("records.ids.relative.monthsAgo", { count: months })
 }
 
 // Printing a card, renewing and replacing all go through Issuances.
@@ -81,6 +95,7 @@ function useIdCount(status: StatusFilter) {
 }
 
 export function BarangayIdsView() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
   const [search, setSearch] = useState("")
@@ -133,45 +148,47 @@ export function BarangayIdsView() {
     <>
       <section
         className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
-        aria-label="Barangay ID summary"
+        aria-label={t("records.ids.summaryAria")}
       >
         <StatCard
           icon={IdCard}
-          label="Residents with an ID"
+          label={t("records.ids.stats.all.label")}
           value={show(allCount.data)}
-          description="Latest issued card"
+          description={t("records.ids.stats.all.description")}
         />
         <StatCard
           icon={CreditCard}
-          label="Valid IDs"
+          label={t("records.ids.stats.valid.label")}
           value={show(validCount.data)}
-          description="Current records"
+          description={t("records.ids.stats.valid.description")}
         />
         <StatCard
           icon={Clock3}
-          label="Expiring IDs"
+          label={t("records.ids.stats.expiring.label")}
           value={show(soonCount.data)}
-          description="Approaching expiry"
+          description={t("records.ids.stats.expiring.description")}
         />
         <StatCard
           icon={CalendarClock}
-          label="Expired IDs"
+          label={t("records.ids.stats.expired.label")}
           value={show(expiredCount.data)}
-          description="Requires review"
+          description={t("records.ids.stats.expired.description")}
         />
       </section>
 
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-col gap-3 border-b p-4 sm:p-5">
           <div>
-            <h2 className="font-semibold tracking-tight">ID Records</h2>
+            <h2 className="font-semibold tracking-tight">
+              {t("records.ids.title")}
+            </h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Each resident's latest issued ID. Check expiry and the next step.
+              {t("records.ids.description")}
             </p>
           </div>
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <label className="relative block min-w-0 flex-1 sm:max-w-sm">
-              <span className="sr-only">Search ID records</span>
+              <span className="sr-only">{t("records.ids.searchLabel")}</span>
               <Search
                 className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                 aria-hidden="true"
@@ -179,12 +196,14 @@ export function BarangayIdsView() {
               <input
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search resident, ID number, or reference"
+                placeholder={t("records.ids.searchPlaceholder")}
                 className={`${formControlClass} pl-9`}
               />
             </label>
             <label className="sm:w-52">
-              <span className="sr-only">Filter by status</span>
+              <span className="sr-only">
+                {t("records.ids.statusFilterLabel")}
+              </span>
               <select
                 value={statusFilter}
                 onChange={(event) =>
@@ -192,21 +211,23 @@ export function BarangayIdsView() {
                 }
                 className={formControlClass}
               >
-                <option value="all">All statuses</option>
-                <option value="valid">Valid</option>
-                <option value="expiring_soon">Expiring soon</option>
-                <option value="expired">Expired</option>
+                <option value="all">{t("records.ids.statusAll")}</option>
+                <option value="valid">{t("records.idStatus.valid")}</option>
+                <option value="expiring_soon">
+                  {t("records.idStatus.expiring_soon")}
+                </option>
+                <option value="expired">{t("records.idStatus.expired")}</option>
               </select>
             </label>
           </div>
         </div>
 
         {idsQuery.isLoading ? (
-          <LoadingState title="Loading ID records..." />
+          <LoadingState title={t("records.ids.loading")} />
         ) : idsQuery.isError ? (
           <ErrorState
-            title="Could not load ID records"
-            description="Check your connection and try again."
+            title={t("records.ids.loadError.title")}
+            description={t("records.ids.loadError.description")}
             onRetry={() => idsQuery.refetch()}
           />
         ) : (
@@ -215,20 +236,12 @@ export function BarangayIdsView() {
               <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    {[
-                      "Resident",
-                      "ID number",
-                      "Card",
-                      "Issued",
-                      "Valid until",
-                      "Status",
-                      "Actions",
-                    ].map((label) => (
+                    {idColumns.map((column) => (
                       <th
-                        key={label}
-                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${label === "Actions" ? "text-right" : ""}`}
+                        key={column}
+                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "text-right" : ""}`}
                       >
-                        {label}
+                        {t(`records.ids.columns.${column}`)}
                       </th>
                     ))}
                   </tr>
@@ -236,7 +249,6 @@ export function BarangayIdsView() {
                 <tbody className="divide-y">
                   {records.map((record) => {
                     const archived = record.resident_status === "archived"
-                    const statusText = statusLabels[record.status]
                     const needsRenewal =
                       record.status === "expiring_soon" ||
                       record.status === "expired"
@@ -257,8 +269,11 @@ export function BarangayIdsView() {
                           {record.id_number}
                         </td>
                         <td className="px-4 py-3 align-middle sm:px-5">
-                          {transactionLabels[record.transaction_type] ??
-                            record.transaction_type}
+                          {isTransactionType(record.transaction_type)
+                            ? t(
+                                `records.ids.transaction.${record.transaction_type}`,
+                              )
+                            : record.transaction_type}
                         </td>
                         <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
                           {formatBusinessDate(record.issue_date)}
@@ -266,23 +281,25 @@ export function BarangayIdsView() {
                         <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
                           <p>{formatBusinessDate(record.valid_until)}</p>
                           <p className="mt-1 text-xs text-muted-foreground">
-                            {expiryRelative(record.valid_until)}
+                            {expiryRelative(record.valid_until, t)}
                           </p>
                         </td>
                         <td className="px-4 py-3 align-middle sm:px-5">
                           <div className="flex flex-wrap gap-1">
                             <Badge
                               variant="outline"
-                              className={statusStyles[statusText]}
+                              className={
+                                statusStyles[statusStyleKey[record.status]]
+                              }
                             >
-                              {statusText}
+                              {t(`records.idStatus.${record.status}`)}
                             </Badge>
                             {archived ? (
                               <Badge
                                 variant="outline"
                                 className={statusStyles.Archived}
                               >
-                                Resident archived
+                                {t("records.ids.residentArchived")}
                               </Badge>
                             ) : null}
                           </div>
@@ -296,24 +313,24 @@ export function BarangayIdsView() {
                                 ? undefined
                                 : needsRenewal
                                   ? {
-                                      label: "Renew",
+                                      label: t("records.ids.renew"),
                                       icon: <RefreshCw aria-hidden="true" />,
                                       onSelect: () =>
                                         openIdIssuance(record.resident_id),
                                     }
                                   : {
-                                      label: "Replace card",
+                                      label: t("records.ids.replaceCard"),
                                       variant: "outline",
-                                      title: "For a lost or damaged card",
+                                      title: t("records.ids.replaceHint"),
                                       onSelect: () =>
                                         openIdIssuance(record.resident_id),
                                     }
                             }
                             items={[
                               {
-                                label: "Replace card",
+                                label: t("records.ids.replaceCard"),
                                 hidden: archived || !needsRenewal,
-                                title: "For a lost or damaged card",
+                                title: t("records.ids.replaceHint"),
                                 onSelect: () =>
                                   openIdIssuance(record.resident_id),
                               },
@@ -327,8 +344,8 @@ export function BarangayIdsView() {
               </table>
               {records.length === 0 ? (
                 <EmptyState
-                  title="No ID records match your search"
-                  description="Try a different resident, ID number, reference, or status. A resident appears here once a Barangay ID has been issued."
+                  title={t("records.ids.empty.title")}
+                  description={t("records.ids.empty.description")}
                 />
               ) : null}
             </div>

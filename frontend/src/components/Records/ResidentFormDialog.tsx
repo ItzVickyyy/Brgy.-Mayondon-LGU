@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import {
   type LookupItem,
@@ -6,8 +7,8 @@ import {
   type ResidentPublic,
   ResidentsService,
 } from "@/client"
-import { uploadResidentPhoto } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { formControlClass } from "@/components/Common/formStyles"
+import { uploadResidentPhoto } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -17,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { civilStatusLabel, residentTypeLabel } from "@/lib/residentLabels"
 import {
   civilStatuses,
   readApiError,
@@ -134,7 +136,11 @@ type ResidentFormDialogProps = {
   resident: ResidentPublic | null
   streets: LookupItem[]
   sectors: LookupItem[]
-  onSaved: (resident: ResidentPublic, mode: "created" | "updated", photoError?: string) => void
+  onSaved: (
+    resident: ResidentPublic,
+    mode: "created" | "updated",
+    photoError?: string,
+  ) => void
 }
 
 const labelClass = "flex flex-col gap-2 text-sm font-medium"
@@ -147,6 +153,7 @@ export function ResidentFormDialog({
   sectors,
   onSaved,
 }: ResidentFormDialogProps) {
+  const { t } = useTranslation()
   const [form, setForm] = useState<FormState>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
@@ -172,16 +179,27 @@ export function ResidentFormDialog({
     try {
       const body = buildBody(form)
       let saved: ResidentPublic = resident
-        ? (await ResidentsService.updateResident({ path: { resident_id: resident.id }, body })).data
-        : (await ResidentsService.createResident({
-            body,
-            query: confirmDuplicate ? { confirm_duplicate: true } : undefined,
-          })).data
+        ? (
+            await ResidentsService.updateResident({
+              path: { resident_id: resident.id },
+              body,
+            })
+          ).data
+        : (
+            await ResidentsService.createResident({
+              body,
+              query: confirmDuplicate ? { confirm_duplicate: true } : undefined,
+            })
+          ).data
       let photoError = ""
       if (photoDataUrl) {
         try {
           await uploadResidentPhoto(saved.id, photoDataUrl)
-          saved = (await ResidentsService.readResident({ path: { resident_id: saved.id } })).data
+          saved = (
+            await ResidentsService.readResident({
+              path: { resident_id: saved.id },
+            })
+          ).data
         } catch (caughtPhoto) {
           photoError = readApiError(caughtPhoto).message
         }
@@ -203,12 +221,11 @@ export function ResidentFormDialog({
       <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">
-            {resident ? "Edit resident details" : "Add resident"}
+            {resident
+              ? t("records.form.editTitle")
+              : t("records.form.addTitle")}
           </DialogTitle>
-          <DialogDescription>
-            Only the first and last name are required to save. Documents ask for
-            more details, such as birthdate and address, when they are issued.
-          </DialogDescription>
+          <DialogDescription>{t("records.form.description")}</DialogDescription>
         </DialogHeader>
 
         <form
@@ -219,7 +236,7 @@ export function ResidentFormDialog({
           }}
         >
           <label className={labelClass}>
-            First name
+            {t("records.form.firstName")}
             <input
               value={form.first_name}
               onChange={(event) => set("first_name", event.target.value)}
@@ -228,7 +245,7 @@ export function ResidentFormDialog({
             />
           </label>
           <label className={labelClass}>
-            Middle name
+            {t("records.form.middleName")}
             <input
               value={form.middle_name}
               onChange={(event) => set("middle_name", event.target.value)}
@@ -236,7 +253,7 @@ export function ResidentFormDialog({
             />
           </label>
           <label className={labelClass}>
-            Last name
+            {t("records.form.lastName")}
             <input
               value={form.last_name}
               onChange={(event) => set("last_name", event.target.value)}
@@ -245,20 +262,20 @@ export function ResidentFormDialog({
             />
           </label>
           <label className={labelClass}>
-            Suffix
+            {t("records.form.suffix")}
             <select
               value={form.suffix}
               onChange={(event) => set("suffix", event.target.value)}
               className={formControlClass}
             >
-              <option value="">None</option>
+              <option value="">{t("records.form.suffixNone")}</option>
               {suffixes.map((item) => (
                 <option key={item}>{item}</option>
               ))}
             </select>
           </label>
           <label className={labelClass}>
-            Birthdate
+            {t("records.form.birthdate")}
             <input
               type="date"
               value={form.birthdate}
@@ -267,9 +284,13 @@ export function ResidentFormDialog({
             />
           </label>
           <div className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
-            <label htmlFor="resident-photo">Resident photo</label>
+            <label htmlFor="resident-photo">
+              {t("records.form.photo.label")}
+            </label>
             <p className="text-xs font-normal text-muted-foreground">
-              {resident?.has_photo ? "A photo is already on file. Uploading a new image replaces it." : "Optional. Add a clear resident portrait for Barangay ID and document printing."}
+              {resident?.has_photo
+                ? t("records.form.photo.onFile")
+                : t("records.form.photo.optional")}
             </p>
             <input
               id="resident-photo"
@@ -282,21 +303,29 @@ export function ResidentFormDialog({
                 setPhotoDataUrl("")
                 setError("")
                 if (file.size > 10 * 1024 * 1024) {
-                  setError("Choose an image smaller than 10 MB.")
+                  setError(t("records.form.photo.tooLarge"))
                   event.target.value = ""
                   return
                 }
                 const reader = new FileReader()
-                reader.onload = () => setPhotoDataUrl(String(reader.result ?? ""))
-                reader.onerror = () => setError("The selected photo could not be read.")
+                reader.onload = () =>
+                  setPhotoDataUrl(String(reader.result ?? ""))
+                reader.onerror = () =>
+                  setError(t("records.form.photo.unreadable"))
                 reader.readAsDataURL(file)
               }}
             />
-            {photoDataUrl ? <img src={photoDataUrl} alt="Selected resident portrait preview" className="h-28 w-24 rounded-md border bg-white object-cover" /> : null}
+            {photoDataUrl ? (
+              <img
+                src={photoDataUrl}
+                alt={t("records.form.photo.previewAlt")}
+                className="h-28 w-24 rounded-md border bg-white object-cover"
+              />
+            ) : null}
           </div>
 
           <label className={labelClass}>
-            Birth place
+            {t("records.form.birthPlace")}
             <input
               value={form.birth_place}
               onChange={(event) => set("birth_place", event.target.value)}
@@ -304,32 +333,34 @@ export function ResidentFormDialog({
             />
           </label>
           <label className={labelClass}>
-            Sex
+            {t("records.form.sex")}
             <select
               value={form.sex}
               onChange={(event) => set("sex", event.target.value)}
               className={formControlClass}
             >
-              <option value="">Not set</option>
-              <option>Male</option>
-              <option>Female</option>
+              <option value="">{t("records.form.notSet")}</option>
+              <option value="Male">{t("records.labels.sex.Male")}</option>
+              <option value="Female">{t("records.labels.sex.Female")}</option>
             </select>
           </label>
           <label className={labelClass}>
-            Civil status
+            {t("records.form.civilStatus")}
             <select
               value={form.civil_status}
               onChange={(event) => set("civil_status", event.target.value)}
               className={formControlClass}
             >
-              <option value="">Not set</option>
+              <option value="">{t("records.form.notSet")}</option>
               {civilStatuses.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {civilStatusLabel(item, t)}
+                </option>
               ))}
             </select>
           </label>
           <label className={labelClass}>
-            House number
+            {t("records.form.houseNumber")}
             <input
               value={form.house_number}
               onChange={(event) => set("house_number", event.target.value)}
@@ -337,14 +368,16 @@ export function ResidentFormDialog({
             />
           </label>
           <label className={labelClass}>
-            Street
+            {t("records.form.street")}
             <select
               value={form.street_id}
               onChange={(event) => set("street_id", event.target.value)}
               className={formControlClass}
             >
               <option value="">
-                {streets.length === 0 ? "No streets added yet" : "Not set"}
+                {streets.length === 0
+                  ? t("records.form.noStreets")
+                  : t("records.form.notSet")}
               </option>
               {streets.map((street) => (
                 <option key={street.id} value={street.id}>
@@ -354,7 +387,7 @@ export function ResidentFormDialog({
             </select>
           </label>
           <label className={labelClass}>
-            Purok
+            {t("records.form.purok")}
             <input
               type="number"
               min={1}
@@ -364,7 +397,7 @@ export function ResidentFormDialog({
             />
           </label>
           <label className={labelClass}>
-            Resident since (year)
+            {t("records.form.residentSince")}
             <input
               type="number"
               min={1900}
@@ -383,24 +416,26 @@ export function ResidentFormDialog({
                   set("resident_since_birth", event.target.checked)
                 }
               />
-              Has lived here since birth
+              {t("records.form.sinceBirth")}
             </span>
           </label>
           <label className={labelClass}>
-            Resident type
+            {t("records.form.residentType")}
             <select
               value={form.resident_type}
               onChange={(event) => set("resident_type", event.target.value)}
               className={formControlClass}
             >
-              <option value="">Not set</option>
+              <option value="">{t("records.form.notSet")}</option>
               {residentTypes.map((item) => (
-                <option key={item}>{item}</option>
+                <option key={item} value={item}>
+                  {residentTypeLabel(item, t)}
+                </option>
               ))}
             </select>
           </label>
           <label className={labelClass}>
-            Voter registration
+            {t("records.form.voter")}
             <select
               value={form.voter_registration}
               onChange={(event) =>
@@ -408,18 +443,20 @@ export function ResidentFormDialog({
               }
               className={formControlClass}
             >
-              <option value="">Not set</option>
-              <option value="registered">Registered</option>
-              <option value="unregistered">Unregistered</option>
+              <option value="">{t("records.form.notSet")}</option>
+              <option value="registered">{t("records.form.registered")}</option>
+              <option value="unregistered">
+                {t("records.form.unregistered")}
+              </option>
             </select>
           </label>
 
           <fieldset className="grid gap-3 sm:col-span-2 sm:grid-cols-3">
             <legend className="mb-2 text-sm font-medium">
-              Emergency contact
+              {t("records.form.emergency.legend")}
             </legend>
             <label className={labelClass}>
-              Name
+              {t("records.form.emergency.name")}
               <input
                 value={form.emergency_contact_name}
                 onChange={(event) =>
@@ -429,7 +466,7 @@ export function ResidentFormDialog({
               />
             </label>
             <label className={labelClass}>
-              Address
+              {t("records.form.emergency.address")}
               <input
                 value={form.emergency_contact_address}
                 onChange={(event) =>
@@ -439,7 +476,7 @@ export function ResidentFormDialog({
               />
             </label>
             <label className={labelClass}>
-              Phone
+              {t("records.form.emergency.phone")}
               <input
                 value={form.emergency_contact_phone}
                 onChange={(event) =>
@@ -451,7 +488,9 @@ export function ResidentFormDialog({
           </fieldset>
 
           <fieldset className="sm:col-span-2">
-            <legend className="mb-2 text-sm font-medium">Sectors</legend>
+            <legend className="mb-2 text-sm font-medium">
+              {t("records.form.sectors")}
+            </legend>
             <div className="grid gap-2 sm:grid-cols-2">
               {sectors.map((sector) => (
                 <label
@@ -481,11 +520,8 @@ export function ResidentFormDialog({
               role="alert"
               className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 sm:col-span-2 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
             >
-              <p className="font-medium">Possible duplicate</p>
-              <p className="mt-1">
-                A resident with the same name and birthdate is already on
-                record. Check the list before saving a second copy.
-              </p>
+              <p className="font-medium">{t("records.form.duplicate.title")}</p>
+              <p className="mt-1">{t("records.form.duplicate.description")}</p>
               <Button
                 type="button"
                 variant="outline"
@@ -493,7 +529,7 @@ export function ResidentFormDialog({
                 disabled={saving}
                 onClick={() => void submit(true)}
               >
-                Save anyway
+                {t("records.form.duplicate.saveAnyway")}
               </Button>
             </div>
           ) : null}
@@ -509,14 +545,14 @@ export function ResidentFormDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t("records.form.cancel")}
             </Button>
             <Button type="submit" disabled={!canSave}>
               {saving
-                ? "Saving..."
+                ? t("records.form.saving")
                 : resident
-                  ? "Save changes"
-                  : "Add resident"}
+                  ? t("records.form.saveChanges")
+                  : t("records.form.addSubmit")}
             </Button>
           </DialogFooter>
         </form>

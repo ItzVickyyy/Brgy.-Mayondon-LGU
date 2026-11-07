@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { CreditCard, FileCheck2, UserRound, Users } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import {
   IssuancesService,
@@ -12,6 +13,7 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { statusStyles } from "@/components/Common/statusStyles"
+import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,8 +23,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  civilStatusLabel,
+  residentTypeLabel,
+  sexLabel,
+} from "@/lib/residentLabels"
 import { formatBusinessDate, residentAddress } from "@/lib/residents"
-import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 
 type ResidentProfileDialogProps = {
   resident: ResidentPublic | null
@@ -36,13 +42,20 @@ type ResidentProfileDialogProps = {
   onEdit?: () => void
 }
 
+// statusStyles is keyed by the capitalised English status word.
 const statusLabel = (status: string) =>
   status.charAt(0).toUpperCase() + status.slice(1)
 
-const voterLabel: Record<string, string> = {
-  registered: "Registered",
-  unregistered: "Unregistered",
-}
+// Profile tabs: the id is kept in English because records.tsx stores it;
+// only the shown label is translated.
+const profileTabs = [
+  { id: "Details", labelKey: "records.profile.tabs.details" },
+  { id: "Family & Sector", labelKey: "records.profile.tabs.familySector" },
+  { id: "Barangay ID", labelKey: "records.profile.tabs.barangayId" },
+  { id: "Issuance History", labelKey: "records.profile.tabs.issuanceHistory" },
+] as const
+
+const historyColumns = ["reference", "document", "issueDate", "status"] as const
 
 export function ResidentProfileDialog({
   resident,
@@ -54,6 +67,23 @@ export function ResidentProfileDialog({
   documentTypes,
   onEdit,
 }: ResidentProfileDialogProps) {
+  const { t } = useTranslation()
+  const voterLabel = (value: string | null | undefined) =>
+    value === "registered"
+      ? t("records.profile.voter.registered")
+      : value === "unregistered"
+        ? t("records.profile.voter.unregistered")
+        : "—"
+  const recordStatusText = (status: string) =>
+    status === "archived"
+      ? t("records.status.archived")
+      : status === "active"
+        ? t("records.status.active")
+        : statusLabel(status)
+  const historyStatusText = (status: string) =>
+    status === "draft" || status === "issued" || status === "voided"
+      ? t(`records.profile.history.status.${status}`)
+      : statusLabel(status)
   const historyQuery = useQuery({
     queryKey: ["resident-issuances", resident?.id],
     queryFn: async () =>
@@ -67,7 +97,8 @@ export function ResidentProfileDialog({
 
   const photoQuery = useQuery({
     queryKey: ["resident-photo", resident?.id],
-    queryFn: async () => resident ? issuanceApi.loadResidentPhoto(resident.id) : undefined,
+    queryFn: async () =>
+      resident ? issuanceApi.loadResidentPhoto(resident.id) : undefined,
     enabled: Boolean(resident?.has_photo) && profileTab === "Details",
     staleTime: 0,
   })
@@ -83,44 +114,76 @@ export function ResidentProfileDialog({
 
   const details: [string, string][] = resident
     ? [
-        ["Resident reference", resident.id],
-        ["Full name", resident.full_name],
+        [t("records.profile.fields.reference"), resident.id],
+        [t("records.profile.fields.fullName"), resident.full_name],
         [
-          "Birthdate / age",
+          t("records.profile.fields.birthdateAge"),
           resident.birthdate
-            ? `${formatBusinessDate(resident.birthdate)}${resident.age !== null ? ` · ${resident.age} yrs` : ""}`
+            ? `${formatBusinessDate(resident.birthdate)}${resident.age !== null ? ` · ${t("records.ageYears", { age: resident.age })}` : ""}`
             : "—",
         ],
-        ["Birth place", resident.birth_place || "—"],
-        ["Sex", resident.sex || "—"],
-        ["Civil status", resident.civil_status || "—"],
-        ["Complete address", residentAddress(resident, streets) || "—"],
+        [t("records.profile.fields.birthPlace"), resident.birth_place || "—"],
         [
-          "Resident since",
+          t("records.profile.fields.sex"),
+          resident.sex ? sexLabel(resident.sex, t) : "—",
+        ],
+        [
+          t("records.profile.fields.civilStatus"),
+          resident.civil_status
+            ? civilStatusLabel(resident.civil_status, t)
+            : "—",
+        ],
+        [
+          t("records.profile.fields.address"),
+          residentAddress(resident, streets) || "—",
+        ],
+        [
+          t("records.profile.fields.residentSince"),
           resident.resident_since_birth
-            ? "Since birth"
+            ? t("records.profile.fields.sinceBirth")
             : resident.resident_since_year
               ? String(resident.resident_since_year)
               : "—",
         ],
-        ["Resident type", resident.resident_type || "—"],
         [
-          "Voter registration",
-          voterLabel[resident.voter_registration ?? ""] ?? "—",
+          t("records.profile.fields.residentType"),
+          resident.resident_type
+            ? residentTypeLabel(resident.resident_type, t)
+            : "—",
         ],
-        ["Emergency contact", resident.emergency_contact_name || "—"],
         [
-          "Emergency contact address",
+          t("records.profile.fields.voter"),
+          voterLabel(resident.voter_registration),
+        ],
+        [
+          t("records.profile.fields.emergency"),
+          resident.emergency_contact_name || "—",
+        ],
+        [
+          t("records.profile.fields.emergencyAddress"),
           resident.emergency_contact_address || "—",
         ],
-        ["Emergency contact phone", resident.emergency_contact_phone || "—"],
-        ["Photo", resident.has_photo ? "On file" : "None"],
-        ["Record status", statusLabel(resident.status)],
+        [
+          t("records.profile.fields.emergencyPhone"),
+          resident.emergency_contact_phone || "—",
+        ],
+        [
+          t("records.profile.fields.photo"),
+          resident.has_photo
+            ? t("records.profile.fields.photoOnFile")
+            : t("records.profile.fields.photoNone"),
+        ],
+        [
+          t("records.profile.fields.recordStatus"),
+          recordStatusText(resident.status),
+        ],
         ...(archived && resident.archive_reason
-          ? ([["Archive reason", resident.archive_reason]] as [
-              string,
-              string,
-            ][])
+          ? ([
+              [
+                t("records.profile.fields.archiveReason"),
+                resident.archive_reason,
+              ],
+            ] as [string, string][])
           : []),
       ]
     : []
@@ -129,10 +192,11 @@ export function ResidentProfileDialog({
     <Dialog open={Boolean(resident)} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">Resident Profile</DialogTitle>
+          <DialogTitle className="text-xl">
+            {t("records.profile.title")}
+          </DialogTitle>
           <DialogDescription>
-            Review resident details, family and sector information, ID records,
-            and issuance history.
+            {t("records.profile.description")}
           </DialogDescription>
         </DialogHeader>
         {resident ? (
@@ -144,37 +208,33 @@ export function ResidentProfileDialog({
               <div className="min-w-0 flex-1">
                 <p className="text-lg font-semibold">{resident.full_name}</p>
                 <p className="text-sm text-muted-foreground">
-                  {residentAddress(resident, streets) || "No address on record"}
+                  {residentAddress(resident, streets) ||
+                    t("records.profile.noAddress")}
                 </p>
               </div>
               <Badge
                 variant="outline"
                 className={statusStyles[statusLabel(resident.status)]}
               >
-                {statusLabel(resident.status)}
+                {recordStatusText(resident.status)}
               </Badge>
             </div>
             <div
               className="flex flex-wrap gap-2 border-b pb-3"
               role="tablist"
-              aria-label="Resident profile sections"
+              aria-label={t("records.profile.tabsAria")}
             >
-              {[
-                "Details",
-                "Family & Sector",
-                "Barangay ID",
-                "Issuance History",
-              ].map((tab) => (
+              {profileTabs.map((tab) => (
                 <Button
-                  key={tab}
+                  key={tab.id}
                   type="button"
                   role="tab"
-                  variant={profileTab === tab ? "default" : "ghost"}
-                  aria-selected={profileTab === tab}
-                  onClick={() => onProfileTabChange(tab)}
+                  variant={profileTab === tab.id ? "default" : "ghost"}
+                  aria-selected={profileTab === tab.id}
+                  onClick={() => onProfileTabChange(tab.id)}
                   className="min-h-11 rounded-md px-3"
                 >
-                  {tab}
+                  {t(tab.labelKey)}
                 </Button>
               ))}
             </div>
@@ -183,16 +243,37 @@ export function ResidentProfileDialog({
               <>
                 {resident?.has_photo ? (
                   <div className="mb-3 flex items-center gap-4 rounded-xl border bg-card p-4">
-                    {photoQuery.data ? <img src={photoQuery.data} alt={resident.full_name + " portrait"} className="h-24 w-20 rounded-md border bg-white object-cover" /> : <div className="flex h-24 w-20 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">{photoQuery.isLoading ? "Loading photo" : "Photo unavailable"}</div>}
-                    <div><p className="font-semibold">Resident photo</p><p className="mt-1 text-sm text-muted-foreground">Used for Barangay ID and supported document printing.</p></div>
+                    {photoQuery.data ? (
+                      <img
+                        src={photoQuery.data}
+                        alt={t("records.profile.photoCard.alt", {
+                          name: resident.full_name,
+                        })}
+                        className="h-24 w-20 rounded-md border bg-white object-cover"
+                      />
+                    ) : (
+                      <div className="flex h-24 w-20 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
+                        {photoQuery.isLoading
+                          ? t("records.profile.photoCard.loading")
+                          : t("records.profile.photoCard.unavailable")}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-semibold">
+                        {t("records.profile.photoCard.title")}
+                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {t("records.profile.photoCard.description")}
+                      </p>
+                    </div>
                   </div>
                 ) : null}
                 <div className="grid gap-3 sm:grid-cols-2">
                   {details.map(([label, value]) => (
-                  <div key={label} className="rounded-lg border bg-card p-4">
-                    <p className="text-sm text-muted-foreground">{label}</p>
-                    <p className="mt-1 break-words font-semibold">{value}</p>
-                  </div>
+                    <div key={label} className="rounded-lg border bg-card p-4">
+                      <p className="text-sm text-muted-foreground">{label}</p>
+                      <p className="mt-1 break-words font-semibold">{value}</p>
+                    </div>
                   ))}
                 </div>
               </>
@@ -202,7 +283,9 @@ export function ResidentProfileDialog({
               <div className="grid gap-3 sm:grid-cols-2">
                 <section className="rounded-xl border bg-card p-4 shadow-sm">
                   <UserRound className="size-5 text-brand" aria-hidden="true" />
-                  <h3 className="mt-2 font-semibold">Sectors</h3>
+                  <h3 className="mt-2 font-semibold">
+                    {t("records.profile.family.sectorsTitle")}
+                  </h3>
                   {sectorNames.length > 0 ? (
                     <ul className="mt-2 list-disc pl-5 text-sm">
                       {sectorNames.map((name) => (
@@ -211,15 +294,17 @@ export function ResidentProfileDialog({
                     </ul>
                   ) : (
                     <p className="mt-1 text-sm text-muted-foreground">
-                      No sector recorded.
+                      {t("records.profile.family.noSector")}
                     </p>
                   )}
                 </section>
                 <section className="rounded-xl border bg-card p-4">
                   <Users className="size-5 text-brand" aria-hidden="true" />
-                  <h3 className="mt-2 font-semibold">Family details</h3>
+                  <h3 className="mt-2 font-semibold">
+                    {t("records.profile.family.familyTitle")}
+                  </h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Household and family member records are not available yet.
+                    {t("records.profile.family.familyDescription")}
                   </p>
                 </section>
               </div>
@@ -233,22 +318,21 @@ export function ResidentProfileDialog({
                     aria-hidden="true"
                   />
                   <p className="mt-2 text-sm text-muted-foreground">
-                    Barangay ID number
+                    {t("records.profile.id.number")}
                   </p>
                   <p className="mt-1 font-semibold">
-                    {resident.id_number || "None on record"}
+                    {resident.id_number || t("records.profile.id.none")}
                   </p>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    ID numbers are set when an ID is issued from Issuance
-                    Management.
+                    {t("records.profile.id.note")}
                   </p>
                 </section>
                 <section className="rounded-xl border bg-card p-4 shadow-sm">
                   <p className="text-sm text-muted-foreground">
-                    Voter registration
+                    {t("records.profile.fields.voter")}
                   </p>
                   <p className="mt-1 font-semibold">
-                    {voterLabel[resident.voter_registration ?? ""] ?? "—"}
+                    {voterLabel(resident.voter_registration)}
                   </p>
                 </section>
               </div>
@@ -261,13 +345,15 @@ export function ResidentProfileDialog({
                     className="size-6 text-brand"
                     aria-hidden="true"
                   />
-                  <h3 className="font-semibold">Issuance history</h3>
+                  <h3 className="font-semibold">
+                    {t("records.profile.history.title")}
+                  </h3>
                 </div>
                 {historyQuery.isLoading ? (
-                  <LoadingState title="Loading history..." />
+                  <LoadingState title={t("records.profile.history.loading")} />
                 ) : historyQuery.isError ? (
                   <ErrorState
-                    title="Could not load the history"
+                    title={t("records.profile.history.loadError")}
                     onRetry={() => historyQuery.refetch()}
                   />
                 ) : historyQuery.data && historyQuery.data.data.length > 0 ? (
@@ -275,14 +361,9 @@ export function ResidentProfileDialog({
                     <table className="w-full min-w-[480px] text-left text-sm">
                       <thead className="text-xs uppercase tracking-wide text-muted-foreground">
                         <tr>
-                          {[
-                            "Reference",
-                            "Document",
-                            "Issue date",
-                            "Status",
-                          ].map((label) => (
-                            <th key={label} className="py-2 pr-4 font-medium">
-                              {label}
+                          {historyColumns.map((column) => (
+                            <th key={column} className="py-2 pr-4 font-medium">
+                              {t(`records.profile.history.columns.${column}`)}
                             </th>
                           ))}
                         </tr>
@@ -291,7 +372,8 @@ export function ResidentProfileDialog({
                         {historyQuery.data.data.map((item) => (
                           <tr key={item.id}>
                             <td className="py-2 pr-4 font-mono">
-                              {item.reference_no ?? "Draft"}
+                              {item.reference_no ??
+                                t("records.profile.history.draft")}
                             </td>
                             <td className="py-2 pr-4">
                               {documentName.get(item.document_type_id) ??
@@ -307,7 +389,7 @@ export function ResidentProfileDialog({
                                   statusStyles[statusLabel(item.status)]
                                 }
                               >
-                                {statusLabel(item.status)}
+                                {historyStatusText(item.status)}
                               </Badge>
                             </td>
                           </tr>
@@ -317,8 +399,8 @@ export function ResidentProfileDialog({
                   </div>
                 ) : (
                   <EmptyState
-                    title="No documents yet"
-                    description="Documents issued to this resident will appear here."
+                    title={t("records.profile.history.empty.title")}
+                    description={t("records.profile.history.empty.description")}
                   />
                 )}
               </section>
@@ -327,7 +409,7 @@ export function ResidentProfileDialog({
             {onEdit && !archived && profileTab === "Details" ? (
               <div className="flex justify-end">
                 <Button type="button" variant="outline" onClick={onEdit}>
-                  Edit details
+                  {t("records.profile.edit")}
                 </Button>
               </div>
             ) : null}

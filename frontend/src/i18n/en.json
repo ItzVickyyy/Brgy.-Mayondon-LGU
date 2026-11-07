@@ -394,6 +394,251 @@
       "added": "{{name}} was added.",
       "updated": "{{name}} was updated.",
       "photoFailed": "{{message}} Photo upload failed: {{error}}"
+    },
+    "labels": {
+      "sex": {
+        "Male": "Male",
+        "Female": "Female"
+      },
+      "civilStatus": {
+        "Single": "Single",
+        "Married": "Married",
+        "Legally Separated": "Legally Separated",
+        "Widow/Widower": "Widow/Widower"
+      },
+      "residentType": {
+        "Existing resident": "Existing resident",
+        "New / renting resident": "New / renting resident"
+      }
+    },
+    "form": {
+      "addTitle": "Add resident",
+      "editTitle": "Edit resident details",
+      "description": "Only the first and last name are required to save. Documents ask for more details, such as birthdate and address, when they are issued.",
+      "firstName": "First name",
+      "middleName": "Middle name",
+      "lastName": "Last name",
+      "suffix": "Suffix",
+      "suffixNone": "None",
+      "birthdate": "Birthdate",
+      "photo": {
+        "label": "Resident photo",
+        "onFile": "A photo is already on file. Uploading a new image replaces it.",
+        "optional": "Optional. Add a clear resident portrait for Barangay ID and document printing.",
+        "previewAlt": "Selected resident portrait preview",
+        "tooLarge": "Choose an image smaller than 10 MB.",
+        "unreadable": "The selected photo could not be read."
+      },
+      "birthPlace": "Birth place",
+      "sex": "Sex",
+      "notSet": "Not set",
+      "civilStatus": "Civil status",
+      "houseNumber": "House number",
+      "street": "Street",
+      "noStreets": "No streets added yet",
+      "purok": "Purok",
+      "residentSince": "Resident since (year)",
+      "sinceBirth": "Has lived here since birth",
+      "residentType": "Resident type",
+      "voter": "Voter registration",
+      "registered": "Registered",
+      "unregistered": "Unregistered",
+      "emergency": {
+        "legend": "Emergency contact",
+        "name": "Name",
+        "address": "Address",
+        "phone": "Phone"
+      },
+      "sectors": "Sectors",
+      "duplicate": {
+        "title": "Possible duplicate",
+        "description": "A resident with the same name and birthdate is already on record. Check the list before saving a second copy.",
+        "saveAnyway": "Save anyway"
+      },
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "saveChanges": "Save changes",
+      "addSubmit": "Add resident"
+    },
+    "profile": {
+      "title": "Resident Profile",
+      "description": "Review resident details, family and sector information, ID records, and issuance history.",
+      "noAddress": "No address on record",
+      "tabsAria": "Resident profile sections",
+      "tabs": {
+        "details": "Details",
+        "familySector": "Family & Sector",
+        "barangayId": "Barangay ID",
+        "issuanceHistory": "Issuance History"
+      },
+      "photoCard": {
+        "title": "Resident photo",
+        "description": "Used for Barangay ID and supported document printing.",
+        "loading": "Loading photo",
+        "unavailable": "Photo unavailable",
+        "alt": "{{name}} portrait"
+      },
+      "fields": {
+        "reference": "Resident reference",
+        "fullName": "Full name",
+        "birthdateAge": "Birthdate / age",
+        "birthPlace": "Birth place",
+        "sex": "Sex",
+        "civilStatus": "Civil status",
+        "address": "Complete address",
+        "residentSince": "Resident since",
+        "sinceBirth": "Since birth",
+        "residentType": "Resident type",
+        "voter": "Voter registration",
+        "emergency": "Emergency contact",
+        "emergencyAddress": "Emergency contact address",
+        "emergencyPhone": "Emergency contact phone",
+        "photo": "Photo",
+        "photoOnFile": "On file",
+        "photoNone": "None",
+        "recordStatus": "Record status",
+        "archiveReason": "Archive reason"
+      },
+      "voter": {
+        "registered": "Registered",
+        "unregistered": "Unregistered"
+      },
+      "family": {
+        "sectorsTitle": "Sectors",
+        "noSector": "No sector recorded.",
+        "familyTitle": "Family details",
+        "familyDescription": "Household and family member records are not available yet."
+      },
+      "id": {
+        "number": "Barangay ID number",
+        "none": "None on record",
+        "note": "ID numbers are set when an ID is issued from Issuance Management."
+      },
+      "history": {
+        "title": "Issuance history",
+        "loading": "Loading history...",
+        "loadError": "Could not load the history",
+        "draft": "Draft",
+        "columns": {
+          "reference": "Reference",
+          "document": "Document",
+          "issueDate": "Issue date",
+          "status": "Status"
+        },
+        "status": {
+          "draft": "Draft",
+          "issued": "Issued",
+          "voided": "Voided"
+        },
+        "empty": {
+          "title": "No documents yet",
+          "description": "Documents issued to this resident will appear here."
+        }
+      },
+      "edit": "Edit details"
+    },
+    "ids": {
+      "summaryAria": "Barangay ID summary",
+      "stats": {
+        "all": {
+          "label": "Residents with an ID",
+          "description": "Latest issued card"
+        },
+        "valid": {
+          "label": "Valid IDs",
+          "description": "Current records"
+        },
+        "expiring": {
+          "label": "Expiring IDs",
+          "description": "Approaching expiry"
+        },
+        "expired": {
+          "label": "Expired IDs",
+          "description": "Requires review"
+        }
+      },
+      "title": "ID Records",
+      "description": "Each resident's latest issued ID. Check expiry and the next step.",
+      "searchLabel": "Search ID records",
+      "searchPlaceholder": "Search resident, ID number, or reference",
+      "statusFilterLabel": "Filter by status",
+      "statusAll": "All statuses",
+      "loading": "Loading ID records...",
+      "loadError": {
+        "title": "Could not load ID records",
+        "description": "Check your connection and try again."
+      },
+      "columns": {
+        "resident": "Resident",
+        "idNumber": "ID number",
+        "card": "Card",
+        "issued": "Issued",
+        "validUntil": "Valid until",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "transaction": {
+        "new": "New",
+        "renewal": "Renewal",
+        "replacement": "Replacement"
+      },
+      "relative": {
+        "today": "today",
+        "inDays_one": "in {{count}} day",
+        "inDays_other": "in {{count}} days",
+        "daysAgo_one": "expired {{count}} day ago",
+        "daysAgo_other": "expired {{count}} days ago",
+        "monthsAgo_one": "expired {{count}} month ago",
+        "monthsAgo_other": "expired {{count}} months ago"
+      },
+      "residentArchived": "Resident archived",
+      "renew": "Renew",
+      "replaceCard": "Replace card",
+      "replaceHint": "For a lost or damaged card",
+      "empty": {
+        "title": "No ID records match your search",
+        "description": "Try a different resident, ID number, reference, or status. A resident appears here once a Barangay ID has been issued."
+      }
+    },
+    "lookups": {
+      "street": {
+        "title": "Streets",
+        "description": "Used in resident addresses and document issuance.",
+        "newName": "New street name",
+        "placeholder": "Enter street name",
+        "loading": "Loading streets...",
+        "loadError": "Could not load streets",
+        "empty": "No streets yet",
+        "deleteTitle": "Delete street?"
+      },
+      "association": {
+        "title": "Tricycle Associations",
+        "description": "Used when recording franchise clearances.",
+        "newName": "New association name",
+        "placeholder": "Enter association name",
+        "loading": "Loading tricycle associations...",
+        "loadError": "Could not load tricycle associations",
+        "empty": "No tricycle associations yet",
+        "deleteTitle": "Delete association?"
+      },
+      "add": "Add",
+      "save": "Save",
+      "cancel": "Cancel",
+      "rename": "Rename",
+      "delete": "Delete",
+      "editLabel": "Edit {{name}}",
+      "notices": {
+        "added": "List item added.",
+        "renamed": "List item renamed.",
+        "deleted": "List item deleted."
+      },
+      "inUse": "This item is already used by a record. It cannot be deleted. Rename it only if the new name is correct for existing records.",
+      "loadErrorDescription": "Check your connection and try again.",
+      "emptyDescription": "Add the names supplied and confirmed by the barangay office.",
+      "deleteDescription": "Delete {{name}}? Items already used by resident or franchise records cannot be deleted.",
+      "thisItem": "this item",
+      "enterName": "Enter a name.",
+      "itemMissing": "The selected list item is missing."
     }
   }
 }

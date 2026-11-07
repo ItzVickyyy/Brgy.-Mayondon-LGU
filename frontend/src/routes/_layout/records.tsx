@@ -44,6 +44,7 @@ import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { residentTypeLabel } from "@/lib/residentLabels"
 import {
   formatBusinessDate,
   readApiError,
@@ -491,7 +492,9 @@ function RecordsManagement() {
                               {address || "—"}
                             </td>
                             <td className="px-4 py-3 align-middle sm:px-5">
-                              {resident.resident_type || "—"}
+                              {resident.resident_type
+                                ? residentTypeLabel(resident.resident_type, t)
+                                : "—"}
                             </td>
                             <td className="px-4 py-3 align-middle sm:px-5">
                               <Badge

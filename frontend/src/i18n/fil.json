@@ -394,6 +394,251 @@
       "added": "Naidagdag si {{name}}.",
       "updated": "Na-update si {{name}}.",
       "photoFailed": "{{message}} Nabigo ang pag-upload ng larawan: {{error}}"
+    },
+    "labels": {
+      "sex": {
+        "Male": "Lalaki",
+        "Female": "Babae"
+      },
+      "civilStatus": {
+        "Single": "Walang Asawa",
+        "Married": "May Asawa",
+        "Legally Separated": "Legal na Hiwalay",
+        "Widow/Widower": "Balo"
+      },
+      "residentType": {
+        "Existing resident": "Kasalukuyang residente",
+        "New / renting resident": "Bago / nangungupahang residente"
+      }
+    },
+    "form": {
+      "addTitle": "Magdagdag ng residente",
+      "editTitle": "I-edit ang mga detalye ng residente",
+      "description": "Ang unang pangalan at apelyido lamang ang kailangan para makapag-save. Hihingin ng mga dokumento ang iba pang detalye, gaya ng petsa ng kapanganakan at tirahan, kapag iniisyu ang mga ito.",
+      "firstName": "Unang pangalan",
+      "middleName": "Gitnang pangalan",
+      "lastName": "Apelyido",
+      "suffix": "Hulapi",
+      "suffixNone": "Wala",
+      "birthdate": "Petsa ng kapanganakan",
+      "photo": {
+        "label": "Larawan ng residente",
+        "onFile": "May larawan nang nakatala. Papalitan ito ng bagong imaheng i-a-upload.",
+        "optional": "Opsyonal. Magdagdag ng malinaw na larawan ng residente para sa pag-print ng Barangay ID at mga dokumento.",
+        "previewAlt": "Preview ng napiling larawan ng residente",
+        "tooLarge": "Pumili ng imaheng mas maliit sa 10 MB.",
+        "unreadable": "Hindi mabasa ang napiling larawan."
+      },
+      "birthPlace": "Lugar ng kapanganakan",
+      "sex": "Kasarian",
+      "notSet": "Hindi nakatakda",
+      "civilStatus": "Katayuang sibil",
+      "houseNumber": "Numero ng bahay",
+      "street": "Kalye",
+      "noStreets": "Wala pang nadagdag na kalye",
+      "purok": "Purok",
+      "residentSince": "Residente mula (taon)",
+      "sinceBirth": "Dito na nakatira mula pagkapanganak",
+      "residentType": "Uri ng residente",
+      "voter": "Rehistro bilang botante",
+      "registered": "Rehistrado",
+      "unregistered": "Hindi rehistrado",
+      "emergency": {
+        "legend": "Contact sa oras ng emergency",
+        "name": "Pangalan",
+        "address": "Tirahan",
+        "phone": "Telepono"
+      },
+      "sectors": "Mga Sektor",
+      "duplicate": {
+        "title": "Posibleng doble",
+        "description": "May residente nang may parehong pangalan at petsa ng kapanganakan sa talaan. Suriin ang listahan bago mag-save ng pangalawang kopya.",
+        "saveAnyway": "I-save pa rin"
+      },
+      "cancel": "Kanselahin",
+      "saving": "Sine-save...",
+      "saveChanges": "I-save ang mga pagbabago",
+      "addSubmit": "Magdagdag ng residente"
+    },
+    "profile": {
+      "title": "Profile ng Residente",
+      "description": "Suriin ang mga detalye ng residente, impormasyon ng pamilya at sektor, mga talaan ng ID, at kasaysayan ng pag-isyu.",
+      "noAddress": "Walang tirahang nakatala",
+      "tabsAria": "Mga seksyon ng profile ng residente",
+      "tabs": {
+        "details": "Mga Detalye",
+        "familySector": "Pamilya at Sektor",
+        "barangayId": "Barangay ID",
+        "issuanceHistory": "Kasaysayan ng Pag-isyu"
+      },
+      "photoCard": {
+        "title": "Larawan ng residente",
+        "description": "Ginagamit para sa Barangay ID at sa pag-print ng mga sinusuportahang dokumento.",
+        "loading": "Nilo-load ang larawan",
+        "unavailable": "Hindi available ang larawan",
+        "alt": "Larawan ni {{name}}"
+      },
+      "fields": {
+        "reference": "Sanggunian ng residente",
+        "fullName": "Buong pangalan",
+        "birthdateAge": "Petsa ng kapanganakan / edad",
+        "birthPlace": "Lugar ng kapanganakan",
+        "sex": "Kasarian",
+        "civilStatus": "Katayuang sibil",
+        "address": "Kumpletong tirahan",
+        "residentSince": "Residente mula",
+        "sinceBirth": "Mula pagkapanganak",
+        "residentType": "Uri ng residente",
+        "voter": "Rehistro bilang botante",
+        "emergency": "Contact sa oras ng emergency",
+        "emergencyAddress": "Tirahan ng emergency contact",
+        "emergencyPhone": "Telepono ng emergency contact",
+        "photo": "Larawan",
+        "photoOnFile": "Nakatala",
+        "photoNone": "Wala",
+        "recordStatus": "Katayuan ng talaan",
+        "archiveReason": "Dahilan ng pag-archive"
+      },
+      "voter": {
+        "registered": "Rehistrado",
+        "unregistered": "Hindi rehistrado"
+      },
+      "family": {
+        "sectorsTitle": "Mga Sektor",
+        "noSector": "Walang naitalang sektor.",
+        "familyTitle": "Mga detalye ng pamilya",
+        "familyDescription": "Wala pang talaan ng sambahayan at mga miyembro ng pamilya."
+      },
+      "id": {
+        "number": "Numero ng Barangay ID",
+        "none": "Walang nakatala",
+        "note": "Itinatakda ang mga numero ng ID kapag may ID na iniisyu mula sa Pamamahala ng Pag-isyu."
+      },
+      "history": {
+        "title": "Kasaysayan ng pag-isyu",
+        "loading": "Nilo-load ang kasaysayan...",
+        "loadError": "Hindi ma-load ang kasaysayan",
+        "draft": "Draft",
+        "columns": {
+          "reference": "Sanggunian",
+          "document": "Dokumento",
+          "issueDate": "Petsa ng pag-isyu",
+          "status": "Katayuan"
+        },
+        "status": {
+          "draft": "Draft",
+          "issued": "Naisyu",
+          "voided": "Na-void"
+        },
+        "empty": {
+          "title": "Wala pang dokumento",
+          "description": "Lalabas dito ang mga dokumentong iniisyu sa residenteng ito."
+        }
+      },
+      "edit": "I-edit ang mga detalye"
+    },
+    "ids": {
+      "summaryAria": "Buod ng Barangay ID",
+      "stats": {
+        "all": {
+          "label": "Mga Residenteng May ID",
+          "description": "Pinakahuling naisyung card"
+        },
+        "valid": {
+          "label": "Mga Wastong ID",
+          "description": "Kasalukuyang talaan"
+        },
+        "expiring": {
+          "label": "Mga ID na Mag-e-expire",
+          "description": "Papalapit na ang expiry"
+        },
+        "expired": {
+          "label": "Mga Expired na ID",
+          "description": "Kailangang suriin"
+        }
+      },
+      "title": "Mga Talaan ng ID",
+      "description": "Pinakahuling naisyung ID ng bawat residente. Suriin ang expiry at ang susunod na hakbang.",
+      "searchLabel": "Hanapin ang mga talaan ng ID",
+      "searchPlaceholder": "Hanapin ang residente, numero ng ID, o sanggunian",
+      "statusFilterLabel": "I-filter ayon sa katayuan",
+      "statusAll": "Lahat ng katayuan",
+      "loading": "Nilo-load ang mga talaan ng ID...",
+      "loadError": {
+        "title": "Hindi ma-load ang mga talaan ng ID",
+        "description": "Suriin ang iyong koneksyon at subukan muli."
+      },
+      "columns": {
+        "resident": "Residente",
+        "idNumber": "Numero ng ID",
+        "card": "Card",
+        "issued": "Naisyu",
+        "validUntil": "May bisa hanggang",
+        "status": "Katayuan",
+        "actions": "Mga Aksyon"
+      },
+      "transaction": {
+        "new": "Bago",
+        "renewal": "Renewal",
+        "replacement": "Kapalit"
+      },
+      "relative": {
+        "today": "ngayon",
+        "inDays_one": "sa loob ng {{count}} araw",
+        "inDays_other": "sa loob ng {{count}} araw",
+        "daysAgo_one": "nag-expire {{count}} araw na ang nakalipas",
+        "daysAgo_other": "nag-expire {{count}} araw na ang nakalipas",
+        "monthsAgo_one": "nag-expire {{count}} buwan na ang nakalipas",
+        "monthsAgo_other": "nag-expire {{count}} buwan na ang nakalipas"
+      },
+      "residentArchived": "Naka-archive ang residente",
+      "renew": "I-renew",
+      "replaceCard": "Palitan ang card",
+      "replaceHint": "Para sa nawala o nasirang card",
+      "empty": {
+        "title": "Walang talaan ng ID na tugma sa iyong paghahanap",
+        "description": "Subukan ang ibang residente, numero ng ID, sanggunian, o katayuan. Lalabas dito ang residente kapag may naisyu nang Barangay ID."
+      }
+    },
+    "lookups": {
+      "street": {
+        "title": "Mga Kalye",
+        "description": "Ginagamit sa mga tirahan ng residente at sa pag-isyu ng dokumento.",
+        "newName": "Pangalan ng bagong kalye",
+        "placeholder": "Ilagay ang pangalan ng kalye",
+        "loading": "Nilo-load ang mga kalye...",
+        "loadError": "Hindi ma-load ang mga kalye",
+        "empty": "Wala pang kalye",
+        "deleteTitle": "Burahin ang kalye?"
+      },
+      "association": {
+        "title": "Mga Asosasyon ng Traysikel",
+        "description": "Ginagamit sa pagtatala ng mga franchise clearance.",
+        "newName": "Pangalan ng bagong asosasyon",
+        "placeholder": "Ilagay ang pangalan ng asosasyon",
+        "loading": "Nilo-load ang mga asosasyon ng traysikel...",
+        "loadError": "Hindi ma-load ang mga asosasyon ng traysikel",
+        "empty": "Wala pang asosasyon ng traysikel",
+        "deleteTitle": "Burahin ang asosasyon?"
+      },
+      "add": "Idagdag",
+      "save": "I-save",
+      "cancel": "Kanselahin",
+      "rename": "Palitan ang pangalan",
+      "delete": "Burahin",
+      "editLabel": "I-edit si {{name}}",
+      "notices": {
+        "added": "Naidagdag ang item sa listahan.",
+        "renamed": "Napalitan ang pangalan ng item sa listahan.",
+        "deleted": "Nabura ang item sa listahan."
+      },
+      "inUse": "Ginagamit na ng isang talaan ang item na ito at hindi ito maaaring burahin. Palitan lamang ang pangalan kung tama ang bagong pangalan para sa mga umiiral na talaan.",
+      "loadErrorDescription": "Suriin ang iyong koneksyon at subukan muli.",
+      "emptyDescription": "Idagdag ang mga pangalang ibinigay at kinumpirma ng tanggapan ng barangay.",
+      "deleteDescription": "Burahin ang {{name}}? Hindi maaaring burahin ang mga item na ginagamit na ng mga talaan ng residente o franchise.",
+      "thisItem": "item na ito",
+      "enterName": "Maglagay ng pangalan.",
+      "itemMissing": "Nawawala ang napiling item sa listahan."
     }
   }
 }

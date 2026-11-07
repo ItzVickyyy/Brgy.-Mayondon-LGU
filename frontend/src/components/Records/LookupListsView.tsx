@@ -1,8 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { Plus, Pencil, Save, Trash2, X } from "lucide-react"
-import { useState, type FormEvent } from "react"
+import i18n from "i18next"
+import { Pencil, Plus, Save, Trash2, X } from "lucide-react"
+import { type FormEvent, useState } from "react"
+import { useTranslation } from "react-i18next"
 
-import { LookupsService, type LookupItem } from "@/client"
+import { type LookupItem, LookupsService } from "@/client"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import {
   EmptyState,
@@ -23,15 +25,16 @@ async function changeLookup(
   id?: number,
 ): Promise<LookupItem | undefined> {
   if (action === "create") {
-    if (!name) throw new Error("Enter a name.")
+    if (!name) throw new Error(i18n.t("records.lookups.enterName"))
     return kind === "street"
       ? (await LookupsService.createStreet({ body: { name } })).data
-      : (await LookupsService.createTricycleAssociation({ body: { name } })).data
+      : (await LookupsService.createTricycleAssociation({ body: { name } }))
+          .data
   }
 
-  if (id === undefined) throw new Error("The selected list item is missing.")
+  if (id === undefined) throw new Error(i18n.t("records.lookups.itemMissing"))
   if (action === "rename") {
-    if (!name) throw new Error("Enter a name.")
+    if (!name) throw new Error(i18n.t("records.lookups.enterName"))
     return kind === "street"
       ? (
           await LookupsService.renameStreet({
@@ -57,21 +60,18 @@ async function changeLookup(
 
 function LookupListPanel({
   kind,
-  title,
-  description,
   items,
   loading,
   failed,
   retry,
 }: {
   kind: LookupKind
-  title: string
-  description: string
   items: LookupItem[]
   loading: boolean
   failed: boolean
   retry: () => void
 }) {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [newName, setNewName] = useState("")
   const [editingId, setEditingId] = useState<number | null>(null)
@@ -81,19 +81,16 @@ function LookupListPanel({
   const [notice, setNotice] = useState("")
 
   const mutation = useMutation({
-    mutationFn: (input: {
-      action: LookupAction
-      name?: string
-      id?: number
-    }) => changeLookup(kind, input.action, input.name, input.id),
+    mutationFn: (input: { action: LookupAction; name?: string; id?: number }) =>
+      changeLookup(kind, input.action, input.name, input.id),
     onSuccess: (_result, input) => {
       setError("")
       setNotice(
         input.action === "create"
-          ? "List item added."
+          ? t("records.lookups.notices.added")
           : input.action === "rename"
-            ? "List item renamed."
-            : "List item deleted.",
+            ? t("records.lookups.notices.renamed")
+            : t("records.lookups.notices.deleted"),
       )
       setNewName("")
       setEditingId(null)
@@ -103,11 +100,12 @@ function LookupListPanel({
     },
     onError: (caught, input) => {
       const failure = readApiError(caught)
-      const status = (caught as { response?: { status?: number } }).response?.status
+      const status = (caught as { response?: { status?: number } }).response
+        ?.status
       setNotice("")
       setError(
         status === 409 && input.action === "delete"
-          ? "This item is already used by a record. It cannot be deleted. Rename it only if the new name is correct for existing records."
+          ? t("records.lookups.inUse")
           : failure.message,
       )
     },
@@ -135,30 +133,40 @@ function LookupListPanel({
   return (
     <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
       <div className="border-b p-4 sm:p-5">
-        <h2 className="font-semibold tracking-tight">{title}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+        <h2 className="font-semibold tracking-tight">
+          {t(`records.lookups.${kind}.title`)}
+        </h2>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t(`records.lookups.${kind}.description`)}
+        </p>
       </div>
 
-      <form onSubmit={submitCreate} className="flex flex-col gap-2 border-b p-4 sm:flex-row">
-        <label className="sr-only" htmlFor={kind + "-new-name"}>
-          New {kind === "street" ? "street" : "association"} name
+      <form
+        onSubmit={submitCreate}
+        className="flex flex-col gap-2 border-b p-4 sm:flex-row"
+      >
+        <label className="sr-only" htmlFor={`${kind}-new-name`}>
+          {t(`records.lookups.${kind}.newName`)}
         </label>
         <input
-          id={kind + "-new-name"}
+          id={`${kind}-new-name`}
           value={newName}
           onChange={(event) => setNewName(event.target.value)}
           className={formControlClass}
-          placeholder={kind === "street" ? "Enter street name" : "Enter association name"}
+          placeholder={t(`records.lookups.${kind}.placeholder`)}
           maxLength={150}
         />
         <Button type="submit" disabled={!newName.trim() || mutation.isPending}>
           <Plus aria-hidden="true" />
-          Add
+          {t("records.lookups.add")}
         </Button>
       </form>
 
       {notice ? (
-        <p role="status" className="border-b px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400">
+        <p
+          role="status"
+          className="border-b px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400"
+        >
           {notice}
         </p>
       ) : null}
@@ -169,26 +177,31 @@ function LookupListPanel({
       ) : null}
 
       {loading ? (
-        <LoadingState title={"Loading " + title.toLowerCase() + "..."} />
+        <LoadingState title={t(`records.lookups.${kind}.loading`)} />
       ) : failed ? (
         <ErrorState
-          title={"Could not load " + title.toLowerCase()}
-          description="Check your connection and try again."
+          title={t(`records.lookups.${kind}.loadError`)}
+          description={t("records.lookups.loadErrorDescription")}
           onRetry={retry}
         />
       ) : items.length === 0 ? (
         <EmptyState
-          title={"No " + title.toLowerCase() + " yet"}
-          description="Add the names supplied and confirmed by the barangay office."
+          title={t(`records.lookups.${kind}.empty`)}
+          description={t("records.lookups.emptyDescription")}
         />
       ) : (
         <ul className="divide-y">
           {items.map((item) => (
-            <li key={item.id} className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <li
+              key={item.id}
+              className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+            >
               {editingId === item.id ? (
                 <>
                   <label className="min-w-0 flex-1">
-                    <span className="sr-only">Edit {item.name}</span>
+                    <span className="sr-only">
+                      {t("records.lookups.editLabel", { name: item.name })}
+                    </span>
                     <input
                       autoFocus
                       value={editingName}
@@ -211,21 +224,33 @@ function LookupListPanel({
                       }
                     >
                       <Save aria-hidden="true" />
-                      Save
+                      {t("records.lookups.save")}
                     </Button>
-                    <Button type="button" size="sm" variant="ghost" onClick={cancelEdit}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="ghost"
+                      onClick={cancelEdit}
+                    >
                       <X aria-hidden="true" />
-                      Cancel
+                      {t("records.lookups.cancel")}
                     </Button>
                   </div>
                 </>
               ) : (
                 <>
-                  <span className="min-w-0 break-words font-medium">{item.name}</span>
+                  <span className="min-w-0 break-words font-medium">
+                    {item.name}
+                  </span>
                   <div className="flex justify-end gap-2">
-                    <Button type="button" size="sm" variant="outline" onClick={() => startEdit(item)}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={() => startEdit(item)}
+                    >
                       <Pencil aria-hidden="true" />
-                      Rename
+                      {t("records.lookups.rename")}
                     </Button>
                     <Button
                       type="button"
@@ -239,7 +264,7 @@ function LookupListPanel({
                       }}
                     >
                       <Trash2 aria-hidden="true" />
-                      Delete
+                      {t("records.lookups.delete")}
                     </Button>
                   </div>
                 </>
@@ -254,16 +279,15 @@ function LookupListPanel({
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null)
         }}
-        title={"Delete " + (kind === "street" ? "street" : "association") + "?"}
-        description={
-          "Delete " +
-          (deleteTarget?.name ?? "this item") +
-          "? Items already used by resident or franchise records cannot be deleted."
-        }
-        confirmLabel="Delete"
+        title={t(`records.lookups.${kind}.deleteTitle`)}
+        description={t("records.lookups.deleteDescription", {
+          name: deleteTarget?.name ?? t("records.lookups.thisItem"),
+        })}
+        confirmLabel={t("records.lookups.delete")}
         destructive
         onConfirm={() => {
-          if (deleteTarget) mutation.mutate({ action: "delete", id: deleteTarget.id })
+          if (deleteTarget)
+            mutation.mutate({ action: "delete", id: deleteTarget.id })
         }}
       />
     </section>
@@ -277,16 +301,13 @@ export function LookupListsView() {
   })
   const associationsQuery = useQuery({
     queryKey: ["lookups", "tricycle-associations"],
-    queryFn: async () =>
-      (await LookupsService.listTricycleAssociations()).data,
+    queryFn: async () => (await LookupsService.listTricycleAssociations()).data,
   })
 
   return (
     <div className="grid gap-4 xl:grid-cols-2">
       <LookupListPanel
         kind="street"
-        title="Streets"
-        description="Used in resident addresses and document issuance."
         items={streetsQuery.data ?? []}
         loading={streetsQuery.isLoading}
         failed={streetsQuery.isError}
@@ -294,8 +315,6 @@ export function LookupListsView() {
       />
       <LookupListPanel
         kind="association"
-        title="Tricycle Associations"
-        description="Used when recording franchise clearances."
         items={associationsQuery.data ?? []}
         loading={associationsQuery.isLoading}
         failed={associationsQuery.isError}
