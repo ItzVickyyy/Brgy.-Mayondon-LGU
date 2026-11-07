@@ -99,9 +99,11 @@ class Settings(BaseSettings):
     FIRST_STAFF_PASSWORD: str | None = None
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
-        if value == "changethis":
+        # "changethis" is the template default; "replace-with-..." is what
+        # .env.example ships, so a copied example is never taken as a real secret.
+        if value == "changethis" or (value or "").startswith("replace-with-"):
             message = (
-                f'The value of {var_name} is "changethis", '
+                f"The value of {var_name} is still a placeholder, "
                 "for security, please change it, at least for deployments."
             )
             if self.FASTAPI_ENV == "development":
