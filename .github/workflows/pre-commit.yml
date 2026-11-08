@@ -4,8 +4,6 @@ on:
   pull_request:
 permissions: {}
 
-env:
-
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
@@ -18,19 +16,9 @@ jobs:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        name: Checkout PR for own repo
+        name: Checkout PR head
         with:
-          # Test the exact PR head commit, not GitHub's synthetic merge commit.
-          ref: ${{ github.head_ref }}
-          # And it needs the full history to be able to compute diffs
-          fetch-depth: 0
-          persist-credentials: false
-      # pre-commit lite ci needs the default checkout configs to work
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        name: Checkout PR for fork
-        with:
-        # To be able to commit it needs the head branch of the PR, the remote one
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: refs/pull/${{ github.event.pull_request.number }}/head
           fetch-depth: 0
           persist-credentials: false
       - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
