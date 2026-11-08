@@ -168,7 +168,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
     signatoryMode: "none", residentNeeds: ["birthDate", "birthPlace", "sex", "civilStatus", "photo", "emergencyContact"],
     fields: [
       { name: "transactionType", label: "Transaction", type: "select", required: true, options: ["New", "Renewal", "Replacement"], group: "main" },
-      { name: "idNumber", label: "Barangay ID number", type: "text", group: "main", help: "Type the number printed on the card. Leave it as shown to keep the resident's current number." },
+      { name: "idNumber", label: "Barangay ID number", type: "text", required: true, group: "main", help: "Type the number printed on the card. Leave it as shown to keep the resident's current number." },
       { name: "validUntil", label: "Valid until", type: "date", required: true, default: "oneYearAfterIssue", group: "main" },
     ],
   },
