@@ -11,7 +11,7 @@ from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func as sa_func
-from sqlmodel import col, select
+from sqlmodel import Session, col, select
 
 from app.api.deps import SessionDep, require_permission
 from app.core.dates import MANILA_TZ, today_manila
@@ -30,6 +30,7 @@ from app.core.report_queries import (
 )
 from app.models import User
 from app.models_foundation import AuditLog, IssuancePurpose, Sector
+from app.models_import import ImportBatch
 from app.models_issuance import Issuance
 from app.models_reports import (
     AccountActivityPublic,
@@ -66,6 +67,23 @@ def _percent(part: int, whole: int) -> float | None:
     return round(part * 100 / whole, 1) if whole else None
 
 
+def _count_committed_imports(session: Session, range_: DateRange) -> int:
+    """Imports finished in the range (Manila days, like the other figures)."""
+    clauses: list[Any] = [
+        col(ImportBatch.status) == "committed",
+        col(ImportBatch.committed_at)
+        < datetime.combine(range_.end + timedelta(days=1), time.min, tzinfo=MANILA_TZ),
+    ]
+    if range_.start is not None:
+        clauses.append(
+            col(ImportBatch.committed_at)
+            >= datetime.combine(range_.start, time.min, tzinfo=MANILA_TZ)
+        )
+    return session.exec(
+        select(sa_func.count()).select_from(ImportBatch).where(*clauses)
+    ).one()
+
+
 @router.get("/summary", response_model=ReportSummary)
 def summary(
     session: SessionDep, _user: ReportsUser, period: PeriodQuery = "month"
@@ -78,6 +96,9 @@ def summary(
         period=period_info(period, today),
         documents_issued=issued,
         records_expiring=count_expiring(session, today, None, "all"),
+        imports_committed=_count_committed_imports(
+            session, resolve_period(period, today)
+        ),
     )
 
 

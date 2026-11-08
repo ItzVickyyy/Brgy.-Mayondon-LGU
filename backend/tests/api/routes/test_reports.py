@@ -617,3 +617,43 @@ def test_no_report_or_dashboard_response_holds_the_health_condition_or_totals_wi
     ):
         text = client.get(f"{REP}/{path}", headers=superuser_token_headers).text
         assert res["first_name"] not in text and res["last_name"] not in text
+
+
+def test_summary_counts_committed_imports(
+    client: TestClient, superuser_token_headers: Headers
+) -> None:
+    def committed() -> int:
+        r = client.get(
+            f"{REP}/summary",
+            headers=superuser_token_headers,
+            params={"period": "overall"},
+        )
+        assert r.status_code == 200, r.text
+        return int(r.json()["imports_committed"])
+
+    before = committed()
+    last = random_lower_string()[:10].capitalize()
+    content = f"First Name,Last Name\nIma,{last}\n".encode()
+    batch = client.post(
+        f"{API}/imports/",
+        headers=superuser_token_headers,
+        files={"file": ("list.csv", content)},
+    ).json()
+    client.put(
+        f"{API}/imports/{batch['id']}/mapping",
+        headers=superuser_token_headers,
+        json={"mapping": batch["suggested_mapping"]},
+    )
+    # Checked but not finished: not counted yet.
+    assert committed() == before
+    r = client.post(
+        f"{API}/imports/{batch['id']}/commit", headers=superuser_token_headers
+    )
+    assert r.status_code == 200, r.text
+    assert committed() == before + 1
+    today = client.get(
+        f"{REP}/summary",
+        headers=superuser_token_headers,
+        params={"period": "today"},
+    ).json()
+    assert today["imports_committed"] >= 1

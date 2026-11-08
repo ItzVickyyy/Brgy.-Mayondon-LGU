@@ -1443,8 +1443,7 @@
         "issued": "Documents Issued",
         "expiring": "Records Expiring",
         "expiringDescription": "Expiring soon or already expired",
-        "imports": "Masterlist Imports",
-        "importsDescription": "Not connected yet"
+        "imports": "Masterlist Imports"
       },
       "summaryError": "Could not load the summary figures",
       "generate": {
@@ -1515,8 +1514,21 @@
         }
       },
       "imports": {
-        "title": "Masterlist imports are not available yet",
-        "description": "Importing a masterlist has not been built, so there is no import history to report."
+        "title": "Latest masterlist imports",
+        "columns": {
+          "date": "Date",
+          "file": "File",
+          "by": "By",
+          "status": "Status",
+          "created": "Created",
+          "updated": "Updated",
+          "skipped": "Skipped",
+          "failed": "Failed"
+        },
+        "empty": {
+          "title": "No masterlist imports yet",
+          "description": "Imports will appear here after a file is uploaded on the Records page."
+        }
       },
       "accounts": {
         "title": "Account activity · {{period}}",
@@ -1534,7 +1546,6 @@
       },
       "notices": {
         "previewBeforeExport": "Preview a report before exporting.",
-        "importsNothing": "Masterlist imports are not available yet, so there is nothing to export.",
         "notLoaded": "The report has not finished loading, so it cannot be exported yet.",
         "csvStarted": "CSV export started for the displayed report.",
         "previewBeforePrint": "Preview a report before printing."

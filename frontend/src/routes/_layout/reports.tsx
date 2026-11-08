@@ -13,7 +13,7 @@ import {
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { ReportsService } from "@/client"
+import { ImportsService, ReportsService } from "@/client"
 import {
   EmptyState,
   ErrorState,
@@ -50,7 +50,6 @@ type ReportType = "issuances" | "purpose" | "expiry" | "imports" | "accounts"
 
 type NoticeKey =
   | "previewBeforeExport"
-  | "importsNothing"
   | "notLoaded"
   | "csvStarted"
   | "previewBeforePrint"
@@ -76,6 +75,21 @@ const expiryStatusKeys = {
 const expiryStatusStyleKey: Record<string, string> = {
   expiring_soon: "Expiring soon",
   expired: "Expired",
+}
+
+const importStatusKeys = {
+  committed: "records.import.status.committed",
+  failed: "records.import.status.failed",
+  cancelled: "records.import.status.cancelled",
+  expired: "records.import.status.expired",
+  uploaded: "records.import.status.uploaded",
+  mapped: "records.import.status.mapped",
+} as const satisfies Record<string, ParseKeys>
+
+// The badge style is looked up by the English status word.
+const importStatusStyleKey: Record<string, string> = {
+  committed: "Completed",
+  failed: "Failed",
 }
 
 const roleKeys = {
@@ -202,16 +216,26 @@ function Reports() {
     enabled: isAdmin && applied?.report === "accounts",
   })
 
+  // Import history is a list of the latest imports, so the period does not apply.
+  const importsQuery = useQuery({
+    queryKey: ["reports-imports"],
+    queryFn: async () =>
+      (await ImportsService.listImports({ query: { limit: 100 } })).data,
+    enabled: isAdmin && applied?.report === "imports",
+  })
+
   const typeRows = typeQuery.data?.data ?? []
   const purposeRows = purposeQuery.data?.data ?? []
   const expiringRows = expiryQuery.data?.data ?? []
   const accountRows = accountQuery.data?.data ?? []
+  const importRows = importsQuery.data?.data ?? []
 
   const resetKey = `${applied?.report}|${applied?.period}`
   const typePagination = usePagination(typeRows, 10, resetKey)
   const purposePagination = usePagination(purposeRows, 10, resetKey)
   const expiringPagination = usePagination(expiringRows, 10, resetKey)
   const accountPagination = usePagination(accountRows, 10, resetKey)
+  const importsPagination = usePagination(importRows, 10, resetKey)
 
   if (!isAdmin) return <NoPermission />
 
@@ -297,6 +321,31 @@ function Reports() {
         ],
       ]
     }
+    if (applied.report === "imports") {
+      if (!importsQuery.data) return null
+      return [
+        [
+          tEn("admin.reports.imports.columns.date"),
+          tEn("admin.reports.imports.columns.file"),
+          tEn("admin.reports.imports.columns.by"),
+          tEn("admin.reports.imports.columns.status"),
+          tEn("admin.reports.imports.columns.created"),
+          tEn("admin.reports.imports.columns.updated"),
+          tEn("admin.reports.imports.columns.skipped"),
+          tEn("admin.reports.imports.columns.failed"),
+        ],
+        ...importRows.map((row) => [
+          formatMoment(row.created_at, FIXED_LOCALE),
+          row.file_name,
+          row.created_by_email ?? "",
+          labelOf(importStatusKeys, row.status, tEn),
+          row.result?.created ?? "",
+          row.result?.updated ?? "",
+          row.result?.skipped ?? "",
+          row.result?.failed ?? "",
+        ]),
+      ]
+    }
     if (applied.report === "accounts") {
       if (!accountQuery.data) return null
       return [
@@ -329,10 +378,6 @@ function Reports() {
   function exportReport() {
     if (!applied) {
       setNotice("previewBeforeExport")
-      return
-    }
-    if (applied.report === "imports") {
-      setNotice("importsNothing")
       return
     }
     const csvRows = buildCsvRows()
@@ -619,11 +664,84 @@ function Reports() {
     }
 
     if (applied.report === "imports") {
+      if (importsQuery.isLoading)
+        return <LoadingState title={t("admin.reports.loading")} />
+      if (importsQuery.isError || !importsQuery.data)
+        return loadFailed(() => importsQuery.refetch())
+      if (importRows.length === 0)
+        return (
+          <EmptyState
+            title={t("admin.reports.imports.empty.title")}
+            description={t("admin.reports.imports.empty.description")}
+          />
+        )
       return (
-        <EmptyState
-          title={t("admin.reports.imports.title")}
-          description={t("admin.reports.imports.description")}
-        />
+        <div className="overflow-x-auto">
+          <h3 className="mb-3 font-semibold tracking-tight">
+            {t("admin.reports.imports.title")}
+          </h3>
+          <table className="w-full min-w-[900px] text-left text-sm">
+            <thead className={thead}>
+              <tr>
+                {(
+                  [
+                    "date",
+                    "file",
+                    "by",
+                    "status",
+                    "created",
+                    "updated",
+                    "skipped",
+                    "failed",
+                  ] as const
+                ).map((id) => (
+                  <th key={id} className={th}>
+                    {t(`admin.reports.imports.columns.${id}`)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {importsPagination.paginatedItems.map((row) => (
+                <tr
+                  key={row.id}
+                  className="transition-colors hover:bg-muted/30"
+                >
+                  <td className={td}>{formatMoment(row.created_at)}</td>
+                  <td className={td}>{row.file_name}</td>
+                  <td className={td}>{row.created_by_email ?? "—"}</td>
+                  <td className={td}>
+                    <Badge
+                      variant="outline"
+                      className={
+                        statusStyles[
+                          importStatusStyleKey[row.status] ?? "Pending"
+                        ]
+                      }
+                    >
+                      {labelOf(importStatusKeys, row.status, t)}
+                    </Badge>
+                  </td>
+                  {(["created", "updated", "skipped", "failed"] as const).map(
+                    (id) => (
+                      <td key={id} className={`${td} tabular-nums`}>
+                        {row.result ? (row.result[id] ?? 0) : "—"}
+                      </td>
+                    ),
+                  )}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <TablePagination
+            start={importsPagination.start}
+            end={importsPagination.end}
+            total={importsPagination.total}
+            pageIndex={importsPagination.pageIndex}
+            pageCount={importsPagination.pageCount}
+            onPageChange={importsPagination.setPageIndex}
+          />
+        </div>
       )
     }
 
@@ -769,8 +887,8 @@ function Reports() {
         <StatCard
           icon={FileUp}
           label={t("admin.reports.stats.imports")}
-          value="—"
-          description={t("admin.reports.stats.importsDescription")}
+          value={summaryQuery.data?.imports_committed ?? "—"}
+          description={t(periodKeys[period])}
         />
       </div>
       {summaryQuery.isError ? (

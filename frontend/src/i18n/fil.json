@@ -1443,8 +1443,7 @@
         "issued": "Mga Dokumentong Naisyu",
         "expiring": "Mga Talaang Mag-e-expire",
         "expiringDescription": "Malapit nang mag-expire o nag-expire na",
-        "imports": "Mga Import ng Masterlist",
-        "importsDescription": "Hindi pa konektado"
+        "imports": "Mga Import ng Masterlist"
       },
       "summaryError": "Hindi ma-load ang mga buod na bilang",
       "generate": {
@@ -1515,8 +1514,21 @@
         }
       },
       "imports": {
-        "title": "Hindi pa magagamit ang import ng masterlist",
-        "description": "Hindi pa nagagawa ang pag-import ng masterlist, kaya wala pang kasaysayan ng import na maiuulat."
+        "title": "Mga pinakabagong pag-import ng masterlist",
+        "columns": {
+          "date": "Petsa",
+          "file": "File",
+          "by": "Ni",
+          "status": "Katayuan",
+          "created": "Nagawa",
+          "updated": "Na-update",
+          "skipped": "Nilaktawan",
+          "failed": "Nabigo"
+        },
+        "empty": {
+          "title": "Wala pang pag-import ng masterlist",
+          "description": "Lalabas dito ang mga pag-import pagkatapos mag-upload ng file sa pahina ng Records."
+        }
       },
       "accounts": {
         "title": "Aktibidad ng account · {{period}}",
@@ -1534,7 +1546,6 @@
       },
       "notices": {
         "previewBeforeExport": "I-preview muna ang ulat bago mag-export.",
-        "importsNothing": "Hindi pa magagamit ang import ng masterlist, kaya walang maie-export.",
         "notLoaded": "Hindi pa tapos mag-load ang ulat, kaya hindi pa ito maie-export.",
         "csvStarted": "Nagsimula na ang pag-export ng CSV para sa ipinapakitang ulat.",
         "previewBeforePrint": "I-preview muna ang ulat bago mag-print."

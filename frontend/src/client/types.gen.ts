@@ -1746,6 +1746,10 @@ export type ReportSummary = {
      * Records Expiring
      */
     records_expiring: number;
+    /**
+     * Imports Committed
+     */
+    imports_committed: number;
 };
 
 /**

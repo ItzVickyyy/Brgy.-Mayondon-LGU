@@ -1,6 +1,7 @@
 // Import Masterlist tab against the real backend (System Administrator).
 // Fictional names only. A random suffix keeps repeated runs from matching
 // residents created by an earlier run.
+import { readFileSync } from "node:fs"
 import { expect, test } from "@playwright/test"
 
 test("upload, map, check and import a small fictional masterlist", async ({
@@ -75,4 +76,22 @@ test("upload, map, check and import a small fictional masterlist", async ({
     .first()
     .fill(`Alma${tag}`)
   await expect(page.getByText(`Alma${tag} Testerio`).first()).toBeVisible()
+
+  // Reports lists the import, counts it, and exports an English CSV.
+  await page.goto("/reports")
+  await page.locator("select").first().selectOption("imports")
+  await page
+    .getByRole("button", { name: "Preview Report", exact: true })
+    .click()
+  const reportRow = page.getByRole("row", {
+    name: new RegExp(`masterlist-${tag}.csv`),
+  })
+  await expect(reportRow).toContainText("Completed")
+  const downloadPromise = page.waitForEvent("download")
+  await page.getByRole("button", { name: "Export", exact: true }).click()
+  const exported = readFileSync(await (await downloadPromise).path(), "utf8")
+  expect(exported.split("\r\n")[0]).toBe(
+    '"Date","File","By","Status","Created","Updated","Skipped","Failed"',
+  )
+  expect(exported).toContain(`masterlist-${tag}.csv`)
 })

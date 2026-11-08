@@ -62,6 +62,7 @@ class ReportSummary(SQLModel):
     period: PeriodInfo
     documents_issued: int
     records_expiring: int  # expiring soon or already expired, latest record each
+    imports_committed: int  # masterlist imports finished in the period
 
 
 class IssuanceTypeRow(SQLModel):
