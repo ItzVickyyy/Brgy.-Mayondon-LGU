@@ -31,9 +31,14 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
+import i18n from "@/i18n"
 import { isSystemAdministrator } from "@/lib/access"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
-import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
+import {
+  FIXED_LOCALE,
+  formatLocaleDate,
+  formatLocaleNumber,
+} from "@/lib/locale"
 
 export const Route = createFileRoute("/_layout/reports")({
   component: Reports,
@@ -85,35 +90,45 @@ function labelOf(keys: Record<string, ParseKeys>, value: string, t: TFunction) {
 }
 
 // Business dates ("YYYY-MM-DD") are formatted without time zones.
-function formatReportDate(value: string) {
+function formatReportDate(value: string, locale?: string) {
   const [year, month, day] = value.split("-").map(Number)
-  return formatLocaleDate(new Date(year, month - 1, day), {
-    month: "short",
-    day: "2-digit",
-    year: "numeric",
-  })
+  return formatLocaleDate(
+    new Date(year, month - 1, day),
+    {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    },
+    locale,
+  )
 }
 
-function formatMoment(value: string | null) {
+function formatMoment(value: string | null, locale?: string) {
   return value
-    ? formatLocaleDate(new Date(value), {
-        month: "short",
-        day: "2-digit",
-        year: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        timeZone: "Asia/Manila",
-      })
+    ? formatLocaleDate(
+        new Date(value),
+        {
+          month: "short",
+          day: "2-digit",
+          year: "numeric",
+          hour: "numeric",
+          minute: "2-digit",
+          timeZone: "Asia/Manila",
+        },
+        locale,
+      )
     : "—"
 }
 
-function formatShare(value: number | null) {
-  return value === null ? "—" : `${formatLocaleNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
+function formatShare(value: number | null, locale?: string) {
+  return value === null
+    ? "—"
+    : `${formatLocaleNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 }, locale)}%`
 }
 
-function formatChange(value: number | null) {
+function formatChange(value: number | null, locale?: string) {
   if (value === null) return "—"
-  return `${value > 0 ? "+" : ""}${formatLocaleNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
+  return `${value > 0 ? "+" : ""}${formatLocaleNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 }, locale)}%`
 }
 
 function daysText(daysLeft: number, t: TFunction) {
@@ -207,27 +222,30 @@ function Reports() {
     setNotice("")
   }
 
+  // The CSV export is always English (owner decision, Nov 8), whatever the
+  // interface language is: headers, labels, dates and numbers all use these.
   function buildCsvRows(): (string | number)[][] | null {
     if (!applied) return null
+    const tEn = i18n.getFixedT("en")
     if (applied.report === "issuances") {
       if (!typeQuery.data) return null
       return [
         [
-          t("admin.reports.issuances.columns.type"),
-          t("admin.reports.issuances.columns.issued"),
-          t("admin.reports.issuances.columns.voided"),
-          t("admin.reports.issuances.columns.share"),
-          t("admin.reports.issuances.columns.change"),
+          tEn("admin.reports.issuances.columns.type"),
+          tEn("admin.reports.issuances.columns.issued"),
+          tEn("admin.reports.issuances.columns.voided"),
+          tEn("admin.reports.issuances.columns.share"),
+          tEn("admin.reports.issuances.columns.change"),
         ],
         ...typeRows.map((row) => [
-          documentTypeLabel(row.code, row.name, t),
+          documentTypeLabel(row.code, row.name, tEn),
           row.issued,
           row.voided,
-          formatShare(row.share_percent),
-          formatChange(row.change_percent),
+          formatShare(row.share_percent, FIXED_LOCALE),
+          formatChange(row.change_percent, FIXED_LOCALE),
         ]),
         [
-          t("admin.reports.total"),
+          tEn("admin.reports.total"),
           typeQuery.data.total_issued,
           typeQuery.data.total_voided,
           "",
@@ -239,39 +257,41 @@ function Reports() {
       if (!purposeQuery.data) return null
       return [
         [
-          t("admin.reports.purpose.columns.purpose"),
-          t("admin.reports.purpose.columns.issued"),
-          t("admin.reports.purpose.columns.share"),
+          tEn("admin.reports.purpose.columns.purpose"),
+          tEn("admin.reports.purpose.columns.issued"),
+          tEn("admin.reports.purpose.columns.share"),
         ],
         ...purposeRows.map((row) => [
-          row.purpose_id === null ? t("admin.reports.noPurpose") : row.purpose,
+          row.purpose_id === null
+            ? tEn("admin.reports.noPurpose")
+            : row.purpose,
           row.issued,
-          formatShare(row.share_percent),
+          formatShare(row.share_percent, FIXED_LOCALE),
         ]),
-        [t("admin.reports.total"), purposeQuery.data.total_issued, ""],
+        [tEn("admin.reports.total"), purposeQuery.data.total_issued, ""],
       ]
     }
     if (applied.report === "expiry") {
       if (!expiryQuery.data) return null
       return [
         [
-          t("admin.reports.expiry.columns.resident"),
-          t("admin.reports.expiry.columns.record"),
-          t("admin.reports.expiry.columns.reference"),
-          t("admin.reports.expiry.columns.expires"),
-          t("admin.reports.expiry.columns.status"),
+          tEn("admin.reports.expiry.columns.resident"),
+          tEn("admin.reports.expiry.columns.record"),
+          tEn("admin.reports.expiry.columns.reference"),
+          tEn("admin.reports.expiry.columns.expires"),
+          tEn("admin.reports.expiry.columns.status"),
         ],
         ...expiringRows.map((row) => [
           row.resident_name,
-          labelOf(kindKeys, row.kind, t),
+          labelOf(kindKeys, row.kind, tEn),
           row.reference_no,
-          formatReportDate(row.expires_on),
-          labelOf(expiryStatusKeys, row.status, t),
+          formatReportDate(row.expires_on, FIXED_LOCALE),
+          labelOf(expiryStatusKeys, row.status, tEn),
         ]),
         [
-          t("admin.reports.total"),
+          tEn("admin.reports.total"),
           expiringRows.length,
-          t("admin.reports.expiry.csvRecords"),
+          tEn("admin.reports.expiry.csvRecords"),
           "",
           "",
         ],
@@ -281,21 +301,21 @@ function Reports() {
       if (!accountQuery.data) return null
       return [
         [
-          t("admin.reports.accounts.columns.user"),
-          t("admin.reports.accounts.columns.role"),
-          t("admin.reports.accounts.columns.issued"),
-          t("admin.reports.accounts.columns.changed"),
-          t("admin.reports.accounts.columns.last"),
+          tEn("admin.reports.accounts.columns.user"),
+          tEn("admin.reports.accounts.columns.role"),
+          tEn("admin.reports.accounts.columns.issued"),
+          tEn("admin.reports.accounts.columns.changed"),
+          tEn("admin.reports.accounts.columns.last"),
         ],
         ...accountRows.map((row) => [
           row.full_name || row.email,
-          labelOf(roleKeys, row.role, t),
+          labelOf(roleKeys, row.role, tEn),
           row.documents_issued,
           row.records_changed,
-          formatMoment(row.last_activity),
+          formatMoment(row.last_activity, FIXED_LOCALE),
         ]),
         [
-          t("admin.reports.total"),
+          tEn("admin.reports.total"),
           "",
           accountRows.reduce((total, row) => total + row.documents_issued, 0),
           accountRows.reduce((total, row) => total + row.records_changed, 0),
