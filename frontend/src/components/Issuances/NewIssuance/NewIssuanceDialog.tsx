@@ -113,6 +113,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const [duplicate, setDuplicate] = useState<{ referenceNo: string; issueDate: string } | null>(null)
   const [formError, setFormError] = useState("")
   const [discardOpen, setDiscardOpen] = useState(false)
+  const [changeResidentOpen, setChangeResidentOpen] = useState(false)
   const [attempted, setAttempted] = useState(false)
   const [quickAttempted, setQuickAttempted] = useState(false)
   const [quickSaving, setQuickSaving] = useState(false)
@@ -496,8 +497,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     await saveChain.current
     const id = draftIdRef.current
     if (!id) return
+    const removed = await issuanceApi.deleteDraft(id)
+    if (!removed) throw new Error(t("issuances.new.errors.deleteDraft"))
     draftIdRef.current = null
-    await issuanceApi.deleteDraft(id)
     onDraftRemoved?.(id)
   }
 
@@ -610,17 +612,34 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   }
 
   async function discardAndClose() {
-    await removeDraft()
-    resetDialog()
-    onOpenChange(false)
+    try {
+      await removeDraft()
+      resetDialog()
+      onOpenChange(false)
+    } catch (error) {
+      setDiscardOpen(false)
+      setFormError(error instanceof Error ? error.message : t("issuances.new.errors.deleteDraft"))
+    }
   }
 
-  /** Close now. The automatic draft stays in the list so the work is not lost. */
+  /** Close only after the latest form values are safely saved. */
   async function closeKeepingDraft() {
-    if (selectedResident && draftSignature !== lastSavedRef.current) await persistDraft(true)
-    await saveChain.current
-    resetDialog()
-    onOpenChange(false)
+    setSaving(true)
+    try {
+      if (selectedResident && draftSignature !== lastSavedRef.current) {
+        const record = await persistDraft(false)
+        if (!record) return
+      }
+      await saveChain.current
+      if (selectedResident && draftSignature !== lastSavedRef.current) {
+        setFormError(t("issuances.new.errors.saveDraft"))
+        return
+      }
+      resetDialog()
+      onOpenChange(false)
+    } finally {
+      setSaving(false)
+    }
   }
 
   function resetDialog() {
@@ -646,6 +665,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setEditingResident(false)
     setPrintNotice("")
     setDiscardOpen(false)
+    setChangeResidentOpen(false)
     setQuickAdd(emptyQuickAdd)
     draftIdRef.current = null
     restoredDraftRef.current = ""
@@ -979,7 +999,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                     <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? t("issuances.new.resident.yearsOld", { age: calculateAge(selectedResident.birthdate, issueDate) }) : t("issuances.new.resident.birthdateNotRecorded")} · {selectedResident.civilStatus ? civilStatusLabel(selectedResident.civilStatus, t) : t("issuances.new.resident.civilStatusNotRecorded")}</p>
                   </div>
                 </div>
-                <div className="flex shrink-0 flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); setEditingResident(false); form.setValue("residentId", ""); setResidentQuery(""); setQuickAdd(emptyQuickAdd); setQuickAttempted(false); setQuickDuplicateSignature(null); setFormError("") }}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
+                <div className="flex shrink-0 flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" onClick={() => setChangeResidentOpen(true)}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
               </div> : <div className="space-y-3">
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3.5 top-3.5 size-5 text-muted-foreground" aria-hidden="true" />
@@ -1098,6 +1118,41 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <ConfirmDialog
+      open={changeResidentOpen}
+      onOpenChange={setChangeResidentOpen}
+      title={t("issuances.new.changeResident.title")}
+      description={t("issuances.new.changeResident.description")}
+      confirmLabel={t("issuances.new.changeResident.confirm")}
+      destructive
+      onConfirm={() => {
+        void (async () => {
+          setSaving(true)
+          try {
+            await removeDraft()
+            setSelectedResident(null)
+            setEditingResident(false)
+            setResidentQuery("")
+            setSearchedQuery("")
+            setSearchFailed(false)
+            form.setValue("residentId", "", { shouldDirty: true })
+            setResidentUpdates({})
+            setAddressParts({ houseNumber: "", street: "", purok: 1 })
+            setSelectedSector("")
+            setSectorManuallySelected(false)
+            setQuickAdd(emptyQuickAdd)
+            setQuickAttempted(false)
+            setQuickDuplicateSignature(null)
+            setDuplicate(null)
+            setFormError("")
+          } catch (error) {
+            setFormError(error instanceof Error ? error.message : t("issuances.new.errors.deleteDraft"))
+          } finally {
+            setSaving(false)
+          }
+        })()
+      }}
+    />
     <ConfirmDialog
       open={pendingDocumentType !== null}
       onOpenChange={(nextOpen) => { if (!nextOpen) setPendingDocumentType(null) }}
