@@ -5,14 +5,13 @@ on:
 permissions: {}
 
 env:
-  CAN_PUSH: ${{ github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]' }}
+  SAME_REPO_PR: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
 
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
     timeout-minutes: 5
     steps:
       - name: Dump GitHub context
@@ -21,7 +20,7 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         name: Checkout PR for own repo
-        if: env.CAN_PUSH == 'true'
+        if: env.SAME_REPO_PR == 'true'
         with:
           # To be able to commit it needs to fetch the head of the branch, not the
           # merge commit
@@ -32,7 +31,7 @@ jobs:
       # pre-commit lite ci needs the default checkout configs to work
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         name: Checkout PR for fork
-        if: env.CAN_PUSH == 'false'
+        if: env.SAME_REPO_PR == 'false'
         with:
         # To be able to commit it needs the head branch of the PR, the remote one
           ref: ${{ github.event.pull_request.head.sha }}
@@ -68,25 +67,6 @@ jobs:
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Get PR Push token
-        id: pr-push
-        if: env.CAN_PUSH == 'true' && steps.changes.outputs.changed == 'true'
-        uses: tiangolo/pr-push@f336b3817f32ea9b8273a8c15f8ecb739ac38167 # 0.0.4
-      - name: Commit and push changes
-        if: env.CAN_PUSH == 'true' && steps.changes.outputs.changed == 'true'
-        env:
-          GH_TOKEN: ${{ steps.pr-push.outputs.token }}
-        run: |
-          git config user.name "pr-push[bot]"
-          git config user.email "pr-push[bot]@users.noreply.github.com"
-          gh auth setup-git
-          git add -A
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "🎨 Auto format and update with pre-commit"
-            git push
           fi
       - uses: pre-commit-ci/lite-action@5d6cc0eb514c891a40562a58a8e71576c5c7fb43 # v1.1.0
         if: env.CAN_PUSH == 'false'
