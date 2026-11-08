@@ -177,7 +177,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     const detailsDirty = Object.entries(current.details as unknown as Record<string, unknown>).some(([key, value]) => {
       const defaults = defaultDetails(current.documentType) as unknown as Record<string, unknown>
       return JSON.stringify(value) !== JSON.stringify(defaults[key])
-    }) || Boolean(current.purposeText?.trim()) || Boolean(current.identification?.idNumber?.trim()) || Boolean(current.payment?.officialReceiptNo?.trim()) || sectorManuallySelected
+    }) || Boolean(current.purposeText?.trim()) || Boolean(current.identification?.idNumber?.trim()) || Boolean(current.payment?.officialReceiptNo?.trim()) || Boolean(current.remarks?.trim() && current.remarks !== (current.documentType === "BARANGAY_CLEARANCE" ? "NO DEROGATORY RECORD ON FILE" : "")) || sectorManuallySelected
     if (detailsDirty) { setPendingDocumentType(nextCode); return }
     applyDocumentType(nextCode)
   }
@@ -350,7 +350,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     let control: ReactNode
     if (field.type === "combobox") {
       control = <ComboField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} options={fieldOptions} invalid={invalid} describedBy={describedBy} />
-    } else if (field.type === "select" || field.type === "radio") {
+    } else if (field.type === "radio") {
+      control = <ChoiceRow id={fieldId} label={fieldLabel(field.label, t)} value={String(value)} options={fieldOptions} optionLabel={(option) => fieldOptionLabel(field.name, option, t)} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
+    } else if (field.type === "select") {
       control = <SelectField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} options={fieldOptions.map((option) => ({ value: normalizedOptionValue(field.name, option), label: fieldOptionLabel(field.name, option, t) }))} invalid={invalid} describedBy={describedBy} />
     } else if (field.type === "multiselect") {
       const current = Array.isArray(value) ? value as string[] : []
@@ -867,7 +869,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     ...(needsPhoto ? [{ label: "Photo", value: selectedResident && (residentUpdates.photoUrl || selectedResident.photoUrl) ? t("issuances.new.previewRows.taken") : "" }] : []),
     { label: "Date on document", value: issueDate },
     ...(config.signatoryMode === "select" ? [{ label: "Signatory", value: currentOfficials.find((official) => official.id === form.watch("signatoryOfficialId"))?.name ?? "________________________" }] : []),
-    ...config.fields.map((field) => ({ label: field.label, value: previewValue(field) })),
+    ...config.fields.filter((field) => field.name !== "remarks").map((field) => ({ label: field.label, value: previewValue(field) })),
+    { label: "Remarks", value: form.watch("remarks") ?? "" },
     ...(config.residentNeeds.includes("residentSince") ? [{ label: documentType === "RESIDENCY" ? "Residing since" : "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (documentType === "RESIDENCY") return source.residentSinceBirth || source.residentSince === 0 ? t("issuances.new.previewRows.sinceBirth") : source.residentSince === undefined ? "" : String(source.residentSince); if (source.residentSinceBirth) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return !source.residentSince ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
   ]
 
@@ -910,7 +913,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
 
   // "residentSince" is a resident-record value (asked under step 2 only when missing), so it is not asked a second time here.
-  const detailFields = fieldsByGroup("main").filter((field) => fieldVisible(field) && field.name !== "residentSince")
+  const detailFields = fieldsByGroup("main").filter((field) => fieldVisible(field) && field.name !== "residentSince" && field.name !== "remarks")
   const requirementFields = [...fieldsByGroup("identity"), ...fieldsByGroup("payment")].filter(fieldVisible)
   const hasRequirements = requirementFields.length > 0
   const signatoryMissing = config.signatoryMode === "select" && availableSignatories.length > 0 && !form.watch("signatoryOfficialId")
@@ -1058,6 +1061,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                   {detailFields.filter((field) => field.name === "purpose" || field.name === "addressedToOffice").map(renderField)}
                 </div>
               ) : <div className="grid items-start gap-4 sm:grid-cols-2">{detailFields.map(renderField)}</div> : <p className="text-sm text-muted-foreground">{t("issuances.new.detailsStep.noExtra")}</p>}
+              <div className={fieldLabelClass}>
+                <label htmlFor="issuance-remarks">{fieldLabel("Remarks", t)}</label>
+                <input id="issuance-remarks" value={form.watch("remarks") ?? ""} onChange={(event) => form.setValue("remarks", event.target.value, { shouldDirty: true })} className={formControlClass} />
+              </div>
               {config.signatoryMode === "select" ? <div className={fieldLabelClass}>
                 <label htmlFor="issuance-signatoryOfficialId">{t("issuances.new.detailsStep.signatory")} {availableSignatories.length > 0 ? <span className="text-destructive">*</span> : null}</label>
                 {availableSignatories.length > 0 ? <SelectField id="issuance-signatoryOfficialId" value={form.watch("signatoryOfficialId") ?? ""} onChange={(next) => form.setValue("signatoryOfficialId", next, { shouldDirty: true })} placeholder={t("issuances.new.detailsStep.chooseOfficial")} invalid={Boolean(readErrorMessage(form.formState.errors.signatoryOfficialId)) || (attempted && signatoryMissing)} describedBy={readErrorMessage(form.formState.errors.signatoryOfficialId) ? "issuance-signatory-error" : undefined} options={availableSignatories.map((official) => ({ value: official.id, label: `${official.name} · ${official.position}` }))} /> : <p className="rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">{t("issuances.new.detailsStep.noOfficials")}</p>}
