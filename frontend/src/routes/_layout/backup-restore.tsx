@@ -1,3 +1,4 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { ParseKeys, TFunction } from "i18next"
 import {
@@ -12,6 +13,7 @@ import {
 import { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
+import { type BackupRunPublic, BackupsService } from "@/client"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
 import { NoPermission } from "@/components/Common/NoPermission"
@@ -25,53 +27,37 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
+import useCustomToast from "@/hooks/useCustomToast"
 import { isSystemAdministrator } from "@/lib/access"
+import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
+import { handleError } from "@/utils"
 
 export const Route = createFileRoute("/_layout/backup-restore")({
   component: BackupRestore,
   head: () => ({ meta: [{ title: pageTitle("Backup and Restore") }] }),
 })
 
-type BackupStatus = "Verified" | "Not checked" | "Failed"
-
-type BackupRecord = {
-  name: string
-  createdAt: string
-  date: string
-  type: "Scheduled" | "Manual"
-  createdBy?: string
-  size: string
-  location: "External drive" | "This computer only"
-  status: BackupStatus
-  failureReason?: string
-}
-
-const sampleBackups: BackupRecord[] = []
+type BackupStatus = "Verified" | "Not checked" | "Running" | "Failed"
 
 const columnIds = [
   "backup",
   "created",
   "type",
   "size",
-  "location",
   "check",
   "actions",
 ] as const
 
 // Stored values stay English; these maps give the label that is shown.
 const typeKeys = {
-  Scheduled: "admin.backup.types.Scheduled",
-  Manual: "admin.backup.types.Manual",
-} as const satisfies Record<BackupRecord["type"], ParseKeys>
-
-const locationKeys = {
-  "External drive": "admin.backup.locations.External drive",
-  "This computer only": "admin.backup.locations.This computer only",
-} as const satisfies Record<BackupRecord["location"], ParseKeys>
+  scheduled: "admin.backup.types.Scheduled",
+  manual: "admin.backup.types.Manual",
+} as const satisfies Record<string, ParseKeys>
 
 const statusKeys = {
   Verified: "admin.backup.statuses.Verified",
   "Not checked": "admin.backup.statuses.Not checked",
+  Running: "admin.backup.statuses.Running",
   Failed: "admin.backup.statuses.Failed",
 } as const satisfies Record<BackupStatus, ParseKeys>
 
@@ -80,9 +66,34 @@ function labelOf(keys: Record<string, ParseKeys>, value: string, t: TFunction) {
   return key ? t(key) : value
 }
 
+function statusOf(run: BackupRunPublic): BackupStatus {
+  if (run.status === "failed") return "Failed"
+  if (run.status === "running") return "Running"
+  return run.verified_at ? "Verified" : "Not checked"
+}
+
+function formatMoment(value: string) {
+  return formatLocaleDate(new Date(value), {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "Asia/Manila",
+  })
+}
+
+function formatSize(bytes: number | null) {
+  if (bytes === null) return "—"
+  const options = { maximumFractionDigits: 1 }
+  if (bytes >= 1024 * 1024)
+    return `${formatLocaleNumber(bytes / (1024 * 1024), options)} MB`
+  return `${formatLocaleNumber(Math.max(1, bytes / 1024), options)} KB`
+}
+
 type Notice =
-  | { key: "verify" | "copy" | "download"; name: string }
-  | { key: "restoreConfirmed"; name?: undefined }
+  | { key: "created" | "verified" | "downloaded"; name: string }
+  | { key: "restoreChecked"; name: string }
 
 // The word the person must type; it is compared in code, so it is never translated.
 const RESTORE_WORD = "RESTORE"
@@ -90,27 +101,99 @@ const RESTORE_WORD = "RESTORE"
 function BackupRestore() {
   const { t } = useTranslation()
   const { user } = useAuth()
+  const queryClient = useQueryClient()
+  const { showErrorToast } = useCustomToast()
+  const admin = isSystemAdministrator(user)
   const [notice, setNotice] = useState<Notice | null>(null)
-  const backups = sampleBackups
   const [confirmRestore, setConfirmRestore] = useState(false)
   const [selectedBackup, setSelectedBackup] = useState("")
   const [restoreConfirmation, setRestoreConfirmation] = useState("")
+  const [restoreCommand, setRestoreCommand] = useState<{
+    name: string
+    command: string
+  } | null>(null)
 
-  const sortedBackups = [...backups].sort((a, b) =>
-    b.createdAt.localeCompare(a.createdAt),
+  const listQuery = useQuery({
+    queryKey: ["backups"],
+    queryFn: async () => (await BackupsService.listBackups()).data,
+    enabled: admin,
+  })
+  const backups = listQuery.data?.data ?? []
+  const toolAvailable = listQuery.data?.tool_available ?? true
+  const keepCopies = listQuery.data?.keep_copies
+
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["backups"] })
+
+  const createMutation = useMutation({
+    mutationFn: async () => (await BackupsService.createBackup()).data,
+    onSuccess: (run) => {
+      if (run.status === "ok")
+        setNotice({ key: "created", name: run.file_name ?? "" })
+    },
+    onError: (err: Error) => handleError.call(showErrorToast, err),
+    onSettled: refresh,
+  })
+  const verifyMutation = useMutation({
+    mutationFn: async (id: string) =>
+      (await BackupsService.verifyBackup({ path: { backup_id: id } })).data,
+    onSuccess: (run) => {
+      if (run.status === "ok")
+        setNotice({ key: "verified", name: run.file_name ?? "" })
+    },
+    onError: (err: Error) => handleError.call(showErrorToast, err),
+    onSettled: refresh,
+  })
+  const restoreMutation = useMutation({
+    mutationFn: async (id: string) =>
+      (await BackupsService.requestRestore({ path: { backup_id: id } })).data,
+    onSuccess: (result) => {
+      setRestoreCommand({ name: result.file_name, command: result.command })
+      setNotice({ key: "restoreChecked", name: result.file_name })
+      setConfirmRestore(false)
+      setRestoreConfirmation("")
+    },
+    onError: (err: Error) => handleError.call(showErrorToast, err),
+    onSettled: refresh,
+  })
+
+  async function download(run: BackupRunPublic) {
+    try {
+      const response = await BackupsService.downloadBackup({
+        path: { backup_id: run.id },
+        responseType: "blob",
+      } as Parameters<typeof BackupsService.downloadBackup>[0])
+      const url = URL.createObjectURL(response.data as unknown as Blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = run.file_name ?? "backup.dump"
+      link.click()
+      URL.revokeObjectURL(url)
+      setNotice({ key: "downloaded", name: run.file_name ?? "" })
+    } catch (err) {
+      handleError.call(showErrorToast, err as Error)
+    }
+  }
+
+  const sortedBackups = backups
+  const restorable = backups.filter(
+    (run) => statusOf(run) === "Verified" && run.file_exists,
   )
-  const backupPagination = usePagination(sortedBackups, 10, backups.length)
-  const latestBackup = sortedBackups[0]
-  const daysSinceLatest = latestBackup
+  const backupPagination = usePagination(
+    sortedBackups,
+    10,
+    listQuery.data?.count ?? 0,
+  )
+  const latestGood = backups.find((run) => run.status === "ok")
+  const daysSinceLatest = latestGood
     ? Math.max(
         0,
         Math.floor(
-          (Date.now() - new Date(latestBackup.createdAt).getTime()) / 86400000,
+          (Date.now() - new Date(latestGood.started_at).getTime()) / 86400000,
         ),
       )
     : null
 
-  if (!isSystemAdministrator(user)) return <NoPermission />
+  if (!admin) return <NoPermission />
 
   return (
     <div className="flex flex-col gap-6">
@@ -125,22 +208,24 @@ function BackupRestore() {
         </div>
       </div>
 
-      <div
-        role="status"
-        className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
-      >
-        <p className="font-medium">{t("admin.backup.unavailable.title")}</p>
-        <p className="mt-1">
-          <Trans
-            i18nKey="admin.backup.unavailable.howTo"
-            values={{
-              command: ".\\scripts\\backup-db.ps1",
-              folder: "backups",
-            }}
-            components={{ code: <code className="font-mono" /> }}
-          />
-        </p>
-      </div>
+      {listQuery.data && !toolAvailable ? (
+        <div
+          role="status"
+          className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+        >
+          <p className="font-medium">{t("admin.backup.unavailable.title")}</p>
+          <p className="mt-1">
+            <Trans
+              i18nKey="admin.backup.unavailable.howTo"
+              values={{
+                command: ".\\scripts\\backup-db.ps1",
+                folder: "backups",
+              }}
+              components={{ code: <code className="font-mono" /> }}
+            />
+          </p>
+        </div>
+      ) : null}
 
       {notice ? (
         <div
@@ -162,6 +247,30 @@ function BackupRestore() {
             aria-label={t("admin.backup.dismiss")}
           >
             <X aria-hidden="true" />
+          </Button>
+        </div>
+      ) : null}
+
+      {restoreCommand ? (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
+          <p className="font-semibold">
+            {t("admin.backup.restore.readyTitle")}
+          </p>
+          <p className="mt-1 leading-6 text-muted-foreground">
+            {t("admin.backup.restore.readyDescription", {
+              name: restoreCommand.name,
+            })}
+          </p>
+          <p className="mt-3 select-all break-all rounded-md bg-background p-3 font-mono text-sm">
+            {restoreCommand.command}
+          </p>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="mt-2"
+            onClick={() => setRestoreCommand(null)}
+          >
+            {t("admin.backup.dismiss")}
           </Button>
         </div>
       ) : null}
@@ -203,17 +312,21 @@ function BackupRestore() {
                 {t("admin.backup.create.last")}
               </span>
               <span className="font-medium">
-                {latestBackup?.date ?? t("admin.backup.create.lastNone")}
+                {latestGood
+                  ? formatMoment(latestGood.started_at)
+                  : t("admin.backup.create.lastNone")}
               </span>
             </div>
           </div>
           <Button
             className="mt-5 min-h-11 w-full"
-            disabled
-            title={t("admin.backup.notAvailableTitle")}
+            disabled={!toolAvailable || createMutation.isPending}
+            onClick={() => createMutation.mutate()}
           >
             <HardDriveDownload aria-hidden="true" />
-            {t("admin.backup.create.button")}
+            {createMutation.isPending
+              ? t("admin.backup.create.working")
+              : t("admin.backup.create.button")}
           </Button>
         </section>
 
@@ -231,58 +344,21 @@ function BackupRestore() {
               </p>
             </div>
           </div>
-          <div className="mt-5 space-y-3">
-            <label className="flex items-center justify-between gap-3 text-sm">
-              <span>{t("admin.backup.schedule.automatic")}</span>
-              <select className={formControlClass} defaultValue="daily">
-                <option value="disabled">
-                  {t("admin.backup.schedule.disabled")}
-                </option>
-                <option value="daily">
-                  {t("admin.backup.schedule.daily")}
-                </option>
-                <option value="weekly">
-                  {t("admin.backup.schedule.weekly")}
-                </option>
-              </select>
-            </label>
-            <label className="flex items-center justify-between gap-3 text-sm">
-              <span>{t("admin.backup.schedule.time")}</span>
-              <input
-                type="time"
-                defaultValue="17:00"
-                className={`${formControlClass} max-w-40`}
-              />
-            </label>
-            <label className="flex items-center justify-between gap-3 text-sm">
-              <span>{t("admin.backup.schedule.keep")}</span>
-              <select
-                className={`${formControlClass} max-w-40`}
-                defaultValue="7"
-              >
-                <option value="3">
-                  {t("admin.backup.schedule.copies", { n: 3 })}
-                </option>
-                <option value="7">
-                  {t("admin.backup.schedule.copies", { n: 7 })}
-                </option>
-                <option value="14">
-                  {t("admin.backup.schedule.copies", { n: 14 })}
-                </option>
-                <option value="30">
-                  {t("admin.backup.schedule.copies", { n: 30 })}
-                </option>
-              </select>
-            </label>
+          <div className="mt-5 space-y-3 text-sm">
+            <div className="flex justify-between gap-4">
+              <span className="text-muted-foreground">
+                {t("admin.backup.schedule.keep")}
+              </span>
+              <span className="font-medium">
+                {keepCopies !== undefined
+                  ? t("admin.backup.schedule.copies", { n: keepCopies })
+                  : "—"}
+              </span>
+            </div>
+            <p className="leading-6 text-muted-foreground">
+              {t("admin.backup.schedule.note")}
+            </p>
           </div>
-          <Button
-            variant="outline"
-            className="mt-5 w-full"
-            disabled
-            title={t("admin.backup.notAvailableTitle")}
-          >
-            {t("admin.backup.schedule.save")}
-          </Button>
         </section>
       </div>
 
@@ -296,11 +372,11 @@ function BackupRestore() {
               {t("admin.backup.history.description")}
             </p>
           </div>
-          {latestBackup && daysSinceLatest !== null ? (
+          {latestGood && daysSinceLatest !== null ? (
             <Badge
               variant="outline"
               className={
-                (daysSinceLatest ?? 0) > 1
+                daysSinceLatest > 1
                   ? statusStyles["Expiring soon"]
                   : statusStyles.Verified
               }
@@ -312,7 +388,7 @@ function BackupRestore() {
           ) : null}
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[1120px] text-left text-sm">
+          <table className="w-full min-w-[960px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
                 {columnIds.map((id) => (
@@ -330,96 +406,104 @@ function BackupRestore() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {backupPagination.paginatedItems.map((backup) => (
-                <tr
-                  key={backup.name}
-                  className="transition-colors hover:bg-muted/30"
-                >
-                  <td className="px-4 py-3 align-middle sm:px-5">
-                    <span className="font-mono font-medium">{backup.name}</span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
-                    {backup.date}
-                  </td>
-                  <td className="px-4 py-3 align-middle sm:px-5">
-                    <p>{labelOf(typeKeys, backup.type, t)}</p>
-                    {backup.createdBy ? (
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {t("admin.backup.history.by", {
-                          name: backup.createdBy,
-                        })}
-                      </p>
-                    ) : null}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
-                    {backup.size}
-                  </td>
-                  <td className="px-4 py-3 align-middle sm:px-5">
-                    {labelOf(locationKeys, backup.location, t)}
-                  </td>
-                  <td className="px-4 py-3 align-middle sm:px-5">
-                    <div className="flex flex-col items-start gap-1">
-                      <Badge
-                        variant="outline"
-                        className={statusStyles[backup.status]}
-                      >
-                        {backup.status === "Verified" ? (
-                          <CheckCircle2 className="size-4" aria-hidden="true" />
-                        ) : null}
-                        {labelOf(statusKeys, backup.status, t)}
-                      </Badge>
-                      {backup.failureReason ? (
-                        <span className="max-w-52 text-xs text-muted-foreground">
-                          {backup.failureReason}
-                        </span>
+              {backupPagination.paginatedItems.map((backup) => {
+                const status = statusOf(backup)
+                const name = backup.file_name ?? "—"
+                return (
+                  <tr
+                    key={backup.id}
+                    className="transition-colors hover:bg-muted/30"
+                  >
+                    <td className="px-4 py-3 align-middle sm:px-5">
+                      <span className="font-mono font-medium">{name}</span>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                      {formatMoment(backup.started_at)}
+                    </td>
+                    <td className="px-4 py-3 align-middle sm:px-5">
+                      <p>{labelOf(typeKeys, backup.kind, t)}</p>
+                      {backup.created_by_email ? (
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {t("admin.backup.history.by", {
+                            name: backup.created_by_email,
+                          })}
+                        </p>
                       ) : null}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 align-middle sm:px-5">
-                    <RowActions
-                      name={backup.name}
-                      isAdmin
-                      primary={
-                        backup.status === "Verified"
-                          ? {
-                              label: t("admin.backup.actions.restore"),
-                              variant: "outline",
-                              icon: <RotateCcw aria-hidden="true" />,
-                              onSelect: () => {
-                                setSelectedBackup(backup.name)
-                                setRestoreConfirmation("")
-                                setConfirmRestore(true)
-                              },
-                            }
-                          : undefined
-                      }
-                      items={[
-                        {
-                          label: t("admin.backup.actions.verify"),
-                          hidden: backup.status === "Verified",
-                          onSelect: () =>
-                            setNotice({ key: "verify", name: backup.name }),
-                        },
-                        {
-                          label: t("admin.backup.actions.copy"),
-                          hidden: backup.location !== "This computer only",
-                          onSelect: () =>
-                            setNotice({ key: "copy", name: backup.name }),
-                        },
-                        {
-                          label: t("admin.backup.actions.download"),
-                          adminOnly: true,
-                          onSelect: () =>
-                            setNotice({ key: "download", name: backup.name }),
-                        },
-                      ]}
-                    />
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                      {formatSize(backup.size_bytes)}
+                    </td>
+                    <td className="px-4 py-3 align-middle sm:px-5">
+                      <div className="flex flex-col items-start gap-1">
+                        <Badge
+                          variant="outline"
+                          className={
+                            statusStyles[
+                              status === "Running" ? "Pending" : status
+                            ]
+                          }
+                        >
+                          {status === "Verified" ? (
+                            <CheckCircle2
+                              className="size-4"
+                              aria-hidden="true"
+                            />
+                          ) : null}
+                          {labelOf(statusKeys, status, t)}
+                        </Badge>
+                        {backup.status === "ok" && !backup.file_exists ? (
+                          <span className="max-w-52 text-xs text-muted-foreground">
+                            {t("admin.backup.history.fileGone")}
+                          </span>
+                        ) : null}
+                        {backup.error ? (
+                          <span className="max-w-52 text-xs text-muted-foreground">
+                            {backup.error}
+                          </span>
+                        ) : null}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 align-middle sm:px-5">
+                      <RowActions
+                        name={name}
+                        isAdmin
+                        primary={
+                          status === "Verified" && backup.file_exists
+                            ? {
+                                label: t("admin.backup.actions.restore"),
+                                variant: "outline",
+                                icon: <RotateCcw aria-hidden="true" />,
+                                onSelect: () => {
+                                  setSelectedBackup(backup.id)
+                                  setRestoreConfirmation("")
+                                  setConfirmRestore(true)
+                                },
+                              }
+                            : undefined
+                        }
+                        items={[
+                          {
+                            label: t("admin.backup.actions.verify"),
+                            hidden: backup.status !== "ok",
+                            disabled: verifyMutation.isPending,
+                            onSelect: () => verifyMutation.mutate(backup.id),
+                          },
+                          {
+                            label: t("admin.backup.actions.download"),
+                            adminOnly: true,
+                            hidden:
+                              backup.status !== "ok" || !backup.file_exists,
+                            onSelect: () => download(backup),
+                          },
+                        ]}
+                      />
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
-          {sortedBackups.length === 0 ? (
+          {listQuery.isSuccess && sortedBackups.length === 0 ? (
             <EmptyState
               title={t("admin.backup.history.empty.title")}
               description={t("admin.backup.history.empty.description")}
@@ -453,7 +537,7 @@ function BackupRestore() {
             {t("admin.backup.restore.archive")}
             <select
               value={selectedBackup}
-              disabled={sortedBackups.length === 0}
+              disabled={restorable.length === 0}
               onChange={(event) => {
                 setSelectedBackup(event.target.value)
                 setConfirmRestore(false)
@@ -461,19 +545,18 @@ function BackupRestore() {
               }}
               className={`${formControlClass} font-normal`}
             >
-              {backups
-                .filter((backup) => backup.status === "Verified")
-                .map((backup) => (
-                  <option key={backup.name} value={backup.name}>
-                    {backup.name}
-                  </option>
-                ))}
+              <option value="">{t("admin.backup.restore.choose")}</option>
+              {restorable.map((backup) => (
+                <option key={backup.id} value={backup.id}>
+                  {backup.file_name}
+                </option>
+              ))}
             </select>
           </label>
           <Button
             variant="outline"
             className="min-h-11 border-destructive/50 text-destructive hover:bg-destructive/5"
-            disabled={sortedBackups.length === 0}
+            disabled={!selectedBackup && !confirmRestore}
             onClick={() => setConfirmRestore((value) => !value)}
           >
             <RotateCcw aria-hidden="true" />
@@ -495,7 +578,7 @@ function BackupRestore() {
               />
             </p>
             <p className="mt-3 rounded-md bg-background p-3 font-mono text-sm">
-              {selectedBackup}
+              {backups.find((run) => run.id === selectedBackup)?.file_name}
             </p>
             <label className="mt-4 block text-sm font-medium">
               {t("admin.backup.restore.typeLabel", { word: RESTORE_WORD })}
@@ -511,17 +594,11 @@ function BackupRestore() {
               variant="destructive"
               className="mt-4 min-h-11"
               disabled={
-                !selectedBackup ||
-                !sortedBackups.some(
-                  (backup) => backup.name === selectedBackup,
-                ) ||
-                restoreConfirmation !== RESTORE_WORD
+                !restorable.some((backup) => backup.id === selectedBackup) ||
+                restoreConfirmation !== RESTORE_WORD ||
+                restoreMutation.isPending
               }
-              onClick={() => {
-                setNotice({ key: "restoreConfirmed" })
-                setConfirmRestore(false)
-                setRestoreConfirmation("")
-              }}
+              onClick={() => restoreMutation.mutate(selectedBackup)}
             >
               <ShieldCheck aria-hidden="true" />
               {t("admin.backup.restore.confirmButton")}

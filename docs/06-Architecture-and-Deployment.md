@@ -180,7 +180,7 @@ The PowerShell smoke test creates a uniquely named temporary database, inserts a
 
 **Gaps vs the Creative Brief:**
 - The brief requires **scheduled and manual** backups to an **external drive**. Only manual scripts exist; **scheduling (e.g. Windows Task Scheduler) is not built**, and the scripts still need to be executed on the intended Windows host. The PowerShell dump/restore path is now exercised in CI against a real PostgreSQL container, but that does not replace Windows-host verification.
-- The Admin "Backup and Restore" screen is still a concept: the backend above exists, but the screen is not connected to it yet.
+- The Admin "Backup and Restore" screen is connected to the backend above: Back up now, history, Verify file and Download copy work. Restore on the screen only checks the chosen file, logs the request and shows the `restore-db.ps1` command; it replaces nothing. The schedule is shown read-only (the Task Scheduler script is the next part).
 - Needed: frequency, external-drive custody, retention, protection of backup files, restore responsibility, and a recorded recovery test **(D-35)**. A backup that stays only on the host does not survive disk failure, theft, ransomware or accidental deletion.
 
 ## 9. Offline limitations to resolve

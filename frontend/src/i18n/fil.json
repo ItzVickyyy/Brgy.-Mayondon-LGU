@@ -1470,11 +1470,10 @@
       "title": "Backup at Restore",
       "subtitle": "Protektahan ang mga lokal na talaan ng barangay at makabawi mula sa pagkawala ng datos.",
       "unavailable": {
-        "title": "Hindi pa maaaring gumawa o mag-restore ng backup mula sa screen na ito. Hindi nagba-backup ng anumang datos ang mga button dito.",
+        "title": "Hindi makagawa ng backup mula sa screen na ito sa computer na ito dahil wala ang backup tool.",
         "howTo": "Para i-backup ngayon ang database, buksan ang PowerShell sa folder ng proyekto at patakbuhin ang <code>{{command}}</code>. Ise-save ang file sa folder na <code>{{folder}}</code>."
       },
       "dismiss": "Isara ang mensahe",
-      "notAvailableTitle": "Hindi pa magagamit",
       "create": {
         "title": "Gumawa ng Backup",
         "subtitle": "Manu-manong backup ng database",
@@ -1484,19 +1483,15 @@
         "formatValue": "PostgreSQL custom archive (.dump)",
         "last": "Huling backup",
         "lastNone": "Wala pang backup",
-        "button": "Gumawa ng Backup"
+        "button": "Mag-backup ngayon",
+        "working": "Nagba-backup…"
       },
       "schedule": {
         "title": "Iskedyul ng Backup",
-        "subtitle": "Magtakda ng paulit-ulit na iskedyul ng backup",
-        "automatic": "Awtomatikong backup",
-        "disabled": "Naka-disable",
-        "daily": "Araw-araw",
-        "weekly": "Lingguhan",
-        "time": "Gustong oras",
+        "subtitle": "Paano pinananatili ang mga naka-iskedyul na backup",
         "keep": "Panatilihin ang mga kamakailang backup",
         "copies": "{{n}} kopya",
-        "save": "I-save ang Iskedyul"
+        "note": "Ang mga naka-iskedyul na backup ay itinatakda sa server computer, hindi sa screen na ito. Awtomatikong tinatanggal ang mga lumang backup file na lampas sa bilang na ito."
       },
       "history": {
         "title": "Kasaysayan ng Backup",
@@ -1509,7 +1504,6 @@
           "created": "Ginawa",
           "type": "Uri",
           "size": "Laki",
-          "location": "Lokasyon",
           "check": "Pagsusuri",
           "actions": "Mga Aksyon"
         },
@@ -1517,43 +1511,43 @@
         "empty": {
           "title": "Walang nakitang backup",
           "description": "Gumawa ng backup para simulang buuin ang kasaysayan ng pagbawi."
-        }
+        },
+        "fileGone": "Wala na ang file sa folder ng backup"
       },
       "types": {
         "Scheduled": "Nakaiskedyul",
         "Manual": "Manu-mano"
       },
-      "locations": {
-        "External drive": "External drive",
-        "This computer only": "Sa computer na ito lang"
-      },
       "statuses": {
         "Verified": "Na-verify",
         "Not checked": "Hindi pa nasusuri",
-        "Failed": "Nabigo"
+        "Failed": "Nabigo",
+        "Running": "Isinasagawa"
       },
       "actions": {
         "restore": "I-restore",
         "verify": "I-verify ang file",
-        "copy": "Kopyahin sa external drive",
         "download": "I-download ang kopya"
       },
       "restore": {
         "title": "Mag-restore ng Backup",
-        "description": "Maaaring palitan ng pag-restore ang kasalukuyang laman ng database. Piliin ang archive at kumpirmahin lamang pagkatapos mong tiyakin ang target na sistema at ang backup.",
+        "description": "Pinapalitan ng restore ang buong database, kasama ang mga account. Hindi ito maaaring patakbuhin mula sa screen na ito: pumili ng nasuring backup at kumpirmahin, at ipapakita ang eksaktong command na patatakbuhin sa server computer.",
         "archive": "Archive ng backup",
         "prepare": "Ihanda ang Restore",
         "cancel": "Kanselahin ang Restore",
         "confirmTitle": "Kumpirmahin ang restore",
-        "confirmDescription": "Maaaring palitan ng aksyong ito ang kasalukuyang database. Tiyakin ang napiling archive at i-type ang <strong>{{word}}</strong> para kumpirmahin.",
+        "confirmDescription": "Sinusuri lang nito ang file at ipinapakita ang command sa pag-restore; wala pang napapalitan. I-type ang <strong>{{word}}</strong> para magpatuloy.",
         "typeLabel": "I-type ang {{word}} para magpatuloy",
-        "confirmButton": "Kumpirmahin ang Restore"
+        "confirmButton": "Suriin at Ipakita ang Command",
+        "choose": "Pumili ng backup",
+        "readyTitle": "Handa nang i-restore",
+        "readyDescription": "Nasuri ang {{name}} at naitala ang kahilingan sa Activity Log. Wala pang na-restore. Para mag-restore, itigil ang app at patakbuhin ang command na ito sa PowerShell mula sa folder ng proyekto sa server computer:"
       },
       "notices": {
-        "verify": "Kailangan ng integrasyon ng backup service para ma-verify ang file na {{name}}.",
-        "copy": "Kailangan ng naka-configure na destinasyon ng drive para makopya ang {{name}} sa external drive.",
-        "download": "Kailangan ng protektadong endpoint sa pag-download ng backup para sa kahilingang i-download ang {{name}}.",
-        "restoreConfirmed": "Nakumpirma na ang kahilingang mag-restore."
+        "created": "Nagawa at nasuri ang backup na {{name}}.",
+        "verified": "Nasuri ang backup na {{name}} at nababasa ito.",
+        "downloaded": "Nagsimula ang pag-download ng {{name}}.",
+        "restoreChecked": "Naitala ang kahilingang mag-restore para sa {{name}}."
       }
     }
   },

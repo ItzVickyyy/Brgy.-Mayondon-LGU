@@ -1470,11 +1470,10 @@
       "title": "Backup and Restore",
       "subtitle": "Protect the barangay's local records and recover from data loss.",
       "unavailable": {
-        "title": "Backups cannot be created or restored from this screen yet. The buttons here do not back up any data.",
+        "title": "Backups cannot be made from this screen on this computer because the backup tool is missing.",
         "howTo": "To back up the database now, open PowerShell in the project folder and run <code>{{command}}</code>. The file is saved in the <code>{{folder}}</code> folder."
       },
       "dismiss": "Dismiss message",
-      "notAvailableTitle": "Not available yet",
       "create": {
         "title": "Create a Backup",
         "subtitle": "Manual database backup",
@@ -1484,19 +1483,15 @@
         "formatValue": "PostgreSQL custom archive (.dump)",
         "last": "Last backup",
         "lastNone": "No backups yet",
-        "button": "Create Backup"
+        "button": "Back up now",
+        "working": "Backing up…"
       },
       "schedule": {
         "title": "Backup Schedule",
-        "subtitle": "Set a recurring backup schedule",
-        "automatic": "Automatic backup",
-        "disabled": "Disabled",
-        "daily": "Daily",
-        "weekly": "Weekly",
-        "time": "Preferred time",
+        "subtitle": "How scheduled backups are kept",
         "keep": "Keep recent backups",
         "copies": "{{n}} copies",
-        "save": "Save Schedule"
+        "note": "Scheduled backups are set up on the server computer, not on this screen. Older backup files beyond this number are removed automatically."
       },
       "history": {
         "title": "Backup History",
@@ -1509,7 +1504,6 @@
           "created": "Created",
           "type": "Type",
           "size": "Size",
-          "location": "Location",
           "check": "Check",
           "actions": "Actions"
         },
@@ -1517,43 +1511,43 @@
         "empty": {
           "title": "No backups found",
           "description": "Create a backup to begin building recovery history."
-        }
+        },
+        "fileGone": "File no longer in the backup folder"
       },
       "types": {
         "Scheduled": "Scheduled",
         "Manual": "Manual"
       },
-      "locations": {
-        "External drive": "External drive",
-        "This computer only": "This computer only"
-      },
       "statuses": {
         "Verified": "Verified",
         "Not checked": "Not checked",
-        "Failed": "Failed"
+        "Failed": "Failed",
+        "Running": "Running"
       },
       "actions": {
         "restore": "Restore",
         "verify": "Verify file",
-        "copy": "Copy to external drive",
         "download": "Download copy"
       },
       "restore": {
         "title": "Restore a Backup",
-        "description": "Restoring can replace current database contents. Choose the archive and confirm only after verifying the target system and backup.",
+        "description": "A restore replaces the whole database, including accounts. It cannot be run from this screen: choose a checked backup and confirm, and the exact command to run on the server computer is shown.",
         "archive": "Backup archive",
         "prepare": "Prepare Restore",
         "cancel": "Cancel Restore",
         "confirmTitle": "Confirm restore",
-        "confirmDescription": "This action can replace the current database. Verify the selected archive and type <strong>{{word}}</strong> to confirm.",
+        "confirmDescription": "This only checks the file and shows the restore command; nothing is replaced yet. Type <strong>{{word}}</strong> to continue.",
         "typeLabel": "Type {{word}} to continue",
-        "confirmButton": "Confirm Restore"
+        "confirmButton": "Check and Show Command",
+        "choose": "Choose a backup",
+        "readyTitle": "Ready to restore",
+        "readyDescription": "{{name}} was checked and the request is recorded in the Activity Log. Nothing has been restored yet. To restore, stop the app and run this command in PowerShell from the project folder on the server computer:"
       },
       "notices": {
-        "verify": "File verification for {{name}} needs the backup service integration.",
-        "copy": "External-drive copy for {{name}} needs a configured drive destination.",
-        "download": "Download request for {{name}} needs a protected backup download endpoint.",
-        "restoreConfirmed": "Restore request confirmed."
+        "created": "Backup {{name}} was created and checked.",
+        "verified": "Backup {{name}} was checked and is readable.",
+        "downloaded": "Download of {{name}} started.",
+        "restoreChecked": "Restore request for {{name}} recorded."
       }
     }
   },
