@@ -1,4 +1,9 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router"
+import {
+  createFileRoute,
+  Outlet,
+  redirect,
+  useRouterState,
+} from "@tanstack/react-router"
 import {
   CalendarDays,
   Clock3,
@@ -55,6 +60,10 @@ function Layout() {
   const { user: currentUser } = useAuth()
   const isDark = theme === "dark"
   const [isFullscreen, setIsFullscreen] = useState(false)
+  // Keying the page wrapper by path replays the soft entrance on each page.
+  const pathname = useRouterState({
+    select: (state) => state.location.pathname,
+  })
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(new Date()), 1000)
@@ -171,7 +180,7 @@ function Layout() {
           tabIndex={-1}
           className="flex-1 p-4 outline-none sm:p-6 md:p-8"
         >
-          <div className="mx-auto max-w-7xl">
+          <div key={pathname} className="page-enter mx-auto max-w-7xl">
             <Outlet />
           </div>
         </main>

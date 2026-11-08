@@ -154,4 +154,89 @@
   [role="button"] {
     cursor: pointer;
   }
+  ::selection {
+    background-color: color-mix(in oklab, var(--brand) 25%, transparent);
+  }
+  a:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+  /* Slim scrollbars for wide tables and long lists. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(
+        in oklab,
+        var(--muted-foreground) 40%,
+        transparent
+      )
+      transparent;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@layer components {
+  /* Soft entrance for the page content. `backwards` (not `both`) so no
+     transform is left behind to trap fixed-position children afterwards. */
+  .page-enter {
+    animation: page-enter 200ms ease-out backwards;
+  }
+
+  /* Opt-in hover lift for cards that are clickable (links and buttons). */
+  .surface-interactive {
+    transition:
+      transform 160ms ease-out,
+      box-shadow 160ms ease-out,
+      border-color 160ms ease-out,
+      background-color 160ms ease-out;
+  }
+  @media (hover: hover) {
+    .surface-interactive:hover {
+      box-shadow: 0 8px 18px -10px oklch(0 0 0 / 0.28);
+    }
+  }
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .surface-interactive:hover {
+      transform: translateY(-2px);
+    }
+    .surface-interactive:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Respect the system "reduce motion" setting everywhere; the loading spinner
+   keeps turning so people can still tell something is happening. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion override must beat utility classes */
+    animation-duration: 0.01ms !important;
+    /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion override must beat utility classes */
+    animation-iteration-count: 1 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion override must beat utility classes */
+    transition-duration: 0.01ms !important;
+  }
+  .animate-spin {
+    /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion override must beat utility classes */
+    animation-duration: 1.2s !important;
+    /* biome-ignore lint/complexity/noImportantStyles: the reduced-motion override must beat utility classes */
+    animation-iteration-count: infinite !important;
+  }
 }

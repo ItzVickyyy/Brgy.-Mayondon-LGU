@@ -294,7 +294,7 @@ function Dashboard() {
               <Link
                 key={item.key}
                 to={item.to}
-                className="group flex min-h-16 items-center gap-3 rounded-xl border border-brand/25 bg-brand/5 p-3 transition-colors hover:border-brand/50 hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-1"
+                className="group flex min-h-16 items-center gap-3 surface-interactive rounded-xl border border-brand/25 bg-brand/5 p-3 hover:border-brand/50 hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-1"
               >
                 <span className="rounded-lg bg-brand/15 p-2 text-brand">
                   <item.icon className="size-5" aria-hidden="true" />
