@@ -953,7 +953,7 @@ export const issuanceApi = {
       (item) => item.id === payload.identification?.idTypeId,
     )?.name
     const idTypePosition = idName ? idOptions.indexOf(idName) + 1 : 0
-    if (payload.identification && idTypePosition < 1) {
+    if (payload.identification?.idTypeId && idTypePosition < 1) {
       throw new Error(
         "The saved ID type is no longer available. Ask an administrator to restore it before continuing this draft.",
       )
