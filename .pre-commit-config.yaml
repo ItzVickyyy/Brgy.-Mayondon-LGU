@@ -16,13 +16,7 @@ repos:
         args: [--force-exclude]
   - repo: local
     hooks:
-      - id: local-biome-check
-        name: biome check
-        entry: bunx biome check --no-errors-on-unmatched --files-ignore-unknown=true
-        language: system
-        types: [text]
-        files: ^frontend/
-
+      # Frontend lint and build are enforced by test-frontend.yml.
       - id: local-ruff-check
         name: ruff check
         entry: uv run ruff check --force-exclude
@@ -43,6 +37,7 @@ repos:
         require_serial: true
         language: unsupported
         pass_filenames: false
+        files: ^backend/.*\.py$
 
       - id: local-ty
         name: ty check
@@ -50,6 +45,7 @@ repos:
         require_serial: true
         language: unsupported
         pass_filenames: false
+        files: ^backend/.*\.py$
 
       - id: generate-frontend-sdk
         name: Generate Frontend SDK
