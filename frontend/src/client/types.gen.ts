@@ -390,6 +390,16 @@ export type BarangayIdsPublic = {
 };
 
 /**
+ * Body_imports-upload_import
+ */
+export type Body_imports_upload_import = {
+    /**
+     * File
+     */
+    file: Blob | File;
+};
+
+/**
  * Body_login-login_access_token
  */
 export type Body_login_login_access_token = {
@@ -723,6 +733,234 @@ export type IdentificationPublic = {
      * Date Of Issue
      */
     date_of_issue: string;
+};
+
+/**
+ * ImportBatchPublic
+ */
+export type ImportBatchPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Created By Email
+     */
+    created_by_email: string | null;
+    /**
+     * File Name
+     */
+    file_name: string;
+    /**
+     * File Type
+     */
+    file_type: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Total Rows
+     */
+    total_rows: number;
+    /**
+     * Headers
+     */
+    headers: Array<string>;
+    /**
+     * Mapping
+     */
+    mapping: {
+        [key: string]: string;
+    } | null;
+    /**
+     * Date Order
+     */
+    date_order: string;
+    /**
+     * Duplicate Action
+     */
+    duplicate_action: string;
+    /**
+     * Counts
+     */
+    counts: {
+        [key: string]: number;
+    } | null;
+    /**
+     * Result
+     */
+    result: {
+        [key: string]: number;
+    } | null;
+    /**
+     * Committed At
+     */
+    committed_at: string | null;
+};
+
+/**
+ * ImportBatchesPublic
+ */
+export type ImportBatchesPublic = {
+    /**
+     * Data
+     */
+    data: Array<ImportBatchPublic>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * ImportRowPublic
+ */
+export type ImportRowPublic = {
+    /**
+     * Row Number
+     */
+    row_number: number;
+    /**
+     * Classification
+     */
+    classification: string | null;
+    /**
+     * Errors
+     */
+    errors: Array<{
+        [key: string]: string;
+    }>;
+    /**
+     * Duplicate Scope
+     */
+    duplicate_scope: string | null;
+    /**
+     * Duplicate Resident Id
+     */
+    duplicate_resident_id: string | null;
+    /**
+     * Outcome
+     */
+    outcome: string | null;
+    /**
+     * Raw
+     */
+    raw: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Mapped
+     */
+    mapped: {
+        [key: string]: unknown;
+    } | null;
+};
+
+/**
+ * ImportRowsPublic
+ */
+export type ImportRowsPublic = {
+    /**
+     * Data
+     */
+    data: Array<ImportRowPublic>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * ImportUploadPublic
+ */
+export type ImportUploadPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Created At
+     */
+    created_at: string;
+    /**
+     * Created By Email
+     */
+    created_by_email: string | null;
+    /**
+     * File Name
+     */
+    file_name: string;
+    /**
+     * File Type
+     */
+    file_type: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Total Rows
+     */
+    total_rows: number;
+    /**
+     * Headers
+     */
+    headers: Array<string>;
+    /**
+     * Mapping
+     */
+    mapping: {
+        [key: string]: string;
+    } | null;
+    /**
+     * Date Order
+     */
+    date_order: string;
+    /**
+     * Duplicate Action
+     */
+    duplicate_action: string;
+    /**
+     * Counts
+     */
+    counts: {
+        [key: string]: number;
+    } | null;
+    /**
+     * Result
+     */
+    result: {
+        [key: string]: number;
+    } | null;
+    /**
+     * Committed At
+     */
+    committed_at: string | null;
+    /**
+     * Importable Fields
+     */
+    importable_fields: Array<string>;
+    /**
+     * Required Fields
+     */
+    required_fields: Array<string>;
+    /**
+     * Suggested Mapping
+     */
+    suggested_mapping: {
+        [key: string]: string;
+    };
+    /**
+     * Sample Rows
+     */
+    sample_rows: Array<{
+        [key: string]: string | null;
+    }>;
 };
 
 /**
@@ -1163,6 +1401,26 @@ export type LookupNameIn = {
      * Name
      */
     name: string;
+};
+
+/**
+ * MappingRequest
+ */
+export type MappingRequest = {
+    /**
+     * Mapping
+     */
+    mapping: {
+        [key: string]: string;
+    };
+    /**
+     * Date Order
+     */
+    date_order?: 'ymd' | 'mdy' | 'dmy';
+    /**
+     * Duplicate Action
+     */
+    duplicate_action?: 'skip' | 'update';
 };
 
 /**
@@ -4105,6 +4363,256 @@ export type backupsRequestRestoreResponses = {
 };
 
 export type backupsRequestRestoreResponse = backupsRequestRestoreResponses[keyof backupsRequestRestoreResponses];
+
+export type importsListImportsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/imports/';
+};
+
+export type importsListImportsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type importsListImportsError = importsListImportsErrors[keyof importsListImportsErrors];
+
+export type importsListImportsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ImportBatchesPublic;
+};
+
+export type importsListImportsResponse = importsListImportsResponses[keyof importsListImportsResponses];
+
+export type importsUploadImportData = {
+    body: Body_imports_upload_import;
+    path?: never;
+    query?: never;
+    url: '/api/v1/imports/';
+};
+
+export type importsUploadImportErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type importsUploadImportError = importsUploadImportErrors[keyof importsUploadImportErrors];
+
+export type importsUploadImportResponses = {
+    /**
+     * Successful Response
+     */
+    201: ImportUploadPublic;
+};
+
+export type importsUploadImportResponse = importsUploadImportResponses[keyof importsUploadImportResponses];
+
+export type importsCancelImportData = {
+    body?: never;
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string;
+    };
+    query?: never;
+    url: '/api/v1/imports/{batch_id}';
+};
+
+export type importsCancelImportErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type importsCancelImportError = importsCancelImportErrors[keyof importsCancelImportErrors];
+
+export type importsCancelImportResponses = {
+    /**
+     * Successful Response
+     */
+    200: ImportBatchPublic;
+};
+
+export type importsCancelImportResponse = importsCancelImportResponses[keyof importsCancelImportResponses];
+
+export type importsReadImportData = {
+    body?: never;
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string;
+    };
+    query?: never;
+    url: '/api/v1/imports/{batch_id}';
+};
+
+export type importsReadImportErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type importsReadImportError = importsReadImportErrors[keyof importsReadImportErrors];
+
+export type importsReadImportResponses = {
+    /**
+     * Successful Response
+     */
+    200: ImportBatchPublic;
+};
+
+export type importsReadImportResponse = importsReadImportResponses[keyof importsReadImportResponses];
+
+export type importsSetMappingData = {
+    body: MappingRequest;
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string;
+    };
+    query?: never;
+    url: '/api/v1/imports/{batch_id}/mapping';
+};
+
+export type importsSetMappingErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type importsSetMappingError = importsSetMappingErrors[keyof importsSetMappingErrors];
+
+export type importsSetMappingResponses = {
+    /**
+     * Successful Response
+     */
+    200: ImportBatchPublic;
+};
+
+export type importsSetMappingResponse = importsSetMappingResponses[keyof importsSetMappingResponses];
+
+export type importsListRowsData = {
+    body?: never;
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string;
+    };
+    query?: {
+        /**
+         * Classification
+         */
+        classification?: 'new' | 'duplicate' | 'error' | null;
+        /**
+         * Skip
+         */
+        skip?: number;
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/imports/{batch_id}/rows';
+};
+
+export type importsListRowsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type importsListRowsError = importsListRowsErrors[keyof importsListRowsErrors];
+
+export type importsListRowsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ImportRowsPublic;
+};
+
+export type importsListRowsResponse = importsListRowsResponses[keyof importsListRowsResponses];
+
+export type importsCommitImportData = {
+    body?: never;
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string;
+    };
+    query?: never;
+    url: '/api/v1/imports/{batch_id}/commit';
+};
+
+export type importsCommitImportErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type importsCommitImportError = importsCommitImportErrors[keyof importsCommitImportErrors];
+
+export type importsCommitImportResponses = {
+    /**
+     * Successful Response
+     */
+    200: ImportBatchPublic;
+};
+
+export type importsCommitImportResponse = importsCommitImportResponses[keyof importsCommitImportResponses];
+
+export type importsDownloadErrorReportData = {
+    body?: never;
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string;
+    };
+    query?: never;
+    url: '/api/v1/imports/{batch_id}/errors.csv';
+};
+
+export type importsDownloadErrorReportErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type importsDownloadErrorReportError = importsDownloadErrorReportErrors[keyof importsDownloadErrorReportErrors];
+
+export type importsDownloadErrorReportResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
 
 export type utilsTestEmailData = {
     body?: never;

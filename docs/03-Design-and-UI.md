@@ -153,7 +153,7 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 - Issuance drafts are saved to the database (status draft) and show in the history as pending. A draft is not an official issuance until it is issued.
 - The Document Management resident selector uses hard-coded sample residents; purposes are hard-coded.
 - **Printing is implemented for six templates** (Clearance, Franchise, Electrical/Water, Indigency, Marginalized Sector, Assistance certification) as typed values on pre-printed forms, with a Printing setup dialog for calibration. Residency, First-Time Jobseekers and Barangay ID have no template. Details: [04-Documents-and-Printing.md](04-Documents-and-Printing.md). Not yet verified on a real printer.
-- Masterlist import shows a file-selection area and planned validation summary; parsing, mapping, preview, duplicate detection and import are not implemented.
+- Masterlist import: the **backend exists** (`/api/v1/imports`, see docs/09: parsing, column mapping, validation, duplicate detection, commit, error report) but the Import Masterlist tab and the Reports and Dashboard import cards are still the placeholder; wiring them is the next part.
 - The account form maps **System Administrator → `is_superuser = true`** and **Staff → `is_superuser = false`**. The backend now has a `role` field (`admin` / `staff`); the form still sends `is_superuser`, which the API maps to the role. There is no pending or rejected state and none is planned (D-11).
 - Backup/Restore screen runs manual backups, shows the real history, verifies and downloads files. Restore from the screen only checks a backup and shows the offline PowerShell command (typed `RESTORE` to continue); the schedule is read-only and is set on the server computer with `scripts\register-backup-task.ps1`.
 - Account profile, password change and account management use the existing foundation functionality.
@@ -169,7 +169,7 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 | Dashboard: issued documents and expiring clearances/IDs | Connected to real totals (counts only); layout retained | Confirm periods and the 30-day window with the client **(D-21)** |
 | Resident records: add, edit, search | List/profile draft with sample rows | Create/edit/profile actions and persistence; confirm search fields |
 | Family, beneficiary, sector details | Draft tab | Confirm real fields and sector categories against the masterlists |
-| Import masterlists | Draft file area and validation summary | Parsing, mapping, preview, validation, duplicates, import |
+| Import masterlists | Backend built; tab still a draft file area | Wire the tab and the report card; client answers (D-19) |
 | Resident and Barangay ID records | Records Management: Barangay IDs tab connected to the API (search, status filter, issue/expiry dates, status counts); Renew and Replace card open New Issuance for the ID type; no Create button | Numbering **(D-43)**; expiry rule **(D-18)**; photo upload; approved ID card layout **(D-44)** |
 | Document request entry and editable purposes | Resident-first selector; purposes hard-coded | Connect to saved residents; maintainable purposes; persist requests |
 | Separate issuance history with issue/expiry | Session-only history, no expiry shown | Persistent records, expiry where applicable, details, corrections preserving the original |

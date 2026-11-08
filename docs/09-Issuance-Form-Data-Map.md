@@ -107,6 +107,24 @@ Rows are kept after retention deletes an old file (the API reports `file_exists`
 
 **API (System Administrator only, `backup.restore`):** `GET /api/v1/backups/` (newest first, plus `tool_available` and `keep_copies`), `POST /api/v1/backups/` (manual backup; 409 if one is running, 503 if `pg_dump` or the folder is missing), `POST /api/v1/backups/{id}/verify`, `GET /api/v1/backups/{id}/download`, `POST /api/v1/backups/{id}/restore-request` (checks the file, logs it, returns the PowerShell command; it does not restore). Audit actions: `backup.create`, `backup.verify`, `backup.download`, `backup.restore_requested`, with the file name and size only.
 
+### `import_batches` and `import_rows` (masterlist import staging, D-19)
+
+An uploaded `.csv` or `.xlsx` is parsed into staging first; nothing reaches `residents` until the System Administrator commits the batch. The client's real column names, required fields and duplicate rule are still open (D-19), so they are **settings of a batch**, not code.
+
+`import_batches`: `id` UUID PK, `created_at`, `created_by` (FK `user`, `ON DELETE SET NULL`) and `created_by_email`, `file_name`, `file_type` (`csv`, `xlsx`), `status` (`uploaded`, `mapped`, `committed`, `cancelled`, `expired`, `failed`), `total_rows`, `headers` (jsonb, the file's column titles), `mapping` (jsonb, column title to resident field), `date_order` (`ymd`, `mdy`, `dmy`; how `05/03/1990` is read, ISO dates always work), `duplicate_action` (`skip` default, `update`), `counts` (jsonb: new, duplicate, error), `result` (jsonb: created, updated, skipped, failed), `committed_at`.
+
+`import_rows` (`ON DELETE CASCADE` from the batch, unique on batch and `row_number`): `row_number` (file row, header is row 1), `raw` and `mapped` (jsonb, **personal data**), `errors` (jsonb list of field and message; messages never contain cell values), `classification` (`new`, `duplicate`, `error`), `duplicate_resident_id`, `duplicate_scope` (`existing` or `file`), `outcome` (`created`, `updated`, `skipped`, `failed`).
+
+Rules as built:
+- **Staged personal data is temporary.** `raw` and `mapped` are set to null when the batch is committed, cancelled or left unfinished for 24 hours (`expired`, cleaned when the list or an upload is requested). Row numbers, reasons and outcomes stay.
+- **Same rules as the resident API:** every row goes through `ResidentFields`. Sex, civil status, suffix and voter registration are matched ignoring case (plus M/F, widow, widower, widowed, separated). A street must already exist in `streets` (matched ignoring case); an unknown street is a row error, no street is created. Sectors are not imported (Step 14).
+- **Required:** `first_name` and `last_name` must be mapped. Each resident field maps to one column only.
+- **Duplicates:** same first name, last name (ignoring case) and birthdate as an existing resident, or as an earlier row of the same file. A row with no birthdate is never a duplicate. Duplicates are skipped by default. With `update`, a duplicate of an **active** existing resident gets the file's non-empty values written over its fields (name and birthdate never change, blanks never erase data); archived residents and repeats inside the file are always skipped. An ID number already held by a different resident, or repeated in the file, is a row error.
+- **Commit** checks every row again (the preview may be stale), then writes in one transaction: if writing fails nothing is saved and the batch is `failed`. Rows with errors are not imported and are reported (`GET /imports/{id}/errors.csv`: row, field, problem; no values).
+- **Limits:** 5 MB, 5000 rows, 60 columns; `.xlsm`, `.xls` and files containing a VBA project are refused; only the first sheet of an `.xlsx` is read.
+
+**API (System Administrator only, `records.import`):** `GET /api/v1/imports/` (history), `POST /api/v1/imports/` (upload; returns the headers, a suggested mapping and sample rows; a mapping used before is suggested first), `GET /{id}`, `PUT /{id}/mapping` (saves mapping, `date_order`, `duplicate_action` and checks every row), `GET /{id}/rows?classification=` (row preview), `POST /{id}/commit`, `GET /{id}/errors.csv`, `DELETE /{id}` (cancel). Audit actions `import.upload`, `import.preview`, `import.commit`, `import.cancel`: file name and counts only.
+
 ### Dashboard and report figures (computed on read, nothing stored)
 
 `GET /api/v1/dashboard` (Staff and Admin) and `GET /api/v1/reports/*` (System Administrator, `reports.view`: `summary`, `issuances-by-type`, `issuances-by-purpose`, `expiring`, `account-activity`, `records-overview`). Counts only: no health condition and no resident names in any total. The expiring list names the resident because it is a work list.
