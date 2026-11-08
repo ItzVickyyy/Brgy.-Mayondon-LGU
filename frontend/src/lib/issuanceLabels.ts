@@ -166,6 +166,12 @@ const validationKeys = {
   "Choose a signatory.": "issuances.new.validation.chooseSignatory",
   "Proof of identity is required.": "issuances.new.validation.identityRequired",
   "Payment details are required.": "issuances.new.validation.paymentRequired",
+  "The saved ID type is no longer available. Ask an administrator to restore it before continuing this draft.": "issuances.new.validation.idTypeUnavailable",
+  "A sector in this draft is no longer available. Ask an administrator to restore it before continuing this draft.": "issuances.new.validation.sectorUnavailable",
+  "Choose a valid ID type before saving this issuance.": "issuances.new.validation.chooseValidIdType",
+  'The ID type "{{name}}" is no longer available. Ask an administrator to restore it, then try again.': "issuances.new.validation.idTypeNotAvailable",
+  "Choose a valid sector before saving this issuance.": "issuances.new.validation.chooseValidSector",
+  'The sector "{{name}}" is no longer available. Ask an administrator to restore it, then try again.': "issuances.new.validation.sectorNotAvailable",
 } as const satisfies Record<string, ParseKeys>
 
 export const validationMessage = (message: string, t: TFunction) =>
