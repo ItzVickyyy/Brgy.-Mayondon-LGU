@@ -13,7 +13,9 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { ActivityService, DashboardService } from "@/client"
+import { AnimatedNumber } from "@/components/Common/AnimatedNumber"
 import { ErrorState, LoadingState } from "@/components/Common/FeedbackState"
+import { Skeleton } from "@/components/ui/skeleton"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { activityTitle } from "@/lib/activity"
@@ -91,11 +93,13 @@ function OverTimeStat({ label, value }: { label: string; value: string }) {
 function SummaryCard({
   title,
   value,
+  loading,
   description,
   icon: Icon,
 }: {
   title: string
-  value: string
+  value: number | undefined
+  loading: boolean
   description: string
   icon: typeof Users
 }) {
@@ -105,7 +109,13 @@ function SummaryCard({
         <div className="min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">
-            {value}
+            {value !== undefined ? (
+              <AnimatedNumber value={value} />
+            ) : loading ? (
+              <Skeleton className="h-9 w-16" />
+            ) : (
+              "–"
+            )}
           </p>
         </div>
         <div className="rounded-lg bg-brand/15 p-2.5 text-brand">
@@ -170,8 +180,6 @@ function Dashboard() {
   const totalByType = dashboard?.total_issued ?? 0
   const expiring = dashboard?.expiring ?? []
   const activities = activityQuery.data?.data ?? []
-  const number = (value: number | undefined) =>
-    value === undefined ? "–" : formatLocaleNumber(value)
   const expiryText = (daysLeft: number) =>
     daysLeft <= 0
       ? t("dashboard.expiring.today")
@@ -242,7 +250,7 @@ function Dashboard() {
       </div>
 
       {dashboardQuery.isLoading ? (
-        <LoadingState title={t("dashboard.loading")} />
+        <LoadingState title={t("dashboard.loading")} lines={0} />
       ) : null}
       {dashboardQuery.isError ? (
         <ErrorState
@@ -258,13 +266,15 @@ function Dashboard() {
       >
         <SummaryCard
           title={t("dashboard.summary.issuedThisMonth.title")}
-          value={number(summary?.documents_issued_this_month)}
+          value={summary?.documents_issued_this_month}
+          loading={dashboardQuery.isLoading}
           description={t("dashboard.summary.issuedThisMonth.description")}
           icon={FileCheck2}
         />
         <SummaryCard
           title={t("dashboard.summary.clearancesExpiring.title")}
-          value={number(summary?.clearances_expiring)}
+          value={summary?.clearances_expiring}
+          loading={dashboardQuery.isLoading}
           description={t("dashboard.summary.clearancesExpiring.description", {
             days: summary?.clearance_window_days ?? 30,
           })}
@@ -272,7 +282,8 @@ function Dashboard() {
         />
         <SummaryCard
           title={t("dashboard.summary.idsExpiring.title")}
-          value={number(summary?.barangay_ids_expiring)}
+          value={summary?.barangay_ids_expiring}
+          loading={dashboardQuery.isLoading}
           description={t("dashboard.summary.idsExpiring.description", {
             days: summary?.id_window_days ?? 30,
           })}
@@ -280,7 +291,8 @@ function Dashboard() {
         />
         <SummaryCard
           title={t("dashboard.summary.pending.title")}
-          value={number(summary?.open_drafts)}
+          value={summary?.open_drafts}
+          loading={dashboardQuery.isLoading}
           description={t("dashboard.summary.pending.description")}
           icon={Users}
         />
