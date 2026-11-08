@@ -386,33 +386,26 @@ function Dashboard() {
                           />
                         ))}
                         <div className="absolute inset-0 flex items-end gap-2 sm:gap-3">
-                          {months.map((item) => {
-                            const isPeak =
-                              peakMonth !== null &&
-                              item.month === peakMonth.month &&
-                              item.count > 0
-                            return (
+                          {months.map((item) => (
+                            <div
+                              key={item.month}
+                              title={`${monthLabel(item.month)}: ${formatLocaleNumber(item.count)}`}
+                              className="group relative flex h-full flex-1 items-end justify-center"
+                            >
+                              {/* Every bar shares one color; it only changes on hover. */}
                               <div
-                                key={item.month}
-                                title={`${monthLabel(item.month)}: ${formatLocaleNumber(item.count)}`}
-                                className="group relative flex h-full flex-1 items-end justify-center"
+                                className="relative w-full max-w-10 rounded-t-md bg-brand/60 transition-colors group-hover:bg-brand"
+                                style={{
+                                  height: `${(item.count / chartTop) * 100}%`,
+                                  minHeight: item.count > 0 ? "4px" : "0",
+                                }}
                               >
-                                <div
-                                  className={`relative w-full max-w-10 rounded-t-md transition-colors ${isPeak ? "bg-brand" : "bg-brand/50 group-hover:bg-brand/80"}`}
-                                  style={{
-                                    height: `${(item.count / chartTop) * 100}%`,
-                                    minHeight: item.count > 0 ? "4px" : "0",
-                                  }}
-                                >
-                                  <span
-                                    className={`absolute -top-5 left-1/2 -translate-x-1/2 text-xs tabular-nums ${isPeak ? "font-semibold text-foreground" : "text-muted-foreground"}`}
-                                  >
-                                    {formatLocaleNumber(item.count)}
-                                  </span>
-                                </div>
+                                <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs tabular-nums text-muted-foreground transition-colors group-hover:text-foreground">
+                                  {formatLocaleNumber(item.count)}
+                                </span>
                               </div>
-                            )
-                          })}
+                            </div>
+                          ))}
                         </div>
                       </div>
                     </div>
