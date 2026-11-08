@@ -5,7 +5,6 @@ on:
 permissions: {}
 
 env:
-  SAME_REPO_PR: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
 
 jobs:
   pre-commit:
@@ -20,10 +19,8 @@ jobs:
         run: echo "$GITHUB_CONTEXT"
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         name: Checkout PR for own repo
-        if: env.SAME_REPO_PR == 'true'
         with:
-          # To be able to commit it needs to fetch the head of the branch, not the
-          # merge commit
+          # Test the exact PR head commit, not GitHub's synthetic merge commit.
           ref: ${{ github.head_ref }}
           # And it needs the full history to be able to compute diffs
           fetch-depth: 0
@@ -31,7 +28,6 @@ jobs:
       # pre-commit lite ci needs the default checkout configs to work
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         name: Checkout PR for fork
-        if: env.SAME_REPO_PR == 'false'
         with:
         # To be able to commit it needs the head branch of the PR, the remote one
           ref: ${{ github.event.pull_request.head.sha }}
@@ -60,18 +56,6 @@ jobs:
         id: precommit
         run: uv run prek run --from-ref origin/${GITHUB_BASE_REF} --to-ref HEAD --show-diff-on-failure
         continue-on-error: true
-      - name: Check for changes
-        id: changes
-        run: |
-          if [[ -n "$(git status --porcelain)" ]]; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          fi
-      - uses: pre-commit-ci/lite-action@5d6cc0eb514c891a40562a58a8e71576c5c7fb43 # v1.1.0
-        if: env.CAN_PUSH == 'false'
-        with:
-          msg: 🎨 Auto format and update with pre-commit
       - name: Error out on pre-commit errors
         if: steps.precommit.outcome == 'failure'
         run: exit 1
