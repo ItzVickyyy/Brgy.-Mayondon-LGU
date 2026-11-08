@@ -41,7 +41,8 @@ function IssuancesManagement() {
   const queryClient = useQueryClient()
   const [printSetupOpen, setPrintSetupOpen] = useState(false)
   const { print: printStoredIssuance, overlay: printOverlay } = usePrintIssuance()
-  const [notice, setNotice] = useState("")
+  // A saved-form notice is stored as a kind so it follows a language switch; messages from the history list are plain text.
+  const [notice, setNotice] = useState<string | { kind: "draft" | "issued"; ref: string }>("")
 
   return (
     <div className="flex flex-col gap-6">
@@ -87,7 +88,7 @@ function IssuancesManagement() {
             className="mt-0.5 size-4 shrink-0 text-brand"
             aria-hidden="true"
           />
-          <p className="flex-1">{notice}</p>
+          <p className="flex-1">{typeof notice === "string" ? notice : notice.kind === "issued" ? t("issuances.noticeIssued", { ref: notice.ref }) : notice.ref === "Draft" ? t("issuances.noticeDraftPlain") : t("issuances.noticeDraft", { ref: notice.ref })}</p>
           <Button variant="ghost" size="icon" className="size-11" onClick={() => setNotice("")} aria-label={t("issuances.dismissMessage")}>
             <X aria-hidden="true" />
           </Button>
@@ -121,7 +122,7 @@ function IssuancesManagement() {
             void queryClient.invalidateQueries({ queryKey: [key] })
           }
           if (meta?.auto) return
-          setNotice(record.status === "draft" ? `${record.referenceNo === "Draft" ? "The draft" : record.referenceNo} was saved as a draft.` : `${record.referenceNo} was recorded as issued.`)
+          setNotice({ kind: record.status === "draft" ? "draft" : "issued", ref: record.referenceNo })
         }}
       />
 

@@ -919,6 +919,39 @@ export const issuanceApi = {
     }
   },
 
+  /**
+   * The form keeps an ID type and each sector as a position in its own option list
+   * (the list in documentConfig), while a saved issuance holds the lookup ids. This
+   * turns the saved ids back into positions by NAME, so it does not matter whether the
+   * database ids happen to follow the order of the lists in the code.
+   */
+  async toFormPositions(
+    code: DocumentCode,
+    payload: {
+      identification?: { idTypeId: number } | undefined
+      sectors?: { sectorId: number; idNumber?: string | undefined }[]
+    },
+  ) {
+    const data = await loadLookups()
+    const idOptions =
+      documentConfig[code].fields.find((field) => field.name === "idType")
+        ?.options ?? []
+    const idName = data.idTypes.find(
+      (item) => item.id === payload.identification?.idTypeId,
+    )?.name
+    const idTypePosition = idName ? idOptions.indexOf(idName) + 1 : 0
+    const sectors: { sectorId: number; idNumber?: string }[] = []
+    const sectorNames: string[] = []
+    for (const sector of payload.sectors ?? []) {
+      const name = data.sectors.find((item) => item.id === sector.sectorId)?.name
+      const position = name ? indigencySectorOptions.indexOf(name) + 1 : 0
+      if (!name || position < 1) continue
+      sectors.push({ sectorId: position, idNumber: sector.idNumber })
+      sectorNames.push(name)
+    }
+    return { idTypePosition, sectors, sectorNames }
+  },
+
   async getOfficials(): Promise<OfficialChoice[]> {
     return (await loadLookups()).officials
   },

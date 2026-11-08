@@ -776,6 +776,9 @@
     "newIssuance": "New Issuance",
     "print": "Print",
     "dismissMessage": "Dismiss message",
+    "noticeDraft": "{{ref}} was saved as a draft.",
+    "noticeDraftPlain": "The draft was saved as a draft.",
+    "noticeIssued": "{{ref}} was recorded as issued.",
     "printSetup": {
       "title": "Printing setup",
       "description": "Line the typed text up with the pre-printed forms. Saved on this computer only."
@@ -1176,6 +1179,8 @@
         "searchLabel": "Search resident",
         "archived": "Archived",
         "noOneFound": "No one found with that name. Check the spelling, or add them as a new resident in the form below.",
+        "searching": "Searching…",
+        "searchFailed": "Could not search the resident list. Check the connection and try again.",
         "editDetails": "Edit resident details",
         "addNew": "Add a new resident",
         "mustBeFilled": "must be filled in",

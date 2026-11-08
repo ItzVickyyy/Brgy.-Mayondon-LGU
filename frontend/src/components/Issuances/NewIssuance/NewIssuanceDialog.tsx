@@ -95,6 +95,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const knownAssociations = lookupsQuery.data?.associations ?? []
   const [residents, setResidents] = useState<ResidentRecord[]>([])
   const [residentQuery, setResidentQuery] = useState("")
+  // Server search state: which query the list in `residents` answers, and whether a search is running or failed.
+  const [searchedQuery, setSearchedQuery] = useState("")
+  const [searchFailed, setSearchFailed] = useState(false)
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [selectedResident, setSelectedResident] = useState<ResidentRecord | null>(null)
   const [quickAdd, setQuickAdd] = useState<QuickResidentInput>(emptyQuickAdd)
@@ -131,11 +134,29 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   // Read during render so react-hook-form keeps isDirty up to date for the discard prompt.
   const formDirty = form.formState.isDirty
   const allResidents = useMemo(() => residents, [residents])
+  const trimmedQuery = residentQuery.trim()
+  // The server does the matching; show its answer only while it still belongs to what is typed.
   const matches = useMemo(() => {
-    const query = residentQuery.trim().toLowerCase()
-    if (!query || selectedResident) return []
-    return allResidents.filter((resident) => [resident.name, resident.id, resident.idNumber, resident.address].some((value) => value.toLowerCase().includes(query))).slice(0, 6)
-  }, [allResidents, residentQuery, selectedResident])
+    if (!trimmedQuery || selectedResident || searchedQuery !== trimmedQuery) return []
+    return allResidents.slice(0, 8)
+  }, [allResidents, trimmedQuery, searchedQuery, selectedResident])
+  const searching = Boolean(trimmedQuery) && !selectedResident && searchedQuery !== trimmedQuery && !searchFailed
+
+  useEffect(() => {
+    if (!open || selectedResident || !trimmedQuery) { setSearchFailed(false); return }
+    let cancelled = false
+    setSearchFailed(false)
+    const timer = window.setTimeout(() => {
+      issuanceApi.searchResidents(trimmedQuery).then((found) => {
+        if (cancelled) return
+        setResidents(found)
+        setSearchedQuery(trimmedQuery)
+      }).catch(() => {
+        if (!cancelled) setSearchFailed(true)
+      })
+    }, 250)
+    return () => { cancelled = true; window.clearTimeout(timer) }
+  }, [open, selectedResident, trimmedQuery])
 
   function prefillResidentSector(code: DocumentCode, resident: ResidentRecord) {
     const sectorField = documentConfig[code].fields.find((field) => field.name === "sector")
@@ -416,13 +437,15 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         setSaving(false)
         return
       }
-      const lookups = await issuanceApi.getLookups()
+      const positions = await issuanceApi.toFormPositions(record.documentType, record.payload)
       const tricycle = record.documentType === "FRANCHISE_CLEARANCE"
         ? await issuanceApi.getTricycle((record.payload.details as { tricycleId?: string }).tricycleId)
         : undefined
       if (!active) return
       const restored = {
         ...record.payload,
+        identification: record.payload.identification ? { ...record.payload.identification, idTypeId: positions.idTypePosition } : undefined,
+        sectors: positions.sectors,
         purposeText: issuanceApi.getPurposeLabel(record.payload.purposeId) ?? "",
         residentId: record.residentId,
         status: "draft" as const,
@@ -438,7 +461,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       setResidentUpdates({})
       setEditingResident(false)
       const sectorField = documentConfig[record.documentType].fields.find((field) => field.name === "sector")
-      const selected = (record.payload.sectors ?? []).map((sector) => lookups.sectors[sector.sectorId - 1]).filter((name): name is string => Boolean(name))
+      const selected = positions.sectorNames
       setSelectedSector(sectorField?.type === "multiselect" ? selected : selected[0] ?? "")
       setSectorManuallySelected(false)
       setValidUntilEdited(true)
@@ -605,6 +628,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setSelectedResident(null)
     setEditingResident(false)
     setResidentQuery("")
+    setSearchedQuery("")
+    setSearchFailed(false)
     setResidentUpdates({})
     setSelectedSector("")
     setSectorManuallySelected(false)
@@ -814,7 +839,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
   const previewRowsRaw = [
     { label: "Resident", value: selectedResident ? formatPrintedName(selectedResident.firstName, selectedResident.middleName, selectedResident.lastName, printedNameType[documentType], selectedResident.suffix) : "" },
-    { label: "Resident number", value: selectedResident?.id ?? "" },
     { label: "Address", value: selectedResident ? getResidentAddress(selectedResident) : "" },
     { label: "Birthdate", value: selectedResident?.birthdate ?? "" },
     { label: "Birthplace", value: selectedResident?.birthplace ?? "" },
@@ -829,7 +853,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
   const previewLabels: Record<string, string> = {
     Resident: t("issuances.new.previewRows.resident"),
-    "Resident number": t("issuances.new.previewRows.residentNumber"),
     Address: t("issuances.new.previewRows.address"),
     Birthdate: t("issuances.new.previewRows.birthdate"),
     Birthplace: t("issuances.new.previewRows.birthplace"),
@@ -894,7 +917,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   }
 
   function issueAnother() {
-    const keep = successRecord ? allResidents.find((resident) => resident.id === successRecord.residentId) : undefined
+    const keep = successRecord && selectedResident?.id === successRecord.residentId ? selectedResident : undefined
     resetDialog()
     if (!keep) return
     // After a reset the form is back on the default document, so keep only the resident (no sector prefill from the previous type).
@@ -953,7 +976,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                   <div className="min-w-0">
                     <p className="text-base font-semibold">{selectedResident.name}</p>
                     <p className="mt-0.5 text-sm">{getResidentAddress(selectedResident)}</p>
-                    <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? t("issuances.new.resident.yearsOld", { age: calculateAge(selectedResident.birthdate, issueDate) }) : t("issuances.new.resident.birthdateNotRecorded")} · {selectedResident.civilStatus ? civilStatusLabel(selectedResident.civilStatus, t) : t("issuances.new.resident.civilStatusNotRecorded")} · {selectedResident.id}</p>
+                    <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? t("issuances.new.resident.yearsOld", { age: calculateAge(selectedResident.birthdate, issueDate) }) : t("issuances.new.resident.birthdateNotRecorded")} · {selectedResident.civilStatus ? civilStatusLabel(selectedResident.civilStatus, t) : t("issuances.new.resident.civilStatusNotRecorded")}</p>
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); setEditingResident(false); form.setValue("residentId", ""); setResidentQuery(""); setQuickAdd(emptyQuickAdd); setQuickAttempted(false); setQuickDuplicateSignature(null); setFormError("") }}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
@@ -965,7 +988,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                 {matches.length ? <div id="issuance-resident-results" role="listbox" className="overflow-hidden rounded-lg border shadow-xs">{matches.map((resident, index) => <button type="button" key={resident.id} id={`issuance-resident-option-${resident.id}`} role="option" aria-selected={activeResidentMatch === index} disabled={resident.status === "Archived"} onMouseEnter={() => setActiveResidentMatch(index)} onClick={() => selectResident(resident)} className={cn("flex min-h-14 w-full flex-col items-start justify-center border-b px-4 py-2 text-left last:border-b-0 hover:bg-muted", activeResidentMatch === index && "bg-muted", resident.status === "Archived" && "cursor-not-allowed opacity-50")}>
                   <span className="text-base font-medium">{resident.name}{resident.status === "Archived" ? <span className="ml-2 text-xs font-normal text-muted-foreground">{t("issuances.new.resident.archived")}</span> : null}</span>
                   <span className="text-sm text-muted-foreground">{getResidentAddress(resident)}</span>
-                </button>)}</div> : residentQuery.trim() ? <p className="rounded-lg border border-dashed p-4 text-sm">{t("issuances.new.resident.noOneFound")}</p> : null}
+                </button>)}</div> : searching ? <p role="status" className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">{t("issuances.new.resident.searching")}</p> : searchFailed ? <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm text-destructive">{t("issuances.new.resident.searchFailed")}</p> : trimmedQuery && !selectedResident ? <p className="rounded-lg border border-dashed p-4 text-sm">{t("issuances.new.resident.noOneFound")}</p> : null}
                 <fieldset disabled={quickSaving} className="min-w-0 space-y-4 rounded-lg border bg-muted/30 p-4">
                   <div className="flex items-baseline justify-between gap-2"><p className="font-semibold">{editingResident ? t("issuances.new.resident.editDetails") : t("issuances.new.resident.addNew")}</p><span className="text-xs text-muted-foreground"><span className="text-destructive">*</span> {t("issuances.new.resident.mustBeFilled")}</span></div>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)_minmax(0,1.3fr)_7.5rem]">

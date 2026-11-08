@@ -776,6 +776,9 @@
     "newIssuance": "Bagong Isyu",
     "print": "I-print",
     "dismissMessage": "Isara ang mensahe",
+    "noticeDraft": "Na-save bilang draft ang {{ref}}.",
+    "noticeDraftPlain": "Na-save bilang draft ang draft.",
+    "noticeIssued": "Naitala bilang naisyu ang {{ref}}.",
     "printSetup": {
       "title": "Setup sa pag-print",
       "description": "Iayon ang tinipang teksto sa mga pre-printed na porma. Nakaimbak lamang sa computer na ito."
@@ -1176,6 +1179,8 @@
         "searchLabel": "Maghanap ng residente",
         "archived": "Naka-archive",
         "noOneFound": "Walang nakitang may ganitong pangalan. Suriin ang baybay, o idagdag siya bilang bagong residente sa form sa ibaba.",
+        "searching": "Naghahanap…",
+        "searchFailed": "Hindi nahanap ang listahan ng mga residente. Suriin ang koneksyon at subukan muli.",
         "editDetails": "I-edit ang mga detalye ng residente",
         "addNew": "Magdagdag ng bagong residente",
         "mustBeFilled": "kailangang punan",

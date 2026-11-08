@@ -131,7 +131,8 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
   ASSISTANCE: {
     code: "ASSISTANCE", name: "Assistance Certification", shortName: "Assistance Certification", category: "certification",
     hint: "Financial, medical, burial", printMode: "overlay", validityMonths: null, onePerResident: false,
-    signatoryMode: "select", signatoryDefault: "Barangay Kagawad", residentNeeds: ["residentSince", "sector"],
+    // The sector is asked once, in Document details (a required field there), not again in the missing-details box.
+    signatoryMode: "select", signatoryDefault: "Barangay Kagawad", residentNeeds: ["residentSince"],
     fields: [
       { name: "sector", label: "Sector", type: "select", required: true, options: sectorOptions, group: "main" },
       { name: "assistanceType", label: "Assistance requested", type: "select", required: true, options: ["Financial", "Medical", "Burial"], group: "main" },
@@ -143,7 +144,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
   MARGINALIZED_SECTOR: {
     code: "MARGINALIZED_SECTOR", name: "Marginalized Sector (Pagpapatunay)", shortName: "Marginalized Sector", category: "certification",
     hint: "Filipino sector certification", printMode: "full_page", validityMonths: null, onePerResident: false,
-    signatoryMode: "select", signatoryDefault: "Barangay Kagawad", residentNeeds: ["sector"],
+    signatoryMode: "select", signatoryDefault: "Barangay Kagawad", residentNeeds: [],
     fields: [
       { name: "sector", label: "Sector", type: "select", required: true, options: sectorOptions, group: "main" },
       { name: "healthCondition", label: "Health condition", type: "textarea", required: true, group: "main" },
