@@ -487,6 +487,22 @@ function OfficialsManagement() {
                   ? t("admin.officials.noMatch.descriptionEmpty")
                   : t("admin.officials.noMatch.descriptionFilter")
               }
+              action={
+                officials.length > 0 &&
+                (search.trim() !== "" || statusFilter !== "Current") ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="min-h-11"
+                    onClick={() => {
+                      setSearch("")
+                      setStatusFilter("Current")
+                    }}
+                  >
+                    {t("issuances.history.resetFilters")}
+                  </Button>
+                ) : undefined
+              }
             />
           ) : null}
         </div>

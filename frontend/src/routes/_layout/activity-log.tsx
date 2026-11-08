@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { ParseKeys, TFunction } from "i18next"
-import { Search } from "lucide-react"
+import { Search, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -15,6 +15,7 @@ import { formControlClass } from "@/components/Common/formStyles"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
@@ -131,6 +132,21 @@ function ActivityLog() {
   ])
 
   const rangeInvalid = Boolean(startDate && endDate && startDate > endDate)
+  const hasFilters =
+    search.trim() !== "" ||
+    moduleFilter !== "all" ||
+    outcomeFilter !== "all" ||
+    actorFilter !== "all" ||
+    startDate !== "" ||
+    endDate !== ""
+  const resetFilters = () => {
+    setSearch("")
+    setModuleFilter("all")
+    setOutcomeFilter("all")
+    setActorFilter("all")
+    setStartDate("")
+    setEndDate("")
+  }
 
   const optionsQuery = useQuery({
     queryKey: ["activity-options"],
@@ -402,6 +418,19 @@ function ActivityLog() {
                 <EmptyState
                   title={t("activity.empty.title")}
                   description={t("activity.empty.description")}
+                  action={
+                    hasFilters ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-h-11"
+                        onClick={resetFilters}
+                      >
+                        <X aria-hidden="true" />
+                        {t("issuances.history.resetFilters")}
+                      </Button>
+                    ) : undefined
+                  }
                 />
               ) : null}
             </div>
