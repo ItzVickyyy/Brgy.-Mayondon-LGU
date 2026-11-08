@@ -387,6 +387,13 @@ export function IssuanceHistory({
     statusFilter !== "all" ||
     dateFrom !== "" ||
     dateTo !== ""
+  const resetFilters = () => {
+    setSearch("")
+    setTypeFilter("")
+    setStatusFilter("all")
+    setDateFrom("")
+    setDateTo("")
+  }
   const today = manilaToday()
   const latest = latestQuery.data
 
@@ -455,13 +462,7 @@ export function IssuanceHistory({
                 variant="ghost"
                 size="sm"
                 className="min-h-11"
-                onClick={() => {
-                  setSearch("")
-                  setTypeFilter("")
-                  setStatusFilter("all")
-                  setDateFrom("")
-                  setDateTo("")
-                }}
+                onClick={resetFilters}
               >
                 <X aria-hidden="true" />
                 {t("issuances.history.resetFilters")}
@@ -721,6 +722,19 @@ export function IssuanceHistory({
                 <EmptyState
                   title={t("issuances.history.empty.title")}
                   description={t("issuances.history.empty.description")}
+                  action={
+                    hasFilters ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-h-11"
+                        onClick={resetFilters}
+                      >
+                        <X aria-hidden="true" />
+                        {t("issuances.history.resetFilters")}
+                      </Button>
+                    ) : undefined
+                  }
                 />
               ) : null}
             </div>

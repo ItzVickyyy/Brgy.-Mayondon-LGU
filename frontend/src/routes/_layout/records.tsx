@@ -552,6 +552,30 @@ function RecordsManagement() {
                     <EmptyState
                       title={t("records.list.empty.title")}
                       description={t("records.list.empty.description")}
+                      action={
+                        search.trim() !== "" || statusFilter !== "active" ? (
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className="min-h-11"
+                            onClick={() => {
+                              setSearch("")
+                              setStatusFilter("active")
+                            }}
+                          >
+                            {t("issuances.history.resetFilters")}
+                          </Button>
+                        ) : (
+                          <Button
+                            type="button"
+                            className="min-h-11"
+                            onClick={() => openForm(null)}
+                          >
+                            <UserRound aria-hidden="true" />
+                            {t("records.addResident")}
+                          </Button>
+                        )
+                      }
                     />
                   ) : null}
                 </div>
