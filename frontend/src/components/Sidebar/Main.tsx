@@ -24,6 +24,19 @@ interface MainProps {
   items: Item[]
 }
 
+// Subtle navigation feedback: smooth colour change, the icon eases up a little
+// on hover, and the current page gets a brand tint with a thin edge marker.
+// Motion is switched off globally when the system asks for reduced motion.
+const NAV_BUTTON_CLASS = [
+  "relative transition-[width,height,padding,background-color,color]",
+  "[&>svg]:transition-transform [&>svg]:duration-150 hover:[&>svg]:scale-110",
+  "before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5",
+  "before:-translate-y-1/2 before:rounded-full before:bg-brand before:opacity-0",
+  "before:transition-opacity data-[active=true]:before:opacity-100",
+  "data-[active=true]:bg-brand/10 data-[active=true]:text-brand",
+  "data-[active=true]:hover:bg-brand/15 data-[active=true]:hover:text-brand",
+].join(" ")
+
 export function Main({ items }: MainProps) {
   const { isMobile, setOpenMobile } = useSidebar()
   const router = useRouterState()
@@ -56,6 +69,7 @@ export function Main({ items }: MainProps) {
                   <SidebarMenuButton
                     tooltip={item.title}
                     isActive={isActive}
+                    className={NAV_BUTTON_CLASS}
                     asChild
                   >
                     <RouterLink to={item.path} onClick={handleMenuClick}>
