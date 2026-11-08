@@ -1141,7 +1141,6 @@
         "busy": "A print is already in progress.",
         "opened": "Opened the print dialog. Load the pre-printed form, print at 100% scale with no headers or footers, and use Print again for another copy.",
         "unable": "Unable to prepare this document for printing.",
-        "oldForm": "This record was made with the old form and has no saved print data. Use New Issuance to issue it again.",
         "notFound": "This issuance could not be found, so it cannot be printed.",
         "voided": "{{ref}} was voided and cannot be printed.",
         "noTemplate": "This document type has no print template yet, so it cannot be printed from here."

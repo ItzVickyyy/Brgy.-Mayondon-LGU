@@ -1141,7 +1141,6 @@
         "busy": "May isinasagawa nang pag-print.",
         "opened": "Nabuksan na ang print dialog. Ilagay ang pre-printed na form, mag-print sa 100% na scale nang walang header o footer, at pindutin muli ang Print para sa isa pang kopya.",
         "unable": "Hindi maihanda ang dokumentong ito para sa pag-print.",
-        "oldForm": "Ginawa ang talaang ito gamit ang lumang form at walang naka-save na datos sa pag-print. Gamitin ang Bagong Isyu para i-isyu itong muli.",
         "notFound": "Hindi makita ang isyung ito, kaya hindi ito mapi-print.",
         "voided": "Ang {{ref}} ay na-void at hindi na mapi-print.",
         "noTemplate": "Wala pang print template ang uri ng dokumentong ito, kaya hindi ito mapi-print mula rito."
