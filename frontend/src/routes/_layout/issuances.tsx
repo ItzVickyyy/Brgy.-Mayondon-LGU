@@ -144,8 +144,6 @@ function IssuancesManagement() {
         </DialogContent>
       </Dialog>
       {printOverlay}
-
-      {printOverlay}
     </div>
   )
 }
