@@ -26,21 +26,21 @@ repos:
     hooks:
       - id: local-biome-check
         name: biome check
-        entry: npm run lint
+        entry: bunx biome check --no-errors-on-unmatched --files-ignore-unknown=true
         language: system
         types: [text]
         files: ^frontend/
 
       - id: local-ruff-check
         name: ruff check
-        entry: uv run ruff check --force-exclude --fix --exit-non-zero-on-fix
+        entry: uv run ruff check --force-exclude
         require_serial: true
         language: unsupported
         types: [python]
 
       - id: local-ruff-format
         name: ruff format
-        entry: uv run ruff format --force-exclude --exit-non-zero-on-format
+        entry: uv run ruff format --force-exclude --check
         require_serial: true
         language: unsupported
         types: [python]
