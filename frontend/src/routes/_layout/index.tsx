@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   Activity,
+  BarChart3,
   CalendarDays,
   Clock3,
   FileCheck2,
@@ -58,6 +59,33 @@ function dateLabel(value: string) {
     day: "2-digit",
     year: "numeric",
   })
+}
+
+// Round the chart's top value up to a "nice" number and build the y-axis ticks
+// (0, step, 2*step, ...) so gridlines land on readable whole counts.
+function niceScale(max: number) {
+  const rough = Math.max(1, max) / 4
+  const power = 10 ** Math.floor(Math.log10(rough))
+  const fraction = rough / power
+  const unit = fraction <= 1 ? 1 : fraction <= 2 ? 2 : fraction <= 5 ? 5 : 10
+  const step = Math.max(1, unit * power)
+  const top = Math.max(step, Math.ceil(max / step) * step)
+  const ticks: number[] = []
+  for (let value = 0; value <= top; value += step) ticks.push(value)
+  return { top, ticks }
+}
+
+function OverTimeStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="min-w-0 rounded-lg border bg-muted/40 px-3 py-2.5">
+      <p className="truncate text-xs font-medium text-muted-foreground">
+        {label}
+      </p>
+      <p className="mt-1 truncate text-lg font-semibold tabular-nums leading-6">
+        {value}
+      </p>
+    </div>
+  )
 }
 
 function SummaryCard({
@@ -129,7 +157,15 @@ function Dashboard() {
   const dashboard = dashboardQuery.data
   const summary = dashboard?.summary
   const months = dashboard?.issuances_over_time ?? []
-  const maxMonthly = Math.max(1, ...months.map((item) => item.count))
+  const maxMonthly = Math.max(0, ...months.map((item) => item.count))
+  const { top: chartTop, ticks: chartTicks } = niceScale(maxMonthly)
+  const monthsTotal = months.reduce((sum, item) => sum + item.count, 0)
+  const monthsAverage = months.length > 0 ? monthsTotal / months.length : 0
+  const peakMonth = months.reduce<(typeof months)[number] | null>(
+    (best, item) => (best === null || item.count > best.count ? item : best),
+    null,
+  )
+  const hasOverTimeData = months.length > 0 && monthsTotal > 0
   const types = dashboard?.by_document_type ?? []
   const totalByType = dashboard?.total_issued ?? 0
   const expiring = dashboard?.expiring ?? []
@@ -278,40 +314,156 @@ function Dashboard() {
       </section>
 
       <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex flex-col items-start gap-2">
-              <SectionHeading
-                title={t("dashboard.overTime.title")}
-                description={t("dashboard.overTime.description")}
-              />
+        <article className="flex flex-col rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <div className="flex items-start gap-3">
+            <div className="hidden rounded-lg bg-brand/10 p-2.5 text-brand sm:block">
+              <BarChart3 className="size-5" aria-hidden="true" />
             </div>
+            <SectionHeading
+              title={t("dashboard.overTime.title")}
+              description={t("dashboard.overTime.description")}
+            />
           </div>
-          <div className="mt-6 flex h-48 items-end gap-3 border-b px-1 sm:gap-5">
-            {months.map((item) => (
-              <div
-                key={item.month}
-                className="flex h-full flex-1 flex-col items-center justify-end gap-2"
-              >
-                <span className="text-xs tabular-nums text-muted-foreground">
-                  {item.count}
-                </span>
+
+          {hasOverTimeData && peakMonth ? (
+            <dl className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <OverTimeStat
+                label={t("dashboard.overTime.stats.total")}
+                value={formatLocaleNumber(monthsTotal)}
+              />
+              <OverTimeStat
+                label={t("dashboard.overTime.stats.average")}
+                value={formatLocaleNumber(monthsAverage, {
+                  maximumFractionDigits: 1,
+                })}
+              />
+              <OverTimeStat
+                label={t("dashboard.overTime.stats.peak")}
+                value={`${monthLabel(peakMonth.month)} · ${formatLocaleNumber(peakMonth.count)}`}
+              />
+            </dl>
+          ) : null}
+
+          {months.length > 0 ? (
+            <>
+              {/* The chart grows to fill the card, so a taller neighbour in the
+                  grid never leaves empty space above the footnote. */}
+              <div className="mt-5 flex flex-1 gap-2">
+                {/* y-axis labels; pb-7 matches the month-label row below the plot */}
                 <div
-                  className="w-full max-w-12 rounded-t-md bg-brand/80 transition-all"
-                  style={{ height: `${(item.count / maxMonthly) * 72}%` }}
-                />
-                <span className="pb-2 text-xs text-muted-foreground">
-                  {monthLabel(item.month)}
-                </span>
+                  className="flex w-8 shrink-0 flex-col pt-6 pb-7"
+                  aria-hidden="true"
+                >
+                  <div className="relative flex-1">
+                    {chartTicks.map((tick) => (
+                      <span
+                        key={tick}
+                        className="absolute right-0 translate-y-1/2 text-[11px] tabular-nums leading-none text-muted-foreground"
+                        style={{ bottom: `${(tick / chartTop) * 100}%` }}
+                      >
+                        {formatLocaleNumber(tick)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* plot area: scrolls sideways when the range is long */}
+                <div
+                  className="flex min-w-0 flex-1 flex-col overflow-x-auto pb-1"
+                  aria-hidden="true"
+                >
+                  <div
+                    className="flex flex-1 flex-col"
+                    style={{ minWidth: `${months.length * 44}px` }}
+                  >
+                    <div className="relative min-h-[14.5rem] flex-1">
+                      <div className="absolute inset-x-0 top-6 bottom-0">
+                        {chartTicks.map((tick) => (
+                          <div
+                            key={tick}
+                            className={`absolute inset-x-0 border-t ${tick === 0 ? "border-border" : "border-dashed border-border/70"}`}
+                            style={{ bottom: `${(tick / chartTop) * 100}%` }}
+                          />
+                        ))}
+                        <div className="absolute inset-0 flex items-end gap-2 sm:gap-3">
+                          {months.map((item) => {
+                            const isPeak =
+                              peakMonth !== null &&
+                              item.month === peakMonth.month &&
+                              item.count > 0
+                            return (
+                              <div
+                                key={item.month}
+                                title={`${monthLabel(item.month)}: ${formatLocaleNumber(item.count)}`}
+                                className="group relative flex h-full flex-1 items-end justify-center"
+                              >
+                                <div
+                                  className={`relative w-full max-w-10 rounded-t-md transition-colors ${isPeak ? "bg-brand" : "bg-brand/50 group-hover:bg-brand/80"}`}
+                                  style={{
+                                    height: `${(item.count / chartTop) * 100}%`,
+                                    minHeight: item.count > 0 ? "4px" : "0",
+                                  }}
+                                >
+                                  <span
+                                    className={`absolute -top-5 left-1/2 -translate-x-1/2 text-xs tabular-nums ${isPeak ? "font-semibold text-foreground" : "text-muted-foreground"}`}
+                                  >
+                                    {formatLocaleNumber(item.count)}
+                                  </span>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="mt-2 flex gap-2 sm:gap-3">
+                      {months.map((item) => (
+                        <span
+                          key={item.month}
+                          className="flex-1 truncate text-center text-xs text-muted-foreground"
+                        >
+                          {monthLabel(item.month)}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-            ))}
-            {months.length === 0 && !dashboardQuery.isLoading ? (
-              <p className="w-full self-center text-center text-sm text-muted-foreground">
+
+              {/* The chart above is visual only; this table carries the same data. */}
+              <table className="sr-only">
+                <caption>{t("dashboard.overTime.title")}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">{t("dashboard.overTime.table.month")}</th>
+                    <th scope="col">{t("dashboard.overTime.table.count")}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {months.map((item) => (
+                    <tr key={item.month}>
+                      <th scope="row">{monthLabel(item.month)}</th>
+                      <td>{formatLocaleNumber(item.count)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          ) : null}
+
+          {months.length === 0 && !dashboardQuery.isLoading ? (
+            <div className="mt-5 flex min-h-52 flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-center">
+              <BarChart3
+                className="size-6 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <p className="text-sm text-muted-foreground">
                 {t("dashboard.overTime.empty")}
               </p>
-            ) : null}
-          </div>
-          <p className="mt-3 text-xs text-muted-foreground">
+            </div>
+          ) : null}
+
+          <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">
             {t("dashboard.overTime.note")}
           </p>
         </article>

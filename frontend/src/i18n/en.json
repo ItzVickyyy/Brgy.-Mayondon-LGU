@@ -117,7 +117,16 @@
       "title": "Document Issuances Over Time",
       "description": "Monthly issuance volume",
       "empty": "No issuance history yet.",
-      "note": "Counts documents currently in force by issue date. Voided documents are not counted."
+      "note": "Counts documents currently in force by issue date. Voided documents are not counted.",
+      "stats": {
+        "total": "Total issued",
+        "average": "Monthly average",
+        "peak": "Busiest month"
+      },
+      "table": {
+        "month": "Month",
+        "count": "Documents issued"
+      }
     },
     "byType": {
       "title": "Issuances by Document Type",

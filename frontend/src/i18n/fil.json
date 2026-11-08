@@ -117,7 +117,16 @@
       "title": "Mga Naisyung Dokumento sa Paglipas ng Panahon",
       "description": "Buwanang dami ng naisyu",
       "empty": "Wala pang kasaysayan ng pag-isyu.",
-      "note": "Binibilang ang mga dokumentong may bisa ayon sa petsa ng pag-isyu. Hindi binibilang ang mga dokumentong na-void."
+      "note": "Binibilang ang mga dokumentong may bisa ayon sa petsa ng pag-isyu. Hindi binibilang ang mga dokumentong na-void.",
+      "stats": {
+        "total": "Kabuuang naisyu",
+        "average": "Karaniwan kada buwan",
+        "peak": "Pinakamaraming buwan"
+      },
+      "table": {
+        "month": "Buwan",
+        "count": "Mga naisyung dokumento"
+      }
     },
     "byType": {
       "title": "Mga Naisyu ayon sa Uri ng Dokumento",
