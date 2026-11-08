@@ -169,13 +169,16 @@ const validationKeys = {
   "The saved ID type is no longer available. Ask an administrator to restore it before continuing this draft.": "issuances.new.validation.idTypeUnavailable",
   "A sector in this draft is no longer available. Ask an administrator to restore it before continuing this draft.": "issuances.new.validation.sectorUnavailable",
   "Choose a valid ID type before saving this issuance.": "issuances.new.validation.chooseValidIdType",
-  'The ID type "{{name}}" is no longer available. Ask an administrator to restore it, then try again.': "issuances.new.validation.idTypeNotAvailable",
   "Choose a valid sector before saving this issuance.": "issuances.new.validation.chooseValidSector",
-  'The sector "{{name}}" is no longer available. Ask an administrator to restore it, then try again.': "issuances.new.validation.sectorNotAvailable",
 } as const satisfies Record<string, ParseKeys>
 
-export const validationMessage = (message: string, t: TFunction) =>
-  lookup(validationKeys, message, t)
+export function validationMessage(message: string, t: TFunction) {
+  const idType = /^The ID type "(.+)" is no longer available\. Ask an administrator to restore it, then try again\.$/.exec(message)
+  if (idType) return t("issuances.new.validation.idTypeNotAvailable", { name: idType[1] })
+  const sector = /^The sector "(.+)" is no longer available\. Ask an administrator to restore it, then try again\.$/.exec(message)
+  if (sector) return t("issuances.new.validation.sectorNotAvailable", { name: sector[1] })
+  return lookup(validationKeys, message, t)
+}
 
 // Messages from lib/print/loadPrintData.ts. Unknown messages are shown as is.
 const printMessageKeys = {
