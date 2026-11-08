@@ -440,15 +440,24 @@ async function buildSections(input: IssuanceInput, data: LookupData) {
       ? idTypeName(code, identification.idTypeId)
       : undefined
     const typeId = typeName ? findByName(data.idTypes, typeName)?.id : undefined
-    sections.identification =
-      identification && typeId && text(identification.idNumber)
-        ? {
-            id_type_id: typeId,
-            id_number: text(identification.idNumber),
-            place_of_issue: text(identification.placeOfIssue) || undefined,
-            date_of_issue: identification.dateOfIssue || null,
-          }
-        : null
+    if (identification && text(identification.idNumber)) {
+      if (!typeName) {
+        throw new Error("Choose a valid ID type before saving this issuance.")
+      }
+      if (!typeId) {
+        throw new Error(
+          `The ID type "${typeName}" is no longer available. Ask an administrator to restore it, then try again.`,
+        )
+      }
+      sections.identification = {
+        id_type_id: typeId,
+        id_number: text(identification.idNumber),
+        place_of_issue: text(identification.placeOfIssue) || undefined,
+        date_of_issue: identification.dateOfIssue || null,
+      }
+    } else {
+      sections.identification = null
+    }
   }
   if (allowed.includes("payment")) {
     const payment = input.payment
@@ -470,15 +479,19 @@ async function buildSections(input: IssuanceInput, data: LookupData) {
           : null
   }
   if (allowed.includes("sectors")) {
-    const chosen = (input.sectors ?? [])
-      .map((sector) => {
-        const name = indigencySectorOptions[sector.sectorId - 1]
-        const id = name ? findByName(data.sectors, name)?.id : undefined
-        return id
-          ? { sector_id: id, sector_id_number: orNull(sector.idNumber) }
-          : null
-      })
-      .filter((sector) => sector !== null)
+    const chosen = (input.sectors ?? []).map((sector) => {
+      const name = indigencySectorOptions[sector.sectorId - 1]
+      if (!name) {
+        throw new Error("Choose a valid sector before saving this issuance.")
+      }
+      const id = findByName(data.sectors, name)?.id
+      if (!id) {
+        throw new Error(
+          `The sector "${name}" is no longer available. Ask an administrator to restore it, then try again.`,
+        )
+      }
+      return { sector_id: id, sector_id_number: orNull(sector.idNumber) }
+    })
     sections.sectors = chosen.length ? chosen : null
   }
   switch (code) {
@@ -940,12 +953,21 @@ export const issuanceApi = {
       (item) => item.id === payload.identification?.idTypeId,
     )?.name
     const idTypePosition = idName ? idOptions.indexOf(idName) + 1 : 0
+    if (payload.identification?.idTypeId && idTypePosition < 1) {
+      throw new Error(
+        "The saved ID type is no longer available. Ask an administrator to restore it before continuing this draft.",
+      )
+    }
     const sectors: { sectorId: number; idNumber?: string }[] = []
     const sectorNames: string[] = []
     for (const sector of payload.sectors ?? []) {
       const name = data.sectors.find((item) => item.id === sector.sectorId)?.name
       const position = name ? indigencySectorOptions.indexOf(name) + 1 : 0
-      if (!name || position < 1) continue
+      if (!name || position < 1) {
+        throw new Error(
+          "A sector in this draft is no longer available. Ask an administrator to restore it before continuing this draft.",
+        )
+      }
       sectors.push({ sectorId: position, idNumber: sector.idNumber })
       sectorNames.push(name)
     }

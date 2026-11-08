@@ -1052,7 +1052,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
             </IssuanceSection> : null}
 
             {duplicate ? <p role="alert" className="rounded-md border border-destructive/40 bg-background p-3 text-sm">{t("issuances.new.duplicate", { reference: duplicate.referenceNo, date: duplicate.issueDate })}</p> : null}
-            {formError ? <p role="alert" className="rounded-md border border-destructive/40 bg-background p-3 text-sm text-destructive">{formError}</p> : null}
+            {formError ? <p role="alert" className="rounded-md border border-destructive/40 bg-background p-3 text-sm text-destructive">{validationMessage(formError, t)}</p> : null}
 
             <div className="lg:hidden">
               <button type="button" className="flex min-h-10 items-center gap-2 text-sm font-medium" aria-expanded={previewOpen} onClick={() => setPreviewOpen((value) => !value)}><ChevronDown className={cn("size-4 transition-transform", previewOpen && "rotate-180")} />{t("issuances.new.preview")}</button>

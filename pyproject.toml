@@ -21,6 +21,8 @@ extend-exclude = [
     "backend/app/frontend/",
     "frontend/dist/",
     "frontend/public/assets/images/",
+    # Filipino translations contain valid Tagalog words that the English spell checker flags.
+    "frontend/src/i18n/fil.json",
 ]
 
 [tool.typos.default]

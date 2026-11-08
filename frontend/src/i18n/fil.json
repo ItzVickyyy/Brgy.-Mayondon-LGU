@@ -1029,7 +1029,13 @@
         "exactlyOneSector": "Pumili ng eksaktong isang sektor.",
         "chooseSignatory": "Pumili ng lumalagda.",
         "identityRequired": "Kailangan ang patunay ng pagkakakilanlan.",
-        "paymentRequired": "Kailangan ang mga detalye ng bayad."
+        "paymentRequired": "Kailangan ang mga detalye ng bayad.",
+        "idTypeUnavailable": "Hindi na available ang naka-save na uri ng ID. Hilingin sa administrator na ibalik ito bago ipagpatuloy ang draft na ito.",
+        "sectorUnavailable": "Hindi na available ang isang sektor sa draft na ito. Hilingin sa administrator na ibalik ito bago ipagpatuloy ang draft na ito.",
+        "chooseValidIdType": "Pumili ng wastong uri ng ID bago i-save ang pag-isyu na ito.",
+        "idTypeNotAvailable": "Hindi na available ang uri ng ID na \"{{name}}\". Hilingin sa administrator na ibalik ito, pagkatapos ay subukan muli.",
+        "chooseValidSector": "Pumili ng wastong sektor bago i-save ang pag-isyu na ito.",
+        "sectorNotAvailable": "Hindi na available ang sektor na \"{{name}}\". Hilingin sa administrator na ibalik ito, pagkatapos ay subukan muli."
       },
       "fieldLabels": {
         "validId": "Balidong ID na ipinakita",
