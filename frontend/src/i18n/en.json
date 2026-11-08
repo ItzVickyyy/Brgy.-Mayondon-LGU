@@ -1029,7 +1029,13 @@
         "exactlyOneSector": "Choose exactly one sector.",
         "chooseSignatory": "Choose a signatory.",
         "identityRequired": "Proof of identity is required.",
-        "paymentRequired": "Payment details are required."
+        "paymentRequired": "Payment details are required.",
+        "idTypeUnavailable": "The saved ID type is no longer available. Ask an administrator to restore it before continuing this draft.",
+        "sectorUnavailable": "A sector in this draft is no longer available. Ask an administrator to restore it before continuing this draft.",
+        "chooseValidIdType": "Choose a valid ID type before saving this issuance.",
+        "idTypeNotAvailable": "The ID type \"{{name}}\" is no longer available. Ask an administrator to restore it, then try again.",
+        "chooseValidSector": "Choose a valid sector before saving this issuance.",
+        "sectorNotAvailable": "The sector \"{{name}}\" is no longer available. Ask an administrator to restore it, then try again."
       },
       "fieldLabels": {
         "validId": "Valid ID presented",
