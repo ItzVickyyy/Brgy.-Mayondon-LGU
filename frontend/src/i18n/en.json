@@ -328,7 +328,36 @@
         "description": "Sector classifications associated with resident records."
       },
       "unavailable": "Not available yet",
-      "unavailableHint": "This screen has not been built yet."
+      "unavailableHint": "This screen has not been built yet.",
+      "sectors": {
+        "assignHint": "Sectors are chosen when you add or edit a resident.",
+        "loading": "Loading sectors…",
+        "loadError": {
+          "title": "Could not load sectors",
+          "description": "Check your connection and try again."
+        },
+        "summary": "{{n}} active residents have at least one sector recorded.",
+        "listAria": "Sectors",
+        "residentCount_one": "{{count}} resident",
+        "residentCount_other": "{{count}} residents",
+        "choose": "Choose a sector to see its active residents.",
+        "listTitle": "Active residents in {{sector}}",
+        "loadingResidents": "Loading residents…",
+        "residentsError": {
+          "title": "Could not load residents",
+          "description": "Check your connection and try again."
+        },
+        "empty": {
+          "title": "No active residents in this sector",
+          "description": "Add the sector to a resident from Residents, then Edit details."
+        },
+        "columns": {
+          "name": "Name",
+          "address": "Address",
+          "type": "Type",
+          "actions": "Actions"
+        }
+      }
     },
     "import": {
       "title": "Import Existing Masterlist",

@@ -509,3 +509,53 @@ def test_today_is_manila_not_utc() -> None:
 
     utc_now = datetime.now(UTC)
     assert today_manila() - utc_now.date() in (timedelta(0), timedelta(days=1))
+
+
+# --- Sector summary ----------------------------------------------------------
+
+
+def _summary(client: TestClient, headers: Headers) -> dict:
+    r = client.get(f"{API}/residents/sector-summary", headers=headers)
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def test_sector_summary_counts_active_residents_once(
+    client: TestClient,
+    staff_token_headers: Headers,
+    superuser_token_headers: Headers,
+    db: Session,
+) -> None:
+    s1, s2 = _sector_ids(db)
+    before = _summary(client, staff_token_headers)
+    by_id = {row["sector_id"]: row["active_residents"] for row in before["data"]}
+    assert s1 in by_id and s2 in by_id
+    names = [row["name"] for row in before["data"]]
+    assert names == sorted(names, key=str.casefold)
+
+    both = _create(client, staff_token_headers, sector_ids=[s1, s2])
+    only_first = _create(client, staff_token_headers, sector_ids=[s1])
+    _create(client, staff_token_headers)  # no sector
+
+    after = _summary(client, staff_token_headers)
+    now = {row["sector_id"]: row["active_residents"] for row in after["data"]}
+    assert now[s1] == by_id[s1] + 2
+    assert now[s2] == by_id[s2] + 1
+    # two residents with sectors were added; the one in both counts once
+    assert after["residents_with_sector"] == before["residents_with_sector"] + 2
+
+    archived = client.post(
+        f"{API}/residents/{only_first['id']}/archive",
+        headers=superuser_token_headers,
+        json={"reason": "Moved away"},
+    )
+    assert archived.status_code == 200, archived.text
+    last = _summary(client, staff_token_headers)
+    again = {row["sector_id"]: row["active_residents"] for row in last["data"]}
+    assert again[s1] == by_id[s1] + 1
+    assert last["residents_with_sector"] == before["residents_with_sector"] + 1
+    assert both["id"]
+
+
+def test_sector_summary_needs_sign_in(client: TestClient) -> None:
+    assert client.get(f"{API}/residents/sector-summary").status_code == 401

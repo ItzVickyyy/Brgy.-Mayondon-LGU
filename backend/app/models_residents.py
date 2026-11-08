@@ -327,3 +327,16 @@ class ResidentPublic(ResidentFields):
 class ResidentsPublic(SQLModel):
     data: list[ResidentPublic]
     count: int
+
+
+class ResidentSectorCount(SQLModel):
+    """One sector and how many active residents belong to it."""
+
+    sector_id: int
+    name: str
+    active_residents: int
+
+
+class SectorSummary(SQLModel):
+    data: list[ResidentSectorCount]
+    residents_with_sector: int

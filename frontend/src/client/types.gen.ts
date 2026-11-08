@@ -1965,6 +1965,26 @@ export type ResidentPublic = {
 };
 
 /**
+ * ResidentSectorCount
+ *
+ * One sector and how many active residents belong to it.
+ */
+export type ResidentSectorCount = {
+    /**
+     * Sector Id
+     */
+    sector_id: number;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Active Residents
+     */
+    active_residents: number;
+};
+
+/**
  * ResidentUpdate
  *
  * Every field optional; only the fields sent are changed.
@@ -2126,6 +2146,20 @@ export type SectorPublic = {
      * Sector Id Number
      */
     sector_id_number: string | null;
+};
+
+/**
+ * SectorSummary
+ */
+export type SectorSummary = {
+    /**
+     * Data
+     */
+    data: Array<ResidentSectorCount>;
+    /**
+     * Residents With Sector
+     */
+    residents_with_sector: number;
 };
 
 /**
@@ -2998,6 +3032,22 @@ export type residentsCreateResidentResponses = {
 };
 
 export type residentsCreateResidentResponse = residentsCreateResidentResponses[keyof residentsCreateResidentResponses];
+
+export type residentsSectorSummaryData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/residents/sector-summary';
+};
+
+export type residentsSectorSummaryResponses = {
+    /**
+     * Successful Response
+     */
+    200: SectorSummary;
+};
+
+export type residentsSectorSummaryResponse = residentsSectorSummaryResponses[keyof residentsSectorSummaryResponses];
 
 export type residentsReadResidentData = {
     body?: never;

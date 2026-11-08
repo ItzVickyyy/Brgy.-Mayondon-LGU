@@ -136,7 +136,7 @@ Rules as built:
 
 ### Not designed yet (waiting on the client)
 
-- **Family, beneficiary and sector-detail fields (D-20):** no table until the client says which fields they need.
+- **Family, beneficiary and sector-detail fields (D-20):** no table until the client says which fields they need. Sector membership itself already exists (`resident_sectors`); the Family & Sector tab reads it through `GET /api/v1/residents/sector-summary` (active residents per sector, no new table).
 - **Masterlist import (D-19):** an `import_batches` table will be added after the column mapping is agreed.
 - **Dashboard and reports (D-21):** computed from `issuances` and the latest ID per resident, so they need no tables.
 

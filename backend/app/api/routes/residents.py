@@ -31,6 +31,8 @@ from app.models_residents import (
     ResidentSector,
     ResidentsPublic,
     ResidentUpdate,
+    ResidentSectorCount,
+    SectorSummary,
     build_full_name,
 )
 
@@ -246,6 +248,40 @@ def list_residents(
         ],
         count=count,
     )
+
+
+@router.get("/sector-summary", response_model=SectorSummary)
+def sector_summary(session: SessionDep, _user: EditUser) -> Any:
+    """Every sector with its number of active residents (zero is listed too).
+
+    ``residents_with_sector`` counts each active resident once, however many
+    sectors they belong to, so it is not the sum of the rows.
+    """
+    rows = session.exec(
+        select(Sector.id, Sector.name, sa_func.count(Resident.id))
+        .select_from(Sector)
+        .outerjoin(ResidentSector, col(ResidentSector.sector_id) == col(Sector.id))
+        .outerjoin(
+            Resident,
+            (col(Resident.id) == col(ResidentSector.resident_id))
+            & (col(Resident.status) == "active"),
+        )
+        .group_by(col(Sector.id), col(Sector.name))
+    ).all()
+    data = sorted(
+        (
+            ResidentSectorCount(sector_id=sid, name=name, active_residents=n)
+            for sid, name, n in rows
+        ),
+        key=lambda item: item.name.casefold(),
+    )
+    distinct = session.exec(
+        select(sa_func.count(sa_func.distinct(ResidentSector.resident_id)))
+        .select_from(ResidentSector)
+        .join(Resident, col(Resident.id) == col(ResidentSector.resident_id))
+        .where(col(Resident.status) == "active")
+    ).one()
+    return SectorSummary(data=data, residents_with_sector=distinct)
 
 
 @router.get("/{resident_id}", response_model=ResidentPublic)

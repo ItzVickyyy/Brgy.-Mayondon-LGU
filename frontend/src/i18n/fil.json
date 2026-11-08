@@ -328,7 +328,36 @@
         "description": "Mga klasipikasyon ng sektor na kaugnay ng mga talaan ng residente."
       },
       "unavailable": "Wala pa",
-      "unavailableHint": "Hindi pa nagagawa ang screen na ito."
+      "unavailableHint": "Hindi pa nagagawa ang screen na ito.",
+      "sectors": {
+        "assignHint": "Pinipili ang sektor kapag nagdagdag o nag-edit ng residente.",
+        "loading": "Nilo-load ang mga sektor…",
+        "loadError": {
+          "title": "Hindi ma-load ang mga sektor",
+          "description": "Suriin ang koneksyon at subukang muli."
+        },
+        "summary": "{{n}} aktibong residente ang may kahit isang naitalang sektor.",
+        "listAria": "Mga sektor",
+        "residentCount_one": "{{count}} residente",
+        "residentCount_other": "{{count}} residente",
+        "choose": "Pumili ng sektor para makita ang mga aktibong residente nito.",
+        "listTitle": "Mga aktibong residente sa {{sector}}",
+        "loadingResidents": "Nilo-load ang mga residente…",
+        "residentsError": {
+          "title": "Hindi ma-load ang mga residente",
+          "description": "Suriin ang koneksyon at subukang muli."
+        },
+        "empty": {
+          "title": "Walang aktibong residente sa sektor na ito",
+          "description": "Idagdag ang sektor sa isang residente mula sa Mga Residente, saka I-edit ang mga detalye."
+        },
+        "columns": {
+          "name": "Pangalan",
+          "address": "Address",
+          "type": "Uri",
+          "actions": "Mga Aksyon"
+        }
+      }
     },
     "import": {
       "title": "Mag-import ng Umiiral na Masterlist",

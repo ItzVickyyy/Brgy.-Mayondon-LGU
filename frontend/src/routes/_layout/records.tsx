@@ -9,7 +9,6 @@ import {
   Archive,
   CheckCircle2,
   CreditCard,
-  FileUp,
   Search,
   UserRound,
   Users,
@@ -35,6 +34,7 @@ import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { BarangayIdsView } from "@/components/Records/BarangayIdsView"
+import { FamilySectorView } from "@/components/Records/FamilySectorView"
 import { ImportMasterlistView } from "@/components/Records/ImportMasterlistView"
 import { LookupListsView } from "@/components/Records/LookupListsView"
 import { ResidentFormDialog } from "@/components/Records/ResidentFormDialog"
@@ -93,12 +93,6 @@ const residentColumns: ResidentColumn[] = [
   "status",
   "actions",
 ]
-
-const familySectorCards = [
-  { key: "family", icon: Users },
-  { key: "beneficiary", icon: UserRound },
-  { key: "sector", icon: FileUp },
-] as const
 
 function RecordsManagement() {
   const { t } = useTranslation()
@@ -580,49 +574,13 @@ function RecordsManagement() {
       {view === "lists" && isAdmin && <LookupListsView />}
 
       {view === "family-sector" && (
-        <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <div className="flex items-start gap-3">
-            <span className="rounded-lg bg-brand/10 p-2.5 text-brand">
-              <Users className="size-5" aria-hidden="true" />
-            </span>
-            <div>
-              <h2 className="font-semibold tracking-tight">
-                {t("records.familySector.title")}
-              </h2>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                {t("records.familySector.description")}
-              </p>
-            </div>
-          </div>
-          <div className="mt-5 grid gap-4 md:grid-cols-2">
-            {familySectorCards.map((item) => (
-              <article
-                key={item.key}
-                className="flex min-h-36 flex-col rounded-xl border bg-background p-4 transition-colors hover:border-brand/40"
-              >
-                <div className="flex items-center gap-2">
-                  <span className="rounded-lg bg-brand/10 p-2.5 text-brand">
-                    <item.icon className="size-5" aria-hidden="true" />
-                  </span>
-                  <h3 className="font-semibold">
-                    {t(`records.familySector.${item.key}.title`)}
-                  </h3>
-                </div>
-                <p className="mt-3 flex-1 text-sm leading-6 text-muted-foreground">
-                  {t(`records.familySector.${item.key}.description`)}
-                </p>
-                <Button
-                  variant="outline"
-                  className="mt-4 min-h-11 self-start"
-                  disabled
-                  title={t("records.familySector.unavailableHint")}
-                >
-                  {t("records.familySector.unavailable")}
-                </Button>
-              </article>
-            ))}
-          </div>
-        </section>
+        <FamilySectorView
+          streets={streetNames}
+          onViewProfile={(resident) => {
+            setSelectedResident(resident)
+            setProfileTab("Family & Sector")
+          }}
+        />
       )}
 
       {view === "import" && isAdmin && <ImportMasterlistView />}
