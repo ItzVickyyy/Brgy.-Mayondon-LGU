@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
 } from "react"
+import { flushSync } from "react-dom"
 
 export type Theme = "dark" | "light" | "system"
 
@@ -27,6 +28,51 @@ const initialState: ThemeProviderState = {
 }
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
+
+/**
+ * Runs `apply` (which must switch the theme synchronously) as one coordinated
+ * change.
+ *
+ * Without this, every element eased to the new colours on its own schedule
+ * (some instantly, some over 140-150ms), so for a moment the page was half
+ * dark and half light, with light text on a light background. Here all CSS
+ * transitions are paused while the switch happens, and the browser cross-fades
+ * the whole page once through the View Transitions API. Browsers without that
+ * API (and people who ask for reduced motion) get a clean instant switch.
+ */
+function runThemeSwitch(apply: () => void) {
+  const prefersReducedMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches
+
+  const freeze = window.document.createElement("style")
+  freeze.textContent =
+    "*,*::before,*::after{transition:none!important}" +
+    "::view-transition-group(root){animation-duration:200ms}" +
+    "::view-transition-old(root),::view-transition-new(root){animation-duration:200ms;animation-timing-function:ease-out}"
+  window.document.head.appendChild(freeze)
+
+  const unfreeze = () => {
+    // Make sure the new colours are committed while transitions are off.
+    void window.getComputedStyle(window.document.body).backgroundColor
+    window.setTimeout(() => freeze.remove(), 0)
+  }
+
+  const startViewTransition = (
+    window.document as Document & {
+      startViewTransition?: (update: () => void) => { finished: Promise<void> }
+    }
+  ).startViewTransition
+
+  if (!prefersReducedMotion && typeof startViewTransition === "function") {
+    const transition = startViewTransition.call(window.document, apply)
+    transition.finished.then(unfreeze, unfreeze)
+    return
+  }
+
+  apply()
+  unfreeze()
+}
 
 export function ThemeProvider({
   children,
@@ -77,8 +123,10 @@ export function ThemeProvider({
 
     const handleChange = () => {
       if (theme === "system") {
-        updateTheme("system")
-        setResolvedTheme(getResolvedTheme("system"))
+        runThemeSwitch(() => {
+          updateTheme("system")
+          flushSync(() => setResolvedTheme(getResolvedTheme("system")))
+        })
       }
     }
 
@@ -92,9 +140,18 @@ export function ThemeProvider({
   const value = {
     theme,
     resolvedTheme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
+    setTheme: (nextTheme: Theme) => {
+      localStorage.setItem(storageKey, nextTheme)
+      if (nextTheme === theme) return
+      runThemeSwitch(() => {
+        // The class and React state change in the same step, so the page
+        // and the sun/moon button flip together.
+        updateTheme(nextTheme)
+        flushSync(() => {
+          setTheme(nextTheme)
+          setResolvedTheme(getResolvedTheme(nextTheme))
+        })
+      })
     },
   }
 

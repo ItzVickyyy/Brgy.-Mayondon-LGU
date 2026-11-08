@@ -63,8 +63,12 @@ function Layout() {
   // A soft shadow under the sticky header once the page has scrolled.
   const [isScrolled, setIsScrolled] = useState(false)
   // Keying the page wrapper by path replays the soft entrance on each page.
+  // `resolvedLocation` only changes once the next page has finished loading;
+  // `location` changes the moment a link is clicked, which re-keyed the page
+  // that was still on screen and made it fade out and back in before the new
+  // page appeared.
   const pathname = useRouterState({
-    select: (state) => state.location.pathname,
+    select: (state) => (state.resolvedLocation ?? state.location).pathname,
   })
 
   useEffect(() => {

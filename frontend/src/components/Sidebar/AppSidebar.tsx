@@ -93,7 +93,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="h-16 min-h-16 justify-center border-b px-4 py-2 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-0">
+      <SidebarHeader className="h-16 min-h-16 justify-center overflow-hidden border-b px-4 py-2 transition-[padding] duration-300 ease-sidebar group-data-[collapsible=icon]:px-2">
         <Logo variant="responsive" />
       </SidebarHeader>
       <SidebarContent className="pt-3">

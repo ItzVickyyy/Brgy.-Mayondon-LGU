@@ -17,12 +17,15 @@ function Mark({ className }: { className?: string }) {
       <img
         src={SITE.logo}
         alt={`${SITE.fullName} logo`}
-        className={cn("size-8 object-contain", className)}
+        className={cn("size-8 shrink-0 object-contain", className)}
       />
     )
   }
   return (
-    <Landmark aria-hidden className={cn("size-6 text-brand", className)} />
+    <Landmark
+      aria-hidden
+      className={cn("size-6 shrink-0 text-brand", className)}
+    />
   )
 }
 
@@ -44,7 +47,7 @@ export function Logo({
     variant === "responsive" ? (
       <span className="flex items-center gap-2">
         <Mark />
-        <Wordmark className="group-data-[collapsible=icon]:hidden" />
+        <Wordmark className="whitespace-nowrap transition-opacity duration-150 ease-out group-data-[collapsible=icon]:opacity-0 group-data-[state=expanded]:delay-150" />
       </span>
     ) : variant === "icon" ? (
       <Mark className={className} />
