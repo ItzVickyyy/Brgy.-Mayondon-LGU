@@ -216,6 +216,82 @@ export type AssistancePublic = {
 };
 
 /**
+ * BackupListPublic
+ */
+export type BackupListPublic = {
+    /**
+     * Data
+     */
+    data: Array<BackupRunPublic>;
+    /**
+     * Count
+     */
+    count: number;
+    /**
+     * Tool Available
+     */
+    tool_available: boolean;
+    /**
+     * Keep Copies
+     */
+    keep_copies: number;
+};
+
+/**
+ * BackupRunPublic
+ */
+export type BackupRunPublic = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Started At
+     */
+    started_at: string;
+    /**
+     * Finished At
+     */
+    finished_at: string | null;
+    /**
+     * Kind
+     */
+    kind: string;
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * File Name
+     */
+    file_name: string | null;
+    /**
+     * Size Bytes
+     */
+    size_bytes: number | null;
+    /**
+     * Sha256
+     */
+    sha256: string | null;
+    /**
+     * Verified At
+     */
+    verified_at: string | null;
+    /**
+     * Created By Email
+     */
+    created_by_email: string | null;
+    /**
+     * Error
+     */
+    error: string | null;
+    /**
+     * File Exists
+     */
+    file_exists: boolean;
+};
+
+/**
  * BarangayIdIn
  */
 export type BarangayIdIn = {
@@ -1729,6 +1805,22 @@ export type ResidentsPublic = {
 };
 
 /**
+ * RestoreRequestPublic
+ *
+ * What the administrator must run on the server computer to restore.
+ */
+export type RestoreRequestPublic = {
+    /**
+     * File Name
+     */
+    file_name: string;
+    /**
+     * Command
+     */
+    command: string;
+};
+
+/**
  * SectorCount
  */
 export type SectorCount = {
@@ -1945,10 +2037,6 @@ export type UserPublic = {
     is_superuser?: boolean;
     role?: UserRole;
     /**
-     * Must Change Password
-     */
-    must_change_password?: boolean;
-    /**
      * Full Name
      */
     full_name?: string | null;
@@ -2008,6 +2096,10 @@ export type UserPublic = {
      * Created At
      */
     created_at?: string | null;
+    /**
+     * Must Change Password
+     */
+    must_change_password?: boolean;
 };
 
 /**
@@ -3879,6 +3971,140 @@ export type reportsRecordsOverviewResponses = {
 };
 
 export type reportsRecordsOverviewResponse = reportsRecordsOverviewResponses[keyof reportsRecordsOverviewResponses];
+
+export type backupsListBackupsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Limit
+         */
+        limit?: number;
+    };
+    url: '/api/v1/backups/';
+};
+
+export type backupsListBackupsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type backupsListBackupsError = backupsListBackupsErrors[keyof backupsListBackupsErrors];
+
+export type backupsListBackupsResponses = {
+    /**
+     * Successful Response
+     */
+    200: BackupListPublic;
+};
+
+export type backupsListBackupsResponse = backupsListBackupsResponses[keyof backupsListBackupsResponses];
+
+export type backupsCreateBackupData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/backups/';
+};
+
+export type backupsCreateBackupResponses = {
+    /**
+     * Successful Response
+     */
+    201: BackupRunPublic;
+};
+
+export type backupsCreateBackupResponse = backupsCreateBackupResponses[keyof backupsCreateBackupResponses];
+
+export type backupsVerifyBackupData = {
+    body?: never;
+    path: {
+        /**
+         * Backup Id
+         */
+        backup_id: string;
+    };
+    query?: never;
+    url: '/api/v1/backups/{backup_id}/verify';
+};
+
+export type backupsVerifyBackupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type backupsVerifyBackupError = backupsVerifyBackupErrors[keyof backupsVerifyBackupErrors];
+
+export type backupsVerifyBackupResponses = {
+    /**
+     * Successful Response
+     */
+    200: BackupRunPublic;
+};
+
+export type backupsVerifyBackupResponse = backupsVerifyBackupResponses[keyof backupsVerifyBackupResponses];
+
+export type backupsDownloadBackupData = {
+    body?: never;
+    path: {
+        /**
+         * Backup Id
+         */
+        backup_id: string;
+    };
+    query?: never;
+    url: '/api/v1/backups/{backup_id}/download';
+};
+
+export type backupsDownloadBackupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type backupsDownloadBackupError = backupsDownloadBackupErrors[keyof backupsDownloadBackupErrors];
+
+export type backupsDownloadBackupResponses = {
+    /**
+     * Successful Response
+     */
+    200: unknown;
+};
+
+export type backupsRequestRestoreData = {
+    body?: never;
+    path: {
+        /**
+         * Backup Id
+         */
+        backup_id: string;
+    };
+    query?: never;
+    url: '/api/v1/backups/{backup_id}/restore-request';
+};
+
+export type backupsRequestRestoreErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type backupsRequestRestoreError = backupsRequestRestoreErrors[keyof backupsRequestRestoreErrors];
+
+export type backupsRequestRestoreResponses = {
+    /**
+     * Successful Response
+     */
+    200: RestoreRequestPublic;
+};
+
+export type backupsRequestRestoreResponse = backupsRequestRestoreResponses[keyof backupsRequestRestoreResponses];
 
 export type utilsTestEmailData = {
     body?: never;

@@ -2,7 +2,7 @@
 
 import { type Client, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { activityActivityOptionsData, activityActivityOptionsResponses, activityListActivityData, activityListActivityErrors, activityListActivityResponses, barangayIdsListBarangayIdsData, barangayIdsListBarangayIdsErrors, barangayIdsListBarangayIdsResponses, dashboardDashboardData, dashboardDashboardErrors, dashboardDashboardResponses, issuancesCorrectData, issuancesCorrectErrors, issuancesCorrectResponses, issuancesCreateIssuanceData, issuancesCreateIssuanceErrors, issuancesCreateIssuanceResponses, issuancesDiscardDraftData, issuancesDiscardDraftErrors, issuancesDiscardDraftResponses, issuancesGetIssuanceData, issuancesGetIssuanceErrors, issuancesGetIssuanceResponses, issuancesIssueData, issuancesIssueErrors, issuancesIssueResponses, issuancesListIssuancesData, issuancesListIssuancesErrors, issuancesListIssuancesResponses, issuancesUpdateDraftData, issuancesUpdateDraftErrors, issuancesUpdateDraftResponses, issuancesVoidData, issuancesVoidErrors, issuancesVoidResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, lookupsCreateStreetData, lookupsCreateStreetErrors, lookupsCreateStreetResponses, lookupsCreateTricycleAssociationData, lookupsCreateTricycleAssociationErrors, lookupsCreateTricycleAssociationResponses, lookupsDeleteStreetData, lookupsDeleteStreetErrors, lookupsDeleteStreetResponses, lookupsDeleteTricycleAssociationData, lookupsDeleteTricycleAssociationErrors, lookupsDeleteTricycleAssociationResponses, lookupsListDocumentTypesData, lookupsListDocumentTypesResponses, lookupsListIdTypesData, lookupsListIdTypesResponses, lookupsListIssuancePurposesData, lookupsListIssuancePurposesResponses, lookupsListSectorsData, lookupsListSectorsResponses, lookupsListStreetsData, lookupsListStreetsResponses, lookupsListTricycleAssociationsData, lookupsListTricycleAssociationsResponses, lookupsRenameStreetData, lookupsRenameStreetErrors, lookupsRenameStreetResponses, lookupsRenameTricycleAssociationData, lookupsRenameTricycleAssociationErrors, lookupsRenameTricycleAssociationResponses, officialsCreateOfficialData, officialsCreateOfficialErrors, officialsCreateOfficialResponses, officialsGetOfficialData, officialsGetOfficialErrors, officialsGetOfficialResponses, officialsListOfficialsData, officialsListOfficialsErrors, officialsListOfficialsResponses, officialsUpdateOfficialData, officialsUpdateOfficialErrors, officialsUpdateOfficialResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, reportsAccountActivityData, reportsAccountActivityErrors, reportsAccountActivityResponses, reportsExpiringData, reportsExpiringErrors, reportsExpiringResponses, reportsIssuancesByPurposeData, reportsIssuancesByPurposeErrors, reportsIssuancesByPurposeResponses, reportsIssuancesByTypeData, reportsIssuancesByTypeErrors, reportsIssuancesByTypeResponses, reportsRecordsOverviewData, reportsRecordsOverviewResponses, reportsSummaryData, reportsSummaryErrors, reportsSummaryResponses, residentsArchiveResidentData, residentsArchiveResidentErrors, residentsArchiveResidentResponses, residentsCreateResidentData, residentsCreateResidentErrors, residentsCreateResidentResponses, residentsDeletePhotoData, residentsDeletePhotoErrors, residentsDeletePhotoResponses, residentsGetPhotoData, residentsGetPhotoErrors, residentsGetPhotoResponses, residentsListResidentsData, residentsListResidentsErrors, residentsListResidentsResponses, residentsPutPhotoData, residentsPutPhotoErrors, residentsPutPhotoResponses, residentsReadResidentData, residentsReadResidentErrors, residentsReadResidentResponses, residentsRestoreResidentData, residentsRestoreResidentErrors, residentsRestoreResidentResponses, residentsUpdateResidentData, residentsUpdateResidentErrors, residentsUpdateResidentResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
+import type { activityActivityOptionsData, activityActivityOptionsResponses, activityListActivityData, activityListActivityErrors, activityListActivityResponses, backupsCreateBackupData, backupsCreateBackupResponses, backupsDownloadBackupData, backupsDownloadBackupErrors, backupsDownloadBackupResponses, backupsListBackupsData, backupsListBackupsErrors, backupsListBackupsResponses, backupsRequestRestoreData, backupsRequestRestoreErrors, backupsRequestRestoreResponses, backupsVerifyBackupData, backupsVerifyBackupErrors, backupsVerifyBackupResponses, barangayIdsListBarangayIdsData, barangayIdsListBarangayIdsErrors, barangayIdsListBarangayIdsResponses, dashboardDashboardData, dashboardDashboardErrors, dashboardDashboardResponses, issuancesCorrectData, issuancesCorrectErrors, issuancesCorrectResponses, issuancesCreateIssuanceData, issuancesCreateIssuanceErrors, issuancesCreateIssuanceResponses, issuancesDiscardDraftData, issuancesDiscardDraftErrors, issuancesDiscardDraftResponses, issuancesGetIssuanceData, issuancesGetIssuanceErrors, issuancesGetIssuanceResponses, issuancesIssueData, issuancesIssueErrors, issuancesIssueResponses, issuancesListIssuancesData, issuancesListIssuancesErrors, issuancesListIssuancesResponses, issuancesUpdateDraftData, issuancesUpdateDraftErrors, issuancesUpdateDraftResponses, issuancesVoidData, issuancesVoidErrors, issuancesVoidResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, lookupsCreateStreetData, lookupsCreateStreetErrors, lookupsCreateStreetResponses, lookupsCreateTricycleAssociationData, lookupsCreateTricycleAssociationErrors, lookupsCreateTricycleAssociationResponses, lookupsDeleteStreetData, lookupsDeleteStreetErrors, lookupsDeleteStreetResponses, lookupsDeleteTricycleAssociationData, lookupsDeleteTricycleAssociationErrors, lookupsDeleteTricycleAssociationResponses, lookupsListDocumentTypesData, lookupsListDocumentTypesResponses, lookupsListIdTypesData, lookupsListIdTypesResponses, lookupsListIssuancePurposesData, lookupsListIssuancePurposesResponses, lookupsListSectorsData, lookupsListSectorsResponses, lookupsListStreetsData, lookupsListStreetsResponses, lookupsListTricycleAssociationsData, lookupsListTricycleAssociationsResponses, lookupsRenameStreetData, lookupsRenameStreetErrors, lookupsRenameStreetResponses, lookupsRenameTricycleAssociationData, lookupsRenameTricycleAssociationErrors, lookupsRenameTricycleAssociationResponses, officialsCreateOfficialData, officialsCreateOfficialErrors, officialsCreateOfficialResponses, officialsGetOfficialData, officialsGetOfficialErrors, officialsGetOfficialResponses, officialsListOfficialsData, officialsListOfficialsErrors, officialsListOfficialsResponses, officialsUpdateOfficialData, officialsUpdateOfficialErrors, officialsUpdateOfficialResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, reportsAccountActivityData, reportsAccountActivityErrors, reportsAccountActivityResponses, reportsExpiringData, reportsExpiringErrors, reportsExpiringResponses, reportsIssuancesByPurposeData, reportsIssuancesByPurposeErrors, reportsIssuancesByPurposeResponses, reportsIssuancesByTypeData, reportsIssuancesByTypeErrors, reportsIssuancesByTypeResponses, reportsRecordsOverviewData, reportsRecordsOverviewResponses, reportsSummaryData, reportsSummaryErrors, reportsSummaryResponses, residentsArchiveResidentData, residentsArchiveResidentErrors, residentsArchiveResidentResponses, residentsCreateResidentData, residentsCreateResidentErrors, residentsCreateResidentResponses, residentsDeletePhotoData, residentsDeletePhotoErrors, residentsDeletePhotoResponses, residentsGetPhotoData, residentsGetPhotoErrors, residentsGetPhotoResponses, residentsListResidentsData, residentsListResidentsErrors, residentsListResidentsResponses, residentsPutPhotoData, residentsPutPhotoErrors, residentsPutPhotoResponses, residentsReadResidentData, residentsReadResidentErrors, residentsReadResidentResponses, residentsRestoreResidentData, residentsRestoreResidentErrors, residentsRestoreResidentResponses, residentsUpdateResidentData, residentsUpdateResidentErrors, residentsUpdateResidentResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -881,6 +881,70 @@ export class ReportsService {
             responseType: 'json',
             security: [{ scheme: 'bearer', type: 'http' }],
             url: '/api/v1/reports/records-overview',
+            ...options
+        });
+    }
+}
+
+export class BackupsService {
+    /**
+     * List Backups
+     */
+    public static listBackups<ThrowOnError extends boolean = true>(options?: Options<backupsListBackupsData, ThrowOnError>) {
+        return (options?.client ?? client).get<backupsListBackupsResponses, backupsListBackupsErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/backups/',
+            ...options
+        });
+    }
+    
+    /**
+     * Create Backup
+     */
+    public static createBackup<ThrowOnError extends boolean = true>(options?: Options<backupsCreateBackupData, ThrowOnError>) {
+        return (options?.client ?? client).post<backupsCreateBackupResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/backups/',
+            ...options
+        });
+    }
+    
+    /**
+     * Verify Backup
+     */
+    public static verifyBackup<ThrowOnError extends boolean = true>(options: Options<backupsVerifyBackupData, ThrowOnError>) {
+        return (options.client ?? client).post<backupsVerifyBackupResponses, backupsVerifyBackupErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/backups/{backup_id}/verify',
+            ...options
+        });
+    }
+    
+    /**
+     * Download Backup
+     */
+    public static downloadBackup<ThrowOnError extends boolean = true>(options: Options<backupsDownloadBackupData, ThrowOnError>) {
+        return (options.client ?? client).get<backupsDownloadBackupResponses, backupsDownloadBackupErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/backups/{backup_id}/download',
+            ...options
+        });
+    }
+    
+    /**
+     * Request Restore
+     *
+     * Check the file and log the request. The restore itself is run offline.
+     */
+    public static requestRestore<ThrowOnError extends boolean = true>(options: Options<backupsRequestRestoreData, ThrowOnError>) {
+        return (options.client ?? client).post<backupsRequestRestoreResponses, backupsRequestRestoreErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/backups/{backup_id}/restore-request',
             ...options
         });
     }

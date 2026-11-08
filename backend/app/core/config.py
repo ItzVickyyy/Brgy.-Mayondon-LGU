@@ -38,6 +38,13 @@ class Settings(BaseSettings):
     USERS_OPEN_REGISTRATION: bool = False
     FASTAPI_ENV: Literal["development"] | None = None
 
+    # Database backups (D-35). The backend container writes dumps to BACKUP_DIR,
+    # which compose.yml mounts from the host's ./backups folder.
+    BACKUP_DIR: str = "/backups"
+    BACKUP_KEEP_COPIES: int = Field(default=14, gt=0)
+    PG_DUMP_BIN: str = "pg_dump"
+    PG_RESTORE_BIN: str = "pg_restore"
+
     PROJECT_NAME: str
     SENTRY_DSN: HttpUrl | None = None
     DATABASE_URL: PostgresDsn

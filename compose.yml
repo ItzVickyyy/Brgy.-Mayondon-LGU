@@ -44,6 +44,13 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Variable not set}@db:5432/app
       SENTRY_DSN: ${SENTRY_DSN:-}
       USERS_OPEN_REGISTRATION: ${USERS_OPEN_REGISTRATION:-false}
+      BACKUP_DIR: /backups
+      BACKUP_KEEP_COPIES: ${BACKUP_KEEP_COPIES:-14}
+
+    volumes:
+      # Backups made by the app appear in the repository's backups folder on
+      # the host (git-ignored; dumps contain resident data).
+      - ./backups:/backups
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]

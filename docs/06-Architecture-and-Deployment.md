@@ -158,6 +158,8 @@ This is **HTTP on a private LAN — not encrypted in transit**. A private LAN is
 
 ## 8. Backup and restore
 
+**Backups made by the app (D-35).** The backend container has the PostgreSQL 18 client tools (same major version as the `db` image) and writes dumps into `/backups`, which Compose mounts from the host's `backups\` folder. `POST /api/v1/backups/` makes one (System Administrator), every attempt is recorded in `backup_runs` and the Activity Log, each file is read back with `pg_restore --list` and given a SHA-256 checksum, and only the newest `BACKUP_KEEP_COPIES` files (default 14) are kept. The same code runs from the command line for scheduled backups: `docker compose -f compose.yml exec -T backend python -m app.backup_cli` (exit code 0 made, 1 failed, 2 could not start). **Restore is deliberately not an app action**: it replaces the accounts and sessions of whoever clicked it and cannot report back once the database is replaced. The app only checks the chosen file, logs the request and shows the `restore-db.ps1` command to run on the server computer. The Docker image change and the `./backups` mount have **not** been built or run on a Windows host yet; that is a recorded host check.
+
 Scripts (run from the repo root with Compose running):
 
 ```powershell
@@ -178,7 +180,7 @@ The PowerShell smoke test creates a uniquely named temporary database, inserts a
 
 **Gaps vs the Creative Brief:**
 - The brief requires **scheduled and manual** backups to an **external drive**. Only manual scripts exist; **scheduling (e.g. Windows Task Scheduler) is not built**, and the scripts still need to be executed on the intended Windows host. The PowerShell dump/restore path is now exercised in CI against a real PostgreSQL container, but that does not replace Windows-host verification.
-- The Admin "Backup and Restore" screen is a design concept and runs nothing.
+- The Admin "Backup and Restore" screen is still a concept: the backend above exists, but the screen is not connected to it yet.
 - Needed: frequency, external-drive custody, retention, protection of backup files, restore responsibility, and a recorded recovery test **(D-35)**. A backup that stays only on the host does not survive disk failure, theft, ransomware or accidental deletion.
 
 ## 9. Offline limitations to resolve

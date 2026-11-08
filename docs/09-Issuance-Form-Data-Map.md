@@ -84,6 +84,29 @@ A database trigger rejects `UPDATE`, `DELETE` and `TRUNCATE`, so the app cannot 
 
 **Reading it:** `GET /api/v1/activity` (filters: person, module, action, outcome, record, Manila date range) and `GET /api/v1/activity/options`. Staff see only their own rows (`activity.view_own`); the System Administrator sees everyone's (`activity.view_all`). Account actions (`user.create`, `user.update`, `user.role_change`, `user.password_change`, `user.update_self`, `user.delete`, `user.delete_self`) are written to this table as well as to the application log; unlike issuance and record changes, the create, update and role change rows are saved just after the change, not in the same transaction.
 
+### `backup_runs` (backup history, D-35)
+
+One row per backup attempt; the dump file itself is in the `backups` folder, not in the database.
+
+| Column | Type / rule |
+|---|---|
+| `id` | UUID PK |
+| `started_at` | timestamptz, default now, indexed |
+| `finished_at` | timestamptz, nullable |
+| `kind` | text, `CHECK` in (`scheduled`, `manual`) |
+| `status` | text, `CHECK` in (`running`, `ok`, `failed`) |
+| `file_name` | text, nullable. Always `mayondon-db-YYYYMMDD-HHMMSS-fff.dump` (Manila time) |
+| `size_bytes` | bigint, nullable |
+| `sha256` | text, nullable. Checksum recorded when the file was made; verification compares against it |
+| `verified_at` | timestamptz, nullable. Last time the archive was read back with `pg_restore --list` and matched its checksum |
+| `created_by` | FK `user`, nullable, `ON DELETE SET NULL`. Empty for scheduled runs |
+| `created_by_email` | text, copied at write time |
+| `error` | text, nullable, trimmed to 500 characters, never contains the database password |
+
+Rows are kept after retention deletes an old file (the API reports `file_exists`). Applying the schedule's retention never removes the newest backup that was checked and recorded as good. A restore **replaces** this table with the backup's own copy of it, so after a restore the history shows only what the backup knew.
+
+**API (System Administrator only, `backup.restore`):** `GET /api/v1/backups/` (newest first, plus `tool_available` and `keep_copies`), `POST /api/v1/backups/` (manual backup; 409 if one is running, 503 if `pg_dump` or the folder is missing), `POST /api/v1/backups/{id}/verify`, `GET /api/v1/backups/{id}/download`, `POST /api/v1/backups/{id}/restore-request` (checks the file, logs it, returns the PowerShell command; it does not restore). Audit actions: `backup.create`, `backup.verify`, `backup.download`, `backup.restore_requested`, with the file name and size only.
+
 ### Dashboard and report figures (computed on read, nothing stored)
 
 `GET /api/v1/dashboard` (Staff and Admin) and `GET /api/v1/reports/*` (System Administrator, `reports.view`: `summary`, `issuances-by-type`, `issuances-by-purpose`, `expiring`, `account-activity`, `records-overview`). Counts only: no health condition and no resident names in any total. The expiring list names the resident because it is a work list.
