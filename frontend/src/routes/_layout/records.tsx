@@ -11,7 +11,6 @@ import {
   CreditCard,
   FileUp,
   Search,
-  Upload,
   UserRound,
   Users,
   X,
@@ -36,6 +35,7 @@ import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { BarangayIdsView } from "@/components/Records/BarangayIdsView"
+import { ImportMasterlistView } from "@/components/Records/ImportMasterlistView"
 import { LookupListsView } from "@/components/Records/LookupListsView"
 import { ResidentFormDialog } from "@/components/Records/ResidentFormDialog"
 import { ResidentProfileDialog } from "@/components/Records/ResidentProfileDialog"
@@ -100,15 +100,6 @@ const familySectorCards = [
   { key: "sector", icon: FileUp },
 ] as const
 
-const importSteps = ["select", "map", "preview", "results"] as const
-const importFields = [
-  { key: "fullName", source: "Name", validation: "required" },
-  { key: "address", source: "Address", validation: "reviewFormat" },
-  { key: "residentType", source: "Resident Type", validation: "checkValues" },
-  { key: "idNumber", source: "ID Number", validation: "checkDuplicates" },
-] as const
-const importResults = ["imported", "updated", "skipped", "failed"] as const
-
 function RecordsManagement() {
   const { t } = useTranslation()
   const initialView = Route.useSearch().view
@@ -128,8 +119,6 @@ function RecordsManagement() {
   )
   const [notice, setNotice] = useState("")
   const [errorNotice, setErrorNotice] = useState("")
-  const [selectedFile, setSelectedFile] = useState("")
-  const [importStep, setImportStep] = useState(0)
   const [selectedResident, setSelectedResident] =
     useState<ResidentPublic | null>(null)
   const [formOpen, setFormOpen] = useState(false)
@@ -636,173 +625,7 @@ function RecordsManagement() {
         </section>
       )}
 
-      {view === "import" && isAdmin && (
-        <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <div className="flex items-start gap-3">
-            <span className="rounded-lg bg-brand/10 p-2.5 text-brand">
-              <FileUp className="size-5" aria-hidden="true" />
-            </span>
-            <div>
-              <h2 className="font-semibold">{t("records.import.title")}</h2>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                {t("records.import.description")}
-              </p>
-            </div>
-          </div>
-          <p
-            role="status"
-            className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm font-medium text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
-          >
-            {t("records.import.notAvailable")}
-          </p>
-          <fieldset
-            className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4"
-            aria-label={t("records.import.stepsAria")}
-          >
-            {importSteps.map((step, index) => (
-              <Button
-                key={step}
-                type="button"
-                variant={importStep === index ? "default" : "outline"}
-                className="min-h-11"
-                aria-current={importStep === index ? "step" : undefined}
-                onClick={() => setImportStep(index)}
-              >
-                {index + 1}. {t(`records.import.steps.${step}`)}
-              </Button>
-            ))}
-          </fieldset>
-          {importStep === 0 ? (
-            <label className="mt-4 flex min-h-36 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed p-6 text-center hover:border-brand/50 hover:bg-muted/30">
-              <Upload className="size-7 text-brand" aria-hidden="true" />
-              <span className="font-semibold">
-                {selectedFile || t("records.import.chooseFile")}
-              </span>
-              <span className="text-sm text-muted-foreground">
-                {t("records.import.formats")}
-              </span>
-              <input
-                type="file"
-                accept=".csv,.xlsx,.xls"
-                className="sr-only"
-                onChange={(event) => {
-                  setSelectedFile(event.target.files?.[0]?.name ?? "")
-                  setNotice("")
-                }}
-              />
-            </label>
-          ) : null}
-          {importStep === 1 ? (
-            <div className="mt-4 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-              <h3 className="font-semibold">{t("records.import.mapTitle")}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {t("records.import.mapDescription")}
-              </p>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {importFields.map((field) => (
-                  <label
-                    key={field.key}
-                    className="flex flex-col gap-2 text-sm font-medium"
-                  >
-                    {t(`records.import.fields.${field.key}`)}
-                    <select className={cn(inputClass, "font-normal")}>
-                      <option>{t("records.import.chooseColumn")}</option>
-                      <option>Name</option>
-                      <option>Address</option>
-                      <option>Resident Type</option>
-                      <option>ID Number</option>
-                    </select>
-                  </label>
-                ))}
-              </div>
-            </div>
-          ) : null}
-          {importStep === 2 ? (
-            <div className="mt-4 overflow-x-auto rounded-xl border">
-              <div className="border-b p-4">
-                <h3 className="font-semibold">
-                  {t("records.import.previewTitle")}
-                </h3>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  {t("records.import.previewDescription")}
-                </p>
-              </div>
-              <table className="w-full min-w-[560px] text-left text-sm">
-                <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
-                  <tr>
-                    {(["field", "source", "validation"] as const).map(
-                      (column) => (
-                        <th
-                          key={column}
-                          className="px-4 py-3 align-middle font-medium sm:px-5"
-                        >
-                          {t(`records.import.previewColumns.${column}`)}
-                        </th>
-                      ),
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {importFields.map((row) => (
-                    <tr
-                      key={row.key}
-                      className="transition-colors hover:bg-muted/30"
-                    >
-                      <td className="px-4 py-3 align-middle font-medium sm:px-5">
-                        {t(`records.import.fields.${row.key}`)}
-                      </td>
-                      <td className="px-4 py-3 align-middle sm:px-5">
-                        {row.source}
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {t(`records.import.validation.${row.validation}`)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : null}
-          {importStep === 3 ? (
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              {importResults.map((result) => (
-                <div
-                  key={result}
-                  className="rounded-xl border bg-card p-4 shadow-sm sm:p-5"
-                >
-                  <p className="text-sm text-muted-foreground">
-                    {t(`records.import.resultLabels.${result}`)}
-                  </p>
-                  <p className="mt-2 text-xl font-semibold">
-                    {t("records.import.pending")}
-                  </p>
-                </div>
-              ))}
-            </div>
-          ) : null}
-          <div className="mt-5 flex flex-wrap justify-between gap-3 border-t pt-4">
-            <Button
-              className="min-h-11"
-              type="button"
-              variant="outline"
-              disabled={importStep === 0}
-              onClick={() => setImportStep((step) => Math.max(0, step - 1))}
-            >
-              {t("records.import.previous")}
-            </Button>
-            <Button
-              className="min-h-11"
-              type="button"
-              disabled={importStep === 3 || (importStep === 0 && !selectedFile)}
-              onClick={() => setImportStep((step) => Math.min(3, step + 1))}
-            >
-              {importStep === 2
-                ? t("records.import.reviewResults")
-                : t("records.import.continue")}
-            </Button>
-          </div>
-        </section>
-      )}
+      {view === "import" && isAdmin && <ImportMasterlistView />}
 
       <ConfirmDialog
         open={archiveTarget !== null}

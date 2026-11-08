@@ -332,8 +332,8 @@
     },
     "import": {
       "title": "Import Existing Masterlist",
-      "description": "Prepare a controlled import from client-provided spreadsheets. Validate the file and preview changes before anything is saved.",
-      "notAvailable": "Importing is not available yet. Nothing on this screen is uploaded or saved, and no resident records are created.",
+      "description": "Bring residents in from a spreadsheet. The file is checked and previewed first; nothing is saved to resident records until you confirm.",
+      "safety": "Use the same synthetic or approved data rules as the rest of the portal. The uploaded rows are kept only until you finish, cancel, or 24 hours pass, then they are deleted.",
       "stepsAria": "Masterlist import steps",
       "steps": {
         "select": "Select file",
@@ -342,39 +342,114 @@
         "results": "Results"
       },
       "chooseFile": "Choose a masterlist file",
-      "formats": "Supported formats: CSV, XLSX, XLS",
+      "formats": "Supported formats: CSV, XLSX (up to 5 MB and 5,000 rows)",
+      "uploadContinue": "Upload and continue",
+      "uploading": "Uploading…",
       "mapTitle": "Map spreadsheet columns",
-      "mapDescription": "Match each resident field to a column in the selected masterlist.",
-      "fields": {
-        "fullName": "Full name",
-        "address": "Complete address",
-        "residentType": "Resident type",
-        "idNumber": "Barangay ID number"
-      },
+      "mapDescription": "Match each resident field to a column in {{file}} ({{rows}} rows). Suggestions are filled in from the column names.",
       "chooseColumn": "Choose source column",
-      "previewTitle": "Preview before import",
-      "previewDescription": "Review the mapped fields and validation summary before confirming.",
-      "previewColumns": {
-        "field": "Field",
-        "source": "Source column",
-        "validation": "Validation"
+      "notInFile": "Not in the file",
+      "requiredMark": "required",
+      "mapRequired": "Choose a column for: {{fields}}",
+      "dateOrderLabel": "How dates are written in the file",
+      "dateOrders": {
+        "ymd": "Year-month-day (2026-03-05)",
+        "mdy": "Month/day/year (03/05/2026)",
+        "dmy": "Day/month/year (05/03/2026)"
       },
-      "validation": {
-        "required": "Required",
-        "reviewFormat": "Review format",
-        "checkValues": "Check allowed values",
-        "checkDuplicates": "Check duplicates"
+      "duplicateLabel": "When a resident already exists",
+      "duplicateActions": {
+        "skip": "Skip it and keep the existing record",
+        "update": "Update the existing record from the file"
       },
+      "sampleTitle": "First rows of the file",
+      "checkFile": "Check the file",
+      "checking": "Checking…",
+      "back": "Back to columns",
+      "classes": {
+        "new": "New",
+        "duplicate": "Duplicate",
+        "error": "Has problems"
+      },
+      "duplicateNote": {
+        "skip": "Duplicates are skipped and the existing records stay as they are. Rows with problems are never imported.",
+        "update": "Duplicates already in the records are updated from the file. Names and birthdate never change, and empty cells never erase existing data. Rows with problems are never imported."
+      },
+      "filters": {
+        "all": "All rows",
+        "new": "New",
+        "duplicate": "Duplicates",
+        "error": "Problems"
+      },
+      "columns": {
+        "row": "Row",
+        "name": "Name",
+        "result": "Result",
+        "problems": "Problems"
+      },
+      "scope": {
+        "file": "Repeated in this file",
+        "existing": "Already in the records"
+      },
+      "loadingRows": "Loading rows",
+      "rowsError": "The rows could not be loaded.",
+      "noRows": "No rows to show",
+      "noRowsDescription": "No rows match this filter.",
+      "downloadErrors": "Download problem report (CSV)",
+      "commit": "Import",
+      "importing": "Importing…",
+      "confirmTitle": "Import these residents?",
+      "confirmDescription": "{{n}} new resident records will be created. This cannot be undone from this screen.",
+      "cancelImport": "Cancel import",
+      "cancelTitle": "Cancel this import?",
+      "cancelDescription": "The uploaded rows will be deleted and nothing will be saved.",
+      "done": "The import of {{file}} is finished.",
       "resultLabels": {
-        "imported": "Imported",
+        "created": "Created",
         "updated": "Updated",
         "skipped": "Skipped",
         "failed": "Failed"
       },
-      "pending": "Pending",
-      "previous": "Previous step",
-      "continue": "Continue",
-      "reviewResults": "Review results"
+      "another": "Import another file",
+      "historyTitle": "Recent imports",
+      "historyEmpty": "No imports yet.",
+      "historyError": "The import history could not be loaded.",
+      "history": {
+        "date": "Date",
+        "file": "File",
+        "by": "By",
+        "status": "Status",
+        "outcome": "Outcome",
+        "outcomeText": "{{created}} created, {{updated}} updated, {{skipped}} skipped, {{failed}} failed"
+      },
+      "status": {
+        "committed": "Completed",
+        "failed": "Failed",
+        "cancelled": "Cancelled",
+        "expired": "Expired",
+        "uploaded": "In progress",
+        "mapped": "In progress"
+      },
+      "fields": {
+        "first_name": "First name",
+        "middle_name": "Middle name",
+        "last_name": "Last name",
+        "suffix": "Suffix",
+        "birthdate": "Birthdate",
+        "birth_place": "Place of birth",
+        "sex": "Sex",
+        "civil_status": "Civil status",
+        "house_number": "House number",
+        "street": "Street",
+        "purok": "Purok",
+        "resident_since_year": "Resident since (year)",
+        "resident_type": "Resident type",
+        "id_number": "Barangay ID number",
+        "voter_registration": "Voter registration",
+        "emergency_contact_name": "Emergency contact name",
+        "emergency_contact_address": "Emergency contact address",
+        "emergency_contact_phone": "Emergency contact phone"
+      }
     },
     "archiveDialog": {
       "title": "Archive resident record?",

@@ -332,49 +332,124 @@
     },
     "import": {
       "title": "Mag-import ng Umiiral na Masterlist",
-      "description": "Maghanda ng kontroladong pag-import mula sa mga spreadsheet na ibinigay ng kliyente. Suriin ang file at i-preview ang mga pagbabago bago may mai-save.",
-      "notAvailable": "Hindi pa available ang pag-import. Walang ina-upload o sine-save sa screen na ito, at walang nagagawang talaan ng residente.",
+      "description": "Magpasok ng mga residente mula sa spreadsheet. Susuriin at ipapakita muna ang file; walang mase-save sa talaan ng mga residente hanggang hindi mo kinukumpirma.",
+      "safety": "Gamitin ang parehong patakaran sa sintetiko o aprubadong datos tulad ng natitirang bahagi ng portal. Ang mga na-upload na hanay ay itatago lamang hanggang matapos mo, makansela, o lumipas ang 24 oras, saka buburahin.",
       "stepsAria": "Mga hakbang sa pag-import ng masterlist",
       "steps": {
         "select": "Pumili ng file",
-        "map": "I-map ang mga column",
-        "preview": "Preview",
-        "results": "Mga resulta"
+        "map": "Itugma ang mga column",
+        "preview": "Silipin",
+        "results": "Resulta"
       },
       "chooseFile": "Pumili ng file ng masterlist",
-      "formats": "Mga sinusuportahang format: CSV, XLSX, XLS",
-      "mapTitle": "I-map ang mga column ng spreadsheet",
-      "mapDescription": "Itugma ang bawat field ng residente sa isang column sa napiling masterlist.",
-      "fields": {
-        "fullName": "Buong pangalan",
-        "address": "Kumpletong tirahan",
-        "residentType": "Uri ng residente",
-        "idNumber": "Numero ng Barangay ID"
+      "formats": "Mga sinusuportahang format: CSV, XLSX (hanggang 5 MB at 5,000 hanay)",
+      "uploadContinue": "I-upload at magpatuloy",
+      "uploading": "Ina-upload…",
+      "mapTitle": "Itugma ang mga column ng spreadsheet",
+      "mapDescription": "Itugma ang bawat field ng residente sa isang column sa {{file}} ({{rows}} hanay). Ang mga mungkahi ay hango sa mga pangalan ng column.",
+      "chooseColumn": "Pumili ng column",
+      "notInFile": "Wala sa file",
+      "requiredMark": "kailangan",
+      "mapRequired": "Pumili ng column para sa: {{fields}}",
+      "dateOrderLabel": "Paano nakasulat ang mga petsa sa file",
+      "dateOrders": {
+        "ymd": "Taon-buwan-araw (2026-03-05)",
+        "mdy": "Buwan/araw/taon (03/05/2026)",
+        "dmy": "Araw/buwan/taon (05/03/2026)"
       },
-      "chooseColumn": "Pumili ng source column",
-      "previewTitle": "Preview bago mag-import",
-      "previewDescription": "Suriin ang mga na-map na field at buod ng pagsusuri bago kumpirmahin.",
-      "previewColumns": {
-        "field": "Field",
-        "source": "Source column",
-        "validation": "Pagsusuri"
+      "duplicateLabel": "Kapag umiiral na ang residente",
+      "duplicateActions": {
+        "skip": "Laktawan at panatilihin ang umiiral na talaan",
+        "update": "I-update ang umiiral na talaan mula sa file"
       },
-      "validation": {
-        "required": "Kailangan",
-        "reviewFormat": "Suriin ang format",
-        "checkValues": "Suriin ang mga pinapayagang halaga",
-        "checkDuplicates": "Suriin kung may doble"
+      "sampleTitle": "Mga unang hanay ng file",
+      "checkFile": "Suriin ang file",
+      "checking": "Sinusuri…",
+      "back": "Bumalik sa mga column",
+      "classes": {
+        "new": "Bago",
+        "duplicate": "Doble",
+        "error": "May problema"
       },
+      "duplicateNote": {
+        "skip": "Lalaktawan ang mga doble at mananatili ang mga umiiral na talaan. Hindi kailanman ii-import ang mga hanay na may problema.",
+        "update": "Ang mga doble na nasa talaan na ay ia-update mula sa file. Hindi nagbabago ang pangalan at petsa ng kapanganakan, at hindi binubura ng mga walang laman na cell ang umiiral na datos. Hindi kailanman ii-import ang mga hanay na may problema."
+      },
+      "filters": {
+        "all": "Lahat ng hanay",
+        "new": "Bago",
+        "duplicate": "Doble",
+        "error": "May problema"
+      },
+      "columns": {
+        "row": "Hanay",
+        "name": "Pangalan",
+        "result": "Resulta",
+        "problems": "Mga problema"
+      },
+      "scope": {
+        "file": "Inuulit sa file na ito",
+        "existing": "Nasa talaan na"
+      },
+      "loadingRows": "Nilo-load ang mga hanay",
+      "rowsError": "Hindi ma-load ang mga hanay.",
+      "noRows": "Walang maipapakitang hanay",
+      "noRowsDescription": "Walang hanay na tugma sa filter na ito.",
+      "downloadErrors": "I-download ang ulat ng problema (CSV)",
+      "commit": "I-import",
+      "importing": "Nag-i-import…",
+      "confirmTitle": "I-import ang mga residenteng ito?",
+      "confirmDescription": "{{n}} bagong talaan ng residente ang gagawin. Hindi ito maaaring bawiin mula sa screen na ito.",
+      "cancelImport": "Kanselahin ang pag-import",
+      "cancelTitle": "Kanselahin ang pag-import na ito?",
+      "cancelDescription": "Buburahin ang mga na-upload na hanay at walang mase-save.",
+      "done": "Tapos na ang pag-import ng {{file}}.",
       "resultLabels": {
-        "imported": "Na-import",
+        "created": "Nagawa",
         "updated": "Na-update",
         "skipped": "Nilaktawan",
         "failed": "Nabigo"
       },
-      "pending": "Nakabinbin",
-      "previous": "Nakaraang hakbang",
-      "continue": "Magpatuloy",
-      "reviewResults": "Suriin ang mga resulta"
+      "another": "Mag-import ng isa pang file",
+      "historyTitle": "Mga kamakailang pag-import",
+      "historyEmpty": "Wala pang pag-import.",
+      "historyError": "Hindi ma-load ang kasaysayan ng pag-import.",
+      "history": {
+        "date": "Petsa",
+        "file": "File",
+        "by": "Ni",
+        "status": "Katayuan",
+        "outcome": "Kinalabasan",
+        "outcomeText": "{{created}} nagawa, {{updated}} na-update, {{skipped}} nilaktawan, {{failed}} nabigo"
+      },
+      "status": {
+        "committed": "Tapos na",
+        "failed": "Nabigo",
+        "cancelled": "Kinansela",
+        "expired": "Nag-expire",
+        "uploaded": "Isinasagawa",
+        "mapped": "Isinasagawa"
+      },
+      "fields": {
+        "first_name": "Pangalan",
+        "middle_name": "Gitnang pangalan",
+        "last_name": "Apelyido",
+        "suffix": "Hulapi",
+        "birthdate": "Petsa ng kapanganakan",
+        "birth_place": "Lugar ng kapanganakan",
+        "sex": "Kasarian",
+        "civil_status": "Katayuang sibil",
+        "house_number": "Numero ng bahay",
+        "street": "Kalye",
+        "purok": "Purok",
+        "resident_since_year": "Residente mula (taon)",
+        "resident_type": "Uri ng residente",
+        "id_number": "Numero ng Barangay ID",
+        "voter_registration": "Rehistro bilang botante",
+        "emergency_contact_name": "Pangalan ng emergency contact",
+        "emergency_contact_address": "Address ng emergency contact",
+        "emergency_contact_phone": "Telepono ng emergency contact"
+      }
     },
     "archiveDialog": {
       "title": "I-archive ang talaan ng residente?",
