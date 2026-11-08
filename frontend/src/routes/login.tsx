@@ -128,7 +128,7 @@ function Login() {
           {passwordChangedNotice ? (
             <p
               role="status"
-              className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground"
+              className="animate-in fade-in-0 rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground duration-200"
             >
               {t("login.passwordChanged")}
             </p>
@@ -137,7 +137,7 @@ function Login() {
           {loginErrorMessage ? (
             <p
               role="alert"
-              className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive"
+              className="animate-in fade-in-0 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2 text-sm text-destructive duration-200"
             >
               {loginErrorMessage}
             </p>

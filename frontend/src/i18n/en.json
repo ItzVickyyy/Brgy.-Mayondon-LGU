@@ -1960,6 +1960,8 @@
     },
     "ui": {
       "skipToMain": "Skip to main content",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
       "collapseSidebar": "Collapse Sidebar",
       "openSidebar": "Open Sidebar",
       "toggleSidebar": "Toggle Sidebar",

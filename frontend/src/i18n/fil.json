@@ -1960,6 +1960,8 @@
     },
     "ui": {
       "skipToMain": "Lumaktaw sa pangunahing nilalaman",
+      "showPassword": "Ipakita ang password",
+      "hidePassword": "Itago ang password",
       "collapseSidebar": "Isara ang sidebar",
       "openSidebar": "Buksan ang sidebar",
       "toggleSidebar": "I-toggle ang sidebar",
