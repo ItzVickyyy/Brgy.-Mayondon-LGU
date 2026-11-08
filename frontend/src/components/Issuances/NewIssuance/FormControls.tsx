@@ -511,6 +511,8 @@ type ChoiceRowProps = {
   label: string
   /** Shown text for an option. The value passed to onChange stays the option itself. */
   optionLabel?: (option: string) => string
+  invalid?: boolean
+  describedBy?: string
 }
 
 /** Two or three big buttons in a row (for example Male / Female). */
@@ -521,13 +523,17 @@ export function ChoiceRow({
   options,
   label,
   optionLabel,
+  invalid,
+  describedBy,
 }: ChoiceRowProps) {
   const name = useId()
   return (
     <fieldset
       id={id}
       aria-label={label}
-      className="m-0 grid h-11 min-w-0 gap-1.5 border-0 p-0"
+      aria-invalid={invalid || undefined}
+      aria-describedby={describedBy}
+      className={cn("m-0 grid h-11 min-w-0 gap-1.5 border-0 p-0", invalid && "rounded-md ring-1 ring-destructive")}
       style={{
         gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
       }}
