@@ -478,6 +478,21 @@
         "emergency_contact_name": "Pangalan ng emergency contact",
         "emergency_contact_address": "Address ng emergency contact",
         "emergency_contact_phone": "Telepono ng emergency contact"
+      },
+      "problems": {
+        "streetUnknown": "Wala ang kalye sa listahan ng mga kalye",
+        "dateUnknown": "Hindi makilala ang petsa",
+        "idTwice": "Dalawang beses lumabas ang numero ng ID sa file",
+        "idTaken": "Nakatalaga na sa ibang residente ang numero ng ID",
+        "futureBirthdate": "Hindi maaaring nasa hinaharap ang petsa ng kapanganakan",
+        "sinceBoth": "Hindi maaaring itakda nang sabay ang mga taong naninirahan dito at ang “dito na nakatira mula pagsilang”",
+        "required": "Kailangan ng halaga",
+        "tooLong": "Masyadong mahaba (hanggang {{max}} karakter lamang)",
+        "notAllowed": "Hindi pinapayagang halaga. Gamitin ang: {{options}}",
+        "atLeast": "Dapat {{min}} o higit pa",
+        "above": "Dapat higit sa {{min}}",
+        "atMost": "Dapat {{max}} o mas mababa",
+        "notWholeNumber": "Dapat ay buong numero"
       }
     },
     "archiveDialog": {

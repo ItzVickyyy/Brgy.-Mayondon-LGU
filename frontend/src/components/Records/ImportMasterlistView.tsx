@@ -19,6 +19,7 @@ import { TablePagination } from "@/components/Common/TablePagination"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import useCustomToast from "@/hooks/useCustomToast"
+import { importProblemText } from "@/lib/importProblems"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
 import { cn } from "@/lib/utils"
 import { handleError } from "@/utils"
@@ -599,7 +600,8 @@ export function ImportMasterlistView() {
                               ? "—"
                               : row.errors.map((error) => (
                                   <p key={`${error.field}-${error.message}`}>
-                                    {fieldLabel(error.field)}: {error.message}
+                                    {fieldLabel(error.field)}:{" "}
+                                    {importProblemText(error.message, t)}
                                   </p>
                                 ))}
                           </td>

@@ -478,6 +478,21 @@
         "emergency_contact_name": "Emergency contact name",
         "emergency_contact_address": "Emergency contact address",
         "emergency_contact_phone": "Emergency contact phone"
+      },
+      "problems": {
+        "streetUnknown": "Street is not in the streets list",
+        "dateUnknown": "Date not recognised",
+        "idTwice": "ID number appears twice in the file",
+        "idTaken": "ID number is already assigned to a resident",
+        "futureBirthdate": "Birthdate cannot be in the future",
+        "sinceBoth": "Years living here and “lived here since birth” cannot both be set",
+        "required": "A value is required",
+        "tooLong": "Too long (at most {{max}} characters)",
+        "notAllowed": "Not an allowed value. Use: {{options}}",
+        "atLeast": "Must be {{min}} or more",
+        "above": "Must be greater than {{min}}",
+        "atMost": "Must be {{max}} or less",
+        "notWholeNumber": "Must be a whole number"
       }
     },
     "archiveDialog": {
