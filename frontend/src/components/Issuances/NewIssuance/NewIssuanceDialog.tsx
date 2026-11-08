@@ -351,7 +351,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     if (field.type === "combobox") {
       control = <ComboField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} options={fieldOptions} invalid={invalid} describedBy={describedBy} />
     } else if (field.type === "radio") {
-      control = <ChoiceRow id={fieldId} label={fieldLabel(field.label, t)} value={String(value)} options={fieldOptions} optionLabel={(option) => fieldOptionLabel(field.name, option, t)} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
+      const radioOptions = fieldOptions.map((option) => normalizedOptionValue(field.name, option))
+      control = <ChoiceRow id={fieldId} label={fieldLabel(field.label, t)} value={String(value)} options={radioOptions} optionLabel={(option) => fieldOptionLabel(field.name, fieldOptions.find((candidate) => normalizedOptionValue(field.name, candidate) === option) ?? option, t)} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
     } else if (field.type === "select") {
       control = <SelectField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} options={fieldOptions.map((option) => ({ value: normalizedOptionValue(field.name, option), label: fieldOptionLabel(field.name, option, t) }))} invalid={invalid} describedBy={describedBy} />
     } else if (field.type === "multiselect") {
