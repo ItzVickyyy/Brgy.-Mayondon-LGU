@@ -14,6 +14,7 @@ Everything the team needs to know about the project lives in this folder, groupe
 | [08-Open-Decisions.md](08-Open-Decisions.md) | **Every undecided, vague or contradictory item**, with owner and deadline | After client or instructor discussions |
 | [09-Issuance-Form-Data-Map.md](09-Issuance-Form-Data-Map.md) | Every New Issuance input mapped to a proposed table and column | When the issuance form or schema changes |
 | [10-Decisions-Already-Made.md](10-Decisions-Already-Made.md) | Things the owner already removed, changed or settled, and legacy code to leave alone | **First, before changing anything**; especially for AI assistants |
+| [11-Host-Checks.md](11-Host-Checks.md) | Step-by-step checks and result sheet for the barangay server PC: backup/restore test, scheduled backup, Docker auto-start, second PC, printer, firewall | Installing or re-testing on the real host |
 
 **Precedence if documents conflict:** the instructor's *Final Project Guide* → the signed Creative Brief (client scope) → these documents.
 
