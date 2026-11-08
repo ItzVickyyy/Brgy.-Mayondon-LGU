@@ -23,6 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { documentTypeLabel } from "@/lib/issuanceLabels"
 import {
   civilStatusLabel,
   residentTypeLabel,
@@ -376,8 +377,12 @@ export function ResidentProfileDialog({
                                 t("records.profile.history.draft")}
                             </td>
                             <td className="py-2 pr-4">
-                              {documentName.get(item.document_type_id) ??
-                                item.document_type_code}
+                              {documentTypeLabel(
+                                item.document_type_code,
+                                documentName.get(item.document_type_id) ??
+                                  item.document_type_code,
+                                t,
+                              )}
                             </td>
                             <td className="py-2 pr-4">
                               {formatBusinessDate(item.issue_date)}

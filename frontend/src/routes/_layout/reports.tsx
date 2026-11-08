@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
 
 export const Route = createFileRoute("/_layout/reports")({
@@ -219,7 +220,7 @@ function Reports() {
           t("admin.reports.issuances.columns.change"),
         ],
         ...typeRows.map((row) => [
-          row.name,
+          documentTypeLabel(row.code, row.name, t),
           row.issued,
           row.voided,
           formatShare(row.share_percent),
@@ -243,7 +244,7 @@ function Reports() {
           t("admin.reports.purpose.columns.share"),
         ],
         ...purposeRows.map((row) => [
-          row.purpose,
+          row.purpose_id === null ? t("admin.reports.noPurpose") : row.purpose,
           row.issued,
           formatShare(row.share_percent),
         ]),
@@ -401,7 +402,9 @@ function Reports() {
                   key={row.document_type_id}
                   className="transition-colors hover:bg-muted/30"
                 >
-                  <td className={`${td} font-medium`}>{row.name}</td>
+                  <td className={`${td} font-medium`}>
+                    {documentTypeLabel(row.code, row.name, t)}
+                  </td>
                   <td className={`${td} tabular-nums`}>{row.issued}</td>
                   <td className={`${td} tabular-nums`}>{row.voided}</td>
                   <td className={td}>{formatShare(row.share_percent)}</td>
@@ -463,7 +466,11 @@ function Reports() {
                   key={row.purpose_id ?? "none"}
                   className="transition-colors hover:bg-muted/30"
                 >
-                  <td className={`${td} font-medium`}>{row.purpose}</td>
+                  <td className={`${td} font-medium`}>
+                    {row.purpose_id === null
+                      ? t("admin.reports.noPurpose")
+                      : row.purpose}
+                  </td>
                   <td className={`${td} tabular-nums`}>{row.issued}</td>
                   <td className={td}>{formatShare(row.share_percent)}</td>
                 </tr>

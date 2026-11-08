@@ -16,6 +16,7 @@ import { ErrorState, LoadingState } from "@/components/Common/FeedbackState"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { activityTitle } from "@/lib/activity"
+import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
 
 export const Route = createFileRoute("/_layout/")({
@@ -326,7 +327,9 @@ function Dashboard() {
             {types.map((item) => (
               <div key={item.code}>
                 <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
-                  <span className="truncate">{item.name}</span>
+                  <span className="truncate">
+                    {documentTypeLabel(item.code, item.name, t)}
+                  </span>
                   <span className="shrink-0 tabular-nums text-muted-foreground">
                     {item.count}
                   </span>

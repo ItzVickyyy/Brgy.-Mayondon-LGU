@@ -1464,7 +1464,8 @@
         "notLoaded": "Hindi pa tapos mag-load ang ulat, kaya hindi pa ito maie-export.",
         "csvStarted": "Nagsimula na ang pag-export ng CSV para sa ipinapakitang ulat.",
         "previewBeforePrint": "I-preview muna ang ulat bago mag-print."
-      }
+      },
+      "noPurpose": "(Walang nakasaad na layunin)"
     },
     "backup": {
       "title": "Backup at Restore",
@@ -1824,6 +1825,21 @@
       "oops": "Naku!",
       "description": "May nangyaring error. Pakisubukan muli.",
       "home": "Bumalik sa Home"
+    },
+    "ui": {
+      "skipToMain": "Lumaktaw sa pangunahing nilalaman",
+      "collapseSidebar": "Isara ang sidebar",
+      "openSidebar": "Buksan ang sidebar",
+      "toggleSidebar": "I-toggle ang sidebar",
+      "lightMode": "Lumipat sa maliwanag na mode",
+      "darkMode": "Lumipat sa madilim na mode",
+      "lightShort": "Maliwanag na mode",
+      "darkShort": "Madilim na mode",
+      "switchTheme": "Palitan ang tema",
+      "appearance": "Hitsura",
+      "enterFullscreen": "Pumasok sa full screen",
+      "exitFullscreen": "Lumabas sa full screen",
+      "close": "Isara"
     }
   },
   "apiErrors": {

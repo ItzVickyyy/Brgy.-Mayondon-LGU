@@ -49,7 +49,7 @@ export const Route = createFileRoute("/_layout")({
 
 function Layout() {
   // Subscribes this component to language changes so the clock is re-formatted.
-  useTranslation()
+  const { t } = useTranslation()
   const [now, setNow] = useState(() => new Date())
   const { theme, setTheme } = useTheme()
   const { user: currentUser } = useAuth()
@@ -97,7 +97,7 @@ function Layout() {
           href="#main-content"
           className="sr-only z-50 rounded-md bg-background px-4 py-3 text-sm font-semibold text-foreground focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:ring-2 focus:ring-ring"
         >
-          Skip to main content
+          {t("common.ui.skipToMain")}
         </a>
         <header className="sticky top-0 z-10 flex min-h-16 shrink-0 items-center gap-3 border-b bg-background/95 px-3 py-2 backdrop-blur sm:px-4">
           <div className="flex min-w-0 flex-1 items-center gap-3">
@@ -121,9 +121,11 @@ function Layout() {
               size="icon"
               className="size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
               aria-label={
-                isDark ? "Switch to light mode" : "Switch to dark mode"
+                isDark ? t("common.ui.lightMode") : t("common.ui.darkMode")
               }
-              title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+              title={
+                isDark ? t("common.ui.lightMode") : t("common.ui.darkMode")
+              }
               onClick={() => setTheme(isDark ? "light" : "dark")}
             >
               {isDark ? (
@@ -138,9 +140,15 @@ function Layout() {
               size="icon"
               className="size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
               aria-label={
-                isFullscreen ? "Exit full screen" : "Enter full screen"
+                isFullscreen
+                  ? t("common.ui.exitFullscreen")
+                  : t("common.ui.enterFullscreen")
               }
-              title={isFullscreen ? "Exit full screen" : "Enter full screen"}
+              title={
+                isFullscreen
+                  ? t("common.ui.exitFullscreen")
+                  : t("common.ui.enterFullscreen")
+              }
               onClick={() => {
                 void toggleFullscreen()
               }}

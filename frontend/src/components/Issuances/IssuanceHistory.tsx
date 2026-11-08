@@ -42,6 +42,7 @@ import {
 } from "@/components/ui/dialog"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { formatLocaleDate } from "@/lib/locale"
 import { cn } from "@/lib/utils"
@@ -265,7 +266,10 @@ export function IssuanceHistory({
   })
   const documentTypes = documentTypesQuery.data ?? []
   const documentNames = new Map(
-    documentTypes.map((type) => [type.id, type.name]),
+    documentTypes.map((type) => [
+      type.id,
+      documentTypeLabel(type.code, type.name, t),
+    ]),
   )
   const purposeNames = new Map(
     (purposesQuery.data ?? []).map((purpose) => [purpose.id, purpose.name]),
@@ -494,7 +498,7 @@ export function IssuanceHistory({
                 </option>
                 {documentTypes.map((type) => (
                   <option key={type.id} value={type.id}>
-                    {type.name}
+                    {documentTypeLabel(type.code, type.name, t)}
                   </option>
                 ))}
               </select>

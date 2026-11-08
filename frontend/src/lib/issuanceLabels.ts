@@ -3,8 +3,8 @@
 // what the API stores and what the print code reads. These helpers only change
 // what is shown. Text with no entry here is shown exactly as it is stored.
 import type { ParseKeys, TFunction } from "i18next"
-
 import type { DocumentCode } from "@/components/Issuances/NewIssuance/documentConfig"
+import i18n from "@/i18n"
 
 function lookup(
   keys: Record<string, ParseKeys>,
@@ -17,6 +17,18 @@ function lookup(
 
 export const documentName = (code: DocumentCode, t: TFunction) =>
   t(`issuances.new.documents.${code}.name`)
+
+// For names that come from the server (dashboard, reports, history filters):
+// a known document code shows its translated name, anything else is shown as
+// the server sent it. The code is what the API stores; only the label changes.
+export function documentTypeLabel(
+  code: string,
+  serverName: string,
+  t: TFunction,
+): string {
+  const key = `issuances.new.documents.${code}.name`
+  return i18n.exists(key) ? t(key as ParseKeys) : serverName
+}
 
 export const documentShortName = (code: DocumentCode, t: TFunction) =>
   t(`issuances.new.documents.${code}.short`)

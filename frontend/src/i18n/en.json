@@ -1464,7 +1464,8 @@
         "notLoaded": "The report has not finished loading, so it cannot be exported yet.",
         "csvStarted": "CSV export started for the displayed report.",
         "previewBeforePrint": "Preview a report before printing."
-      }
+      },
+      "noPurpose": "(No purpose given)"
     },
     "backup": {
       "title": "Backup and Restore",
@@ -1824,6 +1825,21 @@
       "oops": "Oops!",
       "description": "Something went wrong. Please try again.",
       "home": "Go Home"
+    },
+    "ui": {
+      "skipToMain": "Skip to main content",
+      "collapseSidebar": "Collapse Sidebar",
+      "openSidebar": "Open Sidebar",
+      "toggleSidebar": "Toggle Sidebar",
+      "lightMode": "Switch to light mode",
+      "darkMode": "Switch to dark mode",
+      "lightShort": "Light mode",
+      "darkShort": "Dark mode",
+      "switchTheme": "Switch theme",
+      "appearance": "Appearance",
+      "enterFullscreen": "Enter full screen",
+      "exitFullscreen": "Exit full screen",
+      "close": "Close"
     }
   },
   "apiErrors": {
