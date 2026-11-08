@@ -238,7 +238,7 @@ function Dashboard() {
             aria-label={t("dashboard.period.ariaLabel")}
             value={period}
             onChange={(event) => setPeriod(event.target.value as Period)}
-            className="min-h-11 rounded-md border bg-background px-3 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="min-h-11 rounded-md border bg-background px-3 text-base transition-colors hover:border-ring/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {periods.map((value) => (
               <option key={value} value={value}>

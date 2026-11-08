@@ -7,6 +7,7 @@ import {
   IdCard,
   RefreshCw,
   Search,
+  X,
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -23,6 +24,7 @@ import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { formatBusinessDate } from "@/lib/residents"
@@ -346,6 +348,22 @@ export function BarangayIdsView() {
                 <EmptyState
                   title={t("records.ids.empty.title")}
                   description={t("records.ids.empty.description")}
+                  action={
+                    search.trim() !== "" || statusFilter !== "all" ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-h-11"
+                        onClick={() => {
+                          setSearch("")
+                          setStatusFilter("all")
+                        }}
+                      >
+                        <X aria-hidden="true" />
+                        {t("issuances.history.resetFilters")}
+                      </Button>
+                    ) : undefined
+                  }
                 />
               ) : null}
             </div>
