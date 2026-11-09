@@ -177,7 +177,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     const detailsDirty = Object.entries(current.details as unknown as Record<string, unknown>).some(([key, value]) => {
       const defaults = defaultDetails(current.documentType) as unknown as Record<string, unknown>
       return JSON.stringify(value) !== JSON.stringify(defaults[key])
-    }) || Boolean(current.purposeText?.trim()) || Boolean(current.identification?.idNumber?.trim()) || Boolean(current.payment?.officialReceiptNo?.trim()) || Boolean(current.remarks?.trim() && current.remarks !== (current.documentType === "BARANGAY_CLEARANCE" ? "NO DEROGATORY RECORD ON FILE" : "")) || sectorManuallySelected
+    }) || Boolean(current.purposeText?.trim()) || Boolean(current.identification?.idNumber?.trim()) || Boolean(current.payment?.officialReceiptNo?.trim()) || Boolean(current.remarks?.trim() && current.remarks !== "NO DEROGATORY RECORD ON FILE") || sectorManuallySelected
     if (detailsDirty) { setPendingDocumentType(nextCode); return }
     applyDocumentType(nextCode)
   }
