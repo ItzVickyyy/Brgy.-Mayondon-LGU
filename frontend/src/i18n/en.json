@@ -798,6 +798,9 @@
         "datedTo": "Dated to"
       },
       "dateRangeInvalid": "The \"Dated from\" day is after the \"Dated to\" day. Please correct the dates.",
+      "invalidDateRangeTitle": "Adjust the date range",
+      "invalidDateRangeDescription": "No records are shown until the start date is on or before the end date.",
+      "pageSize": "Rows per page",
       "loading": "Loading issuances...",
       "loadError": "Could not load issuances",
       "loadErrorDescription": "Check your connection and try again.",
@@ -809,7 +812,8 @@
         "latestNone": "None yet",
         "latestHint": "Most recent record date",
         "mostIssued": "Most issued document",
-        "mostIssuedNone": "No records yet"
+        "mostIssuedNone": "No records yet",
+        "loadError": "Could not load summary data"
       },
       "status": {
         "issued": "Issued",
@@ -1002,6 +1006,11 @@
         "description": "Details entered for the current document will be cleared. The resident and document date will stay.",
         "confirm": "Change document"
       },
+      "changeResident": {
+        "title": "Change resident?",
+        "description": "The current resident selection and any saved draft for it will be cleared. Your document details will stay. Continue?",
+        "confirm": "Change resident"
+      },
       "errors": {
         "selectResidentDraft": "Select a resident before saving this draft.",
         "selectResidentIssue": "Select a resident before issuing this document.",
@@ -1009,6 +1018,7 @@
         "fillMissing": "Please fill in the missing details in the yellow box under Who is it for?",
         "checkRequired": "Check the required fields marked above.",
         "saveDraft": "Unable to save the draft.",
+        "deleteDraft": "Unable to discard the saved draft. It is still available in Issuance History. Please try again.",
         "issue": "Unable to issue this document.",
         "draftGone": "This draft is no longer available. Refresh Issuance History and try again.",
         "residentLoad": "The resident linked to this draft could not be loaded.",

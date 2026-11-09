@@ -798,6 +798,9 @@
         "datedTo": "Petsa hanggang"
       },
       "dateRangeInvalid": "Mas huli ang araw ng \"Petsa mula\" kaysa sa araw ng \"Petsa hanggang\". Pakiayos ang mga petsa.",
+      "invalidDateRangeTitle": "Ayusin ang saklaw ng petsa",
+      "invalidDateRangeDescription": "Walang ipapakitang talaan hangga't hindi nauuna o kapareho ng petsa hanggang ang petsa mula.",
+      "pageSize": "Mga hilera bawat pahina",
       "loading": "Nilo-load ang mga isyu...",
       "loadError": "Hindi ma-load ang mga isyu",
       "loadErrorDescription": "Suriin ang koneksyon at subukang muli.",
@@ -809,7 +812,8 @@
         "latestNone": "Wala pa",
         "latestHint": "Petsa ng pinakabagong talaan",
         "mostIssued": "Pinakamaraming naisyung dokumento",
-        "mostIssuedNone": "Wala pang talaan"
+        "mostIssuedNone": "Wala pang talaan",
+        "loadError": "Hindi ma-load ang datos ng buod"
       },
       "status": {
         "issued": "Naisyu",
@@ -1002,6 +1006,11 @@
         "description": "Buburahin ang mga detalyeng inilagay para sa kasalukuyang dokumento. Mananatili ang residente at petsa ng dokumento.",
         "confirm": "Palitan ang dokumento"
       },
+      "changeResident": {
+        "title": "Palitan ang residente?",
+        "description": "Aalisin ang kasalukuyang napiling residente at anumang naka-save na draft para rito. Mananatili ang mga detalye ng dokumento. Magpatuloy?",
+        "confirm": "Palitan ang residente"
+      },
       "errors": {
         "selectResidentDraft": "Pumili ng residente bago i-save ang draft na ito.",
         "selectResidentIssue": "Pumili ng residente bago i-isyu ang dokumentong ito.",
@@ -1009,6 +1018,7 @@
         "fillMissing": "Pakipunan ang mga kulang na detalye sa dilaw na kahon sa ilalim ng Para kanino ito?",
         "checkRequired": "Suriin ang mga kinakailangang field na may marka sa itaas.",
         "saveDraft": "Hindi ma-save ang draft.",
+        "deleteDraft": "Hindi maitapon ang naka-save na draft. Nasa Kasaysayan ng Pag-isyu pa rin ito. Pakisubukang muli.",
         "issue": "Hindi ma-isyu ang dokumentong ito.",
         "draftGone": "Hindi na available ang draft na ito. I-refresh ang Kasaysayan ng mga Isyu at subukang muli.",
         "residentLoad": "Hindi ma-load ang residenteng naka-link sa draft na ito.",

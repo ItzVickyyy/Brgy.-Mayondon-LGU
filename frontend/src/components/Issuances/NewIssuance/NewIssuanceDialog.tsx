@@ -113,6 +113,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const [duplicate, setDuplicate] = useState<{ referenceNo: string; issueDate: string } | null>(null)
   const [formError, setFormError] = useState("")
   const [discardOpen, setDiscardOpen] = useState(false)
+  const [changeResidentOpen, setChangeResidentOpen] = useState(false)
   const [attempted, setAttempted] = useState(false)
   const [quickAttempted, setQuickAttempted] = useState(false)
   const [quickSaving, setQuickSaving] = useState(false)
@@ -125,6 +126,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const correctionDraftRef = useRef(false)
   const lastSavedRef = useRef("")
   const saveChain = useRef<Promise<unknown>>(Promise.resolve())
+  const autoSavePausedRef = useRef(false)
   const documentType = form.watch("documentType")
   const issueDate = form.watch("issueDate")
   const details = form.watch("details")
@@ -176,7 +178,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     const detailsDirty = Object.entries(current.details as unknown as Record<string, unknown>).some(([key, value]) => {
       const defaults = defaultDetails(current.documentType) as unknown as Record<string, unknown>
       return JSON.stringify(value) !== JSON.stringify(defaults[key])
-    }) || Boolean(current.purposeText?.trim()) || Boolean(current.identification?.idNumber?.trim()) || Boolean(current.payment?.officialReceiptNo?.trim()) || sectorManuallySelected
+    }) || Boolean(current.purposeText?.trim()) || Boolean(current.identification?.idNumber?.trim()) || Boolean(current.payment?.officialReceiptNo?.trim()) || Boolean(current.remarks?.trim() && current.remarks !== "NO DEROGATORY RECORD ON FILE") || sectorManuallySelected
     if (detailsDirty) { setPendingDocumentType(nextCode); return }
     applyDocumentType(nextCode)
   }
@@ -349,7 +351,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     let control: ReactNode
     if (field.type === "combobox") {
       control = <ComboField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} options={fieldOptions} invalid={invalid} describedBy={describedBy} />
-    } else if (field.type === "select" || field.type === "radio") {
+    } else if (field.type === "radio") {
+      const radioOptions = fieldOptions.map((option) => normalizedOptionValue(field.name, option))
+      control = <ChoiceRow id={fieldId} label={fieldLabel(field.label, t)} value={String(value)} options={radioOptions} optionLabel={(option) => fieldOptionLabel(field.name, fieldOptions.find((candidate) => normalizedOptionValue(field.name, candidate) === option) ?? option, t)} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
+    } else if (field.type === "select") {
       control = <SelectField id={fieldId} value={String(value)} onChange={onValueChange as (next: string) => void} options={fieldOptions.map((option) => ({ value: normalizedOptionValue(field.name, option), label: fieldOptionLabel(field.name, option, t) }))} invalid={invalid} describedBy={describedBy} />
     } else if (field.type === "multiselect") {
       const current = Array.isArray(value) ? value as string[] : []
@@ -486,9 +491,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   // Save quietly a moment after the person stops typing. persistDraft reads the latest values through draftSignature.
   // biome-ignore lint/correctness/useExhaustiveDependencies: draftSignature already covers every form value
   useEffect(() => {
-    if (!open || successRecord || saving || !selectedResident || !formDirty) return
+    if (!open || successRecord || saving || autoSavePausedRef.current || !selectedResident || !formDirty) return
     if (draftSignature === lastSavedRef.current) return
-    const timer = window.setTimeout(() => { void persistDraft(true) }, 1500)
+    const timer = window.setTimeout(() => { if (!autoSavePausedRef.current) void persistDraft(true) }, 1500)
     return () => window.clearTimeout(timer)
   }, [draftSignature, open, successRecord, saving, selectedResident, formDirty])
 
@@ -496,8 +501,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     await saveChain.current
     const id = draftIdRef.current
     if (!id) return
+    const removed = await issuanceApi.deleteDraft(id)
+    if (!removed) throw new Error(t("issuances.new.errors.deleteDraft"))
     draftIdRef.current = null
-    await issuanceApi.deleteDraft(id)
     onDraftRemoved?.(id)
   }
 
@@ -610,17 +616,34 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   }
 
   async function discardAndClose() {
-    await removeDraft()
-    resetDialog()
-    onOpenChange(false)
+    try {
+      await removeDraft()
+      resetDialog()
+      onOpenChange(false)
+    } catch (error) {
+      setDiscardOpen(false)
+      setFormError(error instanceof Error ? error.message : t("issuances.new.errors.deleteDraft"))
+    }
   }
 
-  /** Close now. The automatic draft stays in the list so the work is not lost. */
+  /** Close only after the latest form values are safely saved. */
   async function closeKeepingDraft() {
-    if (selectedResident && draftSignature !== lastSavedRef.current) await persistDraft(true)
-    await saveChain.current
-    resetDialog()
-    onOpenChange(false)
+    setSaving(true)
+    try {
+      if (selectedResident && draftSignature !== lastSavedRef.current) {
+        const record = await persistDraft(false)
+        if (!record) return
+      }
+      await saveChain.current
+      if (selectedResident && draftSignature !== lastSavedRef.current) {
+        setFormError(t("issuances.new.errors.saveDraft"))
+        return
+      }
+      resetDialog()
+      onOpenChange(false)
+    } finally {
+      setSaving(false)
+    }
   }
 
   function resetDialog() {
@@ -646,6 +669,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setEditingResident(false)
     setPrintNotice("")
     setDiscardOpen(false)
+    setChangeResidentOpen(false)
     setQuickAdd(emptyQuickAdd)
     draftIdRef.current = null
     restoredDraftRef.current = ""
@@ -653,6 +677,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     lastSavedRef.current = ""
     saveChain.current = Promise.resolve()
     setAutoSave({ state: "idle" })
+    autoSavePausedRef.current = false
   }
 
   const birthplaceRequired = config.residentNeeds.includes("birthPlace")
@@ -847,7 +872,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     ...(needsPhoto ? [{ label: "Photo", value: selectedResident && (residentUpdates.photoUrl || selectedResident.photoUrl) ? t("issuances.new.previewRows.taken") : "" }] : []),
     { label: "Date on document", value: issueDate },
     ...(config.signatoryMode === "select" ? [{ label: "Signatory", value: currentOfficials.find((official) => official.id === form.watch("signatoryOfficialId"))?.name ?? "________________________" }] : []),
-    ...config.fields.map((field) => ({ label: field.label, value: previewValue(field) })),
+    ...config.fields.filter((field) => field.name !== "remarks").map((field) => ({ label: field.label, value: previewValue(field) })),
+    { label: "Remarks", value: form.watch("remarks") ?? "" },
     ...(config.residentNeeds.includes("residentSince") ? [{ label: documentType === "RESIDENCY" ? "Residing since" : "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (documentType === "RESIDENCY") return source.residentSinceBirth || source.residentSince === 0 ? t("issuances.new.previewRows.sinceBirth") : source.residentSince === undefined ? "" : String(source.residentSince); if (source.residentSinceBirth) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return !source.residentSince ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
   ]
 
@@ -890,7 +916,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
 
   // "residentSince" is a resident-record value (asked under step 2 only when missing), so it is not asked a second time here.
-  const detailFields = fieldsByGroup("main").filter((field) => fieldVisible(field) && field.name !== "residentSince")
+  const detailFields = fieldsByGroup("main").filter((field) => fieldVisible(field) && field.name !== "residentSince" && field.name !== "remarks")
   const requirementFields = [...fieldsByGroup("identity"), ...fieldsByGroup("payment")].filter(fieldVisible)
   const hasRequirements = requirementFields.length > 0
   const signatoryMissing = config.signatoryMode === "select" && availableSignatories.length > 0 && !form.watch("signatoryOfficialId")
@@ -979,7 +1005,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                     <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? t("issuances.new.resident.yearsOld", { age: calculateAge(selectedResident.birthdate, issueDate) }) : t("issuances.new.resident.birthdateNotRecorded")} · {selectedResident.civilStatus ? civilStatusLabel(selectedResident.civilStatus, t) : t("issuances.new.resident.civilStatusNotRecorded")}</p>
                   </div>
                 </div>
-                <div className="flex shrink-0 flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" onClick={() => { setSelectedResident(null); setEditingResident(false); form.setValue("residentId", ""); setResidentQuery(""); setQuickAdd(emptyQuickAdd); setQuickAttempted(false); setQuickDuplicateSignature(null); setFormError("") }}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
+                <div className="flex shrink-0 flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => setChangeResidentOpen(true)}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
               </div> : <div className="space-y-3">
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3.5 top-3.5 size-5 text-muted-foreground" aria-hidden="true" />
@@ -1038,6 +1064,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                   {detailFields.filter((field) => field.name === "purpose" || field.name === "addressedToOffice").map(renderField)}
                 </div>
               ) : <div className="grid items-start gap-4 sm:grid-cols-2">{detailFields.map(renderField)}</div> : <p className="text-sm text-muted-foreground">{t("issuances.new.detailsStep.noExtra")}</p>}
+              <div className={fieldLabelClass}>
+                <label htmlFor="issuance-remarks">{fieldLabel("Remarks", t)}</label>
+                <input id="issuance-remarks" value={form.watch("remarks") ?? ""} onChange={(event) => form.setValue("remarks", event.target.value, { shouldDirty: true })} className={formControlClass} />
+              </div>
               {config.signatoryMode === "select" ? <div className={fieldLabelClass}>
                 <label htmlFor="issuance-signatoryOfficialId">{t("issuances.new.detailsStep.signatory")} {availableSignatories.length > 0 ? <span className="text-destructive">*</span> : null}</label>
                 {availableSignatories.length > 0 ? <SelectField id="issuance-signatoryOfficialId" value={form.watch("signatoryOfficialId") ?? ""} onChange={(next) => form.setValue("signatoryOfficialId", next, { shouldDirty: true })} placeholder={t("issuances.new.detailsStep.chooseOfficial")} invalid={Boolean(readErrorMessage(form.formState.errors.signatoryOfficialId)) || (attempted && signatoryMissing)} describedBy={readErrorMessage(form.formState.errors.signatoryOfficialId) ? "issuance-signatory-error" : undefined} options={availableSignatories.map((official) => ({ value: official.id, label: `${official.name} · ${official.position}` }))} /> : <p className="rounded-md border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">{t("issuances.new.detailsStep.noOfficials")}</p>}
@@ -1098,6 +1128,43 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <ConfirmDialog
+      open={changeResidentOpen}
+      onOpenChange={setChangeResidentOpen}
+      title={t("issuances.new.changeResident.title")}
+      description={t("issuances.new.changeResident.description")}
+      confirmLabel={t("issuances.new.changeResident.confirm")}
+      destructive
+      onConfirm={() => {
+        void (async () => {
+          autoSavePausedRef.current = true
+          setSaving(true)
+          try {
+            await removeDraft()
+            setSelectedResident(null)
+            setEditingResident(false)
+            setResidentQuery("")
+            setSearchedQuery("")
+            setSearchFailed(false)
+            form.setValue("residentId", "", { shouldDirty: true })
+            setResidentUpdates({})
+            setAddressParts({ houseNumber: "", street: "", purok: 1 })
+            setSelectedSector("")
+            setSectorManuallySelected(false)
+            setQuickAdd(emptyQuickAdd)
+            setQuickAttempted(false)
+            setQuickDuplicateSignature(null)
+            setDuplicate(null)
+            setFormError("")
+          } catch (error) {
+            setFormError(error instanceof Error ? error.message : t("issuances.new.errors.deleteDraft"))
+          } finally {
+            autoSavePausedRef.current = false
+            setSaving(false)
+          }
+        })()
+      }}
+    />
     <ConfirmDialog
       open={pendingDocumentType !== null}
       onOpenChange={(nextOpen) => { if (!nextOpen) setPendingDocumentType(null) }}

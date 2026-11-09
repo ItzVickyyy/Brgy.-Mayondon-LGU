@@ -53,7 +53,7 @@ type PendingAction = {
   action: "void" | "discard" | "correct"
 }
 
-const PAGE_SIZE = 10
+const PAGE_SIZE_OPTIONS = [10, 25, 50]
 const historyColumns = [
   "resident",
   "document",
@@ -239,6 +239,7 @@ export function IssuanceHistory({
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
   const [pageIndex, setPageIndex] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const [viewItem, setViewItem] = useState<IssuanceListItem | null>(null)
   const [pending, setPending] = useState<PendingAction | null>(null)
   const [errorNotice, setErrorNotice] = useState("")
@@ -254,7 +255,7 @@ export function IssuanceHistory({
   // biome-ignore lint/correctness/useExhaustiveDependencies: the filters are the trigger.
   useEffect(() => {
     setPageIndex(0)
-  }, [debouncedSearch, typeFilter, statusFilter, dateFrom, dateTo])
+  }, [debouncedSearch, typeFilter, statusFilter, dateFrom, dateTo, pageSize])
 
   const documentTypesQuery = useQuery({
     queryKey: ["lookups", "document-types"],
@@ -285,6 +286,7 @@ export function IssuanceHistory({
       dateFrom,
       dateTo,
       pageIndex,
+      pageSize,
     ],
     queryFn: async () =>
       (
@@ -295,8 +297,8 @@ export function IssuanceHistory({
             status: statusFilter,
             date_from: dateFrom || undefined,
             date_to: dateTo || undefined,
-            skip: pageIndex * PAGE_SIZE,
-            limit: PAGE_SIZE,
+            skip: pageIndex * pageSize,
+            limit: pageSize,
           },
         })
       ).data,
@@ -305,9 +307,9 @@ export function IssuanceHistory({
   })
   const items = historyQuery.data?.data ?? []
   const total = historyQuery.data?.count ?? 0
-  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
-  const start = total ? pageIndex * PAGE_SIZE + 1 : 0
-  const end = Math.min((pageIndex + 1) * PAGE_SIZE, total)
+  const pageCount = Math.max(1, Math.ceil(total / pageSize))
+  const start = total ? pageIndex * pageSize + 1 : 0
+  const end = Math.min((pageIndex + 1) * pageSize, total)
 
   const overallQuery = useQuery({
     queryKey: ["issuances-summary", "overall"],
@@ -403,27 +405,31 @@ export function IssuanceHistory({
         <SummaryCard
           icon={FileCheck2}
           label={t("issuances.history.summary.totalIssued")}
-          value={overallQuery.data ? overallQuery.data.total_issued : "—"}
-          hint={t("issuances.history.summary.totalIssuedHint")}
+          value={overallQuery.isLoading || overallQuery.isError ? "—" : overallQuery.data?.total_issued ?? 0}
+          hint={overallQuery.isError ? t("issuances.history.summary.loadError") : t("issuances.history.summary.totalIssuedHint")}
         />
         <SummaryCard
           icon={CalendarDays}
           label={t("issuances.history.summary.latest")}
           value={
-            latest
-              ? formatBusinessDate(latest.issue_date)
-              : t("issuances.history.summary.latestNone")
+            latestQuery.isLoading || latestQuery.isError
+              ? "—"
+              : latest
+                ? formatBusinessDate(latest.issue_date)
+                : t("issuances.history.summary.latestNone")
           }
-          hint={t("issuances.history.summary.latestHint")}
+          hint={latestQuery.isError ? t("issuances.history.summary.loadError") : t("issuances.history.summary.latestHint")}
         />
         <SummaryCard
           icon={FileText}
           label={t("issuances.history.summary.mostIssued")}
-          value={topType && topType.count > 0 ? topType.count : 0}
+          value={overallQuery.isLoading || overallQuery.isError ? "—" : topType && topType.count > 0 ? topType.count : 0}
           hint={
-            topType && topType.count > 0
-              ? topType.name
-              : t("issuances.history.summary.mostIssuedNone")
+            overallQuery.isError
+              ? t("issuances.history.summary.loadError")
+              : topType && topType.count > 0
+                ? topType.name
+                : t("issuances.history.summary.mostIssuedNone")
           }
         />
       </div>
@@ -550,7 +556,12 @@ export function IssuanceHistory({
           ) : null}
         </div>
 
-        {historyQuery.isLoading ? (
+        {dateRangeInvalid ? (
+          <EmptyState
+            title={t("issuances.history.invalidDateRangeTitle")}
+            description={t("issuances.history.invalidDateRangeDescription")}
+          />
+        ) : historyQuery.isLoading ? (
           <LoadingState title={t("issuances.history.loading")} />
         ) : historyQuery.isError ? (
           <ErrorState
@@ -745,6 +756,10 @@ export function IssuanceHistory({
               pageIndex={pageIndex}
               pageCount={pageCount}
               onPageChange={setPageIndex}
+              pageSize={pageSize}
+              pageSizeOptions={PAGE_SIZE_OPTIONS}
+              pageSizeLabel={t("issuances.history.pageSize")}
+              onPageSizeChange={setPageSize}
             />
           </>
         )}
