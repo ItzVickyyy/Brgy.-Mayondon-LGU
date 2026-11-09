@@ -798,6 +798,9 @@
         "datedTo": "Dated to"
       },
       "dateRangeInvalid": "The \"Dated from\" day is after the \"Dated to\" day. Please correct the dates.",
+      "invalidDateRangeTitle": "Adjust the date range",
+      "invalidDateRangeDescription": "No records are shown until the start date is on or before the end date.",
+      "pageSize": "Rows per page",
       "loading": "Loading issuances...",
       "loadError": "Could not load issuances",
       "loadErrorDescription": "Check your connection and try again.",
