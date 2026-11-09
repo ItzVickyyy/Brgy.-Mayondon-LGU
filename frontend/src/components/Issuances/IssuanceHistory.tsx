@@ -405,27 +405,31 @@ export function IssuanceHistory({
         <SummaryCard
           icon={FileCheck2}
           label={t("issuances.history.summary.totalIssued")}
-          value={overallQuery.data ? overallQuery.data.total_issued : "—"}
-          hint={t("issuances.history.summary.totalIssuedHint")}
+          value={overallQuery.isLoading || overallQuery.isError ? "—" : overallQuery.data?.total_issued ?? 0}
+          hint={overallQuery.isError ? t("issuances.history.summary.loadError") : t("issuances.history.summary.totalIssuedHint")}
         />
         <SummaryCard
           icon={CalendarDays}
           label={t("issuances.history.summary.latest")}
           value={
-            latest
-              ? formatBusinessDate(latest.issue_date)
-              : t("issuances.history.summary.latestNone")
+            latestQuery.isLoading || latestQuery.isError
+              ? "—"
+              : latest
+                ? formatBusinessDate(latest.issue_date)
+                : t("issuances.history.summary.latestNone")
           }
-          hint={t("issuances.history.summary.latestHint")}
+          hint={latestQuery.isError ? t("issuances.history.summary.loadError") : t("issuances.history.summary.latestHint")}
         />
         <SummaryCard
           icon={FileText}
           label={t("issuances.history.summary.mostIssued")}
-          value={topType && topType.count > 0 ? topType.count : 0}
+          value={overallQuery.isLoading || overallQuery.isError ? "—" : topType && topType.count > 0 ? topType.count : 0}
           hint={
-            topType && topType.count > 0
-              ? topType.name
-              : t("issuances.history.summary.mostIssuedNone")
+            overallQuery.isError
+              ? t("issuances.history.summary.loadError")
+              : topType && topType.count > 0
+                ? topType.name
+                : t("issuances.history.summary.mostIssuedNone")
           }
         />
       </div>
