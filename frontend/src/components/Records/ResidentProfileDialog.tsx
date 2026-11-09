@@ -16,6 +16,7 @@ import {
   modalBody,
   modalHeader,
   modalShell,
+  modalTall,
 } from "@/components/Common/ModalLayout"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
@@ -217,7 +218,7 @@ export function ResidentProfileDialog({
 
   return (
     <Dialog open={Boolean(resident)} onOpenChange={onOpenChange}>
-      <DialogContent className={`${modalShell} h-[min(90dvh,46rem)] sm:max-w-4xl`}>
+      <DialogContent className={`${modalShell} ${modalTall} sm:max-w-4xl`}>
         <DialogHeader className={modalHeader}>
           <DialogTitle className="text-xl">
             {t("records.profile.title")}

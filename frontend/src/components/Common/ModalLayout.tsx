@@ -9,6 +9,9 @@ import { cn } from "@/lib/utils"
 // is overridden by the dialog's own `sm:max-w-lg`, so always use `sm:max-w-*`.)
 export const modalShell =
   "flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-0"
+// Same fixed height for the resident profile and the add/edit resident form,
+// so moving between them does not resize the pop-up.
+export const modalTall = "h-[90dvh]"
 export const modalHeader =
   "gap-1.5 border-b px-5 py-4 pr-12 sm:px-6 sm:pr-14"
 export const modalBody = "min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6"

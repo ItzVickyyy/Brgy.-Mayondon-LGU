@@ -15,6 +15,7 @@ import {
   modalFooter,
   modalHeader,
   modalShell,
+  modalTall,
 } from "@/components/Common/ModalLayout"
 import { uploadResidentPhoto } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { Button } from "@/components/ui/button"
@@ -226,7 +227,7 @@ export function ResidentFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`${modalShell} sm:max-w-4xl`}>
+      <DialogContent className={`${modalShell} ${modalTall} sm:max-w-4xl`}>
         <DialogHeader className={modalHeader}>
           <DialogTitle className="text-xl">
             {resident
