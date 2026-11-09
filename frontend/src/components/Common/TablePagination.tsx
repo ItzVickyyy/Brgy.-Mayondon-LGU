@@ -38,15 +38,29 @@ type TablePaginationProps = {
   pageIndex: number
   pageCount: number
   onPageChange: (pageIndex: number) => void
+  pageSize?: number
+  pageSizeOptions?: number[]
+  pageSizeLabel?: string
+  onPageSizeChange?: (pageSize: number) => void
 }
 
-export function TablePagination({ start, end, total, pageIndex, pageCount, onPageChange }: TablePaginationProps) {
+export function TablePagination({ start, end, total, pageIndex, pageCount, onPageChange, pageSize, pageSizeOptions, pageSizeLabel, onPageSizeChange }: TablePaginationProps) {
   const { t } = useTranslation()
   if (total === 0) return null
 
   return (
     <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-      <p className="text-sm text-muted-foreground" aria-live="polite">{t("common.pagination.showing", { start, end, total })}</p>
+      <div className="flex flex-wrap items-center gap-3">
+        <p className="text-sm text-muted-foreground" aria-live="polite">{t("common.pagination.showing", { start, end, total })}</p>
+        {pageSize !== undefined && pageSizeOptions?.length && onPageSizeChange && pageSizeLabel ? (
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>{pageSizeLabel}</span>
+            <select value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))} className="h-9 rounded-md border bg-background px-2 text-sm text-foreground">
+              {pageSizeOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </label>
+        ) : null}
+      </div>
       {pageCount > 1 ? (
         <nav aria-label={t("common.pagination.label")} className="flex items-center justify-end gap-2">
           <Button type="button" variant="outline" className="min-h-11 gap-1 px-3" onClick={() => onPageChange(Math.max(0, pageIndex - 1))} disabled={pageIndex === 0}>
