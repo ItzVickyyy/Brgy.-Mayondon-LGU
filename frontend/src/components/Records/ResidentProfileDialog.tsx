@@ -12,6 +12,11 @@ import {
   ErrorState,
   LoadingState,
 } from "@/components/Common/FeedbackState"
+import {
+  modalBody,
+  modalHeader,
+  modalShell,
+} from "@/components/Common/ModalLayout"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { Badge } from "@/components/ui/badge"
@@ -191,8 +196,8 @@ export function ResidentProfileDialog({
 
   return (
     <Dialog open={Boolean(resident)} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className={`${modalShell} sm:max-w-4xl`}>
+        <DialogHeader className={modalHeader}>
           <DialogTitle className="text-xl">
             {t("records.profile.title")}
           </DialogTitle>
@@ -201,13 +206,23 @@ export function ResidentProfileDialog({
           </DialogDescription>
         </DialogHeader>
         {resident ? (
-          <>
-            <div className="flex flex-col gap-3 rounded-xl border bg-muted/20 p-4 sm:flex-row sm:items-center">
-              <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
-                <UserRound className="size-6" aria-hidden="true" />
-              </span>
+          <div className={`${modalBody} flex flex-col gap-5`}>
+            <div className="flex flex-col gap-4 rounded-xl border bg-muted/20 p-4 sm:flex-row sm:items-center sm:p-5">
+              {resident.has_photo && photoQuery.data ? (
+                <img
+                  src={photoQuery.data}
+                  alt={t("records.profile.photoCard.alt", {
+                    name: resident.full_name,
+                  })}
+                  className="h-28 w-24 shrink-0 rounded-lg border bg-white object-cover"
+                />
+              ) : (
+                <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
+                  <UserRound className="size-7" aria-hidden="true" />
+                </span>
+              )}
               <div className="min-w-0 flex-1">
-                <p className="text-lg font-semibold">{resident.full_name}</p>
+                <p className="text-xl font-semibold">{resident.full_name}</p>
                 <p className="text-sm text-muted-foreground">
                   {residentAddress(resident, streets) ||
                     t("records.profile.noAddress")}
@@ -221,7 +236,7 @@ export function ResidentProfileDialog({
               </Badge>
             </div>
             <div
-              className="flex flex-wrap gap-2 border-b pb-3"
+              className="flex gap-1.5 overflow-x-auto rounded-lg bg-muted/50 p-1"
               role="tablist"
               aria-label={t("records.profile.tabsAria")}
             >
@@ -233,7 +248,7 @@ export function ResidentProfileDialog({
                   variant={profileTab === tab.id ? "default" : "ghost"}
                   aria-selected={profileTab === tab.id}
                   onClick={() => onProfileTabChange(tab.id)}
-                  className="min-h-11 rounded-md px-3"
+                  className="min-h-11 shrink-0 rounded-md px-4 sm:min-h-10"
                 >
                   {t(tab.labelKey)}
                 </Button>
@@ -242,34 +257,14 @@ export function ResidentProfileDialog({
 
             {profileTab === "Details" ? (
               <>
-                {resident?.has_photo ? (
-                  <div className="mb-3 flex items-center gap-4 rounded-xl border bg-card p-4">
-                    {photoQuery.data ? (
-                      <img
-                        src={photoQuery.data}
-                        alt={t("records.profile.photoCard.alt", {
-                          name: resident.full_name,
-                        })}
-                        className="h-24 w-20 rounded-md border bg-white object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-24 w-20 items-center justify-center rounded-md bg-muted text-xs text-muted-foreground">
-                        {photoQuery.isLoading
-                          ? t("records.profile.photoCard.loading")
-                          : t("records.profile.photoCard.unavailable")}
-                      </div>
-                    )}
-                    <div>
-                      <p className="font-semibold">
-                        {t("records.profile.photoCard.title")}
-                      </p>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        {t("records.profile.photoCard.description")}
-                      </p>
-                    </div>
-                  </div>
+                {resident?.has_photo && !photoQuery.data ? (
+                  <p className="text-sm text-muted-foreground">
+                    {photoQuery.isLoading
+                      ? t("records.profile.photoCard.loading")
+                      : t("records.profile.photoCard.unavailable")}
+                  </p>
                 ) : null}
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                   {details.map(([label, value]) => (
                     <div key={label} className="rounded-lg border bg-card p-4">
                       <p className="text-sm text-muted-foreground">{label}</p>
@@ -281,7 +276,7 @@ export function ResidentProfileDialog({
             ) : null}
 
             {profileTab === "Family & Sector" ? (
-              <div className="grid gap-3 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <section className="rounded-xl border bg-card p-4 shadow-sm">
                   <UserRound className="size-5 text-brand" aria-hidden="true" />
                   <h3 className="mt-2 font-semibold">
@@ -412,13 +407,18 @@ export function ResidentProfileDialog({
             ) : null}
 
             {onEdit && !archived && profileTab === "Details" ? (
-              <div className="flex justify-end">
-                <Button type="button" variant="outline" onClick={onEdit}>
+              <div className="flex justify-end border-t pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="min-h-11 sm:min-h-9"
+                  onClick={onEdit}
+                >
                   {t("records.profile.edit")}
                 </Button>
               </div>
             ) : null}
-          </>
+          </div>
         ) : null}
       </DialogContent>
     </Dialog>

@@ -25,6 +25,12 @@ import {
   usePagination,
 } from "@/components/Common/TablePagination"
 import { refreshLookups } from "@/components/Issuances/NewIssuance/issuanceApi"
+import {
+  modalBody,
+  modalFooter,
+  modalHeader,
+  modalShell,
+} from "@/components/Common/ModalLayout"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -522,9 +528,9 @@ function OfficialsManagement() {
           if (!mutation.isPending) setFormOpen(open)
         }}
       >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className={`${modalShell} sm:max-w-2xl`}>
+          <DialogHeader className={modalHeader}>
+            <DialogTitle className="text-xl">
               {editingOfficial
                 ? t("admin.officials.form.editTitle")
                 : t("admin.officials.form.addTitle")}
@@ -533,8 +539,8 @@ function OfficialsManagement() {
               {t("admin.officials.form.description")}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4">
-            <label className="flex flex-col gap-2 text-sm font-medium">
+          <div className={`${modalBody} grid gap-4 sm:grid-cols-2`}>
+            <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
               {t("admin.officials.form.fullName")}
               <input
                 value={name}
@@ -543,7 +549,7 @@ function OfficialsManagement() {
                 required
               />
             </label>
-            <label className="flex flex-col gap-2 text-sm font-medium">
+            <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
               {t("admin.officials.form.position")}
               <select
                 value={position}
@@ -578,9 +584,11 @@ function OfficialsManagement() {
                 required
               />
             </label>
-            {formOpen ? dialogError : null}
+            {formOpen ? (
+              <div className="sm:col-span-2 empty:hidden">{dialogError}</div>
+            ) : null}
           </div>
-          <DialogFooter>
+          <DialogFooter className={modalFooter}>
             <Button
               type="button"
               variant="outline"
@@ -612,9 +620,11 @@ function OfficialsManagement() {
           if (!open && !mutation.isPending) setEndTermOfficial(null)
         }}
       >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("admin.officials.endTerm.title")}</DialogTitle>
+        <DialogContent className={`${modalShell} sm:max-w-xl`}>
+          <DialogHeader className={modalHeader}>
+            <DialogTitle className="text-xl">
+              {t("admin.officials.endTerm.title")}
+            </DialogTitle>
             <DialogDescription>
               {endTermOfficial
                 ? t("admin.officials.endTerm.description", {
@@ -623,18 +633,20 @@ function OfficialsManagement() {
                 : t("admin.officials.endTerm.descriptionFallback")}
             </DialogDescription>
           </DialogHeader>
-          <label className="flex flex-col gap-2 text-sm font-medium">
-            {t("admin.officials.endTerm.dateLabel")}
-            <input
-              type="date"
-              value={termEndDate}
-              onChange={(event) => setTermEndDate(event.target.value)}
-              className={formControlClass}
-              required
-            />
-          </label>
-          {endTermOfficial ? dialogError : null}
-          <DialogFooter>
+          <div className={`${modalBody} grid gap-4`}>
+            <label className="flex flex-col gap-2 text-sm font-medium">
+              {t("admin.officials.endTerm.dateLabel")}
+              <input
+                type="date"
+                value={termEndDate}
+                onChange={(event) => setTermEndDate(event.target.value)}
+                className={formControlClass}
+                required
+              />
+            </label>
+            {endTermOfficial ? dialogError : null}
+          </div>
+          <DialogFooter className={modalFooter}>
             <Button
               type="button"
               variant="outline"
@@ -663,43 +675,51 @@ function OfficialsManagement() {
           if (!open) setViewOfficial(null)
         }}
       >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>{t("admin.officials.view.title")}</DialogTitle>
+        <DialogContent className={`${modalShell} sm:max-w-xl`}>
+          <DialogHeader className={modalHeader}>
+            <DialogTitle className="text-xl">
+              {t("admin.officials.view.title")}
+            </DialogTitle>
             <DialogDescription>
               {t("admin.officials.view.description")}
             </DialogDescription>
           </DialogHeader>
           {viewOfficial ? (
-            <div className="grid gap-3 text-sm">
-              <p>
-                <span className="text-muted-foreground">
-                  {t("admin.officials.view.name")}:{" "}
-                </span>
-                {viewOfficial.name}
-              </p>
-              <p>
-                <span className="text-muted-foreground">
-                  {t("admin.officials.view.position")}:{" "}
-                </span>
-                {viewOfficial.position}
-              </p>
-              <p>
-                <span className="text-muted-foreground">
-                  {t("admin.officials.view.term")}:{" "}
-                </span>
-                {formatTermDate(viewOfficial.termStart, noEndDate)} –{" "}
-                {formatTermDate(viewOfficial.termEnd, noEndDate)}
-              </p>
-              <Badge
-                variant="outline"
-                className={statusStyles[viewOfficial.status]}
-              >
-                {statusLabel(viewOfficial.status, t)}
-              </Badge>
+            <div className={`${modalBody} grid gap-3 text-sm sm:grid-cols-2`}>
+              <div className="rounded-lg border bg-card p-4 sm:col-span-2">
+                <p className="text-muted-foreground">
+                  {t("admin.officials.view.name")}
+                </p>
+                <p className="mt-1 text-lg font-semibold">
+                  {viewOfficial.name}
+                </p>
+              </div>
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-muted-foreground">
+                  {t("admin.officials.view.position")}
+                </p>
+                <p className="mt-1 font-semibold">{viewOfficial.position}</p>
+              </div>
+              <div className="rounded-lg border bg-card p-4">
+                <p className="text-muted-foreground">
+                  {t("admin.officials.view.term")}
+                </p>
+                <p className="mt-1 font-semibold">
+                  {formatTermDate(viewOfficial.termStart, noEndDate)} –{" "}
+                  {formatTermDate(viewOfficial.termEnd, noEndDate)}
+                </p>
+              </div>
+              <div>
+                <Badge
+                  variant="outline"
+                  className={statusStyles[viewOfficial.status]}
+                >
+                  {statusLabel(viewOfficial.status, t)}
+                </Badge>
+              </div>
             </div>
           ) : null}
-          <DialogFooter>
+          <DialogFooter className={modalFooter}>
             <Button
               type="button"
               variant="outline"

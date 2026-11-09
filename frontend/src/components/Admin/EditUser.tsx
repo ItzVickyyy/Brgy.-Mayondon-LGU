@@ -9,6 +9,12 @@ import { z } from "zod"
 
 import { type UserPublic, UsersService } from "@/client"
 import { formControlClass } from "@/components/Common/formStyles"
+import {
+  modalBody,
+  modalFooter,
+  modalHeader,
+  modalShell,
+} from "@/components/Common/ModalLayout"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -125,18 +131,23 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
           {t("admin.users.form.editTitle")}
         </DropdownMenuItem>
       )}
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className={`${modalShell} sm:max-w-2xl`}>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)}>
-            <DialogHeader>
-              <DialogTitle>{t("admin.users.form.editTitle")}</DialogTitle>
+          <form
+            className="flex min-h-0 flex-1 flex-col"
+            onSubmit={form.handleSubmit(onSubmit)}
+          >
+            <DialogHeader className={modalHeader}>
+              <DialogTitle className="text-xl">
+                {t("admin.users.form.editTitle")}
+              </DialogTitle>
               <DialogDescription>
                 {t("admin.users.form.editDescription")}
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
+            <div className={`${modalBody} grid gap-4 sm:grid-cols-2`}>
               {!isEditingSelf ? (
-                <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground">
+                <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground sm:col-span-2">
                   {t("admin.users.form.tempNotice")}
                 </p>
               ) : null}
@@ -241,7 +252,7 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                 control={form.control}
                 name="is_active"
                 render={({ field }) => (
-                  <FormItem className="flex items-center gap-3 space-y-0">
+                  <FormItem className="flex min-h-11 items-center gap-3 space-y-0 self-end rounded-md border bg-background px-3">
                     <FormControl>
                       <Checkbox
                         disabled={protectRoleAndStatus}
@@ -255,7 +266,7 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
               />
             </div>
 
-            <DialogFooter>
+            <DialogFooter className={modalFooter}>
               <DialogClose asChild>
                 <Button variant="outline" className="min-h-11" disabled={mutation.isPending}>
                   {t("admin.users.form.cancel")}

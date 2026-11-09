@@ -9,7 +9,7 @@ import {
   IdCard,
   Users,
 } from "lucide-react"
-import { useState } from "react"
+import { type CSSProperties, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { ActivityService, DashboardService } from "@/client"
@@ -46,11 +46,20 @@ const periods: Period[] = [
   "overall",
 ]
 
-// "2026-11" -> "Nov 26"; the year is two digits so a long range still fits.
-function monthLabel(value: string) {
+// "2026-11" -> "Nov". The year is shown once in the chart heading; pass
+// withYear for places that must stay unambiguous (tooltips, screen readers).
+function monthLabel(value: string, withYear = false) {
   const [year, month] = value.split("-").map(Number)
   const name = formatLocaleDate(new Date(year, month - 1, 1), { month: "short" })
-  return `${name} ${String(year).slice(-2)}`
+  return withYear ? `${name} ${year}` : name
+}
+
+// "2026", or "2025 – 2026" when the range crosses a year.
+function yearRange(values: string[]) {
+  if (values.length === 0) return ""
+  const first = values[0].slice(0, 4)
+  const last = values[values.length - 1].slice(0, 4)
+  return first === last ? first : `${first} – ${last}`
 }
 
 // "2026-12-06" is a business date, not a moment: format it without time zones.
@@ -175,6 +184,7 @@ function Dashboard() {
     (best, item) => (best === null || item.count > best.count ? item : best),
     null,
   )
+  const chartYears = yearRange(months.map((item) => item.month))
   const hasOverTimeData = months.length > 0 && monthsTotal > 0
   const types = dashboard?.by_document_type ?? []
   const totalByType = dashboard?.total_issued ?? 0
@@ -331,10 +341,17 @@ function Dashboard() {
             <div className="hidden rounded-lg bg-brand/10 p-2.5 text-brand sm:block">
               <BarChart3 className="size-5" aria-hidden="true" />
             </div>
-            <SectionHeading
-              title={t("dashboard.overTime.title")}
-              description={t("dashboard.overTime.description")}
-            />
+            <div className="min-w-0 flex-1">
+              <SectionHeading
+                title={t("dashboard.overTime.title")}
+                description={t("dashboard.overTime.description")}
+              />
+            </div>
+            {chartYears ? (
+              <span className="shrink-0 rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-sm font-semibold tabular-nums text-brand">
+                {chartYears}
+              </span>
+            ) : null}
           </div>
 
           {hasOverTimeData && peakMonth ? (
@@ -351,7 +368,7 @@ function Dashboard() {
               />
               <OverTimeStat
                 label={t("dashboard.overTime.stats.peak")}
-                value={`${monthLabel(peakMonth.month)} · ${formatLocaleNumber(peakMonth.count)}`}
+                value={`${monthLabel(peakMonth.month, true)} · ${formatLocaleNumber(peakMonth.count)}`}
               />
             </dl>
           ) : null}
@@ -398,19 +415,21 @@ function Dashboard() {
                           />
                         ))}
                         <div className="absolute inset-0 flex items-end gap-2 sm:gap-3">
-                          {months.map((item) => (
+                          {months.map((item, index) => (
                             <div
-                              key={item.month}
-                              title={`${monthLabel(item.month)}: ${formatLocaleNumber(item.count)}`}
+                              key={`${period}-${item.month}`}
+                              title={`${monthLabel(item.month, true)}: ${formatLocaleNumber(item.count)}`}
                               className="group relative flex h-full flex-1 items-end justify-center"
                             >
-                              {/* Every bar shares one color; it only changes on hover. */}
+                              {/* Solid by default; softer on hover. The bar rises
+                                  from the bottom, one after another. */}
                               <div
-                                className="relative w-full max-w-10 rounded-t-md bg-brand/60 transition-colors group-hover:bg-brand"
+                                className="bar-rise relative w-full max-w-10 rounded-t-md bg-brand transition-colors group-hover:bg-brand/60"
                                 style={{
                                   height: `${(item.count / chartTop) * 100}%`,
                                   minHeight: item.count > 0 ? "4px" : "0",
-                                }}
+                                  "--bar-delay": `${index * 60}ms`,
+                                } as CSSProperties}
                               >
                                 <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs tabular-nums text-muted-foreground transition-colors group-hover:text-foreground">
                                   {formatLocaleNumber(item.count)}
@@ -447,7 +466,7 @@ function Dashboard() {
                 <tbody>
                   {months.map((item) => (
                     <tr key={item.month}>
-                      <th scope="row">{monthLabel(item.month)}</th>
+                      <th scope="row">{monthLabel(item.month, true)}</th>
                       <td>{formatLocaleNumber(item.count)}</td>
                     </tr>
                   ))}
@@ -481,22 +500,23 @@ function Dashboard() {
             />
           </div>
           <div className="mt-5 space-y-4">
-            {types.map((item) => (
-              <div key={item.code}>
+            {types.map((item, index) => (
+              <div key={`${period}-${item.code}`}>
                 <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
                   <span className="truncate">
                     {documentTypeLabel(item.code, item.name, t)}
                   </span>
                   <span className="shrink-0 tabular-nums text-muted-foreground">
-                    {item.count}
+                    <AnimatedNumber value={item.count} />
                   </span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full bg-brand"
+                    className="bar-grow h-full rounded-full bg-brand"
                     style={{
                       width: `${totalByType > 0 ? (item.count / totalByType) * 100 : 0}%`,
-                    }}
+                      "--bar-delay": `${index * 80}ms`,
+                    } as CSSProperties}
                   />
                 </div>
               </div>
@@ -511,7 +531,9 @@ function Dashboard() {
             <span className="text-muted-foreground">
               {t("dashboard.byType.total")}
             </span>
-            <span className="font-semibold tabular-nums">{totalByType}</span>
+            <span className="font-semibold tabular-nums">
+              <AnimatedNumber value={totalByType} />
+            </span>
           </div>
         </article>
       </section>

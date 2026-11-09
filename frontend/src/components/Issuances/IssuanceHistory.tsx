@@ -26,6 +26,12 @@ import {
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
 import { RowActions } from "@/components/Common/RowActions"
+import {
+  modalBody,
+  modalFooter,
+  modalHeader,
+  modalShell,
+} from "@/components/Common/ModalLayout"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { SummaryCard } from "@/components/Issuances/IssuanceLayout"
@@ -88,11 +94,24 @@ function manilaToday() {
   return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" })
 }
 
-function DetailRow({ label, value }: { label: string; value?: string | null }) {
+function DetailRow({
+  label,
+  value,
+  wide = false,
+}: {
+  label: string
+  value?: string | null
+  /** Long text (address, remarks, reasons) takes the full width. */
+  wide?: boolean
+}) {
   return (
-    <div className="grid grid-cols-[9rem_1fr] gap-2 py-1.5 text-sm">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="min-w-0 break-words">{value || "—"}</dd>
+    <div
+      className={`rounded-lg border bg-card px-4 py-3 text-sm ${wide ? "sm:col-span-2" : ""}`}
+    >
+      <dt className="text-xs font-medium text-muted-foreground">{label}</dt>
+      <dd className="mt-1 min-w-0 whitespace-pre-line break-words font-medium">
+        {value || "—"}
+      </dd>
     </div>
   )
 }
@@ -123,17 +142,28 @@ function IssuanceDetailsDialog({
 
   return (
     <Dialog open={item !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-lg">
+      <DialogContent className={`${modalShell} sm:max-w-2xl`}>
         {item ? (
           <>
-            <DialogHeader>
-              <DialogTitle>{documentName}</DialogTitle>
+            <DialogHeader className={modalHeader}>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <DialogTitle className="text-xl leading-snug">
+                  {documentName}
+                </DialogTitle>
+                <Badge
+                  variant="outline"
+                  className={statusStyles[statusStyleKey[item.status] ?? ""]}
+                >
+                  {statusLabel(item.status, t)}
+                </Badge>
+              </div>
               <DialogDescription>
                 {item.reference_no ??
                   t("issuances.history.details.draftNotNumbered")}{" "}
                 · {item.resident_name}
               </DialogDescription>
             </DialogHeader>
+            <div className={modalBody}>
             {detailQuery.isLoading ? (
               <LoadingState title={t("issuances.history.details.loading")} />
             ) : detailQuery.isError || !detail ? (
@@ -142,7 +172,7 @@ function IssuanceDetailsDialog({
                 onRetry={() => detailQuery.refetch()}
               />
             ) : (
-              <dl className="divide-y">
+              <dl className="grid gap-3 sm:grid-cols-2">
                 <DetailRow
                   label={t("issuances.history.details.status")}
                   value={statusLabel(detail.status, t)}
@@ -166,10 +196,12 @@ function IssuanceDetailsDialog({
                 <DetailRow
                   label={t("issuances.history.details.remarks")}
                   value={detail.remarks}
+                  wide
                 />
                 <DetailRow
                   label={t("issuances.history.details.address")}
                   value={detail.snapshot?.address_line}
+                  wide
                 />
                 <DetailRow
                   label={t("issuances.history.details.receiptNo")}
@@ -197,17 +229,20 @@ function IssuanceDetailsDialog({
                   <DetailRow
                     label={t("issuances.history.details.correctionReason")}
                     value={detail.correction_reason}
+                    wide
                   />
                 ) : null}
                 {detail.void_reason ? (
                   <DetailRow
                     label={t("issuances.history.details.voidReason")}
                     value={detail.void_reason}
+                    wide
                   />
                 ) : null}
               </dl>
             )}
-            <DialogFooter>
+            </div>
+            <DialogFooter className={modalFooter}>
               <Button type="button" variant="outline" onClick={onClose}>
                 {t("issuances.history.details.close")}
               </Button>

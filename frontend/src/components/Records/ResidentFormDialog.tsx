@@ -1,3 +1,4 @@
+import { UserRound } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -8,6 +9,13 @@ import {
   ResidentsService,
 } from "@/client"
 import { formControlClass } from "@/components/Common/formStyles"
+import {
+  ModalSection,
+  modalBody,
+  modalFooter,
+  modalHeader,
+  modalShell,
+} from "@/components/Common/ModalLayout"
 import { uploadResidentPhoto } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { Button } from "@/components/ui/button"
 import {
@@ -218,8 +226,8 @@ export function ResidentFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] max-w-3xl overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className={`${modalShell} sm:max-w-4xl`}>
+        <DialogHeader className={modalHeader}>
           <DialogTitle className="text-xl">
             {resident
               ? t("records.form.editTitle")
@@ -229,276 +237,303 @@ export function ResidentFormDialog({
         </DialogHeader>
 
         <form
-          className="grid gap-3 sm:grid-cols-2"
+          className="flex min-h-0 flex-1 flex-col"
           onSubmit={(event) => {
             event.preventDefault()
             if (canSave) void submit(false)
           }}
         >
-          <label className={labelClass}>
-            {t("records.form.firstName")}
-            <input
-              value={form.first_name}
-              onChange={(event) => set("first_name", event.target.value)}
-              className={formControlClass}
-              required
-            />
-          </label>
-          <label className={labelClass}>
-            {t("records.form.middleName")}
-            <input
-              value={form.middle_name}
-              onChange={(event) => set("middle_name", event.target.value)}
-              className={formControlClass}
-            />
-          </label>
-          <label className={labelClass}>
-            {t("records.form.lastName")}
-            <input
-              value={form.last_name}
-              onChange={(event) => set("last_name", event.target.value)}
-              className={formControlClass}
-              required
-            />
-          </label>
-          <label className={labelClass}>
-            {t("records.form.suffix")}
-            <select
-              value={form.suffix}
-              onChange={(event) => set("suffix", event.target.value)}
-              className={formControlClass}
+          <div className={`${modalBody} grid gap-7`}>
+            <ModalSection
+              title={t("records.form.sections.personal")}
+              className="sm:grid-cols-2 lg:grid-cols-3"
             >
-              <option value="">{t("records.form.suffixNone")}</option>
-              {suffixes.map((item) => (
-                <option key={item}>{item}</option>
-              ))}
-            </select>
-          </label>
-          <label className={labelClass}>
-            {t("records.form.birthdate")}
-            <input
-              type="date"
-              value={form.birthdate}
-              onChange={(event) => set("birthdate", event.target.value)}
-              className={formControlClass}
-            />
-          </label>
-          <div className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
-            <label htmlFor="resident-photo">
-              {t("records.form.photo.label")}
-            </label>
-            <p className="text-xs font-normal text-muted-foreground">
-              {resident?.has_photo
-                ? t("records.form.photo.onFile")
-                : t("records.form.photo.optional")}
-            </p>
-            <input
-              id="resident-photo"
-              type="file"
-              accept="image/png,image/jpeg,image/webp"
-              className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm"
-              onChange={(event) => {
-                const file = event.target.files?.[0]
-                if (!file) return
-                setPhotoDataUrl("")
-                setError("")
-                if (file.size > 10 * 1024 * 1024) {
-                  setError(t("records.form.photo.tooLarge"))
-                  event.target.value = ""
-                  return
-                }
-                const reader = new FileReader()
-                reader.onload = () =>
-                  setPhotoDataUrl(String(reader.result ?? ""))
-                reader.onerror = () =>
-                  setError(t("records.form.photo.unreadable"))
-                reader.readAsDataURL(file)
-              }}
-            />
-            {photoDataUrl ? (
-              <img
-                src={photoDataUrl}
-                alt={t("records.form.photo.previewAlt")}
-                className="h-28 w-24 rounded-md border bg-white object-cover"
-              />
-            ) : null}
-          </div>
+              <label className={labelClass}>
+                {t("records.form.firstName")}
+                <input
+                  value={form.first_name}
+                  onChange={(event) => set("first_name", event.target.value)}
+                  className={formControlClass}
+                  required
+                />
+              </label>
+              <label className={labelClass}>
+                {t("records.form.middleName")}
+                <input
+                  value={form.middle_name}
+                  onChange={(event) => set("middle_name", event.target.value)}
+                  className={formControlClass}
+                />
+              </label>
+              <label className={labelClass}>
+                {t("records.form.lastName")}
+                <input
+                  value={form.last_name}
+                  onChange={(event) => set("last_name", event.target.value)}
+                  className={formControlClass}
+                  required
+                />
+              </label>
+              <label className={labelClass}>
+                {t("records.form.suffix")}
+                <select
+                  value={form.suffix}
+                  onChange={(event) => set("suffix", event.target.value)}
+                  className={formControlClass}
+                >
+                  <option value="">{t("records.form.suffixNone")}</option>
+                  {suffixes.map((item) => (
+                    <option key={item}>{item}</option>
+                  ))}
+                </select>
+              </label>
+              <label className={labelClass}>
+                {t("records.form.birthdate")}
+                <input
+                  type="date"
+                  value={form.birthdate}
+                  onChange={(event) => set("birthdate", event.target.value)}
+                  className={formControlClass}
+                />
+              </label>
+              <label className={labelClass}>
+                {t("records.form.birthPlace")}
+                <input
+                  value={form.birth_place}
+                  onChange={(event) => set("birth_place", event.target.value)}
+                  className={formControlClass}
+                />
+              </label>
+              <label className={labelClass}>
+                {t("records.form.sex")}
+                <select
+                  value={form.sex}
+                  onChange={(event) => set("sex", event.target.value)}
+                  className={formControlClass}
+                >
+                  <option value="">{t("records.form.notSet")}</option>
+                  <option value="Male">{t("records.labels.sex.Male")}</option>
+                  <option value="Female">
+                    {t("records.labels.sex.Female")}
+                  </option>
+                </select>
+              </label>
+              <label className={labelClass}>
+                {t("records.form.civilStatus")}
+                <select
+                  value={form.civil_status}
+                  onChange={(event) => set("civil_status", event.target.value)}
+                  className={formControlClass}
+                >
+                  <option value="">{t("records.form.notSet")}</option>
+                  {civilStatuses.map((item) => (
+                    <option key={item} value={item}>
+                      {civilStatusLabel(item, t)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </ModalSection>
 
-          <label className={labelClass}>
-            {t("records.form.birthPlace")}
-            <input
-              value={form.birth_place}
-              onChange={(event) => set("birth_place", event.target.value)}
-              className={formControlClass}
-            />
-          </label>
-          <label className={labelClass}>
-            {t("records.form.sex")}
-            <select
-              value={form.sex}
-              onChange={(event) => set("sex", event.target.value)}
-              className={formControlClass}
-            >
-              <option value="">{t("records.form.notSet")}</option>
-              <option value="Male">{t("records.labels.sex.Male")}</option>
-              <option value="Female">{t("records.labels.sex.Female")}</option>
-            </select>
-          </label>
-          <label className={labelClass}>
-            {t("records.form.civilStatus")}
-            <select
-              value={form.civil_status}
-              onChange={(event) => set("civil_status", event.target.value)}
-              className={formControlClass}
-            >
-              <option value="">{t("records.form.notSet")}</option>
-              {civilStatuses.map((item) => (
-                <option key={item} value={item}>
-                  {civilStatusLabel(item, t)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={labelClass}>
-            {t("records.form.houseNumber")}
-            <input
-              value={form.house_number}
-              onChange={(event) => set("house_number", event.target.value)}
-              className={formControlClass}
-            />
-          </label>
-          <label className={labelClass}>
-            {t("records.form.street")}
-            <select
-              value={form.street_id}
-              onChange={(event) => set("street_id", event.target.value)}
-              className={formControlClass}
-            >
-              <option value="">
-                {streets.length === 0
-                  ? t("records.form.noStreets")
-                  : t("records.form.notSet")}
-              </option>
-              {streets.map((street) => (
-                <option key={street.id} value={street.id}>
-                  {street.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={labelClass}>
-            {t("records.form.purok")}
-            <input
-              type="number"
-              min={1}
-              value={form.purok}
-              onChange={(event) => set("purok", event.target.value)}
-              className={formControlClass}
-            />
-          </label>
-          <label className={labelClass}>
-            {t("records.form.residentSince")}
-            <input
-              type="number"
-              min={1900}
-              value={form.resident_since_birth ? "" : form.resident_since_year}
-              disabled={form.resident_since_birth}
-              onChange={(event) =>
-                set("resident_since_year", event.target.value)
-              }
-              className={formControlClass}
-            />
-            <span className="flex items-center gap-2 font-normal">
-              <input
-                type="checkbox"
-                checked={form.resident_since_birth}
-                onChange={(event) =>
-                  set("resident_since_birth", event.target.checked)
-                }
-              />
-              {t("records.form.sinceBirth")}
-            </span>
-          </label>
-          <label className={labelClass}>
-            {t("records.form.residentType")}
-            <select
-              value={form.resident_type}
-              onChange={(event) => set("resident_type", event.target.value)}
-              className={formControlClass}
-            >
-              <option value="">{t("records.form.notSet")}</option>
-              {residentTypes.map((item) => (
-                <option key={item} value={item}>
-                  {residentTypeLabel(item, t)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className={labelClass}>
-            {t("records.form.voter")}
-            <select
-              value={form.voter_registration}
-              onChange={(event) =>
-                set("voter_registration", event.target.value)
-              }
-              className={formControlClass}
-            >
-              <option value="">{t("records.form.notSet")}</option>
-              <option value="registered">{t("records.form.registered")}</option>
-              <option value="unregistered">
-                {t("records.form.unregistered")}
-              </option>
-            </select>
-          </label>
+            <ModalSection title={t("records.form.photo.label")}>
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                <div className="flex h-32 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-dashed bg-muted/30">
+                  {photoDataUrl ? (
+                    <img
+                      src={photoDataUrl}
+                      alt={t("records.form.photo.previewAlt")}
+                      className="size-full bg-white object-cover"
+                    />
+                  ) : (
+                    <UserRound
+                      className="size-9 text-muted-foreground/60"
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
+                <div className="flex min-w-0 flex-1 flex-col gap-2 text-sm font-medium">
+                  <label htmlFor="resident-photo" className="sr-only">
+                    {t("records.form.photo.label")}
+                  </label>
+                  <p className="text-xs font-normal text-muted-foreground">
+                    {resident?.has_photo
+                      ? t("records.form.photo.onFile")
+                      : t("records.form.photo.optional")}
+                  </p>
+                  <input
+                    id="resident-photo"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    className="block w-full rounded-md border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-muted file:px-3 file:py-1.5 file:text-sm"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0]
+                      if (!file) return
+                      setPhotoDataUrl("")
+                      setError("")
+                      if (file.size > 10 * 1024 * 1024) {
+                        setError(t("records.form.photo.tooLarge"))
+                        event.target.value = ""
+                        return
+                      }
+                      const reader = new FileReader()
+                      reader.onload = () =>
+                        setPhotoDataUrl(String(reader.result ?? ""))
+                      reader.onerror = () =>
+                        setError(t("records.form.photo.unreadable"))
+                      reader.readAsDataURL(file)
+                    }}
+                  />
+                </div>
+              </div>
+            </ModalSection>
 
-          <fieldset className="grid gap-3 sm:col-span-2 sm:grid-cols-3">
-            <legend className="mb-2 text-sm font-medium">
-              {t("records.form.emergency.legend")}
-            </legend>
-            <label className={labelClass}>
-              {t("records.form.emergency.name")}
-              <input
-                value={form.emergency_contact_name}
-                onChange={(event) =>
-                  set("emergency_contact_name", event.target.value)
-                }
-                className={formControlClass}
-              />
-            </label>
-            <label className={labelClass}>
-              {t("records.form.emergency.address")}
-              <input
-                value={form.emergency_contact_address}
-                onChange={(event) =>
-                  set("emergency_contact_address", event.target.value)
-                }
-                className={formControlClass}
-              />
-            </label>
-            <label className={labelClass}>
-              {t("records.form.emergency.phone")}
-              <input
-                value={form.emergency_contact_phone}
-                onChange={(event) =>
-                  set("emergency_contact_phone", event.target.value)
-                }
-                className={formControlClass}
-              />
-            </label>
-          </fieldset>
+            <ModalSection
+              title={t("records.form.sections.address")}
+              className="sm:grid-cols-2 lg:grid-cols-3"
+            >
+              <label className={labelClass}>
+                {t("records.form.houseNumber")}
+                <input
+                  value={form.house_number}
+                  onChange={(event) => set("house_number", event.target.value)}
+                  className={formControlClass}
+                />
+              </label>
+              <label className={labelClass}>
+                {t("records.form.street")}
+                <select
+                  value={form.street_id}
+                  onChange={(event) => set("street_id", event.target.value)}
+                  className={formControlClass}
+                >
+                  <option value="">
+                    {streets.length === 0
+                      ? t("records.form.noStreets")
+                      : t("records.form.notSet")}
+                  </option>
+                  {streets.map((street) => (
+                    <option key={street.id} value={street.id}>
+                      {street.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={labelClass}>
+                {t("records.form.purok")}
+                <input
+                  type="number"
+                  min={1}
+                  value={form.purok}
+                  onChange={(event) => set("purok", event.target.value)}
+                  className={formControlClass}
+                />
+              </label>
+              <label className={labelClass}>
+                {t("records.form.residentSince")}
+                <input
+                  type="number"
+                  min={1900}
+                  value={form.resident_since_birth ? "" : form.resident_since_year}
+                  disabled={form.resident_since_birth}
+                  onChange={(event) =>
+                    set("resident_since_year", event.target.value)
+                  }
+                  className={formControlClass}
+                />
+                <span className="flex min-h-6 items-center gap-2 font-normal">
+                  <input
+                    type="checkbox"
+                    checked={form.resident_since_birth}
+                    onChange={(event) =>
+                      set("resident_since_birth", event.target.checked)
+                    }
+                  />
+                  {t("records.form.sinceBirth")}
+                </span>
+              </label>
+              <label className={labelClass}>
+                {t("records.form.residentType")}
+                <select
+                  value={form.resident_type}
+                  onChange={(event) => set("resident_type", event.target.value)}
+                  className={formControlClass}
+                >
+                  <option value="">{t("records.form.notSet")}</option>
+                  {residentTypes.map((item) => (
+                    <option key={item} value={item}>
+                      {residentTypeLabel(item, t)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className={labelClass}>
+                {t("records.form.voter")}
+                <select
+                  value={form.voter_registration}
+                  onChange={(event) =>
+                    set("voter_registration", event.target.value)
+                  }
+                  className={formControlClass}
+                >
+                  <option value="">{t("records.form.notSet")}</option>
+                  <option value="registered">
+                    {t("records.form.registered")}
+                  </option>
+                  <option value="unregistered">
+                    {t("records.form.unregistered")}
+                  </option>
+                </select>
+              </label>
+            </ModalSection>
 
-          <fieldset className="sm:col-span-2">
-            <legend className="mb-2 text-sm font-medium">
-              {t("records.form.sectors")}
-            </legend>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <ModalSection
+              title={t("records.form.emergency.legend")}
+              className="sm:grid-cols-2 lg:grid-cols-3"
+            >
+              <label className={labelClass}>
+                {t("records.form.emergency.name")}
+                <input
+                  value={form.emergency_contact_name}
+                  onChange={(event) =>
+                    set("emergency_contact_name", event.target.value)
+                  }
+                  className={formControlClass}
+                />
+              </label>
+              <label className={labelClass}>
+                {t("records.form.emergency.address")}
+                <input
+                  value={form.emergency_contact_address}
+                  onChange={(event) =>
+                    set("emergency_contact_address", event.target.value)
+                  }
+                  className={formControlClass}
+                />
+              </label>
+              <label className={labelClass}>
+                {t("records.form.emergency.phone")}
+                <input
+                  value={form.emergency_contact_phone}
+                  onChange={(event) =>
+                    set("emergency_contact_phone", event.target.value)
+                  }
+                  className={formControlClass}
+                />
+              </label>
+            </ModalSection>
+
+            <ModalSection
+              title={t("records.form.sectors")}
+              className="sm:grid-cols-2 lg:grid-cols-3"
+            >
               {sectors.map((sector) => (
                 <label
                   key={sector.id}
-                  className="flex items-center gap-2 text-sm"
+                  className="flex min-h-11 cursor-pointer items-center gap-3 rounded-md border bg-background px-3 text-sm transition-colors hover:border-ring/50 hover:bg-muted/40 has-[:checked]:border-brand/50 has-[:checked]:bg-brand/10"
                 >
                   <input
                     type="checkbox"
+                    className="size-4"
                     checked={form.sector_ids.includes(sector.id)}
                     onChange={(event) =>
                       set(
@@ -512,42 +547,49 @@ export function ResidentFormDialog({
                   {sector.name}
                 </label>
               ))}
-            </div>
-          </fieldset>
+            </ModalSection>
 
-          {duplicate ? (
-            <div
-              role="alert"
-              className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 sm:col-span-2 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
-            >
-              <p className="font-medium">{t("records.form.duplicate.title")}</p>
-              <p className="mt-1">{t("records.form.duplicate.description")}</p>
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-3"
-                disabled={saving}
-                onClick={() => void submit(true)}
+            {duplicate ? (
+              <div
+                role="alert"
+                className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200"
               >
-                {t("records.form.duplicate.saveAnyway")}
-              </Button>
-            </div>
-          ) : null}
-          {error ? (
-            <p role="alert" className="text-sm text-destructive sm:col-span-2">
-              {error}
-            </p>
-          ) : null}
+                <p className="font-medium">
+                  {t("records.form.duplicate.title")}
+                </p>
+                <p className="mt-1">{t("records.form.duplicate.description")}</p>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="mt-3"
+                  disabled={saving}
+                  onClick={() => void submit(true)}
+                >
+                  {t("records.form.duplicate.saveAnyway")}
+                </Button>
+              </div>
+            ) : null}
+            {error ? (
+              <p role="alert" className="text-sm text-destructive">
+                {error}
+              </p>
+            ) : null}
+          </div>
 
-          <DialogFooter className="sm:col-span-2">
+          <DialogFooter className={modalFooter}>
             <Button
               type="button"
               variant="outline"
+              className="min-h-11 sm:min-h-9"
               onClick={() => onOpenChange(false)}
             >
               {t("records.form.cancel")}
             </Button>
-            <Button type="submit" disabled={!canSave}>
+            <Button
+              type="submit"
+              className="min-h-11 sm:min-h-9"
+              disabled={!canSave}
+            >
               {saving
                 ? t("records.form.saving")
                 : resident

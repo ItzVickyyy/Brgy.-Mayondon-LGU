@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react"
 
+import { AnimatedNumber } from "@/components/Common/AnimatedNumber"
+
 type StatCardProps = {
   icon: LucideIcon
   label: string
@@ -19,7 +21,13 @@ export function StatCard({
         <div className="min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{label}</p>
           <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">
-            {value}
+            {typeof value === "number" ? (
+              <AnimatedNumber value={value} />
+            ) : /^\d+$/.test(value) ? (
+              <AnimatedNumber value={Number(value)} />
+            ) : (
+              value
+            )}
           </p>
         </div>
         <div className="rounded-lg bg-brand/10 p-2.5 text-brand">

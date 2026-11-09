@@ -157,6 +157,21 @@
   }
 }
 
+/* Chart bars rise from the baseline and progress bars fill from the left.
+   Only the start is given, so each animation ends at the bar's own size. */
+@keyframes bar-rise {
+  from {
+    height: 0;
+    min-height: 0;
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    width: 0;
+  }
+}
+
 @keyframes shimmer {
   to {
     transform: translateX(100%);
@@ -168,6 +183,15 @@
      transform is left behind to trap fixed-position children afterwards. */
   .page-enter {
     animation: page-enter 200ms ease-out backwards;
+  }
+
+  .bar-rise {
+    animation: bar-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: var(--bar-delay, 0ms);
+  }
+  .bar-grow {
+    animation: bar-grow 800ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+    animation-delay: var(--bar-delay, 0ms);
   }
 
   /* Opt-in hover lift for cards that are clickable (links and buttons). */

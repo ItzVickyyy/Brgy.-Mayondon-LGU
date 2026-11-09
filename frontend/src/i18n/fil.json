@@ -571,6 +571,10 @@
       "voter": "Rehistro bilang botante",
       "registered": "Rehistrado",
       "unregistered": "Hindi rehistrado",
+      "sections": {
+        "personal": "Personal na impormasyon",
+        "address": "Tirahan at paninirahan"
+      },
       "emergency": {
         "legend": "Contact sa oras ng emergency",
         "name": "Pangalan",

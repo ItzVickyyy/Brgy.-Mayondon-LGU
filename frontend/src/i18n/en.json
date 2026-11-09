@@ -571,6 +571,10 @@
       "voter": "Voter registration",
       "registered": "Registered",
       "unregistered": "Unregistered",
+      "sections": {
+        "personal": "Personal information",
+        "address": "Address and residency"
+      },
       "emergency": {
         "legend": "Emergency contact",
         "name": "Name",
