@@ -1,4 +1,5 @@
 import { Appearance } from "@/components/Common/Appearance"
+import { FullscreenButton } from "@/components/Common/FullscreenButton"
 import { Logo } from "@/components/Common/Logo"
 import { Footer } from "./Footer"
 
@@ -9,7 +10,8 @@ interface AuthLayoutProps {
 export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="relative flex min-h-svh flex-col overflow-hidden bg-gradient-to-b from-brand/5 to-background to-40%">
-      <div className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
+      <div className="absolute right-4 top-4 z-10 flex items-center gap-2 sm:right-6 sm:top-6">
+        <FullscreenButton />
         <Appearance />
       </div>
 
