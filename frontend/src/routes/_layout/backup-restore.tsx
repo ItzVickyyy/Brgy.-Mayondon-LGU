@@ -396,7 +396,7 @@ function BackupRestore() {
                     key={id}
                     className={
                       id === "actions"
-                        ? "px-4 py-3 text-right font-medium sm:px-5"
+                        ? "sticky right-0 bg-muted px-4 py-3 text-right font-medium sm:px-5"
                         : "px-4 py-3 align-middle font-medium sm:px-5"
                     }
                   >
@@ -463,7 +463,7 @@ function BackupRestore() {
                         ) : null}
                       </div>
                     </td>
-                    <td className="px-4 py-3 align-middle sm:px-5">
+                    <td className="sticky right-0 bg-card px-4 py-3 align-middle sm:px-5 max-2xl:shadow-[-6px_0_6px_-6px_rgba(0,0,0,0.25)]">
                       <RowActions
                         name={name}
                         isAdmin

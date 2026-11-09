@@ -223,21 +223,21 @@ export function ResidentProfileDialog({
           <DialogTitle className="text-xl">
             {t("records.profile.title")}
           </DialogTitle>
-          <DialogDescription className="max-sm:sr-only">
+          <DialogDescription className="max-sm:sr-only [@media(max-height:700px)]:sr-only">
             {t("records.profile.description")}
           </DialogDescription>
         </DialogHeader>
         {resident ? (
           <>
             <div className="flex shrink-0 flex-col gap-3 border-b px-5 py-3 sm:gap-4 sm:px-6 sm:py-4">
-            <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-muted/20 p-3 sm:flex-nowrap sm:gap-4 sm:p-5">
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-muted/20 p-3 sm:flex-nowrap sm:gap-4 sm:p-5 [@media(max-height:700px)]:sm:p-3">
               {resident.has_photo && photoQuery.data ? (
                 <img
                   src={photoQuery.data}
                   alt={t("records.profile.photoCard.alt", {
                     name: resident.full_name,
                   })}
-                  className="h-20 w-16 shrink-0 rounded-lg border bg-white object-cover sm:h-28 sm:w-24"
+                  className="h-20 w-16 shrink-0 rounded-lg border bg-white object-cover sm:h-28 sm:w-24 [@media(max-height:700px)]:sm:h-20 [@media(max-height:700px)]:sm:w-16"
                 />
               ) : (
                 <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">

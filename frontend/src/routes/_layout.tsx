@@ -128,9 +128,9 @@ function Layout() {
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <SidebarTrigger className="-ml-1 shrink-0 text-muted-foreground" />
             <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
-              <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+              <span className="inline-flex min-w-0 max-w-full items-center gap-1.5 sm:whitespace-nowrap">
                 <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
-                <span>{formattedDate}</span>
+                <span className="min-w-0 leading-tight">{formattedDate}</span>
               </span>
               <span className="hidden items-center gap-1.5 whitespace-nowrap tabular-nums sm:inline-flex">
                 <Clock3 className="size-4 shrink-0" aria-hidden="true" />

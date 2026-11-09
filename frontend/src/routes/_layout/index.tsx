@@ -491,24 +491,28 @@ function Dashboard() {
                 </div>
               </div>
 
-              {/* The chart above is visual only; this table carries the same data. */}
-              <table className="sr-only">
-                <caption>{t("dashboard.overTime.title")}</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">{t("dashboard.overTime.table.month")}</th>
-                    <th scope="col">{t("dashboard.overTime.table.count")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {months.map((item) => (
-                    <tr key={item.month}>
-                      <th scope="row">{monthLabel(item.month, true)}</th>
-                      <td>{formatLocaleNumber(item.count)}</td>
+              {/* The chart above is visual only; this table carries the same data.
+                  A table ignores the 1px width of sr-only and stretched the page
+                  sideways in Filipino, so the clipping box is a div around it. */}
+              <div className="sr-only">
+                <table>
+                  <caption>{t("dashboard.overTime.title")}</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">{t("dashboard.overTime.table.month")}</th>
+                      <th scope="col">{t("dashboard.overTime.table.count")}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {months.map((item) => (
+                      <tr key={item.month}>
+                        <th scope="row">{monthLabel(item.month, true)}</th>
+                        <td>{formatLocaleNumber(item.count)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </>
           ) : null}
 
