@@ -490,8 +490,8 @@ export function IssuanceHistory({
       ) : null}
 
       <section className="print:hidden overflow-hidden rounded-xl border bg-card shadow-sm">
-        <div className="flex flex-col gap-4 border-b p-4 sm:p-5">
-          <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col border-b">
+          <div className="flex items-center justify-between gap-3 p-4 sm:p-5">
             <div>
               <h2 className="font-semibold tracking-tight">
                 {t("issuances.history.title")}
@@ -512,7 +512,10 @@ export function IssuanceHistory({
               </Button>
             ) : null}
           </div>
-          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[2fr_1.4fr_1fr]">
+          <div className="flex flex-col gap-3 border-t bg-muted/30 p-4 sm:px-5">
+          {/* One row on wide screens: search and the two dropdowns flex, the
+              two dates keep a fixed width so they never wrap onto a second row. */}
+          <div className="grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1.2fr)_minmax(0,0.9fr)_9.75rem_9.75rem]">
             <label
               className={`${filterLabelClass} sm:col-span-2 xl:col-span-1`}
             >
@@ -587,10 +590,11 @@ export function IssuanceHistory({
             </label>
           </div>
           {dateRangeInvalid ? (
-            <p role="alert" className="mt-2 text-sm text-destructive">
+            <p role="alert" className="text-sm text-destructive">
               {t("issuances.history.dateRangeInvalid")}
             </p>
           ) : null}
+          </div>
         </div>
 
         {dateRangeInvalid ? (
