@@ -394,7 +394,7 @@ function ActivityLog() {
                             "—"
                           )}
                         </td>
-                        <td className="sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle sm:px-5 max-2xl:shadow-[-6px_0_6px_-6px_rgba(0,0,0,0.25)]">
+                        <td className="sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle sm:px-5 sticky-edge">
                           <Badge
                             variant="outline"
                             className={

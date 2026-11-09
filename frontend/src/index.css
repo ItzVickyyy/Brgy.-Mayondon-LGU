@@ -264,6 +264,33 @@ tr:focus-within > .row-hover-cell {
   background-color: color-mix(in oklab, var(--card), var(--muted) 30%);
 }
 
+/* Left-edge shadow on a sticky Actions / Outcome cell, only while its table
+   really scrolls sideways and is not scrolled to the end. A scroll timeline is
+   inactive when nothing overflows, so wide screens get no stray edge. Browsers
+   without scroll timelines keep the old behaviour (shadow below the 2xl width). */
+@keyframes sticky-edge-shadow {
+  0%,
+  99% {
+    box-shadow: -6px 0 6px -6px rgba(0, 0, 0, 0.25);
+  }
+  100% {
+    box-shadow: none;
+  }
+}
+@supports (animation-timeline: scroll()) {
+  .sticky-edge {
+    animation: sticky-edge-shadow linear both;
+    animation-timeline: scroll(nearest x);
+  }
+}
+@supports not (animation-timeline: scroll()) {
+  @media (max-width: 1535px) {
+    .sticky-edge {
+      box-shadow: -6px 0 6px -6px rgba(0, 0, 0, 0.25);
+    }
+  }
+}
+
 /* Respect the system "reduce motion" setting everywhere; the loading spinner
    keeps turning so people can still tell something is happening. */
 @media (prefers-reduced-motion: reduce) {

@@ -286,7 +286,12 @@ export function ResidentProfileDialog({
               role="tablist"
               aria-label={t("records.profile.tabsAria")}
               ref={(el) => {
-                if (el) updateTabEdges(el)
+                if (!el) return
+                updateTabEdges(el)
+                // Also follow window resize and phone rotation, not just scroll.
+                const observer = new ResizeObserver(() => updateTabEdges(el))
+                observer.observe(el)
+                return () => observer.disconnect()
               }}
               onScroll={(event) => updateTabEdges(event.currentTarget)}
               style={tabFade(tabEdges.left, tabEdges.right)}

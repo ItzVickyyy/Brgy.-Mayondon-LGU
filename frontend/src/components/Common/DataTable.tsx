@@ -84,7 +84,7 @@ export function DataTable<TData extends RowData>({
                     key={cell.id}
                     className={
                       cell.column.id === "actions"
-                        ? "sticky right-0 bg-card row-hover-cell max-2xl:shadow-[-6px_0_6px_-6px_rgba(0,0,0,0.25)]"
+                        ? "sticky right-0 bg-card row-hover-cell sticky-edge"
                         : undefined
                     }
                   >
