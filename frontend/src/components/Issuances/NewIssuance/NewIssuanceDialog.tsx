@@ -124,6 +124,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const draftIdRef = useRef<string | null>(null)
   const restoredDraftRef = useRef("")
   const correctionDraftRef = useRef(false)
+  const [isCorrection, setIsCorrection] = useState(false)
   const lastSavedRef = useRef("")
   const saveChain = useRef<Promise<unknown>>(Promise.resolve())
   const autoSavePausedRef = useRef(false)
@@ -226,6 +227,23 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setDuplicate(null)
     setFormError("")
   }
+
+  // One-per-resident documents: tell staff right away, before the whole form is filled in.
+  useEffect(() => {
+    if (!selectedResident || !config.onePerResident || correctionDraftRef.current || successRecord) return
+    let cancelled = false
+    issuanceApi
+      .checkIssuance(selectedResident.id, documentType)
+      .then((check) => {
+        if (!cancelled && check.existingIssued) setDuplicate(check.existingIssued)
+      })
+      .catch(() => {
+        // Pressing Issue checks again and reports any problem.
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [selectedResident?.id, documentType, config.onePerResident, successRecord])
 
   // Opened from another page (for example an ID row in Records Management): select the resident and document type once per open.
   const appliedInitialRef = useRef("")
@@ -376,6 +394,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       {field.type === "multiselect" ? <span id={`${fieldId}-label`}>{labelText}</span> : <label htmlFor={fieldId}>{labelText}</label>}
       {control}
       {messageNode}
+      {field.type === "multiselect" && field.maxSelected ? <span className="text-xs font-normal text-muted-foreground">{t("issuances.new.detailsStep.chooseUpTo", { count: field.maxSelected })}</span> : null}
       {field.help ? <span className="text-xs font-normal text-muted-foreground">{fieldHelp(field.help, t)}</span> : null}
     </div>
   }
@@ -472,6 +491,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       setValidUntilEdited(true)
       draftIdRef.current = record.id
       correctionDraftRef.current = Boolean(record.correctsIssuanceId)
+      setIsCorrection(Boolean(record.correctsIssuanceId))
       lastSavedRef.current = ""
       setAutoSave({ state: "saved", at: new Date() })
       setSaving(false)
@@ -674,6 +694,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     draftIdRef.current = null
     restoredDraftRef.current = ""
     correctionDraftRef.current = false
+    setIsCorrection(false)
     lastSavedRef.current = ""
     saveChain.current = Promise.resolve()
     setAutoSave({ state: "idle" })
@@ -982,7 +1003,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_368px]">
           <div className="min-h-0 space-y-4 overflow-y-auto bg-muted/30 px-4 py-4 sm:px-5">
             <IssuanceSection id="issuance-step-document" step={1} title={t("issuances.new.documentStep.title")} done>
-              <DocumentTypePicker value={documentType} onChange={changeDocumentType} />
+              {isCorrection ? <p role="status" className="mb-3 rounded-md border border-amber-500/50 bg-amber-500/10 p-3 text-sm">{t("issuances.new.correctionBanner")}</p> : null}
+              <DocumentTypePicker value={documentType} onChange={changeDocumentType} disabled={isCorrection} />
               <div className="flex flex-wrap items-end gap-x-6 gap-y-2 border-t pt-4">
                 <div className={cn(fieldLabelClass, "w-full sm:w-64")}><label htmlFor="issuance-date">{t("issuances.new.documentStep.dateOnDocument")}</label>
                   <DateField id="issuance-date" value={issueDate} onChange={(nextDate) => { form.setValue("issueDate", nextDate, { shouldDirty: true }); if (documentType === "BARANGAY_ID" && !validUntilEdited && nextDate) { const validDate = new Date(`${nextDate}T00:00:00`); validDate.setFullYear(validDate.getFullYear() + 1); setDetail("validUntil", localIsoDate(validDate)) } }} />
@@ -996,7 +1018,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
             </IssuanceSection>
 
             <IssuanceSection id="issuance-step-resident" step={2} title={t("issuances.new.resident.title")} description={selectedResident && !editingResident ? t("issuances.new.resident.descriptionChosen") : editingResident ? t("issuances.new.resident.descriptionEditing") : t("issuances.new.resident.descriptionSearch")} done={residentDone}>
-              {selectedResident && !editingResident ? <div className="flex items-start justify-between gap-3 rounded-lg border border-emerald-600/40 bg-emerald-500/5 p-4">
+              {selectedResident && !editingResident ? <div className="flex flex-col items-stretch gap-3 rounded-lg border border-emerald-600/40 bg-emerald-500/5 p-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="flex min-w-0 items-start gap-3">
                   <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
                   <div className="min-w-0">
@@ -1005,7 +1027,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                     <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? t("issuances.new.resident.yearsOld", { age: calculateAge(selectedResident.birthdate, issueDate) }) : t("issuances.new.resident.birthdateNotRecorded")} · {selectedResident.civilStatus ? civilStatusLabel(selectedResident.civilStatus, t) : t("issuances.new.resident.civilStatusNotRecorded")}</p>
                   </div>
                 </div>
-                <div className="flex shrink-0 flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => setChangeResidentOpen(true)}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
+                <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end"><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => setChangeResidentOpen(true)}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
               </div> : <div className="space-y-3">
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3.5 top-3.5 size-5 text-muted-foreground" aria-hidden="true" />
@@ -1106,7 +1128,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
             <Button type="button" variant="ghost" onClick={() => requestClose(false)}>{t("issuances.new.footer.cancel")}</Button>
             <Button type="button" variant="outline" disabled={saving} onClick={() => void saveDraft()}>{t("issuances.new.footer.saveDraftClose")}</Button>
             <Button type="button" variant="outline" disabled={saving} onClick={() => void issue(true)}><Printer className="size-4" aria-hidden="true" />{t("issuances.new.footer.issueAndPrint")}</Button>
-            <Button type="submit" disabled={saving}>{saving ? t("issuances.new.footer.savingButton") : t("issuances.new.footer.issue")}</Button>
+            <Button type="submit" disabled={saving || Boolean(duplicate)}>{saving ? t("issuances.new.footer.savingButton") : t("issuances.new.footer.issue")}</Button>
           </div>
         </DialogFooter>
       </form>}

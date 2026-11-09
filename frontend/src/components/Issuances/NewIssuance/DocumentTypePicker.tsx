@@ -8,10 +8,12 @@ const groups = ["clearance", "certification", "id"] as const
 type Props = {
   value: DocumentCode
   onChange: (code: DocumentCode) => void
+  /** A correction keeps the document it started from. */
+  disabled?: boolean
 }
 
 /** Plain text choices, grouped in three short rows. One click picks a document. */
-export function DocumentTypePicker({ value, onChange }: Props) {
+export function DocumentTypePicker({ value, onChange, disabled }: Props) {
   const { t } = useTranslation()
   return (
     <div className="space-y-2">
@@ -42,6 +44,7 @@ export function DocumentTypePicker({ value, onChange }: Props) {
                     className={cn(
                       "inline-flex h-9 cursor-pointer items-center rounded-md border bg-background px-3.5 text-sm transition-colors",
                       "hover:bg-muted has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50",
+                      disabled && "cursor-not-allowed opacity-60 hover:bg-background",
                       selected &&
                         "border-brand bg-primary font-medium text-primary-foreground hover:bg-primary",
                     )}
@@ -51,6 +54,7 @@ export function DocumentTypePicker({ value, onChange }: Props) {
                       name="issuance-document-type"
                       value={item.code}
                       checked={selected}
+                      disabled={disabled}
                       onChange={() => onChange(item.code)}
                       className="sr-only"
                     />

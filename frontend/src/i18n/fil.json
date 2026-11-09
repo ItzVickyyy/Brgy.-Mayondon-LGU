@@ -958,7 +958,8 @@
         "noOfficials": "Walang naka-configure na opisyal. Mananatiling blangko ang linya ng lagda.",
         "chooseWhoSigns": "Pakipili kung sino ang lalagda sa dokumentong ito.",
         "jobstartNote": "Napili ang benepisyaryo ng JobStart. Ang Punong Barangay ang magpapasya kung kwalipikado.",
-        "fillIn": "Pakipunan ito."
+        "fillIn": "Pakipunan ito.",
+        "chooseUpTo": "Pumili ng hanggang {{count}}."
       },
       "requirementsStep": {
         "titleWithPayment": "Ipinakitang ID at bayad",
@@ -1271,7 +1272,8 @@
         "yearsOfResidency": "Taon ng paninirahan",
         "sinceBirth": "Mula pagkapanganak",
         "residentRecord": "Talaan ng residente"
-      }
+      },
+      "correctionBanner": "Ito ay pagwawasto ng dokumentong naibigay na. Mananatiling naibigay ang orihinal hanggang i-void mo ito."
     },
     "printing": {
       "summary": {

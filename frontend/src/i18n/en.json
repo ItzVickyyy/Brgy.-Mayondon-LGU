@@ -958,7 +958,8 @@
         "noOfficials": "No officials are configured. The signature line will be left blank.",
         "chooseWhoSigns": "Please choose who signs this document.",
         "jobstartNote": "JobStart beneficiary selected. The Punong Barangay will determine eligibility.",
-        "fillIn": "Please fill this in."
+        "fillIn": "Please fill this in.",
+        "chooseUpTo": "Choose up to {{count}}."
       },
       "requirementsStep": {
         "titleWithPayment": "ID presented & payment",
@@ -1271,7 +1272,8 @@
         "yearsOfResidency": "Years of residency",
         "sinceBirth": "Since birth",
         "residentRecord": "Resident record"
-      }
+      },
+      "correctionBanner": "This is a correction of a document that was already issued. The original stays issued until you void it."
     },
     "printing": {
       "summary": {
