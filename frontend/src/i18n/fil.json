@@ -798,6 +798,9 @@
         "datedTo": "Petsa hanggang"
       },
       "dateRangeInvalid": "Mas huli ang araw ng \"Petsa mula\" kaysa sa araw ng \"Petsa hanggang\". Pakiayos ang mga petsa.",
+      "invalidDateRangeTitle": "Ayusin ang saklaw ng petsa",
+      "invalidDateRangeDescription": "Walang ipapakitang talaan hangga't hindi nauuna o kapareho ng petsa hanggang ang petsa mula.",
+      "pageSize": "Mga hilera bawat pahina",
       "loading": "Nilo-load ang mga isyu...",
       "loadError": "Hindi ma-load ang mga isyu",
       "loadErrorDescription": "Suriin ang koneksyon at subukang muli.",
