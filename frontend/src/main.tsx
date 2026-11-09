@@ -9,6 +9,7 @@ import { AxiosError } from "axios"
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
 import { client } from "./client/client.gen"
+import { PageSkeleton } from "./components/Common/PageSkeleton"
 import { ThemeProvider } from "./components/theme-provider"
 import { Toaster } from "./components/ui/sonner"
 import "./index.css"
@@ -45,7 +46,14 @@ const queryClient = new QueryClient({
   }),
 })
 
-const router = createRouter({ routeTree })
+// Skeleton (not a spinner) while a page is being prepared. The short delay
+// keeps it from flashing on fast loads; once shown it stays a moment.
+const router = createRouter({
+  routeTree,
+  defaultPendingComponent: PageSkeleton,
+  defaultPendingMs: 150,
+  defaultPendingMinMs: 250,
+})
 declare module "@tanstack/react-router" {
   interface Register {
     router: typeof router

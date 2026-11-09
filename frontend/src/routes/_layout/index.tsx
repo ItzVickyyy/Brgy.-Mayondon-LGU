@@ -113,7 +113,7 @@ function SummaryCard({
   icon: typeof Users
 }) {
   return (
-    <article className="rounded-xl border border-brand/25 bg-brand/5 p-4 shadow-sm sm:p-5">
+    <article className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
@@ -127,12 +127,47 @@ function SummaryCard({
             )}
           </p>
         </div>
-        <div className="rounded-lg bg-brand/15 p-2.5 text-brand">
+        <div className="rounded-md bg-brand/10 p-2.5 text-brand">
           <Icon className="size-5" aria-hidden="true" />
         </div>
       </div>
       <p className="mt-3 text-xs text-muted-foreground">{description}</p>
     </article>
+  )
+}
+
+// Placeholders that keep the shape of each card while the numbers load.
+function RowsSkeleton({ rows = 3 }: { rows?: number }) {
+  return (
+    <div className="divide-y" aria-hidden="true">
+      {Array.from({ length: rows }, (_, index) => (
+        <div
+          // Identical placeholders; their order never changes.
+          key={index}
+          className="flex items-center justify-between gap-4 py-3"
+        >
+          <div className="min-w-0 flex-1 space-y-2">
+            <Skeleton className="h-3.5 w-2/3" />
+            <Skeleton className="h-3 w-1/3" />
+          </div>
+          <Skeleton className="h-6 w-20 shrink-0" />
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function ChartSkeleton() {
+  const heights = ["h-1/3", "h-1/2", "h-2/3", "h-2/5", "h-3/4", "h-1/2"]
+  return (
+    <div
+      className="mt-5 flex min-h-[14.5rem] flex-1 items-end gap-3 border-b px-2 pt-6"
+      aria-hidden="true"
+    >
+      {heights.map((height, index) => (
+        <Skeleton key={index} className={`w-full max-w-10 ${height}`} />
+      ))}
+    </div>
   )
 }
 
@@ -201,7 +236,6 @@ function Dashboard() {
       description: t("dashboard.quickActions.findResident.description"),
       to: "/records",
       icon: Users,
-      hue: 235,
     },
     {
       key: "createIssuance",
@@ -209,7 +243,6 @@ function Dashboard() {
       description: t("dashboard.quickActions.createIssuance.description"),
       to: "/issuances",
       icon: FileCheck2,
-      hue: 160,
     },
     {
       key: "reviewHistory",
@@ -217,7 +250,6 @@ function Dashboard() {
       description: t("dashboard.quickActions.reviewHistory.description"),
       to: "/issuances",
       icon: CalendarDays,
-      hue: 80,
     },
     {
       key: "viewActivity",
@@ -225,7 +257,6 @@ function Dashboard() {
       description: t("dashboard.quickActions.viewActivity.description"),
       to: "/activity-log",
       icon: Activity,
-      hue: 300,
     },
   ] as const
 
@@ -320,14 +351,13 @@ function Dashboard() {
               <Link
                 key={item.key}
                 to={item.to}
-                style={{ "--h": item.hue } as CSSProperties}
-                className="tone-card group flex min-h-16 items-center gap-3 surface-interactive rounded-xl border p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-1"
+                className="action-card group flex min-h-16 items-center gap-3 rounded-lg border bg-card p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-1"
               >
-                <span className="tone-chip rounded-lg p-2">
+                <span className="action-chip rounded-md p-2">
                   <item.icon className="size-5" aria-hidden="true" />
                 </span>
                 <span>
-                  <span className="tone-title block font-semibold">
+                  <span className="action-title block font-semibold">
                     {item.title}
                   </span>
                   <span className="block text-sm leading-5 text-muted-foreground">
@@ -377,6 +407,8 @@ function Dashboard() {
               />
             </dl>
           ) : null}
+
+          {dashboardQuery.isLoading ? <ChartSkeleton /> : null}
 
           {months.length > 0 ? (
             <>
@@ -505,6 +537,14 @@ function Dashboard() {
             />
           </div>
           <div className="mt-5 space-y-4">
+            {dashboardQuery.isLoading
+              ? Array.from({ length: 4 }, (_, index) => (
+                  <div key={index} className="space-y-2" aria-hidden="true">
+                    <Skeleton className="h-3.5 w-2/3" />
+                    <Skeleton className="h-2 w-full" />
+                  </div>
+                ))
+              : null}
             {types.map((item, index) => (
               <div key={`${period}-${item.code}`}>
                 <div className="mb-1.5 flex items-center justify-between gap-3 text-sm">
@@ -551,6 +591,11 @@ function Dashboard() {
               description={t("dashboard.expiring.description")}
             />
           </div>
+          {dashboardQuery.isLoading ? (
+            <div className="mt-4">
+              <RowsSkeleton />
+            </div>
+          ) : null}
           <div className="mt-4 divide-y">
             {expiring.map((item) => (
               <div
@@ -608,6 +653,11 @@ function Dashboard() {
             </div>
           </div>
         </div>
+        {activityQuery.isLoading ? (
+          <div className="mt-4">
+            <RowsSkeleton rows={4} />
+          </div>
+        ) : null}
         <div className="mt-4 divide-y">
           {activities.map((activity) => {
             const reference =

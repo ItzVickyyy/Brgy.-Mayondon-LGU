@@ -1,4 +1,4 @@
-import { AlertCircle, Inbox, LoaderCircle, RotateCw } from "lucide-react"
+import { AlertCircle, Inbox, RotateCw } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -20,11 +20,11 @@ type ErrorStateProps = {
 
 type LoadingStateProps = {
   title?: string
-  // Placeholder rows shown under the message; 0 shows the message alone.
+  // Number of placeholder rows; 0 shows nothing but the screen-reader text.
   lines?: number
 }
 
-const skeletonWidths = ["w-full", "w-5/6", "w-2/3", "w-3/4"]
+const skeletonWidths = ["w-2/3", "w-1/2", "w-3/5", "w-2/5"]
 
 export function EmptyState({ title, description, action }: EmptyStateProps) {
   return (
@@ -41,25 +41,30 @@ export function EmptyState({ title, description, action }: EmptyStateProps) {
   )
 }
 
-export function LoadingState({ title, lines = 3 }: LoadingStateProps) {
+// Skeleton rows that look like the list or table they stand in for. The words
+// stay for screen readers only; sighted people see the shape of the page.
+export function LoadingState({ title, lines = 5 }: LoadingStateProps) {
   const { t } = useTranslation()
   return (
-    <div
-      className="flex min-h-24 flex-col items-center justify-center gap-4 p-6 text-base text-muted-foreground"
-      role="status"
-    >
-      <div className="flex items-center gap-2">
-        <LoaderCircle className="size-5 animate-spin" aria-hidden="true" />
-        <span>{title ?? t("common.feedback.loading")}</span>
-      </div>
+    <div className="w-full" role="status" aria-busy="true">
+      <span className="sr-only">{title ?? t("common.feedback.loading")}</span>
       {lines > 0 ? (
-        <div className="w-full max-w-md space-y-2.5" aria-hidden="true">
+        <div className="divide-y" aria-hidden="true">
           {Array.from({ length: lines }, (_, index) => (
-            <Skeleton
+            <div
               // The rows are identical placeholders; their order never changes.
               key={index}
-              className={`h-3.5 ${skeletonWidths[index % skeletonWidths.length]}`}
-            />
+              className="flex items-center gap-4 px-4 py-3.5"
+            >
+              <Skeleton className="size-9 shrink-0" />
+              <div className="min-w-0 flex-1 space-y-2">
+                <Skeleton
+                  className={`h-3.5 ${skeletonWidths[index % skeletonWidths.length]}`}
+                />
+                <Skeleton className="h-3 w-1/3" />
+              </div>
+              <Skeleton className="hidden h-6 w-20 shrink-0 sm:block" />
+            </div>
           ))}
         </div>
       ) : null}

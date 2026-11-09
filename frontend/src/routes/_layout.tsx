@@ -16,6 +16,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { UsersService } from "@/client"
 import { Footer } from "@/components/Common/Footer"
+import { AppShellSkeleton } from "@/components/Common/PageSkeleton"
 import { KeyboardShortcuts } from "@/components/Common/KeyboardShortcuts"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
 import { User } from "@/components/Sidebar/User"
@@ -31,6 +32,7 @@ import { getLocale } from "@/lib/locale"
 
 export const Route = createFileRoute("/_layout")({
   component: Layout,
+  pendingComponent: AppShellSkeleton,
   beforeLoad: async () => {
     if (!isLoggedIn()) throw redirect({ to: "/login" })
 

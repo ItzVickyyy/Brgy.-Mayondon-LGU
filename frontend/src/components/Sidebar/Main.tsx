@@ -1,6 +1,6 @@
 import { Link as RouterLink, useRouterState } from "@tanstack/react-router"
 import type { LucideIcon } from "lucide-react"
-import { type CSSProperties, Fragment } from "react"
+import { Fragment } from "react"
 
 import {
   SidebarGroup,
@@ -18,33 +18,27 @@ export type Item = {
   path: string
   section?: string
   badge?: number | string
-  /** OKLCH hue (0-360) used to colour this item's icon and active state. */
-  hue?: number
 }
 
 interface MainProps {
   items: Item[]
 }
 
-// Each item has its own hue (--nav-hue). The icon is tinted with it, and the
-// current page gets a soft glow of the same colour with a thin edge marker.
+// Formal, uncoloured buttons: quiet light text and icons on the solid navy
+// panel. The current page gets a soft white band, white semibold text and a
+// thin gold marker on its left edge; nothing else is coloured.
 // The sidebar is always dark, so text uses the --sidebar-* tokens.
-// Smooth colour change, and the icon eases up a little on hover.
-// `!` is needed on the active background to beat the base button's own.
-// Motion is switched off globally when the system asks for reduced motion.
 // Width is not transitioned here on purpose: the button simply follows the
 // sidebar as it opens and closes, so the highlight never snaps ahead of it.
+// Motion is switched off globally when the system asks for reduced motion.
 const NAV_BUTTON_CLASS = [
-  "relative transition-[background-color,color]",
-  "[&>svg]:transition-transform [&>svg]:duration-150 hover:[&>svg]:scale-110",
-  "text-sidebar-foreground/80 hover:text-sidebar-accent-foreground",
-  "[&>svg]:text-(color:--nav-color)",
-  "before:absolute before:left-0 before:top-1/2 before:h-5 before:w-1",
-  "before:-translate-y-1/2 before:rounded-r-full before:bg-(--nav-color) before:opacity-0",
+  "relative rounded-md transition-[background-color,color]",
+  "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+  "before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px]",
+  "before:-translate-y-1/2 before:rounded-r-sm before:bg-sidebar-primary before:opacity-0",
   "before:transition-opacity data-[active=true]:before:opacity-100",
-  "data-[active=true]:bg-(color:--nav-bg)! data-[active=true]:text-sidebar-accent-foreground!",
+  "data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground",
   "data-[active=true]:font-semibold",
-  "data-[active=true]:shadow-[inset_0_0_0_1px_var(--nav-bg)]",
 ].join(" ")
 
 // The label keeps the width it has when the sidebar is open (sidebar width
@@ -57,13 +51,6 @@ const NAV_LABEL_CLASS = [
   "group-data-[collapsible=icon]:opacity-0",
   "group-data-[state=expanded]:delay-150",
 ].join(" ")
-
-function navStyle(hue = 250): CSSProperties {
-  return {
-    "--nav-color": `oklch(0.8 0.14 ${hue})`,
-    "--nav-bg": `oklch(0.7 0.15 ${hue} / 0.22)`,
-  } as CSSProperties
-}
 
 export function Main({ items }: MainProps) {
   const { isMobile, setOpenMobile } = useSidebar()
@@ -98,7 +85,6 @@ export function Main({ items }: MainProps) {
                     tooltip={item.title}
                     isActive={isActive}
                     className={NAV_BUTTON_CLASS}
-                    style={navStyle(item.hue)}
                     asChild
                   >
                     <RouterLink to={item.path} onClick={handleMenuClick}>
