@@ -118,81 +118,102 @@ export function ResidentProfileDialog({
     : []
   const archived = resident?.status === "archived"
 
-  const details: [string, string][] = resident
-    ? [
-        [t("records.profile.fields.reference"), resident.id],
-        [t("records.profile.fields.fullName"), resident.full_name],
-        [
-          t("records.profile.fields.birthdateAge"),
-          resident.birthdate
-            ? `${formatBusinessDate(resident.birthdate)}${resident.age !== null ? ` · ${t("records.ageYears", { age: resident.age })}` : ""}`
-            : "—",
-        ],
-        [t("records.profile.fields.birthPlace"), resident.birth_place || "—"],
-        [
-          t("records.profile.fields.sex"),
-          resident.sex ? sexLabel(resident.sex, t) : "—",
-        ],
-        [
-          t("records.profile.fields.civilStatus"),
-          resident.civil_status
-            ? civilStatusLabel(resident.civil_status, t)
-            : "—",
-        ],
-        [
-          t("records.profile.fields.address"),
-          residentAddress(resident, streets) || "—",
-        ],
-        [
-          t("records.profile.fields.residentSince"),
-          resident.resident_since_birth
-            ? t("records.profile.fields.sinceBirth")
-            : resident.resident_since_year
-              ? String(resident.resident_since_year)
-              : "—",
-        ],
-        [
-          t("records.profile.fields.residentType"),
-          resident.resident_type
-            ? residentTypeLabel(resident.resident_type, t)
-            : "—",
-        ],
-        [
-          t("records.profile.fields.voter"),
-          voterLabel(resident.voter_registration),
-        ],
-        [
-          t("records.profile.fields.emergency"),
-          resident.emergency_contact_name || "—",
-        ],
-        [
-          t("records.profile.fields.emergencyAddress"),
-          resident.emergency_contact_address || "—",
-        ],
-        [
-          t("records.profile.fields.emergencyPhone"),
-          resident.emergency_contact_phone || "—",
-        ],
-        [
-          t("records.profile.fields.photo"),
-          resident.has_photo
-            ? t("records.profile.fields.photoOnFile")
-            : t("records.profile.fields.photoNone"),
-        ],
-        [
-          t("records.profile.fields.recordStatus"),
-          recordStatusText(resident.status),
-        ],
-        ...(archived && resident.archive_reason
-          ? ([
+  const dash = "—"
+  // Only what staff need to read; the name, photo and record status are
+  // already in the card above, and the internal reference is not shown.
+  const detailSections: { title: string; rows: [string, string][] }[] =
+    resident
+      ? [
+          {
+            title: t("records.form.sections.personal"),
+            rows: [
               [
-                t("records.profile.fields.archiveReason"),
-                resident.archive_reason,
+                t("records.profile.fields.birthdateAge"),
+                resident.birthdate
+                  ? `${formatBusinessDate(resident.birthdate)}${resident.age !== null ? ` · ${t("records.ageYears", { age: resident.age })}` : ""}`
+                  : dash,
               ],
-            ] as [string, string][])
-          : []),
-      ]
-    : []
+              [
+                t("records.profile.fields.birthPlace"),
+                resident.birth_place || dash,
+              ],
+              [
+                t("records.profile.fields.sex"),
+                resident.sex ? sexLabel(resident.sex, t) : dash,
+              ],
+              [
+                t("records.profile.fields.civilStatus"),
+                resident.civil_status
+                  ? civilStatusLabel(resident.civil_status, t)
+                  : dash,
+              ],
+            ],
+          },
+          {
+            title: t("records.form.sections.address"),
+            rows: [
+              [
+                t("records.profile.fields.address"),
+                residentAddress(resident, streets) || dash,
+              ],
+              [
+                t("records.profile.fields.residentSince"),
+                resident.resident_since_birth
+                  ? t("records.profile.fields.sinceBirth")
+                  : resident.resident_since_year
+                    ? String(resident.resident_since_year)
+                    : dash,
+              ],
+              [
+                t("records.profile.fields.residentType"),
+                resident.resident_type
+                  ? residentTypeLabel(resident.resident_type, t)
+                  : dash,
+              ],
+              [
+                t("records.profile.fields.voter"),
+                voterLabel(resident.voter_registration),
+              ],
+            ],
+          },
+          ...(resident.emergency_contact_name ||
+          resident.emergency_contact_address ||
+          resident.emergency_contact_phone
+            ? [
+                {
+                  title: t("records.form.emergency.legend"),
+                  rows: [
+                    [
+                      t("records.profile.fields.emergency"),
+                      resident.emergency_contact_name || dash,
+                    ],
+                    [
+                      t("records.profile.fields.emergencyAddress"),
+                      resident.emergency_contact_address || dash,
+                    ],
+                    [
+                      t("records.profile.fields.emergencyPhone"),
+                      resident.emergency_contact_phone || dash,
+                    ],
+                  ] as [string, string][],
+                },
+              ]
+            : []),
+          ...(archived && resident.archive_reason
+            ? [
+                {
+                  title: t("records.profile.fields.recordStatus"),
+                  rows: [
+                    [
+                      t("records.profile.fields.archiveReason"),
+                      resident.archive_reason,
+                    ],
+                  ] as [string, string][],
+                },
+              ]
+            : []),
+        ]
+      : []
 
   return (
     <Dialog open={Boolean(resident)} onOpenChange={onOpenChange}>
@@ -267,12 +288,26 @@ export function ResidentProfileDialog({
                       : t("records.profile.photoCard.unavailable")}
                   </p>
                 ) : null}
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                  {details.map(([label, value]) => (
-                    <div key={label} className="rounded-lg border bg-card p-4">
-                      <p className="text-sm text-muted-foreground">{label}</p>
-                      <p className="mt-1 break-words font-semibold">{value}</p>
-                    </div>
+                <div className="mx-auto w-full max-w-3xl space-y-6">
+                  {detailSections.map((section) => (
+                    <section key={section.title}>
+                      <h3 className="border-b pb-1.5 text-xs font-semibold uppercase tracking-wide text-brand">
+                        {section.title}
+                      </h3>
+                      <dl className="divide-y divide-border/60">
+                        {section.rows.map(([label, value]) => (
+                          <div
+                            key={label}
+                            className="grid gap-0.5 py-2.5 text-sm sm:grid-cols-[13rem_1fr] sm:gap-4"
+                          >
+                            <dt className="text-muted-foreground">{label}</dt>
+                            <dd className="min-w-0 break-words font-medium">
+                              {value}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </section>
                   ))}
                 </div>
               </>

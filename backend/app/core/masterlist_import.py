@@ -21,6 +21,7 @@ from pydantic import ValidationError
 from sqlalchemy import func as sa_func
 from sqlmodel import Session, col, select
 
+from app.core.text_repair import fix_mojibake
 from app.models_foundation import Street
 from app.models_import import ImportBatch, ImportRow
 from app.models_residents import (
@@ -120,7 +121,7 @@ def _clean_cell(value: Any) -> str | None:
         return "true" if value else "false"
     if isinstance(value, float) and value.is_integer():
         value = int(value)
-    text = str(value).strip()
+    text = fix_mojibake(str(value)).strip()
     if not text:
         return None
     if len(text) > MAX_CELL_CHARS:
