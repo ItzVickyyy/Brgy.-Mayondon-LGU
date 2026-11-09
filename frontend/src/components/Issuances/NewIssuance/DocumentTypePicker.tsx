@@ -42,7 +42,7 @@ export function DocumentTypePicker({ value, onChange, disabled }: Props) {
                   <label
                     key={item.code}
                     className={cn(
-                      "inline-flex h-9 cursor-pointer items-center rounded-md border bg-background px-3.5 text-sm transition-colors",
+                      "inline-flex h-11 cursor-pointer items-center rounded-md border bg-background px-3.5 text-sm transition-colors sm:h-9",
                       "hover:bg-muted has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50",
                       disabled && "cursor-not-allowed opacity-60 hover:bg-background",
                       selected &&

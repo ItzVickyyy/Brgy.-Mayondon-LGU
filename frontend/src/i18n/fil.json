@@ -813,6 +813,7 @@
         "latestHint": "Petsa ng pinakabagong talaan",
         "mostIssued": "Pinakamaraming naisyung dokumento",
         "mostIssuedNone": "Wala pang talaan",
+        "loading": "Naglo-load…",
         "loadError": "Hindi ma-load ang datos ng buod"
       },
       "status": {

@@ -813,6 +813,7 @@
         "latestHint": "Most recent record date",
         "mostIssued": "Most issued document",
         "mostIssuedNone": "No records yet",
+        "loading": "Loading…",
         "loadError": "Could not load summary data"
       },
       "status": {

@@ -427,7 +427,9 @@ export function IssuanceHistory({
           hint={
             overallQuery.isError
               ? t("issuances.history.summary.loadError")
-              : topType && topType.count > 0
+              : overallQuery.isLoading
+                ? t("issuances.history.summary.loading")
+                : topType && topType.count > 0
                 ? documentTypeLabel(topType.code, topType.name, t)
                 : t("issuances.history.summary.mostIssuedNone")
           }

@@ -1143,7 +1143,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       </form>}
     </DialogContent>
     <Dialog open={discardOpen} onOpenChange={setDiscardOpen}>
-      <DialogContent className="sm:max-w-md" showCloseButton={false}>
+      <DialogContent className="sm:max-w-lg" showCloseButton={false}>
         <DialogHeader>
           <DialogTitle>{t("issuances.new.discard.title")}</DialogTitle>
           <DialogDescription>
@@ -1152,7 +1152,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
               : t("issuances.new.discard.withoutDraft")}
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:flex-nowrap sm:justify-end">
+        <DialogFooter className="flex-col-reverse gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
           <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => setDiscardOpen(false)}>{t("issuances.new.discard.keepEditing")}</Button>
           {selectedResident ? <Button type="button" variant="outline" className="w-full sm:w-auto" onClick={() => void closeKeepingDraft()}>{t("issuances.new.discard.closeKeepDraft")}</Button> : null}
           <Button type="button" variant="destructive" className="w-full sm:w-auto" onClick={() => void discardAndClose()}>{t("issuances.new.discard.discard")}</Button>
