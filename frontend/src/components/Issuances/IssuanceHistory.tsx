@@ -613,13 +613,13 @@ export function IssuanceHistory({
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[1000px] text-left text-sm">
+              <table className="w-full min-w-[880px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
                     {historyColumns.map((column) => (
                       <th
                         key={column}
-                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "text-right max-sm:sticky max-sm:right-0 max-sm:bg-muted" : ""}`}
+                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted text-right" : ""}`}
                       >
                         {t(`issuances.history.columns.${column}`)}
                       </th>
@@ -694,7 +694,7 @@ export function IssuanceHistory({
                             {label}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 align-middle sm:px-5 max-sm:sticky max-sm:right-0 max-sm:bg-card max-sm:shadow-[-6px_0_6px_-6px_rgba(0,0,0,0.25)]">
+                        <td className="px-4 py-3 align-middle sm:px-5 sticky right-0 bg-card max-2xl:shadow-[-6px_0_6px_-6px_rgba(0,0,0,0.25)]">
                           <RowActions
                             name={item.resident_name}
                             isAdmin={isAdmin}

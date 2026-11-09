@@ -21,6 +21,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuSub,
   DropdownMenuSubContent,
@@ -69,7 +70,7 @@ export function User({
               variant="ghost"
               className={
                 compact
-                  ? "min-h-11 w-auto max-w-[280px] min-w-0 justify-start gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-muted/70"
+                  ? "min-h-11 w-auto max-w-[280px] min-w-0 justify-start gap-2 rounded-lg px-1.5 py-1.5 text-left hover:bg-muted/70 sm:px-2"
                   : "h-auto w-full min-w-0 justify-start gap-2 rounded-lg px-2 py-2 text-left group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:min-w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
               }
               aria-label={t("userMenu.ariaLabel")}
@@ -89,7 +90,7 @@ export function User({
               <span
                 className={
                   compact
-                    ? "min-w-0 flex-1"
+                    ? "hidden min-w-0 flex-1 sm:block"
                     : "min-w-0 flex-1 group-data-[collapsible=icon]:hidden"
                 }
               >
@@ -108,6 +109,19 @@ export function User({
             align={compact ? "end" : "start"}
             sideOffset={8}
           >
+            {compact ? (
+              <>
+                <DropdownMenuLabel className="sm:hidden">
+                  <span className="block truncate text-sm font-medium">
+                    {user?.full_name || user?.email || t("userMenu.fallbackName")}
+                  </span>
+                  <span className="block truncate text-xs font-normal text-muted-foreground">
+                    {user?.email || ""}
+                  </span>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="sm:hidden" />
+              </>
+            ) : null}
             <DropdownMenuItem onSelect={() => setAccountOpen(true)}>
               <UserRound className="size-4" />
               {t("userMenu.myAccount")}

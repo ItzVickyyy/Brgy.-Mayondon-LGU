@@ -132,7 +132,7 @@ function Layout() {
                 <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
                 <span>{formattedDate}</span>
               </span>
-              <span className="inline-flex items-center gap-1.5 whitespace-nowrap tabular-nums">
+              <span className="hidden items-center gap-1.5 whitespace-nowrap tabular-nums sm:inline-flex">
                 <Clock3 className="size-4 shrink-0" aria-hidden="true" />
                 <span>{timeText}</span>
               </span>

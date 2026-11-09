@@ -223,21 +223,21 @@ export function ResidentProfileDialog({
           <DialogTitle className="text-xl">
             {t("records.profile.title")}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="max-sm:sr-only">
             {t("records.profile.description")}
           </DialogDescription>
         </DialogHeader>
         {resident ? (
           <>
-            <div className="flex shrink-0 flex-col gap-4 border-b px-5 py-4 sm:px-6">
-            <div className="flex flex-col gap-4 rounded-xl border bg-muted/20 p-4 sm:flex-row sm:items-center sm:p-5">
+            <div className="flex shrink-0 flex-col gap-3 border-b px-5 py-3 sm:gap-4 sm:px-6 sm:py-4">
+            <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-muted/20 p-3 sm:flex-nowrap sm:gap-4 sm:p-5">
               {resident.has_photo && photoQuery.data ? (
                 <img
                   src={photoQuery.data}
                   alt={t("records.profile.photoCard.alt", {
                     name: resident.full_name,
                   })}
-                  className="h-28 w-24 shrink-0 rounded-lg border bg-white object-cover"
+                  className="h-20 w-16 shrink-0 rounded-lg border bg-white object-cover sm:h-28 sm:w-24"
                 />
               ) : (
                 <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
@@ -245,7 +245,7 @@ export function ResidentProfileDialog({
                 </span>
               )}
               <div className="min-w-0 flex-1">
-                <p className="text-xl font-semibold">{resident.full_name}</p>
+                <p className="text-lg font-semibold sm:text-xl">{resident.full_name}</p>
                 <p className="text-sm text-muted-foreground">
                   {residentAddress(resident, streets) ||
                     t("records.profile.noAddress")}

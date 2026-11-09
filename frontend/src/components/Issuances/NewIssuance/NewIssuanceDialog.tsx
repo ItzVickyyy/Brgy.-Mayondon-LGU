@@ -387,7 +387,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     } else if (field.type === "textarea") {
       control = <textarea id={fieldId} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive", "h-auto py-2")} aria-invalid={invalid} aria-describedby={describedBy} rows={2} />
     } else if (field.type === "date") {
-      control = <DateField id={fieldId} value={String(value)} max={field.group === "identity" || field.group === "payment" ? localIsoDate() : undefined} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
+      control = <DateField id={fieldId} value={String(value)} min={field.group === "identity" || field.group === "payment" ? "1900-01-01" : undefined} max={field.group === "identity" || field.group === "payment" ? localIsoDate() : undefined} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
     } else {
       control = <input id={fieldId} type={field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive")} aria-invalid={invalid} aria-describedby={describedBy} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} />
     }
@@ -1015,7 +1015,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
               <DocumentTypePicker value={documentType} onChange={changeDocumentType} disabled={isCorrection} />
               <div className="flex flex-wrap items-end gap-x-6 gap-y-2 border-t pt-4">
                 <div className={cn(fieldLabelClass, "w-full sm:w-64")}><label htmlFor="issuance-date">{t("issuances.new.documentStep.dateOnDocument")}</label>
-                  <DateField id="issuance-date" value={issueDate} onChange={(nextDate) => { form.setValue("issueDate", nextDate, { shouldDirty: true }); if (documentType === "BARANGAY_ID" && !validUntilEdited && nextDate) { const validDate = new Date(`${nextDate}T00:00:00`); validDate.setFullYear(validDate.getFullYear() + 1); setDetail("validUntil", localIsoDate(validDate)) } }} />
+                  <DateField id="issuance-date" value={issueDate} min="1900-01-01" max={localIsoDate()} onChange={(nextDate) => { form.setValue("issueDate", nextDate, { shouldDirty: true }); if (documentType === "BARANGAY_ID" && !validUntilEdited && nextDate) { const validDate = new Date(`${nextDate}T00:00:00`); validDate.setFullYear(validDate.getFullYear() + 1); setDetail("validUntil", localIsoDate(validDate)) } }} />
                 </div>
                 <p className="flex flex-wrap items-center gap-x-4 gap-y-1 pb-3 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><Printer className="size-3.5" aria-hidden="true" />{config.printMode === "overlay" ? t("issuances.new.documentStep.printsOverlay") : t("issuances.new.documentStep.printsFull")}</span>
