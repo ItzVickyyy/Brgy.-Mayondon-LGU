@@ -11,8 +11,8 @@ export function AuthLayout({ children }: AuthLayoutProps) {
   return (
     <div className="relative flex min-h-svh flex-col overflow-hidden bg-gradient-to-b from-brand/5 to-background to-40%">
       <div className="absolute right-4 top-4 z-10 flex items-center gap-2 sm:right-6 sm:top-6">
-        <FullscreenButton />
         <Appearance />
+        <FullscreenButton />
       </div>
 
       <main className="flex flex-1 items-center justify-center px-4 pb-10 pt-20 sm:px-6 sm:py-12">
