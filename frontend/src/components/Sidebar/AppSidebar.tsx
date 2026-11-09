@@ -29,30 +29,35 @@ const items: NavigationItem[] = [
   {
     icon: LayoutDashboard,
     titleKey: "nav.dashboard",
+    hue: 235,
     path: "/",
     sectionKey: "nav.sections.workspace",
   },
   {
     icon: Activity,
     titleKey: "nav.activityLog",
+    hue: 300,
     path: "/activity-log",
     sectionKey: "nav.sections.workspace",
   },
   {
     icon: FileCheck2,
     titleKey: "nav.issuances",
+    hue: 160,
     path: "/issuances",
     sectionKey: "nav.sections.recordsAndDocuments",
   },
   {
     icon: Users,
     titleKey: "nav.records",
+    hue: 80,
     path: "/records",
     sectionKey: "nav.sections.recordsAndDocuments",
   },
   {
     icon: BookUser,
     titleKey: "nav.officials",
+    hue: 10,
     path: "/officials",
     adminOnly: true,
     sectionKey: "nav.sections.administration",
@@ -60,6 +65,7 @@ const items: NavigationItem[] = [
   {
     icon: ShieldCheck,
     titleKey: "nav.userAccounts",
+    hue: 195,
     path: "/admin",
     adminOnly: true,
     sectionKey: "nav.sections.administration",
@@ -67,6 +73,7 @@ const items: NavigationItem[] = [
   {
     icon: BarChart3,
     titleKey: "nav.reports",
+    hue: 50,
     path: "/reports",
     adminOnly: true,
     sectionKey: "nav.sections.administration",
@@ -74,6 +81,7 @@ const items: NavigationItem[] = [
   {
     icon: DatabaseBackup,
     titleKey: "nav.backupRestore",
+    hue: 270,
     path: "/backup-restore",
     adminOnly: true,
     sectionKey: "nav.sections.administration",
@@ -93,8 +101,8 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="h-16 min-h-16 justify-center overflow-hidden border-b px-4 py-2 transition-[padding] duration-300 ease-sidebar group-data-[collapsible=icon]:px-2">
-        <Logo variant="responsive" />
+      <SidebarHeader className="h-16 min-h-16 justify-center overflow-hidden border-b border-sidebar-border px-4 py-2 transition-[padding] duration-300 ease-sidebar group-data-[collapsible=icon]:px-2">
+        <Logo variant="responsive" tone="sidebar" />
       </SidebarHeader>
       <SidebarContent className="pt-3">
         <Main items={visibleItems} />

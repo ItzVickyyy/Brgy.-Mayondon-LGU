@@ -201,6 +201,7 @@ function Dashboard() {
       description: t("dashboard.quickActions.findResident.description"),
       to: "/records",
       icon: Users,
+      hue: 235,
     },
     {
       key: "createIssuance",
@@ -208,6 +209,7 @@ function Dashboard() {
       description: t("dashboard.quickActions.createIssuance.description"),
       to: "/issuances",
       icon: FileCheck2,
+      hue: 160,
     },
     {
       key: "reviewHistory",
@@ -215,6 +217,7 @@ function Dashboard() {
       description: t("dashboard.quickActions.reviewHistory.description"),
       to: "/issuances",
       icon: CalendarDays,
+      hue: 80,
     },
     {
       key: "viewActivity",
@@ -222,6 +225,7 @@ function Dashboard() {
       description: t("dashboard.quickActions.viewActivity.description"),
       to: "/activity-log",
       icon: Activity,
+      hue: 300,
     },
   ] as const
 
@@ -316,13 +320,14 @@ function Dashboard() {
               <Link
                 key={item.key}
                 to={item.to}
-                className="group flex min-h-16 items-center gap-3 surface-interactive rounded-xl border border-brand/25 bg-brand/5 p-3 hover:border-brand/50 hover:bg-brand/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-1"
+                style={{ "--h": item.hue } as CSSProperties}
+                className="tone-card group flex min-h-16 items-center gap-3 surface-interactive rounded-xl border p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-1"
               >
-                <span className="rounded-lg bg-brand/15 p-2 text-brand">
+                <span className="tone-chip rounded-lg p-2">
                   <item.icon className="size-5" aria-hidden="true" />
                 </span>
                 <span>
-                  <span className="block font-semibold group-hover:text-brand">
+                  <span className="tone-title block font-semibold">
                     {item.title}
                   </span>
                   <span className="block text-sm leading-5 text-muted-foreground">

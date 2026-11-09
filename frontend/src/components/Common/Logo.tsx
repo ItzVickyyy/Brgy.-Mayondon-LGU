@@ -8,9 +8,17 @@ interface LogoProps {
   variant?: "full" | "icon" | "responsive"
   className?: string
   asLink?: boolean
+  /** "sidebar" is for the dark navy sidebar: light text, sky-blue mark. */
+  tone?: "default" | "sidebar"
 }
 
-function Mark({ className }: { className?: string }) {
+function Mark({
+  className,
+  tone = "default",
+}: {
+  className?: string
+  tone?: "default" | "sidebar"
+}) {
   // Uses the official logo once SITE.logo is set; otherwise a placeholder icon.
   if (SITE.logo) {
     return (
@@ -24,16 +32,35 @@ function Mark({ className }: { className?: string }) {
   return (
     <Landmark
       aria-hidden
-      className={cn("size-6 shrink-0 text-brand", className)}
+      className={cn(
+        "size-6 shrink-0",
+        tone === "sidebar" ? "text-sidebar-primary" : "text-brand",
+        className,
+      )}
     />
   )
 }
 
-function Wordmark({ className }: { className?: string }) {
+function Wordmark({
+  className,
+  tone = "default",
+}: {
+  className?: string
+  tone?: "default" | "sidebar"
+}) {
   return (
     <span className={cn("flex flex-col leading-tight", className)}>
       <span className="font-semibold">{SITE.shortName}</span>
-      <span className="text-muted-foreground text-xs">{SITE.location}</span>
+      <span
+        className={cn(
+          "text-xs",
+          tone === "sidebar"
+            ? "text-sidebar-foreground/65"
+            : "text-muted-foreground",
+        )}
+      >
+        {SITE.location}
+      </span>
     </span>
   )
 }
@@ -42,19 +69,23 @@ export function Logo({
   variant = "full",
   className,
   asLink = true,
+  tone = "default",
 }: LogoProps) {
   const content =
     variant === "responsive" ? (
       <span className="flex items-center gap-2">
-        <Mark />
-        <Wordmark className="whitespace-nowrap transition-opacity duration-150 ease-out group-data-[collapsible=icon]:opacity-0 group-data-[state=expanded]:delay-150" />
+        <Mark tone={tone} />
+        <Wordmark
+          tone={tone}
+          className="whitespace-nowrap transition-opacity duration-150 ease-out group-data-[collapsible=icon]:opacity-0 group-data-[state=expanded]:delay-150"
+        />
       </span>
     ) : variant === "icon" ? (
-      <Mark className={className} />
+      <Mark className={className} tone={tone} />
     ) : (
       <span className="flex items-center gap-3">
-        <Mark className={cn("size-10", className)} />
-        <Wordmark className="text-lg" />
+        <Mark className={cn("size-10", className)} tone={tone} />
+        <Wordmark className="text-lg" tone={tone} />
       </span>
     )
 
