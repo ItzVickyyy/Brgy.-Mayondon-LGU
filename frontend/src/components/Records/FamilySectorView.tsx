@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button"
 import { residentTypeLabel } from "@/lib/residentLabels"
 import { residentAddress } from "@/lib/residents"
 
-const PAGE_SIZE = 10
 
 // Family and beneficiary details wait for the barangay's own list of fields (D-20).
 const waitingCards = [
@@ -33,6 +32,7 @@ export function FamilySectorView({ streets, onViewProfile }: Props) {
   const { t } = useTranslation()
   const [sectorId, setSectorId] = useState<number | null>(null)
   const [pageIndex, setPageIndex] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: choosing a sector is the trigger.
   useEffect(() => {
@@ -48,15 +48,15 @@ export function FamilySectorView({ streets, onViewProfile }: Props) {
   const selected = counts.find((row) => row.sector_id === sectorId)
 
   const residentsQuery = useQuery({
-    queryKey: ["residents", "by-sector", sectorId, pageIndex],
+    queryKey: ["residents", "by-sector", sectorId, pageIndex, pageSize],
     queryFn: async () =>
       (
         await ResidentsService.listResidents({
           query: {
             sector_id: sectorId ?? undefined,
             status: "active",
-            skip: pageIndex * PAGE_SIZE,
-            limit: PAGE_SIZE,
+            skip: pageIndex * pageSize,
+            limit: pageSize,
           },
         })
       ).data,
@@ -65,9 +65,9 @@ export function FamilySectorView({ streets, onViewProfile }: Props) {
   })
   const residents = residentsQuery.data?.data ?? []
   const total = residentsQuery.data?.count ?? 0
-  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
-  const start = total ? pageIndex * PAGE_SIZE + 1 : 0
-  const end = Math.min((pageIndex + 1) * PAGE_SIZE, total)
+  const pageCount = Math.max(1, Math.ceil(total / pageSize))
+  const start = total ? pageIndex * pageSize + 1 : 0
+  const end = Math.min((pageIndex + 1) * pageSize, total)
 
   return (
     <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
@@ -235,6 +235,11 @@ export function FamilySectorView({ streets, onViewProfile }: Props) {
                     pageIndex={pageIndex}
                     pageCount={pageCount}
                     onPageChange={setPageIndex}
+                    pageSize={pageSize}
+                    onPageSizeChange={(size) => {
+                      setPageSize(size)
+                      setPageIndex(0)
+                    }}
                   />
                 </>
               )}

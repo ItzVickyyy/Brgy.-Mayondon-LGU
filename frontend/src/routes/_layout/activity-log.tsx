@@ -27,7 +27,6 @@ export const Route = createFileRoute("/_layout/activity-log")({
   head: () => ({ meta: [{ title: pageTitle("Activity Log") }] }),
 })
 
-const PAGE_SIZE = 10
 
 const filterLabelClass =
   "flex min-w-0 flex-col gap-1.5 text-xs font-medium text-muted-foreground"
@@ -109,6 +108,7 @@ function ActivityLog() {
   const [startDate, setStartDate] = useState("")
   const [endDate, setEndDate] = useState("")
   const [pageIndex, setPageIndex] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -163,6 +163,7 @@ function ActivityLog() {
       startDate,
       endDate,
       pageIndex,
+      pageSize,
     ],
     queryFn: async () =>
       (
@@ -178,8 +179,8 @@ function ActivityLog() {
               isAdmin && actorFilter !== "all" ? actorFilter : undefined,
             date_from: startDate || undefined,
             date_to: endDate || undefined,
-            skip: pageIndex * PAGE_SIZE,
-            limit: PAGE_SIZE,
+            skip: pageIndex * pageSize,
+            limit: pageSize,
           },
         })
       ).data,
@@ -189,9 +190,9 @@ function ActivityLog() {
 
   const items = activityQuery.data?.data ?? []
   const total = activityQuery.data?.count ?? 0
-  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
-  const start = total ? pageIndex * PAGE_SIZE + 1 : 0
-  const end = Math.min((pageIndex + 1) * PAGE_SIZE, total)
+  const pageCount = Math.max(1, Math.ceil(total / pageSize))
+  const start = total ? pageIndex * pageSize + 1 : 0
+  const end = Math.min((pageIndex + 1) * pageSize, total)
   const columns: ActivityColumn[] = [
     "dateTime",
     ...(isAdmin ? (["user"] as const) : []),
@@ -441,6 +442,11 @@ function ActivityLog() {
               pageIndex={pageIndex}
               pageCount={pageCount}
               onPageChange={setPageIndex}
+              pageSize={pageSize}
+              onPageSizeChange={(size) => {
+                setPageSize(size)
+                setPageIndex(0)
+              }}
             />
           </>
         )}

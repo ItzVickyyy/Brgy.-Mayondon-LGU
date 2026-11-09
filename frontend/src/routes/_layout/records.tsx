@@ -65,7 +65,6 @@ export const Route = createFileRoute("/_layout/records")({
 type View = "residents" | "barangay-ids" | "family-sector" | "lists" | "import"
 
 const inputClass = formControlClass
-const PAGE_SIZE = 10
 
 // statusStyles is keyed by the English status word, not by the shown label.
 const idStatusStyleKey: Record<ResidentPublic["id_status"], string> = {
@@ -105,6 +104,7 @@ function RecordsManagement() {
     "active" | "archived" | "all"
   >("active")
   const [pageIndex, setPageIndex] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const [archiveTarget, setArchiveTarget] = useState<ResidentPublic | null>(
     null,
   )
@@ -151,15 +151,15 @@ function RecordsManagement() {
   const streetNames = streetNameMap(streets)
 
   const residentsQuery = useQuery({
-    queryKey: ["residents", debouncedSearch, statusFilter, pageIndex],
+    queryKey: ["residents", debouncedSearch, statusFilter, pageIndex, pageSize],
     queryFn: async () =>
       (
         await ResidentsService.listResidents({
           query: {
             q: debouncedSearch || undefined,
             status: statusFilter,
-            skip: pageIndex * PAGE_SIZE,
-            limit: PAGE_SIZE,
+            skip: pageIndex * pageSize,
+            limit: pageSize,
           },
         })
       ).data,
@@ -167,9 +167,9 @@ function RecordsManagement() {
   })
   const residents = residentsQuery.data?.data ?? []
   const total = residentsQuery.data?.count ?? 0
-  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
-  const start = total ? pageIndex * PAGE_SIZE + 1 : 0
-  const end = Math.min((pageIndex + 1) * PAGE_SIZE, total)
+  const pageCount = Math.max(1, Math.ceil(total / pageSize))
+  const start = total ? pageIndex * pageSize + 1 : 0
+  const end = Math.min((pageIndex + 1) * pageSize, total)
 
   // Residents whose latest Barangay ID is still usable (valid, or valid but expiring soon).
   const validIdQuery = useQuery({
@@ -586,6 +586,11 @@ function RecordsManagement() {
                   pageIndex={pageIndex}
                   pageCount={pageCount}
                   onPageChange={setPageIndex}
+                  pageSize={pageSize}
+                  onPageSizeChange={(size) => {
+                    setPageSize(size)
+                    setPageIndex(0)
+                  }}
                 />
               </>
             )}

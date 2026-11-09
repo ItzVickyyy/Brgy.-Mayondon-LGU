@@ -4,8 +4,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
-export function usePagination<T>(items: T[], pageSize = 10, resetKey?: string | number) {
+export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
+
+export function usePagination<T>(items: T[], initialPageSize = 10, resetKey?: string | number) {
   const [pageIndex, setPageIndex] = useState(0)
+  const [pageSize, setPageSizeState] = useState(initialPageSize)
+  const setPageSize = (size: number) => {
+    setPageSizeState(size)
+    setPageIndex(0)
+  }
   const pageCount = Math.max(1, Math.ceil(items.length / pageSize))
 
   useEffect(() => {
@@ -25,6 +32,8 @@ export function usePagination<T>(items: T[], pageSize = 10, resetKey?: string | 
     pageIndex: effectivePageIndex,
     pageCount,
     setPageIndex,
+    pageSize,
+    setPageSize,
     start: items.length ? startIndex + 1 : 0,
     end: Math.min(startIndex + pageSize, items.length),
     total: items.length,
@@ -44,7 +53,7 @@ type TablePaginationProps = {
   onPageSizeChange?: (pageSize: number) => void
 }
 
-export function TablePagination({ start, end, total, pageIndex, pageCount, onPageChange, pageSize, pageSizeOptions, pageSizeLabel, onPageSizeChange }: TablePaginationProps) {
+export function TablePagination({ start, end, total, pageIndex, pageCount, onPageChange, pageSize, pageSizeOptions = PAGE_SIZE_OPTIONS, pageSizeLabel, onPageSizeChange }: TablePaginationProps) {
   const { t } = useTranslation()
   if (total === 0) return null
 
@@ -52,9 +61,9 @@ export function TablePagination({ start, end, total, pageIndex, pageCount, onPag
     <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
       <div className="flex flex-wrap items-center gap-3">
         <p className="text-sm text-muted-foreground" aria-live="polite">{t("common.pagination.showing", { start, end, total })}</p>
-        {pageSize !== undefined && pageSizeOptions?.length && onPageSizeChange && pageSizeLabel ? (
+        {pageSize !== undefined && pageSizeOptions.length && onPageSizeChange ? (
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span>{pageSizeLabel}</span>
+            <span>{pageSizeLabel ?? t("common.pagination.rowsPerPage")}</span>
             <select value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))} className="h-9 rounded-md border bg-background px-2 text-sm text-foreground">
               {pageSizeOptions.map((option) => <option key={option} value={option}>{option}</option>)}
             </select>

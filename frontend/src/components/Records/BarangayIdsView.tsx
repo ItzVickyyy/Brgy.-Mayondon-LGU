@@ -31,7 +31,6 @@ import { formatBusinessDate } from "@/lib/residents"
 
 type StatusFilter = "all" | BarangayIdListItem["status"]
 
-const PAGE_SIZE = 10
 
 // statusStyles is keyed by the English status word, not by the shown label.
 const statusStyleKey: Record<BarangayIdListItem["status"], string> = {
@@ -104,6 +103,7 @@ export function BarangayIdsView() {
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [pageIndex, setPageIndex] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -119,15 +119,15 @@ export function BarangayIdsView() {
   }, [debouncedSearch, statusFilter])
 
   const idsQuery = useQuery({
-    queryKey: ["barangay-ids", debouncedSearch, statusFilter, pageIndex],
+    queryKey: ["barangay-ids", debouncedSearch, statusFilter, pageIndex, pageSize],
     queryFn: async () =>
       (
         await BarangayIdsService.idsListBarangayIds({
           query: {
             q: debouncedSearch || undefined,
             status: statusFilter,
-            skip: pageIndex * PAGE_SIZE,
-            limit: PAGE_SIZE,
+            skip: pageIndex * pageSize,
+            limit: pageSize,
           },
         })
       ).data,
@@ -135,9 +135,9 @@ export function BarangayIdsView() {
   })
   const records = idsQuery.data?.data ?? []
   const total = idsQuery.data?.count ?? 0
-  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE))
-  const start = total ? pageIndex * PAGE_SIZE + 1 : 0
-  const end = Math.min((pageIndex + 1) * PAGE_SIZE, total)
+  const pageCount = Math.max(1, Math.ceil(total / pageSize))
+  const start = total ? pageIndex * pageSize + 1 : 0
+  const end = Math.min((pageIndex + 1) * pageSize, total)
 
   const allCount = useIdCount("all")
   const validCount = useIdCount("valid")
@@ -374,6 +374,11 @@ export function BarangayIdsView() {
               pageIndex={pageIndex}
               pageCount={pageCount}
               onPageChange={setPageIndex}
+              pageSize={pageSize}
+              onPageSizeChange={(size) => {
+                setPageSize(size)
+                setPageIndex(0)
+              }}
             />
           </>
         )}

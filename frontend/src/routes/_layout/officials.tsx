@@ -519,6 +519,8 @@ function OfficialsManagement() {
           pageIndex={officialPagination.pageIndex}
           pageCount={officialPagination.pageCount}
           onPageChange={officialPagination.setPageIndex}
+          pageSize={officialPagination.pageSize}
+          onPageSizeChange={officialPagination.setPageSize}
         />
       </section>
 

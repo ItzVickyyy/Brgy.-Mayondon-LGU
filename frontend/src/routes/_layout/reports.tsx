@@ -500,6 +500,8 @@ function Reports() {
             pageIndex={typePagination.pageIndex}
             pageCount={typePagination.pageCount}
             onPageChange={typePagination.setPageIndex}
+            pageSize={typePagination.pageSize}
+            onPageSizeChange={typePagination.setPageSize}
           />
         </div>
       )
@@ -562,6 +564,8 @@ function Reports() {
             pageIndex={purposePagination.pageIndex}
             pageCount={purposePagination.pageCount}
             onPageChange={purposePagination.setPageIndex}
+            pageSize={purposePagination.pageSize}
+            onPageSizeChange={purposePagination.setPageSize}
           />
         </div>
       )
@@ -658,6 +662,8 @@ function Reports() {
             pageIndex={expiringPagination.pageIndex}
             pageCount={expiringPagination.pageCount}
             onPageChange={expiringPagination.setPageIndex}
+            pageSize={expiringPagination.pageSize}
+            onPageSizeChange={expiringPagination.setPageSize}
           />
         </div>
       )
@@ -740,6 +746,8 @@ function Reports() {
             pageIndex={importsPagination.pageIndex}
             pageCount={importsPagination.pageCount}
             onPageChange={importsPagination.setPageIndex}
+            pageSize={importsPagination.pageSize}
+            onPageSizeChange={importsPagination.setPageSize}
           />
         </div>
       )
@@ -832,6 +840,8 @@ function Reports() {
           pageIndex={accountPagination.pageIndex}
           pageCount={accountPagination.pageCount}
           onPageChange={accountPagination.setPageIndex}
+          pageSize={accountPagination.pageSize}
+          onPageSizeChange={accountPagination.setPageSize}
         />
       </div>
     )

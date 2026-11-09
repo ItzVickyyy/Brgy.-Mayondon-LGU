@@ -1868,6 +1868,7 @@
     },
     "pagination": {
       "showing": "Ipinapakita ang {{start}}–{{end}} sa {{total}}",
+      "rowsPerPage": "Mga hilera bawat pahina",
       "label": "Pagination",
       "previous": "Nakaraan",
       "previousPage": "Nakaraang pahina",

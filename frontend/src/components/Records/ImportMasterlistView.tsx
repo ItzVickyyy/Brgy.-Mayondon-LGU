@@ -35,7 +35,6 @@ type DuplicateAction = (typeof DUPLICATE_ACTIONS)[number]
 const ROW_FILTERS = ["all", "new", "duplicate", "error"] as const
 type RowFilter = (typeof ROW_FILTERS)[number]
 
-const PAGE_SIZE = 10
 
 // The fields the API accepts (mirrors IMPORT_FIELDS in the backend). Shown
 // labels are translated; the keys are what the API stores and expects.
@@ -128,6 +127,7 @@ export function ImportMasterlistView() {
     useState<DuplicateAction>("skip")
   const [rowFilter, setRowFilter] = useState<RowFilter>("all")
   const [pageIndex, setPageIndex] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const [confirmOpen, setConfirmOpen] = useState(false)
   const [cancelOpen, setCancelOpen] = useState(false)
 
@@ -141,15 +141,15 @@ export function ImportMasterlistView() {
   })
 
   const rowsQuery = useQuery({
-    queryKey: ["imports", batchId, "rows", rowFilter, pageIndex],
+    queryKey: ["imports", batchId, "rows", rowFilter, pageIndex, pageSize],
     queryFn: async () =>
       (
         await ImportsService.listRows({
           path: { batch_id: batchId as string },
           query: {
             classification: rowFilter === "all" ? undefined : rowFilter,
-            skip: pageIndex * PAGE_SIZE,
-            limit: PAGE_SIZE,
+            skip: pageIndex * pageSize,
+            limit: pageSize,
           },
         })
       ).data,
@@ -272,9 +272,9 @@ export function ImportMasterlistView() {
     counts.new > 0 || (duplicateAction === "update" && counts.duplicate > 0)
   const rows = rowsQuery.data?.data ?? []
   const rowTotal = rowsQuery.data?.count ?? 0
-  const pageCount = Math.max(1, Math.ceil(rowTotal / PAGE_SIZE))
-  const start = rowTotal ? pageIndex * PAGE_SIZE + 1 : 0
-  const end = Math.min(rowTotal, (pageIndex + 1) * PAGE_SIZE)
+  const pageCount = Math.max(1, Math.ceil(rowTotal / pageSize))
+  const start = rowTotal ? pageIndex * pageSize + 1 : 0
+  const end = Math.min(rowTotal, (pageIndex + 1) * pageSize)
   const stepIndex = STEPS.indexOf(step)
 
   function fieldLabel(field: string) {
@@ -619,6 +619,11 @@ export function ImportMasterlistView() {
               pageIndex={pageIndex}
               pageCount={pageCount}
               onPageChange={setPageIndex}
+              pageSize={pageSize}
+              onPageSizeChange={(size) => {
+                setPageSize(size)
+                setPageIndex(0)
+              }}
             />
           </div>
           {counts.error > 0 ? (

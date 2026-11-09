@@ -1868,6 +1868,7 @@
     },
     "pagination": {
       "showing": "Showing {{start}}–{{end}} of {{total}}",
+      "rowsPerPage": "Rows per page",
       "label": "Pagination",
       "previous": "Previous",
       "previousPage": "Previous page",

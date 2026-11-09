@@ -517,6 +517,8 @@ function BackupRestore() {
           pageIndex={backupPagination.pageIndex}
           pageCount={backupPagination.pageCount}
           onPageChange={backupPagination.setPageIndex}
+          pageSize={backupPagination.pageSize}
+          onPageSizeChange={backupPagination.setPageSize}
         />
       </section>
 

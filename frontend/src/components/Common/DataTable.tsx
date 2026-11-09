@@ -94,6 +94,8 @@ export function DataTable<TData extends RowData>({
           pageIndex={table.state.pagination.pageIndex}
           pageCount={table.getPageCount()}
           onPageChange={table.setPageIndex}
+          pageSize={table.state.pagination.pageSize}
+          onPageSizeChange={(size) => table.setPageSize(size)}
         />
       ) : null}
     </div>
