@@ -259,6 +259,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
   // The picture is a separate request. Until it arrives the resident carries a marker so "photo on file" counts.
   const selectedResidentId = selectedResident?.id
+  const residentArchived = selectedResident?.status === "Archived"
   const selectedPhoto = selectedResident?.photoUrl
   useEffect(() => {
     if (!selectedResidentId || selectedPhoto !== PHOTO_ON_FILE) return
@@ -548,6 +549,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       setFormError(t("issuances.new.errors.selectResidentIssue"))
       return
     }
+    if (!andPrint && selectedResident.status === "Archived") return
     const projectedResident = { ...selectedResident, ...residentUpdates } as ResidentRecord
     const missingResidentFields = getMissingResidentFields(projectedResident, documentType)
     if (missingResidentFields.length) {
@@ -865,9 +867,15 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     else if (field.name === "relationship") value = detailValues.beneficiaryRelationship
     else if (field.name === "witnessOfficialId") value = currentOfficials.find((official) => official.id === detailValues.witnessOfficialId)?.name
     else value = detailValues[field.name]
-    if (Array.isArray(value)) return value.join(", ")
+    const previewOptionLabel = (item: unknown) => {
+      const raw = String(item)
+      if (!["services", "connectionType", "classification", "assistanceType", "transactionType", "parts", "educationalAttainment"].includes(field.name)) return raw
+      const option = field.options?.find((candidate) => normalizedOptionValue(field.name, candidate) === raw)
+      return option ? fieldOptionLabel(field.name, option, t) : raw
+    }
+    if (Array.isArray(value)) return value.map(previewOptionLabel).join(", ")
     if (typeof value === "boolean") return value ? t("issuances.new.options.Yes") : t("issuances.new.options.No")
-    return value == null ? "" : String(value)
+    return value == null ? "" : previewOptionLabel(value)
   }
 
   function fieldVisible(field: DetailFieldConfig): boolean {
@@ -1025,6 +1033,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                     <p className="text-base font-semibold">{selectedResident.name}</p>
                     <p className="mt-0.5 text-sm">{getResidentAddress(selectedResident)}</p>
                     <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? t("issuances.new.resident.yearsOld", { age: calculateAge(selectedResident.birthdate, issueDate) }) : t("issuances.new.resident.birthdateNotRecorded")} · {selectedResident.civilStatus ? civilStatusLabel(selectedResident.civilStatus, t) : t("issuances.new.resident.civilStatusNotRecorded")}</p>
+                    {residentArchived ? <p role="alert" className="mt-1.5 text-sm font-medium text-destructive">{t("issuances.new.resident.archivedWarning")}</p> : null}
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end"><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => setChangeResidentOpen(true)}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
@@ -1128,7 +1137,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
             <Button type="button" variant="ghost" onClick={() => requestClose(false)}>{t("issuances.new.footer.cancel")}</Button>
             <Button type="button" variant="outline" disabled={saving} onClick={() => void saveDraft()}>{t("issuances.new.footer.saveDraftClose")}</Button>
             <Button type="button" variant="outline" disabled={saving} onClick={() => void issue(true)}><Printer className="size-4" aria-hidden="true" />{t("issuances.new.footer.issueAndPrint")}</Button>
-            <Button type="submit" disabled={saving || Boolean(duplicate)}>{saving ? t("issuances.new.footer.savingButton") : t("issuances.new.footer.issue")}</Button>
+            <Button type="submit" disabled={saving || Boolean(duplicate) || residentArchived}>{saving ? t("issuances.new.footer.savingButton") : t("issuances.new.footer.issue")}</Button>
           </div>
         </DialogFooter>
       </form>}

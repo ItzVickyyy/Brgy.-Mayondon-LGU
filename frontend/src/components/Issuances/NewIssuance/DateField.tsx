@@ -469,6 +469,10 @@ export function DateField({
   const inputRef = useRef<HTMLInputElement>(null)
   const [open, setOpen] = useState(false)
   const [typed, setTyped] = useState<string | null>(null)
+  const [rejected, setRejected] = useState<"unreadable" | "outOfRange" | null>(
+    null,
+  )
+  const hintId = `${id ?? "date"}-hint`
   const upward = useOpenUpward(open, wrapperRef, panelRef)
   const close = useCallback(() => setOpen(false), [])
   useClickOutside(open, wrapperRef, close)
@@ -486,6 +490,7 @@ export function DateField({
 
   function select(iso: string) {
     onChange(iso)
+    setRejected(null)
     setTyped(null)
     setOpen(false)
     refocus()
@@ -493,6 +498,7 @@ export function DateField({
 
   function onType(text: string) {
     setTyped(text)
+    setRejected(null)
     const parsed = parseLooseDate(text)
     if (parsed && !(min && parsed < min) && !(max && parsed > max)) {
       onChange(parsed)
@@ -545,21 +551,42 @@ export function DateField({
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-controls={open ? `${id ?? "date"}-calendar` : undefined}
-        aria-invalid={invalid || undefined}
-        aria-describedby={describedBy}
+        aria-invalid={invalid || rejected ? true : undefined}
+        aria-describedby={
+          [describedBy, rejected ? hintId : undefined]
+            .filter(Boolean)
+            .join(" ") || undefined
+        }
         onFocus={() => {
           if (!skipFocusOpen.current) setOpen(true)
         }}
         onClick={() => setOpen(true)}
         onChange={(event) => onType(event.target.value)}
-        onBlur={() => setTyped(null)}
+        onBlur={() => {
+          const text = typed?.trim() ?? ""
+          if (text) {
+            const parsed = parseLooseDate(text)
+            if (!parsed) setRejected("unreadable")
+            else if ((min && parsed < min) || (max && parsed > max))
+              setRejected("outOfRange")
+            else setRejected(null)
+          }
+          setTyped(null)
+        }}
         onKeyDown={onKeyDown}
         className={cn(
           formControlClass,
           "pr-10",
-          invalid && "border-destructive",
+          (invalid || rejected) && "border-destructive",
         )}
       />
+      {rejected ? (
+        <p id={hintId} className="mt-1 text-xs text-destructive">
+          {rejected === "unreadable"
+            ? t("issuances.new.date.unreadable")
+            : t("issuances.new.date.outOfRange")}
+        </p>
+      ) : null}
       <button
         type="button"
         tabIndex={-1}

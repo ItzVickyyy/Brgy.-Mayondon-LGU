@@ -428,7 +428,7 @@ export function IssuanceHistory({
             overallQuery.isError
               ? t("issuances.history.summary.loadError")
               : topType && topType.count > 0
-                ? topType.name
+                ? documentTypeLabel(topType.code, topType.name, t)
                 : t("issuances.history.summary.mostIssuedNone")
           }
         />
@@ -578,7 +578,7 @@ export function IssuanceHistory({
                     {historyColumns.map((column) => (
                       <th
                         key={column}
-                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "text-right" : ""}`}
+                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "text-right max-sm:sticky max-sm:right-0 max-sm:bg-muted" : ""}`}
                       >
                         {t(`issuances.history.columns.${column}`)}
                       </th>
@@ -653,7 +653,7 @@ export function IssuanceHistory({
                             {label}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 align-middle sm:px-5">
+                        <td className="px-4 py-3 align-middle sm:px-5 max-sm:sticky max-sm:right-0 max-sm:bg-card max-sm:shadow-[-6px_0_6px_-6px_rgba(0,0,0,0.25)]">
                           <RowActions
                             name={item.resident_name}
                             isAdmin={isAdmin}

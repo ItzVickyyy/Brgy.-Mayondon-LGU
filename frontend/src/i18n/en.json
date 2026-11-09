@@ -1138,6 +1138,8 @@
         "closeCalendar": "Close calendar",
         "calendar": "Calendar",
         "chooseYear": "Choose a year",
+        "unreadable": "That date could not be read. Type it like November 3, 2026.",
+        "outOfRange": "That date is outside the allowed range.",
         "weekdays": {
           "sun": "Su",
           "mon": "Mo",
@@ -1185,6 +1187,7 @@
       "resident": {
         "title": "Who is it for?",
         "descriptionChosen": "You can edit this resident or choose someone else.",
+        "archivedWarning": "This resident has been archived. Choose someone else or ask an administrator to restore the resident.",
         "descriptionEditing": "Update this resident's information, then save your changes.",
         "descriptionSearch": "Type the person's name and select them from the list, or fill in the form below if they are not listed.",
         "yearsOld": "{{age}} years old",

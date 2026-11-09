@@ -1138,6 +1138,8 @@
         "closeCalendar": "Isara ang kalendaryo",
         "calendar": "Kalendaryo",
         "chooseYear": "Pumili ng taon",
+        "unreadable": "Hindi mabasa ang petsang iyon. I-type ito tulad ng Nobyembre 3, 2026.",
+        "outOfRange": "Wala sa pinapayagang saklaw ang petsang iyon.",
         "weekdays": {
           "sun": "Li",
           "mon": "Lu",
@@ -1185,6 +1187,7 @@
       "resident": {
         "title": "Para kanino ito?",
         "descriptionChosen": "Maaari mong i-edit ang residenteng ito o pumili ng iba.",
+        "archivedWarning": "Naka-archive ang residenteng ito. Pumili ng iba o hilingin sa administrator na ibalik ang residente.",
         "descriptionEditing": "I-update ang impormasyon ng residente, pagkatapos ay i-save ang mga pagbabago.",
         "descriptionSearch": "I-type ang pangalan ng tao at piliin siya sa listahan, o punan ang form sa ibaba kung wala siya sa listahan.",
         "yearsOld": "{{age}} taong gulang",
