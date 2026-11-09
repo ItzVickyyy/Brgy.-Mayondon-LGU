@@ -105,7 +105,7 @@ export function ResidentProfileDialog({
     queryKey: ["resident-photo", resident?.id],
     queryFn: async () =>
       resident ? issuanceApi.loadResidentPhoto(resident.id) : undefined,
-    enabled: Boolean(resident?.has_photo) && profileTab === "Details",
+    enabled: Boolean(resident?.has_photo),
     staleTime: 0,
   })
   const documentName = new Map(
@@ -196,7 +196,7 @@ export function ResidentProfileDialog({
 
   return (
     <Dialog open={Boolean(resident)} onOpenChange={onOpenChange}>
-      <DialogContent className={`${modalShell} sm:max-w-4xl`}>
+      <DialogContent className={`${modalShell} h-[min(90dvh,46rem)] sm:max-w-4xl`}>
         <DialogHeader className={modalHeader}>
           <DialogTitle className="text-xl">
             {t("records.profile.title")}
@@ -206,7 +206,8 @@ export function ResidentProfileDialog({
           </DialogDescription>
         </DialogHeader>
         {resident ? (
-          <div className={`${modalBody} flex flex-col gap-5`}>
+          <>
+            <div className="flex shrink-0 flex-col gap-4 border-b px-5 py-4 sm:px-6">
             <div className="flex flex-col gap-4 rounded-xl border bg-muted/20 p-4 sm:flex-row sm:items-center sm:p-5">
               {resident.has_photo && photoQuery.data ? (
                 <img
@@ -236,7 +237,7 @@ export function ResidentProfileDialog({
               </Badge>
             </div>
             <div
-              className="flex gap-1.5 overflow-x-auto rounded-lg bg-muted/50 p-1"
+              className="flex shrink-0 gap-1.5 overflow-x-auto rounded-lg bg-muted/50 p-1"
               role="tablist"
               aria-label={t("records.profile.tabsAria")}
             >
@@ -255,6 +256,8 @@ export function ResidentProfileDialog({
               ))}
             </div>
 
+            </div>
+            <div className={`${modalBody} flex flex-col gap-4`}>
             {profileTab === "Details" ? (
               <>
                 {resident?.has_photo && !photoQuery.data ? (
@@ -406,8 +409,9 @@ export function ResidentProfileDialog({
               </section>
             ) : null}
 
+            </div>
             {onEdit && !archived && profileTab === "Details" ? (
-              <div className="flex justify-end border-t pt-4">
+              <div className="flex shrink-0 justify-end border-t bg-muted/30 px-5 py-3 sm:px-6">
                 <Button
                   type="button"
                   variant="outline"
@@ -418,7 +422,7 @@ export function ResidentProfileDialog({
                 </Button>
               </div>
             ) : null}
-          </div>
+          </>
         ) : null}
       </DialogContent>
     </Dialog>
