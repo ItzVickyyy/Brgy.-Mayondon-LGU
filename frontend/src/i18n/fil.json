@@ -812,7 +812,8 @@
         "latestNone": "Wala pa",
         "latestHint": "Petsa ng pinakabagong talaan",
         "mostIssued": "Pinakamaraming naisyung dokumento",
-        "mostIssuedNone": "Wala pang talaan"
+        "mostIssuedNone": "Wala pang talaan",
+        "loadError": "Hindi ma-load ang datos ng buod"
       },
       "status": {
         "issued": "Naisyu",
