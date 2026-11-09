@@ -126,6 +126,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const correctionDraftRef = useRef(false)
   const lastSavedRef = useRef("")
   const saveChain = useRef<Promise<unknown>>(Promise.resolve())
+  const autoSavePausedRef = useRef(false)
   const documentType = form.watch("documentType")
   const issueDate = form.watch("issueDate")
   const details = form.watch("details")
@@ -490,9 +491,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   // Save quietly a moment after the person stops typing. persistDraft reads the latest values through draftSignature.
   // biome-ignore lint/correctness/useExhaustiveDependencies: draftSignature already covers every form value
   useEffect(() => {
-    if (!open || successRecord || saving || !selectedResident || !formDirty) return
+    if (!open || successRecord || saving || autoSavePausedRef.current || !selectedResident || !formDirty) return
     if (draftSignature === lastSavedRef.current) return
-    const timer = window.setTimeout(() => { void persistDraft(true) }, 1500)
+    const timer = window.setTimeout(() => { if (!autoSavePausedRef.current) void persistDraft(true) }, 1500)
     return () => window.clearTimeout(timer)
   }, [draftSignature, open, successRecord, saving, selectedResident, formDirty])
 
@@ -676,6 +677,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     lastSavedRef.current = ""
     saveChain.current = Promise.resolve()
     setAutoSave({ state: "idle" })
+    autoSavePausedRef.current = false
   }
 
   const birthplaceRequired = config.residentNeeds.includes("birthPlace")
@@ -1003,7 +1005,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                     <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? t("issuances.new.resident.yearsOld", { age: calculateAge(selectedResident.birthdate, issueDate) }) : t("issuances.new.resident.birthdateNotRecorded")} · {selectedResident.civilStatus ? civilStatusLabel(selectedResident.civilStatus, t) : t("issuances.new.resident.civilStatusNotRecorded")}</p>
                   </div>
                 </div>
-                <div className="flex shrink-0 flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" onClick={() => setChangeResidentOpen(true)}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
+                <div className="flex shrink-0 flex-wrap justify-end gap-2"><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => setChangeResidentOpen(true)}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
               </div> : <div className="space-y-3">
                 <div className="relative">
                   <Search className="pointer-events-none absolute left-3.5 top-3.5 size-5 text-muted-foreground" aria-hidden="true" />
@@ -1135,6 +1137,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       destructive
       onConfirm={() => {
         void (async () => {
+          autoSavePausedRef.current = true
           setSaving(true)
           try {
             await removeDraft()
@@ -1156,6 +1159,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
           } catch (error) {
             setFormError(error instanceof Error ? error.message : t("issuances.new.errors.deleteDraft"))
           } finally {
+            autoSavePausedRef.current = false
             setSaving(false)
           }
         })()
