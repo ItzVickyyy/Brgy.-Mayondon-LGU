@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { CreditCard, FileCheck2, UserRound, Users } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import {
@@ -64,6 +65,20 @@ const profileTabs = [
 
 const historyColumns = ["reference", "document", "issueDate", "status"] as const
 
+// On a phone the four tabs are wider than the pop-up and the bar scrolls
+// sideways. Fade the edge that still has tabs behind it so that is visible.
+const tabFade = (left: boolean, right: boolean) => {
+  const mask =
+    left && right
+      ? "linear-gradient(to right, transparent, #000 1.5rem, #000 calc(100% - 1.5rem), transparent)"
+      : right
+        ? "linear-gradient(to right, #000 calc(100% - 2rem), transparent)"
+        : left
+          ? "linear-gradient(to right, transparent, #000 2rem)"
+          : undefined
+  return mask ? { maskImage: mask, WebkitMaskImage: mask } : undefined
+}
+
 export function ResidentProfileDialog({
   resident,
   onOpenChange,
@@ -75,6 +90,14 @@ export function ResidentProfileDialog({
   onEdit,
 }: ResidentProfileDialogProps) {
   const { t } = useTranslation()
+  const [tabEdges, setTabEdges] = useState({ left: false, right: false })
+  const updateTabEdges = (el: HTMLElement) => {
+    const left = el.scrollLeft > 2
+    const right = el.scrollLeft + el.clientWidth < el.scrollWidth - 2
+    setTabEdges((prev) =>
+      prev.left === left && prev.right === right ? prev : { left, right },
+    )
+  }
   const voterLabel = (value: string | null | undefined) =>
     value === "registered"
       ? t("records.profile.voter.registered")
@@ -262,6 +285,11 @@ export function ResidentProfileDialog({
               className="flex shrink-0 gap-1.5 overflow-x-auto rounded-lg bg-muted/50 p-1"
               role="tablist"
               aria-label={t("records.profile.tabsAria")}
+              ref={(el) => {
+                if (el) updateTabEdges(el)
+              }}
+              onScroll={(event) => updateTabEdges(event.currentTarget)}
+              style={tabFade(tabEdges.left, tabEdges.right)}
             >
               {profileTabs.map((tab) => (
                 <Button
@@ -270,7 +298,13 @@ export function ResidentProfileDialog({
                   role="tab"
                   variant={profileTab === tab.id ? "default" : "ghost"}
                   aria-selected={profileTab === tab.id}
-                  onClick={() => onProfileTabChange(tab.id)}
+                  onClick={(event) => {
+                    onProfileTabChange(tab.id)
+                    event.currentTarget.scrollIntoView({
+                      block: "nearest",
+                      inline: "nearest",
+                    })
+                  }}
                   className="min-h-11 shrink-0 rounded-md px-4 sm:min-h-10"
                 >
                   {t(tab.labelKey)}

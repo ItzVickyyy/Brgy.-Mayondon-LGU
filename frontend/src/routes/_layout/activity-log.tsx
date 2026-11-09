@@ -341,7 +341,7 @@ function ActivityLog() {
                     {columns.map((item) => (
                       <th
                         key={item}
-                        className="px-4 py-3 align-middle font-medium sm:px-5"
+                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${item === "outcome" ? "sticky right-0 bg-muted sticky-head-cell" : ""}`}
                       >
                         {t(`activity.columns.${item}`)}
                       </th>
@@ -394,7 +394,7 @@ function ActivityLog() {
                             "—"
                           )}
                         </td>
-                        <td className="px-4 py-3 align-middle sm:px-5">
+                        <td className="sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle sm:px-5 max-2xl:shadow-[-6px_0_6px_-6px_rgba(0,0,0,0.25)]">
                           <Badge
                             variant="outline"
                             className={

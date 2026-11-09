@@ -249,6 +249,21 @@
   }
 }
 
+/* Sticky header cell: same colour as the header row (muted at 50% over card),
+   but opaque so scrolling headers do not show through. */
+.sticky-head-cell {
+  background-color: color-mix(in oklab, var(--card), var(--muted) 50%);
+}
+
+/* Sticky Actions / Outcome cells sit on an opaque card colour so scrolling cells
+   do not show through. Give them the row hover tint (muted at 30% over card)
+   too, otherwise the right edge of a hovered row looks unfinished. Unlayered on
+   purpose: it has to beat the bg-card utility. */
+tr:hover > .row-hover-cell,
+tr:focus-within > .row-hover-cell {
+  background-color: color-mix(in oklab, var(--card), var(--muted) 30%);
+}
+
 /* Respect the system "reduce motion" setting everywhere; the loading spinner
    keeps turning so people can still tell something is happening. */
 @media (prefers-reduced-motion: reduce) {

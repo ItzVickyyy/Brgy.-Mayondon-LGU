@@ -432,7 +432,7 @@ function RecordsManagement() {
                         {residentColumns.map((column) => (
                           <th
                             key={column}
-                            className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted text-right" : ""}`}
+                            className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-right" : ""}`}
                           >
                             {t(`records.list.columns.${column}`)}
                           </th>
@@ -501,7 +501,7 @@ function RecordsManagement() {
                                 {t(`records.status.${statusKey}`)}
                               </Badge>
                             </td>
-                            <td className="sticky right-0 bg-card px-4 py-3 align-middle sm:px-5 max-2xl:shadow-[-6px_0_6px_-6px_rgba(0,0,0,0.25)]">
+                            <td className="sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle sm:px-5 max-2xl:shadow-[-6px_0_6px_-6px_rgba(0,0,0,0.25)]">
                               <RowActions
                                 name={resident.full_name}
                                 isAdmin={isAdmin}

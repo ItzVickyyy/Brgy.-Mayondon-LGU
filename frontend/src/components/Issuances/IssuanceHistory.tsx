@@ -619,7 +619,7 @@ export function IssuanceHistory({
                     {historyColumns.map((column) => (
                       <th
                         key={column}
-                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted text-right" : ""}`}
+                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-right" : ""}`}
                       >
                         {t(`issuances.history.columns.${column}`)}
                       </th>
@@ -694,7 +694,7 @@ export function IssuanceHistory({
                             {label}
                           </Badge>
                         </td>
-                        <td className="px-4 py-3 align-middle sm:px-5 sticky right-0 bg-card max-2xl:shadow-[-6px_0_6px_-6px_rgba(0,0,0,0.25)]">
+                        <td className="px-4 py-3 align-middle sm:px-5 sticky right-0 bg-card row-hover-cell max-2xl:shadow-[-6px_0_6px_-6px_rgba(0,0,0,0.25)]">
                           <RowActions
                             name={item.resident_name}
                             isAdmin={isAdmin}
