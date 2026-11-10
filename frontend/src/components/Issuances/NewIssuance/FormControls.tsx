@@ -533,7 +533,7 @@ export function ChoiceRow({
       aria-label={label}
       aria-invalid={invalid || undefined}
       aria-describedby={describedBy}
-      className={cn("m-0 grid h-11 min-w-0 gap-1.5 border-0 p-0", invalid && "rounded-md ring-1 ring-destructive")}
+      className={cn("m-0 grid min-w-0 gap-1.5 border-0 p-0", invalid && "rounded-md ring-1 ring-destructive")}
       style={{
         gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
       }}
@@ -544,7 +544,7 @@ export function ChoiceRow({
           <label
             key={option}
             className={cn(
-              "flex cursor-pointer items-center justify-center rounded-md border bg-background text-sm transition-colors hover:bg-muted has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50",
+              "relative flex h-11 cursor-pointer items-center justify-center rounded-md border bg-background px-3 text-sm transition-colors hover:bg-muted has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50",
               selected &&
                 "border-brand bg-brand/10 font-medium text-brand hover:bg-brand/10",
             )}

@@ -198,6 +198,7 @@
       "description": "Try a different search term or filter."
     },
     "you": "You",
+    "youWithName": "{{name}} (You)",
     "modules": {
       "records": "Resident Records",
       "issuance": "Issuances",
@@ -380,7 +381,7 @@
         "results": "Results"
       },
       "chooseFile": "Choose a masterlist file",
-      "formats": "Supported formats: CSV, XLSX (up to 5 MB and 5,000 rows)",
+      "formats": "Supported formats: CSV, XLSX (up to 5 MB and 10,000 rows)",
       "uploadContinue": "Upload and continue",
       "uploading": "Uploading…",
       "mapTitle": "Map spreadsheet columns",
@@ -1539,6 +1540,7 @@
         "export": "Export",
         "print": "Print"
       },
+      "printedOn": "Printed on {{date}}",
       "reportTypes": {
         "issuances": "Issuances by document type",
         "purpose": "Issuances by purpose",

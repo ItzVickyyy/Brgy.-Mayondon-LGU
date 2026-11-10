@@ -10,7 +10,7 @@ import {
   FileUp,
   X,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { ImportsService, ReportsService } from "@/client"
@@ -163,6 +163,8 @@ function Reports() {
     period: Period
   } | null>(null)
   const [notice, setNotice] = useState<NoticeKey | "">("")
+  // While true, every row of the report is on the page so a print is complete.
+  const [printAll, setPrintAll] = useState(false)
 
   const summaryQuery = useQuery({
     queryKey: ["reports-summary", period],
@@ -236,6 +238,29 @@ function Reports() {
   const expiringPagination = usePagination(expiringRows, 10, resetKey)
   const accountPagination = usePagination(accountRows, 10, resetKey)
   const importsPagination = usePagination(importRows, 10, resetKey)
+
+  // Prints the previewed report only: the app shell is hidden by index.css while
+  // the body carries "report-printing", and a dark theme is printed as light.
+  useEffect(() => {
+    if (!printAll) return
+    const root = document.documentElement
+    const wasDark = root.classList.contains("dark")
+    const finish = () => {
+      document.body.classList.remove("report-printing")
+      if (wasDark) root.classList.add("dark")
+      setPrintAll(false)
+    }
+    document.body.classList.add("report-printing")
+    root.classList.remove("dark")
+    window.addEventListener("afterprint", finish, { once: true })
+    const timer = window.setTimeout(() => window.print(), 200)
+    return () => {
+      window.clearTimeout(timer)
+      window.removeEventListener("afterprint", finish)
+      document.body.classList.remove("report-printing")
+      if (wasDark) root.classList.add("dark")
+    }
+  }, [printAll])
 
   if (!isAdmin) return <NoPermission />
 
@@ -405,7 +430,12 @@ function Reports() {
       setNotice("previewBeforePrint")
       return
     }
-    window.print()
+    if (!buildCsvRows()) {
+      setNotice("notLoaded")
+      return
+    }
+    setNotice("")
+    setPrintAll(true)
   }
 
   const th = "px-4 py-3 font-medium sm:px-5"
@@ -462,7 +492,7 @@ function Reports() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {typePagination.paginatedItems.map((row) => (
+              {(printAll ? typeRows : typePagination.paginatedItems).map((row) => (
                 <tr
                   key={row.document_type_id}
                   className="transition-colors hover:bg-muted/30"
@@ -528,7 +558,7 @@ function Reports() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {purposePagination.paginatedItems.map((row) => (
+              {(printAll ? purposeRows : purposePagination.paginatedItems).map((row) => (
                 <tr
                   key={row.purpose_id ?? "none"}
                   className="transition-colors hover:bg-muted/30"
@@ -600,7 +630,7 @@ function Reports() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {expiringPagination.paginatedItems.map((row) => {
+              {(printAll ? expiringRows : expiringPagination.paginatedItems).map((row) => {
                 const statusText = labelOf(expiryStatusKeys, row.status, t)
                 return (
                   <tr
@@ -708,7 +738,7 @@ function Reports() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {importsPagination.paginatedItems.map((row) => (
+              {(printAll ? importRows : importsPagination.paginatedItems).map((row) => (
                 <tr
                   key={row.id}
                   className="transition-colors hover:bg-muted/30"
@@ -775,7 +805,7 @@ function Reports() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {accountPagination.paginatedItems.map((row) => (
+            {(printAll ? accountRows : accountPagination.paginatedItems).map((row) => (
               <tr
                 key={row.user_id}
                 className="transition-colors hover:bg-muted/30"
@@ -849,7 +879,7 @@ function Reports() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between print:hidden">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             {t("admin.reports.title")}
@@ -863,7 +893,7 @@ function Reports() {
       {notice ? (
         <div
           role="status"
-          className="flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm"
+          className="flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm print:hidden"
         >
           <CheckCircle2
             className="mt-0.5 size-4 shrink-0 text-brand"
@@ -881,7 +911,7 @@ function Reports() {
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 print:hidden">
         <StatCard
           icon={FileCheck2}
           label={t("admin.reports.stats.issued")}
@@ -908,8 +938,8 @@ function Reports() {
         />
       ) : null}
 
-      <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-        <div className="flex flex-col gap-4 border-b p-4 sm:p-5">
+      <section className="overflow-hidden rounded-xl border bg-card shadow-sm print:overflow-visible print:rounded-none print:border-0 print:shadow-none">
+        <div className="flex flex-col gap-4 border-b p-4 sm:p-5 print:hidden">
           <div>
             <h2 className="font-semibold tracking-tight">
               {t("admin.reports.generate.title")}
@@ -976,7 +1006,29 @@ function Reports() {
           </div>
         </div>
 
-        <div className="p-4 sm:p-5">{renderResults()}</div>
+        <div className="p-4 sm:p-5 print:p-0">
+          {applied ? (
+            <div className="mb-4 hidden border-b pb-3 print:block">
+              <h1 className="text-xl font-bold">{t("admin.reports.title")}</h1>
+              <p className="text-sm">
+                {t(`admin.reports.reportTypes.${applied.report}`)}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t("admin.reports.printedOn", {
+                  date: formatLocaleDate(new Date(), {
+                    month: "long",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    timeZone: "Asia/Manila",
+                  }),
+                })}
+              </p>
+            </div>
+          ) : null}
+          {renderResults()}
+        </div>
       </section>
     </div>
   )

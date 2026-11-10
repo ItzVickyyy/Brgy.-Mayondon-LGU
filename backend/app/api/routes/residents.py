@@ -390,6 +390,20 @@ def update_resident(
             status_code=422,
             detail="resident_since_year and resident_since_birth cannot both be set",
         )
+    # The form sends every field, so only log the ones whose value really changed.
+    changed_fields = [
+        key for key, value in changes.items() if getattr(resident, key, None) != value
+    ]
+    if sector_ids is not None:
+        current_sector_ids = set(
+            session.exec(
+                select(ResidentSector.sector_id).where(
+                    col(ResidentSector.resident_id) == resident.id
+                )
+            ).all()
+        )
+        if current_sector_ids != set(sector_ids):
+            changed_fields.append("sector_ids")
     for key, value in changes.items():
         setattr(resident, key, value)
     resident.updated_at = _now()
@@ -404,11 +418,7 @@ def update_resident(
         module="records",
         record_type="resident",
         record_id=resident.id,
-        details={
-            "fields": sorted(
-                list(changes) + (["sector_ids"] if sector_ids is not None else [])
-            )
-        },
+        details={"fields": sorted(changed_fields)},
     )
     session.commit()
     session.refresh(resident)

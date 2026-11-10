@@ -86,9 +86,13 @@ function detailsText(details: { [key: string]: unknown } | null) {
   if (!details) return ""
   return Object.entries(details)
     .map(([key, value]) => {
-      const text = Array.isArray(value) ? value.join(", ") : String(value)
+      if (Array.isArray(value) && value.length === 0) return ""
+      const text = Array.isArray(value)
+        ? value.map((item) => String(item).replace(/_/g, " ")).join(", ")
+        : String(value)
       return `${key.replace(/_/g, " ")}: ${text}`
     })
+    .filter(Boolean)
     .join(" · ")
 }
 
@@ -363,7 +367,9 @@ function ActivityLog() {
                         {isAdmin ? (
                           <td className="px-4 py-3 align-middle font-medium sm:px-5">
                             {row.is_own
-                              ? t("activity.you")
+                              ? t("activity.youWithName", {
+                                  name: row.actor_email ?? t("activity.you"),
+                                })
                               : (row.actor_email ?? "—")}
                           </td>
                         ) : null}

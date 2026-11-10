@@ -363,7 +363,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     const message = fieldError || (missingNow ? t("issuances.new.detailsStep.fillIn") : "")
     const messageNode = message ? <span id={`${fieldId}-error`} className="text-xs font-normal text-destructive" role="alert">{message}</span> : null
     if (field.type === "checkbox") {
-      return <div key={field.name} className="flex min-h-11 items-center">
+      return <div key={field.name} className={cn("flex min-h-11 items-center", field.group === "payment" && "sm:self-end")}>
         <CheckField id={fieldId} checked={Boolean(value)} onChange={(checked) => onValueChange(checked)} label={fieldLabel(field.label, t)} invalid={invalid} describedBy={describedBy} />
       </div>
     }
@@ -1110,7 +1110,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
             {hasRequirements ? <IssuanceSection id="issuance-step-requirements" step={requirementsStep} title={fieldsByGroup("payment").length ? t("issuances.new.requirementsStep.titleWithPayment") : t("issuances.new.requirementsStep.titleIdOnly")} description={t("issuances.new.requirementsStep.description")} done={requirementsDone}>
               {fieldsByGroup("identity").length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("issuances.new.requirementsStep.proofOfIdentity")}</p><div className="grid gap-4 sm:grid-cols-2">{fieldsByGroup("identity").map(renderField)}</div></div> : null}
-              {fieldsByGroup("payment").length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("issuances.new.requirementsStep.payment")}</p><div className="grid items-end gap-4 sm:grid-cols-2">{fieldsByGroup("payment").map(renderField)}</div></div> : null}
+              {fieldsByGroup("payment").length ? <div className="space-y-2"><p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("issuances.new.requirementsStep.payment")}</p><div className="grid items-start gap-4 sm:grid-cols-2">{fieldsByGroup("payment").map(renderField)}</div></div> : null}
             </IssuanceSection> : null}
 
             {duplicate ? <p role="alert" className="rounded-md border border-destructive/40 bg-background p-3 text-sm">{t("issuances.new.duplicate", { reference: duplicate.referenceNo, date: duplicate.issueDate })}</p> : null}

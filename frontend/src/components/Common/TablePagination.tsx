@@ -58,7 +58,7 @@ export function TablePagination({ start, end, total, pageIndex, pageCount, onPag
   if (total === 0) return null
 
   return (
-    <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+    <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 print:hidden">
       <div className="flex flex-wrap items-center gap-3">
         <p className="text-sm text-muted-foreground" aria-live="polite">{t("common.pagination.showing", { start, end, total })}</p>
         {pageSize !== undefined && pageSizeOptions.length && onPageSizeChange ? (

@@ -198,6 +198,7 @@
       "description": "Subukan ang ibang salitang hahanapin o ibang filter."
     },
     "you": "Ikaw",
+    "youWithName": "{{name}} (Ikaw)",
     "modules": {
       "records": "Mga Talaan ng Residente",
       "issuance": "Mga Pag-isyu",
@@ -380,7 +381,7 @@
         "results": "Resulta"
       },
       "chooseFile": "Pumili ng file ng masterlist",
-      "formats": "Mga sinusuportahang format: CSV, XLSX (hanggang 5 MB at 5,000 hanay)",
+      "formats": "Mga sinusuportahang format: CSV, XLSX (hanggang 5 MB at 10,000 hanay)",
       "uploadContinue": "I-upload at magpatuloy",
       "uploading": "Ina-upload…",
       "mapTitle": "Itugma ang mga column ng spreadsheet",
@@ -1539,6 +1540,7 @@
         "export": "I-export",
         "print": "I-print"
       },
+      "printedOn": "Na-print noong {{date}}",
       "reportTypes": {
         "issuances": "Mga isyu ayon sa uri ng dokumento",
         "purpose": "Mga isyu ayon sa layunin",
