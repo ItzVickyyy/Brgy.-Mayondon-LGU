@@ -80,7 +80,7 @@ function ResetPassword() {
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    mode: "onBlur",
+    mode: "onSubmit",
     criteriaMode: "all",
     defaultValues: {
       new_password: "",

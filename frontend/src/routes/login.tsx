@@ -96,7 +96,7 @@ function Login() {
     new URLSearchParams(window.location.search).get("passwordChanged") === "1"
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    mode: "onBlur",
+    mode: "onSubmit",
     criteriaMode: "all",
     defaultValues: {
       username: "",
@@ -113,6 +113,7 @@ function Login() {
     <AuthLayout>
       <Form {...form}>
         <form
+          noValidate
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-6"
         >

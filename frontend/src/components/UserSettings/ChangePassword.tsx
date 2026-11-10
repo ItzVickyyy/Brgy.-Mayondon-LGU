@@ -79,7 +79,7 @@ const ChangePassword = ({ forced = false }: { forced?: boolean }) => {
   return (
     <div className="max-w-md">
       {forced ? (
-        <div className="mb-2 space-y-2">
+        <div className="mb-6 space-y-2 text-center">
           <h1 className="text-2xl font-bold tracking-tight">
             {t("password.forced.title")}
           </h1>
@@ -155,7 +155,7 @@ const ChangePassword = ({ forced = false }: { forced?: boolean }) => {
           <LoadingButton
             type="submit"
             loading={mutation.isPending}
-            className="self-start"
+            className={forced ? "w-full" : "self-start"}
           >
             {t("password.update")}
           </LoadingButton>
