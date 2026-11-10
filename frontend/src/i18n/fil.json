@@ -278,6 +278,7 @@
     "tabsAria": "Mga tanaw ng Pamamahala ng mga Talaan",
     "tabs": {
       "residents": "Mga Residente",
+      "archived": "Naka-archive",
       "barangayIds": "Mga Barangay ID",
       "familySector": "Detalye ng Pamilya at Sektor",
       "lookupLists": "Mga Listahan",
@@ -326,6 +327,18 @@
       "empty": {
         "title": "Walang katugmang residente",
         "description": "Subukan ang ibang pangalan, tirahan, numero ng ID, o filter."
+      }
+    },
+    "archive": {
+      "title": "Mga Naka-archive na Residente",
+      "description": "Mga residenteng na-archive, kasama ang dahilan at petsa. Maibabalik ng administrator ang isang residente sa listahan ng aktibo.",
+      "columns": {
+        "archivedOn": "Petsa ng pag-archive",
+        "reason": "Dahilan"
+      },
+      "empty": {
+        "title": "Walang naka-archive na residente",
+        "description": "Lalabas dito ang mga residenteng ina-archive ng administrator."
       }
     },
     "ageYears": "{{age}} taong gulang",

@@ -278,6 +278,7 @@
     "tabsAria": "Records Management views",
     "tabs": {
       "residents": "Residents",
+      "archived": "Archived",
       "barangayIds": "Barangay IDs",
       "familySector": "Family & Sector Details",
       "lookupLists": "Lookup Lists",
@@ -326,6 +327,18 @@
       "empty": {
         "title": "No matching residents",
         "description": "Try a different name, address, ID number, or filter."
+      }
+    },
+    "archive": {
+      "title": "Archived Residents",
+      "description": "Residents who were archived, with the reason and the date. An administrator can restore a resident to the active list.",
+      "columns": {
+        "archivedOn": "Archived on",
+        "reason": "Reason"
+      },
+      "empty": {
+        "title": "No archived residents",
+        "description": "Residents that an administrator archives will appear here."
       }
     },
     "ageYears": "{{age}} yrs",

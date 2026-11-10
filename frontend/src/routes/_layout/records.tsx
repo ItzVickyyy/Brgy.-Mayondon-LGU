@@ -34,6 +34,7 @@ import { Select } from "@/components/Common/Select"
 import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
+import { ArchivedResidentsView } from "@/components/Records/ArchivedResidentsView"
 import { BarangayIdsView } from "@/components/Records/BarangayIdsView"
 import { FamilySectorView } from "@/components/Records/FamilySectorView"
 import { ImportMasterlistView } from "@/components/Records/ImportMasterlistView"
@@ -63,7 +64,13 @@ export const Route = createFileRoute("/_layout/records")({
   head: () => ({ meta: [{ title: pageTitle("Records Management") }] }),
 })
 
-type View = "residents" | "barangay-ids" | "family-sector" | "lists" | "import"
+type View =
+  | "residents"
+  | "archived"
+  | "barangay-ids"
+  | "family-sector"
+  | "lists"
+  | "import"
 
 const inputClass = formControlClass
 
@@ -253,6 +260,7 @@ function RecordsManagement() {
 
   const tabs: { id: View; label: string }[] = [
     { id: "residents", label: t("records.tabs.residents") },
+    { id: "archived", label: t("records.tabs.archived") },
     { id: "barangay-ids", label: t("records.tabs.barangayIds") },
     { id: "family-sector", label: t("records.tabs.familySector") },
     ...(isAdmin
@@ -598,6 +606,17 @@ function RecordsManagement() {
             )}
           </section>
         </>
+      )}
+
+      {view === "archived" && (
+        <ArchivedResidentsView
+          isAdmin={isAdmin}
+          onViewProfile={(resident) => {
+            setSelectedResident(resident)
+            setProfileTab("Details")
+          }}
+          onRestore={setRestoreTarget}
+        />
       )}
 
       {view === "barangay-ids" && <BarangayIdsView />}
