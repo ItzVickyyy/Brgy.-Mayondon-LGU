@@ -7,15 +7,15 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
 
-import { type UserCreate, UsersService } from "@/client"
+import { type UserCreateByAdmin, UsersService } from "@/client"
 import { formControlClass } from "@/components/Common/formStyles"
-import { Select } from "@/components/Common/Select"
 import {
   modalBody,
   modalFooter,
   modalHeader,
   modalShell,
 } from "@/components/Common/ModalLayout"
+import { Select } from "@/components/Common/Select"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -38,28 +38,17 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
+import { DEFAULT_PASSWORD } from "@/config/site"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 const buildSchema = (t: TFunction) =>
-  z
-  .object({
+  z.object({
     email: z.email({ message: t("admin.users.form.validation.email") }),
     full_name: z.string().optional(),
-    password: z
-      .string()
-      .min(1, { message: t("admin.users.form.validation.passwordRequired") })
-      .min(12, { message: t("admin.users.form.validation.passwordMin") }),
-    confirm_password: z
-      .string()
-      .min(1, { message: t("admin.users.form.validation.confirmRequired") }),
     // Existing API role flag. A pending/rejected workflow needs a separate backend status field.
     is_superuser: z.boolean(),
     is_active: z.boolean(),
-  })
-  .refine((data) => data.password === data.confirm_password, {
-    message: t("admin.users.form.validation.mismatch"),
-    path: ["confirm_password"],
   })
 
 type FormData = z.infer<ReturnType<typeof buildSchema>>
@@ -78,15 +67,14 @@ const AddUser = () => {
     defaultValues: {
       email: "",
       full_name: "",
-      password: "",
-      confirm_password: "",
       is_superuser: false,
       is_active: false,
     },
   })
 
   const mutation = useMutation({
-    mutationFn: (data: UserCreate) => UsersService.createUser({ body: data }),
+    mutationFn: (data: UserCreateByAdmin) =>
+      UsersService.createUser({ body: data }),
     onSuccess: () => {
       showSuccessToast(t("admin.users.notifications.created"))
       form.reset()
@@ -99,11 +87,9 @@ const AddUser = () => {
   })
 
   const onSubmit = (data: FormData) => {
-    // confirm_password is a client-side validation field, not part of UserCreate.
-    // Keep the API payload limited to fields accepted by the backend schema.
-    const { confirm_password: _confirmPassword, ...userData } = data
+    // No password is sent: the account starts with the default password.
     // is_superuser is the existing API field for the System Administrator role.
-    mutation.mutate(userData)
+    mutation.mutate(data)
   }
 
   return (
@@ -130,7 +116,9 @@ const AddUser = () => {
           >
             <div className={`${modalBody} grid gap-4 sm:grid-cols-2`}>
               <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground sm:col-span-2">
-                {t("admin.users.form.tempNotice")}
+                {t("admin.users.form.tempNotice", {
+                  password: DEFAULT_PASSWORD,
+                })}
               </p>
               <FormField
                 control={form.control}
@@ -138,7 +126,8 @@ const AddUser = () => {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      {t("admin.users.form.email")} <span className="text-destructive">*</span>
+                      {t("admin.users.form.email")}{" "}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -160,49 +149,10 @@ const AddUser = () => {
                   <FormItem>
                     <FormLabel>{t("admin.users.form.fullName")}</FormLabel>
                     <FormControl>
-                      <Input placeholder={t("admin.users.form.fullNamePlaceholder")} type="text" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {t("admin.users.form.tempPasswordLabel")} <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
                       <Input
-                        placeholder={t("admin.users.form.passwordPlaceholder")}
-                        type="password"
+                        placeholder={t("admin.users.form.fullNamePlaceholder")}
+                        type="text"
                         {...field}
-                        required
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="confirm_password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {t("admin.users.form.confirmPassword")}{" "}
-                      <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("admin.users.form.passwordPlaceholder")}
-                        type="password"
-                        {...field}
-                        required
                       />
                     </FormControl>
                     <FormMessage />
@@ -224,8 +174,12 @@ const AddUser = () => {
                           field.onChange(event.target.value === "admin")
                         }
                       >
-                        <option value="staff">{t("admin.users.roleStaff")}</option>
-                        <option value="admin">{t("admin.users.roleAdmin")}</option>
+                        <option value="staff">
+                          {t("admin.users.roleStaff")}
+                        </option>
+                        <option value="admin">
+                          {t("admin.users.roleAdmin")}
+                        </option>
                       </Select>
                     </FormControl>
                     <FormMessage />
@@ -244,7 +198,9 @@ const AddUser = () => {
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel className="font-normal">{t("admin.users.form.isActive")}</FormLabel>
+                    <FormLabel className="font-normal">
+                      {t("admin.users.form.isActive")}
+                    </FormLabel>
                   </FormItem>
                 )}
               />
@@ -252,11 +208,19 @@ const AddUser = () => {
 
             <DialogFooter className={modalFooter}>
               <DialogClose asChild>
-                <Button variant="outline" className="min-h-11" disabled={mutation.isPending}>
+                <Button
+                  variant="outline"
+                  className="min-h-11"
+                  disabled={mutation.isPending}
+                >
                   {t("admin.users.form.cancel")}
                 </Button>
               </DialogClose>
-              <LoadingButton className="min-h-11" type="submit" loading={mutation.isPending}>
+              <LoadingButton
+                className="min-h-11"
+                type="submit"
+                loading={mutation.isPending}
+              >
                 {t("admin.users.form.save")}
               </LoadingButton>
             </DialogFooter>

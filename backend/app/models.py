@@ -80,6 +80,16 @@ class UserCreate(UserBase):
         return self
 
 
+class UserCreateByAdmin(UserBase):
+    """Body of POST /users/. There is no password: the account starts with the
+    default password and must change it at first sign-in."""
+
+    @model_validator(mode="after")
+    def _sync_role(self) -> Self:
+        _reconcile_role(self)
+        return self
+
+
 class UserRegister(SQLModel):
     email: EmailStr = Field(max_length=255)
     password: str = Field(min_length=12, max_length=128)
@@ -94,6 +104,9 @@ class UserUpdate(SQLModel):
     role: UserRole | None = None
     full_name: str | None = Field(default=None, max_length=255)
     password: str | None = Field(default=None, min_length=12, max_length=128)
+    # Administrator only, for another account: back to the default password,
+    # with a forced change at the next sign-in.
+    reset_to_default_password: bool = False
 
     @model_validator(mode="after")
     def _sync_role(self) -> Self:

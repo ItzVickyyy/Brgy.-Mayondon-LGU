@@ -5,21 +5,21 @@ test("temporary password forces a change before the user can access the system",
   page,
 }) => {
   const email = randomEmail()
-  const temporaryPassword = randomPassword()
+  const temporaryPassword = "ChangeThisPassword"
   const newPassword = randomPassword()
 
   await page.goto("/admin")
   await page.getByRole("button", { name: "Add User" }).click()
   await page.getByPlaceholder("Email", { exact: true }).fill(email)
   await page.getByPlaceholder("Full name").fill("Temporary Password Test")
-  await page.getByPlaceholder("Password").first().fill(temporaryPassword)
-  await page.getByPlaceholder("Password").last().fill(temporaryPassword)
   await page.getByLabel("Is active?").check()
   await page.getByRole("button", { name: "Save" }).click()
 
   const userRow = page.getByRole("row").filter({ hasText: email })
   await expect(userRow).toBeVisible()
-  await expect(userRow.getByText("Temporary password", { exact: true })).toBeVisible()
+  await expect(
+    userRow.getByText("Temporary password", { exact: true }),
+  ).toBeVisible()
 
   await page.getByRole("button", { name: "User menu" }).click()
   await page.getByRole("menuitem", { name: "Logout" }).click()

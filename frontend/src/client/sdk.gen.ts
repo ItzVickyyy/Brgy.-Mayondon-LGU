@@ -116,7 +116,8 @@ export class UsersService {
     /**
      * Create User
      *
-     * Create new user.
+     * Create new user. The account starts with the default password and must
+     * change it at the first sign-in; no password is accepted in the request.
      */
     public static createUser<ThrowOnError extends boolean = true>(options: Options<usersCreateUserData, ThrowOnError>) {
         return (options.client ?? client).post<usersCreateUserResponses, usersCreateUserErrors, ThrowOnError>({

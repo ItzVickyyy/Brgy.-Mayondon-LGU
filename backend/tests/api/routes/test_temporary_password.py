@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session
 
 from app.core.config import settings
+from app.core.security import DEFAULT_PASSWORD
 from app.main import app
 from app.models import User, UserRole
 from app.utils import generate_password_reset_token
@@ -22,12 +23,12 @@ EXEMPT = {("GET", f"{API}/users/me"), ("PATCH", f"{API}/users/me/password")}
 
 
 def _create_temp_user(client: TestClient, admin: Headers) -> tuple[str, str, str]:
-    email, password = random_email(), random_lower_string()
+    email, password = random_email(), DEFAULT_PASSWORD
     with patch("app.api.routes.users.send_email", return_value=None):
         r = client.post(
             f"{API}/users/",
             headers=admin,
-            json={"email": email, "password": password},
+            json={"email": email},
         )
     assert r.status_code == 200, r.text
     return r.json()["id"], email, password
@@ -159,12 +160,12 @@ def test_admin_reset_of_another_account_is_temporary(
         headers=superuser_token_headers,
         json={"password": password},
     )
-    assert r.status_code == 400  # same as the current password
-    new_temp = random_lower_string()
+    assert r.status_code == 400  # a typed password for another account
+    new_temp = DEFAULT_PASSWORD
     r = client.patch(
         f"{API}/users/{user.id}",
         headers=superuser_token_headers,
-        json={"password": new_temp},
+        json={"reset_to_default_password": True},
     )
     assert r.status_code == 200, r.text
     assert r.json()["must_change_password"] is True
@@ -203,7 +204,7 @@ def test_staff_cannot_set_another_users_password(
     r = client.patch(
         f"{API}/users/{target.id}",
         headers=staff_token_headers,
-        json={"password": random_lower_string()},
+        json={"reset_to_default_password": True},
     )
     assert r.status_code == 403
     db.refresh(target)

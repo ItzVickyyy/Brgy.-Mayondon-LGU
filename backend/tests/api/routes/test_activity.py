@@ -9,6 +9,7 @@ from sqlmodel import Session
 
 from app.core.config import settings
 from app.core.dates import today_manila
+from app.core.security import DEFAULT_PASSWORD
 from app.models import UserRole
 from tests.api.routes.test_issuances import (  # noqa: F401  (fixtures are reused)
     _resident,
@@ -252,8 +253,8 @@ def test_account_changes_are_logged_without_passwords(
     client: TestClient, superuser_token_headers: Headers
 ) -> None:
     email = random_email()
-    password = random_lower_string()
-    new_password = random_lower_string()
+    password = "typed-by-admin-12345"
+    new_password = DEFAULT_PASSWORD
     with patch("app.api.routes.users.send_email", return_value=None):
         r = client.post(
             f"{API}/users/",
@@ -265,7 +266,7 @@ def test_account_changes_are_logged_without_passwords(
     r = client.patch(
         f"{API}/users/{uid}",
         headers=superuser_token_headers,
-        json={"role": UserRole.admin.value, "password": new_password},
+        json={"role": UserRole.admin.value, "reset_to_default_password": True},
     )
     assert r.status_code == 200, r.text
     r = client.delete(f"{API}/users/{uid}", headers=superuser_token_headers)
@@ -295,7 +296,8 @@ def test_account_changes_are_logged_without_passwords(
     assert reasons == ["account_created", "password_reset"]
     assert by_action["user.create"]["details"] == {"role": "staff"}
     # Field names only; the model also marks is_superuser when the role is set.
-    assert set(by_action["user.update"]["details"]["fields"]) >= {"password", "role"}
+    assert set(by_action["user.update"]["details"]["fields"]) >= {"role"}
+    assert "password" not in by_action["user.update"]["details"]["fields"]
     assert by_action["user.role_change"]["details"] == {"from": "staff", "to": "admin"}
     assert (
         by_action["user.delete"]["actor_email"]

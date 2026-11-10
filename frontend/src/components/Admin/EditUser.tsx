@@ -1,21 +1,21 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { Pencil } from "lucide-react"
 import type { TFunction } from "i18next"
+import { Pencil } from "lucide-react"
 import { useMemo, useState } from "react"
-import { useTranslation } from "react-i18next"
 import { useForm } from "react-hook-form"
+import { useTranslation } from "react-i18next"
 import { z } from "zod"
 
 import { type UserPublic, UsersService } from "@/client"
 import { formControlClass } from "@/components/Common/formStyles"
-import { Select } from "@/components/Common/Select"
 import {
   modalBody,
   modalFooter,
   modalHeader,
   modalShell,
 } from "@/components/Common/ModalLayout"
+import { Select } from "@/components/Common/Select"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
@@ -38,29 +38,34 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
-import useCustomToast from "@/hooks/useCustomToast"
+import { DEFAULT_PASSWORD } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
+import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
 const buildSchema = (t: TFunction) =>
   z
-  .object({
-    email: z.email({ message: t("admin.users.form.validation.email") }),
-    full_name: z.string().optional(),
-    password: z
-      .string()
-      .min(12, { message: t("admin.users.form.validation.passwordMin") })
-      .optional()
-      .or(z.literal("")),
-    confirm_password: z.string().optional(),
-    // Existing API role flag. Do not treat is_active as pending/rejected status.
-    is_superuser: z.boolean().optional(),
-    is_active: z.boolean().optional(),
-  })
-  .refine((data) => !data.password || data.password === data.confirm_password, {
-    message: t("admin.users.form.validation.mismatch"),
-    path: ["confirm_password"],
-  })
+    .object({
+      email: z.email({ message: t("admin.users.form.validation.email") }),
+      full_name: z.string().optional(),
+      password: z
+        .string()
+        .min(12, { message: t("admin.users.form.validation.passwordMin") })
+        .optional()
+        .or(z.literal("")),
+      confirm_password: z.string().optional(),
+      reset_to_default_password: z.boolean().optional(),
+      // Existing API role flag. Do not treat is_active as pending/rejected status.
+      is_superuser: z.boolean().optional(),
+      is_active: z.boolean().optional(),
+    })
+    .refine(
+      (data) => !data.password || data.password === data.confirm_password,
+      {
+        message: t("admin.users.form.validation.mismatch"),
+        path: ["confirm_password"],
+      },
+    )
 
 type FormData = z.infer<ReturnType<typeof buildSchema>>
 
@@ -71,7 +76,12 @@ interface EditUserProps {
   asPrimaryButton?: boolean
 }
 
-const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButton = false }: EditUserProps) => {
+const EditUser = ({
+  user,
+  onSuccess,
+  protectRoleAndStatus = false,
+  asPrimaryButton = false,
+}: EditUserProps) => {
   const { t } = useTranslation()
   const formSchema = useMemo(() => buildSchema(t), [t])
   const [isOpen, setIsOpen] = useState(false)
@@ -89,6 +99,7 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
       full_name: user.full_name ?? undefined,
       is_superuser: user.is_superuser,
       is_active: user.is_active,
+      reset_to_default_password: false,
     },
   })
 
@@ -109,8 +120,11 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
   const onSubmit = (data: FormData) => {
     // exclude confirm_password from submission data and remove password if empty
     const { confirm_password: _, ...submitData } = data
-    if (!submitData.password) {
+    if (!submitData.password || !isEditingSelf) {
       delete submitData.password
+    }
+    if (isEditingSelf || !submitData.reset_to_default_password) {
+      delete submitData.reset_to_default_password
     }
     // Preserve the selected role instead of forcing every account to Admin.
     mutation.mutate(submitData)
@@ -119,7 +133,12 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       {asPrimaryButton ? (
-        <Button type="button" variant="outline" size="sm" onClick={() => setIsOpen(true)}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => setIsOpen(true)}
+        >
           <Pencil aria-hidden="true" />
           {t("admin.users.form.edit")}
         </Button>
@@ -147,18 +166,14 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
               </DialogDescription>
             </DialogHeader>
             <div className={`${modalBody} grid gap-4 sm:grid-cols-2`}>
-              {!isEditingSelf ? (
-                <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground sm:col-span-2">
-                  {t("admin.users.form.tempNotice")}
-                </p>
-              ) : null}
               <FormField
                 control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      {t("admin.users.form.email")} <span className="text-destructive">*</span>
+                      {t("admin.users.form.email")}{" "}
+                      <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
                       <Input
@@ -180,25 +195,9 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                   <FormItem>
                     <FormLabel>{t("admin.users.form.fullName")}</FormLabel>
                     <FormControl>
-                      <Input placeholder={t("admin.users.form.fullNamePlaceholder")} type="text" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {isEditingSelf ? t("admin.users.form.setPassword") : t("admin.users.form.tempPasswordLabel")}
-                    </FormLabel>
-                    <FormControl>
                       <Input
-                        placeholder={t("admin.users.form.passwordPlaceholder")}
-                        type="password"
+                        placeholder={t("admin.users.form.fullNamePlaceholder")}
+                        type="text"
                         {...field}
                       />
                     </FormControl>
@@ -207,23 +206,75 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="confirm_password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("admin.users.form.confirmPassword")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("admin.users.form.passwordPlaceholder")}
-                        type="password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {isEditingSelf ? (
+                <>
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {isEditingSelf
+                            ? t("admin.users.form.setPassword")
+                            : t("admin.users.form.tempPasswordLabel")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t(
+                              "admin.users.form.passwordPlaceholder",
+                            )}
+                            type="password"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="confirm_password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t("admin.users.form.confirmPassword")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t(
+                              "admin.users.form.passwordPlaceholder",
+                            )}
+                            type="password"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </>
+              ) : (
+                <FormField
+                  control={form.control}
+                  name="reset_to_default_password"
+                  render={({ field }) => (
+                    <FormItem className="flex min-h-11 items-start gap-3 space-y-0 rounded-md border bg-background px-3 py-2 sm:col-span-2">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="font-normal">
+                        {t("admin.users.form.resetToDefault", {
+                          password: DEFAULT_PASSWORD,
+                        })}
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+              )}
 
               <FormField
                 control={form.control}
@@ -240,8 +291,12 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                           field.onChange(event.target.value === "admin")
                         }
                       >
-                        <option value="staff">{t("admin.users.roleStaff")}</option>
-                        <option value="admin">{t("admin.users.roleAdmin")}</option>
+                        <option value="staff">
+                          {t("admin.users.roleStaff")}
+                        </option>
+                        <option value="admin">
+                          {t("admin.users.roleAdmin")}
+                        </option>
                       </Select>
                     </FormControl>
                     <FormMessage />
@@ -261,7 +316,9 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel className="font-normal">{t("admin.users.form.isActive")}</FormLabel>
+                    <FormLabel className="font-normal">
+                      {t("admin.users.form.isActive")}
+                    </FormLabel>
                   </FormItem>
                 )}
               />
@@ -269,11 +326,19 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
 
             <DialogFooter className={modalFooter}>
               <DialogClose asChild>
-                <Button variant="outline" className="min-h-11" disabled={mutation.isPending}>
+                <Button
+                  variant="outline"
+                  className="min-h-11"
+                  disabled={mutation.isPending}
+                >
                   {t("admin.users.form.cancel")}
                 </Button>
               </DialogClose>
-              <LoadingButton className="min-h-11" type="submit" loading={mutation.isPending}>
+              <LoadingButton
+                className="min-h-11"
+                type="submit"
+                loading={mutation.isPending}
+              >
                 {t("admin.users.form.save")}
               </LoadingButton>
             </DialogFooter>

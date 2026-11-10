@@ -315,7 +315,7 @@ function Dashboard() {
 
       <section
         aria-label={t("dashboard.summary.ariaLabel")}
-        className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+        className="grid gap-4 sm:grid-cols-2 2xl:grid-cols-4"
       >
         <SummaryCard
           title={t("dashboard.summary.issuedThisMonth.title")}
@@ -354,18 +354,18 @@ function Dashboard() {
       <section aria-label={t("dashboard.quickActions.ariaLabel")}>
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <SectionHeading title={t("dashboard.quickActions.title")} />
-          <div className="mt-3 flex flex-col gap-3 lg:flex-row">
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
             {quickActions.map((item) => (
               <Link
                 key={item.key}
                 to={item.to}
-                className="action-card group flex min-h-16 items-center gap-3 rounded-lg border bg-card p-3 lg:flex-1"
+                className="action-card group flex min-h-14 items-center gap-3 rounded-lg border bg-card px-3 py-2"
               >
-                <span className="action-chip rounded-md p-2">
+                <span className="action-chip rounded-md p-1.5">
                   <item.icon className="size-5" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="action-title block font-semibold">
+                  <span className="action-title block font-semibold leading-5">
                     {item.title}
                   </span>
                   <span className="block text-sm leading-5 text-muted-foreground">

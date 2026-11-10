@@ -320,7 +320,8 @@ test("a resident can only get one First-Time Jobseeker document", async () => {
 // Clerks are Staff, so everything below runs with a Staff token.
 
 const staffEmail = `live-staff-${run}@example.com`
-const staffPassword = `Staff-${run}-Pw-12345!`
+// An account created by an admin starts with the default password.
+const staffPassword = "ChangeThisPassword"
 let staffToken = ""
 let adminToken = ""
 
@@ -343,26 +344,22 @@ test("staff: an admin creates a staff account and it can sign in", async () => {
   await UsersService.createUser({
     body: {
       email: staffEmail,
-      password: staffPassword,
       full_name: "Live Staff",
       role: "staff",
     },
   })
   const temporaryToken = await login(staffEmail, staffPassword)
-  const passwordChange = await fetch(
-    `${baseURL}/api/v1/users/me/password`,
-    {
-      method: "PATCH",
-      headers: {
-        Authorization: `Bearer ${temporaryToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        current_password: staffPassword,
-        new_password: `${staffPassword}-Changed!`,
-      }),
+  const passwordChange = await fetch(`${baseURL}/api/v1/users/me/password`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${temporaryToken}`,
+      "Content-Type": "application/json",
     },
-  )
+    body: JSON.stringify({
+      current_password: staffPassword,
+      new_password: `${staffPassword}-Changed!`,
+    }),
+  })
   expect(passwordChange.status, "change temporary staff password").toBe(200)
   staffToken = await login(staffEmail, `${staffPassword}-Changed!`)
   useToken(staffToken)

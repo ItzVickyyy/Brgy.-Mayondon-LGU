@@ -2241,9 +2241,12 @@ export type UpdatePassword = {
 };
 
 /**
- * UserCreate
+ * UserCreateByAdmin
+ *
+ * Body of POST /users/. There is no password: the account starts with the
+ * default password and must change it at first sign-in.
  */
-export type UserCreate = {
+export type UserCreateByAdmin = {
     /**
      * Email
      */
@@ -2309,10 +2312,6 @@ export type UserCreate = {
      * Profile Photo Url
      */
     profile_photo_url?: string | null;
-    /**
-     * Password
-     */
-    password: string;
 };
 
 /**
@@ -2448,6 +2447,10 @@ export type UserUpdate = {
      * Password
      */
     password?: string | null;
+    /**
+     * Reset To Default Password
+     */
+    reset_to_default_password?: boolean;
 };
 
 /**
@@ -2732,7 +2735,7 @@ export type usersReadUsersResponses = {
 export type usersReadUsersResponse = usersReadUsersResponses[keyof usersReadUsersResponses];
 
 export type usersCreateUserData = {
-    body: UserCreate;
+    body: UserCreateByAdmin;
     path?: never;
     query?: never;
     url: '/api/v1/users/';

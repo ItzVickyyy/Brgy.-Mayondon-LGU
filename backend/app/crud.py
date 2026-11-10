@@ -38,6 +38,7 @@ def update_user(
     true (an administrator resetting another account); any other password
     change clears the forced-change flag."""
     user_data = user_in.model_dump(exclude_unset=True)
+    user_data.pop("reset_to_default_password", None)
     extra_data = {}
     if "password" in user_data:
         password = user_data["password"]

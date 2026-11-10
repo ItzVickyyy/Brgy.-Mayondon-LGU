@@ -20,6 +20,12 @@ password_hash = PasswordHash(
 
 ALGORITHM = "HS256"
 
+# The starting password of every account an administrator creates (or resets).
+# The account is flagged must_change_password, so it only works until the
+# person's first sign-in. Keep equal to DEFAULT_PASSWORD in
+# frontend/src/config/site.ts.
+DEFAULT_PASSWORD = "ChangeThisPassword"
+
 
 def password_fingerprint(hashed_password: str) -> str:
     """Return a keyed fingerprint that changes when the password hash changes."""

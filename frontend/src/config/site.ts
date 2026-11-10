@@ -18,6 +18,13 @@ export const SITE = {
   developedBy: "BSIT-WMAD, Laguna State Polytechnic University – Los Baños",
 } as const
 
+/**
+ * Starting password of every account an administrator creates or resets. The
+ * account must change it at first sign-in. Keep equal to DEFAULT_PASSWORD in
+ * backend/app/core/security.py.
+ */
+export const DEFAULT_PASSWORD = "ChangeThisPassword"
+
 const PAGE_TITLE_KEYS = {
   "Activity Log": "common.pageTitles.activityLog",
   "User Accounts": "common.pageTitles.userAccounts",

@@ -9,7 +9,7 @@ from sqlmodel import Session, select
 
 from app import crud
 from app.core.config import settings
-from app.core.security import verify_password
+from app.core.security import DEFAULT_PASSWORD, verify_password
 from app.models import User, UserCreate
 from tests.utils.user import create_random_user
 from tests.utils.utils import random_email, random_lower_string
@@ -51,8 +51,7 @@ def test_create_user_new_email(
         patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
     ):
         username = random_email()
-        password = random_lower_string()
-        data = {"email": username, "password": password}
+        data = {"email": username, "password": "ignored-typed-password-1"}
         r = client.post(
             f"{settings.API_V1_STR}/users/",
             headers=superuser_token_headers,
@@ -66,7 +65,8 @@ def test_create_user_new_email(
         send_email_mock.assert_called_once()
         sent_html = send_email_mock.call_args.kwargs["html_content"]
         assert "reset-password?token=" in sent_html
-        assert password not in sent_html
+        assert "ignored-typed-password-1" not in sent_html
+        assert DEFAULT_PASSWORD not in sent_html
         assert "Set Password" in sent_html
         assert '"action":"user.create"' in caplog.text
         assert '"target_type":"user"' in caplog.text
@@ -457,13 +457,127 @@ def test_admin_password_change_clears_login_lockout(
     response = client.patch(
         f"{settings.API_V1_STR}/users/{user.id}",
         headers=superuser_token_headers,
-        json={"password": random_lower_string()},
+        json={"reset_to_default_password": True},
     )
 
     assert response.status_code == 200
     db.refresh(user)
     assert user.failed_login_attempts == 0
     assert user.locked_until is None
+
+
+def test_create_user_uses_default_password_and_forces_change(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    email = random_email()
+    r = client.post(
+        f"{settings.API_V1_STR}/users/",
+        headers=superuser_token_headers,
+        json={"email": email, "is_active": True, "role": "staff"},
+    )
+    assert r.status_code == 200
+    user = crud.get_user_by_email(session=db, email=email)
+    assert user
+    assert user.must_change_password is True
+    verified, _ = verify_password(DEFAULT_PASSWORD, user.hashed_password)
+    assert verified
+    login = client.post(
+        f"{settings.API_V1_STR}/login/access-token",
+        data={"username": email, "password": DEFAULT_PASSWORD},
+    )
+    assert login.status_code == 200
+
+
+def test_create_user_ignores_typed_password(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    email = random_email()
+    typed = "Typed-by-admin-12345"
+    r = client.post(
+        f"{settings.API_V1_STR}/users/",
+        headers=superuser_token_headers,
+        json={"email": email, "password": typed},
+    )
+    assert r.status_code == 200
+    user = crud.get_user_by_email(session=db, email=email)
+    assert user
+    assert verify_password(typed, user.hashed_password)[0] is False
+    assert verify_password(DEFAULT_PASSWORD, user.hashed_password)[0] is True
+
+
+def test_reset_to_default_password_for_other_user(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    old = random_lower_string()
+    user = crud.create_user(
+        session=db, user_create=UserCreate(email=random_email(), password=old)
+    )
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/{user.id}",
+        headers=superuser_token_headers,
+        json={"reset_to_default_password": True},
+    )
+    assert r.status_code == 200
+    db.refresh(user)
+    assert user.must_change_password is True
+    assert verify_password(DEFAULT_PASSWORD, user.hashed_password)[0] is True
+    assert verify_password(old, user.hashed_password)[0] is False
+
+
+def test_admin_cannot_type_password_for_other_user(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    user = crud.create_user(
+        session=db,
+        user_create=UserCreate(email=random_email(), password=random_lower_string()),
+    )
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/{user.id}",
+        headers=superuser_token_headers,
+        json={"password": "Another-typed-pass-1"},
+    )
+    assert r.status_code == 400
+
+
+def test_default_password_cannot_be_chosen(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    me = crud.get_user_by_email(session=db, email=settings.FIRST_SUPERUSER)
+    assert me
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/{me.id}",
+        headers=superuser_token_headers,
+        json={"password": DEFAULT_PASSWORD},
+    )
+    assert r.status_code == 400
+
+
+def test_reset_to_default_on_own_account_rejected(
+    client: TestClient, superuser_token_headers: dict[str, str], db: Session
+) -> None:
+    me = crud.get_user_by_email(session=db, email=settings.FIRST_SUPERUSER)
+    assert me
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/{me.id}",
+        headers=superuser_token_headers,
+        json={"reset_to_default_password": True},
+    )
+    assert r.status_code == 400
+
+
+def test_default_password_not_in_audit_details(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    caplog.set_level(logging.INFO, logger="app.audit")
+    email = random_email()
+    client.post(
+        f"{settings.API_V1_STR}/users/",
+        headers=superuser_token_headers,
+        json={"email": email},
+    )
+    assert DEFAULT_PASSWORD not in caplog.text
 
 
 def test_update_user_not_exists(

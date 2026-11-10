@@ -25,15 +25,12 @@ test.describe("Admin user management", () => {
     await page.goto("/admin")
 
     const email = randomEmail()
-    const password = randomPassword()
     const fullName = "Test User Admin"
 
     await page.getByRole("button", { name: "Add User" }).click()
 
     await page.getByPlaceholder("Email", { exact: true }).fill(email)
     await page.getByPlaceholder("Full name").fill(fullName)
-    await page.getByPlaceholder("Password").first().fill(password)
-    await page.getByPlaceholder("Password").last().fill(password)
 
     await page.getByRole("button", { name: "Save" }).click()
 
@@ -49,13 +46,10 @@ test.describe("Admin user management", () => {
     await page.goto("/admin")
 
     const email = randomEmail()
-    const password = randomPassword()
 
     await page.getByRole("button", { name: "Add User" }).click()
 
     await page.getByPlaceholder("Email", { exact: true }).fill(email)
-    await page.getByPlaceholder("Password").first().fill(password)
-    await page.getByPlaceholder("Password").last().fill(password)
 
     await chooseOption(
       page.getByRole("dialog").getByLabel("Role"),
@@ -77,15 +71,12 @@ test.describe("Admin user management", () => {
     await page.goto("/admin")
 
     const email = randomEmail()
-    const password = randomPassword()
     const originalName = "Original Name"
     const updatedName = "Updated Name"
 
     await page.getByRole("button", { name: "Add User" }).click()
     await page.getByPlaceholder("Email", { exact: true }).fill(email)
     await page.getByPlaceholder("Full name").fill(originalName)
-    await page.getByPlaceholder("Password").first().fill(password)
-    await page.getByPlaceholder("Password").last().fill(password)
     await page.getByRole("button", { name: "Save" }).click()
 
     await expect(page.getByRole("dialog")).not.toBeVisible()
@@ -104,12 +95,9 @@ test.describe("Admin user management", () => {
     await page.goto("/admin")
 
     const email = randomEmail()
-    const password = randomPassword()
 
     await page.getByRole("button", { name: "Add User" }).click()
     await page.getByPlaceholder("Email", { exact: true }).fill(email)
-    await page.getByPlaceholder("Password").first().fill(password)
-    await page.getByPlaceholder("Password").last().fill(password)
     await page.getByRole("button", { name: "Save" }).click()
 
     await expect(page.getByRole("dialog")).not.toBeVisible()
@@ -130,7 +118,9 @@ test.describe("Admin user management", () => {
     await page.goto("/admin")
 
     await page.getByRole("button", { name: "Add User" }).click()
-    await page.getByPlaceholder("Email", { exact: true }).fill("test@example.com")
+    await page
+      .getByPlaceholder("Email", { exact: true })
+      .fill("test@example.com")
 
     await page.getByRole("button", { name: "Cancel" }).click()
 
@@ -146,34 +136,6 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Email", { exact: true }).blur()
 
     await expect(page.getByText("Invalid email address")).toBeVisible()
-  })
-
-  test("Password must be at least 12 characters", async ({ page }) => {
-    await page.goto("/admin")
-
-    await page.getByRole("button", { name: "Add User" }).click()
-
-    await page.getByPlaceholder("Email", { exact: true }).fill(randomEmail())
-    await page.getByPlaceholder("Password").first().fill("short")
-    await page.getByPlaceholder("Password").last().fill("short")
-    await page.getByRole("button", { name: "Save" }).click()
-
-    await expect(
-      page.getByText("Password must be at least 12 characters"),
-    ).toBeVisible()
-  })
-
-  test("Passwords must match", async ({ page }) => {
-    await page.goto("/admin")
-
-    await page.getByRole("button", { name: "Add User" }).click()
-
-    await page.getByPlaceholder("Email", { exact: true }).fill(randomEmail())
-    await page.getByPlaceholder("Password").first().fill(randomPassword())
-    await page.getByPlaceholder("Password").last().fill("different12345")
-    await page.getByPlaceholder("Password").last().blur()
-
-    await expect(page.getByText("The passwords don't match")).toBeVisible()
   })
 })
 

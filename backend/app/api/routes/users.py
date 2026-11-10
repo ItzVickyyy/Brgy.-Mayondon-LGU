@@ -14,12 +14,13 @@ from app.api.deps import (
 from app.core.audit import record_admin_action, record_audit_event
 from app.core.config import settings
 from app.core.permissions import Permission, has_permission, is_admin
-from app.core.security import get_password_hash, verify_password
+from app.core.security import DEFAULT_PASSWORD, get_password_hash, verify_password
 from app.models import (
     Message,
     UpdatePassword,
     User,
     UserCreate,
+    UserCreateByAdmin,
     UserPublic,
     UserRegister,
     UserRole,
@@ -69,9 +70,12 @@ def read_users(
 @router.post(
     "/", dependencies=[Depends(require_user_admin)], response_model=UserPublic
 )
-def create_user(*, session: SessionDep, user_in: UserCreate, current_user: CurrentUser) -> Any:
+def create_user(
+    *, session: SessionDep, user_in: UserCreateByAdmin, current_user: CurrentUser
+) -> Any:
     """
-    Create new user.
+    Create new user. The account starts with the default password and must
+    change it at the first sign-in; no password is accepted in the request.
     """
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
@@ -80,7 +84,13 @@ def create_user(*, session: SessionDep, user_in: UserCreate, current_user: Curre
             detail="The user with this email already exists in the system.",
         )
 
-    user = crud.create_user(session=session, user_create=user_in, temporary=True)
+    user = crud.create_user(
+        session=session,
+        user_create=UserCreate(
+            **user_in.model_dump(), password=DEFAULT_PASSWORD
+        ),
+        temporary=True,
+    )
     record_admin_action(actor_id=current_user.id, action="user.create", target_type="user", target_id=user.id)
     record_audit_event(
         session,
@@ -308,15 +318,29 @@ def update_user(
         )
 
     changed_fields = sorted(user_in.model_dump(exclude_unset=True))
-    # A password an administrator types for ANOTHER account is temporary.
-    temporary = bool(user_in.password) and db_user.id != current_user.id
+    is_self = db_user.id == current_user.id
+    if user_in.password and user_in.password == DEFAULT_PASSWORD:
+        raise HTTPException(
+            status_code=400,
+            detail="The default password cannot be chosen as a password.",
+        )
+    if user_in.password and not is_self:
+        raise HTTPException(
+            status_code=400,
+            detail="Another account's password can only be reset to the default.",
+        )
+    if user_in.reset_to_default_password and is_self:
+        raise HTTPException(
+            status_code=400,
+            detail="Use Change password to change your own password.",
+        )
+    temporary = user_in.reset_to_default_password and not is_self
     if temporary:
-        verified, _ = verify_password(user_in.password, db_user.hashed_password)
-        if verified:
-            raise HTTPException(
-                status_code=400,
-                detail="The temporary password must differ from the current one.",
-            )
+        # Never keep the flag or the default in the stored fields or the log.
+        user_in = user_in.model_copy(update={"password": DEFAULT_PASSWORD})
+    changed_fields = sorted(
+        f for f in changed_fields if f not in ("password", "reset_to_default_password")
+    )
     db_user = crud.update_user(
         session=session, db_user=db_user, user_in=user_in, temporary=temporary
     )
