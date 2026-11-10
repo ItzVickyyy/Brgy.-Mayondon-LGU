@@ -4,6 +4,7 @@ import {
   Activity,
   BarChart3,
   CalendarDays,
+  ChevronRight,
   Clock3,
   FileCheck2,
   IdCard,
@@ -15,13 +16,13 @@ import { useTranslation } from "react-i18next"
 import { ActivityService, DashboardService } from "@/client"
 import { AnimatedNumber } from "@/components/Common/AnimatedNumber"
 import { ErrorState, LoadingState } from "@/components/Common/FeedbackState"
+import { Select } from "@/components/Common/Select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { activityTitle } from "@/lib/activity"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
-import { Select } from "@/components/Common/Select"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -51,7 +52,9 @@ const periods: Period[] = [
 // withYear for places that must stay unambiguous (tooltips, screen readers).
 function monthLabel(value: string, withYear = false) {
   const [year, month] = value.split("-").map(Number)
-  const name = formatLocaleDate(new Date(year, month - 1, 1), { month: "short" })
+  const name = formatLocaleDate(new Date(year, month - 1, 1), {
+    month: "short",
+  })
   return withYear ? `${name} ${year}` : name
 }
 
@@ -272,7 +275,10 @@ function Dashboard() {
             {t("dashboard.subtitle")}
           </p>
         </div>
-        <label htmlFor="dashboard-period" className="flex items-center gap-2 self-start text-sm sm:self-auto">
+        <label
+          htmlFor="dashboard-period"
+          className="flex items-center gap-2 self-start text-sm sm:self-auto"
+        >
           <CalendarDays
             className="size-4 text-muted-foreground"
             aria-hidden="true"
@@ -280,7 +286,8 @@ function Dashboard() {
           <span className="text-muted-foreground">
             {t("dashboard.period.label")}
           </span>
-          <Select id="dashboard-period"
+          <Select
+            id="dashboard-period"
             aria-label={t("dashboard.period.ariaLabel")}
             value={period}
             onChange={(event) => setPeriod(event.target.value as Period)}
@@ -352,12 +359,12 @@ function Dashboard() {
               <Link
                 key={item.key}
                 to={item.to}
-                className="action-card group flex min-h-16 items-center gap-3 rounded-lg border bg-card p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring lg:flex-1"
+                className="action-card group flex min-h-16 items-center gap-3 rounded-lg border bg-card p-3 lg:flex-1"
               >
                 <span className="action-chip rounded-md p-2">
                   <item.icon className="size-5" aria-hidden="true" />
                 </span>
-                <span>
+                <span className="min-w-0 flex-1">
                   <span className="action-title block font-semibold">
                     {item.title}
                   </span>
@@ -365,6 +372,10 @@ function Dashboard() {
                     {item.description}
                   </span>
                 </span>
+                <ChevronRight
+                  className="action-arrow size-5 shrink-0"
+                  aria-hidden="true"
+                />
               </Link>
             ))}
           </div>
@@ -463,11 +474,13 @@ function Dashboard() {
                                   from the bottom, one after another. */}
                               <div
                                 className="bar-rise relative w-full max-w-10 rounded-t-md bg-brand transition-colors group-hover:bg-brand/60"
-                                style={{
-                                  height: `${(item.count / chartTop) * 100}%`,
-                                  minHeight: item.count > 0 ? "4px" : "0",
-                                  "--bar-delay": `${index * 60}ms`,
-                                } as CSSProperties}
+                                style={
+                                  {
+                                    height: `${(item.count / chartTop) * 100}%`,
+                                    minHeight: item.count > 0 ? "4px" : "0",
+                                    "--bar-delay": `${index * 60}ms`,
+                                  } as CSSProperties
+                                }
                               >
                                 <span className="absolute -top-5 left-1/2 -translate-x-1/2 text-xs tabular-nums text-muted-foreground transition-colors group-hover:text-foreground">
                                   {formatLocaleNumber(item.count)}
@@ -563,10 +576,12 @@ function Dashboard() {
                 <div className="h-2 overflow-hidden rounded-full bg-muted">
                   <div
                     className="bar-grow h-full rounded-full bg-brand"
-                    style={{
-                      width: `${totalByType > 0 ? (item.count / totalByType) * 100 : 0}%`,
-                      "--bar-delay": `${index * 80}ms`,
-                    } as CSSProperties}
+                    style={
+                      {
+                        width: `${totalByType > 0 ? (item.count / totalByType) * 100 : 0}%`,
+                        "--bar-delay": `${index * 80}ms`,
+                      } as CSSProperties
+                    }
                   />
                 </div>
               </div>

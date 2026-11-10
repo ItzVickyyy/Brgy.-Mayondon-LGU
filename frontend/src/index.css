@@ -214,7 +214,35 @@
   .action-card:hover,
   .action-card:focus-visible {
     background-color: var(--accent);
-    border-color: color-mix(in oklab, var(--brand) 45%, var(--border));
+    border-color: color-mix(in oklab, var(--brand) 70%, var(--border));
+    /* A thin navy marker on the left edge says "this one is selected". */
+    box-shadow:
+      inset 3px 0 0 var(--brand),
+      0 6px 14px -10px oklch(0 0 0 / 0.35);
+  }
+  .action-card:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+  .action-card:active {
+    background-color: color-mix(in oklab, var(--accent) 80%, var(--brand));
+    border-color: var(--brand);
+  }
+  .action-card .action-arrow {
+    color: var(--muted-foreground);
+    transition:
+      color 160ms ease-out,
+      transform 160ms ease-out;
+  }
+  .action-card:hover .action-arrow,
+  .action-card:focus-visible .action-arrow {
+    color: var(--brand);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .action-card:hover .action-arrow,
+    .action-card:focus-visible .action-arrow {
+      transform: translateX(3px);
+    }
   }
   .action-card:hover .action-chip,
   .action-card:focus-visible .action-chip {
@@ -224,6 +252,9 @@
   .action-card:hover .action-title,
   .action-card:focus-visible .action-title {
     color: var(--brand);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
   }
 
   /* Opt-in hover lift for cards that are clickable (links and buttons). */
