@@ -873,7 +873,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       const option = field.options?.find((candidate) => normalizedOptionValue(field.name, candidate) === raw)
       return option ? fieldOptionLabel(field.name, option, t) : raw
     }
-    if (Array.isArray(value)) return value.map(previewOptionLabel).join(", ")
+    // Sectors are shown in the list's order, which is also the order they come back in from a saved draft.
+    if (Array.isArray(value)) { const options = field.name === "sector" ? field.options : undefined; const ordered = options ? [...value].sort((a, b) => options.indexOf(String(a)) - options.indexOf(String(b))) : value; return ordered.map(previewOptionLabel).join(", ") }
     if (typeof value === "boolean") return value ? t("issuances.new.options.Yes") : t("issuances.new.options.No")
     return value == null ? "" : previewOptionLabel(value)
   }
@@ -1092,7 +1093,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
               {detailFields.length ? documentType === "INDIGENCY" ? (
                 <div className="grid items-start gap-x-4 gap-y-3 sm:grid-cols-2">
                   {detailFields.filter((field) => field.name === "sector").map((field) => <div key={field.name} className="sm:col-span-2">{renderField(field)}</div>)}
-                  {detailFields.filter((field) => field.name === "purpose" || field.name === "addressedToOffice").map(renderField)}
+                  {detailFields.filter((field) => field.name === "purpose" || field.name === "addressedToOffice" || field.name === "requestedBy").map(renderField)}
                 </div>
               ) : <div className="grid items-start gap-4 sm:grid-cols-2">{detailFields.map(renderField)}</div> : <p className="text-sm text-muted-foreground">{t("issuances.new.detailsStep.noExtra")}</p>}
               <div className={fieldLabelClass}>
