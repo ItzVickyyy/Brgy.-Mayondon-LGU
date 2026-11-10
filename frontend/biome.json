@@ -17,6 +17,12 @@
     "enabled": true,
     "rules": {
       "preset": "recommended",
+      "a11y": {
+        "noLabelWithoutControl": {
+          "level": "error",
+          "options": { "inputComponents": ["Select"] }
+        }
+      },
       "suspicious": {
         "noExplicitAny": "off",
         "noArrayIndexKey": "off"

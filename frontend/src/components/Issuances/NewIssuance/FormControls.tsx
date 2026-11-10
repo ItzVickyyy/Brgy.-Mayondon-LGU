@@ -161,6 +161,7 @@ export function SelectField({
   // Floating list: place it from the button's position on the screen. An
   // ancestor with a transform (a dialog) becomes the origin of `fixed`, so the
   // origin is measured first. Follows scrolling and resizing while open.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: shown.length re-places the list when a search changes its height
   useLayoutEffect(() => {
     if (!open || !floating) {
       setPlaced(null)
@@ -172,7 +173,8 @@ export function SelectField({
       if (!trigger || !panel) return
       const box = trigger.getBoundingClientRect()
       const origin = panel.getBoundingClientRect()
-      const originLeft = origin.left - (Number.parseFloat(panel.style.left) || 0)
+      const originLeft =
+        origin.left - (Number.parseFloat(panel.style.left) || 0)
       const originTop = origin.top - (Number.parseFloat(panel.style.top) || 0)
       const margin = 8
       const width = Math.max(box.width, 160)
@@ -196,7 +198,11 @@ export function SelectField({
     place()
     let frame = 0
     function schedule(event?: Event) {
-      if (event?.target instanceof Node && panelRef.current?.contains(event.target)) return
+      if (
+        event?.target instanceof Node &&
+        panelRef.current?.contains(event.target)
+      )
+        return
       cancelAnimationFrame(frame)
       frame = requestAnimationFrame(place)
     }
@@ -271,13 +277,16 @@ export function SelectField({
       typed.current = { text, at: now }
       const from = text.length === 1 ? active + 1 : active
       const order = [...shown.slice(from), ...shown.slice(0, from)]
-      const hit = order.find((item) => item.label.toLowerCase().startsWith(text))
+      const hit = order.find((item) =>
+        item.label.toLowerCase().startsWith(text),
+      )
       if (hit) setActive(shown.indexOf(hit))
     }
   }
 
   return (
     <div ref={wrapperRef} className={cn("relative min-w-0", wrapperClassName)}>
+      {/* biome-ignore lint/a11y/useAriaPropsSupportedByRole: aria-required tells a screen reader the choice is required, as a native select did */}
       <button
         {...triggerProps}
         ref={triggerRef}
@@ -290,7 +299,13 @@ export function SelectField({
         aria-expanded={open}
         aria-controls={open ? listId : undefined}
         aria-invalid={invalid || undefined}
-        aria-describedby={describedBy}
+        // The chosen text is part of the description, so a screen reader says it
+        // (a native select announces its value; the label alone would not).
+        aria-describedby={
+          selected
+            ? [describedBy, `${listId}-value`].filter(Boolean).join(" ")
+            : describedBy
+        }
         onClick={() => (open ? setOpen(false) : openPanel())}
         onKeyDown={(event) => {
           if (["ArrowDown", "ArrowUp"].includes(event.key)) {
@@ -305,7 +320,10 @@ export function SelectField({
           className,
         )}
       >
-        <span className={cn("truncate", !selected && "text-muted-foreground")}>
+        <span
+          id={`${listId}-value`}
+          className={cn("truncate", !selected && "text-muted-foreground")}
+        >
           {selected?.label ?? placeholder ?? t("issuances.new.controls.choose")}
         </span>
         <ChevronDown
@@ -663,7 +681,10 @@ export function ChoiceRow({
       aria-label={label}
       aria-invalid={invalid || undefined}
       aria-describedby={describedBy}
-      className={cn("m-0 grid min-w-0 gap-1.5 border-0 p-0", invalid && "rounded-md ring-1 ring-destructive")}
+      className={cn(
+        "m-0 grid min-w-0 gap-1.5 border-0 p-0",
+        invalid && "rounded-md ring-1 ring-destructive",
+      )}
       style={{
         gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))`,
       }}

@@ -36,7 +36,6 @@ type DuplicateAction = (typeof DUPLICATE_ACTIONS)[number]
 const ROW_FILTERS = ["all", "new", "duplicate", "error"] as const
 type RowFilter = (typeof ROW_FILTERS)[number]
 
-
 // The fields the API accepts (mirrors IMPORT_FIELDS in the backend). Shown
 // labels are translated; the keys are what the API stores and expects.
 const FIELD_KEYS = [
@@ -382,7 +381,7 @@ export function ImportMasterlistView() {
                 return (
                   <label
                     key={field}
-                    className="flex flex-col gap-2 text-sm font-medium"
+                    className="flex min-w-0 flex-col gap-2 text-sm font-medium"
                   >
                     <span>
                       {fieldLabel(field)}
@@ -423,7 +422,7 @@ export function ImportMasterlistView() {
               })}
             </div>
             <div className="mt-5 grid gap-3 border-t pt-4 sm:grid-cols-2">
-              <label className="flex flex-col gap-2 text-sm font-medium">
+              <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
                 {t("records.import.dateOrderLabel")}
                 <Select
                   className={cn(inputClass, "font-normal")}
@@ -439,7 +438,7 @@ export function ImportMasterlistView() {
                   ))}
                 </Select>
               </label>
-              <label className="flex flex-col gap-2 text-sm font-medium">
+              <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
                 {t("records.import.duplicateLabel")}
                 <Select
                   className={cn(inputClass, "font-normal")}
