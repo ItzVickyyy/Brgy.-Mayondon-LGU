@@ -1,6 +1,7 @@
 // Backup and Restore page against the real backend (System Administrator).
 // Skipped when the backend cannot make backups (pg_dump or the folder missing).
 import { expect, test } from "@playwright/test"
+import { chooseOption } from "./utils/select"
 
 test("make a backup, check it, and get the restore command", async ({
   page,
@@ -34,7 +35,7 @@ test("make a backup, check it, and get the restore command", async ({
 
   // Restore: choose the backup, type the word, get the command (nothing is restored).
   const archive = page.getByLabel("Backup archive")
-  await archive.selectOption({ index: 1 })
+  await chooseOption(archive, 1)
   await page.getByRole("button", { name: "Prepare Restore" }).click()
   const confirm = page.getByRole("button", { name: "Check and Show Command" })
   await expect(confirm).toBeDisabled()

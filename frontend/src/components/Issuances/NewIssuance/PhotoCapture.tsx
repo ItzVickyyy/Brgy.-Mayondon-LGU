@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { canvasToPhotoUrl, cropToPortrait, PHOTO_HEIGHT, PHOTO_WIDTH, removeBackground } from "@/lib/photo-background"
 import { photoUploadMessage } from "@/lib/issuanceLabels"
 import { PHOTO_UPLOAD_ACCEPT, PHOTO_UPLOAD_OPEN_ERROR, validatePhotoFile } from "@/lib/photo-upload"
+import { Select } from "@/components/Common/Select"
 
 type Phase = "camera" | "working"
 
@@ -256,9 +257,9 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
 
         {phase === "camera" && cameras.length > 1 ? (
           <label className="flex flex-col gap-1.5 text-sm font-medium">{t("issuances.new.photoCapture.camera")}
-            <select value={cameraId || activeCameraId} onChange={(event) => setCameraId(event.target.value)} className="h-9 rounded-md border bg-background px-2 text-sm font-normal">
+            <Select value={cameraId || activeCameraId} onChange={(event) => setCameraId(event.target.value)} className="font-normal">
               {cameras.map((camera, index) => <option key={camera.deviceId} value={camera.deviceId}>{camera.label || t("issuances.new.photoCapture.cameraN", { number: index + 1 })}</option>)}
-            </select>
+            </Select>
           </label>
         ) : null}
 

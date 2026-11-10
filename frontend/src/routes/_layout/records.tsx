@@ -29,6 +29,7 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import { RowActions } from "@/components/Common/RowActions"
 import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
@@ -395,7 +396,7 @@ function RecordsManagement() {
                   <span className="sr-only">
                     {t("records.list.statusFilterLabel")}
                   </span>
-                  <select
+                  <Select
                     value={statusFilter}
                     onChange={(event) =>
                       setStatusFilter(
@@ -411,7 +412,7 @@ function RecordsManagement() {
                       {t("records.list.statusArchived")}
                     </option>
                     <option value="all">{t("records.list.statusAll")}</option>
-                  </select>
+                  </Select>
                 </label>
               </div>
             </div>

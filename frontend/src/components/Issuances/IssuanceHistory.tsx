@@ -25,6 +25,7 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import { RowActions } from "@/components/Common/RowActions"
 import {
   modalBody,
@@ -535,7 +536,7 @@ export function IssuanceHistory({
             </label>
             <label className={filterLabelClass}>
               <span>{t("issuances.history.filters.documentType")}</span>
-              <select
+              <Select
                 value={typeFilter}
                 onChange={(event) => setTypeFilter(event.target.value)}
                 className={formControlClass}
@@ -548,11 +549,11 @@ export function IssuanceHistory({
                     {documentTypeLabel(type.code, type.name, t)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label className={filterLabelClass}>
               <span>{t("issuances.history.filters.status")}</span>
-              <select
+              <Select
                 value={statusFilter}
                 onChange={(event) =>
                   setStatusFilter(event.target.value as StatusFilter)
@@ -565,7 +566,7 @@ export function IssuanceHistory({
                 <option value="issued">{statusLabel("issued", t)}</option>
                 <option value="draft">{statusLabel("draft", t)}</option>
                 <option value="voided">{statusLabel("voided", t)}</option>
-              </select>
+              </Select>
             </label>
             <label className={filterLabelClass}>
               <span>{t("issuances.history.filters.datedFrom")}</span>

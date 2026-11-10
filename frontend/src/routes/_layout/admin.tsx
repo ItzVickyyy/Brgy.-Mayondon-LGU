@@ -9,6 +9,7 @@ import AddUser from "@/components/Admin/AddUser"
 import { type UserTableData, useUserColumns } from "@/components/Admin/columns"
 import { DataTable } from "@/components/Common/DataTable"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import { EmptyState, ErrorState, LoadingState } from "@/components/Common/FeedbackState"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { pageTitle } from "@/config/site"
@@ -109,19 +110,19 @@ function UsersTable() {
         </label>
         <label className="sm:w-52">
           <span className="sr-only">{t("admin.users.filterRole")}</span>
-          <select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as "all" | "admin" | "staff")} className={formControlClass}>
+          <Select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as "all" | "admin" | "staff")} className={formControlClass}>
             <option value="all">{t("admin.users.allRoles")}</option>
             <option value="admin">{t("admin.users.roleAdmin")}</option>
             <option value="staff">{t("admin.users.roleStaff")}</option>
-          </select>
+          </Select>
         </label>
         <label className="sm:w-44">
           <span className="sr-only">{t("admin.users.filterStatus")}</span>
-          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "all" | "active" | "inactive")} className={formControlClass}>
+          <Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "all" | "active" | "inactive")} className={formControlClass}>
             <option value="all">{t("admin.users.allStatuses")}</option>
             <option value="active">{t("admin.users.active")}</option>
             <option value="inactive">{t("admin.users.inactive")}</option>
-          </select>
+          </Select>
         </label>
       </div>
       <DataTable

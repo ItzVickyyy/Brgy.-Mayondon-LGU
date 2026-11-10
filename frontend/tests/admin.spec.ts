@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test"
 import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
 import { createUser } from "./utils/privateApi"
 import { randomEmail, randomPassword } from "./utils/random"
+import { chooseOption } from "./utils/select"
 import { logInUser } from "./utils/user"
 
 test("Admin page is accessible and shows correct title", async ({ page }) => {
@@ -56,9 +57,10 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Password").first().fill(password)
     await page.getByPlaceholder("Password").last().fill(password)
 
-    await page
-      .getByRole("combobox")
-      .selectOption({ label: "System Administrator" })
+    await chooseOption(
+      page.getByRole("dialog").getByLabel("Role"),
+      "System Administrator",
+    )
 
     await page.getByLabel("Is active?").check()
 

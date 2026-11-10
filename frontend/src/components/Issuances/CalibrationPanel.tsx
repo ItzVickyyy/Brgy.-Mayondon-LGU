@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { CalibrationSheet } from "@/components/Issuances/CalibrationSheet"
 import { MAX_OFFSET_PT, clampOffset, getOffset, saveOffset } from "@/lib/print/calibration"
 import { printTemplates, type PrintTemplateId } from "@/lib/print/templates"
+import { Select } from "@/components/Common/Select"
 
 /** Offset editor + calibration sheet button. Mounted by step 5 (e.g. in a "Printing" settings dialog). */
 export function CalibrationPanel() {
@@ -29,9 +30,9 @@ export function CalibrationPanel() {
       <p className="text-sm text-muted-foreground">{t("issuances.printing.calibration.intro")}</p>
       <div className="space-y-2">
         <Label htmlFor="calibration-template">{t("issuances.printing.calibration.form")}</Label>
-        <select id="calibration-template" className="border-input h-9 w-full rounded-md border bg-transparent px-3 text-sm" value={templateId} onChange={(e) => choose(e.target.value as PrintTemplateId)}>
+        <Select id="calibration-template" value={templateId} onChange={(e) => choose(e.target.value as PrintTemplateId)}>
           {(Object.keys(printTemplates) as PrintTemplateId[]).map((id) => <option key={id} value={id}>{t(`issuances.printing.calibration.templates.${id}`)}</option>)}
-        </select>
+        </Select>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-2"><Label htmlFor="calibration-x">{t("issuances.printing.calibration.shiftRight")}</Label><Input id="calibration-x" type="number" step="0.5" min={-MAX_OFFSET_PT} max={MAX_OFFSET_PT} value={offset.x} onChange={(e) => change("x", e.target.value)} /></div>

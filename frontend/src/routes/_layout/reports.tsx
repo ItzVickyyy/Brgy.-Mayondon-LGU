@@ -20,6 +20,7 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
@@ -951,7 +952,7 @@ function Reports() {
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
             <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
               {t("admin.reports.generate.reportType")}
-              <select
+              <Select
                 value={report}
                 onChange={(event) => {
                   setReport(event.target.value as ReportType)
@@ -974,11 +975,11 @@ function Reports() {
                 <option value="accounts">
                   {t("admin.reports.reportTypes.accounts")}
                 </option>
-              </select>
+              </Select>
             </label>
             <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
               {t("admin.reports.generate.period")}
-              <select
+              <Select
                 value={period}
                 onChange={(event) => {
                   setPeriod(event.target.value as Period)
@@ -990,7 +991,7 @@ function Reports() {
                 <option value="month">{t(periodKeys.month)}</option>
                 <option value="quarter">{t(periodKeys.quarter)}</option>
                 <option value="year">{t(periodKeys.year)}</option>
-              </select>
+              </Select>
             </label>
             <Button onClick={previewReport}>
               <BarChart3 aria-hidden="true" />

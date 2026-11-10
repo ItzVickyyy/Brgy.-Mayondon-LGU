@@ -9,6 +9,7 @@ import { z } from "zod"
 
 import { type UserPublic, UsersService } from "@/client"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import {
   modalBody,
   modalFooter,
@@ -231,7 +232,7 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                   <FormItem>
                     <FormLabel>{t("admin.users.form.role")}</FormLabel>
                     <FormControl>
-                      <select
+                      <Select
                         className={formControlClass}
                         disabled={protectRoleAndStatus}
                         value={field.value ? "admin" : "staff"}
@@ -241,7 +242,7 @@ const EditUser = ({ user, onSuccess, protectRoleAndStatus = false, asPrimaryButt
                       >
                         <option value="staff">{t("admin.users.roleStaff")}</option>
                         <option value="admin">{t("admin.users.roleAdmin")}</option>
-                      </select>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

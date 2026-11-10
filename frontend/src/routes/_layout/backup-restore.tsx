@@ -16,6 +16,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { type BackupRunPublic, BackupsService } from "@/client"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { RowActions } from "@/components/Common/RowActions"
 import { statusStyles } from "@/components/Common/statusStyles"
@@ -537,7 +538,7 @@ function BackupRestore() {
         <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
           <label className="flex flex-col gap-2 text-sm font-medium">
             {t("admin.backup.restore.archive")}
-            <select
+            <Select
               value={selectedBackup}
               disabled={restorable.length === 0}
               onChange={(event) => {
@@ -553,7 +554,7 @@ function BackupRestore() {
                   {backup.file_name}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <Button
             variant="outline"

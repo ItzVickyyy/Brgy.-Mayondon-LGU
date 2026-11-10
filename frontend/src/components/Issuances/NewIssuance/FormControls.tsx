@@ -1,10 +1,12 @@
 import { Check, ChevronDown, Search } from "lucide-react"
 import {
+  type ButtonHTMLAttributes,
   type KeyboardEvent,
   type ReactNode,
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react"
@@ -14,7 +16,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { panelClass, useClickOutside, useOpenUpward } from "./popover"
 
-export type ChoiceOption = string | { value: string; label: string }
+export type ChoiceOption =
+  | string
+  | { value: string; label: string; disabled?: boolean }
 
 function optionValue(option: ChoiceOption) {
   return typeof option === "string" ? option : option.value
@@ -74,6 +78,23 @@ type SelectFieldProps = {
   className?: string
   /** Force the search box on or off. By default it shows for 5 or more choices. */
   searchable?: boolean
+  /** Name read by screen readers when there is no visible <label>. */
+  ariaLabel?: string
+  /** Classes for the box around the button (for example a fixed width). */
+  wrapperClassName?: string
+  /** Always open the list above the button (for the bottom edge of a table). */
+  openUp?: boolean
+  /**
+   * Position the list on the screen instead of inside its parent, so a card
+   * or table with `overflow: hidden` cannot cut it off.
+   */
+  floating?: boolean
+  required?: boolean
+  /** Extra attributes for the button, such as data-testid. */
+  triggerProps?: Omit<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    "onChange" | "value" | "children"
+  >
 }
 
 /**
@@ -92,10 +113,17 @@ export function SelectField({
   describedBy,
   className,
   searchable,
+  ariaLabel,
+  wrapperClassName,
+  openUp,
+  floating,
+  required,
+  triggerProps,
 }: SelectFieldProps) {
   const items = options.map((option) => ({
     value: optionValue(option),
     label: optionLabel(option),
+    disabled: typeof option === "string" ? false : Boolean(option.disabled),
   }))
   const withSearch = searchable ?? items.length >= SEARCH_FROM
   const listId = useId()
@@ -107,7 +135,15 @@ export function SelectField({
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState("")
   const [active, setActive] = useState(0)
-  const upward = useOpenUpward(open, wrapperRef, panelRef)
+  const typed = useRef({ text: "", at: 0 })
+  const [placed, setPlaced] = useState<{
+    top: number
+    left: number
+    minWidth: number
+    maxHeight: number
+  } | null>(null)
+  const measuredUpward = useOpenUpward(open && !floating, wrapperRef, panelRef)
+  const upward = Boolean(openUp) || measuredUpward
   const close = useCallback(() => setOpen(false), [])
   useClickOutside(open, wrapperRef, close)
 
@@ -121,6 +157,57 @@ export function SelectField({
     setActive(Math.max(index, 0))
     setOpen(true)
   }
+
+  // Floating list: place it from the button's position on the screen. An
+  // ancestor with a transform (a dialog) becomes the origin of `fixed`, so the
+  // origin is measured first. Follows scrolling and resizing while open.
+  useLayoutEffect(() => {
+    if (!open || !floating) {
+      setPlaced(null)
+      return
+    }
+    function place() {
+      const trigger = triggerRef.current
+      const panel = panelRef.current
+      if (!trigger || !panel) return
+      const box = trigger.getBoundingClientRect()
+      const origin = panel.getBoundingClientRect()
+      const originLeft = origin.left - (Number.parseFloat(panel.style.left) || 0)
+      const originTop = origin.top - (Number.parseFloat(panel.style.top) || 0)
+      const margin = 8
+      const width = Math.max(box.width, 160)
+      const below = window.innerHeight - box.bottom - margin
+      const above = box.top - margin
+      const natural = panel.scrollHeight
+      const up = Boolean(openUp) || (below < natural && above > below)
+      const room = Math.max(up ? above : below, 160)
+      const height = Math.min(natural, room)
+      const left = Math.min(
+        Math.max(box.left, margin),
+        Math.max(window.innerWidth - width - margin, margin),
+      )
+      setPlaced({
+        top: (up ? box.top - height - 4 : box.bottom + 4) - originTop,
+        left: left - originLeft,
+        minWidth: width,
+        maxHeight: room,
+      })
+    }
+    place()
+    let frame = 0
+    function schedule(event?: Event) {
+      if (event?.target instanceof Node && panelRef.current?.contains(event.target)) return
+      cancelAnimationFrame(frame)
+      frame = requestAnimationFrame(place)
+    }
+    window.addEventListener("resize", schedule)
+    window.addEventListener("scroll", schedule, true)
+    return () => {
+      cancelAnimationFrame(frame)
+      window.removeEventListener("resize", schedule)
+      window.removeEventListener("scroll", schedule, true)
+    }
+  }, [open, floating, openUp, shown.length])
 
   // Put the cursor where the person can act: the search box, or the list.
   useEffect(() => {
@@ -138,6 +225,7 @@ export function SelectField({
   }, [open, active, listId])
 
   function choose(next: string) {
+    if (items.find((item) => item.value === next)?.disabled) return
     onChange(next)
     setOpen(false)
     triggerRef.current?.focus()
@@ -167,16 +255,37 @@ export function SelectField({
       triggerRef.current?.focus()
     } else if (event.key === "Tab") {
       setOpen(false)
+    } else if (
+      !withSearch &&
+      event.key.length === 1 &&
+      event.key !== " " &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.altKey
+    ) {
+      // Type-ahead for short lists (no search box): "ma" jumps to "Male".
+      const now = Date.now()
+      const text =
+        (now - typed.current.at < 800 ? typed.current.text : "") +
+        event.key.toLowerCase()
+      typed.current = { text, at: now }
+      const from = text.length === 1 ? active + 1 : active
+      const order = [...shown.slice(from), ...shown.slice(0, from)]
+      const hit = order.find((item) => item.label.toLowerCase().startsWith(text))
+      if (hit) setActive(shown.indexOf(hit))
     }
   }
 
   return (
-    <div ref={wrapperRef} className="relative min-w-0">
+    <div ref={wrapperRef} className={cn("relative min-w-0", wrapperClassName)}>
       <button
+        {...triggerProps}
         ref={triggerRef}
         id={id}
         type="button"
         disabled={disabled}
+        aria-label={ariaLabel}
+        aria-required={required || undefined}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? listId : undefined}
@@ -215,10 +324,29 @@ export function SelectField({
           role="presentation"
           tabIndex={-1}
           onKeyDown={onPanelKeyDown}
+          // Inside a <label>, a click in the list would otherwise be passed on
+          // to the button and open the list again.
+          onClick={(event) => event.preventDefault()}
+          style={
+            floating
+              ? {
+                  position: "fixed",
+                  top: placed?.top ?? 0,
+                  left: placed?.left ?? 0,
+                  minWidth: placed?.minWidth,
+                  maxHeight: placed?.maxHeight,
+                  opacity: placed ? 1 : 0,
+                }
+              : undefined
+          }
           className={cn(
             panelClass,
             "min-w-40 outline-none",
-            upward ? "bottom-full mb-1" : "top-full mt-1",
+            floating
+              ? "z-50 flex flex-col"
+              : upward
+                ? "bottom-full mb-1"
+                : "top-full mt-1",
           )}
         >
           {withSearch ? (
@@ -250,7 +378,7 @@ export function SelectField({
           <div
             id={listId}
             role="listbox"
-            className="max-h-64 overflow-y-auto p-0.5"
+            className="max-h-64 min-h-0 overflow-y-auto p-0.5"
           >
             {shown.length ? (
               shown.map((item, index) => (
@@ -260,6 +388,7 @@ export function SelectField({
                   role="option"
                   tabIndex={-1}
                   aria-selected={item.value === value}
+                  aria-disabled={item.disabled || undefined}
                   onMouseDown={(event) => event.preventDefault()}
                   onMouseEnter={() => setActive(index)}
                   onClick={() => choose(item.value)}
@@ -268,6 +397,7 @@ export function SelectField({
                     "flex min-h-10 cursor-pointer items-center justify-between gap-2 rounded-md px-3 py-2 text-sm",
                     index === active && "bg-accent text-accent-foreground",
                     item.value === value && "font-medium",
+                    item.disabled && "cursor-not-allowed opacity-50",
                   )}
                 >
                   <span>

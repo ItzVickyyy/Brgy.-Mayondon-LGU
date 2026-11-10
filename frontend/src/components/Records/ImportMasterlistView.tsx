@@ -14,6 +14,7 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { Badge } from "@/components/ui/badge"
@@ -392,7 +393,7 @@ export function ImportMasterlistView() {
                         </span>
                       ) : null}
                     </span>
-                    <select
+                    <Select
                       className={cn(inputClass, "font-normal")}
                       value={chosen}
                       onChange={(event) =>
@@ -416,7 +417,7 @@ export function ImportMasterlistView() {
                           {header}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   </label>
                 )
               })}
@@ -424,7 +425,7 @@ export function ImportMasterlistView() {
             <div className="mt-5 grid gap-3 border-t pt-4 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm font-medium">
                 {t("records.import.dateOrderLabel")}
-                <select
+                <Select
                   className={cn(inputClass, "font-normal")}
                   value={dateOrder}
                   onChange={(event) =>
@@ -436,11 +437,11 @@ export function ImportMasterlistView() {
                       {t(`records.import.dateOrders.${order}`)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label className="flex flex-col gap-2 text-sm font-medium">
                 {t("records.import.duplicateLabel")}
-                <select
+                <Select
                   className={cn(inputClass, "font-normal")}
                   value={duplicateAction}
                   onChange={(event) =>
@@ -452,7 +453,7 @@ export function ImportMasterlistView() {
                       {t(`records.import.duplicateActions.${action}`)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
             </div>
             {missingRequired.length > 0 ? (

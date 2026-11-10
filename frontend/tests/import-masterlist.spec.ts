@@ -3,6 +3,7 @@
 // residents created by an earlier run.
 import { readFileSync } from "node:fs"
 import { expect, test } from "@playwright/test"
+import { chooseOption } from "./utils/select"
 
 test("upload, map, check and import a small fictional masterlist", async ({
   page,
@@ -34,15 +35,15 @@ test("upload, map, check and import a small fictional masterlist", async ({
     page.getByRole("heading", { name: "Map spreadsheet columns" }),
   ).toBeVisible()
   const checkFile = page.getByRole("button", { name: "Check the file" })
-  await expect(page.getByLabel(/^First name/)).toHaveValue("Given Name")
-  await expect(page.getByLabel(/^Last name/)).toHaveValue("Surname")
+  await expect(page.getByLabel(/^First name/)).toContainText("Given Name")
+  await expect(page.getByLabel(/^Last name/)).toContainText("Surname")
   await expect(checkFile).toBeEnabled()
 
   // A required field with no column blocks the check until it is mapped again.
-  await page.getByLabel(/^First name/).selectOption("")
+  await chooseOption(page.getByLabel(/^First name/), "Choose source column")
   await expect(checkFile).toBeDisabled()
   await expect(page.getByText("Choose a column for: First name")).toBeVisible()
-  await page.getByLabel(/^First name/).selectOption("Given Name")
+  await chooseOption(page.getByLabel(/^First name/), "Given Name")
   await expect(checkFile).toBeEnabled()
   await checkFile.click()
 
@@ -79,7 +80,7 @@ test("upload, map, check and import a small fictional masterlist", async ({
 
   // Reports lists the import, counts it, and exports an English CSV.
   await page.goto("/reports")
-  await page.locator("select").first().selectOption("imports")
+  await chooseOption(page.getByLabel(/^Report type/), "Masterlist import summary")
   await page
     .getByRole("button", { name: "Preview Report", exact: true })
     .click()

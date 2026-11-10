@@ -12,6 +12,7 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { Badge } from "@/components/ui/badge"
@@ -255,7 +256,7 @@ function ActivityLog() {
             </label>
             <label className={filterLabelClass}>
               <span>{t("activity.filters.module")}</span>
-              <select
+              <Select
                 value={moduleFilter}
                 onChange={(event) => setModuleFilter(event.target.value)}
                 className={formControlClass}
@@ -266,11 +267,11 @@ function ActivityLog() {
                     {moduleLabel(value, t)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label className={filterLabelClass}>
               <span>{t("activity.filters.outcome")}</span>
-              <select
+              <Select
                 value={outcomeFilter}
                 onChange={(event) => setOutcomeFilter(event.target.value)}
                 className={formControlClass}
@@ -281,12 +282,12 @@ function ActivityLog() {
                     {t(`activity.outcomes.${value}`)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
             {isAdmin ? (
               <label className={filterLabelClass}>
                 <span>{t("activity.filters.user")}</span>
-                <select
+                <Select
                   value={actorFilter}
                   onChange={(event) => setActorFilter(event.target.value)}
                   className={formControlClass}
@@ -297,7 +298,7 @@ function ActivityLog() {
                       {actor.email}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
             ) : null}
             <label className={filterLabelClass}>

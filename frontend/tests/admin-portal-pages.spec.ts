@@ -87,7 +87,8 @@ test("User account form offers Staff and System Administrator roles", async ({
   await page.getByRole("button", { name: "Add User" }).click()
   const role = page.getByLabel("Role", { exact: true })
   await expect(role).toBeVisible()
-  await expect(role.locator("option")).toHaveText([
+  await role.click()
+  await expect(page.getByRole("option")).toHaveText([
     "Staff",
     "System Administrator",
   ])

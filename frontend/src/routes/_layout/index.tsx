@@ -21,6 +21,7 @@ import useAuth from "@/hooks/useAuth"
 import { activityTitle } from "@/lib/activity"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
+import { Select } from "@/components/Common/Select"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -279,18 +280,18 @@ function Dashboard() {
           <span className="text-muted-foreground">
             {t("dashboard.period.label")}
           </span>
-          <select
+          <Select
             aria-label={t("dashboard.period.ariaLabel")}
             value={period}
             onChange={(event) => setPeriod(event.target.value as Period)}
-            className="min-h-11 rounded-md border bg-background px-3 text-base transition-colors hover:border-ring/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="min-h-11 min-w-40 rounded-md border bg-background px-3 text-base transition-colors hover:border-ring/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             {periods.map((value) => (
               <option key={value} value={value}>
                 {t(`dashboard.period.${value}`)}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
       </div>
 

@@ -9,6 +9,7 @@ import { z } from "zod"
 
 import { type UserCreate, UsersService } from "@/client"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import {
   modalBody,
   modalFooter,
@@ -216,7 +217,7 @@ const AddUser = () => {
                   <FormItem>
                     <FormLabel>{t("admin.users.form.role")}</FormLabel>
                     <FormControl>
-                      <select
+                      <Select
                         className={formControlClass}
                         value={field.value ? "admin" : "staff"}
                         onChange={(event) =>
@@ -225,7 +226,7 @@ const AddUser = () => {
                       >
                         <option value="staff">{t("admin.users.roleStaff")}</option>
                         <option value="admin">{t("admin.users.roleAdmin")}</option>
-                      </select>
+                      </Select>
                     </FormControl>
                     <FormMessage />
                   </FormItem>

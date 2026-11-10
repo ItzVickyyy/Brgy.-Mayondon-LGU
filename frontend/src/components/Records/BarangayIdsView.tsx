@@ -19,6 +19,7 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import { RowActions } from "@/components/Common/RowActions"
 import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
@@ -206,7 +207,7 @@ export function BarangayIdsView() {
               <span className="sr-only">
                 {t("records.ids.statusFilterLabel")}
               </span>
-              <select
+              <Select
                 value={statusFilter}
                 onChange={(event) =>
                   setStatusFilter(event.target.value as StatusFilter)
@@ -219,7 +220,7 @@ export function BarangayIdsView() {
                   {t("records.idStatus.expiring_soon")}
                 </option>
                 <option value="expired">{t("records.idStatus.expired")}</option>
-              </select>
+              </Select>
             </label>
           </div>
         </div>

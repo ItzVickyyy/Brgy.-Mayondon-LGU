@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { Select } from "@/components/Common/Select"
 
 export const PAGE_SIZE_OPTIONS = [10, 25, 50, 100]
 
@@ -64,9 +65,9 @@ export function TablePagination({ start, end, total, pageIndex, pageCount, onPag
         {pageSize !== undefined && pageSizeOptions.length && onPageSizeChange ? (
           <label className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>{pageSizeLabel ?? t("common.pagination.rowsPerPage")}</span>
-            <select value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))} className="h-9 rounded-md border bg-background px-2 text-sm text-foreground">
+            <Select value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))} wrapperClassName="w-24" className="text-foreground" openUp>
               {pageSizeOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-            </select>
+            </Select>
           </label>
         ) : null}
       </div>

@@ -17,6 +17,7 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { RowActions } from "@/components/Common/RowActions"
 import { statusStyles } from "@/components/Common/statusStyles"
@@ -373,7 +374,7 @@ function OfficialsManagement() {
               <span className="sr-only">
                 {t("admin.officials.filterStatus")}
               </span>
-              <select
+              <Select
                 value={statusFilter}
                 onChange={(event) =>
                   setStatusFilter(
@@ -385,7 +386,7 @@ function OfficialsManagement() {
                 <option value="Current">{statusLabel("Current", t)}</option>
                 <option value="Former">{statusLabel("Former", t)}</option>
                 <option value="all">{t("admin.officials.allStatuses")}</option>
-              </select>
+              </Select>
             </label>
           </div>
         </div>
@@ -553,7 +554,7 @@ function OfficialsManagement() {
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
               {t("admin.officials.form.position")}
-              <select
+              <Select
                 value={position}
                 onChange={(event) => setPosition(event.target.value)}
                 className={formControlClass}
@@ -564,7 +565,7 @@ function OfficialsManagement() {
                 ).map((item) => (
                   <option key={item}>{item}</option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium">
               {t("admin.officials.form.termStart")}

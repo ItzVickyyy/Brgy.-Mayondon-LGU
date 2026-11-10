@@ -2,6 +2,7 @@
 // (owner decision, Nov 8). Needs the running app, like the other page specs.
 import { readFileSync } from "node:fs"
 import { expect, test } from "@playwright/test"
+import { chooseOption } from "./utils/select"
 
 const expectedHeader: Record<string, string> = {
   issuances: '"Document type","Issued","Voided","Share","vs previous period"',
@@ -10,6 +11,9 @@ const expectedHeader: Record<string, string> = {
   accounts:
     '"User","Role","Documents issued","Records added / edited","Last activity"',
 }
+
+// Position of each report in the "Report type" list.
+const reportOrder = ["issuances", "purpose", "expiry", "imports", "accounts"]
 
 const previewLabel = { en: "Preview Report", fil: "I-preview ang Ulat" }
 const exportLabel = { en: "Export", fil: "I-export" }
@@ -23,7 +27,10 @@ for (const language of ["en", "fil"] as const) {
         localStorage.setItem("app-language", value)
       }, language)
       await page.goto("/reports")
-      await page.locator("select").first().selectOption(report)
+      await chooseOption(
+        page.locator('[aria-haspopup="listbox"]').first(),
+        reportOrder.indexOf(report),
+      )
       await page
         .getByRole("button", { name: previewLabel[language], exact: true })
         .click()

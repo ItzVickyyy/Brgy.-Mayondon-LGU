@@ -9,6 +9,7 @@ import {
   ResidentsService,
 } from "@/client"
 import { formControlClass } from "@/components/Common/formStyles"
+import { Select } from "@/components/Common/Select"
 import {
   ModalSection,
   modalBody,
@@ -277,7 +278,7 @@ export function ResidentFormDialog({
               </label>
               <label className={labelClass}>
                 {t("records.form.suffix")}
-                <select
+                <Select
                   value={form.suffix}
                   onChange={(event) => set("suffix", event.target.value)}
                   className={formControlClass}
@@ -286,7 +287,7 @@ export function ResidentFormDialog({
                   {suffixes.map((item) => (
                     <option key={item}>{item}</option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label className={labelClass}>
                 {t("records.form.birthdate")}
@@ -307,7 +308,7 @@ export function ResidentFormDialog({
               </label>
               <label className={labelClass}>
                 {t("records.form.sex")}
-                <select
+                <Select
                   value={form.sex}
                   onChange={(event) => set("sex", event.target.value)}
                   className={formControlClass}
@@ -317,11 +318,11 @@ export function ResidentFormDialog({
                   <option value="Female">
                     {t("records.labels.sex.Female")}
                   </option>
-                </select>
+                </Select>
               </label>
               <label className={labelClass}>
                 {t("records.form.civilStatus")}
-                <select
+                <Select
                   value={form.civil_status}
                   onChange={(event) => set("civil_status", event.target.value)}
                   className={formControlClass}
@@ -332,7 +333,7 @@ export function ResidentFormDialog({
                       {civilStatusLabel(item, t)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
             </ModalSection>
 
@@ -402,7 +403,7 @@ export function ResidentFormDialog({
               </label>
               <label className={labelClass}>
                 {t("records.form.street")}
-                <select
+                <Select
                   value={form.street_id}
                   onChange={(event) => set("street_id", event.target.value)}
                   className={formControlClass}
@@ -417,7 +418,7 @@ export function ResidentFormDialog({
                       {street.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label className={labelClass}>
                 {t("records.form.purok")}
@@ -454,7 +455,7 @@ export function ResidentFormDialog({
               </label>
               <label className={labelClass}>
                 {t("records.form.residentType")}
-                <select
+                <Select
                   value={form.resident_type}
                   onChange={(event) => set("resident_type", event.target.value)}
                   className={formControlClass}
@@ -465,11 +466,11 @@ export function ResidentFormDialog({
                       {residentTypeLabel(item, t)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </label>
               <label className={labelClass}>
                 {t("records.form.voter")}
-                <select
+                <Select
                   value={form.voter_registration}
                   onChange={(event) =>
                     set("voter_registration", event.target.value)
@@ -483,7 +484,7 @@ export function ResidentFormDialog({
                   <option value="unregistered">
                     {t("records.form.unregistered")}
                   </option>
-                </select>
+                </Select>
               </label>
             </ModalSection>
 
