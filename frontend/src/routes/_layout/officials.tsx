@@ -17,21 +17,21 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
-import { Select } from "@/components/Common/Select"
-import { NoPermission } from "@/components/Common/NoPermission"
-import { RowActions } from "@/components/Common/RowActions"
-import { statusStyles } from "@/components/Common/statusStyles"
-import {
-  TablePagination,
-  usePagination,
-} from "@/components/Common/TablePagination"
-import { refreshLookups } from "@/components/Issuances/NewIssuance/issuanceApi"
 import {
   modalBody,
   modalFooter,
   modalHeader,
   modalShell,
 } from "@/components/Common/ModalLayout"
+import { NoPermission } from "@/components/Common/NoPermission"
+import { RowActions } from "@/components/Common/RowActions"
+import { Select } from "@/components/Common/Select"
+import { statusStyles } from "@/components/Common/statusStyles"
+import {
+  TablePagination,
+  usePagination,
+} from "@/components/Common/TablePagination"
+import { refreshLookups } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -370,11 +370,12 @@ function OfficialsManagement() {
                 className={`${formControlClass} pl-9`}
               />
             </label>
-            <label className="sm:w-44">
+            <label htmlFor="officials-status-filter" className="sm:w-44">
               <span className="sr-only">
                 {t("admin.officials.filterStatus")}
               </span>
               <Select
+                id="officials-status-filter"
                 value={statusFilter}
                 onChange={(event) =>
                   setStatusFilter(
@@ -552,9 +553,13 @@ function OfficialsManagement() {
                 required
               />
             </label>
-            <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
+            <label
+              htmlFor="official-position"
+              className="flex flex-col gap-2 text-sm font-medium sm:col-span-2"
+            >
               {t("admin.officials.form.position")}
               <Select
+                id="official-position"
                 value={position}
                 onChange={(event) => setPosition(event.target.value)}
                 className={formControlClass}

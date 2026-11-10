@@ -534,9 +534,9 @@ export function IssuanceHistory({
                 />
               </span>
             </label>
-            <label className={filterLabelClass}>
+            <label htmlFor="history-document-type-filter" className={filterLabelClass}>
               <span>{t("issuances.history.filters.documentType")}</span>
-              <Select
+              <Select id="history-document-type-filter"
                 value={typeFilter}
                 onChange={(event) => setTypeFilter(event.target.value)}
                 className={formControlClass}
@@ -551,9 +551,9 @@ export function IssuanceHistory({
                 ))}
               </Select>
             </label>
-            <label className={filterLabelClass}>
+            <label htmlFor="history-status-filter" className={filterLabelClass}>
               <span>{t("issuances.history.filters.status")}</span>
-              <Select
+              <Select id="history-status-filter"
                 value={statusFilter}
                 onChange={(event) =>
                   setStatusFilter(event.target.value as StatusFilter)

@@ -276,9 +276,9 @@ export function ResidentFormDialog({
                   required
                 />
               </label>
-              <label className={labelClass}>
+              <label htmlFor="resident-form-suffix" className={labelClass}>
                 {t("records.form.suffix")}
-                <Select
+                <Select id="resident-form-suffix"
                   value={form.suffix}
                   onChange={(event) => set("suffix", event.target.value)}
                   className={formControlClass}
@@ -306,9 +306,9 @@ export function ResidentFormDialog({
                   className={formControlClass}
                 />
               </label>
-              <label className={labelClass}>
+              <label htmlFor="resident-form-sex" className={labelClass}>
                 {t("records.form.sex")}
-                <Select
+                <Select id="resident-form-sex"
                   value={form.sex}
                   onChange={(event) => set("sex", event.target.value)}
                   className={formControlClass}
@@ -320,9 +320,9 @@ export function ResidentFormDialog({
                   </option>
                 </Select>
               </label>
-              <label className={labelClass}>
+              <label htmlFor="resident-form-civil-status" className={labelClass}>
                 {t("records.form.civilStatus")}
-                <Select
+                <Select id="resident-form-civil-status"
                   value={form.civil_status}
                   onChange={(event) => set("civil_status", event.target.value)}
                   className={formControlClass}
@@ -401,9 +401,9 @@ export function ResidentFormDialog({
                   className={formControlClass}
                 />
               </label>
-              <label className={labelClass}>
+              <label htmlFor="resident-form-street" className={labelClass}>
                 {t("records.form.street")}
-                <Select
+                <Select id="resident-form-street"
                   value={form.street_id}
                   onChange={(event) => set("street_id", event.target.value)}
                   className={formControlClass}
@@ -453,9 +453,9 @@ export function ResidentFormDialog({
                   {t("records.form.sinceBirth")}
                 </span>
               </label>
-              <label className={labelClass}>
+              <label htmlFor="resident-form-type" className={labelClass}>
                 {t("records.form.residentType")}
-                <Select
+                <Select id="resident-form-type"
                   value={form.resident_type}
                   onChange={(event) => set("resident_type", event.target.value)}
                   className={formControlClass}
@@ -468,9 +468,9 @@ export function ResidentFormDialog({
                   ))}
                 </Select>
               </label>
-              <label className={labelClass}>
+              <label htmlFor="resident-form-voter" className={labelClass}>
                 {t("records.form.voter")}
-                <Select
+                <Select id="resident-form-voter"
                   value={form.voter_registration}
                   onChange={(event) =>
                     set("voter_registration", event.target.value)

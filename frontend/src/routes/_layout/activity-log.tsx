@@ -28,7 +28,6 @@ export const Route = createFileRoute("/_layout/activity-log")({
   head: () => ({ meta: [{ title: pageTitle("Activity Log") }] }),
 })
 
-
 const filterLabelClass =
   "flex min-w-0 flex-col gap-1.5 text-xs font-medium text-muted-foreground"
 
@@ -42,6 +41,31 @@ const outcomeStyleKey: Record<Outcome, string> = {
   failed: "Failed",
   denied: "Denied",
 }
+
+const detailKeyLabels = {
+  fields: "activity.detailKeys.fields",
+  field: "activity.detailKeys.field",
+  file_name: "activity.detailKeys.file_name",
+  rows: "activity.detailKeys.rows",
+  role: "activity.detailKeys.role",
+  reason: "activity.detailKeys.reason",
+  created: "activity.detailKeys.created",
+  updated: "activity.detailKeys.updated",
+  skipped: "activity.detailKeys.skipped",
+  failed: "activity.detailKeys.failed",
+  duplicate: "activity.detailKeys.duplicate",
+  error: "activity.detailKeys.error",
+  new: "activity.detailKeys.new",
+  kind: "activity.detailKeys.kind",
+  size_bytes: "activity.detailKeys.size_bytes",
+  replaced_temporary: "activity.detailKeys.replaced_temporary",
+  corrects: "activity.detailKeys.corrects",
+  document_type: "activity.detailKeys.document_type",
+  id_transaction: "activity.detailKeys.id_transaction",
+  purpose_added: "activity.detailKeys.purpose_added",
+  reference_no: "activity.detailKeys.reference_no",
+  draft_id: "activity.detailKeys.draft_id",
+} as const satisfies Record<string, ParseKeys>
 
 const moduleKeys = {
   records: "activity.modules.records",
@@ -83,7 +107,12 @@ function formatTimestamp(value: string) {
 }
 
 // Details only hold field names, ids and reference numbers. Shown as plain text.
-function detailsText(details: { [key: string]: unknown } | null) {
+function detailLabel(key: string, t: TFunction) {
+  const labelKey = (detailKeyLabels as Record<string, ParseKeys>)[key]
+  return labelKey ? t(labelKey) : key.replace(/_/g, " ")
+}
+
+function detailsText(details: { [key: string]: unknown } | null, t: TFunction) {
   if (!details) return ""
   return Object.entries(details)
     .map(([key, value]) => {
@@ -91,7 +120,7 @@ function detailsText(details: { [key: string]: unknown } | null) {
       const text = Array.isArray(value)
         ? value.map((item) => String(item).replace(/_/g, " ")).join(", ")
         : String(value)
-      return `${key.replace(/_/g, " ")}: ${text}`
+      return `${detailLabel(key, t)}: ${text}`
     })
     .filter(Boolean)
     .join(" · ")
@@ -254,9 +283,13 @@ function ActivityLog() {
                 />
               </span>
             </label>
-            <label className={filterLabelClass}>
+            <label
+              htmlFor="activity-module-filter"
+              className={filterLabelClass}
+            >
               <span>{t("activity.filters.module")}</span>
               <Select
+                id="activity-module-filter"
                 value={moduleFilter}
                 onChange={(event) => setModuleFilter(event.target.value)}
                 className={formControlClass}
@@ -269,9 +302,13 @@ function ActivityLog() {
                 ))}
               </Select>
             </label>
-            <label className={filterLabelClass}>
+            <label
+              htmlFor="activity-outcome-filter"
+              className={filterLabelClass}
+            >
               <span>{t("activity.filters.outcome")}</span>
               <Select
+                id="activity-outcome-filter"
                 value={outcomeFilter}
                 onChange={(event) => setOutcomeFilter(event.target.value)}
                 className={formControlClass}
@@ -285,9 +322,13 @@ function ActivityLog() {
               </Select>
             </label>
             {isAdmin ? (
-              <label className={filterLabelClass}>
+              <label
+                htmlFor="activity-user-filter"
+                className={filterLabelClass}
+              >
                 <span>{t("activity.filters.user")}</span>
                 <Select
+                  id="activity-user-filter"
                   value={actorFilter}
                   onChange={(event) => setActorFilter(event.target.value)}
                   className={formControlClass}
@@ -356,7 +397,7 @@ function ActivityLog() {
                 <tbody className="divide-y">
                   {items.map((row) => {
                     const known = isOutcome(row.outcome)
-                    const details = detailsText(row.details)
+                    const details = detailsText(row.details, t)
                     return (
                       <tr
                         key={row.id}

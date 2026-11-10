@@ -272,7 +272,7 @@ function Dashboard() {
             {t("dashboard.subtitle")}
           </p>
         </div>
-        <label className="flex items-center gap-2 self-start text-sm sm:self-auto">
+        <label htmlFor="dashboard-period" className="flex items-center gap-2 self-start text-sm sm:self-auto">
           <CalendarDays
             className="size-4 text-muted-foreground"
             aria-hidden="true"
@@ -280,7 +280,7 @@ function Dashboard() {
           <span className="text-muted-foreground">
             {t("dashboard.period.label")}
           </span>
-          <Select
+          <Select id="dashboard-period"
             aria-label={t("dashboard.period.ariaLabel")}
             value={period}
             onChange={(event) => setPeriod(event.target.value as Period)}

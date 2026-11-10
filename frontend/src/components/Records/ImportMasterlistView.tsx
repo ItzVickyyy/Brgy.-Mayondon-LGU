@@ -380,6 +380,7 @@ export function ImportMasterlistView() {
                 const isRequired = required.includes(field)
                 return (
                   <label
+                    htmlFor={`import-map-${field}`}
                     key={field}
                     className="flex min-w-0 flex-col gap-2 text-sm font-medium"
                   >
@@ -393,6 +394,7 @@ export function ImportMasterlistView() {
                       ) : null}
                     </span>
                     <Select
+                      id={`import-map-${field}`}
                       className={cn(inputClass, "font-normal")}
                       value={chosen}
                       onChange={(event) =>
@@ -422,9 +424,13 @@ export function ImportMasterlistView() {
               })}
             </div>
             <div className="mt-5 grid gap-3 border-t pt-4 sm:grid-cols-2">
-              <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+              <label
+                htmlFor="import-date-order"
+                className="flex min-w-0 flex-col gap-2 text-sm font-medium"
+              >
                 {t("records.import.dateOrderLabel")}
                 <Select
+                  id="import-date-order"
                   className={cn(inputClass, "font-normal")}
                   value={dateOrder}
                   onChange={(event) =>
@@ -438,9 +444,13 @@ export function ImportMasterlistView() {
                   ))}
                 </Select>
               </label>
-              <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+              <label
+                htmlFor="import-duplicate-action"
+                className="flex min-w-0 flex-col gap-2 text-sm font-medium"
+              >
                 {t("records.import.duplicateLabel")}
                 <Select
+                  id="import-duplicate-action"
                   className={cn(inputClass, "font-normal")}
                   value={duplicateAction}
                   onChange={(event) =>

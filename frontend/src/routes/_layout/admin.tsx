@@ -108,17 +108,17 @@ function UsersTable() {
             className={`${formControlClass} pl-9`}
           />
         </label>
-        <label className="sm:w-52">
+        <label htmlFor="users-role-filter" className="sm:w-52">
           <span className="sr-only">{t("admin.users.filterRole")}</span>
-          <Select value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as "all" | "admin" | "staff")} className={formControlClass}>
+          <Select id="users-role-filter" value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as "all" | "admin" | "staff")} className={formControlClass}>
             <option value="all">{t("admin.users.allRoles")}</option>
             <option value="admin">{t("admin.users.roleAdmin")}</option>
             <option value="staff">{t("admin.users.roleStaff")}</option>
           </Select>
         </label>
-        <label className="sm:w-44">
+        <label htmlFor="users-status-filter" className="sm:w-44">
           <span className="sr-only">{t("admin.users.filterStatus")}</span>
-          <Select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "all" | "active" | "inactive")} className={formControlClass}>
+          <Select id="users-status-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "all" | "active" | "inactive")} className={formControlClass}>
             <option value="all">{t("admin.users.allStatuses")}</option>
             <option value="active">{t("admin.users.active")}</option>
             <option value="inactive">{t("admin.users.inactive")}</option>

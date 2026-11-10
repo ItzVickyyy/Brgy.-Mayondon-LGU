@@ -16,9 +16,9 @@ import { Trans, useTranslation } from "react-i18next"
 import { type BackupRunPublic, BackupsService } from "@/client"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
-import { Select } from "@/components/Common/Select"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { RowActions } from "@/components/Common/RowActions"
+import { Select } from "@/components/Common/Select"
 import { statusStyles } from "@/components/Common/statusStyles"
 import {
   TablePagination,
@@ -536,9 +536,13 @@ function BackupRestore() {
           </div>
         </div>
         <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-          <label className="flex flex-col gap-2 text-sm font-medium">
+          <label
+            htmlFor="backup-restore-archive"
+            className="flex flex-col gap-2 text-sm font-medium"
+          >
             {t("admin.backup.restore.archive")}
             <Select
+              id="backup-restore-archive"
               value={selectedBackup}
               disabled={restorable.length === 0}
               onChange={(event) => {

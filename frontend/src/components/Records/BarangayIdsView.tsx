@@ -203,11 +203,11 @@ export function BarangayIdsView() {
                 className={`${formControlClass} pl-9`}
               />
             </label>
-            <label className="sm:w-52">
+            <label htmlFor="ids-status-filter" className="sm:w-52">
               <span className="sr-only">
                 {t("records.ids.statusFilterLabel")}
               </span>
-              <Select
+              <Select id="ids-status-filter"
                 value={statusFilter}
                 onChange={(event) =>
                   setStatusFilter(event.target.value as StatusFilter)

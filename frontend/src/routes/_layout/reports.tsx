@@ -950,9 +950,9 @@ function Reports() {
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+            <label htmlFor="report-type" className="flex min-w-0 flex-col gap-2 text-sm font-medium">
               {t("admin.reports.generate.reportType")}
-              <Select
+              <Select id="report-type"
                 value={report}
                 onChange={(event) => {
                   setReport(event.target.value as ReportType)
@@ -977,9 +977,9 @@ function Reports() {
                 </option>
               </Select>
             </label>
-            <label className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+            <label htmlFor="report-period" className="flex min-w-0 flex-col gap-2 text-sm font-medium">
               {t("admin.reports.generate.period")}
-              <Select
+              <Select id="report-period"
                 value={period}
                 onChange={(event) => {
                   setPeriod(event.target.value as Period)

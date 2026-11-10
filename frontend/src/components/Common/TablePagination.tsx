@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
@@ -56,6 +56,7 @@ type TablePaginationProps = {
 
 export function TablePagination({ start, end, total, pageIndex, pageCount, onPageChange, pageSize, pageSizeOptions = PAGE_SIZE_OPTIONS, pageSizeLabel, onPageSizeChange }: TablePaginationProps) {
   const { t } = useTranslation()
+  const pageSizeId = useId()
   if (total === 0) return null
 
   return (
@@ -63,9 +64,9 @@ export function TablePagination({ start, end, total, pageIndex, pageCount, onPag
       <div className="flex flex-wrap items-center gap-3">
         <p className="text-sm text-muted-foreground" aria-live="polite">{t("common.pagination.showing", { start, end, total })}</p>
         {pageSize !== undefined && pageSizeOptions.length && onPageSizeChange ? (
-          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+          <label htmlFor={pageSizeId} className="flex items-center gap-2 text-sm text-muted-foreground">
             <span>{pageSizeLabel ?? t("common.pagination.rowsPerPage")}</span>
-            <Select value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))} wrapperClassName="w-24" className="text-foreground" openUp>
+            <Select id={pageSizeId} value={pageSize} onChange={(event) => onPageSizeChange(Number(event.target.value))} wrapperClassName="w-24" className="text-foreground" openUp>
               {pageSizeOptions.map((option) => <option key={option} value={option}>{option}</option>)}
             </Select>
           </label>

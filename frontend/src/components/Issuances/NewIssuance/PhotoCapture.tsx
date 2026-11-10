@@ -256,8 +256,8 @@ function PhotoCaptureDialog({ open, onOpenChange, onUse }: { open: boolean; onOp
         </div>
 
         {phase === "camera" && cameras.length > 1 ? (
-          <label className="flex flex-col gap-1.5 text-sm font-medium">{t("issuances.new.photoCapture.camera")}
-            <Select value={cameraId || activeCameraId} onChange={(event) => setCameraId(event.target.value)} className="font-normal">
+          <label htmlFor="photo-camera-select" className="flex flex-col gap-1.5 text-sm font-medium">{t("issuances.new.photoCapture.camera")}
+            <Select id="photo-camera-select" value={cameraId || activeCameraId} onChange={(event) => setCameraId(event.target.value)} className="font-normal">
               {cameras.map((camera, index) => <option key={camera.deviceId} value={camera.deviceId}>{camera.label || t("issuances.new.photoCapture.cameraN", { number: index + 1 })}</option>)}
             </Select>
           </label>

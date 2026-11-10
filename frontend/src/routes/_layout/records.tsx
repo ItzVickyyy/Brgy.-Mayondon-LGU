@@ -29,8 +29,8 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
-import { Select } from "@/components/Common/Select"
 import { RowActions } from "@/components/Common/RowActions"
+import { Select } from "@/components/Common/Select"
 import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
@@ -392,11 +392,12 @@ function RecordsManagement() {
                     className={`${inputClass} pl-9`}
                   />
                 </label>
-                <label className="sm:w-44">
+                <label htmlFor="records-status-filter" className="sm:w-44">
                   <span className="sr-only">
                     {t("records.list.statusFilterLabel")}
                   </span>
                   <Select
+                    id="records-status-filter"
                     value={statusFilter}
                     onChange={(event) =>
                       setStatusFilter(
