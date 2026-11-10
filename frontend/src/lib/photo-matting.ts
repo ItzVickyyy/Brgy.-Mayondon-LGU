@@ -97,6 +97,115 @@ export function guidedFilter(
   return output
 }
 
+/**
+ * The model sometimes keeps a strip of wall around the person. Starting from the pixels that are
+ * clearly outside, this peels the mask inward one ring at a time while the next pixel still has the
+ * colour of the background nearby, and stops at the first pixel that looks different. So only a
+ * band of background colour that touches the real outside is removed, never a part of the person
+ * that happens to be surrounded by other colours.
+ */
+export function trimBackgroundLeak(
+  rgba: Uint8ClampedArray,
+  alpha: Float32Array,
+  width: number,
+  height: number,
+  maxRing: number,
+  tolerance: number,
+): void {
+  const count = width * height
+  const removed = new Uint8Array(count)
+  const peeled = new Float32Array(count)
+  const outside = new Float32Array(count)
+  const red = new Float32Array(count)
+  const green = new Float32Array(count)
+  const blue = new Float32Array(count)
+  for (let index = 0; index < count; index++) {
+    if (alpha[index] < 0.05) {
+      removed[index] = 1
+      outside[index] = 1
+      red[index] = rgba[index * 4]
+      green[index] = rgba[index * 4 + 1]
+      blue[index] = rgba[index * 4 + 2]
+    }
+  }
+  // Background colour near each pixel, from the outside pixels around it.
+  const reach = maxRing + 2
+  const outsideBlur = boxFilter(outside, width, height, reach)
+  const redBlur = boxFilter(red, width, height, reach)
+  const greenBlur = boxFilter(green, width, height, reach)
+  const blueBlur = boxFilter(blue, width, height, reach)
+
+  // Person colour near each pixel, from pixels that are surely the person and away from the
+  // outside. Where it is close to the background colour (a white shirt in front of a white wall)
+  // the two cannot be told apart, so nothing is peeled there.
+  const deep = new Float32Array(count)
+  const deepRed = new Float32Array(count)
+  const deepGreen = new Float32Array(count)
+  const deepBlue = new Float32Array(count)
+  for (let index = 0; index < count; index++) {
+    if (alpha[index] > 0.97 && outsideBlur[index] === 0) {
+      deep[index] = 1
+      deepRed[index] = rgba[index * 4]
+      deepGreen[index] = rgba[index * 4 + 1]
+      deepBlue[index] = rgba[index * 4 + 2]
+    }
+  }
+  const similarReach = 25
+  const deepBlur = boxFilter(deep, width, height, similarReach)
+  const deepRedBlur = boxFilter(deepRed, width, height, similarReach)
+  const deepGreenBlur = boxFilter(deepGreen, width, height, similarReach)
+  const deepBlueBlur = boxFilter(deepBlue, width, height, similarReach)
+
+  for (let ring = 0; ring < maxRing; ring++) {
+    const found: number[] = []
+    for (let y = 0; y < height; y++) {
+      for (let x = 0; x < width; x++) {
+        const index = y * width + x
+        if (removed[index] || alpha[index] === 0 || outsideBlur[index] < 0.02)
+          continue
+        const touches =
+          (x > 0 && removed[index - 1]) ||
+          (x < width - 1 && removed[index + 1]) ||
+          (y > 0 && removed[index - width]) ||
+          (y < height - 1 && removed[index + width])
+        if (!touches) continue
+        const weight = outsideBlur[index]
+        const offset = index * 4
+        const difference = Math.max(
+          Math.abs(rgba[offset] - redBlur[index] / weight),
+          Math.abs(rgba[offset + 1] - greenBlur[index] / weight),
+          Math.abs(rgba[offset + 2] - blueBlur[index] / weight),
+        )
+        if (difference > tolerance) continue
+        const personWeight = deepBlur[index]
+        if (personWeight < 0.01) continue
+        const personGap = Math.max(
+          Math.abs(deepRedBlur[index] / personWeight - redBlur[index] / weight),
+          Math.abs(
+            deepGreenBlur[index] / personWeight - greenBlur[index] / weight,
+          ),
+          Math.abs(
+            deepBlueBlur[index] / personWeight - blueBlur[index] / weight,
+          ),
+        )
+        if (personGap > 40) found.push(index)
+      }
+    }
+    if (found.length === 0) break
+    for (const index of found) {
+      removed[index] = 1
+      peeled[index] = 1
+    }
+  }
+
+  // Soften the new edge by about a pixel, only around the pixels that were peeled.
+  const soft = boxFilter(peeled, width, height, 1)
+  for (let index = 0; index < count; index++) {
+    if (peeled[index]) alpha[index] = 0
+    else alpha[index] *= 1 - soft[index]
+  }
+}
+
 export type MattingOptions = {
   /** Window of the guided filter, in pixels of the final photo. */
   radius?: number
@@ -107,6 +216,10 @@ export type MattingOptions = {
   high?: number
   /** Window used to find the person's own colour next to the edge. */
   colorRadius?: number
+  /** Most pixels (from the outside in) that may be removed because they still look like the background. */
+  leakRadius?: number
+  /** How close (largest difference in one colour channel, 0..255) a pixel must be to the background to count as background. */
+  leakTolerance?: number
 }
 
 const DEFAULTS: Required<MattingOptions> = {
@@ -115,6 +228,8 @@ const DEFAULTS: Required<MattingOptions> = {
   low: 0.4,
   high: 0.7,
   colorRadius: 5,
+  leakRadius: 8,
+  leakTolerance: 28,
 }
 
 /**
@@ -130,10 +245,11 @@ export function refineCutout(
   height: number,
   options: MattingOptions = {},
 ): Uint8ClampedArray<ArrayBuffer> {
-  const { radius, epsilon, low, high, colorRadius } = {
-    ...DEFAULTS,
-    ...options,
-  }
+  const { radius, epsilon, low, high, colorRadius, leakRadius, leakTolerance } =
+    {
+      ...DEFAULTS,
+      ...options,
+    }
   const count = width * height
 
   const guide = new Float32Array(count)
@@ -150,6 +266,8 @@ export function refineCutout(
   const alpha = new Float32Array(count)
   for (let index = 0; index < count; index++)
     alpha[index] = smoothstep(low, high, filtered[index])
+  if (leakRadius > 0)
+    trimBackgroundLeak(rgba, alpha, width, height, leakRadius, leakTolerance)
 
   // Colour of the person, measured only where the pixel is surely the person.
   const weight = new Float32Array(count)
