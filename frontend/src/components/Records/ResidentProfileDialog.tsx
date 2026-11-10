@@ -267,16 +267,16 @@ export function ResidentProfileDialog({
                   <UserRound className="size-7" aria-hidden="true" />
                 </span>
               )}
-              <div className="min-w-0 flex-1">
-                <p className="text-lg font-semibold sm:text-xl">{resident.full_name}</p>
-                <p className="text-sm text-muted-foreground">
+              <div className="min-w-[9rem] flex-1 sm:min-w-0">
+                <p className="break-words text-lg font-semibold sm:text-xl">{resident.full_name}</p>
+                <p className="break-words text-sm text-muted-foreground">
                   {residentAddress(resident, streets) ||
                     t("records.profile.noAddress")}
                 </p>
               </div>
               <Badge
                 variant="outline"
-                className={statusStyles[statusLabel(resident.status)]}
+                className={`shrink-0 ${statusStyles[statusLabel(resident.status)]}`}
               >
                 {recordStatusText(resident.status)}
               </Badge>
