@@ -80,6 +80,10 @@ function getDefaultToday(value: unknown) {
   return value === "today" ? localIsoDate() : typeof value === "string" ? value : ""
 }
 
+// Footer buttons: two per row on a phone (a long Filipino label wraps instead of
+// pushing the bar taller), one row of fixed-height buttons from `sm` up.
+const footerButton = "h-auto min-h-11 whitespace-normal px-3 leading-tight sm:h-11 sm:whitespace-nowrap sm:px-4"
+
 export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initialDocumentType, initialDraftId, onSaved, onDraftRemoved, onPrint }: Props) {
   const { t } = useTranslation()
   const purokChoices = purokNumbers.map((purok) => ({ value: String(purok), label: t("issuances.new.resident.purokN", { n: purok }) }))
@@ -1125,20 +1129,20 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
             <PrintSummaryPanel type={config.name} typeLabel={documentName(documentType, t)} currentDate={issueDate} structuredRows={previewRows} missingLabels={attempted ? missingPreviewLabels : []} showMissing={attempted} printingPaused />
           </aside>
         </div>
-        <DialogFooter className="shrink-0 items-center gap-2 border-t px-5 py-3 sm:justify-between">
-          <div className="flex min-w-0 flex-col gap-0.5 text-sm" aria-live="polite">
+        <DialogFooter className="shrink-0 items-stretch gap-2 border-t px-5 py-3 sm:items-center sm:justify-between">
+          <div className="flex min-w-0 flex-col gap-0.5 text-sm sm:flex-1" aria-live="polite">
             {remaining ? <button type="button" onClick={goToFirstMissing} className="inline-flex min-h-9 items-center gap-1.5 self-start text-amber-700 dark:text-amber-400 underline-offset-4 hover:underline"><CircleAlert className="size-4" aria-hidden="true" />{t("issuances.new.footer.stillNeeded", { count: remaining })}</button> : <span className="inline-flex min-h-9 items-center gap-1.5 font-medium text-emerald-700 dark:text-emerald-400"><CheckCircle2 className="size-4" aria-hidden="true" />{t("issuances.new.footer.ready")}</span>}
-            <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground" data-testid="autosave-status">
-              <span className={cn("size-2 rounded-full", autoSave.state === "saved" ? "bg-emerald-500" : autoSave.state === "saving" ? "animate-pulse bg-amber-500" : autoSave.state === "error" ? "bg-destructive" : "bg-muted-foreground/40")} aria-hidden="true" />
-              {autoSave.state === "saving" ? t("issuances.new.footer.saving") : autoSave.state === "saved" ? t("issuances.new.footer.saved", { time: autoSave.at?.toLocaleTimeString(getLocaleOr("en-US"), { hour: "numeric", minute: "2-digit" }) }) : autoSave.state === "error" ? t("issuances.new.footer.saveError") : selectedResident ? t("issuances.new.footer.autoWithResident") : t("issuances.new.footer.autoNoResident")}
-              <span className="ml-2 hidden items-center gap-1 xl:inline-flex"><Keyboard className="size-3.5" aria-hidden="true" />{t("issuances.new.footer.shortcut")}</span>
+            <span className="flex min-w-0 items-center gap-1.5 text-xs text-muted-foreground" data-testid="autosave-status">
+              <span className={cn("size-2 shrink-0 rounded-full", autoSave.state === "saved" ? "bg-emerald-500" : autoSave.state === "saving" ? "animate-pulse bg-amber-500" : autoSave.state === "error" ? "bg-destructive" : "bg-muted-foreground/40")} aria-hidden="true" />
+              <span className="min-w-0 truncate">{autoSave.state === "saving" ? t("issuances.new.footer.saving") : autoSave.state === "saved" ? t("issuances.new.footer.saved", { time: autoSave.at?.toLocaleTimeString(getLocaleOr("en-US"), { hour: "numeric", minute: "2-digit" }) }) : autoSave.state === "error" ? t("issuances.new.footer.saveError") : selectedResident ? t("issuances.new.footer.autoWithResident") : t("issuances.new.footer.autoNoResident")}</span>
+              <span className="ml-2 hidden shrink-0 items-center gap-1 xl:inline-flex"><Keyboard className="size-3.5" aria-hidden="true" />{t("issuances.new.footer.shortcut")}</span>
             </span>
           </div>
-          <div className="flex flex-wrap justify-end gap-2">
-            <Button type="button" variant="ghost" onClick={() => requestClose(false)}>{t("issuances.new.footer.cancel")}</Button>
-            <Button type="button" variant="outline" disabled={saving} onClick={() => void saveDraft()}>{t("issuances.new.footer.saveDraftClose")}</Button>
-            <Button type="button" variant="outline" disabled={saving} onClick={() => void issue(true)}><Printer className="size-4" aria-hidden="true" />{t("issuances.new.footer.issueAndPrint")}</Button>
-            <Button type="submit" disabled={saving || Boolean(duplicate) || residentArchived}>{saving ? t("issuances.new.footer.savingButton") : t("issuances.new.footer.issue")}</Button>
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-nowrap sm:justify-end">
+            <Button type="button" variant="ghost" className={footerButton} onClick={() => requestClose(false)}>{t("issuances.new.footer.cancel")}</Button>
+            <Button type="button" variant="outline" className={footerButton} disabled={saving} onClick={() => void saveDraft()}>{t("issuances.new.footer.saveDraftClose")}</Button>
+            <Button type="button" variant="outline" className={footerButton} disabled={saving} onClick={() => void issue(true)}><Printer className="size-4" aria-hidden="true" />{t("issuances.new.footer.issueAndPrint")}</Button>
+            <Button type="submit" className={footerButton} disabled={saving || Boolean(duplicate) || residentArchived}>{saving ? t("issuances.new.footer.savingButton") : t("issuances.new.footer.issue")}</Button>
           </div>
         </DialogFooter>
       </form>}
