@@ -9,7 +9,6 @@ import {
   ResidentsService,
 } from "@/client"
 import { formControlClass } from "@/components/Common/formStyles"
-import { Select } from "@/components/Common/Select"
 import {
   ModalSection,
   modalBody,
@@ -18,6 +17,7 @@ import {
   modalShell,
   modalTall,
 } from "@/components/Common/ModalLayout"
+import { Select } from "@/components/Common/Select"
 import { uploadResidentPhoto } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { Button } from "@/components/ui/button"
 import {
@@ -154,6 +154,22 @@ type ResidentFormDialogProps = {
 }
 
 const labelClass = "flex flex-col gap-2 text-sm font-medium"
+const errorClass = "text-xs font-normal text-destructive"
+
+/** The red asterisk of a required field; the input itself says "required". */
+function RequiredMark() {
+  return (
+    <span aria-hidden="true" className="text-destructive">
+      {" "}
+      *
+    </span>
+  )
+}
+
+/** Today in Manila as YYYY-MM-DD, the latest birthdate the server accepts. */
+function todayManila() {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" })
+}
 
 export function ResidentFormDialog({
   open,
@@ -168,6 +184,8 @@ export function ResidentFormDialog({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [duplicate, setDuplicate] = useState(false)
+  // Set by the first Save click; the missing-field messages show from then on.
+  const [submitted, setSubmitted] = useState(false)
   const [photoDataUrl, setPhotoDataUrl] = useState("")
 
   useEffect(() => {
@@ -175,6 +193,7 @@ export function ResidentFormDialog({
     setForm(resident ? formFromResident(resident) : emptyForm())
     setError("")
     setDuplicate(false)
+    setSubmitted(false)
     setPhotoDataUrl("")
   }, [open, resident])
 
@@ -224,7 +243,10 @@ export function ResidentFormDialog({
     }
   }
 
-  const canSave = form.first_name.trim() && form.last_name.trim() && !saving
+  const firstMissing = !form.first_name.trim()
+  const lastMissing = !form.last_name.trim()
+  const showFirstError = submitted && firstMissing
+  const showLastError = submitted && lastMissing
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -240,24 +262,59 @@ export function ResidentFormDialog({
 
         <form
           className="flex min-h-0 flex-1 flex-col"
+          noValidate
           onSubmit={(event) => {
             event.preventDefault()
-            if (canSave) void submit(false)
+            if (saving) return
+            setSubmitted(true)
+            if (firstMissing || lastMissing) {
+              // Take the person to the first field that needs an answer.
+              document
+                .getElementById(
+                  firstMissing
+                    ? "resident-form-first-name"
+                    : "resident-form-last-name",
+                )
+                ?.focus()
+              return
+            }
+            void submit(false)
           }}
         >
           <div className={`${modalBody} grid gap-7`}>
+            <p className="-mb-3 text-xs text-muted-foreground">
+              {t("records.form.requiredNote")}
+            </p>
             <ModalSection
               title={t("records.form.sections.personal")}
               className="sm:grid-cols-2 lg:grid-cols-3"
             >
-              <label className={labelClass}>
-                {t("records.form.firstName")}
+              <label htmlFor="resident-form-first-name" className={labelClass}>
+                <span>
+                  {t("records.form.firstName")}
+                  <RequiredMark />
+                </span>
                 <input
+                  id="resident-form-first-name"
                   value={form.first_name}
                   onChange={(event) => set("first_name", event.target.value)}
                   className={formControlClass}
                   required
+                  aria-invalid={showFirstError || undefined}
+                  aria-describedby={
+                    showFirstError
+                      ? "resident-form-first-name-error"
+                      : undefined
+                  }
                 />
+                {showFirstError ? (
+                  <span
+                    id="resident-form-first-name-error"
+                    className={errorClass}
+                  >
+                    {t("records.form.errors.firstName")}
+                  </span>
+                ) : null}
               </label>
               <label className={labelClass}>
                 {t("records.form.middleName")}
@@ -267,18 +324,35 @@ export function ResidentFormDialog({
                   className={formControlClass}
                 />
               </label>
-              <label className={labelClass}>
-                {t("records.form.lastName")}
+              <label htmlFor="resident-form-last-name" className={labelClass}>
+                <span>
+                  {t("records.form.lastName")}
+                  <RequiredMark />
+                </span>
                 <input
+                  id="resident-form-last-name"
                   value={form.last_name}
                   onChange={(event) => set("last_name", event.target.value)}
                   className={formControlClass}
                   required
+                  aria-invalid={showLastError || undefined}
+                  aria-describedby={
+                    showLastError ? "resident-form-last-name-error" : undefined
+                  }
                 />
+                {showLastError ? (
+                  <span
+                    id="resident-form-last-name-error"
+                    className={errorClass}
+                  >
+                    {t("records.form.errors.lastName")}
+                  </span>
+                ) : null}
               </label>
               <label htmlFor="resident-form-suffix" className={labelClass}>
                 {t("records.form.suffix")}
-                <Select id="resident-form-suffix"
+                <Select
+                  id="resident-form-suffix"
                   value={form.suffix}
                   onChange={(event) => set("suffix", event.target.value)}
                   className={formControlClass}
@@ -293,6 +367,7 @@ export function ResidentFormDialog({
                 {t("records.form.birthdate")}
                 <input
                   type="date"
+                  max={todayManila()}
                   value={form.birthdate}
                   onChange={(event) => set("birthdate", event.target.value)}
                   className={formControlClass}
@@ -308,7 +383,8 @@ export function ResidentFormDialog({
               </label>
               <label htmlFor="resident-form-sex" className={labelClass}>
                 {t("records.form.sex")}
-                <Select id="resident-form-sex"
+                <Select
+                  id="resident-form-sex"
                   value={form.sex}
                   onChange={(event) => set("sex", event.target.value)}
                   className={formControlClass}
@@ -320,9 +396,13 @@ export function ResidentFormDialog({
                   </option>
                 </Select>
               </label>
-              <label htmlFor="resident-form-civil-status" className={labelClass}>
+              <label
+                htmlFor="resident-form-civil-status"
+                className={labelClass}
+              >
                 {t("records.form.civilStatus")}
-                <Select id="resident-form-civil-status"
+                <Select
+                  id="resident-form-civil-status"
                   value={form.civil_status}
                   onChange={(event) => set("civil_status", event.target.value)}
                   className={formControlClass}
@@ -403,7 +483,8 @@ export function ResidentFormDialog({
               </label>
               <label htmlFor="resident-form-street" className={labelClass}>
                 {t("records.form.street")}
-                <Select id="resident-form-street"
+                <Select
+                  id="resident-form-street"
                   value={form.street_id}
                   onChange={(event) => set("street_id", event.target.value)}
                   className={formControlClass}
@@ -435,14 +516,16 @@ export function ResidentFormDialog({
                 <input
                   type="number"
                   min={1900}
-                  value={form.resident_since_birth ? "" : form.resident_since_year}
+                  value={
+                    form.resident_since_birth ? "" : form.resident_since_year
+                  }
                   disabled={form.resident_since_birth}
                   onChange={(event) =>
                     set("resident_since_year", event.target.value)
                   }
                   className={formControlClass}
                 />
-                <span className="flex min-h-6 items-center gap-2 font-normal">
+                <span className="flex min-h-11 items-center gap-2 font-normal sm:min-h-6">
                   <input
                     type="checkbox"
                     checked={form.resident_since_birth}
@@ -455,7 +538,8 @@ export function ResidentFormDialog({
               </label>
               <label htmlFor="resident-form-type" className={labelClass}>
                 {t("records.form.residentType")}
-                <Select id="resident-form-type"
+                <Select
+                  id="resident-form-type"
                   value={form.resident_type}
                   onChange={(event) => set("resident_type", event.target.value)}
                   className={formControlClass}
@@ -470,7 +554,8 @@ export function ResidentFormDialog({
               </label>
               <label htmlFor="resident-form-voter" className={labelClass}>
                 {t("records.form.voter")}
-                <Select id="resident-form-voter"
+                <Select
+                  id="resident-form-voter"
                   value={form.voter_registration}
                   onChange={(event) =>
                     set("voter_registration", event.target.value)
@@ -559,7 +644,9 @@ export function ResidentFormDialog({
                 <p className="font-medium">
                   {t("records.form.duplicate.title")}
                 </p>
-                <p className="mt-1">{t("records.form.duplicate.description")}</p>
+                <p className="mt-1">
+                  {t("records.form.duplicate.description")}
+                </p>
                 <Button
                   type="button"
                   variant="outline"
@@ -590,7 +677,7 @@ export function ResidentFormDialog({
             <Button
               type="submit"
               className="min-h-11 sm:min-h-9"
-              disabled={!canSave}
+              disabled={saving}
             >
               {saving
                 ? t("records.form.saving")

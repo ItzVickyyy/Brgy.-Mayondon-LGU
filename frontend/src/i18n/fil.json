@@ -615,7 +615,13 @@
       "cancel": "Kanselahin",
       "saving": "Sine-save...",
       "saveChanges": "I-save ang mga pagbabago",
-      "addSubmit": "Magdagdag ng residente"
+      "addSubmit": "Magdagdag ng residente",
+      "requiredNote": "Kailangan ang mga field na may markang *.",
+      "requiredMark": "kailangan",
+      "errors": {
+        "firstName": "Ilagay ang unang pangalan.",
+        "lastName": "Ilagay ang apelyido."
+      }
     },
     "profile": {
       "title": "Profile ng Residente",

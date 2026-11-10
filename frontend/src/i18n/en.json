@@ -615,7 +615,13 @@
       "cancel": "Cancel",
       "saving": "Saving...",
       "saveChanges": "Save changes",
-      "addSubmit": "Add resident"
+      "addSubmit": "Add resident",
+      "requiredNote": "Fields marked with * are required.",
+      "requiredMark": "required",
+      "errors": {
+        "firstName": "Enter the first name.",
+        "lastName": "Enter the last name."
+      }
     },
     "profile": {
       "title": "Resident Profile",
