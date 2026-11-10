@@ -35,6 +35,7 @@ type RowActionsProps = {
   isAdmin: boolean
   primary?: RowPrimaryAction
   items?: RowActionItem[]
+  leading?: ReactNode // extra control shown before the primary button
 }
 
 export function RowActions({
@@ -42,6 +43,7 @@ export function RowActions({
   isAdmin,
   primary,
   items = [],
+  leading,
 }: RowActionsProps) {
   const { t } = useTranslation()
   const visibleItems = items.filter(
@@ -50,6 +52,7 @@ export function RowActions({
 
   return (
     <div className="flex items-center justify-end gap-2">
+      {leading}
       {primary ? (
         <Button
           type="button"

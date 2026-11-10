@@ -132,7 +132,7 @@ function IssuancesManagement() {
           setInitialDraftId(id)
           setIsSimplifiedDialogOpen(true)
         }}
-        onPrint={(item) => printStoredIssuance(item.id)}
+        onPrint={(item, mode) => printStoredIssuance(item.id, mode)}
       />
 
       <Dialog open={printSetupOpen} onOpenChange={setPrintSetupOpen}>

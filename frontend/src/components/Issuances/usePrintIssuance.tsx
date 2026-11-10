@@ -1,17 +1,21 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { PrintForm } from "@/components/Issuances/PrintForm"
 import { PrintOverlay } from "@/components/Issuances/PrintOverlay"
 import { printMessage } from "@/lib/issuanceLabels"
 import type { PrintData } from "@/lib/print/buildPrintData"
 import { getOffset } from "@/lib/print/calibration"
 import { loadPrintData } from "@/lib/print/loadPrintData"
+import { getPrintMode, type PrintMode } from "@/lib/print/printMode"
 
 const IMAGE_WAIT_MS = 3000
 
 /** Resolves once every overlay image has loaded (or after a short timeout), so a photo never prints blank. */
 function waitForOverlayImages(): Promise<void> {
   const images = Array.from(
-    document.querySelectorAll<HTMLImageElement>(".print-overlay-root img"),
+    document.querySelectorAll<HTMLImageElement>(
+      ".print-overlay-root img, .print-form-root img",
+    ),
   )
   const pending = images
     .filter((image) => !image.complete)
@@ -29,15 +33,16 @@ function waitForOverlayImages(): Promise<void> {
 }
 
 /**
- * Prints a stored issuance on the pre-printed form.
- * `print(id)` resolves to a short message for the screen (never throws). Render `overlay` once anywhere in the page.
+ * Prints a stored issuance: the values only (pre-printed paper) or the form with the values (blank paper).
+ * Without `mode` the remembered choice is used. `print(id)` resolves to a short message for the screen (never throws). Render `overlay` once anywhere in the page.
  */
 export function usePrintIssuance(): {
-  print: (issuanceId: string) => Promise<string>
+  print: (issuanceId: string, mode?: PrintMode) => Promise<string>
   overlay: ReactNode
 } {
   const { t } = useTranslation()
   const [data, setData] = useState<PrintData | null>(null)
+  const [mode, setMode] = useState<PrintMode>("data")
   const busy = useRef(false)
   const done = useRef<(() => void) | null>(null)
 
@@ -59,7 +64,7 @@ export function usePrintIssuance(): {
   }, [data])
 
   const print = useCallback(
-    async (issuanceId: string) => {
+    async (issuanceId: string, chosen?: PrintMode) => {
       if (busy.current) return t("issuances.printing.notices.busy")
       busy.current = true
       try {
@@ -67,6 +72,7 @@ export function usePrintIssuance(): {
         if (!result.ok) return printMessage(result.message, t)
         await new Promise<void>((resolve) => {
           done.current = resolve
+          setMode(chosen ?? getPrintMode())
           setData(result.data)
         })
         return t("issuances.printing.notices.opened")
@@ -84,7 +90,11 @@ export function usePrintIssuance(): {
   return {
     print,
     overlay: data ? (
-      <PrintOverlay data={data} offset={getOffset(data.templateId)} />
+      mode === "form" ? (
+        <PrintForm data={data} />
+      ) : (
+        <PrintOverlay data={data} offset={getOffset(data.templateId)} />
+      )
     ) : null,
   }
 }

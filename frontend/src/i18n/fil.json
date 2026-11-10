@@ -871,6 +871,11 @@
         "continueDraft": "Ituloy ang draft",
         "correct": "Itama at i-edit",
         "reprint": "I-reprint",
+        "print": "I-print",
+        "printFor": "I-print para kay {{name}}",
+        "printChoose": "Piliin kung paano i-print para kay {{name}}",
+        "printData": "Data lamang (naka-print nang papel)",
+        "printForm": "Form at data (blangkong papel)",
         "discard": "Itapon ang draft"
       },
       "confirm": {

@@ -51,6 +51,15 @@ Staff apply the dry seal; residents complete thumbmark and signature areas by ha
 
 Browser print must use **actual size / 100% scaling** with headers and footers disabled.
 
+### 3.1 Print mode: data only or form and data (added November 10, 2026)
+
+The Print button on an issued History row prints in one of two modes; the arrow next to it chooses, and the choice is remembered in the browser (`print-mode`).
+
+- **Data only (pre-printed paper)**: the rule above. This is the default.
+- **Form and data (blank paper)**: the form is typeset on one Letter page with the letterhead, a faint logo watermark, the labels and lines, and the typed values. The wording is copied from the Word files in `docs/reference/document-templates/`. Signatures, the thumbmark and the dry seal are still never created: the thumbmark box and the "DRY SEAL" caption are only markers for staff.
+
+Both modes cover the six types that have a print template. Reprint is no longer in the three-dot menu. The typeset forms have not been compared with paper by the client; confirm the letterhead e-mail addresses, the motto spelling and the signatory names on them before relying on blank-paper printing.
+
 ## 4. Form-by-form typed content
 
 ### 4.1 Barangay Clearance

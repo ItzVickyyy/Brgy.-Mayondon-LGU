@@ -10,7 +10,6 @@ import {
   FileCheck2,
   FilePenLine,
   FileText,
-  Printer,
   Search,
   X,
 } from "lucide-react"
@@ -25,8 +24,8 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
-import { Select } from "@/components/Common/Select"
 import { RowActions } from "@/components/Common/RowActions"
+import { Select } from "@/components/Common/Select"
 import {
   modalBody,
   modalFooter,
@@ -37,6 +36,7 @@ import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { SummaryCard } from "@/components/Issuances/IssuanceLayout"
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
+import { PrintSplitButton } from "@/components/Issuances/PrintSplitButton"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -52,6 +52,7 @@ import { isSystemAdministrator } from "@/lib/access"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { formatLocaleDate } from "@/lib/locale"
+import type { PrintMode } from "@/lib/print/printMode"
 import { cn } from "@/lib/utils"
 
 type StatusFilter = "all" | "issued" | "draft" | "voided"
@@ -262,7 +263,10 @@ export function IssuanceHistory({
 }: {
   onNotice: (message: string) => void
   onContinueDraft: (id: string) => void
-  onPrint: (item: IssuanceListItem) => Promise<string | void> | string | void
+  onPrint: (
+    item: IssuanceListItem,
+    mode?: PrintMode,
+  ) => Promise<string | void> | string | void
 }) {
   const { t } = useTranslation()
   const { user } = useAuth()
@@ -699,6 +703,21 @@ export function IssuanceHistory({
                           <RowActions
                             name={item.resident_name}
                             isAdmin={isAdmin}
+                            leading={
+                              isIssued && canReprint ? (
+                                <PrintSplitButton
+                                  name={item.resident_name}
+                                  onPrint={async (mode) => {
+                                    try {
+                                      const message = await onPrint(item, mode)
+                                      if (message) onNotice(message)
+                                    } catch (error) {
+                                      setErrorNotice(readApiError(error).message)
+                                    }
+                                  }}
+                                />
+                              ) : undefined
+                            }
                             primary={{
                               label: t("issuances.history.actions.view"),
                               variant: "outline",
@@ -737,24 +756,6 @@ export function IssuanceHistory({
                                 ),
                                 onSelect: () =>
                                   setPending({ item, action: "correct" }),
-                              },
-                              {
-                                label: t("issuances.history.actions.reprint"),
-                                hidden: !isIssued || !canReprint,
-                                icon: (
-                                  <Printer
-                                    aria-hidden="true"
-                                    className="size-4"
-                                  />
-                                ),
-                                onSelect: async () => {
-                                  try {
-                                    const message = await onPrint(item)
-                                    if (message) onNotice(message)
-                                  } catch (error) {
-                                    setErrorNotice(readApiError(error).message)
-                                  }
-                                },
                               },
                               {
                                 label: t("issuances.history.actions.discard"),

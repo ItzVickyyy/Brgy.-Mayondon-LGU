@@ -871,6 +871,11 @@
         "continueDraft": "Continue draft",
         "correct": "Correct & edit",
         "reprint": "Reprint",
+        "print": "Print",
+        "printFor": "Print for {{name}}",
+        "printChoose": "Choose how to print for {{name}}",
+        "printData": "Data only (pre-printed paper)",
+        "printForm": "Form and data (blank paper)",
         "discard": "Discard draft"
       },
       "confirm": {
