@@ -15,6 +15,7 @@ from sqlmodel import col, select
 from app.api.deps import SessionDep, require_permission
 from app.core.dates import today_manila
 from app.core.permissions import Permission
+from app.core.search import search_words, word_matches
 from app.models import User
 from app.models_issuance import (
     ID_EXPIRING_SOON_DAYS,
@@ -73,14 +74,13 @@ def list_barangay_ids(
         )
     elif status == "valid":
         stmt = stmt.where(col(IssuanceBarangayId.valid_until) > soon)
-    for word in (q or "").split():
-        pattern = f"%{word}%"
+    for word in search_words(q):
         stmt = stmt.where(
-            col(Issuance.reference_no).ilike(pattern)
-            | col(IssuanceBarangayId.id_number).ilike(pattern)
-            | col(Resident.first_name).ilike(pattern)
-            | col(Resident.last_name).ilike(pattern)
-            | col(Resident.middle_name).ilike(pattern)
+            word_matches(
+                word,
+                [Resident.first_name, Resident.last_name, Resident.middle_name],
+                [Issuance.reference_no, IssuanceBarangayId.id_number],
+            )
         )
     count = session.exec(select(sa_func.count()).select_from(stmt.subquery())).one()
     rows = session.exec(

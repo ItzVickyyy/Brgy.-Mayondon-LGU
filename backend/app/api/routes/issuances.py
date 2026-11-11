@@ -30,6 +30,7 @@ from app.core.audit import record_audit_event
 from app.core.config import settings
 from app.core.dates import add_months, today_manila
 from app.core.permissions import Permission, has_permission
+from app.core.search import search_words, word_matches
 from app.models import User
 from app.models_foundation import (
     DocumentType,
@@ -559,13 +560,13 @@ def list_issuances(
         stmt = stmt.where(Issuance.issue_date >= date_from)
     if date_to is not None:
         stmt = stmt.where(Issuance.issue_date <= date_to)
-    for word in (q or "").split():
-        pattern = f"%{word}%"
+    for word in search_words(q):
         stmt = stmt.where(
-            col(Issuance.reference_no).ilike(pattern)
-            | col(Resident.first_name).ilike(pattern)
-            | col(Resident.last_name).ilike(pattern)
-            | col(Resident.middle_name).ilike(pattern)
+            word_matches(
+                word,
+                [Resident.first_name, Resident.last_name, Resident.middle_name],
+                [Issuance.reference_no],
+            )
         )
     count = session.exec(select(sa_func.count()).select_from(stmt.subquery())).one()
     rows = session.exec(

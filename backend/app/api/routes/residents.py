@@ -18,6 +18,7 @@ from app.api.deps import SessionDep, require_permission
 from app.core.audit import record_audit_event
 from app.core.dates import age_on, today_manila
 from app.core.permissions import Permission
+from app.core.search import search_words, word_matches
 from app.models import User
 from app.models_foundation import Sector, Street
 from app.models_issuance import ID_EXPIRING_SOON_DAYS, Issuance, IssuanceBarangayId
@@ -203,7 +204,11 @@ def list_residents(
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> Any:
-    """Search residents. Every word typed must match the first, middle or last name."""
+    """Search residents. Every word typed must match the first, middle or last name.
+
+    Case, accents, commas and spaces are ignored (``Pena``, ``Delacruz`` and
+    ``Dela Cruz, Juan`` all work), see ``app.core.search``.
+    """
     stmt = select(Resident)
     if status != "all":
         stmt = stmt.where(Resident.status == status)
@@ -215,16 +220,15 @@ def list_residents(
                 )
             )
         )
-    for word in (q or "").split():
-        pattern = f"%{word}%"
+    for word in search_words(q):
         stmt = stmt.where(
-            col(Resident.first_name).ilike(pattern)
-            | col(Resident.last_name).ilike(pattern)
-            | col(Resident.middle_name).ilike(pattern)
-            | col(Resident.id_number).ilike(pattern)
-            | col(Resident.house_number).ilike(pattern)
+            word_matches(
+                word,
+                [Resident.first_name, Resident.last_name, Resident.middle_name],
+                [Resident.id_number, Resident.house_number],
+            )
             | col(Resident.street_id).in_(
-                select(Street.id).where(col(Street.name).ilike(pattern))
+                select(Street.id).where(word_matches(word, [], [Street.name]))
             )
         )
     count = session.exec(select(sa_func.count()).select_from(stmt.subquery())).one()

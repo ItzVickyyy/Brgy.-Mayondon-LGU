@@ -322,6 +322,45 @@ def test_search_matches_address_and_id_number(
         assert [row["id"] for row in body["data"]] == [resident["id"]]
 
 
+def test_search_ignores_accents_commas_spaces_and_case(
+    client: TestClient, staff_token_headers: Headers
+) -> None:
+    tag = random_lower_string()[:8]
+    pena = _create(
+        client, staff_token_headers, first_name=f"Jos\u00e9{tag}", last_name="Pe\u00f1a"
+    )
+    dela = _create(
+        client, staff_token_headers, first_name=f"Juan{tag}", last_name="Dela Cruz"
+    )
+
+    def found(term: str) -> list[str]:
+        r = client.get(
+            f"{API}/residents/", headers=staff_token_headers, params={"q": term}
+        )
+        assert r.status_code == 200, r.text
+        return [x["id"] for x in r.json()["data"]]
+
+    assert pena["id"] in found(f"Pena jose{tag}")  # no accents typed
+    assert pena["id"] in found(f"PE\u00d1A, Jos\u00e9{tag}")  # accents and capitals
+    assert dela["id"] in found(f"Delacruz juan{tag}")  # no space typed
+    assert dela["id"] in found(f"Dela Cruz, Juan{tag}")  # Last, First
+    assert dela["id"] in found(f"de la cruz juan{tag}")  # words in any order
+    assert dela["id"] not in found(f"Delacruz jose{tag}")  # every word must match
+
+
+def test_search_treats_percent_and_underscore_literally(
+    client: TestClient, staff_token_headers: Headers
+) -> None:
+    tag = random_lower_string()[:8]
+    resident = _create(client, staff_token_headers, first_name=f"Pct{tag}")
+    for term in ("%", "_", f"P_t{tag}", f"%{tag}"):
+        r = client.get(
+            f"{API}/residents/", headers=staff_token_headers, params={"q": term}
+        )
+        assert r.status_code == 200, r.text
+        assert resident["id"] not in [x["id"] for x in r.json()["data"]]
+
+
 def test_list_pagination_limits(
     client: TestClient, staff_token_headers: Headers
 ) -> None:
