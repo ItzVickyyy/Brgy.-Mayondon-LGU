@@ -255,6 +255,45 @@ def test_mapping_rules(
     )
 
 
+def test_street_names_match_ignoring_case_punctuation_and_abbreviations(
+    db: Session,
+) -> None:
+    tag = _tag()
+    rizal = Street(name=f"Rizal{tag} Street")
+    mabini = Street(name=f"Mabini{tag} Road")
+    mabini_ext = Street(name=f"Mabini{tag} Avenue")
+    db.add_all([rizal, mabini, mabini_ext])
+    db.commit()
+    for item in (rizal, mabini, mabini_ext):
+        db.refresh(item)
+    lookup = mi._street_lookup(db)
+
+    for typed in (
+        f"Rizal{tag} St.",
+        f"RIZAL{tag} STREET",
+        f"rizal{tag}  st",
+        f"Rizal{tag}",  # the generic word may be left out
+    ):
+        assert lookup.get(mi.street_key(typed)) == rizal.id, typed
+    assert lookup.get(mi.street_key(f"Mabini{tag} Rd.")) == mabini.id
+    # Two streets would share "Mabini": the short form must not guess.
+    assert mi.street_key(f"Mabini{tag}") not in lookup
+    assert mi.street_key("No Such Street") not in lookup
+
+
+def test_xlsx_import_skips_a_blank_first_sheet() -> None:
+    book = Workbook()
+    book.active.title = "Cover"
+    data = book.create_sheet("Masterlist")
+    data.append(["First name", "Last name"])
+    data.append(["Ana", "Reyes"])
+    buffer = io.BytesIO()
+    book.save(buffer)
+    rows = mi._read_xlsx(buffer.getvalue())
+    assert rows[0][:2] == ["First name", "Last name"]
+    assert rows[1][:2] == ["Ana", "Reyes"]
+
+
 def test_validation_uses_resident_rules_and_hides_values(
     client: TestClient, superuser_token_headers: dict[str, str], street: Street
 ) -> None:

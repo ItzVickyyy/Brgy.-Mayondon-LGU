@@ -21,6 +21,7 @@ from pydantic import ValidationError
 from sqlalchemy import func as sa_func
 from sqlmodel import Session, col, select
 
+from app.core.search import fold_text
 from app.core.text_repair import fix_mojibake
 from app.models_foundation import Street
 from app.models_import import ImportBatch, ImportRow
@@ -162,10 +163,15 @@ def _read_xlsx(content: bytes) -> list[list[Any]]:
         raise ImportFileError("This is not a valid .xlsx file") from None
     try:
         workbook = load_workbook(io.BytesIO(content), read_only=True, data_only=True)
-        sheet = workbook.worksheets[0]
-        rows = [
-            list(r) for r in sheet.iter_rows(values_only=True, max_row=MAX_ROWS + 2)
-        ]
+        rows = []
+        # The first sheet that holds anything: a blank cover sheet must not hide
+        # the real list behind it.
+        for sheet in workbook.worksheets:
+            rows = [
+                list(r) for r in sheet.iter_rows(values_only=True, max_row=MAX_ROWS + 2)
+            ]
+            if any(cell is not None and str(cell).strip() for r in rows for cell in r):
+                break
         workbook.close()
     except ImportFileError:
         raise
@@ -343,7 +349,7 @@ def check_row(
         if value is None:
             continue
         if field == "street":
-            street_id = street_ids.get(value.casefold())
+            street_id = street_ids.get(street_key(value))
             if street_id is None:
                 errors.append(
                     {"field": "street", "message": "Street is not in the streets list"}
@@ -382,12 +388,45 @@ def check_row(
     return dumped, errors
 
 
+_STREET_WORDS = {
+    "st": "street",
+    "str": "street",
+    "ave": "avenue",
+    "av": "avenue",
+    "rd": "road",
+    "blvd": "boulevard",
+    "hwy": "highway",
+    "ext": "extension",
+    "brgy": "barangay",
+}
+_STREET_GENERIC = {"street", "avenue", "road", "boulevard", "highway", "extension"}
+
+
+def street_key(value: str) -> str:
+    """Compare street names ignoring case, accents, punctuation and ``St.``/``Street``."""
+    words = re.sub(r"[^\w\s]", " ", fold_text(value)).split()
+    return " ".join(_STREET_WORDS.get(word, word) for word in words)
+
+
 def _street_lookup(session: Session) -> dict[str, int]:
-    return {
-        name.casefold(): street_id
+    """Normalised street name to id. The name without a trailing ``Street``/``Road``
+    also matches (``Rizal`` finds ``Rizal Street``) unless two streets would share it.
+    """
+    rows = [
+        (street_id, street_key(name))
         for street_id, name in session.exec(select(Street.id, Street.name)).all()
         if street_id is not None
-    }
+    ]
+    lookup = {key: street_id for street_id, key in rows}
+    short: dict[str, set[int]] = {}
+    for street_id, key in rows:
+        words = key.split()
+        if len(words) > 1 and words[-1] in _STREET_GENERIC:
+            short.setdefault(" ".join(words[:-1]), set()).add(street_id)
+    for key, ids in short.items():
+        if len(ids) == 1 and key not in lookup:
+            lookup[key] = next(iter(ids))
+    return lookup
 
 
 def classify_batch(session: Session, batch: ImportBatch) -> dict[str, int]:
