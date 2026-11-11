@@ -155,7 +155,7 @@ If the admin already exists, the script is **not** a password reset; use the rec
 5. Test login, search, data entry, printing, logout and simultaneous use from more than one computer.
 6. Ask the network administrator to reserve the host's address in the router **(D-32)**.
 
-This is **HTTP on a private LAN — not encrypted in transit**. A private LAN is not a substitute for authentication, least privilege or physical security **(D-33)**.
+This is **HTTP on a private LAN — not encrypted in transit** until HTTPS is switched on (patch 54, `docs/11` section G item 7; then use `https://<host-IPv4>` and open TCP 443 and 80 instead of 8000). A private LAN is not a substitute for authentication, least privilege or physical security **(D-33)**.
 
 ## 8. Backup and restore
 
@@ -187,7 +187,7 @@ The PowerShell smoke test creates a uniquely named temporary database, inserts a
 ## 9. Offline limitations to resolve
 
 - **Password recovery and account setup by email** depend on SMTP and will not work offline **(D-12)**.
-- **ID photo background removal:** the client uses an online service today. Replace it with an approved local tool or a manual process; **never upload resident photos to an external service** **(D-18)**. The prototype removes the background in the browser with the MediaPipe selfie-segmentation files served from our own server (`/vision/selfie-segmentation/`, copied from `node_modules` by `vite.config.ts`). The model's mask is low resolution, so `lib/photo-matting.ts` refines it on the same computer (guided filter against the photo's own edges, a slight pull-in of the edge, edge colours taken from the person instead of the old background, and a strip of wall that the model kept is peeled away from the outside when it still has the wall colour, except where the person and the wall look alike); it needs no extra files and no internet. The camera needs `localhost` or https: plain `http://<LAN address>` blocks it.
+- **ID photo background removal:** the client uses an online service today. Replace it with an approved local tool or a manual process; **never upload resident photos to an external service** **(D-18)**. The prototype removes the background in the browser with the MediaPipe selfie-segmentation files served from our own server (`/vision/selfie-segmentation/`, copied from `node_modules` by `vite.config.ts`). The model's mask is low resolution, so `lib/photo-matting.ts` refines it on the same computer (guided filter against the photo's own edges, a slight pull-in of the edge, edge colours taken from the person instead of the old background, and a strip of wall that the model kept is peeled away from the outside when it still has the wall colour, except where the person and the wall look alike); it needs no extra files and no internet. The camera needs `localhost` or https: plain `http://<LAN address>` blocks it. HTTPS for the office network is available from patch 54 (a Caddy proxy with its own certificate authority, off until switched on; `docs/11` section G item 7).
 - **External resources:** verify fonts, icons and scripts load offline (the packaged frontend uses local assets and same-origin calls).
 - **API docs page:** the custom `/docs` endpoint uses CDN-hosted Swagger UI assets and may not render offline. **Decision (Nov 1, 2026, D-37):** staff do not need it offline, so leave it as is; package the assets only if wanted for a demo.
 - **Updates and dependencies:** download and test before taking the host offline; never rely on live package downloads at the barangay.

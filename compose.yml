@@ -27,8 +27,10 @@ services:
         restart: true
     ports:
       # The application and API share this port. Office computers open
-      # http://<server-computer-LAN-IP>:8000 from their browsers.
-      - "${APP_PORT:-8000}:8000"
+      # http://<server-computer-LAN-IP>:8000 from their browsers. With HTTPS
+      # switched on (docs/11 section G item 7) set APP_BIND=127.0.0.1 so only
+      # this computer can use plain HTTP and the office uses the HTTPS proxy.
+      - "${APP_BIND:-0.0.0.0}:${APP_PORT:-8000}:8000"
     environment:
       PROJECT_NAME: ${PROJECT_NAME:?Variable not set}
       SECRET_KEY: ${SECRET_KEY:?Variable not set}
@@ -49,6 +51,11 @@ services:
       BACKUP_REQUIRE_ENCRYPTION: ${BACKUP_REQUIRE_ENCRYPTION:-false}
       MIGRATE_ON_START: ${MIGRATE_ON_START:-true}
       PRE_MIGRATION_BACKUP: ${PRE_MIGRATION_BACKUP:-true}
+      # Which senders may tell the app "this request came in over HTTPS".
+      # Default: only this container itself. Set to * together with
+      # COMPOSE_PROFILES=https (the backend is then reachable only through the
+      # proxy and this computer).
+      FORWARDED_ALLOW_IPS: ${FORWARDED_ALLOW_IPS:-127.0.0.1}
 
     volumes:
       # Backups made by the app appear in the repository's backups folder on
@@ -67,5 +74,29 @@ services:
       context: .
       dockerfile: backend/Dockerfile
 
+  # HTTPS for the office network. Off unless COMPOSE_PROFILES=https is set in
+  # .env, so applying an update never changes a running system by itself.
+  caddy:
+    image: caddy:2
+    profiles: ["https"]
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${HTTPS_PORT:-443}:443"
+      # Port 80 only answers with a redirect to https.
+      - "${HTTP_REDIRECT_PORT:-80}:80"
+    environment:
+      HTTPS_HOST: ${HTTPS_HOST:-localhost}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      # The certificate authority lives here. Losing this volume means every
+      # office computer must trust the new authority again.
+      - caddy-data:/data
+      - caddy-config:/config
+
 volumes:
   app-db-data:
+  caddy-data:
+  caddy-config:
