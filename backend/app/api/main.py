@@ -19,8 +19,14 @@ from app.api.routes import (
 from app.core.config import settings
 
 
-def create_api_router(fastapi_env: str | None) -> APIRouter:
-    """Build the API router with development-only routes excluded by default."""
+def create_api_router(
+    fastapi_env: str | None, enable_dev_routes: bool = False
+) -> APIRouter:
+    """Build the API router with development-only routes excluded by default.
+
+    The unauthenticated helper routes need BOTH ``FASTAPI_ENV=development`` and an
+    explicit ``ENABLE_DEV_ROUTES=true``, so a copied ``.env`` can never open them.
+    """
     router = APIRouter()
     router.include_router(login.router)
     router.include_router(users.router)
@@ -36,11 +42,11 @@ def create_api_router(fastapi_env: str | None) -> APIRouter:
     router.include_router(imports.router)
     router.include_router(utils.router)
 
-    if fastapi_env == "development":
+    if fastapi_env == "development" and enable_dev_routes:
         router.include_router(private.router)
         router.include_router(login.dev_router)
 
     return router
 
 
-api_router = create_api_router(settings.FASTAPI_ENV)
+api_router = create_api_router(settings.FASTAPI_ENV, settings.ENABLE_DEV_ROUTES)

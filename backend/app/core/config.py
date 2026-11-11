@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     # client explicitly wants public self-registration.
     USERS_OPEN_REGISTRATION: bool = False
     FASTAPI_ENV: Literal["development"] | None = None
+    # Mounts unauthenticated test helpers (POST /private/users/, password-recovery
+    # HTML preview). Only for local development and automated tests; needs
+    # FASTAPI_ENV=development as well. Never set it on a real deployment.
+    ENABLE_DEV_ROUTES: bool = False
 
     # Database backups (D-35). The backend container writes dumps to BACKUP_DIR,
     # which compose.yml mounts from the host's ./backups folder.
@@ -120,6 +124,11 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
+        if self.ENABLE_DEV_ROUTES and self.FASTAPI_ENV != "development":
+            raise ValueError(
+                "ENABLE_DEV_ROUTES=true needs FASTAPI_ENV=development; "
+                "remove ENABLE_DEV_ROUTES for a real deployment."
+            )
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
         if len(self.SECRET_KEY.encode("utf-8")) < 32:
             message = (

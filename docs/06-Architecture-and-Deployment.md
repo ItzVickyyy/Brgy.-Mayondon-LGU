@@ -123,7 +123,7 @@ Copy-Item .env.example .env
 
 Set unique values in `.env` for: `SECRET_KEY` (random, ≥ 32 bytes), `POSTGRES_PASSWORD` (long, random, alphanumeric — avoid `@ : / #` until URL-encoding is handled in Compose), `FIRST_SUPERUSER`, `FIRST_SUPERUSER_PASSWORD`, `APP_PORT` (normally `8000`).
 
-For a deployment test, remove `FASTAPI_ENV=development` or leave it blank (the settings accept `development` or unset, not `production`). In development mode weak-secret checks only warn; unset, default secrets or a signing key shorter than 32 bytes prevent startup. This alone does **not** make the app production-secure. Keep SMTP, Sentry and external database settings empty. Never commit `.env` or paste it into chats or issues.
+For a deployment test, remove `FASTAPI_ENV=development` and `ENABLE_DEV_ROUTES=true` or leave them blank (`ENABLE_DEV_ROUTES` is refused unless `FASTAPI_ENV=development`; it opens the unauthenticated `POST /api/v1/private/users/`, so it must never be set on a real deployment) (the settings accept `development` or unset, not `production`). In development mode weak-secret checks only warn; unset, default secrets or a signing key shorter than 32 bytes prevent startup. This alone does **not** make the app production-secure. Keep SMTP, Sentry and external database settings empty. Never commit `.env` or paste it into chats or issues.
 
 ## 6. Validate, build and start
 

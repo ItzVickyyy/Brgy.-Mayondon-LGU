@@ -24,7 +24,7 @@ PUBLIC_ALWAYS = {
     ("POST", f"{API}/users/signup"),  # refused unless USERS_OPEN_REGISTRATION
     ("GET", f"{API}/utils/health-check/"),
 }
-# Only mounted when FASTAPI_ENV=development (see app/api/main.py).
+# Only mounted when FASTAPI_ENV=development AND ENABLE_DEV_ROUTES=true (app/api/main.py).
 PUBLIC_DEVELOPMENT_ONLY = {
     ("POST", f"{API}/private/users/"),
 }
@@ -87,4 +87,4 @@ def test_every_operation_requires_sign_in_except_the_allow_list(
 def test_the_public_list_has_no_stale_entries() -> None:
     present = {(method, path) for method, path, _ in _operations()}
     assert PUBLIC_ALWAYS <= present
-    assert PUBLIC_DEVELOPMENT_ONLY <= present or settings.FASTAPI_ENV != "development"
+    assert PUBLIC_DEVELOPMENT_ONLY <= present or not settings.ENABLE_DEV_ROUTES

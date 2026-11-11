@@ -14,6 +14,7 @@ def make_settings(**overrides: object) -> Settings:
         "FIRST_SUPERUSER": "admin@example.com",
         "FIRST_SUPERUSER_PASSWORD": "secure-admin-password",
         "FASTAPI_ENV": None,
+        "ENABLE_DEV_ROUTES": False,
         "_env_file": None,
     }
     values.update(overrides)
