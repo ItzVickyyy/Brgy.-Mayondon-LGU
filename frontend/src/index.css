@@ -197,12 +197,28 @@
     animation-delay: var(--bar-delay, 0ms);
   }
 
-  /* Quick action cards: plain white with a hairline border. On hover or
-     focus the border and the icon tile turn navy; nothing else is coloured. */
+  /* Quick action cards: raised tiles that read as buttons at rest (navy-tinted
+     border, soft shadow, ringed chevron). On hover or focus the border and the
+     icon tile turn navy and the tile lifts; only existing navy/neutral tokens. */
   .action-card {
+    border-color: color-mix(in oklab, var(--brand) 32%, var(--border));
+    box-shadow:
+      0 1px 2px oklch(0 0 0 / 0.1),
+      0 3px 8px -4px oklch(0 0 0 / 0.22);
     transition:
       border-color 160ms ease-out,
-      background-color 160ms ease-out;
+      background-color 160ms ease-out,
+      box-shadow 160ms ease-out,
+      transform 160ms ease-out;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .action-card:hover,
+    .action-card:focus-visible {
+      transform: translateY(-2px);
+    }
+    .action-card:active {
+      transform: translateY(0);
+    }
   }
   .action-card .action-chip {
     background-color: var(--muted);
@@ -218,7 +234,8 @@
     /* A thin navy marker on the left edge says "this one is selected". */
     box-shadow:
       inset 3px 0 0 var(--brand),
-      0 6px 14px -10px oklch(0 0 0 / 0.35);
+      0 0 0 1px color-mix(in oklab, var(--brand) 70%, var(--border)),
+      0 10px 18px -10px oklch(0 0 0 / 0.4);
   }
   .action-card:focus-visible {
     outline: 2px solid var(--brand);
@@ -227,16 +244,25 @@
   .action-card:active {
     background-color: color-mix(in oklab, var(--accent) 80%, var(--brand));
     border-color: var(--brand);
+    box-shadow: inset 3px 0 0 var(--brand);
   }
+  .action-card .action-title {
+    font-weight: 700;
+  }
+  /* The chevron is always visible, in a small ring, so the tile reads as a button. */
   .action-card .action-arrow {
-    color: var(--muted-foreground);
+    box-sizing: border-box;
+    padding: 2px;
+    border: 1px solid color-mix(in oklab, var(--brand) 45%, var(--border));
+    border-radius: 9999px;
+    color: var(--brand);
     transition:
       color 160ms ease-out,
       transform 160ms ease-out;
   }
   .action-card:hover .action-arrow,
   .action-card:focus-visible .action-arrow {
-    color: var(--brand);
+    border-color: var(--brand);
   }
   @media (prefers-reduced-motion: no-preference) {
     .action-card:hover .action-arrow,
