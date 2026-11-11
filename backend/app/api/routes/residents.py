@@ -408,6 +408,9 @@ def update_resident(
         )
         if current_sector_ids != set(sector_ids):
             changed_fields.append("sector_ids")
+    if not changed_fields:
+        # Saved with nothing changed: no new timestamp and no Activity Log row.
+        return _public(session, resident)
     for key, value in changes.items():
         setattr(resident, key, value)
     resident.updated_at = _now()

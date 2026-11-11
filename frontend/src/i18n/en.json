@@ -565,6 +565,7 @@
       "restored": "{{name}} was restored.",
       "added": "{{name}} was added.",
       "updated": "{{name}} was updated.",
+      "unchanged": "No changes were made to {{name}}.",
       "photoFailed": "{{message}} Photo upload failed: {{error}}"
     },
     "labels": {

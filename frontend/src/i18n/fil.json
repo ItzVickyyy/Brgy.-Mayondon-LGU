@@ -565,6 +565,7 @@
       "restored": "Naibalik si {{name}}.",
       "added": "Naidagdag si {{name}}.",
       "updated": "Na-update si {{name}}.",
+      "unchanged": "Walang binago kay {{name}}.",
       "photoFailed": "{{message}} Nabigo ang pag-upload ng larawan: {{error}}"
     },
     "labels": {

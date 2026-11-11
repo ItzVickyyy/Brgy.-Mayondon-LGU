@@ -691,7 +691,9 @@ function RecordsManagement() {
           const savedMessage =
             mode === "created"
               ? t("records.notices.added", { name: saved.full_name })
-              : t("records.notices.updated", { name: saved.full_name })
+              : mode === "unchanged"
+                ? t("records.notices.unchanged", { name: saved.full_name })
+                : t("records.notices.updated", { name: saved.full_name })
           setNotice(
             photoError
               ? t("records.notices.photoFailed", {

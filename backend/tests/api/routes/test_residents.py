@@ -239,6 +239,98 @@ def test_update_changes_only_sent_fields_and_sectors(
     assert audit and audit[0].details == {"fields": ["birth_place", "sector_ids"]}
 
 
+def _form_body(resident: dict) -> dict[str, object]:
+    """What the Edit resident form sends: every field, blanks as null."""
+
+    def text(value: str | None) -> str | None:
+        return (value or "").strip() or None
+
+    return {
+        "first_name": resident["first_name"].strip(),
+        "middle_name": text(resident.get("middle_name")),
+        "last_name": resident["last_name"].strip(),
+        "suffix": resident.get("suffix") or None,
+        "birthdate": resident.get("birthdate") or None,
+        "birth_place": text(resident.get("birth_place")),
+        "sex": resident.get("sex") or None,
+        "civil_status": resident.get("civil_status") or None,
+        "house_number": text(resident.get("house_number")),
+        "street_id": resident.get("street_id") or None,
+        "purok": resident.get("purok") or None,
+        "resident_since_year": resident.get("resident_since_year") or None,
+        "resident_since_birth": bool(resident.get("resident_since_birth")),
+        "resident_type": text(resident.get("resident_type")),
+        "voter_registration": resident.get("voter_registration") or None,
+        "emergency_contact_name": text(resident.get("emergency_contact_name")),
+        "emergency_contact_address": text(resident.get("emergency_contact_address")),
+        "emergency_contact_phone": text(resident.get("emergency_contact_phone")),
+        "sector_ids": resident.get("sector_ids") or [],
+    }
+
+
+def test_saving_without_changes_writes_nothing(
+    client: TestClient, staff_token_headers: Headers, db: Session
+) -> None:
+    s1, s2 = _sector_ids(db)
+    created = _create(
+        client,
+        staff_token_headers,
+        middle_name="Mid",
+        house_number="12",
+        purok=2,
+        sector_ids=[s1, s2],
+    )
+    for _ in range(2):
+        r = client.patch(
+            f"{API}/residents/{created['id']}",
+            headers=staff_token_headers,
+            json=_form_body(
+                client.get(
+                    f"{API}/residents/{created['id']}", headers=staff_token_headers
+                ).json()
+            ),
+        )
+        assert r.status_code == 200, r.text
+        assert r.json()["updated_at"] == created["updated_at"]
+    assert _audit(db, "resident.update", created["id"]) == []
+
+
+def test_saving_one_changed_field_logs_only_that_field(
+    client: TestClient, staff_token_headers: Headers, db: Session
+) -> None:
+    created = _create(client, staff_token_headers, house_number="12")
+    body = _form_body(created)
+    body["house_number"] = "13"
+    r = client.patch(
+        f"{API}/residents/{created['id']}", headers=staff_token_headers, json=body
+    )
+    assert r.status_code == 200 and r.json()["house_number"] == "13"
+    assert r.json()["updated_at"] != created["updated_at"]
+    audit = _audit(db, "resident.update", created["id"])
+    assert len(audit) == 1 and audit[0].details == {"fields": ["house_number"]}
+
+
+def test_extra_spaces_are_not_a_change_but_clearing_a_value_is(
+    client: TestClient, staff_token_headers: Headers, db: Session
+) -> None:
+    created = _create(client, staff_token_headers, birth_place="Calamba")
+    body = _form_body(created)
+    body["birth_place"] = "  Calamba  "
+    body["middle_name"] = "   "
+    r = client.patch(
+        f"{API}/residents/{created['id']}", headers=staff_token_headers, json=body
+    )
+    assert r.status_code == 200
+    assert _audit(db, "resident.update", created["id"]) == []
+    body["birth_place"] = None
+    r = client.patch(
+        f"{API}/residents/{created['id']}", headers=staff_token_headers, json=body
+    )
+    assert r.json()["birth_place"] is None
+    audit = _audit(db, "resident.update", created["id"])
+    assert len(audit) == 1 and audit[0].details == {"fields": ["birth_place"]}
+
+
 def test_update_cannot_blank_required_names(
     client: TestClient, staff_token_headers: Headers
 ) -> None:

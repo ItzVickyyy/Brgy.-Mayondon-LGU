@@ -148,7 +148,7 @@ type ResidentFormDialogProps = {
   sectors: LookupItem[]
   onSaved: (
     resident: ResidentPublic,
-    mode: "created" | "updated",
+    mode: "created" | "updated" | "unchanged",
     photoError?: string,
   ) => void
 }
@@ -233,7 +233,17 @@ export function ResidentFormDialog({
           photoError = readApiError(caughtPhoto).message
         }
       }
-      onSaved(saved, resident ? "updated" : "created", photoError || undefined)
+      // The server leaves the record (and the Activity Log) alone when nothing
+      // changed, so an unchanged timestamp and no new photo means "no changes".
+      const unchanged =
+        resident !== null &&
+        !photoDataUrl &&
+        saved.updated_at === resident.updated_at
+      onSaved(
+        saved,
+        resident ? (unchanged ? "unchanged" : "updated") : "created",
+        photoError || undefined,
+      )
     } catch (caught) {
       const failure = readApiError(caught)
       if (failure.code === "possible_duplicate") setDuplicate(true)
