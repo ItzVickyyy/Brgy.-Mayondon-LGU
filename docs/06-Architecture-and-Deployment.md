@@ -191,6 +191,7 @@ The PowerShell smoke test creates a uniquely named temporary database, inserts a
 - **External resources:** verify fonts, icons and scripts load offline (the packaged frontend uses local assets and same-origin calls).
 - **API docs page:** the custom `/docs` endpoint uses CDN-hosted Swagger UI assets and may not render offline. **Decision (Nov 1, 2026, D-37):** staff do not need it offline, so leave it as is; package the assets only if wanted for a demo.
 - **Updates and dependencies:** download and test before taking the host offline; never rely on live package downloads at the barangay.
+- **Disk encryption on the host (step 15):** the database, `backups\\`, `.env` and the photos sit readable on the host's disk, so turn on BitLocker (or Device encryption) for the drive(s) holding the project folder and Docker's data, and keep the recovery key off the computer. Steps, the start-up choice (TPM only keeps the unattended restart of D-36; a PIN is stronger but needs a person after every restart) and the check are in `docs/11` section G item 8.
 - **Host availability:** other computers depend on the host and its database. Agree who restarts it, applies updates and handles hardware failure **(D-36)**.
 - **Night-duty staff:** the brief lists a night-duty user, so the host must be on during those hours or the system will be unavailable **(D-31)**.
 - **Data migration:** import spreadsheets only after agreeing field mapping, duplicate handling, validation and retention **(D-19)**.
