@@ -22,8 +22,10 @@ class Settings(BaseSettings):
     )
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str
-    # 60 minutes * 24 hours * 8 days = 8 days
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60 * 24 * 8, gt=0)
+    # A sign-in lasts one working day: 60 minutes * 8 hours = 8 hours. After that
+    # the person signs in again (a shorter life limits what a left-open or stolen
+    # session can read).
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60 * 8, gt=0)
     LOGIN_MAX_FAILED_ATTEMPTS: int = Field(default=5, gt=0)
     LOGIN_LOCKOUT_MINUTES: int = Field(default=15, gt=0)
     PASSWORD_RECOVERY_WINDOW_MINUTES: int = Field(default=15, gt=0)

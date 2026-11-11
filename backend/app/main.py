@@ -48,6 +48,10 @@ async def add_security_headers(
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    if request.url.path.startswith("/api/"):
+        # Resident data must never be kept in a browser or proxy cache on a
+        # shared office computer.
+        response.headers.setdefault("Cache-Control", "no-store")
     return response
 
 
