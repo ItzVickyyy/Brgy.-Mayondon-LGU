@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { ParseKeys, TFunction } from "i18next"
 import {
@@ -158,11 +158,10 @@ function Reports() {
   const isAdmin = isSystemAdministrator(user)
   const [period, setPeriod] = useState<Period>("month")
   const [report, setReport] = useState<ReportType>("issuances")
-  // The report and period that were last previewed; null until Preview is clicked.
-  const [applied, setApplied] = useState<{
-    report: ReportType
-    period: Period
-  } | null>(null)
+  const queryClient = useQueryClient()
+  // The preview always follows the two selects: it loads with the page and
+  // again whenever either select changes, with no button to press.
+  const applied = { report, period }
   const [notice, setNotice] = useState<NoticeKey | "">("")
   // While true, every row of the report is on the page so a print is complete.
   const [printAll, setPrintAll] = useState(false)
@@ -267,9 +266,12 @@ function Reports() {
 
   const appliedPeriodText = t(periodKeys[applied?.period ?? period])
 
+  // The preview is always on screen; the button only reloads the figures.
   function previewReport() {
-    setApplied({ report, period })
     setNotice("")
+    void queryClient.invalidateQueries({
+      predicate: (query) => String(query.queryKey[0]).startsWith("reports-"),
+    })
   }
 
   // The CSV export is always English (owner decision, Nov 8), whatever the
@@ -977,7 +979,7 @@ function Reports() {
                 value={report}
                 onChange={(event) => {
                   setReport(event.target.value as ReportType)
-                  setApplied(null)
+                  setNotice("")
                 }}
                 className={`${formControlClass} min-w-52 font-normal`}
               >
@@ -1008,7 +1010,7 @@ function Reports() {
                 value={period}
                 onChange={(event) => {
                   setPeriod(event.target.value as Period)
-                  setApplied(null)
+                  setNotice("")
                 }}
                 className={`${formControlClass} min-w-40 font-normal`}
               >
