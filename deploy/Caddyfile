@@ -1,0 +1,22 @@
+# HTTPS for the office network (docs/11 section G item 7). Used only when the
+# "https" profile is on (COMPOSE_PROFILES=https in .env).
+#
+# HTTPS_HOST is the address the office computers type: the server computer's
+# fixed LAN IP address (for example 192.168.1.10), or a name that every office
+# computer resolves to it. Several can be given separated by commas.
+#
+# "tls internal" makes Caddy act as its own small certificate authority: no
+# internet and no outside service is involved. Each office computer must trust
+# that authority ONCE (scripts\export-https-root.ps1 gives you the file).
+{
+	# Never reach out to the internet for certificates.
+	skip_install_trust
+}
+
+{$HTTPS_HOST:localhost} {
+	tls internal
+	encode zstd gzip
+	# The backend answers over plain HTTP inside Compose's private network.
+	# Caddy adds X-Forwarded-Proto and X-Forwarded-For itself.
+	reverse_proxy backend:8000
+}

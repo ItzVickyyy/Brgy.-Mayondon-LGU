@@ -37,6 +37,7 @@
     "title": "Maligayang pagbabalik",
     "subtitle": "Mag-sign in para mapasok ang portal ng mga tauhan ng barangay.",
     "passwordChanged": "Napalitan na ang iyong password. Mag-sign in muli.",
+    "idleSignedOut": "Na-sign out ka dahil matagal na walang ginagalaw sa screen. Mag-sign in muli para magpatuloy.",
     "emailLabel": "Email address",
     "emailPlaceholder": "Ilagay ang iyong email address",
     "passwordLabel": "Password",
@@ -1917,6 +1918,12 @@
     "email": "Email"
   },
   "common": {
+    "idle": {
+      "title": "Nandiyan ka pa ba?",
+      "message": "Matagal nang walang ginagawa. Para maprotektahan ang mga talaan ng residente, masa-sign out ka sa loob ng {{seconds}} segundo.",
+      "stay": "Manatiling naka-sign in",
+      "signOutNow": "Mag-sign out ngayon"
+    },
     "confirm": {
       "confirm": "Kumpirmahin",
       "cancel": "Kanselahin",

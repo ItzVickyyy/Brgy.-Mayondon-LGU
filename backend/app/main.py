@@ -48,6 +48,10 @@ async def add_security_headers(
     response.headers.setdefault("X-Content-Type-Options", "nosniff")
     response.headers.setdefault("X-Frame-Options", "DENY")
     response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    if request.url.scheme == "https":
+        # Only sent over HTTPS (browsers ignore it on HTTP). 30 days, no
+        # subdomains: short enough to undo if the office goes back to HTTP.
+        response.headers.setdefault("Strict-Transport-Security", "max-age=2592000")
     if request.url.path.startswith("/api/"):
         # Resident data must never be kept in a browser or proxy cache on a
         # shared office computer.
