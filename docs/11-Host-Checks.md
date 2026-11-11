@@ -53,6 +53,16 @@ Open client answers (D-35): the real schedule, which drive and who keeps it, how
 1. Windows Defender Firewall stays **on**. Allow inbound TCP 8000 on the **Private** profile only.
 2. From the second PC: `Test-NetConnection <host-IPv4> -Port 8000` must succeed and `Test-NetConnection <host-IPv4> -Port 5432` must **fail** (PostgreSQL is bound to `127.0.0.1` in `compose.yml`).
 
+## F. First set-up on a new installation (administrator)
+
+A fresh database is empty. Do these once, signed in as the System Administrator, before staff start work.
+
+1. **Streets.** Staff cannot add streets (only the administrator can). Open the resident form and check the street list; if it says no streets have been added, add every street and purok of the barangay first. Without them residents cannot be saved with an address and the masterlist import rejects every street.
+2. **Staff accounts.** Add User creates the account with the default password and a forced change at first sign-in. Create each account with the person present, hand over the default password in person and let them change it at once. The account is active by default; untick "Is active?" only to hold an account back.
+3. **Locked accounts.** After repeated wrong passwords an account locks for a while. The Users table shows "Locked until"; Edit User has "Unlock this account", which leaves the password alone.
+4. **Camera for photos.** The browser allows the camera only on `localhost` or over HTTPS. On the plain-HTTP office network a second PC cannot take photos with the camera (uploading a file still works); take Barangay ID photos on the host PC until HTTPS is set up. Record what you find.
+5. **Change every default secret** in `.env` before real data goes in (`FIRST_SUPERUSER_PASSWORD`, `SECRET_KEY`, the database password) and leave `FASTAPI_ENV` and `ENABLE_DEV_ROUTES` blank.
+
 ## Result sheet
 
 Copy this table into a new file or the final report and fill it in.
@@ -68,3 +78,4 @@ Copy this table into a new file or the final report and fill it in.
 | C. After sleep / reboot | | | | | |
 | D. Printer from second PC | | | | | |
 | E. Port 8000 open, 5432 closed | | | | | |
+| F. Streets added, accounts created, secrets changed | | | | | |

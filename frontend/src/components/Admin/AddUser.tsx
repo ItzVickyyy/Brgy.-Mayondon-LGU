@@ -68,7 +68,7 @@ const AddUser = () => {
       email: "",
       full_name: "",
       is_superuser: false,
-      is_active: false,
+      is_active: true,
     },
   })
 
