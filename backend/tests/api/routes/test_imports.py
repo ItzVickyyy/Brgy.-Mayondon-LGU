@@ -145,6 +145,8 @@ def test_upload_suggests_mapping_and_stages_rows(
         ("a.csv", b"First Name,Last Name\n", "no data rows"),
         ("a.csv", b"First Name,first name\nA,B\n", "same title"),
         ("a.csv", b"\x00\x01\x02", "CSV"),
+        # 0x81 is not defined in Windows-1252 and is not valid UTF-8 either.
+        ("a.csv", b"First Name,Last Name\nJos\x81,Cruz\n", "could not be read"),
         ("a.xlsx", b"not a zip", "valid .xlsx"),
     ],
 )
@@ -158,6 +160,13 @@ def test_bad_files_are_rejected(
     r = _upload(client, superuser_token_headers, content, name)
     assert r.status_code == 422
     assert message in r.json()["detail"]
+
+
+def test_csv_decoding_keeps_utf8_and_windows_1252_text() -> None:
+    assert mi._decode_csv("Peña\n".encode("utf-8-sig")) == "Peña\n"
+    assert mi._decode_csv("Peña\n".encode("cp1252")) == "Peña\n"
+    with pytest.raises(mi.ImportFileError):
+        mi._decode_csv(b"Jos\x81\n")
 
 
 def test_file_over_size_limit_is_rejected(

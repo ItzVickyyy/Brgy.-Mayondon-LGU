@@ -136,7 +136,16 @@ def _decode_csv(content: bytes) -> str:
     try:
         return content.decode("utf-8-sig")
     except UnicodeDecodeError:
-        return content.decode("cp1252", errors="replace")
+        pass
+    # Older Excel "CSV" files are Windows-1252. A byte it cannot read means the
+    # file is in some other encoding: refuse it rather than save "�" in a name.
+    try:
+        return content.decode("cp1252")
+    except UnicodeDecodeError:
+        raise ImportFileError(
+            "The text in this CSV file could not be read. "
+            "Save it again as CSV UTF-8 (or upload the .xlsx file)."
+        ) from None
 
 
 def _read_csv(content: bytes) -> list[list[Any]]:

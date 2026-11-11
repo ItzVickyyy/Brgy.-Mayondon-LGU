@@ -17,6 +17,7 @@ backend/app/frontend/
 
 # Local database backups can contain resident personal information
 /backups/
+*.dump
 
 # Local build output & tooling
 openapi.json
