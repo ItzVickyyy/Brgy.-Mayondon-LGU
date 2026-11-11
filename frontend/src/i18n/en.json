@@ -270,6 +270,7 @@
         "role_change": "Account role changed",
         "password_change": "Password changed",
         "temp_password_set": "Temporary password set",
+        "unlock": "Account unlocked",
         "update_self": "Own account updated",
         "delete": "Account deleted",
         "delete_self": "Own account deleted"
@@ -1421,12 +1422,14 @@
       "na": "N/A",
       "you": "You",
       "tempPassword": "Temporary password",
+      "lockedUntil": "Locked until {{time}}",
       "form": {
         "addButton": "Add User",
         "addTitle": "Add User",
         "addDescription": "Fill in the form below to add a new user to the system.",
         "tempNotice": "The account starts with the default password {{password}}. Give it to the user in person; the user must change it at first sign-in.",
         "resetToDefault": "Reset the password to the default ({{password}}). The user must change it at the next sign-in.",
+        "unlockAccount": "Unlock this account (the password stays the same)",
         "email": "Email",
         "emailPlaceholder": "Email",
         "fullName": "Full Name",

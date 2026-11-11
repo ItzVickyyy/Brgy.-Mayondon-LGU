@@ -2407,6 +2407,10 @@ export type UserPublic = {
      * Must Change Password
      */
     must_change_password?: boolean;
+    /**
+     * Locked Until
+     */
+    locked_until?: string | null;
 };
 
 /**
@@ -2463,6 +2467,10 @@ export type UserUpdate = {
      * Reset To Default Password
      */
     reset_to_default_password?: boolean;
+    /**
+     * Unlock
+     */
+    unlock?: boolean;
 };
 
 /**

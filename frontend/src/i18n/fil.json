@@ -270,6 +270,7 @@
         "role_change": "Binago ang tungkulin ng account",
         "password_change": "Napalitan ang password",
         "temp_password_set": "Naitakda ang pansamantalang password",
+        "unlock": "Na-unlock ang account",
         "update_self": "Na-update ang sariling account",
         "delete": "Binura ang account",
         "delete_self": "Binura ang sariling account"
@@ -1421,12 +1422,14 @@
       "na": "Wala",
       "you": "Ikaw",
       "tempPassword": "Pansamantalang password",
+      "lockedUntil": "Naka-lock hanggang {{time}}",
       "form": {
         "addButton": "Magdagdag ng User",
         "addTitle": "Magdagdag ng User",
         "addDescription": "Punan ang form sa ibaba para magdagdag ng bagong user sa sistema.",
         "tempNotice": "Magsisimula ang account sa default na password na {{password}}. Ibigay ito nang personal sa user; kailangang palitan ito ng user sa unang pag-sign in.",
         "resetToDefault": "I-reset ang password sa default ({{password}}). Kailangang palitan ito ng user sa susunod na pag-sign in.",
+        "unlockAccount": "I-unlock ang account na ito (hindi magbabago ang password)",
         "email": "Email",
         "emailPlaceholder": "Email",
         "fullName": "Buong Pangalan",

@@ -55,6 +55,7 @@ const buildSchema = (t: TFunction) =>
         .or(z.literal("")),
       confirm_password: z.string().optional(),
       reset_to_default_password: z.boolean().optional(),
+      unlock: z.boolean().optional(),
       // Existing API role flag. Do not treat is_active as pending/rejected status.
       is_superuser: z.boolean().optional(),
       is_active: z.boolean().optional(),
@@ -100,6 +101,7 @@ const EditUser = ({
       is_superuser: user.is_superuser,
       is_active: user.is_active,
       reset_to_default_password: false,
+      unlock: false,
     },
   })
 
@@ -125,6 +127,9 @@ const EditUser = ({
     }
     if (isEditingSelf || !submitData.reset_to_default_password) {
       delete submitData.reset_to_default_password
+    }
+    if (isEditingSelf || !user.locked_until || !submitData.unlock) {
+      delete submitData.unlock
     }
     // Preserve the selected role instead of forcing every account to Admin.
     mutation.mutate(submitData)
@@ -255,25 +260,46 @@ const EditUser = ({
                   />
                 </>
               ) : (
-                <FormField
-                  control={form.control}
-                  name="reset_to_default_password"
-                  render={({ field }) => (
-                    <FormItem className="flex min-h-11 items-start gap-3 space-y-0 rounded-md border bg-background px-3 py-2 sm:col-span-2">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        {t("admin.users.form.resetToDefault", {
-                          password: DEFAULT_PASSWORD,
-                        })}
-                      </FormLabel>
-                    </FormItem>
+                <>
+                  {user.locked_until && (
+                    <FormField
+                      control={form.control}
+                      name="unlock"
+                      render={({ field }) => (
+                        <FormItem className="flex min-h-11 items-start gap-3 space-y-0 rounded-md border bg-background px-3 py-2 sm:col-span-2">
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                          <FormLabel className="font-normal">
+                            {t("admin.users.form.unlockAccount")}
+                          </FormLabel>
+                        </FormItem>
+                      )}
+                    />
                   )}
-                />
+                  <FormField
+                    control={form.control}
+                    name="reset_to_default_password"
+                    render={({ field }) => (
+                      <FormItem className="flex min-h-11 items-start gap-3 space-y-0 rounded-md border bg-background px-3 py-2 sm:col-span-2">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          {t("admin.users.form.resetToDefault", {
+                            password: DEFAULT_PASSWORD,
+                          })}
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                </>
               )}
 
               <FormField

@@ -334,26 +334,43 @@ def update_user(
             status_code=400,
             detail="Use Change password to change your own password.",
         )
+    if user_in.unlock and is_self:
+        raise HTTPException(
+            status_code=400, detail="An account cannot unlock itself."
+        )
     temporary = user_in.reset_to_default_password and not is_self
     if temporary:
         # Never keep the flag or the default in the stored fields or the log.
         user_in = user_in.model_copy(update={"password": DEFAULT_PASSWORD})
     changed_fields = sorted(
-        f for f in changed_fields if f not in ("password", "reset_to_default_password")
+        f
+        for f in changed_fields
+        if f not in ("password", "reset_to_default_password", "unlock")
     )
     db_user = crud.update_user(
         session=session, db_user=db_user, user_in=user_in, temporary=temporary
     )
-    record_admin_action(actor_id=current_user.id, action="user.update", target_type="user", target_id=db_user.id)
-    record_audit_event(
-        session,
-        action="user.update",
-        actor=current_user,
-        module="users",
-        record_type="user",
-        record_id=db_user.id,
-        details={"fields": changed_fields},
-    )
+    unlock_only = user_in.unlock and not changed_fields and not temporary
+    if not unlock_only:
+        record_admin_action(actor_id=current_user.id, action="user.update", target_type="user", target_id=db_user.id)
+        record_audit_event(
+            session,
+            action="user.update",
+            actor=current_user,
+            module="users",
+            record_type="user",
+            record_id=db_user.id,
+            details={"fields": changed_fields},
+        )
+    if user_in.unlock:
+        record_audit_event(
+            session,
+            action="user.unlock",
+            actor=current_user,
+            module="users",
+            record_type="user",
+            record_id=db_user.id,
+        )
     if temporary:
         record_audit_event(
             session,

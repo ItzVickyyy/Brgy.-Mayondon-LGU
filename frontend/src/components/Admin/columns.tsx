@@ -23,7 +23,7 @@ export function useUserColumns(): ColumnDef<DataTableFeatures, UserTableData>[] 
     cell: ({ row }) => {
       const fullName = row.original.full_name
       return (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <span
             className={cn("font-medium", !fullName && "text-muted-foreground")}
           >
@@ -40,6 +40,19 @@ export function useUserColumns(): ColumnDef<DataTableFeatures, UserTableData>[] 
               className="border-brand/30 bg-brand/10 text-brand"
             >
               {t("admin.users.tempPassword")}
+            </Badge>
+          )}
+          {row.original.locked_until && (
+            <Badge
+              variant="outline"
+              className="h-auto max-w-full whitespace-normal border-destructive/40 bg-destructive/10 text-destructive"
+            >
+              {t("admin.users.lockedUntil", {
+                time: new Date(row.original.locked_until).toLocaleTimeString(
+                  [],
+                  { hour: "2-digit", minute: "2-digit" },
+                ),
+              })}
             </Badge>
           )}
         </div>

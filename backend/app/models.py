@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Self
 
-from pydantic import EmailStr, model_validator
+from pydantic import EmailStr, field_validator, model_validator
 from sqlalchemy import CheckConstraint, DateTime, Enum, false
 from sqlmodel import Field, SQLModel
 
@@ -107,6 +107,9 @@ class UserUpdate(SQLModel):
     # Administrator only, for another account: back to the default password,
     # with a forced change at the next sign-in.
     reset_to_default_password: bool = False
+    # Administrator only, for another account: clear a failed-sign-in lockout
+    # and leave the password as it is.
+    unlock: bool = False
 
     @model_validator(mode="after")
     def _sync_role(self) -> Self:
@@ -169,6 +172,16 @@ class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime | None = None
     must_change_password: bool = False
+    # Set only while the account is locked after too many failed sign-ins.
+    locked_until: datetime | None = None
+
+    @field_validator("locked_until")
+    @classmethod
+    def _only_while_locked(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return None
+        aware = value if value.tzinfo else value.replace(tzinfo=UTC)
+        return value if aware > datetime.now(UTC) else None
 
 
 class UsersPublic(SQLModel):

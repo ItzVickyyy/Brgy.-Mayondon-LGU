@@ -39,6 +39,9 @@ def update_user(
     change clears the forced-change flag."""
     user_data = user_in.model_dump(exclude_unset=True)
     user_data.pop("reset_to_default_password", None)
+    if user_data.pop("unlock", False):
+        db_user.failed_login_attempts = 0
+        db_user.locked_until = None
     extra_data = {}
     if "password" in user_data:
         password = user_data["password"]

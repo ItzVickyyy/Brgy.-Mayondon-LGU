@@ -24,6 +24,7 @@ const activityKeys = {
   "user.role_change": "activity.actions.user.role_change",
   "user.password_change": "activity.actions.user.password_change",
   "user.temp_password_set": "activity.actions.user.temp_password_set",
+  "user.unlock": "activity.actions.user.unlock",
   "user.update_self": "activity.actions.user.update_self",
   "user.delete": "activity.actions.user.delete",
   "user.delete_self": "activity.actions.user.delete_self",
