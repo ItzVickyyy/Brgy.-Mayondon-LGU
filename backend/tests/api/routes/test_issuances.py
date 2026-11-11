@@ -635,16 +635,20 @@ def test_correction_flow(
     fixed = _issue(client, staff_token_headers, draft["id"])
     assert fixed["identification"]["id_number"] == "FIXED-1"
     assert fixed["reference_no"] != original["reference_no"]
-    # The original is untouched.
+    # Issuing the correction voids the original, with an automatic reason.
     untouched = client.get(
         f"{ISS}/{original['id']}", headers=staff_token_headers
     ).json()
-    assert untouched["status"] == "issued"
+    assert untouched["status"] == "voided"
+    assert fixed["reference_no"] in untouched["void_reason"]
+    assert "Typo in the ID number" in untouched["void_reason"]
     assert (
         untouched["identification"]["id_number"]
         == original["identification"]["id_number"]
     )
     assert "issuance.correct" in _audit(db, original["id"])
+    assert "issuance.void" in _audit(db, original["id"])
+    assert fixed["status"] == "issued"
 
 
 def test_only_an_issued_document_can_be_corrected(

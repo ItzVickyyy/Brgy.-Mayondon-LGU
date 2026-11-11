@@ -15,6 +15,7 @@ from tests.api.routes.test_barangay_ids import (  # noqa: F401
     _try_issue,
 )
 from tests.api.routes.test_issuances import (  # noqa: F401  (fixtures are reused)
+    _clearance,
     _doc,
     _franchise,
     _franchise_draft,
@@ -112,3 +113,34 @@ def test_one_valid_franchise_per_tricycle(
     r = client.post(f"{ISS}/{rival['id']}/issue", headers=staff_token_headers)
     assert r.status_code == 409
     assert r.json()["detail"]["code"] == "tricycle_has_valid_franchise"
+
+
+def test_issuing_a_correction_voids_only_the_original(
+    client: TestClient, staff_token_headers: dict[str, str], street_id: int
+) -> None:
+    res = _resident(client, staff_token_headers, street_id)
+    bystander = _resident(client, staff_token_headers, street_id)
+    other = _clearance(client, staff_token_headers, bystander["id"])
+    original = _issue(
+        client,
+        staff_token_headers,
+        _clearance(client, staff_token_headers, res["id"])["id"],
+    )
+    draft = client.post(
+        f"{ISS}/{original['id']}/correct",
+        headers=staff_token_headers,
+        json={"reason": "Wrong spelling"},
+    ).json()
+    # While the correction is only a draft, the original stays valid.
+    still = client.get(f"{ISS}/{original['id']}", headers=staff_token_headers).json()
+    assert still["status"] == "issued"
+    fixed = _issue(client, staff_token_headers, draft["id"])
+    after = client.get(f"{ISS}/{original['id']}", headers=staff_token_headers).json()
+    assert after["status"] == "voided"
+    assert after["void_reason"] == (
+        f"Replaced by correction {fixed['reference_no']}. Reason: Wrong spelling"
+    )
+    assert fixed["status"] == "issued"
+    # An unrelated draft is not touched.
+    unrelated = client.get(f"{ISS}/{other['id']}", headers=staff_token_headers).json()
+    assert unrelated["status"] == "draft"

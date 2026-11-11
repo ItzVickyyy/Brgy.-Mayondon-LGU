@@ -336,7 +336,7 @@ def test_issuances_by_type_counts_issued_voided_and_corrections(
     before = _get(client, superuser_token_headers, url, period="today")
     first = _issue_clearance(client, staff_token_headers, street_id)
     second = _issue_clearance(client, staff_token_headers, street_id)
-    # Void one; correct and re-issue the other.
+    # Void one; correct and re-issue the other (which voids the original).
     assert (
         client.post(
             f"{API}/issuances/{first['id']}/void",
@@ -358,8 +358,10 @@ def test_issuances_by_type_counts_issued_voided_and_corrections(
         _type_row(before, "BARANGAY_CLEARANCE"),
         _type_row(after, "BARANGAY_CLEARANCE"),
     )
-    assert now["issued"] == was["issued"] + 2  # second + its correction; first is void
-    assert now["voided"] == was["voided"] + 1
+    # Only the correction is in force: the first was voided by hand, the second
+    # was voided automatically when its correction was issued.
+    assert now["issued"] == was["issued"] + 1
+    assert now["voided"] == was["voided"] + 2
     assert now["corrections"] == was["corrections"] + 1
     assert after["total_issued"] == sum(r["issued"] for r in after["data"])
     assert after["total_voided"] == sum(r["voided"] for r in after["data"])

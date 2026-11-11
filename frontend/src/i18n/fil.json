@@ -221,7 +221,9 @@
       "id_transaction": "uri ng transaksyon sa ID",
       "purpose_added": "idinagdag ang layunin",
       "reference_no": "numero ng reference",
-      "draft_id": "ID ng draft"
+      "draft_id": "ID ng draft",
+      "replaced_by": "pinalitan ng",
+      "automatic": "awtomatiko"
     },
     "modules": {
       "records": "Mga Talaan ng Residente",
@@ -902,7 +904,7 @@
         "voidDescription": "I-void ang {{reference}}? Mananatili ito sa kasaysayan at hindi na maaaring i-edit. Kailangan ng dahilan.",
         "voidConfirm": "I-void ang isyu",
         "correctTitle": "Gumawa ng correction draft?",
-        "correctDescription": "Gumawa ng bagong na-eedit na draft mula sa naisyung dokumentong ito? Mananatiling naisyu ang orihinal hanggang i-void ito ng administrator.",
+        "correctDescription": "Gumawa ng bagong na-eedit na draft mula sa naisyung dokumentong ito? Mananatiling may bisa ang orihinal hanggang maisyu ang pagwawasto, at awtomatiko itong ima-void pagkatapos.",
         "correctConfirm": "Gumawa ng correction draft",
         "discardTitle": "Itapon ang draft?",
         "discardDescription": "Itapon ang nakabinbing draft na ito? Made-delete ito.",
@@ -1330,7 +1332,7 @@
         "sinceBirth": "Mula pagkapanganak",
         "residentRecord": "Talaan ng residente"
       },
-      "correctionBanner": "Ito ay pagwawasto ng dokumentong naibigay na. Mananatiling naibigay ang orihinal hanggang i-void mo ito."
+      "correctionBanner": "Ito ay pagwawasto ng dokumentong naibigay na. Kapag naisyu ito, awtomatikong ima-void ang orihinal."
     },
     "printing": {
       "summary": {

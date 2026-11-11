@@ -905,6 +905,42 @@ def _require_free_tricycle(session: Session, issuance: Issuance) -> None:
         )
 
 
+def _void_replaced_original(session: Session, correction: Issuance, user: User) -> None:
+    """Void the document a correction replaces, in the same transaction.
+
+    Staff cannot void by hand, but issuing a correction they are allowed to make
+    must not leave two valid documents, so the original is voided here with an
+    automatic reason and its own audit event.
+    """
+    original = session.exec(
+        select(Issuance)
+        .where(Issuance.id == correction.corrects_issuance_id)
+        .with_for_update()
+    ).first()
+    if original is None or original.status != "issued":
+        return
+    why = correction.correction_reason or ""
+    reason = f"Replaced by correction {correction.reference_no}. Reason: {why}"
+    original.status = "voided"
+    original.void_reason = reason[:500]
+    original.updated_at = datetime.now(UTC)
+    session.add(original)
+    record_audit_event(
+        session,
+        action="issuance.void",
+        actor=user,
+        module=MODULE,
+        record_type="issuance",
+        record_id=original.id,
+        reason=original.void_reason,
+        details={
+            "reference_no": original.reference_no,
+            "replaced_by": correction.reference_no,
+            "automatic": True,
+        },
+    )
+
+
 @router.post("/{issuance_id}/issue", response_model=IssuancePublic)
 def issue(
     issuance_id: uuid.UUID,
@@ -1046,6 +1082,8 @@ def issue(
         record_id=issuance.id,
         details=details,
     )
+    if issuance.corrects_issuance_id is not None:
+        _void_replaced_original(session, issuance, user)
     try:
         session.commit()
     except IntegrityError as exc:
@@ -1070,8 +1108,8 @@ def correct(
 ) -> IssuancePublic:
     """Start a correction: a new draft copied from an issued document.
 
-    The issued document is not changed. Edit the draft, then issue it. The
-    original stays valid until a System Administrator voids it.
+    The issued document is not changed yet. Edit the draft, then issue it: the
+    original is voided automatically at that moment (same transaction).
     """
     original = _get_or_404(session, issuance_id)
     if original.status != "issued":

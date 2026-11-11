@@ -672,7 +672,10 @@ test("staff: a correction opens a draft, blocks a second one, and issues", async
       "A correction for this document is already open. Finish or discard that draft first.",
   })
 
-  // Issuing the draft keeps the link and leaves the original alone.
+  // The original stays valid while the correction is only a draft.
+  expect((await issuanceApi.getIssuance(original.id))?.status).toBe("issued")
+
+  // Issuing the draft keeps the link and voids the original automatically.
   const { input } = inputs(resident.id).BARANGAY_CLEARANCE
   const fixed = await issuanceApi.issueDraft(draft.id, {
     ...input,
@@ -681,7 +684,7 @@ test("staff: a correction opens a draft, blocks a second one, and issues", async
   expect(fixed.status).toBe("issued")
   expect(fixed.correctsIssuanceId).toBe(original.id)
   expect(fixed.id).toBe(draft.id)
-  expect((await issuanceApi.getIssuance(original.id))?.status).toBe("issued")
+  expect((await issuanceApi.getIssuance(original.id))?.status).toBe("voided")
 })
 
 test("staff: a draft cannot be corrected, only issued documents can", async () => {

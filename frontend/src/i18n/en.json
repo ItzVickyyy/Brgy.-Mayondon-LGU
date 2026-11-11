@@ -221,7 +221,9 @@
       "id_transaction": "id transaction",
       "purpose_added": "purpose added",
       "reference_no": "reference no",
-      "draft_id": "draft id"
+      "draft_id": "draft id",
+      "replaced_by": "replaced by",
+      "automatic": "automatic"
     },
     "modules": {
       "records": "Resident Records",
@@ -902,7 +904,7 @@
         "voidDescription": "Void {{reference}}? It stays in the history and cannot be edited. A reason is required.",
         "voidConfirm": "Void issuance",
         "correctTitle": "Create correction draft?",
-        "correctDescription": "Create a new editable draft from this issued document? The original remains issued until an administrator voids it.",
+        "correctDescription": "Create a new editable draft from this issued document? The original stays valid until you issue the correction, and is then voided automatically.",
         "correctConfirm": "Create correction draft",
         "discardTitle": "Discard draft?",
         "discardDescription": "Discard this pending draft? It will be deleted.",
@@ -1330,7 +1332,7 @@
         "sinceBirth": "Since birth",
         "residentRecord": "Resident record"
       },
-      "correctionBanner": "This is a correction of a document that was already issued. The original stays issued until you void it."
+      "correctionBanner": "This is a correction of a document that was already issued. When you issue it, the original is voided automatically."
     },
     "printing": {
       "summary": {

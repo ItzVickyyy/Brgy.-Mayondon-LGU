@@ -10,7 +10,7 @@ Maps every input in the **New Issuance** dialog to a proposed table and column, 
 2. **Pick from lookups, don't free-type.** Purpose, sector, ID type, official, tricycle association and street are lookup tables. The form stores the lookup id. Purpose and association may be added on the fly (combobox) and are inserted into their lookup table.
 3. **Snapshot at issue time.** When status becomes `issued`, the resident's printed values are copied into `issuance_resident_snapshot`, so a later edit to the resident never changes a document that was already handed out.
 4. **Document-specific data lives in its own detail table**, not as nullable columns on `issuances`. This keeps `issuances` small and lets each document evolve independently.
-5. **Issued records are never edited or deleted.** Corrections create a new row (`corrects_issuance_id`, `correction_reason`). Voiding sets `status = voided` plus `void_reason` (admin only).
+5. **Issued records are never edited or deleted.** Corrections create a new row (`corrects_issuance_id`, `correction_reason`). Voiding sets `status = voided` plus `void_reason` (admin only). Issuing a correction also voids the document it replaces, automatically and in the same transaction (reason "Replaced by correction ISS-…", audit event `issuance.void` with `replaced_by` and `automatic`); this is allowed for staff because they may correct.
 
 ## Settled design decisions (Nov 5, 2026)
 
@@ -130,7 +130,7 @@ Rules as built:
 `GET /api/v1/dashboard` (Staff and Admin) and `GET /api/v1/reports/*` (System Administrator, `reports.view`: `summary`, `issuances-by-type`, `issuances-by-purpose`, `expiring`, `account-activity`, `records-overview`). Counts only: no health condition and no resident names in any total. The expiring list names the resident because it is a work list.
 
 - **Period:** `today`, `week` (from Monday), `month`, `quarter`, `3months`, `6months` (calendar months, current month included), `year`, `overall`. Each runs **up to today**, Manila date. The "previous period" is the same span one unit earlier (month so far against the same days of last month); `overall` has none.
-- **Issued** means a document in force (`status = 'issued'`) counted by `issue_date`. **Voided** documents are counted separately and never as issued. **Corrections** are issued documents that replace an earlier one.
+- **Issued** means a document in force (`status = 'issued'`) counted by `issue_date`. **Voided** documents are counted separately and never as issued. **Corrections** are issued documents that replace an earlier one; the earlier one becomes voided when the correction is issued.
 - **Expiring or expired** looks only at a resident's **latest issued** Barangay Clearance and latest issued Barangay ID (by `issued_at`), so a renewed record is not listed. "Soon" is 30 days for both (`CLEARANCE_EXPIRING_SOON_DAYS`, `ID_EXPIRING_SOON_DAYS`; D-21 is open). The ID counts use the same rule as `GET /barangay-ids`.
 - **Not reported yet:** sign-ins (not recorded), masterlist imports (no import yet, D-19), pending registrations (no registration flow, none planned: D-11). The dashboard's "pending document requests" card is `open_drafts`, the number of unissued drafts.
 
