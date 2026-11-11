@@ -37,6 +37,7 @@
     "title": "Welcome back",
     "subtitle": "Sign in to access the barangay personnel portal.",
     "passwordChanged": "Your password has been changed. Sign in again.",
+    "idleSignedOut": "You were signed out because the screen was left idle. Sign in again to continue.",
     "emailLabel": "Email address",
     "emailPlaceholder": "Enter your email address",
     "passwordLabel": "Password",
@@ -1917,6 +1918,12 @@
     "email": "Email"
   },
   "common": {
+    "idle": {
+      "title": "Are you still there?",
+      "message": "There has been no activity for a while. To protect resident records you will be signed out in {{seconds}} seconds.",
+      "stay": "Stay signed in",
+      "signOutNow": "Sign out now"
+    },
     "confirm": {
       "confirm": "Confirm",
       "cancel": "Cancel",

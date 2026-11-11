@@ -16,6 +16,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { UsersService } from "@/client"
 import { Footer } from "@/components/Common/Footer"
+import { IdleSignOut } from "@/components/Common/IdleSignOut"
 import { KeyboardShortcuts } from "@/components/Common/KeyboardShortcuts"
 import { AppShellSkeleton } from "@/components/Common/PageSkeleton"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
@@ -112,6 +113,7 @@ function Layout() {
   return (
     <SidebarProvider>
       <KeyboardShortcuts />
+      <IdleSignOut />
       <AppSidebar />
       <SidebarInset>
         <a
