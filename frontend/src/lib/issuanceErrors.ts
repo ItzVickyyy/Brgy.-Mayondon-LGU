@@ -1,5 +1,5 @@
-import { readApiError } from "@/lib/residents"
 import i18n from "@/i18n"
+import { readApiError } from "@/lib/residents"
 
 const fieldWords: Record<string, string> = {
   birthdate: "birthdate",
@@ -41,9 +41,13 @@ export function issuanceErrorMessage(error: unknown): string {
   const body = (detail ?? {}) as Record<string, unknown>
   switch (code) {
     case "missing_sections":
-      return i18n.t("apiErrors.issuance.missingSections", { sections: list(body.sections, sectionWords) })
+      return i18n.t("apiErrors.issuance.missingSections", {
+        sections: list(body.sections, sectionWords),
+      })
     case "missing_resident_fields":
-      return i18n.t("apiErrors.issuance.missingResidentFields", { fields: list(body.fields, fieldWords) })
+      return i18n.t("apiErrors.issuance.missingResidentFields", {
+        fields: list(body.fields, fieldWords),
+      })
     case "possible_duplicate":
       return i18n.t("apiErrors.issuance.possibleDuplicate")
     case "tricycle_mismatch":
@@ -62,6 +66,16 @@ export function issuanceErrorMessage(error: unknown): string {
       return i18n.t("apiErrors.issuance.idNumberInUse")
     case "invalid_valid_until":
       return i18n.t("apiErrors.issuance.invalidValidUntil")
+    case "issue_date_too_old":
+      return i18n.t("apiErrors.issuance.issueDateTooOld", {
+        earliest: String(body.earliest ?? ""),
+      })
+    case "valid_until_too_long":
+      return i18n.t("apiErrors.issuance.validUntilTooLong", {
+        latest: String(body.latest ?? ""),
+      })
+    case "tricycle_has_valid_franchise":
+      return i18n.t("apiErrors.issuance.tricycleHasValidFranchise")
     case "id_number_taken":
       return "This ID number is already used by another resident."
     default:

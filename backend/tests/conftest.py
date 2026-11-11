@@ -58,3 +58,9 @@ def normal_user_token_headers(client: TestClient, db: Session) -> dict[str, str]
     return authentication_token_from_email(
         client=client, email=settings.EMAIL_TEST_USER, db=db
     )
+
+
+@pytest.fixture(autouse=True)
+def _wide_issue_date_window(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Most tests back-date on purpose (expiry, reports); the rule has its own tests."""
+    monkeypatch.setattr(settings, "ISSUANCE_BACKDATE_MAX_DAYS", 100_000)

@@ -25,6 +25,12 @@ export const SITE = {
  */
 export const DEFAULT_PASSWORD = "ChangeThisPassword"
 
+/**
+ * How many days back a new issuance may be dated. Keep equal to the default of
+ * ISSUANCE_BACKDATE_MAX_DAYS in backend/app/core/config.py (the server decides).
+ */
+export const ISSUE_DATE_MAX_DAYS_BACK = 7
+
 const PAGE_TITLE_KEYS = {
   "Activity Log": "common.pageTitles.activityLog",
   "User Accounts": "common.pageTitles.userAccounts",

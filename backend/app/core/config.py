@@ -41,6 +41,10 @@ class Settings(BaseSettings):
     # HTML preview). Only for local development and automated tests; needs
     # FASTAPI_ENV=development as well. Never set it on a real deployment.
     ENABLE_DEV_ROUTES: bool = False
+    # How many days back a clerk may date a new issuance (0 = today only).
+    ISSUANCE_BACKDATE_MAX_DAYS: int = Field(default=7, ge=0)
+    # Longest validity a Barangay ID may be given, counted from its issue date.
+    BARANGAY_ID_MAX_VALID_YEARS: int = Field(default=5, gt=0)
 
     # Database backups (D-35). The backend container writes dumps to BACKUP_DIR,
     # which compose.yml mounts from the host's ./backups folder.

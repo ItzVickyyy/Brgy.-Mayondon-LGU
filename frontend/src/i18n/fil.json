@@ -2074,7 +2074,10 @@
       "noEarlierId": "Wala pang naunang Barangay ID ang residenteng ito. Piliin ang New.",
       "idNumberRequired": "Ilagay ang Barangay ID number para sa card na ito.",
       "idNumberInUse": "Ginagamit na ng ibang residente ang ID number na ito.",
-      "invalidValidUntil": "Dapat mas huli sa petsa ng pag-isyu ang petsang “Valid until”."
+      "invalidValidUntil": "Dapat mas huli sa petsa ng pag-isyu ang petsang “Valid until”.",
+      "issueDateTooOld": "Hindi maaaring mas maaga kaysa {{earliest}} ang petsa ng pag-isyu.",
+      "validUntilTooLong": "Hindi maaaring mas huli kaysa {{latest}} ang petsang “Valid until”.",
+      "tricycleHasValidFranchise": "May balidong prangkisa na ang traysikel na ito na naisyu sa ibang residente."
     }
   }
 }

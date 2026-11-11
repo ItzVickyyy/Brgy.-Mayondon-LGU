@@ -16,7 +16,7 @@ Audit details hold field names and reference numbers, never personal values.
 """
 
 import uuid
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
@@ -27,6 +27,7 @@ from sqlmodel import Session, col, delete, select
 
 from app.api.deps import SessionDep, require_permission
 from app.core.audit import record_audit_event
+from app.core.config import settings
 from app.core.dates import add_months, today_manila
 from app.core.permissions import Permission, has_permission
 from app.models import User
@@ -116,6 +117,20 @@ def _resident(session: Session, resident_id: uuid.UUID) -> Resident:
     if resident is None:
         raise HTTPException(status_code=422, detail="Unknown resident")
     return resident
+
+
+def _check_issue_date(value: date) -> None:
+    """Refuse a date too far back, so a document cannot be quietly back-dated."""
+    earliest = today_manila() - timedelta(days=settings.ISSUANCE_BACKDATE_MAX_DAYS)
+    if value < earliest:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "issue_date_too_old",
+                "message": "The issue date is too far in the past",
+                "earliest": earliest.isoformat(),
+            },
+        )
 
 
 def _require_active(resident: Resident) -> None:
@@ -578,6 +593,8 @@ def create_issuance(
     _check_core_references(
         session, purpose_id=body.purpose_id, official_id=body.signatory_official_id
     )
+    if body.issue_date is not None:
+        _check_issue_date(body.issue_date)
     remarks = body.remarks
     if remarks is None and doc_type.code == "BARANGAY_CLEARANCE":
         remarks = DEFAULT_CLEARANCE_REMARKS
@@ -637,6 +654,8 @@ def update_draft(
     if "issue_date" in sent:
         if body.issue_date is None:
             raise HTTPException(status_code=422, detail="issue_date cannot be cleared")
+        if body.issue_date != issuance.issue_date:
+            _check_issue_date(body.issue_date)
         issuance.issue_date = body.issue_date
     if "purpose_id" in sent or "signatory_official_id" in sent:
         _check_core_references(
@@ -751,6 +770,24 @@ def _issued_card_exists(session: Session, resident_id: uuid.UUID) -> bool:
     )
 
 
+_LOOK_ALIKE_FROM, _LOOK_ALIKE_TO = "OIL", "011"
+
+
+def _look_alike(value: str) -> str:
+    """Compare ID numbers ignoring case, spaces and O/0 and I/L/1 mix-ups."""
+    return "".join(_norm(value).upper().split()).translate(
+        str.maketrans(_LOOK_ALIKE_FROM, _LOOK_ALIKE_TO)
+    )
+
+
+def _look_alike_sql(column: Any) -> Any:
+    return sa_func.translate(
+        sa_func.replace(sa_func.upper(column), " ", ""),
+        _LOOK_ALIKE_FROM,
+        _LOOK_ALIKE_TO,
+    )
+
+
 def _prepare_id_card(
     session: Session, issuance: Issuance, resident: Resident
 ) -> IssuanceBarangayId:
@@ -769,6 +806,16 @@ def _prepare_id_card(
             detail={
                 "code": "invalid_valid_until",
                 "message": "valid_until must be after the issue date",
+            },
+        )
+    latest = add_months(issuance.issue_date, 12 * settings.BARANGAY_ID_MAX_VALID_YEARS)
+    if card.valid_until > latest:
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "valid_until_too_long",
+                "message": "valid_until is further out than an ID may be valid",
+                "latest": latest.isoformat(),
             },
         )
     # A correction replaces a card that is already in the history; skip the
@@ -793,13 +840,14 @@ def _prepare_id_card(
                     "message": "This resident has no earlier ID. Use new",
                 },
             )
-    number = card.id_number or resident.id_number
-    if number is None:
+    number = _norm(card.id_number) if card.id_number else resident.id_number
+    if number is None or not number:
         raise HTTPException(status_code=422, detail={"code": "id_number_required"})
+    look = _look_alike(number)
     clash = (
         session.exec(
             select(Resident.id).where(
-                sa_func.lower(col(Resident.id_number)) == number.lower(),
+                _look_alike_sql(col(Resident.id_number)) == look,
                 Resident.id != resident.id,
             )
         ).first()
@@ -812,7 +860,7 @@ def _prepare_id_card(
             .where(
                 Issuance.status == "issued",
                 Issuance.resident_id != resident.id,
-                sa_func.lower(col(IssuanceBarangayId.id_number)) == number.lower(),
+                _look_alike_sql(col(IssuanceBarangayId.id_number)) == look,
             )
         ).first()
     )
@@ -826,6 +874,35 @@ def _prepare_id_card(
         )
     card.id_number = number
     return card
+
+
+def _require_free_tricycle(session: Session, issuance: Issuance) -> None:
+    """One tricycle, one valid franchise: refuse a second holder while one is valid."""
+    mine = session.get(IssuanceFranchise, issuance.id)
+    if mine is None:
+        return
+    taken = (
+        select(Issuance.id)
+        .join(IssuanceFranchise, col(IssuanceFranchise.issuance_id) == col(Issuance.id))
+        .where(
+            IssuanceFranchise.tricycle_id == mine.tricycle_id,
+            Issuance.status == "issued",
+            Issuance.resident_id != issuance.resident_id,
+            (col(Issuance.expires_on).is_(None))
+            | (col(Issuance.expires_on) >= today_manila()),
+        )
+    )
+    if issuance.corrects_issuance_id is not None:
+        taken = taken.where(Issuance.id != issuance.corrects_issuance_id)
+    if session.exec(taken).first() is not None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "tricycle_has_valid_franchise",
+                "message": "This tricycle already has a valid franchise "
+                "issued to another resident",
+            },
+        )
 
 
 @router.post("/{issuance_id}/issue", response_model=IssuancePublic)
@@ -880,6 +957,8 @@ def issue(
                 detail="This resident already has this document. "
                 "Void it first or correct it",
             )
+    if doc_type.code == "FRANCHISE_CLEARANCE":
+        _require_free_tricycle(session, issuance)
     payment = session.get(IssuancePayment, issuance.id)
     if payment is not None and not payment.is_free:
         clash = (

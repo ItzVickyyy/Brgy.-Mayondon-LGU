@@ -2074,7 +2074,10 @@
       "noEarlierId": "This resident has no earlier Barangay ID. Choose New instead.",
       "idNumberRequired": "Type the Barangay ID number for this card.",
       "idNumberInUse": "This ID number is already used by another resident.",
-      "invalidValidUntil": "The “Valid until” date must be after the issue date."
+      "invalidValidUntil": "The “Valid until” date must be after the issue date.",
+      "issueDateTooOld": "The issue date cannot be earlier than {{earliest}}.",
+      "validUntilTooLong": "The “Valid until” date cannot be later than {{latest}}.",
+      "tricycleHasValidFranchise": "This tricycle already has a valid franchise issued to another resident."
     }
   }
 }
