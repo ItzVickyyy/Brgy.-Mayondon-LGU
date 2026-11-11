@@ -5,7 +5,6 @@ import {
   redirect,
 } from "@tanstack/react-router"
 import type { TFunction } from "i18next"
-import { ArrowRight } from "lucide-react"
 import { useMemo } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -199,7 +198,7 @@ function Login() {
               className="h-11 w-full"
               loading={loginMutation.isPending}
             >
-              {t("login.submit")} <ArrowRight className="ml-2 size-4" />
+              {t("login.submit")}
             </LoadingButton>
           </div>
         </form>
