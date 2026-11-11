@@ -1661,6 +1661,18 @@ export type PeriodInfo = {
 };
 
 /**
+ * PrintedRequest
+ *
+ * What the browser reports just before it opens the print dialog.
+ */
+export type PrintedRequest = {
+    /**
+     * Mode
+     */
+    mode: 'data' | 'form';
+};
+
+/**
  * PrivateUserCreate
  */
 export type PrivateUserCreate = {
@@ -3896,6 +3908,36 @@ export type issuancesCorrectResponses = {
 };
 
 export type issuancesCorrectResponse = issuancesCorrectResponses[keyof issuancesCorrectResponses];
+
+export type issuancesRecordPrintData = {
+    body: PrintedRequest;
+    path: {
+        /**
+         * Issuance Id
+         */
+        issuance_id: string;
+    };
+    query?: never;
+    url: '/api/v1/issuances/{issuance_id}/printed';
+};
+
+export type issuancesRecordPrintErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type issuancesRecordPrintError = issuancesRecordPrintErrors[keyof issuancesRecordPrintErrors];
+
+export type issuancesRecordPrintResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type issuancesRecordPrintResponse = issuancesRecordPrintResponses[keyof issuancesRecordPrintResponses];
 
 export type issuancesVoidData = {
     body: ReasonRequest;

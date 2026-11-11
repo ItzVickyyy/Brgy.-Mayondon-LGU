@@ -33,6 +33,7 @@ from app.core.permissions import Permission, has_permission
 from app.core.search import search_words, word_matches
 from app.models import User
 from app.models_foundation import (
+    AuditLog,
     DocumentType,
     IdType,
     IssuancePurpose,
@@ -75,6 +76,7 @@ from app.models_issuance import (
     JobseekerPublic,
     MarginalizedPublic,
     PaymentPublic,
+    PrintedRequest,
     ReasonRequest,
     SectorPublic,
     SnapshotPublic,
@@ -1175,6 +1177,45 @@ def correct(
     session.commit()
     session.refresh(draft)
     return _public(session, draft)
+
+
+@router.post("/{issuance_id}/printed", status_code=204)
+def record_print(
+    issuance_id: uuid.UUID, body: PrintedRequest, session: SessionDep, user: WriteUser
+) -> Response:
+    """Write an ``issuance.print`` audit row. The browser calls it before printing.
+
+    Only an issued document can be printed. ``copy`` counts every print of this
+    document so far (1 is the first print, 2 or more are reprints).
+    """
+    issuance = _get_or_404(session, issuance_id)
+    if issuance.status != "issued":
+        raise HTTPException(
+            status_code=409, detail="Only an issued document can be printed"
+        )
+    earlier = session.exec(
+        select(sa_func.count())
+        .select_from(AuditLog)
+        .where(
+            col(AuditLog.action) == "issuance.print",
+            col(AuditLog.record_id) == str(issuance.id),
+        )
+    ).one()
+    record_audit_event(
+        session,
+        action="issuance.print",
+        actor=user,
+        module=MODULE,
+        record_type="issuance",
+        record_id=issuance.id,
+        details={
+            "reference_no": issuance.reference_no,
+            "mode": "data only" if body.mode == "data" else "form and data",
+            "copy": earlier + 1,
+        },
+        commit=True,
+    )
+    return Response(status_code=204)
 
 
 @router.post("/{issuance_id}/void", response_model=IssuancePublic)

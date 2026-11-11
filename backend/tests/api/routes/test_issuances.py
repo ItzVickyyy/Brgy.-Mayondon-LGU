@@ -409,6 +409,43 @@ def test_issue_clearance(
     assert "issuance.issue" in _audit(db, draft["id"])
 
 
+def test_printing_is_audited_with_a_copy_count(
+    client: TestClient, staff_token_headers: Headers, street_id: int, db: Session
+) -> None:
+    res = _resident(client, staff_token_headers, street_id)
+    draft = _clearance(client, staff_token_headers, res["id"])
+    url = f"{ISS}/{draft['id']}/printed"
+    # A draft is not a document yet.
+    r = client.post(url, headers=staff_token_headers, json={"mode": "data"})
+    assert r.status_code == 409
+    issued = _issue(client, staff_token_headers, draft["id"])
+    assert (
+        client.post(url, headers=staff_token_headers, json={"mode": "x"}).status_code
+        == 422
+    )
+    for mode in ("data", "form"):
+        r = client.post(url, headers=staff_token_headers, json={"mode": mode})
+        assert r.status_code == 204, r.text
+    db.rollback()
+    rows = db.exec(
+        select(AuditLog)
+        .where(
+            col(AuditLog.record_id) == draft["id"],
+            col(AuditLog.action) == "issuance.print",
+        )
+        .order_by(col(AuditLog.occurred_at))
+    ).all()
+    assert [r.details["copy"] for r in rows] == [1, 2]
+    assert [r.details["mode"] for r in rows] == ["data only", "form and data"]
+    assert rows[0].details["reference_no"] == issued["reference_no"]
+    assert all(r.actor_email for r in rows)
+
+
+def test_printing_requires_login(client: TestClient) -> None:
+    r = client.post(f"{ISS}/{uuid.uuid4()}/printed", json={"mode": "data"})
+    assert r.status_code == 401
+
+
 def test_snapshot_survives_later_resident_edit(
     client: TestClient, staff_token_headers: Headers, street_id: int
 ) -> None:

@@ -223,7 +223,9 @@
       "reference_no": "numero ng reference",
       "draft_id": "ID ng draft",
       "replaced_by": "pinalitan ng",
-      "automatic": "awtomatiko"
+      "automatic": "awtomatiko",
+      "mode": "uri",
+      "copy": "kopya"
     },
     "modules": {
       "records": "Mga Talaan ng Residente",
@@ -251,6 +253,7 @@
         "issue": "Naisyu ang dokumento",
         "correct": "Nagsimula ang pagwawasto",
         "void": "Na-void ang dokumento",
+        "print": "Na-print ang dokumento",
         "view_sensitive": "Tiningnan ang pinaghihigpitang detalye"
       },
       "official": {
@@ -1353,7 +1356,8 @@
         "unable": "Hindi maihanda ang dokumentong ito para sa pag-print.",
         "notFound": "Hindi makita ang isyung ito, kaya hindi ito mapi-print.",
         "voided": "Ang {{ref}} ay na-void at hindi na mapi-print.",
-        "noTemplate": "Wala pang print template ang uri ng dokumentong ito, kaya hindi ito mapi-print mula rito."
+        "noTemplate": "Wala pang print template ang uri ng dokumentong ito, kaya hindi ito mapi-print mula rito.",
+        "notRecorded": "Hindi naitala sa Activity Log ang pag-print, kaya hindi ito sinimulan. Pakisubukang muli."
       },
       "calibration": {
         "intro": "I-print ang calibration sheet sa plain na papel sa 100% na scale (walang header, footer o fit-to-page), pagkatapos ay idikit ito sa pre-printed na form. Ayusin ang offset hanggang ang mga pulang kahon ay nasa mga patlang.",

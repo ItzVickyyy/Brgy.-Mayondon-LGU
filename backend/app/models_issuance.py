@@ -686,6 +686,12 @@ class ReasonRequest(SQLModel):
     ]
 
 
+class PrintedRequest(SQLModel):
+    """What the browser reports just before it opens the print dialog."""
+
+    mode: Literal["data", "form"]
+
+
 class IdentificationPublic(SQLModel):
     id_type_id: int
     id_number: str

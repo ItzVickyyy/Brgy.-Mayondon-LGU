@@ -223,7 +223,9 @@
       "reference_no": "reference no",
       "draft_id": "draft id",
       "replaced_by": "replaced by",
-      "automatic": "automatic"
+      "automatic": "automatic",
+      "mode": "mode",
+      "copy": "copy"
     },
     "modules": {
       "records": "Resident Records",
@@ -251,6 +253,7 @@
         "issue": "Document issued",
         "correct": "Correction started",
         "void": "Document voided",
+        "print": "Document printed",
         "view_sensitive": "Restricted detail viewed"
       },
       "official": {
@@ -1353,7 +1356,8 @@
         "unable": "Unable to prepare this document for printing.",
         "notFound": "This issuance could not be found, so it cannot be printed.",
         "voided": "{{ref}} was voided and cannot be printed.",
-        "noTemplate": "This document type has no print template yet, so it cannot be printed from here."
+        "noTemplate": "This document type has no print template yet, so it cannot be printed from here.",
+        "notRecorded": "The print could not be recorded in the Activity Log, so it was not started. Please try again."
       },
       "calibration": {
         "intro": "Print the calibration sheet on plain paper at 100% scale (no headers, footers or fit-to-page), then hold it against the pre-printed form. Adjust the offset until the red boxes sit on the blanks.",

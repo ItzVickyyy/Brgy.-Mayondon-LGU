@@ -1,5 +1,6 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { IssuancesService } from "@/client"
 import { PrintForm } from "@/components/Issuances/PrintForm"
 import { PrintOverlay } from "@/components/Issuances/PrintOverlay"
 import { printMessage } from "@/lib/issuanceLabels"
@@ -70,9 +71,19 @@ export function usePrintIssuance(): {
       try {
         const result = await loadPrintData(issuanceId)
         if (!result.ok) return printMessage(result.message, t)
+        const printMode = chosen ?? getPrintMode()
+        // The Activity Log must know about every print, so a print that cannot be recorded does not start.
+        try {
+          await IssuancesService.recordPrint({
+            path: { issuance_id: issuanceId },
+            body: { mode: printMode },
+          })
+        } catch {
+          return t("issuances.printing.notices.notRecorded")
+        }
         await new Promise<void>((resolve) => {
           done.current = resolve
-          setMode(chosen ?? getPrintMode())
+          setMode(printMode)
           setData(result.data)
         })
         return t("issuances.printing.notices.opened")

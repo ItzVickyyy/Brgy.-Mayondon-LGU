@@ -65,6 +65,10 @@ const detailKeyLabels = {
   purpose_added: "activity.detailKeys.purpose_added",
   reference_no: "activity.detailKeys.reference_no",
   draft_id: "activity.detailKeys.draft_id",
+  replaced_by: "activity.detailKeys.replaced_by",
+  automatic: "activity.detailKeys.automatic",
+  mode: "activity.detailKeys.mode",
+  copy: "activity.detailKeys.copy",
 } as const satisfies Record<string, ParseKeys>
 
 const moduleKeys = {
