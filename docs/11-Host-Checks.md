@@ -62,6 +62,7 @@ A fresh database is empty. Do these once, signed in as the System Administrator,
 3. **Locked accounts.** After repeated wrong passwords an account locks for a while. The Users table shows "Locked until"; Edit User has "Unlock this account", which leaves the password alone.
 4. **Camera for photos.** The browser allows the camera only on `localhost` or over HTTPS. On the plain-HTTP office network a second PC cannot take photos with the camera (uploading a file still works); take Barangay ID photos on the host PC until HTTPS is set up. Record what you find.
 5. **Change every default secret** in `.env` before real data goes in (`FIRST_SUPERUSER_PASSWORD`, `SECRET_KEY`, the database password) and leave `FASTAPI_ENV` and `ENABLE_DEV_ROUTES` blank.
+6. **After every update, restart the backend.** If a button answers "Method Not Allowed" or "No API route POST /api/...", the running backend is older than the screens (for example Backup and Restore without the create-backup route). Rebuild and restart it (`docker compose build backend && docker compose up -d`) and try again.
 
 ## Result sheet
 

@@ -7,6 +7,7 @@ from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import FileResponse, Response
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
+from starlette.routing import Match
 
 from app.api.main import api_router
 from app.core.config import settings
@@ -91,6 +92,51 @@ app.add_middleware(
 )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+
+@app.api_route(
+    "/api/{_rest_of_path:path}",
+    methods=["POST", "PUT", "PATCH", "DELETE"],
+    include_in_schema=False,
+)
+def unknown_api_write(request: Request, _rest_of_path: str):
+    """Reached only when no real route took a write request under /api/.
+
+    A path that exists for other methods keeps the usual 405. A path that does
+    not exist at all answers 404 and names the route, so an out-of-date backend
+    (for example one without POST /api/v1/backups/) is not mistaken for a wrong
+    method.
+    """
+    path = request.url.path
+    own_paths = {"/api/{_rest_of_path:path}", "/{full_path:path}", "/"}
+    allowed = []
+    for method in ("GET", "POST", "PUT", "PATCH", "DELETE"):
+        scope = {
+            "type": "http",
+            "path": path,
+            "method": method,
+            "root_path": "",
+            "headers": [],
+            "query_string": b"",
+        }
+        if any(
+            getattr(route, "path", None) not in own_paths
+            and route.matches(scope)[0] == Match.FULL
+            for route in app.router.routes
+        ):
+            allowed.append(method)
+    if allowed:
+        raise HTTPException(
+            status_code=405,
+            detail="Method Not Allowed",
+            headers={"Allow": ", ".join(allowed)},
+        )
+    raise HTTPException(
+        status_code=404,
+        detail=f"No API route {request.method} {path}. The server may be out of date.",
+    )
+
+
 # Serve the packaged frontend for self-hosted LAN deployments. The fallback
 # returns index.html for client-side routes such as /login, while keeping API
 # paths as API 404s and serving existing frontend assets directly.
