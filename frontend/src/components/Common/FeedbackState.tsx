@@ -72,11 +72,7 @@ export function LoadingState({ title, lines = 5 }: LoadingStateProps) {
   )
 }
 
-export function ErrorState({
-  title,
-  description,
-  onRetry,
-}: ErrorStateProps) {
+export function ErrorState({ title, description, onRetry }: ErrorStateProps) {
   const { t } = useTranslation()
   return (
     <div

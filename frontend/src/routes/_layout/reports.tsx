@@ -20,8 +20,8 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
-import { Select } from "@/components/Common/Select"
 import { NoPermission } from "@/components/Common/NoPermission"
+import { Select } from "@/components/Common/Select"
 import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
 import {
@@ -493,20 +493,22 @@ function Reports() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {(printAll ? typeRows : typePagination.paginatedItems).map((row) => (
-                <tr
-                  key={row.document_type_id}
-                  className="transition-colors hover:bg-muted/30"
-                >
-                  <td className={`${td} font-medium`}>
-                    {documentTypeLabel(row.code, row.name, t)}
-                  </td>
-                  <td className={`${td} tabular-nums`}>{row.issued}</td>
-                  <td className={`${td} tabular-nums`}>{row.voided}</td>
-                  <td className={td}>{formatShare(row.share_percent)}</td>
-                  <td className={td}>{formatChange(row.change_percent)}</td>
-                </tr>
-              ))}
+              {(printAll ? typeRows : typePagination.paginatedItems).map(
+                (row) => (
+                  <tr
+                    key={row.document_type_id}
+                    className="transition-colors hover:bg-muted/30"
+                  >
+                    <td className={`${td} font-medium`}>
+                      {documentTypeLabel(row.code, row.name, t)}
+                    </td>
+                    <td className={`${td} tabular-nums`}>{row.issued}</td>
+                    <td className={`${td} tabular-nums`}>{row.voided}</td>
+                    <td className={td}>{formatShare(row.share_percent)}</td>
+                    <td className={td}>{formatChange(row.change_percent)}</td>
+                  </tr>
+                ),
+              )}
             </tbody>
             <tfoot>
               <tr className="border-t bg-muted/30 font-semibold">
@@ -559,20 +561,22 @@ function Reports() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {(printAll ? purposeRows : purposePagination.paginatedItems).map((row) => (
-                <tr
-                  key={row.purpose_id ?? "none"}
-                  className="transition-colors hover:bg-muted/30"
-                >
-                  <td className={`${td} font-medium`}>
-                    {row.purpose_id === null
-                      ? t("admin.reports.noPurpose")
-                      : row.purpose}
-                  </td>
-                  <td className={`${td} tabular-nums`}>{row.issued}</td>
-                  <td className={td}>{formatShare(row.share_percent)}</td>
-                </tr>
-              ))}
+              {(printAll ? purposeRows : purposePagination.paginatedItems).map(
+                (row) => (
+                  <tr
+                    key={row.purpose_id ?? "none"}
+                    className="transition-colors hover:bg-muted/30"
+                  >
+                    <td className={`${td} font-medium`}>
+                      {row.purpose_id === null
+                        ? t("admin.reports.noPurpose")
+                        : row.purpose}
+                    </td>
+                    <td className={`${td} tabular-nums`}>{row.issued}</td>
+                    <td className={td}>{formatShare(row.share_percent)}</td>
+                  </tr>
+                ),
+              )}
             </tbody>
             <tfoot>
               <tr className="border-t bg-muted/30 font-semibold">
@@ -631,7 +635,10 @@ function Reports() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {(printAll ? expiringRows : expiringPagination.paginatedItems).map((row) => {
+              {(printAll
+                ? expiringRows
+                : expiringPagination.paginatedItems
+              ).map((row) => {
                 const statusText = labelOf(expiryStatusKeys, row.status, t)
                 return (
                   <tr
@@ -739,35 +746,37 @@ function Reports() {
               </tr>
             </thead>
             <tbody className="divide-y">
-              {(printAll ? importRows : importsPagination.paginatedItems).map((row) => (
-                <tr
-                  key={row.id}
-                  className="transition-colors hover:bg-muted/30"
-                >
-                  <td className={td}>{formatMoment(row.created_at)}</td>
-                  <td className={td}>{row.file_name}</td>
-                  <td className={td}>{row.created_by_email ?? "—"}</td>
-                  <td className={td}>
-                    <Badge
-                      variant="outline"
-                      className={
-                        statusStyles[
-                          importStatusStyleKey[row.status] ?? "Pending"
-                        ]
-                      }
-                    >
-                      {labelOf(importStatusKeys, row.status, t)}
-                    </Badge>
-                  </td>
-                  {(["created", "updated", "skipped", "failed"] as const).map(
-                    (id) => (
-                      <td key={id} className={`${td} tabular-nums`}>
-                        {row.result ? (row.result[id] ?? 0) : "—"}
-                      </td>
-                    ),
-                  )}
-                </tr>
-              ))}
+              {(printAll ? importRows : importsPagination.paginatedItems).map(
+                (row) => (
+                  <tr
+                    key={row.id}
+                    className="transition-colors hover:bg-muted/30"
+                  >
+                    <td className={td}>{formatMoment(row.created_at)}</td>
+                    <td className={td}>{row.file_name}</td>
+                    <td className={td}>{row.created_by_email ?? "—"}</td>
+                    <td className={td}>
+                      <Badge
+                        variant="outline"
+                        className={
+                          statusStyles[
+                            importStatusStyleKey[row.status] ?? "Pending"
+                          ]
+                        }
+                      >
+                        {labelOf(importStatusKeys, row.status, t)}
+                      </Badge>
+                    </td>
+                    {(["created", "updated", "skipped", "failed"] as const).map(
+                      (id) => (
+                        <td key={id} className={`${td} tabular-nums`}>
+                          {row.result ? (row.result[id] ?? 0) : "—"}
+                        </td>
+                      ),
+                    )}
+                  </tr>
+                ),
+              )}
             </tbody>
           </table>
           <TablePagination
@@ -806,36 +815,44 @@ function Reports() {
             </tr>
           </thead>
           <tbody className="divide-y">
-            {(printAll ? accountRows : accountPagination.paginatedItems).map((row) => (
-              <tr
-                key={row.user_id}
-                className="transition-colors hover:bg-muted/30"
-              >
-                <td className={td}>
-                  <p className="font-semibold">{row.full_name || row.email}</p>
-                  {row.full_name ? (
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {row.email}
+            {(printAll ? accountRows : accountPagination.paginatedItems).map(
+              (row) => (
+                <tr
+                  key={row.user_id}
+                  className="transition-colors hover:bg-muted/30"
+                >
+                  <td className={td}>
+                    <p className="font-semibold">
+                      {row.full_name || row.email}
                     </p>
-                  ) : null}
-                </td>
-                <td className={td}>
-                  <Badge
-                    variant="outline"
-                    className={
-                      row.role === "admin"
-                        ? "border-brand/30 bg-brand/10 text-brand"
-                        : statusStyles.Inactive
-                    }
-                  >
-                    {labelOf(roleKeys, row.role, t)}
-                  </Badge>
-                </td>
-                <td className={`${td} tabular-nums`}>{row.documents_issued}</td>
-                <td className={`${td} tabular-nums`}>{row.records_changed}</td>
-                <td className={td}>{formatMoment(row.last_activity)}</td>
-              </tr>
-            ))}
+                    {row.full_name ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {row.email}
+                      </p>
+                    ) : null}
+                  </td>
+                  <td className={td}>
+                    <Badge
+                      variant="outline"
+                      className={
+                        row.role === "admin"
+                          ? "border-brand/30 bg-brand/10 text-brand"
+                          : statusStyles.Inactive
+                      }
+                    >
+                      {labelOf(roleKeys, row.role, t)}
+                    </Badge>
+                  </td>
+                  <td className={`${td} tabular-nums`}>
+                    {row.documents_issued}
+                  </td>
+                  <td className={`${td} tabular-nums`}>
+                    {row.records_changed}
+                  </td>
+                  <td className={td}>{formatMoment(row.last_activity)}</td>
+                </tr>
+              ),
+            )}
           </tbody>
           <tfoot>
             <tr className="border-t bg-muted/30 font-semibold">
@@ -950,9 +967,13 @@ function Reports() {
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
-            <label htmlFor="report-type" className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+            <label
+              htmlFor="report-type"
+              className="flex min-w-0 flex-col gap-2 text-sm font-medium"
+            >
               {t("admin.reports.generate.reportType")}
-              <Select id="report-type"
+              <Select
+                id="report-type"
                 value={report}
                 onChange={(event) => {
                   setReport(event.target.value as ReportType)
@@ -977,9 +998,13 @@ function Reports() {
                 </option>
               </Select>
             </label>
-            <label htmlFor="report-period" className="flex min-w-0 flex-col gap-2 text-sm font-medium">
+            <label
+              htmlFor="report-period"
+              className="flex min-w-0 flex-col gap-2 text-sm font-medium"
+            >
               {t("admin.reports.generate.period")}
-              <Select id="report-period"
+              <Select
+                id="report-period"
                 value={period}
                 onChange={(event) => {
                   setPeriod(event.target.value as Period)

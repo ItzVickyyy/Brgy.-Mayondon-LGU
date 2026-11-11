@@ -1,4 +1,3 @@
-import { useTranslation } from "react-i18next"
 import {
   type ColumnDef,
   createPaginatedRowModel,
@@ -8,6 +7,7 @@ import {
   tableFeatures,
   useTable,
 } from "@tanstack/react-table"
+import { useTranslation } from "react-i18next"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { TablePagination } from "@/components/Common/TablePagination"
 import {
@@ -76,34 +76,47 @@ export function DataTable<TData extends RowData>({
           ))}
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="hover:bg-muted/30">
-                {row.getAllCells().map((cell) => (
-                  <TableCell
-                    key={cell.id}
-                    className={
-                      cell.column.id === "actions"
-                        ? "sticky right-0 bg-card row-hover-cell sticky-edge"
-                        : undefined
-                    }
-                  >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : null}
+          {table.getRowModel().rows.length
+            ? table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id} className="hover:bg-muted/30">
+                  {row.getAllCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className={
+                        cell.column.id === "actions"
+                          ? "sticky right-0 bg-card row-hover-cell sticky-edge"
+                          : undefined
+                      }
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            : null}
         </TableBody>
       </Table>
       {table.getRowModel().rows.length === 0 ? (
-        <EmptyState title={emptyTitle ?? t("common.table.emptyTitle")} description={emptyDescription ?? t("common.table.emptyDescription")} />
+        <EmptyState
+          title={emptyTitle ?? t("common.table.emptyTitle")}
+          description={emptyDescription ?? t("common.table.emptyDescription")}
+        />
       ) : null}
 
       {data.length > 0 ? (
         <TablePagination
-          start={table.state.pagination.pageIndex * table.state.pagination.pageSize + 1}
-          end={Math.min((table.state.pagination.pageIndex + 1) * table.state.pagination.pageSize, data.length)}
+          start={
+            table.state.pagination.pageIndex * table.state.pagination.pageSize +
+            1
+          }
+          end={Math.min(
+            (table.state.pagination.pageIndex + 1) *
+              table.state.pagination.pageSize,
+            data.length,
+          )}
           total={data.length}
           pageIndex={table.state.pagination.pageIndex}
           pageCount={table.getPageCount()}

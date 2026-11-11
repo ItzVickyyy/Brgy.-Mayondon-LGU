@@ -4,13 +4,13 @@
  * Tests pass the in-memory copy of the API (`issuanceApi.mock`) instead of the real one.
  */
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
-import { printTemplates } from "./templates"
 import type { MockIssuance } from "@/components/Issuances/NewIssuance/issuanceTypes"
 import {
   buildPrintData,
   type PrintData,
   type PrintLookups,
 } from "./buildPrintData"
+import { printTemplates } from "./templates"
 
 export type LoadPrintResult =
   | { ok: true; data: PrintData }
@@ -23,9 +23,7 @@ export type PrintApi = {
     idTypes: string[]
     purposes: string[]
   }>
-  getResidentName(
-    id: string,
-  ): Promise<
+  getResidentName(id: string): Promise<
     | {
         firstName: string
         middleName: string

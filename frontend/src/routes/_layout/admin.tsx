@@ -8,10 +8,14 @@ import { type UserPublic, UsersService } from "@/client"
 import AddUser from "@/components/Admin/AddUser"
 import { type UserTableData, useUserColumns } from "@/components/Admin/columns"
 import { DataTable } from "@/components/Common/DataTable"
+import {
+  EmptyState,
+  ErrorState,
+  LoadingState,
+} from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
-import { Select } from "@/components/Common/Select"
-import { EmptyState, ErrorState, LoadingState } from "@/components/Common/FeedbackState"
 import { NoPermission } from "@/components/Common/NoPermission"
+import { Select } from "@/components/Common/Select"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
@@ -35,7 +39,9 @@ function UsersTable() {
   const { user: currentUser } = useAuth()
   const [search, setSearch] = useState("")
   const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "staff">("all")
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all")
+  const [statusFilter, setStatusFilter] = useState<
+    "all" | "active" | "inactive"
+  >("all")
   const {
     data: users,
     isLoading,
@@ -100,7 +106,10 @@ function UsersTable() {
       <div className="flex flex-col gap-2 border-b p-4 sm:flex-row sm:flex-wrap sm:items-center sm:p-5">
         <label className="relative block min-w-0 flex-1 sm:max-w-sm">
           <span className="sr-only">{t("admin.users.searchLabel")}</span>
-          <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+          <Search
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            aria-hidden="true"
+          />
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
@@ -110,7 +119,14 @@ function UsersTable() {
         </label>
         <label htmlFor="users-role-filter" className="sm:w-52">
           <span className="sr-only">{t("admin.users.filterRole")}</span>
-          <Select id="users-role-filter" value={roleFilter} onChange={(event) => setRoleFilter(event.target.value as "all" | "admin" | "staff")} className={formControlClass}>
+          <Select
+            id="users-role-filter"
+            value={roleFilter}
+            onChange={(event) =>
+              setRoleFilter(event.target.value as "all" | "admin" | "staff")
+            }
+            className={formControlClass}
+          >
             <option value="all">{t("admin.users.allRoles")}</option>
             <option value="admin">{t("admin.users.roleAdmin")}</option>
             <option value="staff">{t("admin.users.roleStaff")}</option>
@@ -118,7 +134,16 @@ function UsersTable() {
         </label>
         <label htmlFor="users-status-filter" className="sm:w-44">
           <span className="sr-only">{t("admin.users.filterStatus")}</span>
-          <Select id="users-status-filter" value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as "all" | "active" | "inactive")} className={formControlClass}>
+          <Select
+            id="users-status-filter"
+            value={statusFilter}
+            onChange={(event) =>
+              setStatusFilter(
+                event.target.value as "all" | "active" | "inactive",
+              )
+            }
+            className={formControlClass}
+          >
             <option value="all">{t("admin.users.allStatuses")}</option>
             <option value="active">{t("admin.users.active")}</option>
             <option value="inactive">{t("admin.users.inactive")}</option>
@@ -155,7 +180,9 @@ function Admin() {
       </div>
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="border-b p-4 sm:p-5">
-          <h2 className="font-semibold tracking-tight">{t("admin.users.listTitle")}</h2>
+          <h2 className="font-semibold tracking-tight">
+            {t("admin.users.listTitle")}
+          </h2>
           <p className="mt-1 text-sm text-muted-foreground">
             {t("admin.users.listDescription")}
           </p>

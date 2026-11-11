@@ -87,7 +87,6 @@ function Steps({ items }: { items: ReactNode[] }) {
   return (
     <ol className="list-decimal space-y-1 pl-5">
       {items.map((item, index) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: static help text
         <li key={index}>{item}</li>
       ))}
     </ol>
@@ -170,10 +169,10 @@ export function HelpDialog(props: DialogProps) {
         </Section>
         <Section title="Your first sign-in">
           <p>
-            If the System Administrator gave you a temporary password, the system
-            asks you to set a new one before you continue. The new password must
-            have at least 12 characters. After saving it, sign in again with the
-            new password.
+            If the System Administrator gave you a temporary password, the
+            system asks you to set a new one before you continue. The new
+            password must have at least 12 characters. After saving it, sign in
+            again with the new password.
           </p>
         </Section>
         <Section title="Signing out">
@@ -199,8 +198,8 @@ export function HelpDialog(props: DialogProps) {
 
       <HelpGroup title="Dashboard">
         <p>
-          The Dashboard is the first page after you sign in. Use the Period
-          menu (Today, This Week, This Month, Past 3 Months, Past 6 Months, This
+          The Dashboard is the first page after you sign in. Use the Period menu
+          (Today, This Week, This Month, Past 3 Months, Past 6 Months, This
           Year, Overall) to change the numbers.
         </p>
         <ul className="list-disc space-y-1 pl-5">
@@ -306,8 +305,8 @@ export function HelpDialog(props: DialogProps) {
               right away.
             </li>
             <li>
-              <strong>Cancel:</strong> closes the form. You can keep the draft or
-              discard the changes.
+              <strong>Cancel:</strong> closes the form. You can keep the draft
+              or discard the changes.
             </li>
           </ul>
         </Section>
@@ -346,11 +345,11 @@ export function HelpDialog(props: DialogProps) {
         </Section>
         <Section title="Barangay ID requirements">
           <p>
-            The resident record must already have the birthdate, birthplace, sex,
-            civil status, address, emergency contact (name, address and number)
-            and a photo. A new card is refused if the resident already has a
-            Barangay ID number. A renewal or replacement keeps the current number
-            unless you type another.
+            The resident record must already have the birthdate, birthplace,
+            sex, civil status, address, emergency contact (name, address and
+            number) and a photo. A new card is refused if the resident already
+            has a Barangay ID number. A renewal or replacement keeps the current
+            number unless you type another.
           </p>
         </Section>
       </HelpGroup>
@@ -359,15 +358,15 @@ export function HelpDialog(props: DialogProps) {
         <Section title="Print a document">
           <p>
             After issuing, choose Print. Most documents print only the filled-in
-            details onto the barangay's pre-printed forms, so load the right form
-            in the printer first. Residency, Marginalized Sector and First-Time
-            Jobseeker print as full pages.
+            details onto the barangay's pre-printed forms, so load the right
+            form in the printer first. Residency, Marginalized Sector and
+            First-Time Jobseeker print as full pages.
           </p>
         </Section>
         <Section title="Reprint">
           <p>
-            Open Issuance Management, find the document in the history and choose
-            Print again. A reprint keeps the same reference number.
+            Open Issuance Management, find the document in the history and
+            choose Print again. A reprint keeps the same reference number.
           </p>
         </Section>
         <Section title="Text does not line up with the blanks">
@@ -392,10 +391,10 @@ export function HelpDialog(props: DialogProps) {
         </Section>
         <Section title="Mistake in an issued document">
           <p>
-            Issued documents are never edited directly. Choose Correct, enter the
-            reason, and the system creates a correction draft with the old
-            details filled in. Fix them and issue the new document. The reason is
-            kept in the history.
+            Issued documents are never edited directly. Choose Correct, enter
+            the reason, and the system creates a correction draft with the old
+            details filled in. Fix them and issue the new document. The reason
+            is kept in the history.
           </p>
         </Section>
         <Section title="Void or discard">
@@ -479,9 +478,9 @@ export function HelpDialog(props: DialogProps) {
             Administrator to set a temporary password for you.
           </Problem>
           <Problem q="It says my email or password is incorrect.">
-            Check that Caps Lock is off and the email is typed in full. Passwords
-            are case-sensitive. If it still fails, ask the System Administrator
-            to check that your account is active.
+            Check that Caps Lock is off and the email is typed in full.
+            Passwords are case-sensitive. If it still fails, ask the System
+            Administrator to check that your account is active.
           </Problem>
           <Problem q="A page says I have no permission.">
             That page is for System Administrators only.
@@ -492,8 +491,8 @@ export function HelpDialog(props: DialogProps) {
             tell the System Administrator.
           </Problem>
           <Problem q="I cannot find a resident.">
-            Try fewer words or only the last name. Check the filter is not set to
-            Active when the resident was archived. If they are really not
+            Try fewer words or only the last name. Check the filter is not set
+            to Active when the resident was archived. If they are really not
             there, add them from the New Issuance form or Records Management.
           </Problem>
           <Problem q="The Issue button says details are missing.">
@@ -502,13 +501,13 @@ export function HelpDialog(props: DialogProps) {
             try again.
           </Problem>
           <Problem q="I cannot take the resident's photo.">
-            Allow the browser to use the camera when it asks. Check the camera is
-            plugged in and not used by another program.
+            Allow the browser to use the camera when it asks. Check the camera
+            is plugged in and not used by another program.
           </Problem>
           <Problem q="Printing is cut off or in the wrong place.">
             Print at 100% scale with no headers or footers, then use Printing
-            setup to shift the text. Make sure the pre-printed form is loaded the
-            right way round.
+            setup to shift the text. Make sure the pre-printed form is loaded
+            the right way round.
           </Problem>
           <Problem q="I issued the wrong document or entered a wrong detail.">
             Do not delete it. Use Correct, or Void if it should not be used, and

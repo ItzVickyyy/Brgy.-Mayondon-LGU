@@ -14,7 +14,9 @@ const NotFound = () => {
           <span className="text-6xl md:text-8xl font-bold leading-none mb-4">
             404
           </span>
-          <span className="text-2xl font-bold mb-2">{t("common.notFound.oops")}</span>
+          <span className="text-2xl font-bold mb-2">
+            {t("common.notFound.oops")}
+          </span>
         </div>
       </div>
 

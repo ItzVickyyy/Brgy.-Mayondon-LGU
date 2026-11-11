@@ -1,6 +1,6 @@
 import { Link as RouterLink } from "@tanstack/react-router"
-import { useTranslation } from "react-i18next"
 import { ShieldAlert } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 
@@ -15,7 +15,9 @@ export function NoPermission() {
         />
       </div>
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">{t("common.permission.title")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">
+          {t("common.permission.title")}
+        </h1>
         <p className="mt-2 text-base text-muted-foreground">
           {t("common.permission.description")}
         </p>

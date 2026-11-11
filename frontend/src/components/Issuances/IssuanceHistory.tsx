@@ -24,14 +24,14 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
-import { RowActions } from "@/components/Common/RowActions"
-import { Select } from "@/components/Common/Select"
 import {
   modalBody,
   modalFooter,
   modalHeader,
   modalShell,
 } from "@/components/Common/ModalLayout"
+import { RowActions } from "@/components/Common/RowActions"
+import { Select } from "@/components/Common/Select"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { SummaryCard } from "@/components/Issuances/IssuanceLayout"
@@ -50,9 +50,9 @@ import {
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
-import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { formatLocaleDate } from "@/lib/locale"
 import type { PrintMode } from "@/lib/print/printMode"
+import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { cn } from "@/lib/utils"
 
 type StatusFilter = "all" | "issued" | "draft" | "voided"
@@ -266,6 +266,7 @@ export function IssuanceHistory({
   onPrint: (
     item: IssuanceListItem,
     mode?: PrintMode,
+    // biome-ignore lint/suspicious/noConfusingVoidType: the print callback may return nothing
   ) => Promise<string | void> | string | void
 }) {
   const { t } = useTranslation()

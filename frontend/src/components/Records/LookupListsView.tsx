@@ -203,6 +203,7 @@ function LookupListPanel({
                       {t("records.lookups.editLabel", { name: item.name })}
                     </span>
                     <input
+                      // biome-ignore lint/a11y/noAutofocus: the field appears only after the person chose Edit
                       autoFocus
                       value={editingName}
                       onChange={(event) => setEditingName(event.target.value)}

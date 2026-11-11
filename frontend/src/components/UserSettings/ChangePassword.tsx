@@ -88,7 +88,9 @@ const ChangePassword = ({ forced = false }: { forced?: boolean }) => {
           </p>
         </div>
       ) : (
-        <h3 className="py-4 text-lg font-semibold">{t("password.changeTitle")}</h3>
+        <h3 className="py-4 text-lg font-semibold">
+          {t("password.changeTitle")}
+        </h3>
       )}
       <Form {...form}>
         <form

@@ -45,7 +45,10 @@ test.describe("Edit user profile", () => {
   test.beforeEach(async ({ page }) => {
     await logInUser(page, email, password)
     await openMyAccount(page)
-    await page.getByRole("dialog").getByRole("button", { name: "Edit Account" }).click()
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Edit Account" })
+      .click()
   })
 
   test("Edit the first name and save the profile", async ({ page }) => {
@@ -55,8 +58,12 @@ test.describe("Edit user profile", () => {
     await dialog.getByLabel("First Name").fill(updatedName)
     await dialog.getByRole("button", { name: "Save Changes" }).click()
 
-    await expect(page.getByText("My Account updated successfully")).toBeVisible()
-    await expect(dialog.getByText(updatedName, { exact: true }).first()).toBeVisible()
+    await expect(
+      page.getByText("My Account updated successfully"),
+    ).toBeVisible()
+    await expect(
+      dialog.getByText(updatedName, { exact: true }).first(),
+    ).toBeVisible()
   })
 
   test("Invalid email is blocked by browser validation", async ({ page }) => {
@@ -85,8 +92,12 @@ test.describe("Edit user email", () => {
     await dialog.getByLabel("Email").fill(updatedEmail)
     await dialog.getByRole("button", { name: "Save Changes" }).click()
 
-    await expect(page.getByText("My Account updated successfully")).toBeVisible()
-    await expect(dialog.getByText(updatedEmail, { exact: true }).first()).toBeVisible()
+    await expect(
+      page.getByText("My Account updated successfully"),
+    ).toBeVisible()
+    await expect(
+      dialog.getByText(updatedEmail, { exact: true }).first(),
+    ).toBeVisible()
   })
 })
 
@@ -106,7 +117,9 @@ test.describe("Cancel edit actions", () => {
     await dialog.getByLabel("First Name").fill("Changed Name")
     await dialog.getByRole("button", { name: "Cancel Edit" }).click()
 
-    await expect(dialog.getByText(user.full_name as string, { exact: true }).first()).toBeVisible()
+    await expect(
+      dialog.getByText(user.full_name as string, { exact: true }).first(),
+    ).toBeVisible()
   })
 
   test("Cancel edit restores the original email", async ({ page }) => {
@@ -166,7 +179,10 @@ test.describe("Change password validation", () => {
   test.beforeEach(async ({ page }) => {
     await logInUser(page, email, password)
     await openMyAccount(page)
-    await page.getByRole("dialog").getByRole("button", { name: "Edit Account" }).click()
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Edit Account" })
+      .click()
   })
 
   test("Reject a password that is too short", async ({ page }) => {

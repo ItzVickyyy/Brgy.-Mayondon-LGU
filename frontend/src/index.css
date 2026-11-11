@@ -352,19 +352,25 @@ tr:focus-within > .row-hover-cell {
   body.report-printing [data-slot="sidebar-inset"] > header,
   body.report-printing [data-slot="sidebar-inset"] > footer,
   body.report-printing [data-sonner-toaster] {
+    /* biome-ignore lint/complexity/noImportantStyles: the printed report must beat the screen layout classes */
     display: none !important;
   }
   body.report-printing [data-slot="sidebar-inset"] {
+    /* biome-ignore lint/complexity/noImportantStyles: the printed report must beat the screen layout classes */
     margin: 0 !important;
   }
   body.report-printing main {
+    /* biome-ignore lint/complexity/noImportantStyles: the printed report must beat the screen layout classes */
     padding: 0 !important;
   }
   body.report-printing .overflow-x-auto {
+    /* biome-ignore lint/complexity/noImportantStyles: the printed report must beat the screen layout classes */
     overflow: visible !important;
   }
   body.report-printing table {
+    /* biome-ignore lint/complexity/noImportantStyles: the printed report must beat the screen layout classes */
     min-width: 0 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: the printed report must beat the screen layout classes */
     width: 100% !important;
   }
   body.report-printing tr {

@@ -12,7 +12,5 @@ export function SummaryCard({
   value: string | number
   hint: string
 }) {
-  return (
-    <StatCard icon={Icon} label={label} value={value} description={hint} />
-  )
+  return <StatCard icon={Icon} label={label} value={value} description={hint} />
 }

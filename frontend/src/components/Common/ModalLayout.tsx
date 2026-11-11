@@ -12,11 +12,9 @@ export const modalShell =
 // Same fixed height for the resident profile and the add/edit resident form,
 // so moving between them does not resize the pop-up.
 export const modalTall = "h-[90dvh]"
-export const modalHeader =
-  "gap-1.5 border-b px-5 py-4 pr-12 sm:px-6 sm:pr-14"
+export const modalHeader = "gap-1.5 border-b px-5 py-4 pr-12 sm:px-6 sm:pr-14"
 export const modalBody = "min-h-0 flex-1 overflow-y-auto px-5 py-5 sm:px-6"
-export const modalFooter =
-  "border-t bg-muted/30 px-5 py-3 sm:px-6 sm:py-4"
+export const modalFooter = "border-t bg-muted/30 px-5 py-3 sm:px-6 sm:py-4"
 
 /** A titled group of fields inside a pop-up. */
 export function ModalSection({

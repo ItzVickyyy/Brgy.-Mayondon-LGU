@@ -113,7 +113,9 @@ export function User({
               <>
                 <DropdownMenuLabel className="sm:hidden">
                   <span className="block truncate text-sm font-medium">
-                    {user?.full_name || user?.email || t("userMenu.fallbackName")}
+                    {user?.full_name ||
+                      user?.email ||
+                      t("userMenu.fallbackName")}
                   </span>
                   <span className="block truncate text-xs font-normal text-muted-foreground">
                     {user?.email || ""}

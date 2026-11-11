@@ -108,6 +108,8 @@ cd backend && uv run pytest
 cd frontend && bun run lint && bun run build
 ```
 
+`bun run lint` only reports problems and changes nothing, so CI can fail on them. To fix what Biome can fix on its own, run `bun run lint:fix` and review the diff. A few very dense files (listed under `formatter.includes` in `frontend/biome.json`) are not reformatted: edit them with small exact changes.
+
 Run Docker Compose and Playwright checks when a change touches container setup, full-stack integration, authentication, routing or user workflows.
 
 **Frontend build notes.** The route tree is generated during the build, so run `bun run build` first, then `bunx tsc -p tsconfig.build.json --noEmit`. Biome reports pre-existing formatting and import-sort noise; ignore it unless you touched those lines.

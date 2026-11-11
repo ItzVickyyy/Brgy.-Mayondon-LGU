@@ -54,7 +54,10 @@ export function ConfirmDialog({
         {reason !== "none" ? (
           <div className="flex flex-col gap-2">
             <label htmlFor="confirm-reason" className="text-sm font-medium">
-              {t("common.confirm.reason")} {needsReason ? `(${t("common.confirm.required")})` : `(${t("common.confirm.optional")})`}
+              {t("common.confirm.reason")}{" "}
+              {needsReason
+                ? `(${t("common.confirm.required")})`
+                : `(${t("common.confirm.optional")})`}
             </label>
             <textarea
               id="confirm-reason"
@@ -66,8 +69,12 @@ export function ConfirmDialog({
               required={needsReason}
               aria-describedby={needsReason ? "confirm-reason-help" : undefined}
             />
-            {needsReason && reasonText.trim().length > 0 && reasonText.trim().length < 3 ? (
-              <p id="confirm-reason-help" className="text-xs text-destructive">{t("common.confirm.minReason")}</p>
+            {needsReason &&
+            reasonText.trim().length > 0 &&
+            reasonText.trim().length < 3 ? (
+              <p id="confirm-reason-help" className="text-xs text-destructive">
+                {t("common.confirm.minReason")}
+              </p>
             ) : null}
           </div>
         ) : null}

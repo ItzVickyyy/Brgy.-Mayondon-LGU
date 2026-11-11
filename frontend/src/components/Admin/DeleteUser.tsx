@@ -76,7 +76,11 @@ const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
 
           <DialogFooter className="mt-4">
             <DialogClose asChild>
-              <Button variant="outline" className="min-h-11" disabled={mutation.isPending}>
+              <Button
+                variant="outline"
+                className="min-h-11"
+                disabled={mutation.isPending}
+              >
                 {t("admin.users.form.cancel")}
               </Button>
             </DialogClose>

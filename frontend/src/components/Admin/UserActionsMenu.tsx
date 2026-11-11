@@ -72,7 +72,9 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
             <Button
               variant="outline"
               size="icon"
-              aria-label={t("admin.users.actions.moreFor", { name: user.full_name || user.email })}
+              aria-label={t("admin.users.actions.moreFor", {
+                name: user.full_name || user.email,
+              })}
             >
               <EllipsisVertical aria-hidden="true" />
             </Button>
@@ -93,7 +95,9 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
               ) : (
                 <UserRoundCheck aria-hidden="true" />
               )}
-              {user.is_active ? t("admin.users.actions.deactivate") : t("admin.users.actions.reactivate")}
+              {user.is_active
+                ? t("admin.users.actions.deactivate")
+                : t("admin.users.actions.reactivate")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -104,13 +108,25 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
         onOpenChange={(nextOpen) => {
           if (!nextOpen) setPendingActive(null)
         }}
-        title={pendingActive ? t("admin.users.actions.reactivateTitle") : t("admin.users.actions.deactivateTitle")}
+        title={
+          pendingActive
+            ? t("admin.users.actions.reactivateTitle")
+            : t("admin.users.actions.deactivateTitle")
+        }
         description={
           pendingActive
-            ? t("admin.users.actions.reactivateDescription", { name: user.full_name || user.email })
-            : t("admin.users.actions.deactivateDescription", { name: user.full_name || user.email })
+            ? t("admin.users.actions.reactivateDescription", {
+                name: user.full_name || user.email,
+              })
+            : t("admin.users.actions.deactivateDescription", {
+                name: user.full_name || user.email,
+              })
         }
-        confirmLabel={pendingActive ? t("admin.users.actions.reactivateConfirm") : t("admin.users.actions.deactivateConfirm")}
+        confirmLabel={
+          pendingActive
+            ? t("admin.users.actions.reactivateConfirm")
+            : t("admin.users.actions.deactivateConfirm")
+        }
         destructive={pendingActive === false}
         onConfirm={() => {
           if (pendingActive === null) return

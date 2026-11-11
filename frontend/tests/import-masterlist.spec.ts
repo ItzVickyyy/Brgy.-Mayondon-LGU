@@ -80,7 +80,10 @@ test("upload, map, check and import a small fictional masterlist", async ({
 
   // Reports lists the import, counts it, and exports an English CSV.
   await page.goto("/reports")
-  await chooseOption(page.getByLabel(/^Report type/), "Masterlist import summary")
+  await chooseOption(
+    page.getByLabel(/^Report type/),
+    "Masterlist import summary",
+  )
   await page
     .getByRole("button", { name: "Preview Report", exact: true })
     .click()

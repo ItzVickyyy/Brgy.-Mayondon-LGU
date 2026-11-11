@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button"
 import { residentTypeLabel } from "@/lib/residentLabels"
 import { residentAddress } from "@/lib/residents"
 
-
 // Family and beneficiary details wait for the barangay's own list of fields (D-20).
 const waitingCards = [
   { key: "family", icon: Users },

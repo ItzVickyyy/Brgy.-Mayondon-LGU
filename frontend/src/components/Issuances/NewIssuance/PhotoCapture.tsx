@@ -1,13 +1,13 @@
-import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react"
 import type { TFunction } from "i18next"
-import { useTranslation } from "react-i18next"
 import { Camera, ImageOff, LoaderCircle, RefreshCw, Upload, UserRound } from "lucide-react"
+import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
+import { Select } from "@/components/Common/Select"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { canvasToPhotoUrl, cropToPortrait, PHOTO_HEIGHT, PHOTO_WIDTH, removeBackground } from "@/lib/photo-background"
 import { photoUploadMessage } from "@/lib/issuanceLabels"
+import { canvasToPhotoUrl, cropToPortrait, PHOTO_HEIGHT, PHOTO_WIDTH, removeBackground } from "@/lib/photo-background"
 import { PHOTO_UPLOAD_ACCEPT, PHOTO_UPLOAD_OPEN_ERROR, validatePhotoFile } from "@/lib/photo-upload"
-import { Select } from "@/components/Common/Select"
 
 type Phase = "camera" | "working"
 

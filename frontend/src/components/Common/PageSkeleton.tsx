@@ -61,7 +61,11 @@ export function PageSkeleton() {
 export function AppShellSkeleton() {
   const { t } = useTranslation()
   return (
-    <div className="flex min-h-svh bg-background" role="status" aria-busy="true">
+    <div
+      className="flex min-h-svh bg-background"
+      role="status"
+      aria-busy="true"
+    >
       <span className="sr-only">{t("common.feedback.loading")}</span>
       <div
         aria-hidden="true"

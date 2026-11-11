@@ -103,7 +103,9 @@ function RecoverPassword() {
           className="flex flex-col gap-6"
         >
           <div className="flex flex-col items-center gap-2 text-center">
-            <h1 className="text-2xl font-bold">{t("password.recovery.title")}</h1>
+            <h1 className="text-2xl font-bold">
+              {t("password.recovery.title")}
+            </h1>
           </div>
 
           {offlineNotice ? (
@@ -123,11 +125,7 @@ function RecoverPassword() {
                 <FormItem>
                   <FormLabel>{t("password.email")}</FormLabel>
                   <FormControl>
-                    <Input
-                      data-testid="email-input"
-                      type="email"
-                      {...field}
-                    />
+                    <Input data-testid="email-input" type="email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -16,7 +16,9 @@ const ErrorComponent = () => {
           <span className="text-6xl md:text-8xl font-bold leading-none mb-4">
             {t("common.errorPage.code")}
           </span>
-          <span className="text-2xl font-bold mb-2">{t("common.errorPage.oops")}</span>
+          <span className="text-2xl font-bold mb-2">
+            {t("common.errorPage.oops")}
+          </span>
         </div>
       </div>
 

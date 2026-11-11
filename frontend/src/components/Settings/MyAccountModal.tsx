@@ -40,19 +40,31 @@ const profileFields: {
   type?: string
   placeholder?: ParseKeys
 }[] = [
-  { key: "first_name", label: "account.fields.firstName", placeholder: "account.placeholders.firstName" },
+  {
+    key: "first_name",
+    label: "account.fields.firstName",
+    placeholder: "account.placeholders.firstName",
+  },
   {
     key: "middle_name",
     label: "account.fields.middleName",
     placeholder: "account.placeholders.middleName",
   },
-  { key: "last_name", label: "account.fields.lastName", placeholder: "account.placeholders.lastName" },
+  {
+    key: "last_name",
+    label: "account.fields.lastName",
+    placeholder: "account.placeholders.lastName",
+  },
   {
     key: "extension_name",
     label: "account.fields.extensionName",
     placeholder: "account.placeholders.extensionName",
   },
-  { key: "sex", label: "account.fields.sex", placeholder: "account.placeholders.sex" },
+  {
+    key: "sex",
+    label: "account.fields.sex",
+    placeholder: "account.placeholders.sex",
+  },
   {
     key: "civil_status",
     label: "account.fields.civilStatus",
@@ -225,8 +237,13 @@ export function MyAccountModal({
     mutation.mutate(payload as unknown as UserUpdateMe)
   }
 
-  const status = user?.is_active === false ? t("account.status.inactive") : t("account.status.active")
-  const role = user?.is_superuser ? t("account.roles.admin") : t("account.roles.staff")
+  const status =
+    user?.is_active === false
+      ? t("account.status.inactive")
+      : t("account.status.active")
+  const role = user?.is_superuser
+    ? t("account.roles.admin")
+    : t("account.roles.staff")
   const username = user?.username || user?.email || t("account.notProvided")
 
   return (
@@ -258,8 +275,14 @@ export function MyAccountModal({
                     description={t("account.sections.informationDescription")}
                   />
                   <div className="grid grid-cols-2 gap-x-3 gap-y-4 rounded-xl border bg-muted/20 px-4 py-3.5 sm:grid-cols-4 sm:gap-x-3 sm:gap-y-2 xl:grid-cols-[0.8fr_1.25fr_1fr_1.7fr]">
-                    <AccountField label={t("account.status.label")} value={status} />
-                    <AccountField label={t("account.username")} value={username} />
+                    <AccountField
+                      label={t("account.status.label")}
+                      value={status}
+                    />
+                    <AccountField
+                      label={t("account.username")}
+                      value={username}
+                    />
                     <AccountField label={t("account.role")} value={role} />
                     <AccountField
                       label={t("account.governingLgu")}
@@ -319,7 +342,10 @@ export function MyAccountModal({
                     description={t("account.sections.contactDescription")}
                   />
                   <div className="grid gap-4 rounded-xl border p-4 sm:grid-cols-2">
-                    <AccountField label={t("account.fields.email")} value={form.email} />
+                    <AccountField
+                      label={t("account.fields.email")}
+                      value={form.email}
+                    />
                     <AccountField
                       label={t("account.fields.phoneNumber")}
                       value={form.phone_number}
@@ -360,8 +386,14 @@ export function MyAccountModal({
                     description={t("account.sections.informationDescription")}
                   />
                   <div className="grid grid-cols-2 gap-x-3 gap-y-4 rounded-xl border bg-muted/20 px-4 py-3.5 sm:grid-cols-4 sm:gap-x-3 sm:gap-y-2 xl:grid-cols-[0.8fr_1.25fr_1fr_1.7fr]">
-                    <AccountField label={t("account.status.label")} value={status} />
-                    <AccountField label={t("account.username")} value={username} />
+                    <AccountField
+                      label={t("account.status.label")}
+                      value={status}
+                    />
+                    <AccountField
+                      label={t("account.username")}
+                      value={username}
+                    />
                     <AccountField label={t("account.role")} value={role} />
                     <AccountField
                       label={t("account.governingLgu")}
@@ -414,8 +446,7 @@ export function MyAccountModal({
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-medium">
-                          {selectedPhotoName ||
-                            t("account.photoChoose")}
+                          {selectedPhotoName || t("account.photoChoose")}
                         </p>
                         <p className="mt-1 text-xs text-muted-foreground">
                           {t("account.photoBrowseHint")}
@@ -459,7 +490,11 @@ export function MyAccountModal({
                             onChange={(event) =>
                               updateField(field.key, event.target.value)
                             }
-                            placeholder={field.placeholder ? t(field.placeholder) : undefined}
+                            placeholder={
+                              field.placeholder
+                                ? t(field.placeholder)
+                                : undefined
+                            }
                             maxLength={255}
                             className="min-h-11 bg-background"
                           />
@@ -483,7 +518,11 @@ export function MyAccountModal({
                               onChange={(event) =>
                                 updateField(field.key, event.target.value)
                               }
-                              placeholder={field.placeholder ? t(field.placeholder) : undefined}
+                              placeholder={
+                                field.placeholder
+                                  ? t(field.placeholder)
+                                  : undefined
+                              }
                               maxLength={255}
                               className="min-h-11 bg-background"
                             />
@@ -535,38 +574,43 @@ export function MyAccountModal({
                         </p>
                       </div>
                       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                        {([
-                          {
-                            key: "address_line",
-                            label: "account.addressFields.street",
-                            placeholder: "account.addressPlaceholders.street",
-                          },
-                          {
-                            key: "purok_sitio",
-                            label: "account.addressFields.purok",
-                            placeholder: "account.addressPlaceholders.purok",
-                          },
-                          {
-                            key: "barangay",
-                            label: "account.addressFields.barangay",
-                            placeholder: "account.addressPlaceholders.barangay",
-                          },
-                          {
-                            key: "municipality_city",
-                            label: "account.addressFields.city",
-                            placeholder: "account.addressPlaceholders.city",
-                          },
-                          {
-                            key: "province",
-                            label: "account.addressFields.province",
-                            placeholder: "account.addressPlaceholders.province",
-                          },
-                          {
-                            key: "zip_code",
-                            label: "account.addressFields.zipCode",
-                            placeholder: "account.addressPlaceholders.zipCode",
-                          },
-                        ] as const).map((field) => (
+                        {(
+                          [
+                            {
+                              key: "address_line",
+                              label: "account.addressFields.street",
+                              placeholder: "account.addressPlaceholders.street",
+                            },
+                            {
+                              key: "purok_sitio",
+                              label: "account.addressFields.purok",
+                              placeholder: "account.addressPlaceholders.purok",
+                            },
+                            {
+                              key: "barangay",
+                              label: "account.addressFields.barangay",
+                              placeholder:
+                                "account.addressPlaceholders.barangay",
+                            },
+                            {
+                              key: "municipality_city",
+                              label: "account.addressFields.city",
+                              placeholder: "account.addressPlaceholders.city",
+                            },
+                            {
+                              key: "province",
+                              label: "account.addressFields.province",
+                              placeholder:
+                                "account.addressPlaceholders.province",
+                            },
+                            {
+                              key: "zip_code",
+                              label: "account.addressFields.zipCode",
+                              placeholder:
+                                "account.addressPlaceholders.zipCode",
+                            },
+                          ] as const
+                        ).map((field) => (
                           <div key={field.key}>
                             <Label
                               htmlFor={field.key}
@@ -587,7 +631,11 @@ export function MyAccountModal({
                                   [field.key]: event.target.value,
                                 }))
                               }
-                              placeholder={field.placeholder ? t(field.placeholder) : undefined}
+                              placeholder={
+                                field.placeholder
+                                  ? t(field.placeholder)
+                                  : undefined
+                              }
                               maxLength={field.key === "zip_code" ? 10 : 255}
                               className="min-h-11 bg-background"
                             />
@@ -686,7 +734,9 @@ export function MyAccountModal({
                     className="gap-2"
                   >
                     <Save className="size-4" />
-                    {mutation.isPending ? t("account.actions.saving") : t("account.actions.saveChanges")}
+                    {mutation.isPending
+                      ? t("account.actions.saving")
+                      : t("account.actions.saveChanges")}
                   </Button>
                 </>
               )}

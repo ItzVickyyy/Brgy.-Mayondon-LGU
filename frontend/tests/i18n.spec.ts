@@ -1,6 +1,7 @@
 // Checks that the English and Filipino strings stay in step. No browser needed.
-import { expect, test } from "@playwright/test"
+
 import { readFileSync } from "node:fs"
+import { expect, test } from "@playwright/test"
 
 const en = JSON.parse(
   readFileSync(new URL("../src/i18n/en.json", import.meta.url), "utf8"),

@@ -19,8 +19,8 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
-import { Select } from "@/components/Common/Select"
 import { RowActions } from "@/components/Common/RowActions"
+import { Select } from "@/components/Common/Select"
 import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
@@ -31,7 +31,6 @@ import { isSystemAdministrator } from "@/lib/access"
 import { formatBusinessDate } from "@/lib/residents"
 
 type StatusFilter = "all" | BarangayIdListItem["status"]
-
 
 // statusStyles is keyed by the English status word, not by the shown label.
 const statusStyleKey: Record<BarangayIdListItem["status"], string> = {
@@ -120,7 +119,13 @@ export function BarangayIdsView() {
   }, [debouncedSearch, statusFilter])
 
   const idsQuery = useQuery({
-    queryKey: ["barangay-ids", debouncedSearch, statusFilter, pageIndex, pageSize],
+    queryKey: [
+      "barangay-ids",
+      debouncedSearch,
+      statusFilter,
+      pageIndex,
+      pageSize,
+    ],
     queryFn: async () =>
       (
         await BarangayIdsService.idsListBarangayIds({
@@ -207,7 +212,8 @@ export function BarangayIdsView() {
               <span className="sr-only">
                 {t("records.ids.statusFilterLabel")}
               </span>
-              <Select id="ids-status-filter"
+              <Select
+                id="ids-status-filter"
                 value={statusFilter}
                 onChange={(event) =>
                   setStatusFilter(event.target.value as StatusFilter)

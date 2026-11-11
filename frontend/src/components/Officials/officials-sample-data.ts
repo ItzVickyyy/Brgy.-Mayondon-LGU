@@ -29,13 +29,17 @@ export function getSignatories(): OfficialRecord[] {
   }
 
   return initialOfficials
-    .filter((official) =>
-      official.status === "Current" &&
-      ["Punong Barangay", "Barangay Kagawad", "OIC Kagawad"].includes(official.position),
+    .filter(
+      (official) =>
+        official.status === "Current" &&
+        ["Punong Barangay", "Barangay Kagawad", "OIC Kagawad"].includes(
+          official.position,
+        ),
     )
-    .sort((a, b) =>
-      (rank[a.position] ?? 99) - (rank[b.position] ?? 99) ||
-      a.name.localeCompare(b.name),
+    .sort(
+      (a, b) =>
+        (rank[a.position] ?? 99) - (rank[b.position] ?? 99) ||
+        a.name.localeCompare(b.name),
     )
 }
 

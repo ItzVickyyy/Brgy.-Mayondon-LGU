@@ -8,7 +8,7 @@
       // Apply the saved theme before the first paint so a reload does not flash
       // white first. Keep the key and the default ("dark") in step with
       // ThemeProvider in src/main.tsx.
-      (function () {
+      (() => {
         var theme = "dark";
         try {
           theme = localStorage.getItem("vite-ui-theme") || "dark";
@@ -17,7 +17,7 @@
               ? "dark"
               : "light";
           }
-        } catch (e) {}
+        } catch {}
         document.documentElement.classList.add(theme === "light" ? "light" : "dark");
       })();
     </script>

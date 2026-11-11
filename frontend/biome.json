@@ -10,7 +10,9 @@
       "!**/src/client/**/*",
       "!**/src/components/ui/**/*",
       "!**/playwright-report",
-      "!**/playwright.config.ts"
+      "!**/playwright.config.ts",
+      "!**/openapi.json",
+      "!**/test-results"
     ]
   },
   "linter": {
@@ -36,7 +38,16 @@
     }
   },
   "formatter": {
-    "indentStyle": "space"
+    "indentStyle": "space",
+    "includes": [
+      "**",
+      "!**/src/components/Issuances/IssuanceHistory.tsx",
+      "!**/src/components/Issuances/NewIssuance/NewIssuanceDialog.tsx",
+      "!**/src/components/Issuances/NewIssuance/PhotoCapture.tsx",
+      "!**/src/components/Issuances/NewIssuance/issuanceApi.ts",
+      "!**/src/components/Records/ResidentProfileDialog.tsx",
+      "!**/src/routes/_layout/issuances.tsx"
+    ]
   },
   "javascript": {
     "formatter": {

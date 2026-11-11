@@ -44,7 +44,8 @@ export function DocumentTypePicker({ value, onChange, disabled }: Props) {
                     className={cn(
                       "relative inline-flex h-11 cursor-pointer items-center rounded-md border bg-background px-3.5 text-sm transition-colors sm:h-9",
                       "hover:bg-muted has-[:focus-visible]:ring-[3px] has-[:focus-visible]:ring-ring/50",
-                      disabled && "cursor-not-allowed opacity-60 hover:bg-background",
+                      disabled &&
+                        "cursor-not-allowed opacity-60 hover:bg-background",
                       selected &&
                         "border-brand bg-primary font-medium text-primary-foreground hover:bg-primary",
                     )}

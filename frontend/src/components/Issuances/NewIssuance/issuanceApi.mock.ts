@@ -1,11 +1,26 @@
-import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import { clearancePurposeOptions } from "@/components/Issuances/config"
-import { documentConfig, type DocumentCode } from "./documentConfig"
-import { issuanceInputSchema, type IssuanceInput } from "./schemas"
-import { missingFields, snapshotAddress, type CreateIssuanceResult, type IssuanceCheck, type IssuanceLookups, type MockIssuance, type QuickResidentInput, type ResidentPatch, type StoredDocumentDetails, type StoredIssuancePayload } from "./issuanceTypes"
+import type { ResidentRecord } from "@/components/Records/records-sample-data"
+import { type DocumentCode, documentConfig } from "./documentConfig"
+import {
+  type CreateIssuanceResult,
+  type IssuanceCheck,
+  type IssuanceLookups,
+  type MockIssuance,
+  missingFields,
+  type QuickResidentInput,
+  type ResidentPatch,
+  type StoredDocumentDetails,
+  type StoredIssuancePayload,
+  snapshotAddress,
+} from "./issuanceTypes"
+import { type IssuanceInput, issuanceInputSchema } from "./schemas"
 
+export type {
+  MockIssuance,
+  QuickResidentInput,
+  ResidentPatch,
+} from "./issuanceTypes"
 export { getMissingResidentFields, getResidentAddress } from "./issuanceTypes"
-export type { MockIssuance, QuickResidentInput, ResidentPatch } from "./issuanceTypes"
 
 let residents: ResidentRecord[] = []
 let issuances: MockIssuance[] = []
@@ -13,11 +28,34 @@ let issuanceCounter = 0
 let streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
 let purposes = [...clearancePurposeOptions]
 let associations = ["Mayondon Tricycle Operators and Drivers Association"]
-let mockTricycles: { id: string; associationId: number; make: string; bodyType: string; motorNumber: string; color: string; plateNumber: string }[] = []
+let mockTricycles: {
+  id: string
+  associationId: number
+  make: string
+  bodyType: string
+  motorNumber: string
+  color: string
+  plateNumber: string
+}[] = []
 
-function toStoredPayload(input: IssuanceInput, tricycleId?: string): StoredIssuancePayload {
-  const { residentUpdates: _residentUpdates, purposeText, details, ...base } = input
-  const purposeId = input.purposeId ?? (purposeText?.trim() ? purposes.findIndex((purpose) => purpose.toLowerCase() === purposeText.trim().toLowerCase()) + 1 : undefined)
+function toStoredPayload(
+  input: IssuanceInput,
+  tricycleId?: string,
+): StoredIssuancePayload {
+  const {
+    residentUpdates: _residentUpdates,
+    purposeText,
+    details,
+    ...base
+  } = input
+  const purposeId =
+    input.purposeId ??
+    (purposeText?.trim()
+      ? purposes.findIndex(
+          (purpose) =>
+            purpose.toLowerCase() === purposeText.trim().toLowerCase(),
+        ) + 1
+      : undefined)
   let storedDetails: StoredDocumentDetails
   if (details.type === "FRANCHISE_CLEARANCE") {
     storedDetails = { type: "FRANCHISE_CLEARANCE", tricycleId }
@@ -27,7 +65,11 @@ function toStoredPayload(input: IssuanceInput, tricycleId?: string): StoredIssua
   } else {
     storedDetails = details
   }
-  return { ...base, purposeId: purposeId && purposeId > 0 ? purposeId : undefined, details: storedDetails }
+  return {
+    ...base,
+    purposeId: purposeId && purposeId > 0 ? purposeId : undefined,
+    details: storedDetails,
+  }
 }
 
 export const issuanceApi = {
@@ -45,7 +87,14 @@ export const issuanceApi = {
 
   async getResidentName(id: string) {
     const resident = residents.find((item) => item.id === id)
-    return resident ? { firstName: resident.firstName, middleName: resident.middleName, lastName: resident.lastName, suffix: resident.suffix } : undefined
+    return resident
+      ? {
+          firstName: resident.firstName,
+          middleName: resident.middleName,
+          lastName: resident.lastName,
+          suffix: resident.suffix,
+        }
+      : undefined
   },
 
   getPurposeLabel(id?: number) {
@@ -54,14 +103,44 @@ export const issuanceApi = {
 
   async searchResidents(query = ""): Promise<ResidentRecord[]> {
     const q = query.trim().toLowerCase()
-    return residents.filter((resident) => resident.status === "Active")
-      .filter((resident) => !q || [resident.name, resident.id, resident.idNumber, resident.address].some((value) => value.toLowerCase().includes(q)))
+    return residents
+      .filter((resident) => resident.status === "Active")
+      .filter(
+        (resident) =>
+          !q ||
+          [
+            resident.name,
+            resident.id,
+            resident.idNumber,
+            resident.address,
+          ].some((value) => value.toLowerCase().includes(q)),
+      )
   },
 
   async createResident(input: QuickResidentInput): Promise<ResidentRecord> {
-    const sequence = residents.reduce((max, resident) => Math.max(max, Number(resident.id.match(/\d+$/)?.[0] ?? 0)), 0) + 1
-    const name = [input.firstName.trim(), input.middleName?.trim(), input.lastName.trim(), input.suffix?.trim()].filter(Boolean).join(" ")
-    const address = [[input.houseNumber?.trim(), input.street.trim()].filter(Boolean).join(" "), `Purok ${input.purok}`, "Mayondon"].filter(Boolean).join(", ")
+    const sequence =
+      residents.reduce(
+        (max, resident) =>
+          Math.max(max, Number(resident.id.match(/\d+$/)?.[0] ?? 0)),
+        0,
+      ) + 1
+    const name = [
+      input.firstName.trim(),
+      input.middleName?.trim(),
+      input.lastName.trim(),
+      input.suffix?.trim(),
+    ]
+      .filter(Boolean)
+      .join(" ")
+    const address = [
+      [input.houseNumber?.trim(), input.street.trim()]
+        .filter(Boolean)
+        .join(" "),
+      `Purok ${input.purok}`,
+      "Mayondon",
+    ]
+      .filter(Boolean)
+      .join(", ")
     const resident: ResidentRecord = {
       id: `RES-${String(sequence).padStart(4, "0")}`,
       name,
@@ -88,42 +167,75 @@ export const issuanceApi = {
       status: "Active",
     }
     residents = [...residents, resident]
-    if (input.street.trim() && !streets.some((street) => street.toLowerCase() === input.street.trim().toLowerCase())) streets = [...streets, input.street.trim()]
+    if (
+      input.street.trim() &&
+      !streets.some(
+        (street) => street.toLowerCase() === input.street.trim().toLowerCase(),
+      )
+    )
+      streets = [...streets, input.street.trim()]
     return resident
   },
 
-  async updateResident(id: string, patch: ResidentPatch): Promise<ResidentRecord> {
+  async updateResident(
+    id: string,
+    patch: ResidentPatch,
+  ): Promise<ResidentRecord> {
     const current = residents.find((resident) => resident.id === id)
     if (!current) throw new Error("Resident record was not found.")
     const updated = { ...current, ...patch }
-    residents = residents.map((resident) => resident.id === id ? updated : resident)
+    residents = residents.map((resident) =>
+      resident.id === id ? updated : resident,
+    )
     return updated
   },
 
   async getLookups(): Promise<IssuanceLookups> {
-    const { indigencySectorOptions, idTypeOptions, civilStatusOptions } = await import("@/components/Issuances/config")
-    const { initialOfficials } = await import("@/components/Officials/officials-sample-data")
+    const { indigencySectorOptions, idTypeOptions, civilStatusOptions } =
+      await import("@/components/Issuances/config")
+    const { initialOfficials } = await import(
+      "@/components/Officials/officials-sample-data"
+    )
     return {
       documentTypes: Object.values(documentConfig),
       purposes: [...purposes],
       sectors: [...indigencySectorOptions],
       idTypes: [...new Set(["CTC", ...idTypeOptions])],
-      puroks: ["Purok 1", "Purok 2", "Purok 3", "Purok 4", "Purok 5", "Purok 6"],
+      puroks: [
+        "Purok 1",
+        "Purok 2",
+        "Purok 3",
+        "Purok 4",
+        "Purok 5",
+        "Purok 6",
+      ],
       streets: [...streets],
       associations: [...associations],
-      officials: initialOfficials.filter((official) => official.status === "Current").map(({ id, name, position }) => ({ id, name, position })),
+      officials: initialOfficials
+        .filter((official) => official.status === "Current")
+        .map(({ id, name, position }) => ({ id, name, position })),
       civilStatuses: [...civilStatusOptions],
     }
   },
 
-  async checkIssuance(residentId: string, documentType: DocumentCode): Promise<IssuanceCheck> {
+  async checkIssuance(
+    residentId: string,
+    documentType: DocumentCode,
+  ): Promise<IssuanceCheck> {
     const resident = residents.find((item) => item.id === residentId)
     if (!resident) throw new Error("Select a resident record first.")
     const existing = documentConfig[documentType].onePerResident
-      ? issuances.find((item) => item.residentId === residentId && item.documentType === documentType && item.status === "issued")
+      ? issuances.find(
+          (item) =>
+            item.residentId === residentId &&
+            item.documentType === documentType &&
+            item.status === "issued",
+        )
       : undefined
     return {
-      existingIssued: existing ? { referenceNo: existing.referenceNo, issueDate: existing.issueDate } : undefined,
+      existingIssued: existing
+        ? { referenceNo: existing.referenceNo, issueDate: existing.issueDate }
+        : undefined,
       missingResidentFields: missingFields(resident, documentType),
     }
   },
@@ -131,51 +243,120 @@ export const issuanceApi = {
   async getTricycles(plate = "", motor = "") {
     const normalizedPlate = plate.trim().toLowerCase()
     const normalizedMotor = motor.trim().toLowerCase()
-    const match = mockTricycles.find((tricycle) =>
-      (normalizedPlate && tricycle.plateNumber.toLowerCase() === normalizedPlate) ||
-      (normalizedMotor && tricycle.motorNumber.toLowerCase() === normalizedMotor),
+    const match = mockTricycles.find(
+      (tricycle) =>
+        (normalizedPlate &&
+          tricycle.plateNumber.toLowerCase() === normalizedPlate) ||
+        (normalizedMotor &&
+          tricycle.motorNumber.toLowerCase() === normalizedMotor),
     )
-    return { plate, motor, match: match ? { ...match, associationName: associations[match.associationId - 1] ?? "" } : undefined }
+    return {
+      plate,
+      motor,
+      match: match
+        ? {
+            ...match,
+            associationName: associations[match.associationId - 1] ?? "",
+          }
+        : undefined,
+    }
   },
 
   /** Looks up a tricycle by the id stored on a franchise issuance (needed to print it). */
   async getTricycle(id?: string) {
-    const match = id ? mockTricycles.find((tricycle) => tricycle.id === id) : undefined
-    return match ? { ...match, associationName: associations[match.associationId - 1] ?? "" } : undefined
+    const match = id
+      ? mockTricycles.find((tricycle) => tricycle.id === id)
+      : undefined
+    return match
+      ? {
+          ...match,
+          associationName: associations[match.associationId - 1] ?? "",
+        }
+      : undefined
   },
 
   async createIssuance(input: IssuanceInput): Promise<CreateIssuanceResult> {
-    const parsed = input.status === "draft" ? input : issuanceInputSchema.parse(input)
+    const parsed =
+      input.status === "draft" ? input : issuanceInputSchema.parse(input)
     // Only a finished issuance adds to the suggestion lists. Half-typed draft text must not.
-    if (parsed.status === "issued" && parsed.purposeText?.trim() && !purposes.some((purpose) => purpose.toLowerCase() === parsed.purposeText?.trim().toLowerCase())) purposes = [...purposes, parsed.purposeText.trim()]
-    const franchiseDetails = parsed.details.type === "FRANCHISE_CLEARANCE" ? parsed.details : undefined
-    if (parsed.status === "issued" && franchiseDetails?.associationName.trim() && !associations.some((association) => association.toLowerCase() === franchiseDetails.associationName.trim().toLowerCase())) associations = [...associations, franchiseDetails.associationName.trim()]
+    if (
+      parsed.status === "issued" &&
+      parsed.purposeText?.trim() &&
+      !purposes.some(
+        (purpose) =>
+          purpose.toLowerCase() === parsed.purposeText?.trim().toLowerCase(),
+      )
+    )
+      purposes = [...purposes, parsed.purposeText.trim()]
+    const franchiseDetails =
+      parsed.details.type === "FRANCHISE_CLEARANCE" ? parsed.details : undefined
+    if (
+      parsed.status === "issued" &&
+      franchiseDetails?.associationName.trim() &&
+      !associations.some(
+        (association) =>
+          association.toLowerCase() ===
+          franchiseDetails.associationName.trim().toLowerCase(),
+      )
+    )
+      associations = [...associations, franchiseDetails.associationName.trim()]
     const resident = residents.find((item) => item.id === parsed.residentId)
     if (!resident) throw new Error("Select a resident record first.")
-    const projectedResident = { ...resident, ...(parsed.residentUpdates as ResidentPatch | undefined) }
+    const projectedResident = {
+      ...resident,
+      ...(parsed.residentUpdates as ResidentPatch | undefined),
+    }
     if (parsed.status === "issued") {
-      const check = await this.checkIssuance(parsed.residentId, parsed.documentType)
+      const check = await this.checkIssuance(
+        parsed.residentId,
+        parsed.documentType,
+      )
       if (check.existingIssued) {
-        throw Object.assign(new Error(`An issued ${documentConfig[parsed.documentType].shortName} already exists: ${check.existingIssued.referenceNo} (${check.existingIssued.issueDate}).`), { status: 409, existing: check.existingIssued })
+        throw Object.assign(
+          new Error(
+            `An issued ${documentConfig[parsed.documentType].shortName} already exists: ${check.existingIssued.referenceNo} (${check.existingIssued.issueDate}).`,
+          ),
+          { status: 409, existing: check.existingIssued },
+        )
       }
       const missing = missingFields(projectedResident, parsed.documentType)
-      if (missing.length) throw new Error(`Complete the resident record fields needed for this document: ${missing.join(", ")}.`)
+      if (missing.length)
+        throw new Error(
+          `Complete the resident record fields needed for this document: ${missing.join(", ")}.`,
+        )
     }
     if (parsed.residentUpdates) {
-      await this.updateResident(resident.id, parsed.residentUpdates as ResidentPatch)
+      await this.updateResident(
+        resident.id,
+        parsed.residentUpdates as ResidentPatch,
+      )
     }
-    let updatedResident = residents.find((item) => item.id === parsed.residentId) ?? resident
-    if (parsed.status === "issued" && parsed.documentType === "BARANGAY_ID" && !updatedResident.idNumber) {
-      updatedResident = await this.updateResident(updatedResident.id, { idNumber: `18-128-3597-${this.getNextBarangayIdNumber()}` })
+    let updatedResident =
+      residents.find((item) => item.id === parsed.residentId) ?? resident
+    if (
+      parsed.status === "issued" &&
+      parsed.documentType === "BARANGAY_ID" &&
+      !updatedResident.idNumber
+    ) {
+      updatedResident = await this.updateResident(updatedResident.id, {
+        idNumber: `18-128-3597-${this.getNextBarangayIdNumber()}`,
+      })
     }
     let tricycleId: string | undefined
     if (franchiseDetails) {
-      let tricycle = mockTricycles.find((item) =>
-        item.plateNumber.toLowerCase() === franchiseDetails.plateNumber.trim().toLowerCase() ||
-        item.motorNumber.toLowerCase() === franchiseDetails.motorNumber.trim().toLowerCase(),
+      let tricycle = mockTricycles.find(
+        (item) =>
+          item.plateNumber.toLowerCase() ===
+            franchiseDetails.plateNumber.trim().toLowerCase() ||
+          item.motorNumber.toLowerCase() ===
+            franchiseDetails.motorNumber.trim().toLowerCase(),
       )
       if (!tricycle && parsed.status === "issued") {
-        const associationIndex = associations.findIndex((association) => association.toLowerCase() === franchiseDetails.associationName.trim().toLowerCase())
+        const associationIndex = associations.findIndex(
+          (association) =>
+            association.toLowerCase() ===
+            franchiseDetails.associationName.trim().toLowerCase(),
+        )
         tricycle = {
           id: `TRI-${String(mockTricycles.length + 1).padStart(4, "0")}`,
           associationId: associationIndex + 1,
@@ -199,20 +380,30 @@ export const issuanceApi = {
       issueDate: parsed.issueDate,
       status: parsed.status,
       payload: toStoredPayload(parsed, tricycleId),
-      ...(parsed.status === "issued" ? {
-        residentSnapshot: {
-          fullName: [updatedResident.firstName, updatedResident.middleName, updatedResident.lastName].filter(Boolean).join(" "),
-          addressLine: snapshotAddress(updatedResident),
-          birthDate: updatedResident.birthdate || undefined,
-          birthPlace: updatedResident.birthplace || undefined,
-          sex: updatedResident.sex,
-          civilStatus: updatedResident.civilStatus,
-          photoUrl: updatedResident.photoUrl || undefined,
-          residentSinceYear: updatedResident.residentSinceBirth ? undefined : updatedResident.residentSince || undefined,
-          residentSinceBirth: Boolean(updatedResident.residentSinceBirth),
-        },
-        issuedAt: new Date().toISOString(),
-      } : {}),
+      ...(parsed.status === "issued"
+        ? {
+            residentSnapshot: {
+              fullName: [
+                updatedResident.firstName,
+                updatedResident.middleName,
+                updatedResident.lastName,
+              ]
+                .filter(Boolean)
+                .join(" "),
+              addressLine: snapshotAddress(updatedResident),
+              birthDate: updatedResident.birthdate || undefined,
+              birthPlace: updatedResident.birthplace || undefined,
+              sex: updatedResident.sex,
+              civilStatus: updatedResident.civilStatus,
+              photoUrl: updatedResident.photoUrl || undefined,
+              residentSinceYear: updatedResident.residentSinceBirth
+                ? undefined
+                : updatedResident.residentSince || undefined,
+              residentSinceBirth: Boolean(updatedResident.residentSinceBirth),
+            },
+            issuedAt: new Date().toISOString(),
+          }
+        : {}),
     }
     issuances = [record, ...issuances]
     return record
@@ -223,9 +414,13 @@ export const issuanceApi = {
       ...record,
       payload: {
         ...payload,
-        details: payload.details.type === "MARGINALIZED_SECTOR"
-          ? { type: "MARGINALIZED_SECTOR" as const, healthCondition: "[restricted]" }
-          : payload.details,
+        details:
+          payload.details.type === "MARGINALIZED_SECTOR"
+            ? {
+                type: "MARGINALIZED_SECTOR" as const,
+                healthCondition: "[restricted]",
+              }
+            : payload.details,
       },
     }))
   },
@@ -236,37 +431,60 @@ export const issuanceApi = {
 
   async correctIssuance(id: string, reason: string, input: IssuanceInput) {
     const original = issuances.find((item) => item.id === id)
-    if (!original || original.status !== "issued") throw new Error("Only an issued record can be corrected.")
+    if (original?.status !== "issued")
+      throw new Error("Only an issued record can be corrected.")
     if (!reason.trim()) throw new Error("A correction reason is required.")
     const corrected = await this.createIssuance({ ...input, status: "issued" })
-    const updated = { ...corrected, correctsIssuanceId: original.id, correctionReason: reason.trim() }
-    issuances = issuances.map((item) => item.id === corrected.id ? updated : item)
+    const updated = {
+      ...corrected,
+      correctsIssuanceId: original.id,
+      correctionReason: reason.trim(),
+    }
+    issuances = issuances.map((item) =>
+      item.id === corrected.id ? updated : item,
+    )
     return updated
   },
 
   async voidIssuance(id: string, reason: string, role: "staff" | "admin") {
-    if (role !== "admin") throw Object.assign(new Error("Only the System Administrator can void an issuance."), { status: 403 })
+    if (role !== "admin")
+      throw Object.assign(
+        new Error("Only the System Administrator can void an issuance."),
+        { status: 403 },
+      )
     if (!reason.trim()) throw new Error("A void reason is required.")
     const record = issuances.find((item) => item.id === id)
-    if (!record || record.status !== "issued") throw new Error("Only an issued record can be voided.")
-    const updated = { ...record, status: "voided" as const, voidReason: reason.trim() }
-    issuances = issuances.map((item) => item.id === id ? updated : item)
+    if (record?.status !== "issued")
+      throw new Error("Only an issued record can be voided.")
+    const updated = {
+      ...record,
+      status: "voided" as const,
+      voidReason: reason.trim(),
+    }
+    issuances = issuances.map((item) => (item.id === id ? updated : item))
     return updated
   },
 
   async deleteDraft(id: string) {
     const existing = issuances.find((item) => item.id === id)
-    if (!existing || existing.status !== "draft") return false
+    if (existing?.status !== "draft") return false
     issuances = issuances.filter((item) => item.id !== id)
     return true
   },
 
   async updateDraft(id: string, input: IssuanceInput) {
     const existing = issuances.find((item) => item.id === id)
-    if (!existing || existing.status !== "draft") throw new Error("Only drafts can be edited.")
+    if (existing?.status !== "draft")
+      throw new Error("Only drafts can be edited.")
     const parsed = { ...input, status: "draft" as const }
-    const updated = { ...existing, payload: toStoredPayload(parsed), issueDate: parsed.issueDate, documentType: parsed.documentType, residentId: parsed.residentId }
-    issuances = issuances.map((item) => item.id === id ? updated : item)
+    const updated = {
+      ...existing,
+      payload: toStoredPayload(parsed),
+      issueDate: parsed.issueDate,
+      documentType: parsed.documentType,
+      residentId: parsed.residentId,
+    }
+    issuances = issuances.map((item) => (item.id === id ? updated : item))
     return updated
   },
 }
@@ -283,12 +501,24 @@ export const mockIssuanceStore = {
   },
   addStreet(name: string) {
     const normalized = name.trim()
-    if (normalized && !streets.some((street) => street.toLowerCase() === normalized.toLowerCase())) streets = [...streets, normalized]
+    if (
+      normalized &&
+      !streets.some(
+        (street) => street.toLowerCase() === normalized.toLowerCase(),
+      )
+    )
+      streets = [...streets, normalized]
     return [...streets]
   },
   addAssociation(name: string) {
     const normalized = name.trim()
-    if (normalized && !associations.some((association) => association.toLowerCase() === normalized.toLowerCase())) associations = [...associations, normalized]
+    if (
+      normalized &&
+      !associations.some(
+        (association) => association.toLowerCase() === normalized.toLowerCase(),
+      )
+    )
+      associations = [...associations, normalized]
     return [...associations]
   },
 }

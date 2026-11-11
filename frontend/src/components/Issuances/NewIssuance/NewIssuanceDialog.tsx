@@ -1,29 +1,29 @@
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
-import { ChevronDown, CircleAlert, CheckCircle2, Clock, Keyboard, Printer, Search } from "lucide-react"
-import { useNewIssuanceForm, defaultDetails, localIsoDate } from "./useNewIssuanceForm"
-import { ISSUE_DATE_MAX_DAYS_BACK } from "@/config/site"
-import { documentConfig, type DetailFieldConfig, type DocumentCode } from "./documentConfig"
-import { signatoryRules } from "./schemas"
 import { useQuery } from "@tanstack/react-query"
-import { getMissingResidentFields, getResidentAddress, issuanceApi, PHOTO_ON_FILE, type MockIssuance, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
-import type { ResidentRecord } from "@/components/Records/records-sample-data"
-import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
-import { formControlClass } from "@/components/Common/formStyles"
-import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
-import { Button } from "@/components/ui/button"
-import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
-import { CheckField, ChoiceRow, ComboField, SelectField } from "./FormControls"
-import { DateField } from "./DateField"
-import { popoverIsOpen } from "./popover"
-import { IssuanceSection } from "./IssuanceSection"
-import { DocumentTypePicker } from "./DocumentTypePicker"
-import { PhotoCapture } from "./PhotoCapture"
+import { CheckCircle2, ChevronDown, CircleAlert, Clock, Keyboard, Printer, Search } from "lucide-react"
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
+import { formControlClass } from "@/components/Common/formStyles"
+import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
+import type { ResidentRecord } from "@/components/Records/records-sample-data"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ISSUE_DATE_MAX_DAYS_BACK } from "@/config/site"
+import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { documentName, fieldHelp, fieldLabel, fieldOptionLabel, validationMessage } from "@/lib/issuanceLabels"
 import { getLocaleOr } from "@/lib/locale"
 import { civilStatusLabel, sexLabel } from "@/lib/residentLabels"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { cn } from "@/lib/utils"
+import { DateField } from "./DateField"
+import { DocumentTypePicker } from "./DocumentTypePicker"
+import { type DetailFieldConfig, type DocumentCode, documentConfig } from "./documentConfig"
+import { CheckField, ChoiceRow, ComboField, SelectField } from "./FormControls"
+import { IssuanceSection } from "./IssuanceSection"
+import { getMissingResidentFields, getResidentAddress, issuanceApi, type MockIssuance, PHOTO_ON_FILE, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
+import { PhotoCapture } from "./PhotoCapture"
+import { popoverIsOpen } from "./popover"
+import { signatoryRules } from "./schemas"
+import { defaultDetails, localIsoDate, useNewIssuanceForm } from "./useNewIssuanceForm"
 
 type Props = {
   open: boolean
@@ -37,6 +37,7 @@ type Props = {
   /** Called when a draft is deleted (discarded, or turned into an issued document). */
   onDraftRemoved?: (id: string) => void
   /** Called when the person asks to print an issued document. */
+  // biome-ignore lint/suspicious/noConfusingVoidType: the print callback may return nothing
   onPrint?: (record: MockIssuance) => Promise<string | void> | string | void
 }
 
@@ -240,6 +241,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   }
 
   // One-per-resident documents: tell staff right away, before the whole form is filled in.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: only the resident's id matters, not the whole object
   useEffect(() => {
     if (!selectedResident || !config.onePerResident || correctionDraftRef.current || successRecord) return
     let cancelled = false
@@ -461,7 +463,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     void (async () => {
       const record = await issuanceApi.getIssuance(initialDraftId)
       if (!active) return
-      if (!record || record.status !== "draft") {
+      if (record?.status !== "draft") {
         setFormError(t("issuances.new.errors.draftGone"))
         setSaving(false)
         return
