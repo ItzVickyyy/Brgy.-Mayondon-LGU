@@ -52,6 +52,13 @@ class Settings(BaseSettings):
     # which compose.yml mounts from the host's ./backups folder.
     BACKUP_DIR: str = "/backups"
     BACKUP_KEEP_COPIES: int = Field(default=14, gt=0)
+    # Backup encryption (step 15). When this PUBLIC key file exists every backup
+    # is encrypted with it; only the matching private key and its passphrase
+    # (kept off this computer) can open a backup. Make the pair with
+    # `python -m app.backup_cli make-key`. With BACKUP_REQUIRE_ENCRYPTION true a
+    # backup is refused, and so is a start-up safety copy, while the key is missing.
+    BACKUP_PUBLIC_KEY_FILE: str = "/backups/backup-public.pem"
+    BACKUP_REQUIRE_ENCRYPTION: bool = False
     PG_DUMP_BIN: str = "pg_dump"
     PG_RESTORE_BIN: str = "pg_restore"
 
@@ -151,7 +158,9 @@ class Settings(BaseSettings):
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )
         if bool(self.FIRST_STAFF) != bool(self.FIRST_STAFF_PASSWORD):
-            raise ValueError("Set both FIRST_STAFF and FIRST_STAFF_PASSWORD, or neither.")
+            raise ValueError(
+                "Set both FIRST_STAFF and FIRST_STAFF_PASSWORD, or neither."
+            )
         self._check_default_secret("FIRST_STAFF_PASSWORD", self.FIRST_STAFF_PASSWORD)
 
         return self

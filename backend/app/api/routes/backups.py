@@ -139,5 +139,12 @@ def request_restore(
     )
     return RestoreRequestPublic(
         file_name=run.file_name,
-        command=f".\\scripts\\restore-db.ps1 -BackupFile .\\backups\\{run.file_name}",
+        command=(
+            f".\\scripts\\restore-db.ps1 -BackupFile .\\backups\\{run.file_name}"
+            + (
+                " -KeyFile <path to your private key file>"
+                if run.file_name.endswith(".enc")
+                else ""
+            )
+        ),
     )

@@ -4,7 +4,12 @@ param(
 
     # Optional explicit confirmation for automated recovery tests.
     # Without this parameter, the script always prompts interactively.
-    [string]$Confirmation
+    [string]$Confirmation,
+
+    # Needed when the backup is encrypted (*.dump.enc): the private key file
+    # (backup-private.pem, normally the copy on the USB drive). The script asks
+    # for the passphrase; it is never put on a command line or written to disk.
+    [string]$KeyFile
 )
 
 # Restore a PostgreSQL custom-format backup into the selected local database.
@@ -45,9 +50,54 @@ if ($Confirmation -cne "RESTORE") {
     exit 0
 }
 
+# An encrypted backup is opened first, inside a short-lived backend container
+# that does not touch the database. The plain copy lives in the backups folder
+# only until it has been copied into the database container.
+$decryptedTemp = $null
+if ($resolvedBackup.EndsWith(".enc", [System.StringComparison]::OrdinalIgnoreCase)) {
+    if ([string]::IsNullOrWhiteSpace($KeyFile)) {
+        throw "This backup is encrypted. Run again with -KeyFile <path to backup-private.pem> (the copy kept away from this computer)."
+    }
+    $resolvedKey = (Resolve-Path -LiteralPath $KeyFile).ProviderPath
+    $secure = Read-Host "Backup passphrase (the sealed paper)" -AsSecureString
+    $bstr = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure)
+    try {
+        $env:BACKUP_PASSPHRASE = [Runtime.InteropServices.Marshal]::PtrToStringBSTR($bstr)
+    }
+    finally {
+        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+    }
+    $backupFolder = Join-Path (Get-Location) "backups"
+    New-Item -ItemType Directory -Path $backupFolder -Force | Out-Null
+    $tempName = "restore-temp-$([guid]::NewGuid().ToString('N')).dump"
+    $decryptedTemp = Join-Path $backupFolder $tempName
+    try {
+        docker compose -f compose.yml run --rm -T --no-deps -e MIGRATE_ON_START=false -e BACKUP_PASSPHRASE `
+            -v "$((Split-Path -Parent $resolvedBackup)):/in:ro" `
+            -v "$((Split-Path -Parent $resolvedKey)):/keys:ro" `
+            backend python -m app.backup_cli decrypt `
+            --in "/in/$(Split-Path -Leaf $resolvedBackup)" `
+            --key "/keys/$(Split-Path -Leaf $resolvedKey)" `
+            --out "/backups/$tempName"
+        $decryptExit = $LASTEXITCODE
+    }
+    finally {
+        Remove-Item Env:BACKUP_PASSPHRASE -ErrorAction SilentlyContinue
+    }
+    if ($decryptExit -ne 0 -or -not (Test-Path -LiteralPath $decryptedTemp)) {
+        Remove-Item -LiteralPath $decryptedTemp -Force -ErrorAction SilentlyContinue
+        throw "The backup could not be decrypted (wrong passphrase or key file, or the file is damaged). Nothing was changed."
+    }
+    $resolvedBackup = $decryptedTemp
+}
+
 $containerPath = "/tmp/mayondon-restore-$([guid]::NewGuid().ToString('N')).dump"
 docker cp "$resolvedBackup" "$($containerId):$containerPath"
-if ($LASTEXITCODE -ne 0) {
+$copyExit = $LASTEXITCODE
+if ($decryptedTemp) {
+    Remove-Item -LiteralPath $decryptedTemp -Force -ErrorAction SilentlyContinue
+}
+if ($copyExit -ne 0) {
     throw "Copying the backup into the database container failed."
 }
 

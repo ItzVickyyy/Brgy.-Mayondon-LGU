@@ -51,7 +51,8 @@ if (-not [string]::IsNullOrWhiteSpace($CopyTo)) {
     try {
         New-Item -ItemType Directory -Path $CopyTo -Force | Out-Null
         # File names sort by date, so the last name is the newest backup.
-        $newest = Get-ChildItem -LiteralPath $backupDirectory -Filter "mayondon-db-*.dump" -File |
+        $newest = Get-ChildItem -LiteralPath $backupDirectory -Filter "mayondon-db-*" -File |
+            Where-Object { $_.Name -match '\.dump(\.enc)?$' } |
             Sort-Object Name | Select-Object -Last 1
         if (-not $newest) { throw "No backup file was found in $backupDirectory." }
         $target = Join-Path $CopyTo $newest.Name
@@ -60,7 +61,8 @@ if (-not [string]::IsNullOrWhiteSpace($CopyTo)) {
             throw "The copy in $CopyTo has a different size than the original."
         }
         # Keep only the newest files that follow the backup name pattern.
-        Get-ChildItem -LiteralPath $CopyTo -Filter "mayondon-db-*.dump" -File |
+        Get-ChildItem -LiteralPath $CopyTo -Filter "mayondon-db-*" -File |
+            Where-Object { $_.Name -match '\.dump(\.enc)?$' } |
             Sort-Object Name -Descending | Select-Object -Skip $KeepCopies |
             Remove-Item -Force
         $copiedTo = $target

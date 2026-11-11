@@ -1,8 +1,17 @@
 # Back up the local PostgreSQL database to a file outside Docker.
 # Run from the repository root in PowerShell with Docker Compose running.
 # MAYONDON_DATABASE_NAME is an optional override used by the isolated smoke test.
+# This script writes an UNENCRYPTED file. Once backup encryption is set up
+# (backups\backup-public.pem exists) it refuses to run unless -AllowPlain is given;
+# use scripts\scheduled-backup.ps1 instead, which encrypts.
+
+param([switch]$AllowPlain)
 
 $ErrorActionPreference = "Stop"
+
+if ((Test-Path -LiteralPath (Join-Path (Get-Location) "backups\backup-public.pem")) -and -not $AllowPlain) {
+    throw "Backup encryption is set up, and this script would write an unencrypted file. Run .\scripts\scheduled-backup.ps1 instead (or add -AllowPlain if you really want a plain file)."
+}
 
 $databaseName = if ([string]::IsNullOrWhiteSpace($env:MAYONDON_DATABASE_NAME)) {
     "app"

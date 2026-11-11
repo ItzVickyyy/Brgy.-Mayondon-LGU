@@ -46,7 +46,15 @@ from alembic.script.revision import RevisionError
 from alembic.util.exc import CommandError
 from sqlalchemy import inspect, text
 
-from app.core.backup import BackupError, backup_dir, list_archive, run_dump
+from app.core.backup import (
+    BackupError,
+    BackupUnavailable,
+    backup_dir,
+    encrypt_copy,
+    list_archive,
+    public_key_or_none,
+    run_dump,
+)
 from app.core.dates import MANILA_TZ
 from app.core.db import engine
 
@@ -130,11 +138,21 @@ def safety_copy(from_revision: str) -> Path:
     )
     partial = final.with_name(final.name + ".partial")
     try:
+        # Raises BackupUnavailable when encryption is required but not set up;
+        # main() turns any failure here into "STOP, nothing was changed".
+        public_key = public_key_or_none()
         run_dump(partial)
         list_archive(partial)
-        os.replace(partial, final)
+        if public_key is None:
+            os.replace(partial, final)
+        else:
+            final = final.with_name(final.name + ".enc")
+            encrypted = final.with_name(final.name + ".partial")
+            encrypt_copy(partial, encrypted, public_key)
+            os.replace(encrypted, final)
     finally:
         partial.unlink(missing_ok=True)
+        final.with_name(final.name + ".partial").unlink(missing_ok=True)
     return final
 
 
@@ -189,7 +207,7 @@ def main() -> int:
             )
             try:
                 saved = safety_copy(current[0])
-            except (BackupError, OSError) as exc:
+            except (BackupError, BackupUnavailable, OSError) as exc:
                 say(
                     f"STOP: could not make the safety copy ({exc}). The database was not "
                     "changed and the program will not start. Fix the problem, or set "

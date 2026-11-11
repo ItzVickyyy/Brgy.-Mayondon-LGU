@@ -21,9 +21,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from urllib.parse import unquote
 
+from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PublicKey
 from sqlalchemy import text
 from sqlmodel import Session, col, select
 
+from app.core import backup_crypto
 from app.core.audit import record_audit_event
 from app.core.config import settings
 from app.core.dates import MANILA_TZ
@@ -35,7 +37,7 @@ logger = logging.getLogger("app.backup")
 
 # The same name pattern backup-db.ps1 uses, so retention treats both alike and
 # never touches a file somebody else put in the folder.
-BACKUP_FILE_PATTERN = re.compile(r"^mayondon-db-\d{8}-\d{6}-\d{3}\.dump$")
+BACKUP_FILE_PATTERN = re.compile(r"^mayondon-db-\d{8}-\d{6}-\d{3}\.dump(\.enc)?$")
 _LOCK_KEY = 0x4D415942  # "MAYB": one backup at a time, across both workers
 _TOOL_TIMEOUT_SECONDS = 600
 _ERROR_LIMIT = 500
@@ -142,6 +144,38 @@ def list_archive(path: Path) -> None:
         raise BackupError(_clean(f"The file is not a readable backup: {result.stderr}"))
 
 
+def public_key_or_none() -> X25519PublicKey | None:
+    """The key backups are locked with, or None when encryption is not set up.
+
+    Raises ``BackupUnavailable`` when encryption is required but the key is
+    missing, and ``BackupError`` when the key file exists but cannot be used.
+    """
+    key_file = Path(settings.BACKUP_PUBLIC_KEY_FILE)
+    if not key_file.is_file():
+        if settings.BACKUP_REQUIRE_ENCRYPTION:
+            raise BackupUnavailable(
+                "Backup encryption is required but no key is set up. Run "
+                "'docker compose -f compose.yml exec backend python -m "
+                "app.backup_cli make-key' once (docs/11 section G)."
+            )
+        return None
+    try:
+        return backup_crypto.load_public_key(key_file)
+    except backup_crypto.CryptoError as exc:
+        raise BackupError(str(exc)) from exc
+
+
+def encrypt_copy(plain: Path, encrypted: Path, key: X25519PublicKey) -> None:
+    """Write the encrypted copy and delete the plain file (even when it fails)."""
+    try:
+        backup_crypto.encrypt_file(plain, encrypted, key)
+    except (backup_crypto.CryptoError, OSError) as exc:
+        encrypted.unlink(missing_ok=True)
+        raise BackupError(_clean(f"Encrypting the backup failed: {exc}")) from exc
+    finally:
+        plain.unlink(missing_ok=True)
+
+
 def file_sha256(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as handle:
@@ -184,6 +218,10 @@ def create_backup(
     """
     if not tool_available():
         raise BackupUnavailable("Backups are not set up on this computer.")
+    try:
+        public_key = public_key_or_none()
+    except BackupError as exc:
+        raise BackupUnavailable(str(exc)) from exc
     lock = _acquire_lock()
     if lock is None:
         raise BackupBusy("A backup is already running.")
@@ -199,8 +237,11 @@ def create_backup(
             session.add(stale)
 
         file_name = _new_file_name()
+        if public_key is not None:
+            file_name += ".enc"
         final_path = backup_dir() / file_name
         partial_path = backup_dir() / f"{file_name}.part"
+        plain_partial = backup_dir() / f"{file_name}.plain.part"
         run = BackupRun(
             kind=kind,
             status="running",
@@ -213,8 +254,17 @@ def create_backup(
         session.refresh(run)
 
         try:
-            run_dump(partial_path)
-            list_archive(partial_path)
+            if public_key is None:
+                run_dump(partial_path)
+                list_archive(partial_path)
+            else:
+                # Read the plain dump back with pg_restore first, then lock it;
+                # the plain file is deleted as soon as the encrypted one exists.
+                run_dump(plain_partial)
+                list_archive(plain_partial)
+                if plain_partial.stat().st_size <= 0:
+                    raise BackupError("The backup file is empty.")
+                encrypt_copy(plain_partial, partial_path, public_key)
             size = partial_path.stat().st_size
             if size <= 0:
                 raise BackupError("The backup file is empty.")
@@ -222,6 +272,7 @@ def create_backup(
             partial_path.replace(final_path)
         except Exception as exc:
             partial_path.unlink(missing_ok=True)
+            plain_partial.unlink(missing_ok=True)
             message = str(exc) if isinstance(exc, BackupError) else _clean(repr(exc))
             run.status = "failed"
             run.error = message
@@ -277,7 +328,15 @@ def verify_backup(session: Session, run: BackupRun, *, actor: User | None) -> Ba
             path = backup_path(run.file_name)
             if not path.is_file():
                 raise BackupError("The backup file is no longer in the folder.")
-            list_archive(path)
+            if path.name.endswith(".enc"):
+                # Without the private key only the framing can be checked; the
+                # full proof is `backup_cli decrypt --check` (docs/11 section G).
+                try:
+                    backup_crypto.check_structure(path)
+                except backup_crypto.CryptoError as exc:
+                    raise BackupError(str(exc)) from exc
+            else:
+                list_archive(path)
             if run.sha256 and file_sha256(path) != run.sha256:
                 raise BackupError(
                     "The file has changed since it was created (checksum mismatch)."
