@@ -69,6 +69,10 @@ const detailKeyLabels = {
   automatic: "activity.detailKeys.automatic",
   mode: "activity.detailKeys.mode",
   copy: "activity.detailKeys.copy",
+  status: "activity.detailKeys.status",
+  count: "activity.detailKeys.count",
+  report: "activity.detailKeys.report",
+  period: "activity.detailKeys.period",
 } as const satisfies Record<string, ParseKeys>
 
 const moduleKeys = {
@@ -78,6 +82,7 @@ const moduleKeys = {
   officials: "activity.modules.officials",
   lookups: "activity.modules.lookups",
   auth: "activity.modules.auth",
+  reports: "activity.modules.reports",
 } as const satisfies Record<string, ParseKeys>
 
 type ActivityColumn =

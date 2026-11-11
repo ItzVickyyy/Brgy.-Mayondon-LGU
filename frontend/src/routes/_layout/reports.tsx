@@ -54,6 +54,7 @@ type NoticeKey =
   | "notLoaded"
   | "csvStarted"
   | "previewBeforePrint"
+  | "notRecorded"
 
 const periodKeys = {
   week: "admin.reports.periods.week",
@@ -403,7 +404,22 @@ function Reports() {
     return null
   }
 
-  function exportReport() {
+  // The Activity Log must know about every report that leaves the screen, so
+  // an export or print that cannot be recorded does not start.
+  async function recordExport(mode: "csv" | "print"): Promise<boolean> {
+    if (!applied) return false
+    try {
+      await ReportsService.recordExport({
+        body: { report: applied.report, period: applied.period, mode },
+      })
+      return true
+    } catch {
+      setNotice("notRecorded")
+      return false
+    }
+  }
+
+  async function exportReport() {
     if (!applied) {
       setNotice("previewBeforeExport")
       return
@@ -413,6 +429,7 @@ function Reports() {
       setNotice("notLoaded")
       return
     }
+    if (!(await recordExport("csv"))) return
     const csv = csvRows
       .map((row) =>
         row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","),
@@ -428,7 +445,7 @@ function Reports() {
     setNotice("csvStarted")
   }
 
-  function printReport() {
+  async function printReport() {
     if (!applied) {
       setNotice("previewBeforePrint")
       return
@@ -437,6 +454,7 @@ function Reports() {
       setNotice("notLoaded")
       return
     }
+    if (!(await recordExport("print"))) return
     setNotice("")
     setPrintAll(true)
   }

@@ -9,11 +9,12 @@ values). Which reports and periods the client wants is still open (D-21).
 from datetime import datetime, time, timedelta
 from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, Response
 from sqlalchemy import func as sa_func
 from sqlmodel import Session, col, select
 
 from app.api.deps import SessionDep, require_permission
+from app.core.audit import record_audit_event
 from app.core.dates import MANILA_TZ, today_manila
 from app.core.periods import DateRange, Period, resolve_period
 from app.core.permissions import Permission
@@ -42,6 +43,7 @@ from app.models_reports import (
     IssuanceTypeRow,
     PurposeRow,
     RecordsOverview,
+    ReportExportedRequest,
     ReportSummary,
     SectorCount,
 )
@@ -306,3 +308,25 @@ def records_overview(session: SessionDep, _user: ReportsUser) -> Any:
             total=total,
         ),
     )
+
+
+@router.post("/exported", status_code=204)
+def record_export(
+    body: ReportExportedRequest, session: SessionDep, user: ReportsUser
+) -> Response:
+    """Write a ``report.export`` audit row. The browser calls it before it saves
+    the CSV or opens the print dialog, so a report that leaves the screen is
+    on record. The row names the report and period, never any values."""
+    record_audit_event(
+        session,
+        action="report.export",
+        actor=user,
+        module="reports",
+        details={
+            "report": body.report,
+            "period": body.period,
+            "mode": "CSV file" if body.mode == "csv" else "printed",
+        },
+        commit=True,
+    )
+    return Response(status_code=204)

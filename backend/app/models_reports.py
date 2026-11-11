@@ -9,6 +9,16 @@ from typing import Literal
 from sqlmodel import SQLModel
 
 
+class ReportExportedRequest(SQLModel):
+    """What the browser reports just before it saves or prints a report."""
+
+    report: Literal["issuances", "purpose", "expiry", "imports", "accounts"]
+    period: Literal[
+        "today", "week", "month", "quarter", "3months", "6months", "year", "overall"
+    ]
+    mode: Literal["csv", "print"]
+
+
 class PeriodInfo(SQLModel):
     period: str
     start: date | None  # None for "overall"

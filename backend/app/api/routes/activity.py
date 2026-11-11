@@ -15,6 +15,7 @@ from sqlalchemy import func as sa_func
 from sqlmodel import col, select
 
 from app.api.deps import SessionDep, require_permission
+from app.core.audit import READ_ACTIONS
 from app.core.dates import MANILA_TZ
 from app.core.permissions import Permission, has_permission
 from app.models import User
@@ -63,6 +64,10 @@ def list_activity(
             description="Leave out one module, e.g. auth to hide sign-ins",
         ),
     ] = None,
+    hide_reads: Annotated[
+        bool,
+        Query(description="Leave out rows that only record somebody reading data"),
+    ] = False,
     action: Annotated[str | None, Query(max_length=80)] = None,
     outcome: Literal["success", "failed", "denied"] | None = None,
     actor_user_id: uuid.UUID | None = None,
@@ -93,6 +98,8 @@ def list_activity(
         stmt = stmt.where(AuditLog.module == module)
     if exclude_module:
         stmt = stmt.where(col(AuditLog.module).is_distinct_from(exclude_module))
+    if hide_reads:
+        stmt = stmt.where(col(AuditLog.action).not_in(READ_ACTIONS))
     if action:
         stmt = stmt.where(AuditLog.action == action)
     if outcome:

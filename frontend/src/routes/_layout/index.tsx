@@ -208,7 +208,7 @@ function Dashboard() {
     queryFn: async () =>
       (
         await ActivityService.listActivity({
-          query: { limit: 5, exclude_module: "auth" },
+          query: { limit: 5, exclude_module: "auth", hide_reads: true },
         })
       ).data,
   })

@@ -225,7 +225,11 @@
       "replaced_by": "pinalitan ng",
       "automatic": "awtomatiko",
       "mode": "uri",
-      "copy": "kopya"
+      "copy": "kopya",
+      "status": "katayuan",
+      "count": "bilang",
+      "report": "ulat",
+      "period": "panahon"
     },
     "modules": {
       "records": "Mga Talaan ng Residente",
@@ -233,7 +237,8 @@
       "users": "Mga Account ng User",
       "officials": "Mga Opisyal",
       "lookups": "Mga Kalye at Asosasyon",
-      "auth": "Mga Sign-in"
+      "auth": "Mga Sign-in",
+      "reports": "Mga Ulat"
     },
     "outcomes": {
       "success": "Matagumpay",
@@ -247,7 +252,9 @@
         "archive": "Na-archive ang residente",
         "restore": "Naibalik ang residente",
         "photo_set": "Naidagdag ang larawan ng residente",
-        "photo_remove": "Naalis ang larawan ng residente"
+        "photo_remove": "Naalis ang larawan ng residente",
+        "view": "Tiningnan ang talaan ng residente",
+        "list": "Tiningnan ang listahan ng mga residente"
       },
       "issuance": {
         "issue": "Naisyu ang dokumento",
@@ -255,6 +262,12 @@
         "void": "Na-void ang dokumento",
         "print": "Na-print ang dokumento",
         "view_sensitive": "Tiningnan ang pinaghihigpitang detalye"
+      },
+      "barangay_id": {
+        "list": "Tiningnan ang listahan ng Barangay ID"
+      },
+      "report": {
+        "export": "Na-export o na-print ang ulat"
       },
       "official": {
         "create": "Naidagdag ang opisyal",
@@ -1693,7 +1706,8 @@
         "previewBeforeExport": "I-preview muna ang ulat bago mag-export.",
         "notLoaded": "Hindi pa tapos mag-load ang ulat, kaya hindi pa ito maie-export.",
         "csvStarted": "Nagsimula na ang pag-export ng CSV para sa ipinapakitang ulat.",
-        "previewBeforePrint": "I-preview muna ang ulat bago mag-print."
+        "previewBeforePrint": "I-preview muna ang ulat bago mag-print.",
+        "notRecorded": "Hindi nai-record sa Activity Log ang pag-export, kaya hindi ito sinimulan. Subukang muli."
       },
       "noPurpose": "(Walang nakasaad na layunin)"
     },

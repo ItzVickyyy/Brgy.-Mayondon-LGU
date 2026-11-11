@@ -15,7 +15,7 @@ from sqlalchemy import func as sa_func
 from sqlmodel import Session, col, delete, select
 
 from app.api.deps import SessionDep, require_permission
-from app.core.audit import record_audit_event
+from app.core.audit import record_audit_event, record_read_event
 from app.core.dates import age_on, today_manila
 from app.core.permissions import Permission
 from app.core.search import search_words, word_matches
@@ -41,6 +41,8 @@ router = APIRouter(prefix="/residents", tags=["residents"])
 
 EditUser = Annotated[User, Depends(require_permission(Permission.RECORDS_EDIT))]
 ArchiveUser = Annotated[User, Depends(require_permission(Permission.RECORDS_ARCHIVE))]
+
+MODULE = "records"
 
 PNG_MAGIC = b"\x89PNG\r\n\x1a\n"
 
@@ -197,7 +199,7 @@ def _set_sectors(
 @router.get("/", response_model=ResidentsPublic)
 def list_residents(
     session: SessionDep,
-    _user: EditUser,
+    user: EditUser,
     q: Annotated[str | None, Query(max_length=100, description="Name search")] = None,
     status: Literal["active", "archived", "all"] = "active",
     sector_id: int | None = None,
@@ -208,6 +210,9 @@ def list_residents(
 
     Case, accents, commas and spaces are ignored (``Pena``, ``Delacruz`` and
     ``Dela Cruz, Juan`` all work), see ``app.core.search``.
+
+    Browsing the list without a name search is a bulk read of personal data and
+    adds a ``resident.list`` audit row (once per 10 minutes per person).
     """
     stmt = select(Resident)
     if status != "all":
@@ -245,6 +250,15 @@ def list_residents(
     sectors = _sector_ids(session, ids)
     photos = _photo_ids(session, ids)
     id_statuses = _id_statuses(session, ids)
+    if not search_words(q) and rows:
+        record_read_event(
+            session,
+            action="resident.list",
+            actor=user,
+            module=MODULE,
+            record_type="resident",
+            details={"status": status, "count": count},
+        )
     return ResidentsPublic(
         data=[
             _to_public(r, sectors[r.id], r.id in photos, id_statuses[r.id])
@@ -289,8 +303,19 @@ def sector_summary(session: SessionDep, _user: EditUser) -> Any:
 
 
 @router.get("/{resident_id}", response_model=ResidentPublic)
-def read_resident(resident_id: uuid.UUID, session: SessionDep, _user: EditUser) -> Any:
-    return _public(session, _get_or_404(session, resident_id))
+def read_resident(resident_id: uuid.UUID, session: SessionDep, user: EditUser) -> Any:
+    """One resident's full profile. Adds a ``resident.view`` audit row (once per
+    10 minutes per person and resident); the row holds no personal values."""
+    resident = _get_or_404(session, resident_id)
+    record_read_event(
+        session,
+        action="resident.view",
+        actor=user,
+        module=MODULE,
+        record_type="resident",
+        record_id=resident.id,
+    )
+    return _public(session, resident)
 
 
 @router.post("/", response_model=ResidentPublic, status_code=201)

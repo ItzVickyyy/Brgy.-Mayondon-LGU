@@ -225,7 +225,11 @@
       "replaced_by": "replaced by",
       "automatic": "automatic",
       "mode": "mode",
-      "copy": "copy"
+      "copy": "copy",
+      "status": "status",
+      "count": "count",
+      "report": "report",
+      "period": "period"
     },
     "modules": {
       "records": "Resident Records",
@@ -233,7 +237,8 @@
       "users": "User Accounts",
       "officials": "Officials",
       "lookups": "Streets and Associations",
-      "auth": "Sign-ins"
+      "auth": "Sign-ins",
+      "reports": "Reports"
     },
     "outcomes": {
       "success": "Success",
@@ -247,7 +252,9 @@
         "archive": "Resident archived",
         "restore": "Resident restored",
         "photo_set": "Resident photo added",
-        "photo_remove": "Resident photo removed"
+        "photo_remove": "Resident photo removed",
+        "view": "Resident record viewed",
+        "list": "Resident list viewed"
       },
       "issuance": {
         "issue": "Document issued",
@@ -255,6 +262,12 @@
         "void": "Document voided",
         "print": "Document printed",
         "view_sensitive": "Restricted detail viewed"
+      },
+      "barangay_id": {
+        "list": "Barangay ID list viewed"
+      },
+      "report": {
+        "export": "Report exported or printed"
       },
       "official": {
         "create": "Official added",
@@ -1693,7 +1706,8 @@
         "previewBeforeExport": "Preview a report before exporting.",
         "notLoaded": "The report has not finished loading, so it cannot be exported yet.",
         "csvStarted": "CSV export started for the displayed report.",
-        "previewBeforePrint": "Preview a report before printing."
+        "previewBeforePrint": "Preview a report before printing.",
+        "notRecorded": "The export could not be recorded in the Activity Log, so it was not started. Try again."
       },
       "noPurpose": "(No purpose given)"
     },

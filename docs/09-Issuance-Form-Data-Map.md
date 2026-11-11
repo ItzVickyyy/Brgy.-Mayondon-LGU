@@ -74,7 +74,7 @@ No `full_name` column. One backend function builds the display and printed name,
 | `occurred_at` | timestamptz, default now |
 | `actor_user_id` | FK `user`, nullable, `ON DELETE SET NULL` |
 | `actor_email` | text, copied at write time |
-| `action` | text, for example `issuance.issue`, `issuance.void`, `issuance.print` (written by `POST /issuances/{id}/printed` just before the browser print dialog opens; `details.copy` counts prints of that document, 2 or more are reprints; the print does not start if the row cannot be written), `resident.archive`, `user.role_change` |
+| `action` | text, for example `issuance.issue`, `issuance.void`, `issuance.print` (written by `POST /issuances/{id}/printed` just before the browser print dialog opens; `details.copy` counts prints of that document, 2 or more are reprints; the print does not start if the row cannot be written), `resident.archive`, `user.role_change`, and the READ rows `resident.view`, `resident.list`, `barangay_id.list` (see `docs/11` section G item 6) and `report.export` |
 | `module`, `record_type`, `record_id` | text. `record_id` is text so any table can be referenced |
 | `outcome` | text, `CHECK` in (`success`, `failed`, `denied`) |
 | `reason` | text, required for void, correction and archive |

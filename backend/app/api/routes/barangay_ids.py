@@ -13,6 +13,7 @@ from sqlalchemy import func as sa_func
 from sqlmodel import col, select
 
 from app.api.deps import SessionDep, require_permission
+from app.core.audit import record_read_event
 from app.core.dates import today_manila
 from app.core.permissions import Permission
 from app.core.search import search_words, word_matches
@@ -34,7 +35,7 @@ RecordsUser = Annotated[User, Depends(require_permission(Permission.RECORDS_EDIT
 @router.get("/", response_model=BarangayIdsPublic)
 def list_barangay_ids(
     session: SessionDep,
-    _user: RecordsUser,
+    user: RecordsUser,
     q: Annotated[
         str | None,
         Query(max_length=100, description="Name words, ID number or reference"),
@@ -44,7 +45,11 @@ def list_barangay_ids(
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> Any:
     """Latest issued card per resident. A voided card is not listed; the card
-    issued before it, if any, shows instead."""
+    issued before it, if any, shows instead.
+
+    Browsing the list without a name or number search is a bulk read of personal
+    data and adds a ``barangay_id.list`` audit row (once per 10 minutes).
+    """
     today = today_manila()
     soon = today + timedelta(days=ID_EXPIRING_SOON_DAYS)
     latest = (
@@ -88,6 +93,16 @@ def list_barangay_ids(
         .offset(skip)
         .limit(limit)
     ).all()
+
+    if not search_words(q) and rows:
+        record_read_event(
+            session,
+            action="barangay_id.list",
+            actor=user,
+            module="records",
+            record_type="barangay_id",
+            details={"status": status, "count": count},
+        )
 
     def state(valid_until: Any) -> Literal["valid", "expiring_soon", "expired"]:
         if valid_until < today:

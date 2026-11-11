@@ -1746,6 +1746,26 @@ export type RecordsOverview = {
 };
 
 /**
+ * ReportExportedRequest
+ *
+ * What the browser reports just before it saves or prints a report.
+ */
+export type ReportExportedRequest = {
+    /**
+     * Report
+     */
+    report: 'issuances' | 'purpose' | 'expiry' | 'imports' | 'accounts';
+    /**
+     * Period
+     */
+    period: 'today' | 'week' | 'month' | 'quarter' | '3months' | '6months' | 'year' | 'overall';
+    /**
+     * Mode
+     */
+    mode: 'csv' | 'print';
+};
+
+/**
  * ReportSummary
  */
 export type ReportSummary = {
@@ -4042,6 +4062,12 @@ export type activityListActivityData = {
          */
         exclude_module?: string | null;
         /**
+         * Hide Reads
+         *
+         * Leave out rows that only record somebody reading data
+         */
+        hide_reads?: boolean;
+        /**
          * Action
          */
         action?: string | null;
@@ -4336,6 +4362,31 @@ export type reportsRecordsOverviewResponses = {
 };
 
 export type reportsRecordsOverviewResponse = reportsRecordsOverviewResponses[keyof reportsRecordsOverviewResponses];
+
+export type reportsRecordExportData = {
+    body: ReportExportedRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/reports/exported';
+};
+
+export type reportsRecordExportErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsRecordExportError = reportsRecordExportErrors[keyof reportsRecordExportErrors];
+
+export type reportsRecordExportResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type reportsRecordExportResponse = reportsRecordExportResponses[keyof reportsRecordExportResponses];
 
 export type backupsListBackupsData = {
     body?: never;
