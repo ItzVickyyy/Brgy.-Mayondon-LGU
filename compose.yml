@@ -46,6 +46,8 @@ services:
       USERS_OPEN_REGISTRATION: ${USERS_OPEN_REGISTRATION:-false}
       BACKUP_DIR: /backups
       BACKUP_KEEP_COPIES: ${BACKUP_KEEP_COPIES:-14}
+      MIGRATE_ON_START: ${MIGRATE_ON_START:-true}
+      PRE_MIGRATION_BACKUP: ${PRE_MIGRATION_BACKUP:-true}
 
     volumes:
       # Backups made by the app appear in the repository's backups folder on
@@ -57,6 +59,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+      # Room for the start-up database update (app/migrate_on_start.py).
+      start_period: 90s
 
     build:
       context: .

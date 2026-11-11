@@ -136,12 +136,13 @@ docker compose -f compose.yml up -d
 docker compose -f compose.yml ps
 ```
 
-Wait for `db` and `backend` to be healthy; otherwise inspect `docker compose -f compose.yml logs --tail 100 db` / `backend`. On first install:
+Wait for `db` and `backend` to be healthy; otherwise inspect `docker compose -f compose.yml logs --tail 100 db` / `backend`. The backend creates or updates the database tables by itself every time it starts (`backend/scripts/entrypoint.sh` runs `backend/app/migrate_on_start.py`; when the database holds data and is behind, a safety copy `mayondon-premigrate-*.dump` is saved in `backups\` first; see docs/11 section F item 7). On first install, create the first administrator once:
 
 ```powershell
-docker compose -f compose.yml exec backend alembic upgrade head
 docker compose -f compose.yml exec backend python app/initial_data.py
 ```
+
+This step is not automatic on purpose: running it at every start would recreate the first account, with the password from `.env`, if it had been renamed. Running `alembic upgrade head` by hand is still safe but no longer needed.
 
 If the admin already exists, the script is **not** a password reset; use the recovery procedure in docs/05 (administrator-set temporary password, **D-12**). Check `Invoke-WebRequest http://localhost:8000/api/v1/utils/health-check/`, then open `http://localhost:8000` and confirm login and pages load. A healthy endpoint alone does not mean deployment is complete.
 

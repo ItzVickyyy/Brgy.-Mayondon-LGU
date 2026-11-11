@@ -67,4 +67,9 @@ WORKDIR /app/backend/
 
 # Bind to all container interfaces so the published port is reachable from
 # trusted office computers on the local network.
+# Every start first brings the database up to date (see
+# backend/app/migrate_on_start.py), then runs CMD. A command given by
+# "docker compose run" or by compose.override.yml is run after that step too.
+ENTRYPOINT ["bash", "scripts/entrypoint.sh"]
+
 CMD ["fastapi", "run", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
