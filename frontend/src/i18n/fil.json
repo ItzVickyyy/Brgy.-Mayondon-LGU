@@ -230,7 +230,8 @@
       "status": "katayuan",
       "count": "bilang",
       "report": "ulat",
-      "period": "panahon"
+      "period": "panahon",
+      "keep_days": "itinago nang (araw)"
     },
     "modules": {
       "records": "Mga Talaan ng Residente",
@@ -239,7 +240,8 @@
       "officials": "Mga Opisyal",
       "lookups": "Mga Kalye at Asosasyon",
       "auth": "Mga Sign-in",
-      "reports": "Mga Ulat"
+      "reports": "Mga Ulat",
+      "audit": "Talaan ng Aktibidad"
     },
     "outcomes": {
       "success": "Matagumpay",
@@ -269,6 +271,9 @@
       },
       "report": {
         "export": "Na-export o na-print ang ulat"
+      },
+      "audit": {
+        "prune": "Naalis ang lumang tiningnan na entry"
       },
       "official": {
         "create": "Naidagdag ang opisyal",

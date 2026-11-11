@@ -230,7 +230,8 @@
       "status": "status",
       "count": "count",
       "report": "report",
-      "period": "period"
+      "period": "period",
+      "keep_days": "kept for days"
     },
     "modules": {
       "records": "Resident Records",
@@ -239,7 +240,8 @@
       "officials": "Officials",
       "lookups": "Streets and Associations",
       "auth": "Sign-ins",
-      "reports": "Reports"
+      "reports": "Reports",
+      "audit": "Activity Log"
     },
     "outcomes": {
       "success": "Success",
@@ -269,6 +271,9 @@
       },
       "report": {
         "export": "Report exported or printed"
+      },
+      "audit": {
+        "prune": "Old viewed entries removed"
       },
       "official": {
         "create": "Official added",

@@ -14,6 +14,7 @@ const activityKeys = {
   "resident.list": "activity.actions.resident.list",
   "barangay_id.list": "activity.actions.barangay_id.list",
   "report.export": "activity.actions.report.export",
+  "audit.prune": "activity.actions.audit.prune",
   "issuance.issue": "activity.actions.issuance.issue",
   "issuance.correct": "activity.actions.issuance.correct",
   "issuance.void": "activity.actions.issuance.void",

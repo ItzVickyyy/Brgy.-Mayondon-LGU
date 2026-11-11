@@ -66,7 +66,9 @@ No `full_name` column. One backend function builds the display and printed name,
 
 `id` (UUID), `full_name`, `position`, `term_start` (date), `term_end` (date, optional), `is_elected` (bool), `is_current` (bool). Mark an official as not current instead of deleting: `issuances.signatory_official_id` and `witness_official_id` use `ON DELETE RESTRICT`. Whether the module stays in Version 1 is still D-23.
 
-### `audit_log` (append only)
+### `audit_log` (append only; one narrow exception)
+
+A database trigger blocks UPDATE, DELETE and TRUNCATE. Since patch 57 the single exception is DELETE of a READ row (`resident.view`, `resident.list`, `barangay_id.list`) older than 90 days; the trigger enforces both limits itself. The clean-up is `python -m app.audit_cli prune-reads` (counts only unless `--delete`), and a real clean-up writes one `audit.prune` row (module `audit`, details `count`, `keep_days`). See `docs/11` section G item 10.
 
 | Column | Type / rule |
 |---|---|
@@ -74,7 +76,7 @@ No `full_name` column. One backend function builds the display and printed name,
 | `occurred_at` | timestamptz, default now |
 | `actor_user_id` | FK `user`, nullable, `ON DELETE SET NULL` |
 | `actor_email` | text, copied at write time |
-| `action` | text, for example `issuance.issue`, `issuance.void`, `issuance.print` (written by `POST /issuances/{id}/printed` just before the browser print dialog opens; `details.copy` counts prints of that document, 2 or more are reprints; the print does not start if the row cannot be written), `resident.archive`, `user.role_change`, and the READ rows `resident.view`, `resident.list`, `barangay_id.list` (see `docs/11` section G item 6) and `report.export` |
+| `action` | text, for example `issuance.issue`, `issuance.void`, `issuance.print` (written by `POST /issuances/{id}/printed` just before the browser print dialog opens; `details.copy` counts prints of that document, 2 or more are reprints; the print does not start if the row cannot be written), `resident.archive`, `user.role_change`, and the READ rows `resident.view`, `resident.list`, `barangay_id.list` (see `docs/11` section G item 6) `report.export` and `audit.prune` |
 | `module`, `record_type`, `record_id` | text. `record_id` is text so any table can be referenced |
 | `outcome` | text, `CHECK` in (`success`, `failed`, `denied`) |
 | `reason` | text, required for void, correction and archive |
