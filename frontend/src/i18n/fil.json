@@ -454,7 +454,7 @@
         "results": "Resulta"
       },
       "chooseFile": "Pumili ng file ng masterlist",
-      "formats": "Mga sinusuportahang format: CSV, XLSX (hanggang 5 MB at 10,000 hanay)",
+      "formats": "Mga sinusuportahang format: CSV, XLSX (hanggang 10 MB at 30,000 hanay)",
       "uploadContinue": "I-upload at magpatuloy",
       "uploading": "Ina-upload…",
       "mapTitle": "Itugma ang mga column ng spreadsheet",

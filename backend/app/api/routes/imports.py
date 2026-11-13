@@ -334,9 +334,13 @@ def _apply_batch(session: Session, batch: ImportBatch, user: User) -> dict[str, 
         if row.classification == "error":
             row.outcome = "failed"
         elif row.classification == "duplicate":
+            # Only "update" needs the existing record; skipping must not load
+            # one resident per row (a full masterlist re-import is 20,000 rows).
             target = (
                 session.get(Resident, row.duplicate_resident_id)
-                if row.duplicate_scope == "existing" and row.duplicate_resident_id
+                if batch.duplicate_action == "update"
+                and row.duplicate_scope == "existing"
+                and row.duplicate_resident_id
                 else None
             )
             if (

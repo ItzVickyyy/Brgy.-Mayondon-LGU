@@ -175,7 +175,7 @@ def test_file_over_size_limit_is_rejected(
     big = b"First Name,Last Name\n" + b"A,B\n" * (mi.MAX_FILE_BYTES // 4 + 10)
     r = _upload(client, superuser_token_headers, big)
     assert r.status_code == 422
-    assert "5 MB" in r.json()["detail"]
+    assert "10 MB" in r.json()["detail"]
 
 
 def test_row_limit(
@@ -188,6 +188,105 @@ def test_row_limit(
     r = _upload(client, superuser_token_headers, content)
     assert r.status_code == 422
     assert "more than 2 rows" in r.json()["detail"]
+
+
+def test_a_whole_barangay_masterlist_fits_the_limits() -> None:
+    """A list of about twenty thousand residents is one file, not a split job."""
+    rows = [f"A{i},B{i}" for i in range(20000)]
+    content = ("First Name,Last Name\n" + "\n".join(rows) + "\n").encode()
+    assert len(content) < mi.MAX_FILE_BYTES
+    _type, _headers, parsed = mi.parse_rows("list.csv", content)
+    assert len(parsed) == 20000
+    assert parsed[-1][0] == 20001  # row numbers stay true
+
+
+def test_masterlist_layout_with_separate_name_columns_maps_cleanly() -> None:
+    """Header layout of the barangay's list (synthetic header row only)."""
+    headers = [
+        "ID NUMBER",
+        "First Name",
+        "Middle Name",
+        "Last Name",
+        "Extension",
+        "House Number",
+        "Street",
+        "Purok",
+        "Barangay",
+        "Municipality",
+        "Province",
+        "Birthdate",
+        "Sex",
+        "Civil Status",
+        "Occupation",
+        "Place of Birth",
+    ]
+    mapping = mi.suggest_mapping(headers)
+    assert mapping == {
+        "ID NUMBER": "id_number",
+        "First Name": "first_name",
+        "Middle Name": "middle_name",
+        "Last Name": "last_name",
+        "Extension": "suffix",
+        "House Number": "house_number",
+        "Street": "street",
+        "Purok": "purok",
+        "Birthdate": "birthdate",
+        "Sex": "sex",
+        "Civil Status": "civil_status",
+        "Place of Birth": "birth_place",
+    }
+    mi.check_mapping(headers, mapping)
+    values, errors = mi.check_row(
+        {
+            "ID NUMBER": "12-345-6789-0123",
+            "First Name": "Ana",
+            "Middle Name": "Reyes",
+            "Last Name": "Cruz",
+            "Extension": "Jr",
+            "Sex": "F",
+            "Civil Status": "Widowed",
+            "Birthdate": "1990-05-04",
+        },
+        mapping,
+        "mdy",
+        {},
+    )
+    assert errors == []
+    assert values["suffix"] == "Jr."
+    assert values["sex"] == "Female"
+    assert values["civil_status"] == "Widow/Widower"
+
+
+def test_checks_against_the_database_work_in_small_slices(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    staff_token_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Same answers when the lookups are split into several queries."""
+    monkeypatch.setattr(mi, "LOOKUP_CHUNK", 2)
+    last = _tag()
+    number = f"MAY-{uuid.uuid4().hex[:8].upper()}"
+    existing = client.post(
+        f"{settings.API_V1_STR}/residents/",
+        headers=staff_token_headers,
+        json={
+            "first_name": "Eli",
+            "last_name": last,
+            "birthdate": "1980-02-02",
+            "id_number": number,
+        },
+    )
+    assert existing.status_code == 201, existing.text
+    rows = [["Eli", last, "", "1980-02-02", "", "", "", "", ""]]  # in database
+    rows += [
+        [f"P{i}", last, "", f"19{70 + i}-01-01", "", "", "", "", f"MAY-X{i}{last}"]
+        for i in range(5)
+    ]
+    rows.append(["Zed", last, "", "", "", "", "", "", number])  # number taken
+    batch = _upload(client, superuser_token_headers, _csv(rows)).json()
+    done = _map(client, superuser_token_headers, batch).json()
+    assert done["counts"] == {"new": 5, "duplicate": 1, "error": 1}
 
 
 def test_xlsx_upload_reads_dates_and_numbers(

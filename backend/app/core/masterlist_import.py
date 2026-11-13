@@ -33,8 +33,10 @@ from app.models_residents import (
     ResidentFields,
 )
 
-MAX_FILE_BYTES = 5 * 1024 * 1024
-MAX_ROWS = 10000
+MAX_FILE_BYTES = 10 * 1024 * 1024
+MAX_ROWS = 30000
+# Values per ``IN (...)`` query when checking a batch against the database.
+LOOKUP_CHUNK = 5000
 MAX_UNZIPPED_BYTES = 50 * 1024 * 1024
 MAX_COLUMNS = 60
 MAX_CELL_CHARS = 1000
@@ -197,7 +199,7 @@ def parse_rows(
     The header is row 1. Empty rows are dropped but numbering stays true.
     """
     if len(content) > MAX_FILE_BYTES:
-        raise ImportFileError("The file is larger than 5 MB")
+        raise ImportFileError("The file is larger than 10 MB")
     if not content:
         raise ImportFileError("The file is empty")
     lower = file_name.lower()
@@ -438,6 +440,13 @@ def _street_lookup(session: Session) -> dict[str, int]:
     return lookup
 
 
+def _chunks(values: list[Any]) -> Iterable[list[Any]]:
+    """Slices of at most ``LOOKUP_CHUNK`` values (a large file must not build
+    one query with tens of thousands of parameters)."""
+    for start in range(0, len(values), LOOKUP_CHUNK):
+        yield values[start : start + LOOKUP_CHUNK]
+
+
 def classify_batch(session: Session, batch: ImportBatch) -> dict[str, int]:
     """Check every staged row against the mapping and the database.
 
@@ -468,9 +477,9 @@ def classify_batch(session: Session, batch: ImportBatch) -> dict[str, int]:
                 id_numbers.add(mapped["id_number"])
 
     existing: dict[tuple[str, str, date], tuple[Any, str]] = {}
-    if birthdates:
+    for dates in _chunks(sorted(birthdates)):
         for person in session.exec(
-            select(Resident).where(col(Resident.birthdate).in_(birthdates))
+            select(Resident).where(col(Resident.birthdate).in_(dates))
         ).all():
             if person.birthdate is not None:
                 person_key = (
@@ -482,16 +491,18 @@ def classify_batch(session: Session, batch: ImportBatch) -> dict[str, int]:
                 if person_key not in existing or person.status == "active":
                     existing[person_key] = (person.id, person.status)
     owners: dict[str, Any] = {}
-    if id_numbers:
-        owners = {
-            number: rid
-            for rid, number in session.exec(
-                select(Resident.id, Resident.id_number).where(
-                    col(Resident.id_number).in_(id_numbers)
-                )
-            ).all()
-            if number is not None
-        }
+    for numbers in _chunks(sorted(id_numbers)):
+        owners.update(
+            {
+                number: rid
+                for rid, number in session.exec(
+                    select(Resident.id, Resident.id_number).where(
+                        col(Resident.id_number).in_(numbers)
+                    )
+                ).all()
+                if number is not None
+            }
+        )
 
     counts = {"new": 0, "duplicate": 0, "error": 0}
     seen_people: set[tuple[str, str, date]] = set()
