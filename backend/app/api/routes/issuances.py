@@ -61,6 +61,7 @@ from app.models_issuance import (
     FranchiseIn,
     FranchisePublic,
     IdentificationPublic,
+    IdNumberSeries,
     IndigencyPublic,
     Issuance,
     IssuanceAssistance,
@@ -89,6 +90,7 @@ from app.models_issuance import (
     SnapshotPublic,
     Tricycle,
     UtilityPublic,
+    format_id_number,
 )
 from app.models_residents import Resident, ResidentPhoto, build_full_name
 
@@ -842,15 +844,100 @@ def _look_alike_sql(column: Any) -> Any:
     )
 
 
+def _id_number_clash(
+    session: Session, number: str, resident_id: uuid.UUID | None
+) -> bool:
+    """True when another resident holds a number that looks like ``number``.
+
+    With ``resident_id`` None every holder counts (used to skip taken numbers
+    when the series hands one out). Archived cards still count: hiding a
+    record does not free its number.
+    """
+    look = _look_alike(number)
+    held = select(Resident.id).where(_look_alike_sql(col(Resident.id_number)) == look)
+    issued = (
+        select(Issuance.id)
+        .join(
+            IssuanceBarangayId,
+            col(IssuanceBarangayId.issuance_id) == col(Issuance.id),
+        )
+        .where(
+            Issuance.status == "issued",
+            _look_alike_sql(col(IssuanceBarangayId.id_number)) == look,
+        )
+    )
+    if resident_id is not None:
+        held = held.where(Resident.id != resident_id)
+        issued = issued.where(Issuance.resident_id != resident_id)
+    return (
+        session.exec(held).first() is not None
+        or session.exec(issued).first() is not None
+    )
+
+
+def _series_row(session: Session, *, lock: bool = False) -> IdNumberSeries:
+    """The one numbering-series row (created if a restore left it out)."""
+    stmt = select(IdNumberSeries).where(IdNumberSeries.id == 1)
+    if lock:
+        stmt = stmt.with_for_update()
+    row = session.exec(stmt).first()
+    if row is None:
+        row = IdNumberSeries()
+        session.add(row)
+        session.flush()
+    return row
+
+
+def _allocate_series_number(session: Session) -> str:
+    """Reserve the next number of the series. Call inside the issue transaction.
+
+    The series row is locked until commit, so two clerks never get the same
+    number. Numbers that already belong to someone (or look like one that does)
+    are skipped, so a series started below the real latest number still works.
+    """
+    series = _series_row(session, lock=True)
+    year = today_manila().year
+    if series.restart_yearly and series.counter_year != year:
+        series.next_number = 1
+    series.counter_year = year
+    number = series.next_number
+    for _ in range(10000):
+        candidate = format_id_number(series, number, year)
+        if len(candidate) > 50:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "code": "id_series_too_long",
+                    "message": "The next ID number is longer than 50 characters",
+                },
+            )
+        if not _id_number_clash(session, candidate, None):
+            series.next_number = number + 1
+            session.add(series)
+            return candidate
+        number += 1
+    raise HTTPException(
+        status_code=409,
+        detail={
+            "code": "id_series_exhausted",
+            "message": "No free ID number was found; check the series setup",
+        },
+    )
+
+
 def _prepare_id_card(
-    session: Session, issuance: Issuance, resident: Resident
-) -> IssuanceBarangayId:
+    session: Session, issuance: Issuance, resident: Resident, user: User
+) -> tuple[IssuanceBarangayId, str | None]:
     """Check the ID card rules and settle its number. Raises 409 or 422.
 
-    The numbering series is still open (D-43), so the clerk types the number
-    for a new card; a renewal or replacement keeps the resident's current
-    number unless another is typed. ``valid_until`` is also typed because the
-    validity length is open (D-18).
+    Returns the card and where its number came from: ``"series"`` (handed out
+    by the numbering series), ``"override"`` (an administrator typed a number
+    while the series is on) or None (typed by the clerk, or kept from the
+    resident's earlier card). With the series off the clerk types the number for
+    a new card; a renewal or replacement keeps the resident's current number
+    unless another is typed. With the series on, a new card gets the next
+    number by itself, and only an administrator may type a different one.
+    ``valid_until`` is typed because the validity length is open (D-18).
     """
     card = session.get(IssuanceBarangayId, issuance.id)
     assert card is not None
@@ -894,31 +981,32 @@ def _prepare_id_card(
                     "message": "This resident has no earlier ID. Use new",
                 },
             )
-    number = _norm(card.id_number) if card.id_number else resident.id_number
+    typed = _norm(card.id_number) if card.id_number else None
+    source: str | None = None
+    number: str | None
+    if _series_row(session).enabled:
+        if typed and typed != resident.id_number:
+            if not has_permission(user, Permission.ID_OVERRIDE):
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "code": "id_number_automatic",
+                        "message": "ID numbers are assigned automatically; "
+                        "only an administrator may type one",
+                    },
+                )
+            number, source = typed, "override"
+        elif resident.id_number:
+            number = resident.id_number
+        elif issuance.corrects_issuance_id is None:
+            number, source = _allocate_series_number(session), "series"
+        else:
+            number = None
+    else:
+        number = typed or resident.id_number
     if number is None or not number:
         raise HTTPException(status_code=422, detail={"code": "id_number_required"})
-    look = _look_alike(number)
-    clash = (
-        session.exec(
-            select(Resident.id).where(
-                _look_alike_sql(col(Resident.id_number)) == look,
-                Resident.id != resident.id,
-            )
-        ).first()
-        or session.exec(
-            select(Issuance.id)
-            .join(
-                IssuanceBarangayId,
-                col(IssuanceBarangayId.issuance_id) == col(Issuance.id),
-            )
-            .where(
-                Issuance.status == "issued",
-                Issuance.resident_id != resident.id,
-                _look_alike_sql(col(IssuanceBarangayId.id_number)) == look,
-            )
-        ).first()
-    )
-    if clash is not None:
+    if source != "series" and _id_number_clash(session, number, resident.id):
         raise HTTPException(
             status_code=409,
             detail={
@@ -927,7 +1015,7 @@ def _prepare_id_card(
             },
         )
     card.id_number = number
-    return card
+    return card, source
 
 
 def _require_free_tricycle(session: Session, issuance: Issuance) -> None:
@@ -1074,6 +1162,7 @@ def issue(
             )
 
     card: IssuanceBarangayId | None = None
+    number_source: str | None = None
     if doc_type.code == "BARANGAY_ID":
         _require_id_permission(user, doc_type.code)
         # Lock the resident so two cards cannot take the same number or
@@ -1081,7 +1170,7 @@ def issue(
         session.exec(
             select(Resident.id).where(Resident.id == resident.id).with_for_update()
         ).first()
-        card = _prepare_id_card(session, issuance, resident)
+        card, number_source = _prepare_id_card(session, issuance, resident, user)
 
     # Last of the checks, so the more specific messages above come first.
     duplicate_of: str | None = None
@@ -1160,6 +1249,8 @@ def issue(
     }
     if card is not None:
         details["id_transaction"] = card.transaction_type
+    if number_source is not None:
+        details["id_number_source"] = number_source
     if purpose_added:
         details["purpose_added"] = True
     if duplicate_of is not None:

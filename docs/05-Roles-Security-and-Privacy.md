@@ -37,6 +37,7 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 | Records Management, Barangay IDs tab: list and view | Allowed | Allowed |
 | Barangay IDs: create, renew, print (done through Issuance Management, ID document type) | Allowed | Allowed |
 | Records Management, Barangay IDs: override validity rules | No | Allowed |
+| Records Management, Barangay IDs: set up the ID number series, and type an ID number by hand while the series is on (the same permission, `id.override`, guards all three; no new permission) | No | Allowed |
 | Marginalized Sector health condition (value) | Allowed on the single record only; masked in lists; each read is audited | Same |
 | Activity Log | Own activity | All users, with filters |
 | My Account, User Settings | Allowed | Allowed |

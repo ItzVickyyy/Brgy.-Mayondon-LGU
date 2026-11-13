@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { CheckCircle2, ChevronDown, CircleAlert, Clock, Keyboard, Printer, Search } from "lucide-react"
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import { BarangayIdsService } from "@/client"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { formControlClass } from "@/components/Common/formStyles"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
@@ -9,6 +10,8 @@ import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ISSUE_DATE_MAX_DAYS_BACK } from "@/config/site"
+import useAuth from "@/hooks/useAuth"
+import { isSystemAdministrator } from "@/lib/access"
 import { defaultIdValidUntil, idValidityNoteKey } from "@/lib/idValidity"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { documentName, fieldHelp, fieldLabel, fieldOptionLabel, validationMessage } from "@/lib/issuanceLabels"
@@ -147,7 +150,13 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const details = form.watch("details")
   const identification = form.watch("identification")
   const payment = form.watch("payment")
-  const config = documentConfig[documentType]
+  const { user: signedInUser } = useAuth()
+  const seriesQuery = useQuery({ queryKey: ["id-series-status"], queryFn: async () => (await BarangayIdsService.idsSeriesStatus()).data, enabled: open && documentType === "BARANGAY_ID", staleTime: 10_000 })
+  // With automatic numbering a new card needs no typed number; only an administrator may type one.
+  const seriesOn = documentType === "BARANGAY_ID" && seriesQuery.data?.enabled === true
+  const canTypeIdNumber = isSystemAdministrator(signedInUser)
+  const baseConfig = documentConfig[documentType]
+  const config = (seriesOn ? { ...baseConfig, fields: baseConfig.fields.map((candidate) => (candidate.name === "idNumber" ? { ...candidate, required: false } : candidate)) } : baseConfig) as typeof baseConfig
   // Read during render so react-hook-form keeps isDirty up to date for the discard prompt.
   const formDirty = form.formState.isDirty
   const allResidents = useMemo(() => residents, [residents])
@@ -376,6 +385,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       else setDetail(field.name, nextValue)
     }
     const fieldOptions = field.name === "associationName" ? knownAssociations : field.name === "witnessOfficialId" ? currentOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
+    const autoIdNumber = seriesOn && field.name === "idNumber"
     const missingNow = attempted && Boolean(field.required) && !fieldHasValue(field)
     const invalid = Boolean(fieldError) || missingNow
     const describedBy = fieldError || missingNow ? `${fieldId}-error` : undefined
@@ -409,14 +419,14 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     } else if (field.type === "date") {
       control = <DateField id={fieldId} value={String(value)} min={field.group === "identity" || field.group === "payment" ? "1900-01-01" : undefined} max={field.group === "identity" || field.group === "payment" ? localIsoDate() : undefined} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} />
     } else {
-      control = <input id={fieldId} type={field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive")} aria-invalid={invalid} aria-describedby={describedBy} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} />
+      control = <input id={fieldId} type={field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive")} aria-invalid={invalid} aria-describedby={describedBy} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} readOnly={autoIdNumber && !canTypeIdNumber} placeholder={autoIdNumber ? (canTypeIdNumber ? t("issuances.new.series.adminPlaceholder", { number: seriesQuery.data?.preview ?? "" }) : t("issuances.new.series.placeholder")) : undefined} />
     }
     return <div key={field.name} className={fieldLabelClass}>
       {field.type === "multiselect" ? <span id={`${fieldId}-label`}>{labelText}</span> : <label htmlFor={fieldId}>{labelText}</label>}
       {control}
       {messageNode}
       {field.type === "multiselect" && field.maxSelected ? <span className="text-xs font-normal text-muted-foreground">{t("issuances.new.detailsStep.chooseUpTo", { count: field.maxSelected })}</span> : null}
-      {field.help ? <span className="text-xs font-normal text-muted-foreground">{fieldHelp(field.help, t)}</span> : null}
+      {autoIdNumber ? <span className="text-xs font-normal text-muted-foreground">{t(canTypeIdNumber ? "issuances.new.series.helpAdmin" : String(value).trim() !== "" ? "issuances.new.series.helpKept" : "issuances.new.series.helpStaff", { number: seriesQuery.data?.preview ?? "" })}</span> : field.help ? <span className="text-xs font-normal text-muted-foreground">{fieldHelp(field.help, t)}</span> : null}
       {field.name === "validUntil" && documentType === "BARANGAY_ID" ? (() => {
         const noteKey = idValidityNoteKey(issueDate, String((details as unknown as Record<string, unknown>).transactionType ?? "new"), selectedResident)
         return noteKey ? <span className="text-xs font-normal text-muted-foreground">{t(noteKey)}</span> : null

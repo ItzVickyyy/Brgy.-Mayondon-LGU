@@ -21,7 +21,7 @@ These close the gaps found when the database plan was reviewed. They are **desig
 | # | Topic | Decision | Why | Related |
 |---|---|---|---|---|
 | 1 | Resident photos | Stored in the database in `resident_photos` as `bytea`: one row per resident, the processed PNG or WebP, at most 300 KB (checked by the API), type checked from the file's first bytes and not its name. There is **no `photo_url` column**. Photos are served only through an authenticated endpoint. | The backup script dumps only PostgreSQL, so files on disk would be missed by every backup and restore. Photos must never leave the host. A separate table keeps image bytes out of list queries. | D-18, D-35 |
-| 2 | Barangay ID numbers | `residents.id_number` is the **current** number (unique when set). `issuance_barangay_id.id_number` is the number printed on that card. Every new, renewal or replacement ID is its own issuance row, so history is kept. | Goal GOAL-02: history must not be overwritten. | D-43 (numbering rule still open) |
+| 2 | Barangay ID numbers | `residents.id_number` is the **current** number (unique when set). `issuance_barangay_id.id_number` is the number printed on that card. Every new, renewal or replacement ID is its own issuance row, so history is kept. | Goal GOAL-02: history must not be overwritten. | D-43 (numbering series built in patch 65, off until an administrator sets it; the barangay still has to confirm the latest number and the renewal rule) |
 | 3 | Sensitive health condition | **No new permission.** Staff issue the Marginalized Sector certification, so they must be able to enter and print the value. List endpoints always return `[restricted]`. Only the single-issuance endpoint returns the value, and only to someone with `issuance.write`. Each read of the value is written to the audit log as `issuance.view_sensitive`. The value never appears in logs, exports or reports. | A "sensitive read" permission staff must hold anyway would restrict nothing. Masking by endpoint plus an audit trail does. | D-25 |
 | 4 | Name fields | Residents use **`suffix`** (the form and API contract already use it). `user.extension_name` stays until the account cleanup. | Different table, different owner of the field. | — |
 | 5 | Dates and time zone | Moments are `timestamptz` (UTC). Business dates are `date`: birthdate, `issue_date`, `date_of_issue`, `valid_until`, `date_of_payment`. "Today" and every expiry are computed in `Asia/Manila` (a `BUSINESS_TIMEZONE` setting), never from the server's UTC date. | The Docker host runs on UTC, so a document issued before 8 AM would carry yesterday's date. | — |
@@ -139,6 +139,20 @@ Rules as built:
 - **Issued** means a document in force (`status = 'issued'`) counted by `issue_date`. **Voided** documents are counted separately and never as issued. **Corrections** are issued documents that replace an earlier one; the earlier one becomes voided when the correction is issued.
 - **Expiring or expired** looks only at a resident's **latest issued** Barangay Clearance and latest issued Barangay ID (by `issued_at`), so a renewed record is not listed. "Soon" is 30 days for both (`CLEARANCE_EXPIRING_SOON_DAYS`, `ID_EXPIRING_SOON_DAYS`; D-21 is open). The ID counts use the same rule as `GET /barangay-ids`.
 - **Not reported yet:** sign-ins (not recorded), masterlist imports (no import yet, D-19), pending registrations (no registration flow, none planned: D-11). The dashboard's "pending document requests" card is `open_drafts`, the number of unissued drafts.
+
+### `id_number_series` (Barangay ID numbering, patch 65)
+
+One settings row (`id = 1`, enforced by a check). Columns: `prefix` (up to 30 characters, may be empty), `include_year`, `digit_width` (0 to 12; 0 means no zero padding), `restart_yearly` (only with `include_year`), `next_number` (1 or more), `counter_year`, `enabled` (default **false**), `updated_at`, `updated_by_user_id`. The migration inserts the row switched off and changes no data. The number is `prefix` + (`YYYY-` when the year is included) + the running number.
+
+Rules while `enabled` is true (while it is false everything works as before, staff type the number):
+
+- A **new card** for a resident with no ID number gets the next series number, taken inside the issue transaction under a row lock (resident row first, then the series row), so two clerks issuing at the same moment get different numbers. Numbers already in use (including look-alikes, archived cards included) are skipped, up to 10,000 tries (409 `id_series_exhausted`); a number longer than 50 characters is refused (409 `id_series_too_long`).
+- A resident who **already has** a number keeps it. Renewals and replacements keep it, as before. A **correction** never takes a new number.
+- A number typed by hand that differs from the resident's current one needs `id.override` (administrator): otherwise 403 `{code: "id_number_automatic"}` and nothing is reserved. An administrator's override is allowed and recorded. The look-alike check still refuses a number held by another resident.
+- With `restart_yearly`, the counter goes back to 1 when the Manila calendar year changes.
+- The `issuance.issue` audit row carries `id_number_source` = `series` or `override`.
+
+API: `GET /api/v1/barangay-ids/series/status` (admin and staff; `{enabled, preview}`), `GET` and `PUT /api/v1/barangay-ids/series` (administrator only, permission `id.override`). A change writes the audit action `id_series.update` (module `records`; details: changed field names, `numbering` on or off, `next_number`) and nothing when nothing changed. Saving also sets `counter_year` to the current year.
 
 ### Not designed yet (waiting on the client)
 

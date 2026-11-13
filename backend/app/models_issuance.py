@@ -460,6 +460,76 @@ class IssuanceBarangayId(SQLModel, table=True):
     id_number: str | None = Field(default=None, max_length=50)
 
 
+class IdNumberSeries(SQLModel, table=True):
+    """The Barangay ID numbering series: one row, set once by an administrator.
+
+    Off by default, so staff type the number as before. When on, the next number
+    is reserved inside the transaction that issues a new card (the row is
+    locked), so two clerks can never receive the same number.
+    """
+
+    __tablename__ = "id_number_series"
+    __table_args__ = (
+        CheckConstraint("id = 1", name="ck_id_number_series_single_row"),
+        CheckConstraint(
+            "digit_width >= 0 AND digit_width <= 12", name="ck_id_number_series_width"
+        ),
+        CheckConstraint("next_number >= 1", name="ck_id_number_series_next"),
+        CheckConstraint(
+            "NOT restart_yearly OR include_year", name="ck_id_number_series_restart"
+        ),
+    )
+
+    id: int = Field(default=1, primary_key=True)
+    prefix: str = Field(default="", max_length=30)
+    include_year: bool = Field(
+        default=False,
+        sa_column=Column(Boolean, nullable=False, server_default=text("false")),
+    )
+    digit_width: int = Field(
+        default=0, sa_column=Column(SmallInteger, nullable=False, server_default="0")
+    )
+    restart_yearly: bool = Field(
+        default=False,
+        sa_column=Column(Boolean, nullable=False, server_default=text("false")),
+    )
+    next_number: int = Field(default=1)
+    # Year the counter belongs to; used only when numbering restarts each year.
+    counter_year: int | None = Field(default=None)
+    enabled: bool = Field(
+        default=False,
+        sa_column=Column(Boolean, nullable=False, server_default=text("false")),
+    )
+    updated_at: datetime = Field(
+        default_factory=get_datetime_utc, sa_column=_timestamp()
+    )
+    updated_by_user_id: uuid.UUID | None = Field(
+        default=None, foreign_key="user.id", ondelete="SET NULL"
+    )
+
+
+def format_id_number(
+    series: IdNumberSeries, number: int, year: int | None = None
+) -> str:
+    """Text of one number: prefix, optional year, then the running number."""
+    digits = (
+        str(number).zfill(series.digit_width) if series.digit_width else str(number)
+    )
+    middle = f"{year}-" if series.include_year and year is not None else ""
+    return f"{series.prefix}{middle}{digits}"
+
+
+def series_preview(series: IdNumberSeries, year: int) -> str:
+    """The number the next new card would receive (taken numbers are skipped
+    only when it is really handed out)."""
+    number = (
+        1
+        if series.restart_yearly and series.counter_year != year
+        else series.next_number
+    )
+    return format_id_number(series, number, year)
+
+
 # --- API shapes -------------------------------------------------------------
 
 Req = Annotated[
@@ -867,3 +937,37 @@ class BarangayIdListItem(SQLModel):
 class BarangayIdsPublic(SQLModel):
     data: list[BarangayIdListItem]
     count: int
+
+
+class IdSeriesIn(SQLModel):
+    prefix: Annotated[str, StringConstraints(strip_whitespace=True, max_length=30)] = ""
+    include_year: bool = False
+    digit_width: int = Field(default=0, ge=0, le=12)
+    restart_yearly: bool = False
+    next_number: int = Field(ge=1, le=999_999_999)
+    enabled: bool = False
+
+    @model_validator(mode="after")
+    def _restart_needs_year(self) -> IdSeriesIn:
+        if self.restart_yearly and not self.include_year:
+            raise ValueError("Restarting each year needs the year in the number")
+        return self
+
+
+class IdSeriesPublic(SQLModel):
+    prefix: str
+    include_year: bool
+    digit_width: int
+    restart_yearly: bool
+    next_number: int
+    enabled: bool
+    preview: str  # the number the next new card would receive
+    updated_at: datetime | None = None
+    updated_by_name: str | None = None
+
+
+class IdSeriesStatus(SQLModel):
+    """What the issue form needs: is numbering automatic, and what comes next."""
+
+    enabled: bool
+    preview: str | None = None

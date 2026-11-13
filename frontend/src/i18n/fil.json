@@ -236,7 +236,10 @@
       "count": "bilang",
       "report": "ulat",
       "period": "panahon",
-      "keep_days": "itinago nang (araw)"
+      "keep_days": "itinago nang (araw)",
+      "numbering": "awtomatikong pagbibilang",
+      "next_number": "susunod na numero",
+      "id_number_source": "numero mula sa"
     },
     "modules": {
       "records": "Mga Talaan ng Residente",
@@ -277,6 +280,9 @@
       },
       "barangay_id": {
         "list": "Tiningnan ang listahan ng Barangay ID"
+      },
+      "id_series": {
+        "update": "Binago ang serye ng numero ng Barangay ID"
       },
       "report": {
         "export": "Na-export o na-print ang ulat"
@@ -767,6 +773,31 @@
       "edit": "I-edit ang mga detalye"
     },
     "ids": {
+      "series": {
+        "title": "Serye ng ID number",
+        "on": "Awtomatiko",
+        "off": "Naka-off",
+        "nextIs": "Ang susunod na bagong card ay tatanggap ng {{number}}.",
+        "offDescription": "Naka-off. Ang staff ang nagta-type ng ID number sa bawat bagong card. I-set up ito para awtomatikong bilangan ang mga bagong card.",
+        "setUp": "I-set up",
+        "edit": "I-edit",
+        "dialogTitle": "Serye ng numero ng Barangay ID",
+        "dialogDescription": "Ituloy ang kasalukuyang pagbibilang ng barangay. Ang renewal at replacement ay nagpapanatili ng numero ng residente. Kunin ang susunod na numero mula sa pinakahuling ID na naibigay na.",
+        "prefix": "Nakapirming simula ng numero",
+        "prefixHelp": "Teksto bago ang tuloy-tuloy na numero, halimbawa 12-345-6789-. Iwanang walang laman kung wala.",
+        "nextNumber": "Susunod na numero",
+        "nextNumberHelp": "Ang tuloy-tuloy na numerong tatanggapin ng susunod na bagong card. Nilalaktawan ang mga numerong ginagamit na.",
+        "nextNumberError": "Maglagay ng numerong 1 pataas.",
+        "digitWidth": "Bilang ng digit (zero padding)",
+        "digitWidthHelp": "0 kung walang padding, o hanggang 12 para lagyan ng zero, halimbawa ang 4 ay 0007.",
+        "digitWidthError": "Maglagay ng numero mula 0 hanggang 12.",
+        "includeYear": "Isama ang taon sa numero",
+        "restartYearly": "Magsimula ulit sa 1 bawat taon",
+        "enable": "Awtomatikong ibigay ang mga bagong ID number",
+        "example": "Ang susunod na card ay magiging",
+        "save": "I-save",
+        "saved": "Na-save ang serye ng ID number."
+      },
       "summaryAria": "Buod ng Barangay ID",
       "stats": {
         "all": {
@@ -1136,6 +1167,13 @@
       "validityNote": {
         "sixMonths": "May bisa na 6 na buwan: bago o nangungupahan ang residenteng ito at hindi pa napapatunayan ang rehistro bilang botante. Maaari mong baguhin ang petsa.",
         "replacement": "Pinananatili ng kapalit na card ang bisa ng card na pinapalitan nito. Maaari mong baguhin ang petsa."
+      },
+      "series": {
+        "placeholder": "Awtomatikong ibibigay",
+        "adminPlaceholder": "Iwanang walang laman para gamitin ang {{number}}",
+        "helpStaff": "Awtomatikong ibinibigay ang ID number kapag na-isyu ang card. Ang bagong card ay tatanggap ng {{number}}.",
+        "helpKept": "May ID number na ang residenteng ito at ito ang mananatili. Awtomatikong binibigyan lang ng numero ang mga residenteng wala pa.",
+        "helpAdmin": "Ang residenteng may ID number na ay mananatili rito. Kung wala pa, iwanang walang laman para gamitin ang susunod na numero ({{number}}). Bilang administrator, maaari kang mag-type ng iba; itatala ito sa Activity Log."
       },
       "sameDay": {
         "title": "Mag-isyu ng isa pang kopya para sa parehong araw?",
@@ -2171,6 +2209,9 @@
       "idAlreadyExists": "May Barangay ID na ang residenteng ito. Piliin ang Renewal o Replacement.",
       "noEarlierId": "Wala pang naunang Barangay ID ang residenteng ito. Piliin ang New.",
       "idNumberRequired": "Ilagay ang Barangay ID number para sa card na ito.",
+      "idNumberAutomatic": "Awtomatikong ibinibigay ang ID number. Administrator lamang ang maaaring mag-type nito.",
+      "idSeriesTooLong": "Lalampas sa 50 character ang susunod na ID number. Pakisuyong ipasuri sa administrator ang serye ng ID number.",
+      "idSeriesExhausted": "Walang nakitang libreng ID number. Pakisuyong ipasuri sa administrator ang serye ng ID number.",
       "idNumberInUse": "Ginagamit na ng ibang residente ang ID number na ito.",
       "invalidValidUntil": "Dapat mas huli sa petsa ng pag-isyu ang petsang “Valid until”.",
       "issueDateTooOld": "Hindi maaaring mas maaga kaysa {{earliest}} ang petsa ng pag-isyu.",

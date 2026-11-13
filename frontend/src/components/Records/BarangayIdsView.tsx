@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { formatBusinessDate } from "@/lib/residents"
+import { IdSeriesCard } from "./IdSeriesCard"
 
 type StatusFilter = "all" | BarangayIdListItem["status"]
 
@@ -154,6 +155,7 @@ export function BarangayIdsView() {
 
   return (
     <>
+      {isAdmin ? <IdSeriesCard /> : null}
       <section
         className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
         aria-label={t("records.ids.summaryAria")}

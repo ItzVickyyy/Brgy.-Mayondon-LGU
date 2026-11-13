@@ -5,7 +5,7 @@ only lists each resident's latest issued card with a status computed from
 ``valid_until``. Nothing here is stored (docs/09, derived values).
 """
 
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Query
@@ -13,7 +13,7 @@ from sqlalchemy import func as sa_func
 from sqlmodel import col, select
 
 from app.api.deps import SessionDep, require_permission
-from app.core.audit import record_read_event
+from app.core.audit import record_audit_event, record_read_event
 from app.core.dates import today_manila
 from app.core.permissions import Permission
 from app.core.search import search_words, word_matches
@@ -22,14 +22,21 @@ from app.models_issuance import (
     ID_EXPIRING_SOON_DAYS,
     BarangayIdListItem,
     BarangayIdsPublic,
+    IdNumberSeries,
+    IdSeriesIn,
+    IdSeriesPublic,
+    IdSeriesStatus,
     Issuance,
     IssuanceBarangayId,
+    series_preview,
 )
 from app.models_residents import Resident, build_full_name
 
 router = APIRouter(prefix="/barangay-ids", tags=["barangay-ids"])
 
 RecordsUser = Annotated[User, Depends(require_permission(Permission.RECORDS_EDIT))]
+# Setting up the numbering series is administrator work, like overriding a number.
+SeriesAdmin = Annotated[User, Depends(require_permission(Permission.ID_OVERRIDE))]
 
 
 @router.get("/", response_model=BarangayIdsPublic)
@@ -127,3 +134,99 @@ def list_barangay_ids(
         ],
         count=count,
     )
+
+
+# --- Numbering series (patch 65) --------------------------------------------
+
+
+def _series(session: SessionDep, *, lock: bool = False) -> IdNumberSeries:
+    stmt = select(IdNumberSeries).where(IdNumberSeries.id == 1)
+    if lock:
+        stmt = stmt.with_for_update()
+    row = session.exec(stmt).first()
+    if row is None:
+        row = IdNumberSeries()
+        session.add(row)
+        session.flush()
+    return row
+
+
+def _series_public(session: SessionDep, row: IdNumberSeries) -> IdSeriesPublic:
+    editor = (
+        session.get(User, row.updated_by_user_id) if row.updated_by_user_id else None
+    )
+    return IdSeriesPublic(
+        prefix=row.prefix,
+        include_year=row.include_year,
+        digit_width=row.digit_width,
+        restart_yearly=row.restart_yearly,
+        next_number=row.next_number,
+        enabled=row.enabled,
+        preview=series_preview(row, today_manila().year),
+        updated_at=row.updated_at,
+        updated_by_name=(editor.full_name or editor.email) if editor else None,
+    )
+
+
+@router.get(
+    "/series/status",
+    response_model=IdSeriesStatus,
+    dependencies=[Depends(require_permission(Permission.ID_WRITE))],
+)
+def series_status(session: SessionDep) -> Any:
+    """Whether new ID numbers are assigned automatically (for the issue form)."""
+    row = _series(session)
+    if not row.enabled:
+        return IdSeriesStatus(enabled=False)
+    return IdSeriesStatus(
+        enabled=True, preview=series_preview(row, today_manila().year)
+    )
+
+
+@router.get(
+    "/series",
+    response_model=IdSeriesPublic,
+    dependencies=[Depends(require_permission(Permission.ID_OVERRIDE))],
+)
+def get_series(session: SessionDep) -> Any:
+    """The numbering series setup (administrator only)."""
+    return _series_public(session, _series(session))
+
+
+@router.put("/series", response_model=IdSeriesPublic)
+def update_series(body: IdSeriesIn, session: SessionDep, user: SeriesAdmin) -> Any:
+    """Set the numbering series. ``next_number`` is the number the next new card
+    receives; take it from the barangay's real latest ID. Audited."""
+    row = _series(session, lock=True)
+    new = {
+        "prefix": body.prefix,
+        "include_year": body.include_year,
+        "digit_width": body.digit_width,
+        "restart_yearly": body.restart_yearly,
+        "next_number": body.next_number,
+        "enabled": body.enabled,
+    }
+    changed = {k: v for k, v in new.items() if getattr(row, k) != v}
+    for key, value in new.items():
+        setattr(row, key, value)
+    row.counter_year = today_manila().year
+    row.updated_at = datetime.now(UTC)
+    row.updated_by_user_id = user.id
+    session.add(row)
+    if changed:
+        record_audit_event(
+            session,
+            action="id_series.update",
+            actor=user,
+            module="records",
+            record_type="id_number_series",
+            record_id=1,
+            details={
+                "fields": ", ".join(changed),
+                "numbering": "on" if row.enabled else "off",
+                "next_number": row.next_number,
+            },
+        )
+    session.commit()
+    session.refresh(row)
+    return _series_public(session, row)

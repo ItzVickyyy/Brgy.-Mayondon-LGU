@@ -236,7 +236,10 @@
       "count": "count",
       "report": "report",
       "period": "period",
-      "keep_days": "kept for days"
+      "keep_days": "kept for days",
+      "numbering": "automatic numbering",
+      "next_number": "next number",
+      "id_number_source": "number from"
     },
     "modules": {
       "records": "Resident Records",
@@ -277,6 +280,9 @@
       },
       "barangay_id": {
         "list": "Barangay ID list viewed"
+      },
+      "id_series": {
+        "update": "Barangay ID number series changed"
       },
       "report": {
         "export": "Report exported or printed"
@@ -767,6 +773,31 @@
       "edit": "Edit details"
     },
     "ids": {
+      "series": {
+        "title": "ID number series",
+        "on": "Automatic",
+        "off": "Off",
+        "nextIs": "The next new card receives {{number}}.",
+        "offDescription": "Off. Staff type the ID number on each new card. Set it up to number new cards automatically.",
+        "setUp": "Set up",
+        "edit": "Edit",
+        "dialogTitle": "Barangay ID number series",
+        "dialogDescription": "Continue the barangay's existing numbering. Renewals and replacements keep the resident's number. Take the next number from the latest ID already issued.",
+        "prefix": "Fixed beginning of the number",
+        "prefixHelp": "Text before the running number, for example 12-345-6789-. Leave empty if there is none.",
+        "nextNumber": "Next number",
+        "nextNumberHelp": "The running number the next new card receives. Numbers already in use are skipped.",
+        "nextNumberError": "Enter a number of 1 or more.",
+        "digitWidth": "Digits (zero padding)",
+        "digitWidthHelp": "0 for no padding, or up to 12 to pad with zeros, for example 4 gives 0007.",
+        "digitWidthError": "Enter a number from 0 to 12.",
+        "includeYear": "Put the year in the number",
+        "restartYearly": "Start again at 1 each year",
+        "enable": "Assign new ID numbers automatically",
+        "example": "The next card would be",
+        "save": "Save",
+        "saved": "ID number series saved."
+      },
       "summaryAria": "Barangay ID summary",
       "stats": {
         "all": {
@@ -1136,6 +1167,13 @@
       "validityNote": {
         "sixMonths": "Valid for 6 months: this resident is new or renting and proof of voter registration is not yet verified. You can change the date.",
         "replacement": "A replacement keeps the validity of the card it replaces. You can change the date."
+      },
+      "series": {
+        "placeholder": "Assigned automatically",
+        "adminPlaceholder": "Leave empty to use {{number}}",
+        "helpStaff": "ID numbers are assigned automatically when the card is issued. A new card receives {{number}}.",
+        "helpKept": "This resident already has an ID number and keeps it. Numbers are assigned automatically only to residents without one.",
+        "helpAdmin": "A resident who already has an ID number keeps it. Otherwise leave empty to use the next number ({{number}}). As an administrator you may type a different one; it is recorded in the Activity Log."
       },
       "sameDay": {
         "title": "Issue another copy for the same day?",
@@ -2171,6 +2209,9 @@
       "idAlreadyExists": "This resident already has a Barangay ID. Choose Renewal or Replacement instead.",
       "noEarlierId": "This resident has no earlier Barangay ID. Choose New instead.",
       "idNumberRequired": "Type the Barangay ID number for this card.",
+      "idNumberAutomatic": "ID numbers are assigned automatically. Only an administrator may type one.",
+      "idSeriesTooLong": "The next ID number would be longer than 50 characters. Ask an administrator to check the ID number series.",
+      "idSeriesExhausted": "No free ID number was found. Ask an administrator to check the ID number series.",
       "idNumberInUse": "This ID number is already used by another resident.",
       "invalidValidUntil": "The “Valid until” date must be after the issue date.",
       "issueDateTooOld": "The issue date cannot be earlier than {{earliest}}.",

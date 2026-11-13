@@ -670,6 +670,94 @@ export type HTTPValidationError = {
 };
 
 /**
+ * IdSeriesIn
+ */
+export type IdSeriesIn = {
+    /**
+     * Prefix
+     */
+    prefix?: string;
+    /**
+     * Include Year
+     */
+    include_year?: boolean;
+    /**
+     * Digit Width
+     */
+    digit_width?: number;
+    /**
+     * Restart Yearly
+     */
+    restart_yearly?: boolean;
+    /**
+     * Next Number
+     */
+    next_number: number;
+    /**
+     * Enabled
+     */
+    enabled?: boolean;
+};
+
+/**
+ * IdSeriesPublic
+ */
+export type IdSeriesPublic = {
+    /**
+     * Prefix
+     */
+    prefix: string;
+    /**
+     * Include Year
+     */
+    include_year: boolean;
+    /**
+     * Digit Width
+     */
+    digit_width: number;
+    /**
+     * Restart Yearly
+     */
+    restart_yearly: boolean;
+    /**
+     * Next Number
+     */
+    next_number: number;
+    /**
+     * Enabled
+     */
+    enabled: boolean;
+    /**
+     * Preview
+     */
+    preview: string;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
+    /**
+     * Updated By Name
+     */
+    updated_by_name?: string | null;
+};
+
+/**
+ * IdSeriesStatus
+ *
+ * What the issue form needs: is numbering automatic, and what comes next.
+ */
+export type IdSeriesStatus = {
+    /**
+     * Enabled
+     */
+    enabled: boolean;
+    /**
+     * Preview
+     */
+    preview?: string | null;
+};
+
+/**
  * IdStatusCounts
  */
 export type IdStatusCounts = {
@@ -4248,6 +4336,63 @@ export type barangayIdsListBarangayIdsResponses = {
 };
 
 export type barangayIdsListBarangayIdsResponse = barangayIdsListBarangayIdsResponses[keyof barangayIdsListBarangayIdsResponses];
+
+export type barangayIdsSeriesStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/barangay-ids/series/status';
+};
+
+export type barangayIdsSeriesStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: IdSeriesStatus;
+};
+
+export type barangayIdsSeriesStatusResponse = barangayIdsSeriesStatusResponses[keyof barangayIdsSeriesStatusResponses];
+
+export type barangayIdsGetSeriesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/barangay-ids/series';
+};
+
+export type barangayIdsGetSeriesResponses = {
+    /**
+     * Successful Response
+     */
+    200: IdSeriesPublic;
+};
+
+export type barangayIdsGetSeriesResponse = barangayIdsGetSeriesResponses[keyof barangayIdsGetSeriesResponses];
+
+export type barangayIdsUpdateSeriesData = {
+    body: IdSeriesIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/barangay-ids/series';
+};
+
+export type barangayIdsUpdateSeriesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type barangayIdsUpdateSeriesError = barangayIdsUpdateSeriesErrors[keyof barangayIdsUpdateSeriesErrors];
+
+export type barangayIdsUpdateSeriesResponses = {
+    /**
+     * Successful Response
+     */
+    200: IdSeriesPublic;
+};
+
+export type barangayIdsUpdateSeriesResponse = barangayIdsUpdateSeriesResponses[keyof barangayIdsUpdateSeriesResponses];
 
 export type activityListActivityData = {
     body?: never;

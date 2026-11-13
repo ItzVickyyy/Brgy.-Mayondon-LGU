@@ -68,6 +68,12 @@ export function issuanceErrorMessage(error: unknown): string {
       return i18n.t("apiErrors.issuance.noEarlierId")
     case "id_number_required":
       return i18n.t("apiErrors.issuance.idNumberRequired")
+    case "id_number_automatic":
+      return i18n.t("apiErrors.issuance.idNumberAutomatic")
+    case "id_series_too_long":
+      return i18n.t("apiErrors.issuance.idSeriesTooLong")
+    case "id_series_exhausted":
+      return i18n.t("apiErrors.issuance.idSeriesExhausted")
     case "id_number_in_use":
       return i18n.t("apiErrors.issuance.idNumberInUse")
     case "invalid_valid_until":
