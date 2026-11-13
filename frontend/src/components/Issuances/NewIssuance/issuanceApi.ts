@@ -624,9 +624,16 @@ async function toCreateBody(
     issue_date: input.issueDate || null,
     purpose_id: purposeIdFor(input, data) ?? null,
     remarks: orNull(input.remarks),
+    ...additionalStatementFor(input),
     signatory_official_id: toApiOfficial(input.signatoryOfficialId),
     ...present,
   } as IssuanceCreate
+}
+
+/** The Residency "Additional statement" is its own column; other documents send nothing. */
+function additionalStatementFor(input: IssuanceInput) {
+  if (input.details.type !== "RESIDENCY") return {}
+  return { additional_statement: orNull(input.details.additionalStatement) }
 }
 
 async function toUpdateBody(
@@ -638,6 +645,7 @@ async function toUpdateBody(
     issue_date: input.issueDate || null,
     purpose_id: purposeIdFor(input, data) ?? null,
     remarks: orNull(input.remarks),
+    ...additionalStatementFor(input),
     signatory_official_id: toApiOfficial(input.signatoryOfficialId),
     ...sections,
   } as IssuanceUpdate
@@ -719,6 +727,12 @@ function toMockIssuance(issuance: IssuancePublic): MockIssuance {
           | "replacement",
         validUntil: idCard?.valid_until ?? "",
         idNumber: idCard?.id_number ?? undefined,
+      }
+      break
+    case "RESIDENCY":
+      details = {
+        type: code,
+        additionalStatement: issuance.additional_statement ?? undefined,
       }
       break
     default:

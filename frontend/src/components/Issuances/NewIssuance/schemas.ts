@@ -48,7 +48,10 @@ const detailsSchemas = {
     classification: z.enum(["residential", "commercial"]),
     location: nonEmpty,
   }),
-  RESIDENCY: z.object({ type: z.literal("RESIDENCY") }),
+  RESIDENCY: z.object({
+    type: z.literal("RESIDENCY"),
+    additionalStatement: z.string().max(500).optional(),
+  }),
   INDIGENCY: z.object({
     type: z.literal("INDIGENCY"),
     addressedToOffice: nonEmpty,

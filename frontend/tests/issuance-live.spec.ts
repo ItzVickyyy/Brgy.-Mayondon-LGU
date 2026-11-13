@@ -949,6 +949,34 @@ test("archive: admin hides an issued document, restore brings it back unchanged"
   expect(await listed("exclude")).toContain(id)
 })
 
+test("residency: the additional statement is saved, read back and kept", async () => {
+  useToken(adminToken || token)
+  const resident = await newResident("statement")
+  const { input } = inputs(resident.id).RESIDENCY
+  const draft = await issuanceApi.createIssuance({
+    ...input,
+    status: "draft",
+    details: {
+      type: "RESIDENCY",
+      additionalStatement: "Living with her family.",
+    },
+  })
+  const stored = await issuanceApi.getIssuance(draft.id)
+  expect(stored?.payload.details).toMatchObject({
+    additionalStatement: "Living with her family.",
+  })
+  await issuanceApi.updateDraft(draft.id, {
+    ...input,
+    status: "draft",
+    details: { type: "RESIDENCY", additionalStatement: "" },
+  })
+  const cleared = await issuanceApi.getIssuance(draft.id)
+  expect(cleared?.payload.details).toMatchObject({
+    additionalStatement: undefined,
+  })
+  await issuanceApi.deleteDraft(draft.id)
+})
+
 // ------------------------------------------------ Barangay ID number series
 // Patch 65. These tests switch automatic numbering ON and the afterAll below
 // switches it OFF again, because every other test in this file assumes the

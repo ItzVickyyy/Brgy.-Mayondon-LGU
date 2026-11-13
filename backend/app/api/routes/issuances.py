@@ -505,6 +505,7 @@ def _public(
         **issuance.model_dump(
             include={
                 "remarks",
+                "additional_statement",
                 "signatory_official_id",
                 "issued_by_user_id",
                 "correction_reason",
@@ -638,6 +639,15 @@ def list_issuances(
     )
 
 
+def _check_additional_statement(code: str, value: str | None) -> None:
+    """The extra statement exists on the Certification of Residency only."""
+    if value is not None and code != "RESIDENCY":
+        raise HTTPException(
+            status_code=422,
+            detail="additional_statement applies to the Certification of Residency only",
+        )
+
+
 @router.post("/", response_model=IssuancePublic, status_code=201)
 def create_issuance(
     body: IssuanceCreate, session: SessionDep, user: WriteUser
@@ -651,6 +661,7 @@ def create_issuance(
     )
     if body.issue_date is not None:
         _check_issue_date(body.issue_date)
+    _check_additional_statement(doc_type.code, body.additional_statement)
     remarks = body.remarks
     if remarks is None and doc_type.code == "BARANGAY_CLEARANCE":
         remarks = DEFAULT_CLEARANCE_REMARKS
@@ -660,6 +671,7 @@ def create_issuance(
         issue_date=body.issue_date or today_manila(),
         purpose_id=body.purpose_id,
         remarks=remarks,
+        additional_statement=body.additional_statement,
         signatory_official_id=body.signatory_official_id,
         created_by_user_id=user.id,
     )
@@ -723,6 +735,9 @@ def update_draft(
         issuance.signatory_official_id = body.signatory_official_id
     if "remarks" in sent:
         issuance.remarks = body.remarks
+    if "additional_statement" in sent:
+        _check_additional_statement(doc_type.code, body.additional_statement)
+        issuance.additional_statement = body.additional_statement
     issuance.updated_at = datetime.now(UTC)
     session.add(issuance)
     session.flush()
@@ -1321,6 +1336,7 @@ def correct(
         issue_date=today_manila(),
         purpose_id=original.purpose_id,
         remarks=original.remarks,
+        additional_statement=original.additional_statement,
         signatory_official_id=original.signatory_official_id,
         corrects_issuance_id=original.id,
         correction_reason=body.reason,

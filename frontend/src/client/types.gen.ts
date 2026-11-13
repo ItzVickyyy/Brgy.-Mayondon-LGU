@@ -1104,6 +1104,10 @@ export type IssuanceCreate = {
      */
     remarks?: string | null;
     /**
+     * Additional Statement
+     */
+    additional_statement?: string | null;
+    /**
      * Signatory Official Id
      */
     signatory_official_id?: string | null;
@@ -1273,6 +1277,10 @@ export type IssuancePublic = {
      */
     remarks: string | null;
     /**
+     * Additional Statement
+     */
+    additional_statement?: string | null;
+    /**
      * Signatory Official Id
      */
     signatory_official_id: string | null;
@@ -1370,6 +1378,10 @@ export type IssuanceUpdate = {
      * Remarks
      */
     remarks?: string | null;
+    /**
+     * Additional Statement
+     */
+    additional_statement?: string | null;
     /**
      * Signatory Official Id
      */

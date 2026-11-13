@@ -216,6 +216,8 @@ class Issuance(SQLModel, table=True):
         default=None, foreign_key="issuance_purposes.id", ondelete="RESTRICT"
     )
     remarks: str | None = Field(default=None, max_length=500)
+    # Certification of Residency only: the clerk's extra sentence.
+    additional_statement: str | None = Field(default=None, max_length=500)
     signatory_official_id: uuid.UUID | None = Field(
         default=None, foreign_key="officials.id", ondelete="RESTRICT"
     )
@@ -709,6 +711,7 @@ class IssuanceCreate(SQLModel):
     issue_date: date | None = None  # default: today (Manila)
     purpose_id: int | None = None
     remarks: str | None = Field(default=None, max_length=500)
+    additional_statement: str | None = Field(default=None, max_length=500)
     signatory_official_id: uuid.UUID | None = None
     identification: IdentificationIn | None = None
     payment: PaymentIn | None = None
@@ -728,7 +731,7 @@ class IssuanceCreate(SQLModel):
             raise ValueError("issue_date cannot be in the future")
         return value
 
-    @field_validator("remarks")
+    @field_validator("remarks", "additional_statement")
     @classmethod
     def _blank_to_none(cls, value: str | None) -> str | None:
         return _clean(value)
@@ -743,6 +746,7 @@ class IssuanceUpdate(SQLModel):
     issue_date: date | None = None
     purpose_id: int | None = None
     remarks: str | None = Field(default=None, max_length=500)
+    additional_statement: str | None = Field(default=None, max_length=500)
     signatory_official_id: uuid.UUID | None = None
     identification: IdentificationIn | None = None
     payment: PaymentIn | None = None
@@ -762,7 +766,7 @@ class IssuanceUpdate(SQLModel):
             raise ValueError("issue_date cannot be in the future")
         return value
 
-    @field_validator("remarks")
+    @field_validator("remarks", "additional_statement")
     @classmethod
     def _blank_to_none(cls, value: str | None) -> str | None:
         return _clean(value)
@@ -896,6 +900,7 @@ class IssuanceListItem(SQLModel):
 
 class IssuancePublic(IssuanceListItem):
     remarks: str | None
+    additional_statement: str | None = None
     signatory_official_id: uuid.UUID | None
     issued_by_user_id: uuid.UUID | None
     correction_reason: str | None

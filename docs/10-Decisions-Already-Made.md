@@ -8,7 +8,7 @@ Last updated: November 7, 2026. Synthetic data only: never write real names, ID 
 
 | # | Decision | When | Reason |
 |---|---|---|---|
-| 1 | New Issuance has **no "Optional extras" accordion, Purpose note, or Referred by (c/o)**. Nothing prints for them. **Remarks stays** (always visible). Residency "Additional statement" and Indigency "Requested by" are inline fields. | Round before Records Management | Simplify the popup; the client forms do not need these |
+| 1 | New Issuance has **no "Optional extras" accordion, Purpose note, or Referred by (c/o)**. Nothing prints for them. **Remarks stays** (always visible). Residency "Additional statement" and Indigency "Requested by" are inline fields. The Residency statement is now saved (patch 68, one nullable column `issuances.additional_statement`), so the field stays inline as decided. | Round before Records Management | Simplify the popup; the client forms do not need these |
 | 2 | **PhilHealth Certification is not a document type.** Removed from the picker, schemas and code. | Same | Documents of other agencies are out of scope ([02](02-Requirements-and-Scope.md)) |
 | 3 | **Barangay IDs have no separate page or sidebar item.** They live in Records Management (`/records`, Barangay IDs tab). `/barangay-ids` only redirects to `/records?view=barangay-ids`. | Records Management rounds A-C | One place for resident and ID records |
 | 4 | **No "Create Barangay ID" button.** IDs are issued in Issuance Management. ID row Print and Renew open `/issuances?resident=<id>&type=BARANGAY_ID`. | Round B | Avoid two ways to issue an ID |

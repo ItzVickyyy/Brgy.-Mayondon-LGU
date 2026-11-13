@@ -173,6 +173,7 @@ API: `GET /api/v1/barangay-ids/series/status` (admin and staff; `{enabled, previ
 | Date on document | `issueDate` | `issue_date` | date, default today | input |
 | Purpose | `purposeText` | `purpose_id` | FK `issuance_purposes` (nullable) | select / combobox |
 | Remarks | `remarks` | `remarks` | text, default `NO DEROGATORY RECORD ON FILE` for clearance | optional |
+| Residency "Additional statement" | `additionalStatement` | `issuances.additional_statement` | text, up to 500 characters; one nullable column, not a detail table (patch 68); accepted on a Residency only (422 otherwise); not sent on update = unchanged, sent blank = cleared; kept by a correction; not printed yet (Residency has no print template) | optional |
 | Signatory | `signatoryOfficialId` | `signatory_official_id` | FK `officials` (null when pre-printed) | select, defaulted per document |
 | (Issue / Save draft) | `status` | `status` | enum `draft`, `issued`, `voided` | button |
 | (auto) | — | `issued_by_user_id` | FK `user`, `ON DELETE RESTRICT` (decision 7) | session |
