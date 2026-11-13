@@ -76,6 +76,8 @@ const detailKeyLabels = {
   numbering: "activity.detailKeys.numbering",
   next_number: "activity.detailKeys.next_number",
   id_number_source: "activity.detailKeys.id_number_source",
+  question_ids: "activity.detailKeys.question_ids",
+  method: "activity.detailKeys.method",
   copy: "activity.detailKeys.copy",
   status: "activity.detailKeys.status",
   count: "activity.detailKeys.count",

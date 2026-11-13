@@ -30,6 +30,11 @@ const activityKeys = {
   "auth.login": "activity.actions.auth.login",
   "auth.login_failed": "activity.actions.auth.login_failed",
   "auth.secrets_rotate": "activity.actions.auth.secrets_rotate",
+  "auth.recovery_questions_set": "activity.actions.auth.recovery_questions_set",
+  "auth.recovery_failed": "activity.actions.auth.recovery_failed",
+  "auth.recovery_success": "activity.actions.auth.recovery_success",
+  "auth.recovery_reset_by_admin":
+    "activity.actions.auth.recovery_reset_by_admin",
   "user.create": "activity.actions.user.create",
   "user.update": "activity.actions.user.update",
   "user.role_change": "activity.actions.user.role_change",

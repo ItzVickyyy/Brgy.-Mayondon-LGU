@@ -239,7 +239,9 @@
       "keep_days": "itinago nang (araw)",
       "numbering": "awtomatikong pagbibilang",
       "next_number": "susunod na numero",
-      "id_number_source": "numero mula sa"
+      "id_number_source": "numero mula sa",
+      "question_ids": "mga tanong",
+      "method": "paraan"
     },
     "modules": {
       "records": "Mga Talaan ng Residente",
@@ -297,7 +299,11 @@
       "auth": {
         "login": "Nag-sign in",
         "login_failed": "Nabigo ang pag-sign in",
-        "secrets_rotate": "Pinalitan ang mga lihim ng sistema"
+        "secrets_rotate": "Pinalitan ang mga lihim ng sistema",
+        "recovery_questions_set": "Naitakda ang mga tanong sa pagbawi",
+        "recovery_failed": "Nabigo ang pagbawi ng password",
+        "recovery_success": "Nabawi ang password gamit ang mga tanong",
+        "recovery_reset_by_admin": "Binura ng administrator ang mga tanong sa pagbawi"
       },
       "user": {
         "create": "Nagawa ang account",
@@ -1987,6 +1993,73 @@
       "cancelEdit": "Kanselahin ang Pag-edit",
       "saving": "Sine-save...",
       "saveChanges": "I-save ang mga Pagbabago"
+    }
+  },
+  "securityQuestions": {
+    "title": "Mga tanong para sa pagbawi ng password",
+    "cardDescription": "Sa tatlong pribadong tanong, mare-reset mo ang sarili mong password kapag nakalimutan mo ito, kahit walang e-mail o administrator.",
+    "statusSet": "Naitakda na ang mga tanong (huling binago noong {{date}}).",
+    "statusNotSet": "Wala pang naitakdang mga tanong.",
+    "setUp": "Itakda ang mga tanong",
+    "change": "Baguhin ang mga tanong",
+    "banner": {
+      "admin": "Itakda ang iyong mga tanong sa pagbawi ng password. Kapag nakalimutan mo ang password mo, ito lang ang paraan para mabawi ang account ng administrator na ito nang hindi gumagamit ng server computer.",
+      "staff": "Itakda ang iyong mga tanong sa pagbawi ng password para ma-reset mo ang sarili mong password kapag nakalimutan mo ito.",
+      "action": "Itakda ngayon",
+      "dismiss": "Mamaya na"
+    },
+    "dialog": {
+      "title": "Mga tanong sa pagbawi ng password",
+      "description": "Pumili ng tatlong magkakaibang tanong at i-type ang mga sagot. Ikaw lang dapat ang nakakaalam nito. Hindi pinapansin ng mga sagot ang malalaking titik, tuldik at bantas.",
+      "question": "Tanong {{n}}",
+      "choose": "Pumili ng tanong",
+      "answer": "Sagot {{n}}",
+      "currentPassword": "Ang kasalukuyan mong password",
+      "currentPasswordHelp": "Hinihingi namin ito para matiyak na ikaw ito.",
+      "save": "I-save ang mga tanong",
+      "cancel": "Kanselahin",
+      "saved": "Na-save ang mga tanong sa pagbawi",
+      "validation": {
+        "required": "Kailangan ito",
+        "answerMin": "Gumamit ng hindi bababa sa dalawang letra o numero",
+        "distinctQuestions": "Pumili ng tatlong magkakaibang tanong",
+        "distinctAnswers": "Dapat magkakaiba ang tatlong sagot"
+      }
+    },
+    "recovery": {
+      "title": "Sagutin ang iyong mga tanong",
+      "description": "Sagutin ang tatlong tanong para sa {{email}}, saka pumili ng bagong password.",
+      "answer": "Sagot",
+      "newPassword": "Bagong password",
+      "confirmPassword": "Kumpirmahin ang bagong password",
+      "submit": "I-reset ang password",
+      "back": "Gumamit ng ibang email",
+      "success": "Napalitan na ang iyong password. Maaari ka nang mag-sign in.",
+      "failed": "Hindi tinanggap ang mga sagot. Suriin at subukang muli.",
+      "tooMany": "Napakaraming pagsubok. Subukang muli pagkalipas ng 30 minuto, o magtanong sa System Administrator.",
+      "noQuestionsHint": "Kung hindi ka pa nakapagtakda ng mga tanong sa pagbawi, hilingin sa System Administrator na magtakda ng pansamantalang password para sa iyo.",
+      "useQuestions": "Gamitin na lang ang mga tanong sa seguridad"
+    },
+    "admin": {
+      "label": "Mga tanong sa pagbawi ng password",
+      "set": "Naitakda na",
+      "notSet": "Hindi pa naitakda",
+      "clear": "Burahin",
+      "confirmTitle": "Burahin ang mga tanong sa pagbawi?",
+      "confirmMessage": "Kailangang itakda muli ni {{name}} ang mga tanong bago niya mabawi ang sarili niyang password.",
+      "cleared": "Nabura ang mga tanong sa pagbawi"
+    },
+    "catalog": {
+      "q01": "Ano ang buong apelyido ng nanay mo noong dalaga pa siya?",
+      "q02": "Ano ang pangalan ng una mong alagang hayop?",
+      "q03": "Sa anong bayan o barangay ipinanganak ang nanay mo?",
+      "q04": "Ano ang pangalan ng paaralan mo noong elementarya?",
+      "q05": "Ano ang palayaw mo noong bata ka?",
+      "q06": "Ano ang pangalan ng pinakamatanda mong pinsan?",
+      "q07": "Ano ang tatak o kulay ng una mong bisikleta o sasakyan?",
+      "q08": "Ano ang pangalan ng kalye kung saan ka lumaki?",
+      "q09": "Ano ang pangalan ng matalik mong kaibigan noong elementarya?",
+      "q10": "Ano ang una mong trabaho?"
     }
   },
   "password": {

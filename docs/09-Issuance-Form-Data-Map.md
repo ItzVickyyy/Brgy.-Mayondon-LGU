@@ -154,6 +154,12 @@ Rules while `enabled` is true (while it is false everything works as before, sta
 
 API: `GET /api/v1/barangay-ids/series/status` (admin and staff; `{enabled, preview}`), `GET` and `PUT /api/v1/barangay-ids/series` (administrator only, permission `id.override`). A change writes the audit action `id_series.update` (module `records`; details: changed field names, `numbering` on or off, `next_number`) and nothing when nothing changed. Saving also sets `counter_year` to the current year.
 
+### `security_answers` (recovery by security questions, patch 69)
+
+Columns: `user_id` (FK `user.id`, ON DELETE CASCADE), `question_id` (`q01` to `q10`, 8 characters), `answer_hash` (Argon2 of `"<question_id>:<normalised answer>"`), `updated_at`; primary key (`user_id`, `question_id`). A person has either 0 rows (not set) or exactly 3. Saving replaces the old rows. Migration `b5d2f8a6c391`; no data change. The question wording lives in the language files (`securityQuestions.catalog`), the ids are fixed in `backend/app/core/security_questions.py` and `frontend/src/lib/securityQuestions.ts`.
+
+API: `GET` and `PUT /api/v1/users/me/security-questions` (own account; `PUT` needs `current_password`, exactly 3 different ids, 3 different answers); `GET` and `DELETE /api/v1/users/{id}/security-questions` (administrator only; `{configured}`; not for yourself); signed out: `POST /api/v1/password-recovery/questions` and `POST /api/v1/password-recovery/reset`. Settings: `RECOVERY_QUESTIONS_MAX_FAILED_ATTEMPTS` (5), `RECOVERY_QUESTIONS_LOCKOUT_MINUTES` (30), `RECOVERY_QUESTIONS_MAX_FAILED_ATTEMPTS_PER_IP` (30); the counters reuse the `PasswordRecoveryRateLimit` buckets (kinds `questions-email` and `questions-ip`). Audit actions: `auth.recovery_questions_set`, `auth.recovery_failed`, `auth.recovery_success`, `auth.recovery_reset_by_admin`.
+
 ### Not designed yet (waiting on the client)
 
 - **Family, beneficiary and sector-detail fields (D-20):** no table until the client says which fields they need. Sector membership itself already exists (`resident_sectors`); the Family & Sector tab reads it through `GET /api/v1/residents/sector-summary` (active residents per sector, no new table).

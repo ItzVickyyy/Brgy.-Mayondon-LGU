@@ -20,6 +20,8 @@ API = settings.API_V1_STR
 PUBLIC_ALWAYS = {
     ("POST", f"{API}/login/access-token"),
     ("POST", f"{API}/password-recovery"),
+    ("POST", f"{API}/password-recovery/questions"),  # decoys for unknown accounts
+    ("POST", f"{API}/password-recovery/reset"),  # needs all three answers
     ("POST", f"{API}/reset-password/"),
     ("POST", f"{API}/users/signup"),  # refused unless USERS_OPEN_REGISTRATION
     ("GET", f"{API}/utils/health-check/"),

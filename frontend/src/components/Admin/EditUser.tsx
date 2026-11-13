@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import type { TFunction } from "i18next"
 import { Pencil } from "lucide-react"
 import { useMemo, useState } from "react"
@@ -7,7 +7,12 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
 
-import { type UserPublic, UsersService } from "@/client"
+import {
+  SecurityQuestionsService,
+  type UserPublic,
+  UsersService,
+} from "@/client"
+import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { formControlClass } from "@/components/Common/formStyles"
 import {
   modalBody,
@@ -103,6 +108,30 @@ const EditUser = ({
       reset_to_default_password: false,
       unlock: false,
     },
+  })
+
+  const [clearOpen, setClearOpen] = useState(false)
+  const questionsKey = ["security-questions", "user", user.id]
+  const questionsStatus = useQuery({
+    queryKey: questionsKey,
+    queryFn: async () =>
+      (
+        await SecurityQuestionsService.questionsReadUserSecurityQuestions({
+          path: { user_id: user.id },
+        })
+      ).data,
+    enabled: isOpen && !isEditingSelf,
+  })
+  const clearQuestions = useMutation({
+    mutationFn: () =>
+      SecurityQuestionsService.questionsClearUserSecurityQuestions({
+        path: { user_id: user.id },
+      }),
+    onSuccess: () => {
+      showSuccessToast(t("securityQuestions.admin.cleared"))
+      queryClient.invalidateQueries({ queryKey: questionsKey })
+    },
+    onError: handleError.bind(showErrorToast),
   })
 
   const mutation = useMutation({
@@ -280,6 +309,30 @@ const EditUser = ({
                       )}
                     />
                   )}
+                  <div
+                    className="flex min-h-11 flex-wrap items-center justify-between gap-2 rounded-md border bg-background px-3 py-2 sm:col-span-2"
+                    data-testid="user-security-questions"
+                  >
+                    <span className="text-sm">
+                      {t("securityQuestions.admin.label")}:{" "}
+                      <strong>
+                        {questionsStatus.data?.configured
+                          ? t("securityQuestions.admin.set")
+                          : t("securityQuestions.admin.notSet")}
+                      </strong>
+                    </span>
+                    {questionsStatus.data?.configured ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="min-h-11 sm:min-h-8"
+                        onClick={() => setClearOpen(true)}
+                      >
+                        {t("securityQuestions.admin.clear")}
+                      </Button>
+                    ) : null}
+                  </div>
                   <FormField
                     control={form.control}
                     name="reset_to_default_password"
@@ -370,6 +423,20 @@ const EditUser = ({
             </DialogFooter>
           </form>
         </Form>
+        <ConfirmDialog
+          open={clearOpen}
+          onOpenChange={setClearOpen}
+          title={t("securityQuestions.admin.confirmTitle")}
+          description={t("securityQuestions.admin.confirmMessage", {
+            name: user.full_name || user.email,
+          })}
+          confirmLabel={t("securityQuestions.admin.clear")}
+          destructive
+          onConfirm={() => {
+            setClearOpen(false)
+            clearQuestions.mutate()
+          }}
+        />
       </DialogContent>
     </Dialog>
   )

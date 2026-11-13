@@ -1884,6 +1884,48 @@ export type RecordsOverview = {
 };
 
 /**
+ * RecoveryQuestions
+ */
+export type RecoveryQuestions = {
+    /**
+     * Question Ids
+     */
+    question_ids: Array<string>;
+};
+
+/**
+ * RecoveryQuestionsRequest
+ */
+export type RecoveryQuestionsRequest = {
+    /**
+     * Email
+     */
+    email: string;
+};
+
+/**
+ * RecoveryReset
+ */
+export type RecoveryReset = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Answers
+     */
+    answers: [
+        SecurityAnswerIn,
+        SecurityAnswerIn,
+        SecurityAnswerIn
+    ];
+    /**
+     * New Password
+     */
+    new_password: string;
+};
+
+/**
  * ReportExportedRequest
  *
  * What the browser reports just before it saves or prints a report.
@@ -2362,6 +2404,68 @@ export type SectorSummary = {
      * Residents With Sector
      */
     residents_with_sector: number;
+};
+
+/**
+ * SecurityAnswerIn
+ */
+export type SecurityAnswerIn = {
+    /**
+     * Question Id
+     */
+    question_id: string;
+    /**
+     * Answer
+     */
+    answer: string;
+};
+
+/**
+ * SecurityQuestionsConfigured
+ */
+export type SecurityQuestionsConfigured = {
+    /**
+     * Configured
+     */
+    configured: boolean;
+};
+
+/**
+ * SecurityQuestionsSet
+ *
+ * Body of PUT /users/me/security-questions: exactly three questions.
+ */
+export type SecurityQuestionsSet = {
+    /**
+     * Current Password
+     */
+    current_password: string;
+    /**
+     * Answers
+     */
+    answers: [
+        SecurityAnswerIn,
+        SecurityAnswerIn,
+        SecurityAnswerIn
+    ];
+};
+
+/**
+ * SecurityQuestionsStatus
+ */
+export type SecurityQuestionsStatus = {
+    /**
+     * Configured
+     */
+    configured: boolean;
+    /**
+     * Question Ids
+     */
+    question_ids?: Array<string>;
+    /**
+     * Updated At
+     */
+    updated_at?: string | null;
 };
 
 /**
@@ -2921,6 +3025,157 @@ export type loginResetPasswordResponses = {
 };
 
 export type loginResetPasswordResponse = loginResetPasswordResponses[keyof loginResetPasswordResponses];
+
+export type securityQuestionsReadMySecurityQuestionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/security-questions';
+};
+
+export type securityQuestionsReadMySecurityQuestionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SecurityQuestionsStatus;
+};
+
+export type securityQuestionsReadMySecurityQuestionsResponse = securityQuestionsReadMySecurityQuestionsResponses[keyof securityQuestionsReadMySecurityQuestionsResponses];
+
+export type securityQuestionsSetMySecurityQuestionsData = {
+    body: SecurityQuestionsSet;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/security-questions';
+};
+
+export type securityQuestionsSetMySecurityQuestionsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type securityQuestionsSetMySecurityQuestionsError = securityQuestionsSetMySecurityQuestionsErrors[keyof securityQuestionsSetMySecurityQuestionsErrors];
+
+export type securityQuestionsSetMySecurityQuestionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type securityQuestionsSetMySecurityQuestionsResponse = securityQuestionsSetMySecurityQuestionsResponses[keyof securityQuestionsSetMySecurityQuestionsResponses];
+
+export type securityQuestionsClearUserSecurityQuestionsData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/security-questions';
+};
+
+export type securityQuestionsClearUserSecurityQuestionsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type securityQuestionsClearUserSecurityQuestionsError = securityQuestionsClearUserSecurityQuestionsErrors[keyof securityQuestionsClearUserSecurityQuestionsErrors];
+
+export type securityQuestionsClearUserSecurityQuestionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type securityQuestionsClearUserSecurityQuestionsResponse = securityQuestionsClearUserSecurityQuestionsResponses[keyof securityQuestionsClearUserSecurityQuestionsResponses];
+
+export type securityQuestionsReadUserSecurityQuestionsData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/security-questions';
+};
+
+export type securityQuestionsReadUserSecurityQuestionsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type securityQuestionsReadUserSecurityQuestionsError = securityQuestionsReadUserSecurityQuestionsErrors[keyof securityQuestionsReadUserSecurityQuestionsErrors];
+
+export type securityQuestionsReadUserSecurityQuestionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: SecurityQuestionsConfigured;
+};
+
+export type securityQuestionsReadUserSecurityQuestionsResponse = securityQuestionsReadUserSecurityQuestionsResponses[keyof securityQuestionsReadUserSecurityQuestionsResponses];
+
+export type securityQuestionsRecoveryQuestionsData = {
+    body: RecoveryQuestionsRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/password-recovery/questions';
+};
+
+export type securityQuestionsRecoveryQuestionsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type securityQuestionsRecoveryQuestionsError = securityQuestionsRecoveryQuestionsErrors[keyof securityQuestionsRecoveryQuestionsErrors];
+
+export type securityQuestionsRecoveryQuestionsResponses = {
+    /**
+     * Successful Response
+     */
+    200: RecoveryQuestions;
+};
+
+export type securityQuestionsRecoveryQuestionsResponse = securityQuestionsRecoveryQuestionsResponses[keyof securityQuestionsRecoveryQuestionsResponses];
+
+export type securityQuestionsRecoveryResetData = {
+    body: RecoveryReset;
+    path?: never;
+    query?: never;
+    url: '/api/v1/password-recovery/reset';
+};
+
+export type securityQuestionsRecoveryResetErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type securityQuestionsRecoveryResetError = securityQuestionsRecoveryResetErrors[keyof securityQuestionsRecoveryResetErrors];
+
+export type securityQuestionsRecoveryResetResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type securityQuestionsRecoveryResetResponse = securityQuestionsRecoveryResetResponses[keyof securityQuestionsRecoveryResetResponses];
 
 export type usersReadUsersData = {
     body?: never;

@@ -239,7 +239,9 @@
       "keep_days": "kept for days",
       "numbering": "automatic numbering",
       "next_number": "next number",
-      "id_number_source": "number from"
+      "id_number_source": "number from",
+      "question_ids": "questions",
+      "method": "method"
     },
     "modules": {
       "records": "Resident Records",
@@ -297,7 +299,11 @@
       "auth": {
         "login": "Signed in",
         "login_failed": "Sign-in failed",
-        "secrets_rotate": "System secrets changed"
+        "secrets_rotate": "System secrets changed",
+        "recovery_questions_set": "Recovery questions set",
+        "recovery_failed": "Password recovery failed",
+        "recovery_success": "Password recovered with questions",
+        "recovery_reset_by_admin": "Recovery questions cleared by administrator"
       },
       "user": {
         "create": "Account created",
@@ -1987,6 +1993,73 @@
       "cancelEdit": "Cancel Edit",
       "saving": "Saving...",
       "saveChanges": "Save Changes"
+    }
+  },
+  "securityQuestions": {
+    "title": "Password recovery questions",
+    "cardDescription": "Three private questions let you reset your own password if you forget it, with no e-mail or administrator needed.",
+    "statusSet": "Questions are set (last changed {{date}}).",
+    "statusNotSet": "Questions are not set yet.",
+    "setUp": "Set up questions",
+    "change": "Change questions",
+    "banner": {
+      "admin": "Set your password recovery questions. If you forget your password, they are the only way to recover this administrator account without the server computer.",
+      "staff": "Set your password recovery questions so you can reset your own password if you forget it.",
+      "action": "Set up now",
+      "dismiss": "Not now"
+    },
+    "dialog": {
+      "title": "Password recovery questions",
+      "description": "Choose three different questions and type the answers. Only you should know them. Answers ignore capital letters, accents and punctuation.",
+      "question": "Question {{n}}",
+      "choose": "Choose a question",
+      "answer": "Answer {{n}}",
+      "currentPassword": "Your current password",
+      "currentPasswordHelp": "We ask for it to confirm that it is you.",
+      "save": "Save questions",
+      "cancel": "Cancel",
+      "saved": "Recovery questions saved",
+      "validation": {
+        "required": "This is required",
+        "answerMin": "Use at least two letters or digits",
+        "distinctQuestions": "Choose three different questions",
+        "distinctAnswers": "The three answers must be different"
+      }
+    },
+    "recovery": {
+      "title": "Answer your questions",
+      "description": "Answer all three questions for {{email}}, then choose a new password.",
+      "answer": "Answer",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "submit": "Reset password",
+      "back": "Use a different email",
+      "success": "Your password was changed. You can sign in now.",
+      "failed": "The answers were not accepted. Check them and try again.",
+      "tooMany": "Too many attempts. Try again in 30 minutes, or ask the System Administrator.",
+      "noQuestionsHint": "If you never set recovery questions, ask the System Administrator to set a temporary password for you.",
+      "useQuestions": "Use security questions instead"
+    },
+    "admin": {
+      "label": "Password recovery questions",
+      "set": "Set",
+      "notSet": "Not set",
+      "clear": "Clear",
+      "confirmTitle": "Clear recovery questions?",
+      "confirmMessage": "{{name}} will have to set the questions again before they can recover their own password.",
+      "cleared": "Recovery questions cleared"
+    },
+    "catalog": {
+      "q01": "What is your mother's full maiden name?",
+      "q02": "What was the name of your first pet?",
+      "q03": "In which town or barangay was your mother born?",
+      "q04": "What was the name of your elementary school?",
+      "q05": "What was your nickname as a child?",
+      "q06": "What is the first name of your oldest cousin?",
+      "q07": "What was the make or color of your first bicycle or vehicle?",
+      "q08": "What was the name of the street where you grew up?",
+      "q09": "What was the name of your best friend in grade school?",
+      "q10": "What was the first job you ever had?"
     }
   },
   "password": {

@@ -31,6 +31,11 @@ class Settings(BaseSettings):
     PASSWORD_RECOVERY_WINDOW_MINUTES: int = Field(default=15, gt=0)
     PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_EMAIL: int = Field(default=5, gt=0)
     PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_IP: int = Field(default=30, gt=0)
+    # Offline recovery by security questions (step 13). Five wrong answers lock
+    # recovery for that account for 30 minutes; sign-in itself is not locked.
+    RECOVERY_QUESTIONS_MAX_FAILED_ATTEMPTS: int = Field(default=5, gt=0)
+    RECOVERY_QUESTIONS_LOCKOUT_MINUTES: int = Field(default=30, gt=0)
+    RECOVERY_QUESTIONS_MAX_FAILED_ATTEMPTS_PER_IP: int = Field(default=30, gt=0)
     FRONTEND_HOST: str = "http://localhost:5173"
     # Comma-separated trusted origins, useful for production and selected previews.
     # FRONTEND_HOST remains as a backwards-compatible local/default origin.

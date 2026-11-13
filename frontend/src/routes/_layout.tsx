@@ -19,6 +19,7 @@ import { Footer } from "@/components/Common/Footer"
 import { IdleSignOut } from "@/components/Common/IdleSignOut"
 import { KeyboardShortcuts } from "@/components/Common/KeyboardShortcuts"
 import { AppShellSkeleton } from "@/components/Common/PageSkeleton"
+import { SecurityQuestionsBanner } from "@/components/SecurityQuestions/SecurityQuestionsBanner"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
 import { User } from "@/components/Sidebar/User"
 import { useTheme } from "@/components/theme-provider"
@@ -193,6 +194,7 @@ function Layout() {
             <User user={currentUser} compact />
           </div>
         </header>
+        <SecurityQuestionsBanner />
         <main
           id="main-content"
           tabIndex={-1}

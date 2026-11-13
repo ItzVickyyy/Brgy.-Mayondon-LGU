@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { activityActivityOptionsData, activityActivityOptionsResponses, activityListActivityData, activityListActivityErrors, activityListActivityResponses, backupsCreateBackupData, backupsCreateBackupResponses, backupsDownloadBackupData, backupsDownloadBackupErrors, backupsDownloadBackupResponses, backupsListBackupsData, backupsListBackupsErrors, backupsListBackupsResponses, backupsRequestRestoreData, backupsRequestRestoreErrors, backupsRequestRestoreResponses, backupsVerifyBackupData, backupsVerifyBackupErrors, backupsVerifyBackupResponses, barangayIdsGetSeriesData, barangayIdsGetSeriesResponses, barangayIdsListBarangayIdsData, barangayIdsListBarangayIdsErrors, barangayIdsListBarangayIdsResponses, barangayIdsSeriesStatusData, barangayIdsSeriesStatusResponses, barangayIdsUpdateSeriesData, barangayIdsUpdateSeriesErrors, barangayIdsUpdateSeriesResponses, dashboardDashboardData, dashboardDashboardErrors, dashboardDashboardResponses, importsCancelImportData, importsCancelImportErrors, importsCancelImportResponses, importsCommitImportData, importsCommitImportErrors, importsCommitImportResponses, importsDownloadErrorReportData, importsDownloadErrorReportErrors, importsDownloadErrorReportResponses, importsListImportsData, importsListImportsErrors, importsListImportsResponses, importsListRowsData, importsListRowsErrors, importsListRowsResponses, importsReadImportData, importsReadImportErrors, importsReadImportResponses, importsSetMappingData, importsSetMappingErrors, importsSetMappingResponses, importsUploadImportData, importsUploadImportErrors, importsUploadImportResponses, issuancesArchiveData, issuancesArchiveErrors, issuancesArchiveResponses, issuancesCorrectData, issuancesCorrectErrors, issuancesCorrectResponses, issuancesCreateIssuanceData, issuancesCreateIssuanceErrors, issuancesCreateIssuanceResponses, issuancesDiscardDraftData, issuancesDiscardDraftErrors, issuancesDiscardDraftResponses, issuancesGetIssuanceData, issuancesGetIssuanceErrors, issuancesGetIssuanceResponses, issuancesIssueData, issuancesIssueErrors, issuancesIssueResponses, issuancesListIssuancesData, issuancesListIssuancesErrors, issuancesListIssuancesResponses, issuancesRecordPrintData, issuancesRecordPrintErrors, issuancesRecordPrintResponses, issuancesRestoreData, issuancesRestoreErrors, issuancesRestoreResponses, issuancesUpdateDraftData, issuancesUpdateDraftErrors, issuancesUpdateDraftResponses, issuancesVoidData, issuancesVoidErrors, issuancesVoidResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, lookupsCreateStreetData, lookupsCreateStreetErrors, lookupsCreateStreetResponses, lookupsCreateTricycleAssociationData, lookupsCreateTricycleAssociationErrors, lookupsCreateTricycleAssociationResponses, lookupsDeleteStreetData, lookupsDeleteStreetErrors, lookupsDeleteStreetResponses, lookupsDeleteTricycleAssociationData, lookupsDeleteTricycleAssociationErrors, lookupsDeleteTricycleAssociationResponses, lookupsListDocumentTypesData, lookupsListDocumentTypesResponses, lookupsListIdTypesData, lookupsListIdTypesResponses, lookupsListIssuancePurposesData, lookupsListIssuancePurposesResponses, lookupsListSectorsData, lookupsListSectorsResponses, lookupsListStreetsData, lookupsListStreetsResponses, lookupsListTricycleAssociationsData, lookupsListTricycleAssociationsResponses, lookupsRenameStreetData, lookupsRenameStreetErrors, lookupsRenameStreetResponses, lookupsRenameTricycleAssociationData, lookupsRenameTricycleAssociationErrors, lookupsRenameTricycleAssociationResponses, officialsCreateOfficialData, officialsCreateOfficialErrors, officialsCreateOfficialResponses, officialsGetOfficialData, officialsGetOfficialErrors, officialsGetOfficialResponses, officialsListOfficialsData, officialsListOfficialsErrors, officialsListOfficialsResponses, officialsUpdateOfficialData, officialsUpdateOfficialErrors, officialsUpdateOfficialResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, reportsAccountActivityData, reportsAccountActivityErrors, reportsAccountActivityResponses, reportsExpiringData, reportsExpiringErrors, reportsExpiringResponses, reportsIssuancesByPurposeData, reportsIssuancesByPurposeErrors, reportsIssuancesByPurposeResponses, reportsIssuancesByTypeData, reportsIssuancesByTypeErrors, reportsIssuancesByTypeResponses, reportsRecordExportData, reportsRecordExportErrors, reportsRecordExportResponses, reportsRecordsOverviewData, reportsRecordsOverviewResponses, reportsSummaryData, reportsSummaryErrors, reportsSummaryResponses, residentsArchiveResidentData, residentsArchiveResidentErrors, residentsArchiveResidentResponses, residentsClearVoterProofData, residentsClearVoterProofErrors, residentsClearVoterProofResponses, residentsCreateResidentData, residentsCreateResidentErrors, residentsCreateResidentResponses, residentsDeletePhotoData, residentsDeletePhotoErrors, residentsDeletePhotoResponses, residentsGetPhotoData, residentsGetPhotoErrors, residentsGetPhotoResponses, residentsListResidentsData, residentsListResidentsErrors, residentsListResidentsResponses, residentsPutPhotoData, residentsPutPhotoErrors, residentsPutPhotoResponses, residentsReadResidentData, residentsReadResidentErrors, residentsReadResidentResponses, residentsRestoreResidentData, residentsRestoreResidentErrors, residentsRestoreResidentResponses, residentsSectorSummaryData, residentsSectorSummaryResponses, residentsUpdateResidentData, residentsUpdateResidentErrors, residentsUpdateResidentResponses, residentsVerifyVoterProofData, residentsVerifyVoterProofErrors, residentsVerifyVoterProofResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
+import type { activityActivityOptionsData, activityActivityOptionsResponses, activityListActivityData, activityListActivityErrors, activityListActivityResponses, backupsCreateBackupData, backupsCreateBackupResponses, backupsDownloadBackupData, backupsDownloadBackupErrors, backupsDownloadBackupResponses, backupsListBackupsData, backupsListBackupsErrors, backupsListBackupsResponses, backupsRequestRestoreData, backupsRequestRestoreErrors, backupsRequestRestoreResponses, backupsVerifyBackupData, backupsVerifyBackupErrors, backupsVerifyBackupResponses, barangayIdsGetSeriesData, barangayIdsGetSeriesResponses, barangayIdsListBarangayIdsData, barangayIdsListBarangayIdsErrors, barangayIdsListBarangayIdsResponses, barangayIdsSeriesStatusData, barangayIdsSeriesStatusResponses, barangayIdsUpdateSeriesData, barangayIdsUpdateSeriesErrors, barangayIdsUpdateSeriesResponses, dashboardDashboardData, dashboardDashboardErrors, dashboardDashboardResponses, importsCancelImportData, importsCancelImportErrors, importsCancelImportResponses, importsCommitImportData, importsCommitImportErrors, importsCommitImportResponses, importsDownloadErrorReportData, importsDownloadErrorReportErrors, importsDownloadErrorReportResponses, importsListImportsData, importsListImportsErrors, importsListImportsResponses, importsListRowsData, importsListRowsErrors, importsListRowsResponses, importsReadImportData, importsReadImportErrors, importsReadImportResponses, importsSetMappingData, importsSetMappingErrors, importsSetMappingResponses, importsUploadImportData, importsUploadImportErrors, importsUploadImportResponses, issuancesArchiveData, issuancesArchiveErrors, issuancesArchiveResponses, issuancesCorrectData, issuancesCorrectErrors, issuancesCorrectResponses, issuancesCreateIssuanceData, issuancesCreateIssuanceErrors, issuancesCreateIssuanceResponses, issuancesDiscardDraftData, issuancesDiscardDraftErrors, issuancesDiscardDraftResponses, issuancesGetIssuanceData, issuancesGetIssuanceErrors, issuancesGetIssuanceResponses, issuancesIssueData, issuancesIssueErrors, issuancesIssueResponses, issuancesListIssuancesData, issuancesListIssuancesErrors, issuancesListIssuancesResponses, issuancesRecordPrintData, issuancesRecordPrintErrors, issuancesRecordPrintResponses, issuancesRestoreData, issuancesRestoreErrors, issuancesRestoreResponses, issuancesUpdateDraftData, issuancesUpdateDraftErrors, issuancesUpdateDraftResponses, issuancesVoidData, issuancesVoidErrors, issuancesVoidResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, lookupsCreateStreetData, lookupsCreateStreetErrors, lookupsCreateStreetResponses, lookupsCreateTricycleAssociationData, lookupsCreateTricycleAssociationErrors, lookupsCreateTricycleAssociationResponses, lookupsDeleteStreetData, lookupsDeleteStreetErrors, lookupsDeleteStreetResponses, lookupsDeleteTricycleAssociationData, lookupsDeleteTricycleAssociationErrors, lookupsDeleteTricycleAssociationResponses, lookupsListDocumentTypesData, lookupsListDocumentTypesResponses, lookupsListIdTypesData, lookupsListIdTypesResponses, lookupsListIssuancePurposesData, lookupsListIssuancePurposesResponses, lookupsListSectorsData, lookupsListSectorsResponses, lookupsListStreetsData, lookupsListStreetsResponses, lookupsListTricycleAssociationsData, lookupsListTricycleAssociationsResponses, lookupsRenameStreetData, lookupsRenameStreetErrors, lookupsRenameStreetResponses, lookupsRenameTricycleAssociationData, lookupsRenameTricycleAssociationErrors, lookupsRenameTricycleAssociationResponses, officialsCreateOfficialData, officialsCreateOfficialErrors, officialsCreateOfficialResponses, officialsGetOfficialData, officialsGetOfficialErrors, officialsGetOfficialResponses, officialsListOfficialsData, officialsListOfficialsErrors, officialsListOfficialsResponses, officialsUpdateOfficialData, officialsUpdateOfficialErrors, officialsUpdateOfficialResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, reportsAccountActivityData, reportsAccountActivityErrors, reportsAccountActivityResponses, reportsExpiringData, reportsExpiringErrors, reportsExpiringResponses, reportsIssuancesByPurposeData, reportsIssuancesByPurposeErrors, reportsIssuancesByPurposeResponses, reportsIssuancesByTypeData, reportsIssuancesByTypeErrors, reportsIssuancesByTypeResponses, reportsRecordExportData, reportsRecordExportErrors, reportsRecordExportResponses, reportsRecordsOverviewData, reportsRecordsOverviewResponses, reportsSummaryData, reportsSummaryErrors, reportsSummaryResponses, residentsArchiveResidentData, residentsArchiveResidentErrors, residentsArchiveResidentResponses, residentsClearVoterProofData, residentsClearVoterProofErrors, residentsClearVoterProofResponses, residentsCreateResidentData, residentsCreateResidentErrors, residentsCreateResidentResponses, residentsDeletePhotoData, residentsDeletePhotoErrors, residentsDeletePhotoResponses, residentsGetPhotoData, residentsGetPhotoErrors, residentsGetPhotoResponses, residentsListResidentsData, residentsListResidentsErrors, residentsListResidentsResponses, residentsPutPhotoData, residentsPutPhotoErrors, residentsPutPhotoResponses, residentsReadResidentData, residentsReadResidentErrors, residentsReadResidentResponses, residentsRestoreResidentData, residentsRestoreResidentErrors, residentsRestoreResidentResponses, residentsSectorSummaryData, residentsSectorSummaryResponses, residentsUpdateResidentData, residentsUpdateResidentErrors, residentsUpdateResidentResponses, residentsVerifyVoterProofData, residentsVerifyVoterProofErrors, residentsVerifyVoterProofResponses, securityQuestionsClearUserSecurityQuestionsData, securityQuestionsClearUserSecurityQuestionsErrors, securityQuestionsClearUserSecurityQuestionsResponses, securityQuestionsReadMySecurityQuestionsData, securityQuestionsReadMySecurityQuestionsResponses, securityQuestionsReadUserSecurityQuestionsData, securityQuestionsReadUserSecurityQuestionsErrors, securityQuestionsReadUserSecurityQuestionsResponses, securityQuestionsRecoveryQuestionsData, securityQuestionsRecoveryQuestionsErrors, securityQuestionsRecoveryQuestionsResponses, securityQuestionsRecoveryResetData, securityQuestionsRecoveryResetErrors, securityQuestionsRecoveryResetResponses, securityQuestionsSetMySecurityQuestionsData, securityQuestionsSetMySecurityQuestionsErrors, securityQuestionsSetMySecurityQuestionsResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -94,6 +94,109 @@ export class LoginService {
             security: [{ scheme: 'bearer', type: 'http' }],
             url: '/api/v1/password-recovery-html-content/{email}',
             ...options
+        });
+    }
+}
+
+export class SecurityQuestionsService {
+    /**
+     * Read My Security Questions
+     *
+     * Which questions the signed-in person chose (never the answers).
+     */
+    public static questionsReadMySecurityQuestions<ThrowOnError extends boolean = true>(options?: Options<securityQuestionsReadMySecurityQuestionsData, ThrowOnError>) {
+        return (options?.client ?? client).get<securityQuestionsReadMySecurityQuestionsResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/me/security-questions',
+            ...options
+        });
+    }
+    
+    /**
+     * Set My Security Questions
+     *
+     * Choose three questions and answers. Needs the current password.
+     */
+    public static questionsSetMySecurityQuestions<ThrowOnError extends boolean = true>(options: Options<securityQuestionsSetMySecurityQuestionsData, ThrowOnError>) {
+        return (options.client ?? client).put<securityQuestionsSetMySecurityQuestionsResponses, securityQuestionsSetMySecurityQuestionsErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/me/security-questions',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Clear User Security Questions
+     *
+     * Administrator only: clear another person's questions (they set them again).
+     */
+    public static questionsClearUserSecurityQuestions<ThrowOnError extends boolean = true>(options: Options<securityQuestionsClearUserSecurityQuestionsData, ThrowOnError>) {
+        return (options.client ?? client).delete<securityQuestionsClearUserSecurityQuestionsResponses, securityQuestionsClearUserSecurityQuestionsErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/{user_id}/security-questions',
+            ...options
+        });
+    }
+    
+    /**
+     * Read User Security Questions
+     *
+     * Administrator only: are this person's questions set? (never the answers)
+     */
+    public static questionsReadUserSecurityQuestions<ThrowOnError extends boolean = true>(options: Options<securityQuestionsReadUserSecurityQuestionsData, ThrowOnError>) {
+        return (options.client ?? client).get<securityQuestionsReadUserSecurityQuestionsResponses, securityQuestionsReadUserSecurityQuestionsErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/{user_id}/security-questions',
+            ...options
+        });
+    }
+    
+    /**
+     * Recovery Questions
+     *
+     * Show the three questions of an account.
+     *
+     * An unknown account, or one with no questions set, gets three questions
+     * chosen from the e-mail itself, so this page never reveals which accounts
+     * exist. Same limiter as the e-mail recovery request.
+     */
+    public static questionsRecoveryQuestions<ThrowOnError extends boolean = true>(options: Options<securityQuestionsRecoveryQuestionsData, ThrowOnError>) {
+        return (options.client ?? client).post<securityQuestionsRecoveryQuestionsResponses, securityQuestionsRecoveryQuestionsErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/password-recovery/questions',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Recovery Reset
+     *
+     * Check all three answers and set a new password.
+     *
+     * Every failure looks the same. Five wrong attempts lock recovery for the
+     * account (and 30 per computer) for 30 minutes; normal sign-in is not locked.
+     */
+    public static questionsRecoveryReset<ThrowOnError extends boolean = true>(options: Options<securityQuestionsRecoveryResetData, ThrowOnError>) {
+        return (options.client ?? client).post<securityQuestionsRecoveryResetResponses, securityQuestionsRecoveryResetErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/password-recovery/reset',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
         });
     }
 }

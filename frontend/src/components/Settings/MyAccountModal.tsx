@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { UsersService, type UserUpdateMe } from "@/client"
+import { SecurityQuestionsCard } from "@/components/SecurityQuestions/SecurityQuestionsCard"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import { Button } from "@/components/ui/button"
 import {
@@ -669,6 +670,7 @@ export function MyAccountModal({
                       <ChangePassword />
                     </div>
                   </div>
+                  <SecurityQuestionsCard />
                 </section>
               </>
             )}
