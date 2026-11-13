@@ -56,9 +56,10 @@ import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { cn } from "@/lib/utils"
 
 type StatusFilter = "all" | "issued" | "draft" | "voided"
+type HistoryView = "active" | "archived"
 type PendingAction = {
   item: IssuanceListItem
-  action: "void" | "discard" | "correct"
+  action: "void" | "discard" | "correct" | "archive" | "restore"
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50]
@@ -241,6 +242,27 @@ function IssuanceDetailsDialog({
                     wide
                   />
                 ) : null}
+                {detail.archived_at ? (
+                  <>
+                    <DetailRow
+                      label={t("issuances.history.details.archivedOn")}
+                      value={formatLocaleDate(new Date(detail.archived_at), {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                        timeZone: "Asia/Manila",
+                      })}
+                    />
+                    <DetailRow
+                      label={t("issuances.history.details.archivedBy")}
+                      value={detail.archived_by_name}
+                    />
+                    <DetailRow
+                      label={t("issuances.history.details.archiveReason")}
+                      value={detail.archive_reason}
+                      wide
+                    />
+                  </>
+                ) : null}
               </dl>
             )}
             </div>
@@ -277,6 +299,7 @@ export function IssuanceHistory({
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
+  const [view, setView] = useState<HistoryView>("active")
   const [dateFrom, setDateFrom] = useState("")
   const [dateTo, setDateTo] = useState("")
   const [pageIndex, setPageIndex] = useState(0)
@@ -296,7 +319,15 @@ export function IssuanceHistory({
   // biome-ignore lint/correctness/useExhaustiveDependencies: the filters are the trigger.
   useEffect(() => {
     setPageIndex(0)
-  }, [debouncedSearch, typeFilter, statusFilter, dateFrom, dateTo, pageSize])
+  }, [
+    debouncedSearch,
+    typeFilter,
+    statusFilter,
+    view,
+    dateFrom,
+    dateTo,
+    pageSize,
+  ])
 
   const documentTypesQuery = useQuery({
     queryKey: ["lookups", "document-types"],
@@ -324,6 +355,7 @@ export function IssuanceHistory({
       debouncedSearch,
       typeFilter,
       statusFilter,
+      view,
       dateFrom,
       dateTo,
       pageIndex,
@@ -336,6 +368,7 @@ export function IssuanceHistory({
             q: debouncedSearch || undefined,
             document_type_id: typeFilter ? Number(typeFilter) : undefined,
             status: statusFilter,
+            archived: view === "archived" ? "only" : "exclude",
             date_from: dateFrom || undefined,
             date_to: dateTo || undefined,
             skip: pageIndex * pageSize,
@@ -377,6 +410,8 @@ export function IssuanceHistory({
     void queryClient.invalidateQueries({ queryKey: ["barangay-ids"] })
     void queryClient.invalidateQueries({ queryKey: ["barangay-id-count"] })
     void queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+    void queryClient.invalidateQueries({ queryKey: ["residents"] })
+    void queryClient.invalidateQueries({ queryKey: ["resident-issuances"] })
   }
 
   const actionMutation = useMutation({
@@ -390,6 +425,17 @@ export function IssuanceHistory({
           path: { issuance_id: item.id },
           body: { reason },
         })
+        return undefined
+      }
+      if (action === "archive") {
+        await IssuancesService.archive({
+          path: { issuance_id: item.id },
+          body: { reason },
+        })
+        return undefined
+      }
+      if (action === "restore") {
+        await IssuancesService.restore({ path: { issuance_id: item.id } })
         return undefined
       }
       if (action === "correct")
@@ -408,6 +454,14 @@ export function IssuanceHistory({
             : t("issuances.history.notices.correctionCreatedDocument"),
         )
         onContinueDraft(createdDraft.id)
+      } else if (action === "archive" || action === "restore") {
+        onNotice(
+          item.reference_no
+            ? t(`issuances.history.notices.${action}d`, {
+                reference: item.reference_no,
+              })
+            : t(`issuances.history.notices.${action}dDocument`),
+        )
       } else {
         onNotice(
           action === "void"
@@ -517,6 +571,25 @@ export function IssuanceHistory({
                 {t("issuances.history.resetFilters")}
               </Button>
             ) : null}
+          </div>
+          <div
+            className="flex flex-wrap gap-2 border-t px-4 py-3 sm:px-5"
+            role="tablist"
+            aria-label={t("issuances.history.views.aria")}
+          >
+            {(["active", "archived"] as const).map((id) => (
+              <Button
+                key={id}
+                type="button"
+                role="tab"
+                variant={view === id ? "default" : "ghost"}
+                aria-selected={view === id}
+                onClick={() => setView(id)}
+                className="min-h-11 rounded-md px-3"
+              >
+                {t(`issuances.history.views.${id}`)}
+              </Button>
+            ))}
           </div>
           <div className="flex flex-col gap-3 border-t bg-muted/30 p-4 sm:px-5">
           {/* One row on wide screens: search and the two dropdowns flex, the
@@ -635,7 +708,8 @@ export function IssuanceHistory({
                 <tbody className="divide-y">
                   {items.map((item) => {
                     const isDraft = item.status === "draft"
-                    const isIssued = item.status === "issued"
+                    const isArchived = Boolean(item.archived_at)
+                    const isIssued = item.status === "issued" && !isArchived
                     const canReprint = [
                       "BARANGAY_CLEARANCE",
                       "FRANCHISE_CLEARANCE",
@@ -699,6 +773,30 @@ export function IssuanceHistory({
                           >
                             {label}
                           </Badge>
+                          {isArchived ? (
+                            <p className="mt-1 text-xs text-muted-foreground">
+                              {item.archived_by_name
+                                ? t("issuances.history.archivedLine", {
+                                    date: formatLocaleDate(
+                                      new Date(item.archived_at ?? ""),
+                                      {
+                                        dateStyle: "medium",
+                                        timeZone: "Asia/Manila",
+                                      },
+                                    ),
+                                    name: item.archived_by_name,
+                                  })
+                                : t("issuances.history.archivedLineNoName", {
+                                    date: formatLocaleDate(
+                                      new Date(item.archived_at ?? ""),
+                                      {
+                                        dateStyle: "medium",
+                                        timeZone: "Asia/Manila",
+                                      },
+                                    ),
+                                  })}
+                            </p>
+                          ) : null}
                         </td>
                         <td className="px-4 py-3 align-middle sm:px-5 sticky right-0 bg-card row-hover-cell sticky-edge">
                           <RowActions
@@ -765,6 +863,20 @@ export function IssuanceHistory({
                                 onSelect: () =>
                                   setPending({ item, action: "discard" }),
                               },
+                              {
+                                label: t("issuances.history.actions.archive"),
+                                adminOnly: true,
+                                hidden: isDraft || isArchived,
+                                onSelect: () =>
+                                  setPending({ item, action: "archive" }),
+                              },
+                              {
+                                label: t("issuances.history.actions.restore"),
+                                adminOnly: true,
+                                hidden: !isArchived,
+                                onSelect: () =>
+                                  setPending({ item, action: "restore" }),
+                              },
                             ]}
                           />
                         </td>
@@ -775,8 +887,16 @@ export function IssuanceHistory({
               </table>
               {items.length === 0 ? (
                 <EmptyState
-                  title={t("issuances.history.empty.title")}
-                  description={t("issuances.history.empty.description")}
+                  title={
+                    view === "archived"
+                      ? t("issuances.history.empty.archivedTitle")
+                      : t("issuances.history.empty.title")
+                  }
+                  description={
+                    view === "archived"
+                      ? t("issuances.history.empty.archivedDescription")
+                      : t("issuances.history.empty.description")
+                  }
                   action={
                     hasFilters ? (
                       <Button
@@ -833,7 +953,11 @@ export function IssuanceHistory({
             ? t("issuances.history.confirm.voidTitle")
             : pending?.action === "correct"
               ? t("issuances.history.confirm.correctTitle")
-              : t("issuances.history.confirm.discardTitle")
+              : pending?.action === "archive"
+                ? t("issuances.history.confirm.archiveTitle")
+                : pending?.action === "restore"
+                  ? t("issuances.history.confirm.restoreTitle")
+                  : t("issuances.history.confirm.discardTitle")
         }
         description={
           pending
@@ -843,7 +967,15 @@ export function IssuanceHistory({
                 })
               : pending.action === "correct"
                 ? t("issuances.history.confirm.correctDescription")
-                : t("issuances.history.confirm.discardDescription")
+                : pending.action === "archive"
+                  ? t("issuances.history.confirm.archiveDescription", {
+                      reference: pending.item.reference_no ?? "",
+                    })
+                  : pending.action === "restore"
+                    ? t("issuances.history.confirm.restoreDescription", {
+                        reference: pending.item.reference_no ?? "",
+                      })
+                    : t("issuances.history.confirm.discardDescription")
             : ""
         }
         confirmLabel={
@@ -851,11 +983,19 @@ export function IssuanceHistory({
             ? t("issuances.history.confirm.voidConfirm")
             : pending?.action === "correct"
               ? t("issuances.history.confirm.correctConfirm")
-              : t("issuances.history.confirm.discardConfirm")
+              : pending?.action === "archive"
+                ? t("issuances.history.confirm.archiveConfirm")
+                : pending?.action === "restore"
+                  ? t("issuances.history.confirm.restoreConfirm")
+                  : t("issuances.history.confirm.discardConfirm")
         }
-        destructive={pending?.action !== "correct"}
+        destructive={
+          pending?.action === "void" || pending?.action === "discard"
+        }
         reason={
-          pending?.action === "void" || pending?.action === "correct"
+          pending?.action === "void" ||
+          pending?.action === "correct" ||
+          pending?.action === "archive"
             ? "required"
             : "none"
         }

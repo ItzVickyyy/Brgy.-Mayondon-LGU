@@ -202,6 +202,8 @@
     "youWithName": "{{name}} (Ikaw)",
     "detailKeys": {
       "duplicate_of": "Ulit ng",
+      "original_status": "dating",
+      "archive_reason": "dahilan ng pag-archive",
       "fields": "mga field",
       "field": "field",
       "file_name": "pangalan ng file",
@@ -265,7 +267,9 @@
         "correct": "Nagsimula ang pagwawasto",
         "void": "Na-void ang dokumento",
         "print": "Na-print ang dokumento",
-        "view_sensitive": "Tiningnan ang pinaghihigpitang detalye"
+        "view_sensitive": "Tiningnan ang pinaghihigpitang detalye",
+        "archive": "Na-archive ang dokumento",
+        "restore": "Naibalik ang dokumento"
       },
       "barangay_id": {
         "list": "Tiningnan ang listahan ng Barangay ID"
@@ -905,11 +909,20 @@
         "status": "Katayuan",
         "actions": "Mga aksyon"
       },
+      "views": {
+        "aria": "Tanaw ng kasaysayan",
+        "active": "Mga aktibong talaan",
+        "archived": "Naka-archive"
+      },
+      "archivedLine": "Na-archive noong {{date}} ni {{name}}",
+      "archivedLineNoName": "Na-archive noong {{date}}",
       "notNumbered": "Wala pang numero",
       "expired": "Nag-expire na",
       "empty": {
         "title": "Walang nahanap na talaan",
-        "description": "Subukan ang ibang paghahanap o uri ng dokumento, o gumawa ng bagong isyu."
+        "description": "Subukan ang ibang paghahanap o uri ng dokumento, o gumawa ng bagong isyu.",
+        "archivedTitle": "Walang naka-archive na talaan",
+        "archivedDescription": "Dito iniingatan ang mga talaang ina-archive ng administrator. Walang binubura."
       },
       "actions": {
         "view": "Tingnan",
@@ -922,7 +935,9 @@
         "printChoose": "Piliin kung paano i-print para kay {{name}}",
         "printData": "Data lamang (naka-print nang papel)",
         "printForm": "Form at data (blangkong papel)",
-        "discard": "Itapon ang draft"
+        "discard": "Itapon ang draft",
+        "archive": "I-archive",
+        "restore": "Ibalik"
       },
       "confirm": {
         "voidTitle": "I-void ang isyu?",
@@ -933,14 +948,24 @@
         "correctConfirm": "Gumawa ng correction draft",
         "discardTitle": "Itapon ang draft?",
         "discardDescription": "Itapon ang nakabinbing draft na ito? Made-delete ito.",
-        "discardConfirm": "Itapon ang draft"
+        "discardConfirm": "Itapon ang draft",
+        "archiveTitle": "I-archive ang dokumentong ito?",
+        "archiveDescription": "I-archive ang {{reference}}? Aalis ito sa listahan ng kasaysayan, mga ulat at dashboard pero hindi binubura o binabago. Maaari mo itong ibalik. Kailangan ng dahilan.",
+        "archiveConfirm": "I-archive",
+        "restoreTitle": "Ibalik ang dokumentong ito?",
+        "restoreDescription": "Ibalik ang {{reference}}? Babalik ito nang eksakto kung ano ito. Hindi ito nag-iisyu ng bagong dokumento.",
+        "restoreConfirm": "Ibalik"
       },
       "notices": {
         "correctionCreated": "Nakagawa ng correction draft para sa {{reference}}.",
         "correctionCreatedDocument": "Nakagawa ng correction draft para sa dokumentong ito.",
         "voided": "Na-void ang {{reference}}.",
         "voidedDocument": "Na-void ang dokumento.",
-        "discarded": "Naitapon ang draft."
+        "discarded": "Naitapon ang draft.",
+        "archived": "Na-archive ang {{reference}}.",
+        "archivedDocument": "Na-archive ang dokumento.",
+        "restored": "Naibalik ang {{reference}}.",
+        "restoredDocument": "Naibalik ang dokumento."
       },
       "details": {
         "draftNotNumbered": "Draft, wala pang numero",
@@ -957,7 +982,10 @@
         "freeOfCharge": "Libre",
         "issuedAt": "Naisyu noong",
         "correctionReason": "Dahilan ng pagtatama",
-        "voidReason": "Dahilan ng pag-void"
+        "voidReason": "Dahilan ng pag-void",
+        "archivedOn": "Na-archive noong",
+        "archivedBy": "Na-archive ni",
+        "archiveReason": "Dahilan ng pag-archive"
       }
     },
     "new": {
@@ -2108,6 +2136,7 @@
     "issuance": {
       "missingSections": "Pakikumpleto ang mga sumusunod: {{sections}}.",
       "missingResidentFields": "May kulang na impormasyon sa rekord ng residente: {{fields}}.",
+      "archived": "Naka-archive ang dokumentong ito. Ibalik muna ito.",
       "duplicateSameDay": "May dokumentong ito na ang residenteng ito na may parehong petsa ({{reference}}). Kumpirmahin para mag-isyu ng isa pang kopya.",
       "possibleDuplicate": "May nakatala nang residente na kapareho ang pangalan at petsa ng kapanganakan. Hanapin muna siya sa listahan sa halip na magdagdag ng panibagong rekord.",
       "tricycleMismatch": "Nakatala na ang plate number o motor number na ito kasama ng ibang detalye ng traysikel. Suriin ang mga numero, tatak, kulay, at asosasyon.",

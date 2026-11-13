@@ -48,7 +48,11 @@ def count_by_type(
 ) -> dict[int, int]:
     stmt = (
         select(col(Issuance.document_type_id), sa_func.count())
-        .where(Issuance.status == status, *in_range(range_))
+        .where(
+            Issuance.status == status,
+            col(Issuance.archived_at).is_(None),
+            *in_range(range_),
+        )
         .group_by(col(Issuance.document_type_id))
     )
     if corrections_only:
@@ -61,7 +65,11 @@ def monthly_issued(session: Session, range_: DateRange) -> dict[str, int]:
     month = sa_func.to_char(col(Issuance.issue_date), "YYYY-MM")
     rows = session.exec(
         select(month, sa_func.count())
-        .where(Issuance.status == "issued", *in_range(range_))
+        .where(
+            Issuance.status == "issued",
+            col(Issuance.archived_at).is_(None),
+            *in_range(range_),
+        )
         .group_by(month)
     ).all()
     return dict(rows)
@@ -69,7 +77,9 @@ def monthly_issued(session: Session, range_: DateRange) -> dict[str, int]:
 
 def first_issue_date(session: Session) -> date | None:
     return session.exec(
-        select(sa_func.min(col(Issuance.issue_date))).where(Issuance.status == "issued")
+        select(sa_func.min(col(Issuance.issue_date))).where(
+            Issuance.status == "issued", col(Issuance.archived_at).is_(None)
+        )
     ).one()
 
 
@@ -99,6 +109,7 @@ def expiring_records(
         select(col(Issuance.id).label("id"))
         .where(
             Issuance.status == "issued",
+            col(Issuance.archived_at).is_(None),
             col(Issuance.expires_on).is_not(None),
             col(Issuance.document_type_id).in_(type_ids.values()),
         )

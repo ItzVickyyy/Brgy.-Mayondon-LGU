@@ -52,6 +52,8 @@ export function issuanceErrorMessage(error: unknown): string {
       return i18n.t("apiErrors.issuance.duplicateSameDay", {
         reference: String(body.reference_no ?? ""),
       })
+    case "archived":
+      return i18n.t("apiErrors.issuance.archived")
     case "possible_duplicate":
       return i18n.t("apiErrors.issuance.possibleDuplicate")
     case "tricycle_mismatch":

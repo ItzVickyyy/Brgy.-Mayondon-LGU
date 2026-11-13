@@ -96,6 +96,7 @@ def _id_statuses(
         )
         .where(
             Issuance.status == "issued",
+            col(Issuance.archived_at).is_(None),
             col(Issuance.resident_id).in_(resident_ids),
         )
         .distinct(col(Issuance.resident_id))

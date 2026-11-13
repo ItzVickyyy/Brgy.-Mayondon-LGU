@@ -50,6 +50,8 @@ const detailKeyLabels = {
   role: "activity.detailKeys.role",
   reason: "activity.detailKeys.reason",
   duplicate_of: "activity.detailKeys.duplicate_of",
+  original_status: "activity.detailKeys.original_status",
+  archive_reason: "activity.detailKeys.archive_reason",
   created: "activity.detailKeys.created",
   updated: "activity.detailKeys.updated",
   skipped: "activity.detailKeys.skipped",

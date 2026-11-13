@@ -161,7 +161,11 @@ def issuances_by_purpose(
         select(col(IssuancePurpose.id), col(IssuancePurpose.name), sa_func.count())
         .select_from(Issuance)
         .outerjoin(IssuancePurpose, col(IssuancePurpose.id) == col(Issuance.purpose_id))
-        .where(Issuance.status == "issued", *in_range(resolve_period(period, today)))
+        .where(
+            Issuance.status == "issued",
+            col(Issuance.archived_at).is_(None),
+            *in_range(resolve_period(period, today)),
+        )
         .group_by(col(IssuancePurpose.id), col(IssuancePurpose.name))
         .order_by(sa_func.count().desc(), col(IssuancePurpose.name))
     ).all()
@@ -226,6 +230,7 @@ def account_activity(
     issued_stmt = (
         select(col(Issuance.issued_by_user_id), sa_func.count())
         .where(Issuance.status.in_(["issued", "voided"]))  # type: ignore[attr-defined]
+        .where(col(Issuance.archived_at).is_(None))
         .where(col(Issuance.issued_at) < end)
         .group_by(col(Issuance.issued_by_user_id))
     )

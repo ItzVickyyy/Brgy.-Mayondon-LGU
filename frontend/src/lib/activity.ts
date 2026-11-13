@@ -18,6 +18,8 @@ const activityKeys = {
   "issuance.issue": "activity.actions.issuance.issue",
   "issuance.correct": "activity.actions.issuance.correct",
   "issuance.void": "activity.actions.issuance.void",
+  "issuance.archive": "activity.actions.issuance.archive",
+  "issuance.restore": "activity.actions.issuance.restore",
   "issuance.print": "activity.actions.issuance.print",
   "issuance.view_sensitive": "activity.actions.issuance.view_sensitive",
   "official.create": "activity.actions.official.create",

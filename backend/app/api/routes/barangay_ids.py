@@ -57,7 +57,7 @@ def list_barangay_ids(
         .join(
             IssuanceBarangayId, col(IssuanceBarangayId.issuance_id) == col(Issuance.id)
         )
-        .where(Issuance.status == "issued")
+        .where(Issuance.status == "issued", col(Issuance.archived_at).is_(None))
         .distinct(col(Issuance.resident_id))
         .order_by(col(Issuance.resident_id), col(Issuance.issued_at).desc())
         .subquery()

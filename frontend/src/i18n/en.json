@@ -202,6 +202,8 @@
     "youWithName": "{{name}} (You)",
     "detailKeys": {
       "duplicate_of": "Repeat of",
+      "original_status": "was",
+      "archive_reason": "archive reason",
       "fields": "fields",
       "field": "field",
       "file_name": "file name",
@@ -265,7 +267,9 @@
         "correct": "Correction started",
         "void": "Document voided",
         "print": "Document printed",
-        "view_sensitive": "Restricted detail viewed"
+        "view_sensitive": "Restricted detail viewed",
+        "archive": "Document archived",
+        "restore": "Document restored"
       },
       "barangay_id": {
         "list": "Barangay ID list viewed"
@@ -905,11 +909,20 @@
         "status": "Status",
         "actions": "Actions"
       },
+      "views": {
+        "aria": "History view",
+        "active": "Active records",
+        "archived": "Archived"
+      },
+      "archivedLine": "Archived {{date}} by {{name}}",
+      "archivedLineNoName": "Archived {{date}}",
       "notNumbered": "Not numbered yet",
       "expired": "Expired",
       "empty": {
         "title": "No records found",
-        "description": "Try a different search or document type, or create a new issuance."
+        "description": "Try a different search or document type, or create a new issuance.",
+        "archivedTitle": "No archived records",
+        "archivedDescription": "Records an administrator archives are kept here. Nothing is ever deleted."
       },
       "actions": {
         "view": "View",
@@ -922,7 +935,9 @@
         "printChoose": "Choose how to print for {{name}}",
         "printData": "Data only (pre-printed paper)",
         "printForm": "Form and data (blank paper)",
-        "discard": "Discard draft"
+        "discard": "Discard draft",
+        "archive": "Archive",
+        "restore": "Restore"
       },
       "confirm": {
         "voidTitle": "Void issuance?",
@@ -933,14 +948,24 @@
         "correctConfirm": "Create correction draft",
         "discardTitle": "Discard draft?",
         "discardDescription": "Discard this pending draft? It will be deleted.",
-        "discardConfirm": "Discard draft"
+        "discardConfirm": "Discard draft",
+        "archiveTitle": "Archive this document?",
+        "archiveDescription": "Archive {{reference}}? It leaves the History list, reports and the dashboard but is not deleted or changed. You can restore it. A reason is required.",
+        "archiveConfirm": "Archive",
+        "restoreTitle": "Restore this document?",
+        "restoreDescription": "Restore {{reference}}? It returns exactly as it was. This does not issue a new document.",
+        "restoreConfirm": "Restore"
       },
       "notices": {
         "correctionCreated": "A correction draft was created for {{reference}}.",
         "correctionCreatedDocument": "A correction draft was created for this document.",
         "voided": "{{reference}} was voided.",
         "voidedDocument": "The document was voided.",
-        "discarded": "The draft was discarded."
+        "discarded": "The draft was discarded.",
+        "archived": "{{reference}} was archived.",
+        "archivedDocument": "The document was archived.",
+        "restored": "{{reference}} was restored.",
+        "restoredDocument": "The document was restored."
       },
       "details": {
         "draftNotNumbered": "Draft, not yet numbered",
@@ -957,7 +982,10 @@
         "freeOfCharge": "Free of charge",
         "issuedAt": "Issued at",
         "correctionReason": "Correction reason",
-        "voidReason": "Void reason"
+        "voidReason": "Void reason",
+        "archivedOn": "Archived on",
+        "archivedBy": "Archived by",
+        "archiveReason": "Archive reason"
       }
     },
     "new": {
@@ -2108,6 +2136,7 @@
     "issuance": {
       "missingSections": "Please fill in: {{sections}}.",
       "missingResidentFields": "The resident record is missing: {{fields}}.",
+      "archived": "This document is archived. Restore it first.",
       "duplicateSameDay": "This resident already has this document dated the same day ({{reference}}). Confirm to issue another copy.",
       "possibleDuplicate": "A resident with the same name and birthdate is already on file. Search for them above instead of adding them again.",
       "tricycleMismatch": "This plate or motor number is already on file with different tricycle details. Check the numbers, make, color and association.",

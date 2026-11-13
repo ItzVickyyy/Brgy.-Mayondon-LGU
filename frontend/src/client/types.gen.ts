@@ -1090,6 +1090,22 @@ export type IssuanceListItem = {
      * Created At
      */
     created_at: string;
+    /**
+     * Archived At
+     */
+    archived_at?: string | null;
+    /**
+     * Archived By Name
+     */
+    archived_by_name?: string | null;
+    /**
+     * Archive Reason
+     */
+    archive_reason?: string | null;
+    /**
+     * Original Status
+     */
+    original_status?: string | null;
 };
 
 /**
@@ -1148,6 +1164,22 @@ export type IssuancePublic = {
      * Created At
      */
     created_at: string;
+    /**
+     * Archived At
+     */
+    archived_at?: string | null;
+    /**
+     * Archived By Name
+     */
+    archived_by_name?: string | null;
+    /**
+     * Archive Reason
+     */
+    archive_reason?: string | null;
+    /**
+     * Original Status
+     */
+    original_status?: string | null;
     /**
      * Remarks
      */
@@ -3716,6 +3748,12 @@ export type issuancesListIssuancesData = {
          */
         status?: 'draft' | 'issued' | 'voided' | 'all';
         /**
+         * Archived
+         *
+         * Archived records: hidden (default), only those, or both
+         */
+        archived?: 'exclude' | 'only' | 'include';
+        /**
          * Document Type Id
          */
         document_type_id?: number | null;
@@ -4002,6 +4040,66 @@ export type issuancesVoidResponses = {
 };
 
 export type issuancesVoidResponse = issuancesVoidResponses[keyof issuancesVoidResponses];
+
+export type issuancesArchiveData = {
+    body: ReasonRequest;
+    path: {
+        /**
+         * Issuance Id
+         */
+        issuance_id: string;
+    };
+    query?: never;
+    url: '/api/v1/issuances/{issuance_id}/archive';
+};
+
+export type issuancesArchiveErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type issuancesArchiveError = issuancesArchiveErrors[keyof issuancesArchiveErrors];
+
+export type issuancesArchiveResponses = {
+    /**
+     * Successful Response
+     */
+    200: IssuancePublic;
+};
+
+export type issuancesArchiveResponse = issuancesArchiveResponses[keyof issuancesArchiveResponses];
+
+export type issuancesRestoreData = {
+    body?: never;
+    path: {
+        /**
+         * Issuance Id
+         */
+        issuance_id: string;
+    };
+    query?: never;
+    url: '/api/v1/issuances/{issuance_id}/restore';
+};
+
+export type issuancesRestoreErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type issuancesRestoreError = issuancesRestoreErrors[keyof issuancesRestoreErrors];
+
+export type issuancesRestoreResponses = {
+    /**
+     * Successful Response
+     */
+    200: IssuancePublic;
+};
+
+export type issuancesRestoreResponse = issuancesRestoreResponses[keyof issuancesRestoreResponses];
 
 export type barangayIdsListBarangayIdsData = {
     body?: never;

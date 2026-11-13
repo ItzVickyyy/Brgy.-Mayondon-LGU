@@ -322,6 +322,7 @@ ADMIN_ONLY = {
     Permission.RECORDS_IMPORT,
     Permission.RECORDS_ARCHIVE,
     Permission.ISSUANCE_VOID,
+    Permission.ISSUANCE_ARCHIVE,
     Permission.ID_OVERRIDE,
     Permission.ACTIVITY_VIEW_ALL,
     Permission.REPORTS_VIEW,

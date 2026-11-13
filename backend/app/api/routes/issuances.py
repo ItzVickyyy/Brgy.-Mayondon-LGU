@@ -2,8 +2,9 @@
 
 Supported document types are listed in ``DOCUMENT_RULES`` (models_issuance.py);
 a type without an entry answers 501.
-Every route needs ISSUANCE_WRITE (Staff and System Administrator), except void,
-which needs ISSUANCE_VOID (System Administrator only). Barangay ID drafts also
+Every route needs ISSUANCE_WRITE (Staff and System Administrator), except void
+and archive/restore, which need ISSUANCE_VOID and ISSUANCE_ARCHIVE (System
+Administrator only). Barangay ID drafts also
 need ID_WRITE (docs/05), checked once the document type is known.
 
 Life of a document:
@@ -12,6 +13,12 @@ An issued row is never edited or deleted. ``POST /{id}/correct`` makes a new
 draft that points back at the issued one; issuing that draft completes the
 correction. Drafts can be edited and discarded freely and are not audited;
 issue, correct and void each add an audit row in the same transaction.
+Archiving (``POST /{id}/archive``) only hides an issued or voided record from
+the default History list, reports, the dashboard and the expiring report. It
+never changes ``status`` and never deletes; ``/restore`` brings it back as it
+was. An archived record cannot be voided, corrected or printed until restored,
+and it still counts for the one-per-resident, same-day, OR-number, ID-number
+and franchise checks, because hiding a record does not cancel the document.
 Audit details hold field names and reference numbers, never personal values.
 """
 
@@ -89,6 +96,7 @@ router = APIRouter(prefix="/issuances", tags=["issuances"])
 
 WriteUser = Annotated[User, Depends(require_permission(Permission.ISSUANCE_WRITE))]
 VoidUser = Annotated[User, Depends(require_permission(Permission.ISSUANCE_VOID))]
+ArchiveUser = Annotated[User, Depends(require_permission(Permission.ISSUANCE_ARCHIVE))]
 
 MODULE = "issuance"
 
@@ -148,6 +156,17 @@ def _require_draft(issuance: Issuance) -> None:
         raise HTTPException(
             status_code=409,
             detail="Only a draft can be edited. Use correct to change an issued document",
+        )
+
+
+def _require_not_archived(issuance: Issuance) -> None:
+    if issuance.archived_at is not None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "archived",
+                "message": "This document is archived. Restore it first",
+            },
         )
 
 
@@ -429,7 +448,10 @@ def _apply_sections(
 
 
 def _item_fields(
-    issuance: Issuance, doc_code: str, resident: Resident
+    issuance: Issuance,
+    doc_code: str,
+    resident: Resident,
+    archiver_name: str | None = None,
 ) -> dict[str, Any]:
     return {
         **issuance.model_dump(
@@ -445,11 +467,25 @@ def _item_fields(
                 "issued_at",
                 "corrects_issuance_id",
                 "created_at",
+                "archived_at",
+                "archive_reason",
+                "original_status",
             }
         ),
         "document_type_code": doc_code,
         "resident_name": build_full_name(resident),
+        "archived_by_name": archiver_name,
     }
+
+
+def _archiver_name(session: Session, issuance: Issuance) -> str | None:
+    """Who archived it: the full name, else the e-mail; None if unknown."""
+    if issuance.archived_at is None or issuance.archived_by_user_id is None:
+        return None
+    account = session.get(User, issuance.archived_by_user_id)
+    if account is None:
+        return None
+    return account.full_name or account.email
 
 
 def _public(
@@ -461,7 +497,9 @@ def _public(
     resident = session.get(Resident, issuance.resident_id)
     assert doc_type is not None and resident is not None
     data: dict[str, Any] = {
-        **_item_fields(issuance, doc_type.code, resident),
+        **_item_fields(
+            issuance, doc_type.code, resident, _archiver_name(session, issuance)
+        ),
         **issuance.model_dump(
             include={
                 "remarks",
@@ -532,6 +570,10 @@ def list_issuances(
         Query(max_length=100, description="Reference number or resident name words"),
     ] = None,
     status: Literal["draft", "issued", "voided", "all"] = "all",
+    archived: Annotated[
+        Literal["exclude", "only", "include"],
+        Query(description="Archived records: hidden (default), only those, or both"),
+    ] = "exclude",
     document_type_id: int | None = None,
     resident_id: uuid.UUID | None = None,
     date_from: Annotated[
@@ -548,10 +590,15 @@ def list_issuances(
     if date_from is not None and date_to is not None and date_from > date_to:
         raise HTTPException(status_code=422, detail="date_from cannot be after date_to")
     stmt = (
-        select(Issuance, DocumentType.code, Resident)
+        select(Issuance, DocumentType.code, Resident, User)
         .join(DocumentType, col(DocumentType.id) == col(Issuance.document_type_id))
         .join(Resident, col(Resident.id) == col(Issuance.resident_id))
+        .join(User, col(User.id) == col(Issuance.archived_by_user_id), isouter=True)
     )
+    if archived == "exclude":
+        stmt = stmt.where(col(Issuance.archived_at).is_(None))
+    elif archived == "only":
+        stmt = stmt.where(col(Issuance.archived_at).is_not(None))
     if status != "all":
         stmt = stmt.where(Issuance.status == status)
     if document_type_id is not None:
@@ -578,8 +625,12 @@ def list_issuances(
     ).all()
     return IssuancesPublic(
         data=[
-            IssuanceListItem.model_validate(_item_fields(i, code, r))
-            for i, code, r in rows
+            IssuanceListItem.model_validate(
+                _item_fields(
+                    i, code, r, (a.full_name or a.email) if a is not None else None
+                )
+            )
+            for i, code, r, a in rows
         ],
         count=count,
     )
@@ -922,6 +973,11 @@ def _void_replaced_original(session: Session, correction: Issuance, user: User) 
     ).first()
     if original is None or original.status != "issued":
         return
+    if original.archived_at is not None:
+        raise HTTPException(
+            status_code=409,
+            detail="The document being corrected is archived. Restore it first",
+        )
     why = correction.correction_reason or ""
     reason = f"Replaced by correction {correction.reference_no}. Reason: {why}"
     original.status = "voided"
@@ -1153,6 +1209,7 @@ def correct(
         raise HTTPException(
             status_code=409, detail="Only an issued document can be corrected"
         )
+    _require_not_archived(original)
     original_type = session.get(DocumentType, original.document_type_id)
     assert original_type is not None
     _require_id_permission(user, original_type.code)
@@ -1227,6 +1284,7 @@ def record_print(
         raise HTTPException(
             status_code=409, detail="Only an issued document can be printed"
         )
+    _require_not_archived(issuance)
     earlier = session.exec(
         select(sa_func.count())
         .select_from(AuditLog)
@@ -1265,6 +1323,7 @@ def void(
         raise HTTPException(
             status_code=409, detail="Only an issued document can be voided"
         )
+    _require_not_archived(issuance)
     issuance.status = "voided"
     issuance.void_reason = body.reason
     issuance.updated_at = datetime.now(UTC)
@@ -1278,6 +1337,94 @@ def void(
         record_id=issuance.id,
         reason=body.reason,
         details={"reference_no": issuance.reference_no},
+    )
+    session.commit()
+    session.refresh(issuance)
+    return _public(session, issuance)
+
+
+@router.post("/{issuance_id}/archive", response_model=IssuancePublic)
+def archive(
+    issuance_id: uuid.UUID, body: ReasonRequest, session: SessionDep, user: ArchiveUser
+) -> IssuancePublic:
+    """Hide an issued or voided record. Nothing is deleted and ``status`` stays.
+
+    The status the record had is stored next to who, when and why. A draft is
+    not archived: it is discarded instead.
+    """
+    issuance = session.exec(
+        select(Issuance).where(Issuance.id == issuance_id).with_for_update()
+    ).first()
+    if issuance is None:
+        raise HTTPException(status_code=404, detail="Issuance not found")
+    if issuance.archived_at is not None:
+        raise HTTPException(status_code=409, detail="This document is already archived")
+    if issuance.status not in ("issued", "voided"):
+        raise HTTPException(
+            status_code=409,
+            detail="Only an issued or voided document can be archived",
+        )
+    now = datetime.now(UTC)
+    issuance.archived_at = now
+    issuance.archived_by_user_id = user.id
+    issuance.archive_reason = body.reason
+    issuance.original_status = issuance.status
+    issuance.updated_at = now
+    session.add(issuance)
+    record_audit_event(
+        session,
+        action="issuance.archive",
+        actor=user,
+        module=MODULE,
+        record_type="issuance",
+        record_id=issuance.id,
+        reason=body.reason,
+        details={
+            "reference_no": issuance.reference_no,
+            "original_status": issuance.original_status,
+        },
+    )
+    session.commit()
+    session.refresh(issuance)
+    return _public(session, issuance)
+
+
+@router.post("/{issuance_id}/restore", response_model=IssuancePublic)
+def restore(
+    issuance_id: uuid.UUID, session: SessionDep, user: ArchiveUser
+) -> IssuancePublic:
+    """Bring an archived record back exactly as it was.
+
+    This is not an issue: no new reference number, no new issue date and no
+    ``issuance.issue`` row. The audit row keeps the original archive time and
+    reason.
+    """
+    issuance = session.exec(
+        select(Issuance).where(Issuance.id == issuance_id).with_for_update()
+    ).first()
+    if issuance is None:
+        raise HTTPException(status_code=404, detail="Issuance not found")
+    if issuance.archived_at is None:
+        raise HTTPException(status_code=409, detail="This document is not archived")
+    details: dict[str, Any] = {
+        "reference_no": issuance.reference_no,
+        "original_status": issuance.original_status,
+        "archive_reason": issuance.archive_reason,
+    }
+    issuance.archived_at = None
+    issuance.archived_by_user_id = None
+    issuance.archive_reason = None
+    issuance.original_status = None
+    issuance.updated_at = datetime.now(UTC)
+    session.add(issuance)
+    record_audit_event(
+        session,
+        action="issuance.restore",
+        actor=user,
+        module=MODULE,
+        record_type="issuance",
+        record_id=issuance.id,
+        details=details,
     )
     session.commit()
     session.refresh(issuance)

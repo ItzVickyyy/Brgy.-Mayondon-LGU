@@ -31,6 +31,7 @@ class Permission(StrEnum):
     RECORDS_IMPORT = "records.import"  # import masterlist
     RECORDS_ARCHIVE = "records.archive"
     ISSUANCE_VOID = "issuance.void"
+    ISSUANCE_ARCHIVE = "issuance.archive"  # hide and restore, never delete
     ID_OVERRIDE = "id.override"  # override ID validity rules
     ACTIVITY_VIEW_ALL = "activity.view_all"
     REPORTS_VIEW = "reports.view"

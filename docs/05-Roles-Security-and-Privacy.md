@@ -33,6 +33,7 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 | Records Management: archive | No | Allowed |
 | Issuance: create, review, print, correct with reason | Allowed | Allowed |
 | Issuance: void/cancel | No | Allowed |
+| Issuance: archive and restore (hide, never delete) | No | Allowed |
 | Records Management, Barangay IDs tab: list and view | Allowed | Allowed |
 | Barangay IDs: create, renew, print (done through Issuance Management, ID document type) | Allowed | Allowed |
 | Records Management, Barangay IDs: override validity rules | No | Allowed |

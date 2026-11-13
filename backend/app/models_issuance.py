@@ -182,6 +182,17 @@ class Issuance(SQLModel, table=True):
             "(corrects_issuance_id IS NULL) = (correction_reason IS NULL)",
             name="ck_issuances_correction_reason",
         ),
+        # Archiving hides a record; it never changes ``status``. The account may
+        # later be deleted (SET NULL), so only time, reason and the status the
+        # record had are required.
+        CheckConstraint(
+            "(archived_at IS NULL AND archive_reason IS NULL "
+            "AND original_status IS NULL AND archived_by_user_id IS NULL) OR "
+            "(archived_at IS NOT NULL AND archive_reason IS NOT NULL "
+            "AND original_status IN ('issued', 'voided') "
+            "AND original_status = status)",
+            name="ck_issuances_archive_fields",
+        ),
         Index(
             "ix_issuances_resident_type_status",
             "resident_id",
@@ -189,6 +200,11 @@ class Issuance(SQLModel, table=True):
             "status",
         ),
         Index("ix_issuances_issue_date", "issue_date"),
+        Index(
+            "ix_issuances_archived_at",
+            "archived_at",
+            postgresql_where=text("archived_at IS NOT NULL"),
+        ),
     )
 
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
@@ -218,6 +234,14 @@ class Issuance(SQLModel, table=True):
     )
     correction_reason: str | None = None
     void_reason: str | None = None
+    archived_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True))
+    )
+    archived_by_user_id: uuid.UUID | None = Field(
+        default=None, foreign_key="user.id", ondelete="SET NULL"
+    )
+    archive_reason: str | None = None
+    original_status: str | None = Field(default=None, max_length=10)
     created_by_user_id: uuid.UUID | None = Field(
         default=None, foreign_key="user.id", ondelete="SET NULL"
     )
@@ -793,6 +817,11 @@ class IssuanceListItem(SQLModel):
     issued_at: datetime | None
     corrects_issuance_id: uuid.UUID | None
     created_at: datetime
+    # Filled only while the record is archived.
+    archived_at: datetime | None = None
+    archived_by_name: str | None = None
+    archive_reason: str | None = None
+    original_status: str | None = None
 
 
 class IssuancePublic(IssuanceListItem):
