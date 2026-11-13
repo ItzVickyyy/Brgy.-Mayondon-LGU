@@ -499,6 +499,11 @@ export function DateField({
   function onType(text: string) {
     setTyped(text)
     setRejected(null)
+    // Deleting all the text clears the date (the form then asks for it again).
+    if (text.trim() === "") {
+      onChange("")
+      return
+    }
     const parsed = parseLooseDate(text)
     if (parsed && !(min && parsed < min) && !(max && parsed > max)) {
       onChange(parsed)

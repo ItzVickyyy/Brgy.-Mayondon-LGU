@@ -97,9 +97,11 @@ export function User({
                 <span className="block truncate text-sm font-medium">
                   {user?.full_name || user?.email || t("userMenu.fallbackName")}
                 </span>
-                <span className="block truncate text-xs font-normal text-muted-foreground">
-                  {user?.email || ""}
-                </span>
+                {user?.full_name ? (
+                  <span className="block truncate text-xs font-normal text-muted-foreground">
+                    {user.email}
+                  </span>
+                ) : null}
               </span>
             </Button>
           </DropdownMenuTrigger>
@@ -117,9 +119,11 @@ export function User({
                       user?.email ||
                       t("userMenu.fallbackName")}
                   </span>
-                  <span className="block truncate text-xs font-normal text-muted-foreground">
-                    {user?.email || ""}
-                  </span>
+                  {user?.full_name ? (
+                    <span className="block truncate text-xs font-normal text-muted-foreground">
+                      {user.email}
+                    </span>
+                  ) : null}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="sm:hidden" />
               </>

@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 import {
   ActivityService,
+  BarangayIdsService,
   DashboardService,
   IssuancesService,
   LookupsService,
@@ -946,4 +947,148 @@ test("archive: admin hides an issued document, restore brings it back unchanged"
   expect(restored.status).toBe("issued")
   expect(restored.reference_no).toBe(archived.reference_no)
   expect(await listed("exclude")).toContain(id)
+})
+
+// ------------------------------------------------ Barangay ID number series
+// Patch 65. These tests switch automatic numbering ON and the afterAll below
+// switches it OFF again, because every other test in this file assumes the
+// series is off. Keep this block LAST in the file.
+
+const seriesPrefix = `S${run}-`.toUpperCase()
+const seriesStart = 700
+let seriesFirstResidentId = ""
+
+async function idNumberOf(issuanceId: string) {
+  const stored = await issuanceApi.getIssuance(issuanceId)
+  const details = stored?.payload.details
+  return details?.type === "BARANGAY_ID" ? details.idNumber : undefined
+}
+
+async function setSeries(enabled: boolean) {
+  await BarangayIdsService.idsUpdateSeries({
+    body: {
+      prefix: seriesPrefix,
+      include_year: false,
+      digit_width: 0,
+      restart_yearly: false,
+      next_number: seriesStart,
+      enabled,
+    },
+  })
+}
+
+test.afterAll(async () => {
+  useToken(adminToken)
+  if (baseURL && adminToken) await setSeries(false).catch(() => undefined)
+})
+
+test("series: staff cannot set it up, admin can, and it starts from the chosen number", async () => {
+  useToken(staffToken)
+  expect(
+    await statusOf(
+      BarangayIdsService.idsUpdateSeries({
+        body: { prefix: "X-", next_number: 1, enabled: true },
+      }),
+    ),
+  ).toBe(403)
+  expect(await statusOf(BarangayIdsService.idsGetSeries())).toBe(403)
+
+  useToken(adminToken)
+  await setSeries(true)
+  const series = (await BarangayIdsService.idsGetSeries()).data
+  expect(series.enabled).toBe(true)
+  expect(series.next_number).toBe(seriesStart)
+
+  // Clerks can read only the on/off state and the next number to expect.
+  useToken(staffToken)
+  const status = (await BarangayIdsService.idsSeriesStatus()).data
+  expect(status.enabled).toBe(true)
+  expect(status.preview).toBe(`${seriesPrefix}${seriesStart}`)
+})
+
+test("series: an admin's new card with no number gets the next one", async () => {
+  useToken(adminToken)
+  const resident = await newResident("seriesadmin")
+  seriesFirstResidentId = resident.id
+  const issued = await issuanceApi.createIssuance(idInput(resident.id, "new"))
+  expect(issued.status).toBe("issued")
+  expect(await idNumberOf(issued.id)).toBe(`${seriesPrefix}${seriesStart}`)
+})
+
+test("series: a clerk's new card takes the number after that", async () => {
+  useToken(staffToken)
+  const resident = await newResident("seriesstaff")
+  const issued = await issuanceApi.createIssuance(idInput(resident.id, "new"))
+  expect(await idNumberOf(issued.id)).toBe(`${seriesPrefix}${seriesStart + 1}`)
+  const status = (await BarangayIdsService.idsSeriesStatus()).data
+  expect(status.preview).toBe(`${seriesPrefix}${seriesStart + 2}`)
+})
+
+test("series: a clerk cannot type a number, and nothing is used up by the refusal", async () => {
+  useToken(staffToken)
+  const resident = await newResident("seriestyped")
+  expect(
+    await statusOf(
+      issuanceApi.createIssuance(
+        idInput(resident.id, "new", { idNumber: `TYPED-${run}`.toUpperCase() }),
+      ),
+    ),
+  ).toBe(403)
+  const status = (await BarangayIdsService.idsSeriesStatus()).data
+  expect(status.preview).toBe(`${seriesPrefix}${seriesStart + 2}`)
+})
+
+test("series: a renewal keeps the resident's number", async () => {
+  useToken(staffToken)
+  const renewal = await issuanceApi.createIssuance(
+    idInput(seriesFirstResidentId, "renewal", {
+      validUntil: `${nextYear + 1}-12-31`,
+    }),
+    true, // same-day repeat, confirmed
+  )
+  expect(await idNumberOf(renewal.id)).toBe(`${seriesPrefix}${seriesStart}`)
+  const status = (await BarangayIdsService.idsSeriesStatus()).data
+  expect(status.preview).toBe(`${seriesPrefix}${seriesStart + 2}`)
+})
+
+test("series: an admin may type a number, and it is recorded as an override", async () => {
+  useToken(adminToken)
+  const resident = await newResident("seriesoverride")
+  const typed = `OVR-${run}`.toUpperCase()
+  const issued = await issuanceApi.createIssuance(
+    idInput(resident.id, "new", { idNumber: typed }),
+  )
+  expect(await idNumberOf(issued.id)).toBe(typed)
+  const rows = (await ActivityService.listActivity({ query: { limit: 50 } }))
+    .data.data
+  expect(rows.some((row) => row.action === "id_series.update")).toBe(true)
+  expect(
+    rows.some(
+      (row) =>
+        row.action === "issuance.issue" &&
+        JSON.stringify(row.details ?? {}).includes("override"),
+    ),
+  ).toBe(true)
+  expect(
+    rows.some(
+      (row) =>
+        row.action === "issuance.issue" &&
+        JSON.stringify(row.details ?? {}).includes("series"),
+    ),
+  ).toBe(true)
+})
+
+test("series: switched off again, a clerk must type the number as before", async () => {
+  useToken(adminToken)
+  await setSeries(false)
+  useToken(staffToken)
+  const resident = await newResident("seriesoff")
+  await expect(
+    issuanceApi.createIssuance(idInput(resident.id, "new")),
+  ).rejects.toMatchObject({
+    message: "Type the Barangay ID number for this card.",
+  })
+  const status = (await BarangayIdsService.idsSeriesStatus()).data
+  expect(status.enabled).toBe(false)
+  useToken(adminToken)
 })
