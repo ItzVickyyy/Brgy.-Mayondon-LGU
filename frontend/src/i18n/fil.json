@@ -303,7 +303,13 @@
         "recovery_questions_set": "Naitakda ang mga tanong sa pagbawi",
         "recovery_failed": "Nabigo ang pagbawi ng password",
         "recovery_success": "Nabawi ang password gamit ang mga tanong",
-        "recovery_reset_by_admin": "Binura ng administrator ang mga tanong sa pagbawi"
+        "recovery_reset_by_admin": "Binura ng administrator ang mga tanong sa pagbawi",
+        "mfa_enabled": "Na-on ang two-factor na pag-sign in",
+        "mfa_disabled": "Na-off ang two-factor na pag-sign in",
+        "mfa_failed": "Tinanggihan ang code ng two-factor",
+        "mfa_recovery_code_used": "Gumamit ng recovery code sa pag-sign in",
+        "mfa_codes_renewed": "Gumawa ng bagong recovery code",
+        "mfa_reset_by_admin": "Ini-off ng administrator ang two-factor"
       },
       "user": {
         "create": "Nagawa ang account",
@@ -1993,6 +1999,80 @@
       "cancelEdit": "Kanselahin ang Pag-edit",
       "saving": "Sine-save...",
       "saveChanges": "I-save ang mga Pagbabago"
+    }
+  },
+  "twoFactor": {
+    "title": "Two-factor na pag-sign in",
+    "cardDescription": "Pagkatapos ng password, hihingi rin ang pag-sign in ng 6-digit na code mula sa authenticator app sa iyong telepono. Gumagana ito kahit walang internet.",
+    "statusOn": "Naka-on ang two-factor na pag-sign in (mula {{date}}).",
+    "statusOff": "Naka-off ang two-factor na pag-sign in.",
+    "unavailable": "Hindi pa naka-set up ang two-factor na pag-sign in sa server na ito. Magtanong sa System Administrator.",
+    "codesLeft_one": "{{count}} recovery code na lang.",
+    "codesLeft_other": "{{count}} recovery code na lang.",
+    "turnOn": "I-on ang two-factor",
+    "turnOff": "I-off",
+    "newCodes": "Kumuha ng bagong recovery code",
+    "currentPassword": "Ang kasalukuyan mong password",
+    "required": "Kailangan ito",
+    "cancel": "Kanselahin",
+    "setup": {
+      "passwordTitle": "I-on ang two-factor na pag-sign in",
+      "passwordDescription": "I-type ang iyong password para magsimula. Kailangan mo ng authenticator app sa telepono (halimbawa Google Authenticator, Microsoft Authenticator o Aegis).",
+      "scanTitle": "I-scan ang code",
+      "scanDescription": "Sa authenticator app, piliin ang Add account, i-scan ang larawang ito, at i-type ang 6-digit na code na ipinapakita ng app.",
+      "codesTitle": "Itago ang iyong recovery code",
+      "codesDescription": "Kung mawala ang telepono mo, makakapag-sign in ka nang isang beses sa bawat code na ito. Ngayon lang ito ipapakita. Itago ito sa papel sa ligtas na lugar.",
+      "next": "Magpatuloy",
+      "turnOn": "I-on",
+      "qrAlt": "QR code para sa authenticator app",
+      "cannotScan": "Hindi ma-scan? I-type na lang ang key na ito sa app:",
+      "serverTime": "Oras ng server: {{time}}. Dapat parehong oras ang ipakita ng orasan ng telepono mo (hanggang isang minutong pagkakaiba) o hindi magtutugma ang mga code.",
+      "clockWarning": "Ang orasan ng computer na ito ay may agwat na mga {{minutes}} minuto sa server. Ayusin muna ang orasan ng telepono at ng server computer bago magpatuloy.",
+      "codeLabel": "6-digit na code mula sa app",
+      "enabled": "Naka-on na ang two-factor na pag-sign in"
+    },
+    "codes": {
+      "copy": "Kopyahin",
+      "download": "I-save bilang file",
+      "copied": "Nakopya ang mga recovery code",
+      "copyFailed": "Hindi makopya. Isulat na lang ang mga code.",
+      "fileHeading": "Barangay Mayondon: mga recovery code ng two-factor (isang beses lang magagamit ang bawat isa)",
+      "savedConfirm": "Naitago ko ang mga code na ito sa ligtas na lugar.",
+      "done": "Tapos na"
+    },
+    "manage": {
+      "disableTitle": "I-off ang two-factor na pag-sign in",
+      "disableDescription": "Password na lang ang hihingin sa pag-sign in. I-type ang iyong password at isang kasalukuyang code para kumpirmahin.",
+      "disableConfirm": "I-off",
+      "codesTitle": "Kumuha ng bagong recovery code",
+      "codesDescription": "Papalitan ng sampung bagong code ang luma; hindi na gagana ang mga lumang code. I-type ang iyong password at isang kasalukuyang code para kumpirmahin.",
+      "codesConfirm": "Gumawa ng bagong code",
+      "newCodesTitle": "Ang iyong bagong recovery code",
+      "newCodesDescription": "Ngayon lang ito ipapakita. Itago ito sa papel sa ligtas na lugar.",
+      "codeLabel": "Code",
+      "codeHelp": "Ang 6-digit na code mula sa app, o isang recovery code.",
+      "turnedOff": "Na-off ang two-factor na pag-sign in",
+      "codesMade": "Nakagawa ng bagong recovery code"
+    },
+    "login": {
+      "title": "Ilagay ang iyong code",
+      "subtitle": "Buksan ang authenticator app at i-type ang 6-digit na code.",
+      "codeLabel": "Code",
+      "help": "Nawala ang telepono? I-type na lang ang isa sa iyong recovery code.",
+      "submit": "I-verify",
+      "back": "Magsimula ulit gamit ang password",
+      "wrong": "Hindi tinanggap ang code. Suriin ito at subukan muli.",
+      "expired": "Natagalan ang hakbang na ito. Magsimula ulit gamit ang iyong password."
+    },
+    "admin": {
+      "label": "Two-factor na pag-sign in",
+      "on": "Naka-on",
+      "off": "Naka-off",
+      "turnOff": "I-off",
+      "adminNote": "Sa server computer lang maaaring i-reset ang two-factor ng isang administrator (tingnan ang gabay sa Deployment).",
+      "confirmTitle": "I-off ang two-factor na pag-sign in?",
+      "confirmMessage": "Password lang ang gagamitin ni {{name}} sa pag-sign in at maaari niyang i-set up muli ang two-factor. Gamitin ito kapag nawala ang telepono.",
+      "reset": "Na-off ang two-factor na pag-sign in para sa taong ito"
     }
   },
   "securityQuestions": {

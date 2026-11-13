@@ -35,6 +35,12 @@ const activityKeys = {
   "auth.recovery_success": "activity.actions.auth.recovery_success",
   "auth.recovery_reset_by_admin":
     "activity.actions.auth.recovery_reset_by_admin",
+  "auth.mfa_enabled": "activity.actions.auth.mfa_enabled",
+  "auth.mfa_disabled": "activity.actions.auth.mfa_disabled",
+  "auth.mfa_failed": "activity.actions.auth.mfa_failed",
+  "auth.mfa_recovery_code_used": "activity.actions.auth.mfa_recovery_code_used",
+  "auth.mfa_codes_renewed": "activity.actions.auth.mfa_codes_renewed",
+  "auth.mfa_reset_by_admin": "activity.actions.auth.mfa_reset_by_admin",
   "user.create": "activity.actions.user.create",
   "user.update": "activity.actions.user.update",
   "user.role_change": "activity.actions.user.role_change",

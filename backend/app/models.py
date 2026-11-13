@@ -159,6 +159,19 @@ class User(UserBase, table=True):
         default=False,
         sa_column_kwargs={"server_default": false()},
     )
+    # Two-factor sign-in (step 14). The secret is stored encrypted (see
+    # core/mfa.py) and is never part of any response model. While
+    # ``mfa_enabled`` is false a stored secret is a half-finished set-up.
+    mfa_enabled: bool = Field(
+        default=False,
+        sa_column_kwargs={"server_default": false()},
+    )
+    mfa_secret_encrypted: str | None = Field(default=None, max_length=255)
+    # The last 30-second step that was accepted: one code works only once.
+    mfa_last_step: int | None = Field(default=None)
+    mfa_enrolled_at: datetime | None = Field(
+        default=None, sa_type=DateTime(timezone=True)
+    )
 
 
 class PasswordRecoveryRateLimit(SQLModel, table=True):
@@ -172,6 +185,7 @@ class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime | None = None
     must_change_password: bool = False
+    mfa_enabled: bool = False
     # Set only while the account is locked after too many failed sign-ins.
     locked_until: datetime | None = None
 
@@ -200,10 +214,22 @@ class Token(SQLModel):
     token_type: str = "bearer"
 
 
+# Answer of the password step. Either a finished sign-in (``access_token``) or,
+# for a person with two-factor on, only ``mfa_token``: a short single-purpose
+# token that is good for nothing except POST /login/mfa.
+class LoginResult(SQLModel):
+    access_token: str | None = None
+    token_type: str = "bearer"
+    mfa_required: bool = False
+    mfa_token: str | None = None
+
+
 # Contents of JWT token
 class TokenPayload(SQLModel):
     sub: str | None = None
     pwdv: str | None = None
+    # Set only on the short two-factor token. A full sign-in token has none.
+    purpose: str | None = None
 
 
 class PasswordRecoveryRequest(SQLModel):

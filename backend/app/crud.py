@@ -114,8 +114,11 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
 
     if updated_password_hash:
         db_user.hashed_password = updated_password_hash
-    db_user.failed_login_attempts = 0
-    db_user.locked_until = None
+    if not db_user.mfa_enabled:
+        # With two-factor on, wrong codes count toward the same lock-out, so a
+        # correct password must not wipe them: only a correct code does.
+        db_user.failed_login_attempts = 0
+        db_user.locked_until = None
     session.add(db_user)
     session.commit()
     session.refresh(db_user)

@@ -29,6 +29,13 @@ Parts (``--parts``, default all three):
                      written to ``.env``). ``FIRST_SUPERUSER_PASSWORD`` in
                      ``.env`` becomes a random value that belongs to no account.
 
+* ``mfa-key``        (not in the default) a new ``MFA_ENCRYPTION_KEY``: the key
+                     that locks everyone's authenticator-app secret. Every stored
+                     secret is re-encrypted with the new key in ONE database
+                     transaction that is saved only after ``.env`` is replaced.
+                     When ``.env`` has no such key yet, this part makes one (use
+                     it once to set two-factor up). Rollback puts the secrets back.
+
 Nothing here prints a secret. Afterwards restart the backend (``apply`` prints
 the exact command). Exit codes: 0 = done (or plan fine), 1 = failed or refused,
 2 = bad option.
@@ -41,6 +48,7 @@ import re
 import secrets
 import shutil
 import sys
+import uuid
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
@@ -51,11 +59,14 @@ from psycopg import sql
 from sqlalchemy.engine import URL, Engine, make_url
 from sqlmodel import Session, create_engine, select
 
+from app.core import mfa
 from app.core.audit import record_audit_event
 from app.core.security import DEFAULT_PASSWORD, get_password_hash
 from app.models import User, UserRole
 
 PARTS = ("secret-key", "db-password", "admin-password")
+# Chosen only by name (--parts mfa-key): it is not part of "everything".
+OPTIONAL_PARTS = ("mfa-key",)
 MIN_ADMIN_PASSWORD_LENGTH = 12
 DEFAULT_MAX_BACKUP_AGE_MINUTES = 120
 BACKUP_FILE = re.compile(r"^mayondon-db-\d{8}-\d{6}-\d{3}\.dump(\.enc)?$")
@@ -153,6 +164,7 @@ def check_env(
         "secret-key": ["SECRET_KEY"],
         "db-password": ["POSTGRES_PASSWORD"],
         "admin-password": ["FIRST_SUPERUSER", "FIRST_SUPERUSER_PASSWORD"],
+        "mfa-key": [],
     }
     for part in parts:
         for key in required[part]:
@@ -252,6 +264,13 @@ def build_plan(
             "to no account."
         )
         plan.lines.append("This change is not undone by rollback.")
+    if "mfa-key" in parts:
+        plan.lines.append(
+            "MFA_ENCRYPTION_KEY: a new random value (made when .env has none). "
+            "Every stored authenticator secret is re-encrypted with it in one "
+            "transaction, saved only after .env is replaced. Nobody has to set "
+            "two-factor up again."
+        )
     plan.lines.append(
         "The old .env is saved first as .env.before-rotation-<time> next to it."
     )
@@ -302,6 +321,74 @@ def _engine(url: URL, password: str) -> Engine:
     return create_engine(
         url.set(drivername="postgresql+psycopg", password=password), pool_pre_ping=True
     )
+
+
+def read_mfa_secrets(url: URL, password: str) -> list[tuple[uuid.UUID, str]]:
+    """Every stored (still encrypted) authenticator secret."""
+    with connect(url, password) as connection:
+        rows = connection.execute(
+            'SELECT id, mfa_secret_encrypted FROM "user" '
+            "WHERE mfa_secret_encrypted IS NOT NULL ORDER BY id"
+        ).fetchall()
+    return [(row[0], row[1]) for row in rows]
+
+
+def begin_mfa_reencrypt(
+    url: URL, password: str, from_key: str, to_key: str
+) -> psycopg.Connection:
+    """Re-encrypt every authenticator secret, but do NOT save yet.
+
+    Returns the open transaction; the caller commits it once ``.env`` has the
+    new key (or rolls it back). Raises RotationError (and rolls back) if any
+    secret cannot be read with ``from_key``.
+    """
+    connection = psycopg.connect(
+        host=url.host,
+        port=url.port or 5432,
+        dbname=url.database,
+        user=url.username,
+        password=password,
+        connect_timeout=10,
+        autocommit=False,
+    )
+    try:
+        rows = connection.execute(
+            'SELECT id, mfa_secret_encrypted FROM "user" '
+            "WHERE mfa_secret_encrypted IS NOT NULL FOR UPDATE"
+        ).fetchall()
+        for user_id, stored in rows:
+            plain = mfa.decrypt_secret(stored, user_id, key=from_key)
+            if plain is None:
+                raise RotationError(
+                    "A stored authenticator secret cannot be read with the "
+                    "current MFA_ENCRYPTION_KEY. Nothing was changed."
+                )
+            connection.execute(
+                'UPDATE "user" SET mfa_secret_encrypted = %s WHERE id = %s',
+                (mfa.encrypt_secret(plain, user_id, key=to_key), user_id),
+            )
+    except BaseException:
+        connection.rollback()
+        connection.close()
+        raise
+    return connection
+
+
+def check_mfa_secrets_readable(url: URL, password: str, key: str) -> int:
+    """How many secrets exist; raises when any cannot be read with ``key``."""
+    rows = read_mfa_secrets(url, password)
+    if rows and not key:
+        raise RotationError(
+            f"{len(rows)} authenticator secret(s) are stored but .env has no "
+            "MFA_ENCRYPTION_KEY, so they cannot be re-encrypted. Nothing was changed."
+        )
+    for user_id, stored in rows:
+        if mfa.decrypt_secret(stored, user_id, key=key) is None:
+            raise RotationError(
+                "A stored authenticator secret cannot be read with the "
+                "MFA_ENCRYPTION_KEY in .env. Nothing was changed."
+            )
+    return len(rows)
 
 
 def write_admin_password(
@@ -418,6 +505,11 @@ def apply_rotation(
             "Not done: the database does not accept the current password."
         )
 
+    old_mfa_key = env_get(text, "MFA_ENCRYPTION_KEY") or ""
+    if "mfa-key" in parts:
+        # Prove every stored secret can be read BEFORE anything changes.
+        check_mfa_secrets_readable(url, current_db_password, old_mfa_key)
+
     # Ask for the administrator's new password BEFORE changing anything.
     admin_password: str | None = None
     admin_email = env_get(text, "FIRST_SUPERUSER") or ""
@@ -451,12 +543,19 @@ def apply_rotation(
             new_text, "FIRST_SUPERUSER_PASSWORD", new_database_password()
         )
         changed.append("administrator password")
+    new_mfa_key = ""
+    if "mfa-key" in parts:
+        new_mfa_key = new_secret_key()
+        new_text = env_set(new_text, "MFA_ENCRYPTION_KEY", new_mfa_key)
+        changed.append("MFA_ENCRYPTION_KEY")
 
     old_copy = env_file.with_name(f"{env_file.name}.before-rotation-{_stamp(now)}")
     shutil.copy2(env_file, old_copy)
     old_copy.chmod(0o600)
 
     database_changed = False
+    mfa_transaction: psycopg.Connection | None = None
+    env_replaced = False
     try:
         if "db-password" in parts:
             set_role_password(url, current_db_password, new_db_password)
@@ -465,8 +564,22 @@ def apply_rotation(
                 raise RotationError("the database did not accept the new password")
             if can_connect(url, current_db_password):
                 raise RotationError("the database still accepts the old password")
+        if "mfa-key" in parts:
+            mfa_transaction = begin_mfa_reencrypt(
+                url, new_db_password, old_mfa_key, new_mfa_key
+            )
         _replace_env(env_file, new_text)
+        env_replaced = True
+        if mfa_transaction is not None:
+            mfa_transaction.commit()
     except Exception as exc:
+        if mfa_transaction is not None:
+            try:
+                mfa_transaction.rollback()
+            except psycopg.Error:
+                pass
+        if env_replaced:
+            _replace_env(env_file, text)
         if database_changed:
             try:
                 set_role_password(url, new_db_password, current_db_password)
@@ -506,6 +619,9 @@ def rollback_rotation(
             "The old .env file has no POSTGRES_PASSWORD; it is not a saved copy."
         )
     steps: list[str] = []
+    current_mfa_key = env_get(read_text_exact(env_file), "MFA_ENCRYPTION_KEY") or ""
+    old_mfa_key = env_get(old_text, "MFA_ENCRYPTION_KEY") or ""
+    mfa_transaction: psycopg.Connection | None = None
     if old_password != current_db_password:
         if not can_connect(url, current_db_password):
             raise RotationError(
@@ -518,7 +634,27 @@ def rollback_rotation(
         raise RotationError(
             "The database does not accept the old password after the change."
         )
-    _replace_env(env_file, old_text)
+    if current_mfa_key != old_mfa_key:
+        stored = read_mfa_secrets(url, old_password)
+        if stored and not old_mfa_key:
+            raise RotationError(
+                f"The old .env has no MFA_ENCRYPTION_KEY but {len(stored)} "
+                "authenticator secret(s) exist. Turn their two-factor off first "
+                "(account_recovery_cli reset-mfa), then roll back."
+            )
+        if stored:
+            mfa_transaction = begin_mfa_reencrypt(
+                url, old_password, current_mfa_key, old_mfa_key
+            )
+    try:
+        _replace_env(env_file, old_text)
+        if mfa_transaction is not None:
+            mfa_transaction.commit()
+            steps.append("authenticator secrets put back under the old key")
+    except Exception:
+        if mfa_transaction is not None:
+            mfa_transaction.rollback()
+        raise
     steps.append(".env restored")
     return steps
 
@@ -532,9 +668,10 @@ def parse_parts(value: str) -> tuple[str, ...]:
     chosen = tuple(
         dict.fromkeys(item.strip() for item in value.split(",") if item.strip())
     )
-    unknown = [item for item in chosen if item not in PARTS]
+    allowed = PARTS + OPTIONAL_PARTS
+    unknown = [item for item in chosen if item not in allowed]
     if unknown or not chosen:
-        raise argparse.ArgumentTypeError(f"--parts takes some of: {', '.join(PARTS)}")
+        raise argparse.ArgumentTypeError(f"--parts takes some of: {', '.join(allowed)}")
     return chosen
 
 

@@ -19,6 +19,7 @@ API = settings.API_V1_STR
 # Reachable without credentials by design.
 PUBLIC_ALWAYS = {
     ("POST", f"{API}/login/access-token"),
+    ("POST", f"{API}/login/mfa"),  # needs the short token from the password step
     ("POST", f"{API}/password-recovery"),
     ("POST", f"{API}/password-recovery/questions"),  # decoys for unknown accounts
     ("POST", f"{API}/password-recovery/reset"),  # needs all three answers

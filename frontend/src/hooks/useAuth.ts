@@ -4,6 +4,7 @@ import { useEffect } from "react"
 
 import {
   type Body_login_login_access_token as AccessToken,
+  type LoginResult,
   LoginService,
   type UserPublic,
   type UserRegister,
@@ -51,19 +52,43 @@ const useAuth = () => {
     },
   })
 
+  // A person with two-factor on gets only a short ``mfa_token`` here; the
+  // access token comes from the second step (``verifyMfaMutation``).
+  const finishSignIn = (result: LoginResult) => {
+    if (!result.access_token) return false
+    localStorage.setItem("access_token", result.access_token)
+    return true
+  }
+
   const login = async (data: AccessToken) => {
     const response = await LoginService.loginAccessToken({
       body: data,
     })
-    localStorage.setItem("access_token", response.data.access_token)
+    const result = response.data
+    return {
+      signedIn: finishSignIn(result),
+      mfaToken: result.mfa_required ? (result.mfa_token ?? null) : null,
+    }
   }
 
   const loginMutation = useMutation({
     mutationFn: login,
-    onSuccess: () => {
-      navigate({ to: "/" })
+    onSuccess: ({ signedIn }) => {
+      if (signedIn) navigate({ to: "/" })
     },
     onError: handleError.bind(showErrorToast),
+  })
+
+  const verifyMfaMutation = useMutation({
+    mutationFn: async (data: { mfaToken: string; code: string }) => {
+      const response = await LoginService.loginMfa({
+        body: { mfa_token: data.mfaToken, code: data.code },
+      })
+      return finishSignIn(response.data)
+    },
+    onSuccess: (signedIn) => {
+      if (signedIn) navigate({ to: "/" })
+    },
   })
 
   const logout = () => {
@@ -74,6 +99,7 @@ const useAuth = () => {
   return {
     signUpMutation,
     loginMutation,
+    verifyMfaMutation,
     logout,
     user,
   }

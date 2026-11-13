@@ -34,6 +34,8 @@ services:
     environment:
       PROJECT_NAME: ${PROJECT_NAME:?Variable not set}
       SECRET_KEY: ${SECRET_KEY:?Variable not set}
+      # Two-factor sign-in: locks each person's authenticator secret. Empty = off.
+      MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY:-}
       FIRST_SUPERUSER: ${FIRST_SUPERUSER:?Variable not set}
       FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD:?Variable not set}
       SMTP_HOST: ${SMTP_HOST:-}

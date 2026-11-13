@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { activityActivityOptionsData, activityActivityOptionsResponses, activityListActivityData, activityListActivityErrors, activityListActivityResponses, backupsCreateBackupData, backupsCreateBackupResponses, backupsDownloadBackupData, backupsDownloadBackupErrors, backupsDownloadBackupResponses, backupsListBackupsData, backupsListBackupsErrors, backupsListBackupsResponses, backupsRequestRestoreData, backupsRequestRestoreErrors, backupsRequestRestoreResponses, backupsVerifyBackupData, backupsVerifyBackupErrors, backupsVerifyBackupResponses, barangayIdsGetSeriesData, barangayIdsGetSeriesResponses, barangayIdsListBarangayIdsData, barangayIdsListBarangayIdsErrors, barangayIdsListBarangayIdsResponses, barangayIdsSeriesStatusData, barangayIdsSeriesStatusResponses, barangayIdsUpdateSeriesData, barangayIdsUpdateSeriesErrors, barangayIdsUpdateSeriesResponses, dashboardDashboardData, dashboardDashboardErrors, dashboardDashboardResponses, importsCancelImportData, importsCancelImportErrors, importsCancelImportResponses, importsCommitImportData, importsCommitImportErrors, importsCommitImportResponses, importsDownloadErrorReportData, importsDownloadErrorReportErrors, importsDownloadErrorReportResponses, importsListImportsData, importsListImportsErrors, importsListImportsResponses, importsListRowsData, importsListRowsErrors, importsListRowsResponses, importsReadImportData, importsReadImportErrors, importsReadImportResponses, importsSetMappingData, importsSetMappingErrors, importsSetMappingResponses, importsUploadImportData, importsUploadImportErrors, importsUploadImportResponses, issuancesArchiveData, issuancesArchiveErrors, issuancesArchiveResponses, issuancesCorrectData, issuancesCorrectErrors, issuancesCorrectResponses, issuancesCreateIssuanceData, issuancesCreateIssuanceErrors, issuancesCreateIssuanceResponses, issuancesDiscardDraftData, issuancesDiscardDraftErrors, issuancesDiscardDraftResponses, issuancesGetIssuanceData, issuancesGetIssuanceErrors, issuancesGetIssuanceResponses, issuancesIssueData, issuancesIssueErrors, issuancesIssueResponses, issuancesListIssuancesData, issuancesListIssuancesErrors, issuancesListIssuancesResponses, issuancesRecordPrintData, issuancesRecordPrintErrors, issuancesRecordPrintResponses, issuancesRestoreData, issuancesRestoreErrors, issuancesRestoreResponses, issuancesUpdateDraftData, issuancesUpdateDraftErrors, issuancesUpdateDraftResponses, issuancesVoidData, issuancesVoidErrors, issuancesVoidResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, lookupsCreateStreetData, lookupsCreateStreetErrors, lookupsCreateStreetResponses, lookupsCreateTricycleAssociationData, lookupsCreateTricycleAssociationErrors, lookupsCreateTricycleAssociationResponses, lookupsDeleteStreetData, lookupsDeleteStreetErrors, lookupsDeleteStreetResponses, lookupsDeleteTricycleAssociationData, lookupsDeleteTricycleAssociationErrors, lookupsDeleteTricycleAssociationResponses, lookupsListDocumentTypesData, lookupsListDocumentTypesResponses, lookupsListIdTypesData, lookupsListIdTypesResponses, lookupsListIssuancePurposesData, lookupsListIssuancePurposesResponses, lookupsListSectorsData, lookupsListSectorsResponses, lookupsListStreetsData, lookupsListStreetsResponses, lookupsListTricycleAssociationsData, lookupsListTricycleAssociationsResponses, lookupsRenameStreetData, lookupsRenameStreetErrors, lookupsRenameStreetResponses, lookupsRenameTricycleAssociationData, lookupsRenameTricycleAssociationErrors, lookupsRenameTricycleAssociationResponses, officialsCreateOfficialData, officialsCreateOfficialErrors, officialsCreateOfficialResponses, officialsGetOfficialData, officialsGetOfficialErrors, officialsGetOfficialResponses, officialsListOfficialsData, officialsListOfficialsErrors, officialsListOfficialsResponses, officialsUpdateOfficialData, officialsUpdateOfficialErrors, officialsUpdateOfficialResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, reportsAccountActivityData, reportsAccountActivityErrors, reportsAccountActivityResponses, reportsExpiringData, reportsExpiringErrors, reportsExpiringResponses, reportsIssuancesByPurposeData, reportsIssuancesByPurposeErrors, reportsIssuancesByPurposeResponses, reportsIssuancesByTypeData, reportsIssuancesByTypeErrors, reportsIssuancesByTypeResponses, reportsRecordExportData, reportsRecordExportErrors, reportsRecordExportResponses, reportsRecordsOverviewData, reportsRecordsOverviewResponses, reportsSummaryData, reportsSummaryErrors, reportsSummaryResponses, residentsArchiveResidentData, residentsArchiveResidentErrors, residentsArchiveResidentResponses, residentsClearVoterProofData, residentsClearVoterProofErrors, residentsClearVoterProofResponses, residentsCreateResidentData, residentsCreateResidentErrors, residentsCreateResidentResponses, residentsDeletePhotoData, residentsDeletePhotoErrors, residentsDeletePhotoResponses, residentsGetPhotoData, residentsGetPhotoErrors, residentsGetPhotoResponses, residentsListResidentsData, residentsListResidentsErrors, residentsListResidentsResponses, residentsPutPhotoData, residentsPutPhotoErrors, residentsPutPhotoResponses, residentsReadResidentData, residentsReadResidentErrors, residentsReadResidentResponses, residentsRestoreResidentData, residentsRestoreResidentErrors, residentsRestoreResidentResponses, residentsSectorSummaryData, residentsSectorSummaryResponses, residentsUpdateResidentData, residentsUpdateResidentErrors, residentsUpdateResidentResponses, residentsVerifyVoterProofData, residentsVerifyVoterProofErrors, residentsVerifyVoterProofResponses, securityQuestionsClearUserSecurityQuestionsData, securityQuestionsClearUserSecurityQuestionsErrors, securityQuestionsClearUserSecurityQuestionsResponses, securityQuestionsReadMySecurityQuestionsData, securityQuestionsReadMySecurityQuestionsResponses, securityQuestionsReadUserSecurityQuestionsData, securityQuestionsReadUserSecurityQuestionsErrors, securityQuestionsReadUserSecurityQuestionsResponses, securityQuestionsRecoveryQuestionsData, securityQuestionsRecoveryQuestionsErrors, securityQuestionsRecoveryQuestionsResponses, securityQuestionsRecoveryResetData, securityQuestionsRecoveryResetErrors, securityQuestionsRecoveryResetResponses, securityQuestionsSetMySecurityQuestionsData, securityQuestionsSetMySecurityQuestionsErrors, securityQuestionsSetMySecurityQuestionsResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
+import type { activityActivityOptionsData, activityActivityOptionsResponses, activityListActivityData, activityListActivityErrors, activityListActivityResponses, backupsCreateBackupData, backupsCreateBackupResponses, backupsDownloadBackupData, backupsDownloadBackupErrors, backupsDownloadBackupResponses, backupsListBackupsData, backupsListBackupsErrors, backupsListBackupsResponses, backupsRequestRestoreData, backupsRequestRestoreErrors, backupsRequestRestoreResponses, backupsVerifyBackupData, backupsVerifyBackupErrors, backupsVerifyBackupResponses, barangayIdsGetSeriesData, barangayIdsGetSeriesResponses, barangayIdsListBarangayIdsData, barangayIdsListBarangayIdsErrors, barangayIdsListBarangayIdsResponses, barangayIdsSeriesStatusData, barangayIdsSeriesStatusResponses, barangayIdsUpdateSeriesData, barangayIdsUpdateSeriesErrors, barangayIdsUpdateSeriesResponses, dashboardDashboardData, dashboardDashboardErrors, dashboardDashboardResponses, importsCancelImportData, importsCancelImportErrors, importsCancelImportResponses, importsCommitImportData, importsCommitImportErrors, importsCommitImportResponses, importsDownloadErrorReportData, importsDownloadErrorReportErrors, importsDownloadErrorReportResponses, importsListImportsData, importsListImportsErrors, importsListImportsResponses, importsListRowsData, importsListRowsErrors, importsListRowsResponses, importsReadImportData, importsReadImportErrors, importsReadImportResponses, importsSetMappingData, importsSetMappingErrors, importsSetMappingResponses, importsUploadImportData, importsUploadImportErrors, importsUploadImportResponses, issuancesArchiveData, issuancesArchiveErrors, issuancesArchiveResponses, issuancesCorrectData, issuancesCorrectErrors, issuancesCorrectResponses, issuancesCreateIssuanceData, issuancesCreateIssuanceErrors, issuancesCreateIssuanceResponses, issuancesDiscardDraftData, issuancesDiscardDraftErrors, issuancesDiscardDraftResponses, issuancesGetIssuanceData, issuancesGetIssuanceErrors, issuancesGetIssuanceResponses, issuancesIssueData, issuancesIssueErrors, issuancesIssueResponses, issuancesListIssuancesData, issuancesListIssuancesErrors, issuancesListIssuancesResponses, issuancesRecordPrintData, issuancesRecordPrintErrors, issuancesRecordPrintResponses, issuancesRestoreData, issuancesRestoreErrors, issuancesRestoreResponses, issuancesUpdateDraftData, issuancesUpdateDraftErrors, issuancesUpdateDraftResponses, issuancesVoidData, issuancesVoidErrors, issuancesVoidResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginLoginMfaData, loginLoginMfaErrors, loginLoginMfaResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, lookupsCreateStreetData, lookupsCreateStreetErrors, lookupsCreateStreetResponses, lookupsCreateTricycleAssociationData, lookupsCreateTricycleAssociationErrors, lookupsCreateTricycleAssociationResponses, lookupsDeleteStreetData, lookupsDeleteStreetErrors, lookupsDeleteStreetResponses, lookupsDeleteTricycleAssociationData, lookupsDeleteTricycleAssociationErrors, lookupsDeleteTricycleAssociationResponses, lookupsListDocumentTypesData, lookupsListDocumentTypesResponses, lookupsListIdTypesData, lookupsListIdTypesResponses, lookupsListIssuancePurposesData, lookupsListIssuancePurposesResponses, lookupsListSectorsData, lookupsListSectorsResponses, lookupsListStreetsData, lookupsListStreetsResponses, lookupsListTricycleAssociationsData, lookupsListTricycleAssociationsResponses, lookupsRenameStreetData, lookupsRenameStreetErrors, lookupsRenameStreetResponses, lookupsRenameTricycleAssociationData, lookupsRenameTricycleAssociationErrors, lookupsRenameTricycleAssociationResponses, officialsCreateOfficialData, officialsCreateOfficialErrors, officialsCreateOfficialResponses, officialsGetOfficialData, officialsGetOfficialErrors, officialsGetOfficialResponses, officialsListOfficialsData, officialsListOfficialsErrors, officialsListOfficialsResponses, officialsUpdateOfficialData, officialsUpdateOfficialErrors, officialsUpdateOfficialResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, reportsAccountActivityData, reportsAccountActivityErrors, reportsAccountActivityResponses, reportsExpiringData, reportsExpiringErrors, reportsExpiringResponses, reportsIssuancesByPurposeData, reportsIssuancesByPurposeErrors, reportsIssuancesByPurposeResponses, reportsIssuancesByTypeData, reportsIssuancesByTypeErrors, reportsIssuancesByTypeResponses, reportsRecordExportData, reportsRecordExportErrors, reportsRecordExportResponses, reportsRecordsOverviewData, reportsRecordsOverviewResponses, reportsSummaryData, reportsSummaryErrors, reportsSummaryResponses, residentsArchiveResidentData, residentsArchiveResidentErrors, residentsArchiveResidentResponses, residentsClearVoterProofData, residentsClearVoterProofErrors, residentsClearVoterProofResponses, residentsCreateResidentData, residentsCreateResidentErrors, residentsCreateResidentResponses, residentsDeletePhotoData, residentsDeletePhotoErrors, residentsDeletePhotoResponses, residentsGetPhotoData, residentsGetPhotoErrors, residentsGetPhotoResponses, residentsListResidentsData, residentsListResidentsErrors, residentsListResidentsResponses, residentsPutPhotoData, residentsPutPhotoErrors, residentsPutPhotoResponses, residentsReadResidentData, residentsReadResidentErrors, residentsReadResidentResponses, residentsRestoreResidentData, residentsRestoreResidentErrors, residentsRestoreResidentResponses, residentsSectorSummaryData, residentsSectorSummaryResponses, residentsUpdateResidentData, residentsUpdateResidentErrors, residentsUpdateResidentResponses, residentsVerifyVoterProofData, residentsVerifyVoterProofErrors, residentsVerifyVoterProofResponses, securityQuestionsClearUserSecurityQuestionsData, securityQuestionsClearUserSecurityQuestionsErrors, securityQuestionsClearUserSecurityQuestionsResponses, securityQuestionsReadMySecurityQuestionsData, securityQuestionsReadMySecurityQuestionsResponses, securityQuestionsReadUserSecurityQuestionsData, securityQuestionsReadUserSecurityQuestionsErrors, securityQuestionsReadUserSecurityQuestionsResponses, securityQuestionsRecoveryQuestionsData, securityQuestionsRecoveryQuestionsErrors, securityQuestionsRecoveryQuestionsResponses, securityQuestionsRecoveryResetData, securityQuestionsRecoveryResetErrors, securityQuestionsRecoveryResetResponses, securityQuestionsSetMySecurityQuestionsData, securityQuestionsSetMySecurityQuestionsErrors, securityQuestionsSetMySecurityQuestionsResponses, twoFactorDisableMfaData, twoFactorDisableMfaErrors, twoFactorDisableMfaResponses, twoFactorEnableMfaData, twoFactorEnableMfaErrors, twoFactorEnableMfaResponses, twoFactorNewMyRecoveryCodesData, twoFactorNewMyRecoveryCodesErrors, twoFactorNewMyRecoveryCodesResponses, twoFactorReadMyMfaData, twoFactorReadMyMfaResponses, twoFactorReadUserMfaData, twoFactorReadUserMfaErrors, twoFactorReadUserMfaResponses, twoFactorResetUserMfaData, twoFactorResetUserMfaErrors, twoFactorResetUserMfaResponses, twoFactorStartMfaSetupData, twoFactorStartMfaSetupErrors, twoFactorStartMfaSetupResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -22,7 +22,11 @@ export class LoginService {
     /**
      * Login Access Token
      *
-     * OAuth2 compatible token login, get an access token for future requests
+     * OAuth2 compatible token login, get an access token for future requests.
+     *
+     * For a person with two-factor on, a correct password returns only a short
+     * ``mfa_token`` (good for nothing but ``POST /login/mfa``); the access token
+     * comes after the code.
      */
     public static loginAccessToken<ThrowOnError extends boolean = true>(options: Options<loginLoginAccessTokenData, ThrowOnError>) {
         return (options.client ?? client).post<loginLoginAccessTokenResponses, loginLoginAccessTokenErrors, ThrowOnError>({
@@ -32,6 +36,25 @@ export class LoginService {
             ...options,
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Login Mfa
+     *
+     * Second step of sign-in: the code from the authenticator app, or one of
+     * the ten one-time recovery codes. Wrong codes count toward the same lock-out
+     * as wrong passwords; a code that was already used is refused.
+     */
+    public static loginMfa<ThrowOnError extends boolean = true>(options: Options<loginLoginMfaData, ThrowOnError>) {
+        return (options.client ?? client).post<loginLoginMfaResponses, loginLoginMfaErrors, ThrowOnError>({
+            responseType: 'json',
+            url: '/api/v1/login/mfa',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
                 ...options.headers
             }
         });
@@ -197,6 +220,126 @@ export class SecurityQuestionsService {
                 'Content-Type': 'application/json',
                 ...options.headers
             }
+        });
+    }
+}
+
+export class TwoFactorService {
+    /**
+     * Read My Mfa
+     */
+    public static factorReadMyMfa<ThrowOnError extends boolean = true>(options?: Options<twoFactorReadMyMfaData, ThrowOnError>) {
+        return (options?.client ?? client).get<twoFactorReadMyMfaResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/me/mfa',
+            ...options
+        });
+    }
+    
+    /**
+     * Start Mfa Setup
+     *
+     * Make a new secret (not active yet) to put into the authenticator app.
+     */
+    public static factorStartMfaSetup<ThrowOnError extends boolean = true>(options: Options<twoFactorStartMfaSetupData, ThrowOnError>) {
+        return (options.client ?? client).post<twoFactorStartMfaSetupResponses, twoFactorStartMfaSetupErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/me/mfa/setup',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Enable Mfa
+     *
+     * Prove the app works by typing its current code; then it is switched on
+     * and the ten recovery codes are shown (this once).
+     */
+    public static factorEnableMfa<ThrowOnError extends boolean = true>(options: Options<twoFactorEnableMfaData, ThrowOnError>) {
+        return (options.client ?? client).post<twoFactorEnableMfaResponses, twoFactorEnableMfaErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/me/mfa/enable',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Disable Mfa
+     *
+     * Turn two-factor off. Needs the password and a valid code (an
+     * authenticator code or a recovery code).
+     */
+    public static factorDisableMfa<ThrowOnError extends boolean = true>(options: Options<twoFactorDisableMfaData, ThrowOnError>) {
+        return (options.client ?? client).post<twoFactorDisableMfaResponses, twoFactorDisableMfaErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/me/mfa/disable',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * New My Recovery Codes
+     *
+     * Replace all recovery codes with ten new ones (the old ones stop working).
+     */
+    public static factorNewMyRecoveryCodes<ThrowOnError extends boolean = true>(options: Options<twoFactorNewMyRecoveryCodesData, ThrowOnError>) {
+        return (options.client ?? client).post<twoFactorNewMyRecoveryCodesResponses, twoFactorNewMyRecoveryCodesErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/me/mfa/recovery-codes',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+    
+    /**
+     * Reset User Mfa
+     *
+     * Administrator only: turn off a STAFF person's two-factor (lost phone).
+     *
+     * Not for yourself, and not for another administrator: an administrator who
+     * lost the phone uses the server command (docs/11). The person sets
+     * two-factor up again themselves.
+     */
+    public static factorResetUserMfa<ThrowOnError extends boolean = true>(options: Options<twoFactorResetUserMfaData, ThrowOnError>) {
+        return (options.client ?? client).delete<twoFactorResetUserMfaResponses, twoFactorResetUserMfaErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/{user_id}/mfa',
+            ...options
+        });
+    }
+    
+    /**
+     * Read User Mfa
+     *
+     * Administrator only: is this person's two-factor on? (never any secret)
+     */
+    public static factorReadUserMfa<ThrowOnError extends boolean = true>(options: Options<twoFactorReadUserMfaData, ThrowOnError>) {
+        return (options.client ?? client).get<twoFactorReadUserMfaResponses, twoFactorReadUserMfaErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/users/{user_id}/mfa',
+            ...options
         });
     }
 }

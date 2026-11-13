@@ -406,3 +406,169 @@ def test_cli_apply_and_rollback_need_the_typed_word(
 def test_cli_rejects_unknown_parts() -> None:
     with pytest.raises(SystemExit):
         r.main(["plan", "--parts", "everything"])
+
+
+# ---- two-factor key (step 14) -----------------------------------------------
+
+OLD_MFA_KEY = "old-mfa-encryption-key-0123456789-0123456789-abcdef"
+
+
+def _forget_other_secrets(db: Session) -> None:
+    """Earlier tests leave enrolled throw-away people behind; the tool (rightly)
+    looks at every stored secret, so start from none."""
+    for other in db.exec(
+        select(User).where(col(User.mfa_secret_encrypted).is_not(None))
+    ):
+        other.mfa_enabled = False
+        other.mfa_secret_encrypted = None
+        db.add(other)
+    db.commit()
+
+
+def _enrolled_user(db: Session, key: str) -> tuple[User, str]:
+    from app.core import mfa
+
+    _forget_other_secrets(db)
+    secret = mfa.new_secret()
+    user = User(
+        email="rotation-mfa@example.com",
+        hashed_password="x",
+        role=UserRole.staff,
+        is_active=True,
+    )
+    db.add(user)
+    db.flush()
+    user.mfa_enabled = True
+    user.mfa_secret_encrypted = mfa.encrypt_secret(secret, user.id, key=key)
+    db.add(user)
+    db.commit()
+    return user, secret
+
+
+@pytest.fixture
+def enrolled(db: Session) -> Generator[tuple[User, str]]:
+    pair = _enrolled_user(db, OLD_MFA_KEY)
+    yield pair
+    db.rollback()
+    leftover = db.exec(
+        select(User).where(col(User.email) == "rotation-mfa@example.com")
+    ).first()
+    if leftover:
+        db.delete(leftover)
+        db.commit()
+
+
+def _env_with_mfa_key(folder: Path, key: str | None) -> None:
+    text = env_text(SCRATCH_PASSWORD)
+    if key:
+        text += f"MFA_ENCRYPTION_KEY={key}\r\n"
+    (folder / ".env").write_text(text, encoding="utf-8", newline="")
+
+
+def _stored(db: Session, user: User) -> str:
+    db.expire_all()
+    row = db.get(User, user.id)
+    assert row is not None and row.mfa_secret_encrypted
+    return row.mfa_secret_encrypted
+
+
+@pytest.mark.usefixtures("scratch")
+def test_mfa_key_is_not_part_of_everything() -> None:
+    assert "mfa-key" not in r.PARTS
+    assert r.parse_parts("mfa-key") == ("mfa-key",)
+
+
+@pytest.mark.usefixtures("scratch")
+def test_plan_for_the_mfa_key_names_it_without_a_value(folder: Path) -> None:
+    plan = r.build_plan(
+        env_text("pw"),
+        ("mfa-key",),
+        backups=folder / "backups",
+        max_backup_age_minutes=120,
+        current_db_password="pw",
+        need_encrypted=False,
+    )
+    assert plan.ok
+    assert any("MFA_ENCRYPTION_KEY" in line for line in plan.lines)
+
+
+@pytest.mark.usefixtures("scratch")
+def test_mfa_key_rotation_re_encrypts_every_secret(
+    folder: Path, db: Session, enrolled: tuple[User, str]
+) -> None:
+    from app.core import mfa
+
+    user, secret = enrolled
+    _env_with_mfa_key(folder, OLD_MFA_KEY)
+    result = run_apply(folder, ("mfa-key",))
+    new_text = r.read_text_exact(folder / ".env")
+    new_key = r.env_get(new_text, "MFA_ENCRYPTION_KEY")
+    assert new_key and new_key != OLD_MFA_KEY
+    assert r.env_get(new_text, "SECRET_KEY") == OLD_SECRET_KEY  # only the one part
+    stored = _stored(db, user)
+    assert mfa.decrypt_secret(stored, user.id, key=new_key) == secret
+    assert mfa.decrypt_secret(stored, user.id, key=OLD_MFA_KEY) is None
+    assert result.changed == ["MFA_ENCRYPTION_KEY"]
+    # Rollback puts the secrets back under the old key with the old .env.
+    steps = r.rollback_rotation(
+        folder / ".env",
+        result.old_env_copy,
+        url=scratch_url(),
+        current_db_password=SCRATCH_PASSWORD,
+    )
+    assert "authenticator secrets put back under the old key" in steps
+    assert (
+        r.env_get(r.read_text_exact(folder / ".env"), "MFA_ENCRYPTION_KEY")
+        == OLD_MFA_KEY
+    )
+    assert mfa.decrypt_secret(_stored(db, user), user.id, key=OLD_MFA_KEY) == secret
+
+
+@pytest.mark.usefixtures("scratch")
+def test_mfa_key_is_made_when_env_has_none_and_nobody_is_enrolled(
+    folder: Path, db: Session
+) -> None:
+    _forget_other_secrets(db)
+    _env_with_mfa_key(folder, None)
+    run_apply(folder, ("mfa-key",))
+    key = r.env_get(r.read_text_exact(folder / ".env"), "MFA_ENCRYPTION_KEY")
+    assert key and len(key.encode()) >= 32
+
+
+@pytest.mark.usefixtures("scratch")
+def test_mfa_key_refuses_when_a_secret_cannot_be_read(
+    folder: Path, db: Session, enrolled: tuple[User, str]
+) -> None:
+    user, _ = enrolled
+    before = _stored(db, user)
+    _env_with_mfa_key(folder, "some-other-key-that-is-not-the-one-used-0123456789")
+    with pytest.raises(r.RotationError, match="cannot be read"):
+        run_apply(folder, ("mfa-key",))
+    assert _stored(db, user) == before
+    assert not list(folder.glob(".env.before-rotation-*"))
+    _env_with_mfa_key(folder, None)
+    with pytest.raises(r.RotationError, match="no MFA_ENCRYPTION_KEY"):
+        run_apply(folder, ("mfa-key",))
+    assert _stored(db, user) == before
+
+
+@pytest.mark.usefixtures("scratch")
+def test_failure_while_replacing_env_leaves_secrets_untouched(
+    folder: Path,
+    db: Session,
+    enrolled: tuple[User, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    user, _ = enrolled
+    before = _stored(db, user)
+    _env_with_mfa_key(folder, OLD_MFA_KEY)
+    original = r.read_text_exact(folder / ".env")
+
+    def broken(*_args: object) -> None:
+        raise OSError("disk full")
+
+    monkeypatch.setattr(r, "_replace_env", broken)
+    with pytest.raises(r.RotationError, match="Not done"):
+        run_apply(folder, ("mfa-key",))
+    assert _stored(db, user) == before  # the transaction was never saved
+    assert r.read_text_exact(folder / ".env") == original

@@ -9,6 +9,7 @@ from app.api.routes import (
     issuances,
     login,
     lookups,
+    mfa,
     officials,
     private,
     reports,
@@ -32,6 +33,7 @@ def create_api_router(
     router.include_router(login.router)
     # Before users.router: /users/me/... must win over /users/{user_id}.
     router.include_router(security_questions.router)
+    router.include_router(mfa.router)
     router.include_router(users.router)
     router.include_router(residents.router)
     router.include_router(lookups.router)

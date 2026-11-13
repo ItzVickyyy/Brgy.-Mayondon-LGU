@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 
 import { UsersService, type UserUpdateMe } from "@/client"
 import { SecurityQuestionsCard } from "@/components/SecurityQuestions/SecurityQuestionsCard"
+import { TwoFactorCard } from "@/components/TwoFactor/TwoFactorCard"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import { Button } from "@/components/ui/button"
 import {
@@ -671,6 +672,7 @@ export function MyAccountModal({
                     </div>
                   </div>
                   <SecurityQuestionsCard />
+                  <TwoFactorCard />
                 </section>
               </>
             )}

@@ -5,13 +5,14 @@ import {
   redirect,
 } from "@tanstack/react-router"
 import type { TFunction } from "i18next"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
 
 import type { Body_login_login_access_token as AccessToken } from "@/client"
 import { AuthLayout } from "@/components/Common/AuthLayout"
+import { MfaStep } from "@/components/TwoFactor/MfaStep"
 import {
   Form,
   FormControl,
@@ -77,6 +78,7 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const { t } = useTranslation()
   const { loginMutation } = useAuth()
+  const [mfaToken, setMfaToken] = useState<string | null>(null)
   const formSchema = useMemo(
     () =>
       z.object({
@@ -107,7 +109,23 @@ function Login() {
 
   const onSubmit = (data: FormData) => {
     if (loginMutation.isPending) return
-    loginMutation.mutate(data)
+    loginMutation.mutate(data, {
+      onSuccess: (result) => setMfaToken(result.mfaToken),
+    })
+  }
+
+  if (mfaToken) {
+    return (
+      <AuthLayout>
+        <MfaStep
+          mfaToken={mfaToken}
+          onExpired={() => {
+            setMfaToken(null)
+            loginMutation.reset()
+          }}
+        />
+      </AuthLayout>
+    )
   }
 
   return (

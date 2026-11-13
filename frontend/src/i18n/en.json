@@ -303,7 +303,13 @@
         "recovery_questions_set": "Recovery questions set",
         "recovery_failed": "Password recovery failed",
         "recovery_success": "Password recovered with questions",
-        "recovery_reset_by_admin": "Recovery questions cleared by administrator"
+        "recovery_reset_by_admin": "Recovery questions cleared by administrator",
+        "mfa_enabled": "Two-factor sign-in turned on",
+        "mfa_disabled": "Two-factor sign-in turned off",
+        "mfa_failed": "Two-factor code refused",
+        "mfa_recovery_code_used": "Recovery code used to sign in",
+        "mfa_codes_renewed": "New recovery codes made",
+        "mfa_reset_by_admin": "Two-factor turned off by administrator"
       },
       "user": {
         "create": "Account created",
@@ -1993,6 +1999,80 @@
       "cancelEdit": "Cancel Edit",
       "saving": "Saving...",
       "saveChanges": "Save Changes"
+    }
+  },
+  "twoFactor": {
+    "title": "Two-factor sign-in",
+    "cardDescription": "After your password, sign-in also asks for a 6-digit code from an authenticator app on your phone. It works with no internet.",
+    "statusOn": "Two-factor sign-in is on (since {{date}}).",
+    "statusOff": "Two-factor sign-in is off.",
+    "unavailable": "Two-factor sign-in is not set up on this server yet. Ask the System Administrator.",
+    "codesLeft_one": "{{count}} recovery code left.",
+    "codesLeft_other": "{{count}} recovery codes left.",
+    "turnOn": "Turn on two-factor",
+    "turnOff": "Turn off",
+    "newCodes": "Get new recovery codes",
+    "currentPassword": "Your current password",
+    "required": "This is required",
+    "cancel": "Cancel",
+    "setup": {
+      "passwordTitle": "Turn on two-factor sign-in",
+      "passwordDescription": "Type your password to start. You need an authenticator app on your phone (for example Google Authenticator, Microsoft Authenticator or Aegis).",
+      "scanTitle": "Scan the code",
+      "scanDescription": "In the authenticator app choose Add account, scan this picture, then type the 6-digit code the app shows.",
+      "codesTitle": "Save your recovery codes",
+      "codesDescription": "If you lose your phone, each of these codes can sign you in once. They are shown only now. Keep them on paper in a safe place.",
+      "next": "Continue",
+      "turnOn": "Turn on",
+      "qrAlt": "QR code for the authenticator app",
+      "cannotScan": "Cannot scan? Type this key into the app instead:",
+      "serverTime": "Server time: {{time}}. Your phone's clock must show the same time (within a minute) or the codes will not match.",
+      "clockWarning": "This computer's clock differs from the server's by about {{minutes}} minute(s). Fix the clock of the phone and of the server computer before continuing.",
+      "codeLabel": "6-digit code from the app",
+      "enabled": "Two-factor sign-in is on"
+    },
+    "codes": {
+      "copy": "Copy",
+      "download": "Save as file",
+      "copied": "Recovery codes copied",
+      "copyFailed": "Could not copy. Write the codes down instead.",
+      "fileHeading": "Barangay Mayondon: two-factor recovery codes (each works once)",
+      "savedConfirm": "I saved these codes in a safe place.",
+      "done": "Done"
+    },
+    "manage": {
+      "disableTitle": "Turn off two-factor sign-in",
+      "disableDescription": "Sign-in will ask for the password only. Type your password and a current code to confirm.",
+      "disableConfirm": "Turn off",
+      "codesTitle": "Get new recovery codes",
+      "codesDescription": "The ten new codes replace the old ones; the old codes stop working. Type your password and a current code to confirm.",
+      "codesConfirm": "Make new codes",
+      "newCodesTitle": "Your new recovery codes",
+      "newCodesDescription": "They are shown only now. Keep them on paper in a safe place.",
+      "codeLabel": "Code",
+      "codeHelp": "The 6-digit code from the app, or one recovery code.",
+      "turnedOff": "Two-factor sign-in turned off",
+      "codesMade": "New recovery codes made"
+    },
+    "login": {
+      "title": "Enter your code",
+      "subtitle": "Open your authenticator app and type the 6-digit code.",
+      "codeLabel": "Code",
+      "help": "Lost your phone? Type one of your recovery codes instead.",
+      "submit": "Verify",
+      "back": "Start again with the password",
+      "wrong": "The code was not accepted. Check it and try again.",
+      "expired": "This step took too long. Start again with your password."
+    },
+    "admin": {
+      "label": "Two-factor sign-in",
+      "on": "On",
+      "off": "Off",
+      "turnOff": "Turn off",
+      "adminNote": "An administrator's two-factor can only be reset from the server computer (see the Deployment guide).",
+      "confirmTitle": "Turn off two-factor sign-in?",
+      "confirmMessage": "{{name}} will sign in with the password only and can set two-factor up again. Use this when the phone was lost.",
+      "reset": "Two-factor sign-in turned off for this person"
     }
   },
   "securityQuestions": {

@@ -42,6 +42,12 @@ def get_current_user_allow_temporary(session: SessionDep, token: TokenDep) -> Us
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
+    if token_data.purpose is not None:
+        # A password-only (two-factor pending) token is not a sign-in.
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
     user = session.get(User, token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

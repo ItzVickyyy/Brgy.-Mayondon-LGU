@@ -1516,6 +1516,28 @@ export type JobseekerPublic = {
 };
 
 /**
+ * LoginResult
+ */
+export type LoginResult = {
+    /**
+     * Access Token
+     */
+    access_token?: string | null;
+    /**
+     * Token Type
+     */
+    token_type?: string;
+    /**
+     * Mfa Required
+     */
+    mfa_required?: boolean;
+    /**
+     * Mfa Token
+     */
+    mfa_token?: string | null;
+};
+
+/**
  * LookupItem
  */
 export type LookupItem = {
@@ -1589,6 +1611,126 @@ export type Message = {
      * Message
      */
     message: string;
+};
+
+/**
+ * MfaCode
+ */
+export type MfaCode = {
+    /**
+     * Code
+     */
+    code: string;
+};
+
+/**
+ * MfaCodeWithPassword
+ */
+export type MfaCodeWithPassword = {
+    /**
+     * Current Password
+     */
+    current_password: string;
+    /**
+     * Code
+     */
+    code: string;
+};
+
+/**
+ * MfaConfigured
+ */
+export type MfaConfigured = {
+    /**
+     * Enabled
+     */
+    enabled: boolean;
+};
+
+/**
+ * MfaLogin
+ */
+export type MfaLogin = {
+    /**
+     * Mfa Token
+     */
+    mfa_token: string;
+    /**
+     * Code
+     */
+    code: string;
+};
+
+/**
+ * MfaRecoveryCodes
+ *
+ * Plain recovery codes: shown this once, never readable again.
+ */
+export type MfaRecoveryCodes = {
+    /**
+     * Recovery Codes
+     */
+    recovery_codes: Array<string>;
+};
+
+/**
+ * MfaSetup
+ *
+ * Shown once while setting up: the QR code is drawn from ``otpauth_uri``.
+ */
+export type MfaSetup = {
+    /**
+     * Secret
+     */
+    secret: string;
+    /**
+     * Otpauth Uri
+     */
+    otpauth_uri: string;
+    /**
+     * Server Time
+     */
+    server_time: string;
+};
+
+/**
+ * MfaSetupRequest
+ */
+export type MfaSetupRequest = {
+    /**
+     * Current Password
+     */
+    current_password: string;
+};
+
+/**
+ * MfaStatus
+ */
+export type MfaStatus = {
+    /**
+     * Available
+     */
+    available: boolean;
+    /**
+     * Enabled
+     */
+    enabled: boolean;
+    /**
+     * Setup Pending
+     */
+    setup_pending?: boolean;
+    /**
+     * Enrolled At
+     */
+    enrolled_at?: string | null;
+    /**
+     * Recovery Codes Remaining
+     */
+    recovery_codes_remaining?: number;
+    /**
+     * Server Time
+     */
+    server_time: string;
 };
 
 /**
@@ -2519,20 +2661,6 @@ export type SnapshotPublic = {
 };
 
 /**
- * Token
- */
-export type Token = {
-    /**
-     * Access Token
-     */
-    access_token: string;
-    /**
-     * Token Type
-     */
-    token_type?: string;
-};
-
-/**
  * UpdatePassword
  */
 export type UpdatePassword = {
@@ -2701,6 +2829,10 @@ export type UserPublic = {
      * Must Change Password
      */
     must_change_password?: boolean;
+    /**
+     * Mfa Enabled
+     */
+    mfa_enabled?: boolean;
     /**
      * Locked Until
      */
@@ -2955,10 +3087,35 @@ export type loginLoginAccessTokenResponses = {
     /**
      * Successful Response
      */
-    200: Token;
+    200: LoginResult;
 };
 
 export type loginLoginAccessTokenResponse = loginLoginAccessTokenResponses[keyof loginLoginAccessTokenResponses];
+
+export type loginLoginMfaData = {
+    body: MfaLogin;
+    path?: never;
+    query?: never;
+    url: '/api/v1/login/mfa';
+};
+
+export type loginLoginMfaErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type loginLoginMfaError = loginLoginMfaErrors[keyof loginLoginMfaErrors];
+
+export type loginLoginMfaResponses = {
+    /**
+     * Successful Response
+     */
+    200: LoginResult;
+};
+
+export type loginLoginMfaResponse = loginLoginMfaResponses[keyof loginLoginMfaResponses];
 
 export type loginTestTokenData = {
     body?: never;
@@ -3176,6 +3333,182 @@ export type securityQuestionsRecoveryResetResponses = {
 };
 
 export type securityQuestionsRecoveryResetResponse = securityQuestionsRecoveryResetResponses[keyof securityQuestionsRecoveryResetResponses];
+
+export type twoFactorReadMyMfaData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/mfa';
+};
+
+export type twoFactorReadMyMfaResponses = {
+    /**
+     * Successful Response
+     */
+    200: MfaStatus;
+};
+
+export type twoFactorReadMyMfaResponse = twoFactorReadMyMfaResponses[keyof twoFactorReadMyMfaResponses];
+
+export type twoFactorStartMfaSetupData = {
+    body: MfaSetupRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/mfa/setup';
+};
+
+export type twoFactorStartMfaSetupErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type twoFactorStartMfaSetupError = twoFactorStartMfaSetupErrors[keyof twoFactorStartMfaSetupErrors];
+
+export type twoFactorStartMfaSetupResponses = {
+    /**
+     * Successful Response
+     */
+    200: MfaSetup;
+};
+
+export type twoFactorStartMfaSetupResponse = twoFactorStartMfaSetupResponses[keyof twoFactorStartMfaSetupResponses];
+
+export type twoFactorEnableMfaData = {
+    body: MfaCode;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/mfa/enable';
+};
+
+export type twoFactorEnableMfaErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type twoFactorEnableMfaError = twoFactorEnableMfaErrors[keyof twoFactorEnableMfaErrors];
+
+export type twoFactorEnableMfaResponses = {
+    /**
+     * Successful Response
+     */
+    200: MfaRecoveryCodes;
+};
+
+export type twoFactorEnableMfaResponse = twoFactorEnableMfaResponses[keyof twoFactorEnableMfaResponses];
+
+export type twoFactorDisableMfaData = {
+    body: MfaCodeWithPassword;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/mfa/disable';
+};
+
+export type twoFactorDisableMfaErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type twoFactorDisableMfaError = twoFactorDisableMfaErrors[keyof twoFactorDisableMfaErrors];
+
+export type twoFactorDisableMfaResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type twoFactorDisableMfaResponse = twoFactorDisableMfaResponses[keyof twoFactorDisableMfaResponses];
+
+export type twoFactorNewMyRecoveryCodesData = {
+    body: MfaCodeWithPassword;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/mfa/recovery-codes';
+};
+
+export type twoFactorNewMyRecoveryCodesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type twoFactorNewMyRecoveryCodesError = twoFactorNewMyRecoveryCodesErrors[keyof twoFactorNewMyRecoveryCodesErrors];
+
+export type twoFactorNewMyRecoveryCodesResponses = {
+    /**
+     * Successful Response
+     */
+    200: MfaRecoveryCodes;
+};
+
+export type twoFactorNewMyRecoveryCodesResponse = twoFactorNewMyRecoveryCodesResponses[keyof twoFactorNewMyRecoveryCodesResponses];
+
+export type twoFactorResetUserMfaData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/mfa';
+};
+
+export type twoFactorResetUserMfaErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type twoFactorResetUserMfaError = twoFactorResetUserMfaErrors[keyof twoFactorResetUserMfaErrors];
+
+export type twoFactorResetUserMfaResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type twoFactorResetUserMfaResponse = twoFactorResetUserMfaResponses[keyof twoFactorResetUserMfaResponses];
+
+export type twoFactorReadUserMfaData = {
+    body?: never;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/mfa';
+};
+
+export type twoFactorReadUserMfaErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type twoFactorReadUserMfaError = twoFactorReadUserMfaErrors[keyof twoFactorReadUserMfaErrors];
+
+export type twoFactorReadUserMfaResponses = {
+    /**
+     * Successful Response
+     */
+    200: MfaConfigured;
+};
+
+export type twoFactorReadUserMfaResponse = twoFactorReadUserMfaResponses[keyof twoFactorReadUserMfaResponses];
 
 export type usersReadUsersData = {
     body?: never;

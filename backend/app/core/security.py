@@ -19,6 +19,7 @@ password_hash = PasswordHash(
 
 
 ALGORITHM = "HS256"
+MFA_TOKEN_PURPOSE = "mfa"
 
 # The starting password of every account an administrator creates (or resets).
 # The account is flagged must_change_password, so it only works until the
@@ -56,6 +57,26 @@ def create_access_token(
     }
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
+
+def create_mfa_token(subject: str | Any, hashed_password: str) -> str:
+    """The token handed out after a correct password when two-factor is on.
+
+    It carries ``purpose=mfa`` and lives a few minutes. The normal request
+    check refuses any token with a purpose, so it can only be used at
+    ``POST /login/mfa``. Changing the password makes it stale (``pwdv``).
+    """
+    expire = datetime.now(UTC) + timedelta(minutes=settings.MFA_TOKEN_EXPIRE_MINUTES)
+    return jwt.encode(
+        {
+            "exp": expire,
+            "sub": str(subject),
+            "pwdv": password_fingerprint(hashed_password),
+            "purpose": MFA_TOKEN_PURPOSE,
+        },
+        settings.SECRET_KEY,
+        algorithm=ALGORITHM,
+    )
 
 
 def verify_password(

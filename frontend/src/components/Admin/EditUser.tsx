@@ -9,6 +9,7 @@ import { z } from "zod"
 
 import {
   SecurityQuestionsService,
+  TwoFactorService,
   type UserPublic,
   UsersService,
 } from "@/client"
@@ -130,6 +131,29 @@ const EditUser = ({
     onSuccess: () => {
       showSuccessToast(t("securityQuestions.admin.cleared"))
       queryClient.invalidateQueries({ queryKey: questionsKey })
+    },
+    onError: handleError.bind(showErrorToast),
+  })
+
+  const [mfaResetOpen, setMfaResetOpen] = useState(false)
+  const mfaKey = ["mfa", "user", user.id]
+  const mfaStatus = useQuery({
+    queryKey: mfaKey,
+    queryFn: async () =>
+      (
+        await TwoFactorService.factorReadUserMfa({
+          path: { user_id: user.id },
+        })
+      ).data,
+    enabled: isOpen && !isEditingSelf,
+  })
+  const resetMfa = useMutation({
+    mutationFn: () =>
+      TwoFactorService.factorResetUserMfa({ path: { user_id: user.id } }),
+    onSuccess: () => {
+      showSuccessToast(t("twoFactor.admin.reset"))
+      queryClient.invalidateQueries({ queryKey: mfaKey })
+      queryClient.invalidateQueries({ queryKey: ["users"] })
     },
     onError: handleError.bind(showErrorToast),
   })
@@ -333,6 +357,35 @@ const EditUser = ({
                       </Button>
                     ) : null}
                   </div>
+                  <div
+                    className="flex min-h-11 flex-wrap items-center justify-between gap-2 rounded-md border bg-background px-3 py-2 sm:col-span-2"
+                    data-testid="user-mfa"
+                  >
+                    <span className="text-sm">
+                      {t("twoFactor.admin.label")}:{" "}
+                      <strong>
+                        {mfaStatus.data?.enabled
+                          ? t("twoFactor.admin.on")
+                          : t("twoFactor.admin.off")}
+                      </strong>
+                    </span>
+                    {mfaStatus.data?.enabled && !user.is_superuser ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="min-h-11 sm:min-h-8"
+                        onClick={() => setMfaResetOpen(true)}
+                      >
+                        {t("twoFactor.admin.turnOff")}
+                      </Button>
+                    ) : null}
+                    {mfaStatus.data?.enabled && user.is_superuser ? (
+                      <span className="basis-full text-xs text-muted-foreground">
+                        {t("twoFactor.admin.adminNote")}
+                      </span>
+                    ) : null}
+                  </div>
                   <FormField
                     control={form.control}
                     name="reset_to_default_password"
@@ -435,6 +488,20 @@ const EditUser = ({
           onConfirm={() => {
             setClearOpen(false)
             clearQuestions.mutate()
+          }}
+        />
+        <ConfirmDialog
+          open={mfaResetOpen}
+          onOpenChange={setMfaResetOpen}
+          title={t("twoFactor.admin.confirmTitle")}
+          description={t("twoFactor.admin.confirmMessage", {
+            name: user.full_name || user.email,
+          })}
+          confirmLabel={t("twoFactor.admin.turnOff")}
+          destructive
+          onConfirm={() => {
+            setMfaResetOpen(false)
+            resetMfa.mutate()
           }}
         />
       </DialogContent>
