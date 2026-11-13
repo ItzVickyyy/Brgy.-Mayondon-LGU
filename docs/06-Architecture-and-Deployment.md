@@ -155,7 +155,7 @@ If the admin already exists, the script is **not** a password reset; use the rec
 5. Test login, search, data entry, printing, logout and simultaneous use from more than one computer.
 6. Ask the network administrator to reserve the host's address in the router **(D-32)**.
 
-This is **HTTP on a private LAN — not encrypted in transit** until HTTPS is switched on (patch 54, `docs/11` section G item 7; then use `https://<host-IPv4>` and open TCP 443 and 80 instead of 8000). A private LAN is not a substitute for authentication, least privilege or physical security **(D-33)**.
+This is **HTTP on a private LAN — not encrypted in transit** until HTTPS is switched on (patch 54, `docs/11` section G item 7; then use `https://<host-IPv4>` and open TCP 443 and 80 instead of 8000). With HTTPS the office can use a name such as `brgy-mayondon.test` instead of an address (`docs/11` section G item 7, "HTTPS by name"). A private LAN is not a substitute for authentication, least privilege or physical security **(D-33)**.
 
 ## 8. Backup and restore
 
@@ -183,6 +183,7 @@ The PowerShell smoke test creates a uniquely named temporary database, inserts a
 - The brief requires **scheduled and manual** backups to an **external drive**. Scheduling now exists as a Task Scheduler script (see above) and the app can make manual backups, but **none of it has been run on the intended Windows host**. The PowerShell dump/restore path is now exercised in CI against a real PostgreSQL container, but that does not replace Windows-host verification.
 - The Admin "Backup and Restore" screen is connected to the backend above: Back up now, history, Verify file and Download copy work. Restore on the screen only checks the chosen file, logs the request and shows the `restore-db.ps1` command; it replaces nothing. The schedule is shown read-only; it is set with `register-backup-task.ps1` on the server computer.
 - Needed: frequency, external-drive custody, retention, protection of backup files, restore responsibility, and a recorded recovery test **(D-35)**. A backup that stays only on the host does not survive disk failure, theft, ransomware or accidental deletion.
+- **Replacing secrets (patch 62).** `python -m app.rotate_secrets_cli` (run through `docker compose -f compose.yml run --rm -v "${PWD}:/work" backend ...`) replaces `SECRET_KEY`, the database password and the administrator password. `plan` (the default) is a dry run; `apply` needs `--confirm ROTATE`, a backup from the last 2 hours, saves the old `.env` as `.env.before-rotation-<time>`, changes the database password inside the running database first, proves it, and puts the old one back if any later step fails; `rollback` restores both. It never prints a secret. Runbook and rollback: `docs/11` section G item 11.
 
 ## 9. Offline limitations to resolve
 

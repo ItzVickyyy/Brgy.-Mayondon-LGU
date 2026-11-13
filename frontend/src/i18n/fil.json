@@ -290,7 +290,8 @@
       },
       "auth": {
         "login": "Nag-sign in",
-        "login_failed": "Nabigo ang pag-sign in"
+        "login_failed": "Nabigo ang pag-sign in",
+        "secrets_rotate": "Pinalitan ang mga lihim ng sistema"
       },
       "user": {
         "create": "Nagawa ang account",

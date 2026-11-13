@@ -12,8 +12,11 @@ backend/app/frontend/
 /frontend/src/routeTree.gen.ts
 /frontend/.tanstack/
 
-# Local secrets (copy .env.example to .env)
+# Local secrets (copy .env.example to .env). The rotation tool also leaves
+# .env.before-rotation-<time> (the OLD secrets) beside it until you move it away.
 .env
+.env.*
+!.env.example
 
 # Local database backups can contain resident personal information
 /backups/

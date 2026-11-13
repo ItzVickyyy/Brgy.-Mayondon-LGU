@@ -290,7 +290,8 @@
       },
       "auth": {
         "login": "Signed in",
-        "login_failed": "Sign-in failed"
+        "login_failed": "Sign-in failed",
+        "secrets_rotate": "System secrets changed"
       },
       "user": {
         "create": "Account created",

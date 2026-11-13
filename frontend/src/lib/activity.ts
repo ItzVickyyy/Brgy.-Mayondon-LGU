@@ -28,6 +28,7 @@ const activityKeys = {
   "official.update": "activity.actions.official.update",
   "auth.login": "activity.actions.auth.login",
   "auth.login_failed": "activity.actions.auth.login_failed",
+  "auth.secrets_rotate": "activity.actions.auth.secrets_rotate",
   "user.create": "activity.actions.user.create",
   "user.update": "activity.actions.user.update",
   "user.role_change": "activity.actions.user.role_change",
