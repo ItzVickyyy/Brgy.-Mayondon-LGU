@@ -19,6 +19,12 @@ export type ResidentRecord = {
   street?: string
   purok?: number
   residentType: string
+  /** regular / new / renting; empty counts as regular (patch 61). */
+  residencyType?: "regular" | "new" | "renting"
+  /** Months the next Barangay ID is normally valid for this resident. */
+  idValidityMonths?: 6 | 12
+  /** valid_until of the latest issued, unarchived Barangay ID, if any. */
+  idValidUntil?: string
   idNumber: string
   idStatus: "Valid" | "Expiring soon" | "Expired" | "None"
   registration: "Registered" | "Unregistered"

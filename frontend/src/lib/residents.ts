@@ -16,6 +16,9 @@ export const suffixes = ["Jr.", "Sr.", "II", "III", "IV", "V"] as const
 // What "resident type" means is still an open question (D-48); the column is free text.
 export const residentTypes = ["Existing resident", "New / renting resident"]
 
+// regular / new / renting (patch 61); an empty value counts as regular.
+export const residencyTypes = ["regular", "new", "renting"] as const
+
 // "2026-12-06" is a business date, not a moment: format it without time zones.
 export function formatBusinessDate(value: string) {
   const [year, month, day] = value.split("-").map(Number)

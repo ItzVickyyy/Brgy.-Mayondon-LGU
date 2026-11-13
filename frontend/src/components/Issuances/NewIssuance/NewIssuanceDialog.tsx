@@ -9,6 +9,7 @@ import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { ISSUE_DATE_MAX_DAYS_BACK } from "@/config/site"
+import { defaultIdValidUntil, idValidityNoteKey } from "@/lib/idValidity"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { documentName, fieldHelp, fieldLabel, fieldOptionLabel, validationMessage } from "@/lib/issuanceLabels"
 import { getLocaleOr } from "@/lib/locale"
@@ -202,9 +203,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     form.setValue("documentType", nextCode, { shouldDirty: true })
     const nextDetails = defaultDetails(nextCode)
     if (nextCode === "BARANGAY_ID" && nextDetails.type === "BARANGAY_ID") {
-      const baseDate = new Date(`${current.issueDate}T00:00:00`)
-      baseDate.setFullYear(baseDate.getFullYear() + 1)
-      nextDetails.validUntil = localIsoDate(baseDate)
+      nextDetails.validUntil = defaultIdValidUntil(current.issueDate, nextDetails.transactionType, selectedResident).date
     }
     form.setValue("details", nextDetails, { shouldDirty: true })
     form.setValue("purposeText", "")
@@ -239,6 +238,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setSectorManuallySelected(false)
     setDuplicate(null)
     setFormError("")
+    const chosenDetails = form.getValues("details") as unknown as Record<string, unknown>
+    if (chosenDetails.type === "BARANGAY_ID" && !validUntilEdited) {
+      setDetail("validUntil", defaultIdValidUntil(form.getValues("issueDate"), String(chosenDetails.transactionType ?? "new"), resident).date)
+    }
   }
 
   // One-per-resident documents: tell staff right away, before the whole form is filled in.
@@ -364,6 +367,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       else if (field.name === "isJobstartBeneficiary") setDetail(field.name, nextValue === "true")
       else if (["services", "connectionType", "classification", "assistanceType", "transactionType"].includes(field.name)) {
         setDetail(field.name, Array.isArray(nextValue) ? nextValue : String(nextValue).toLowerCase())
+        if (field.name === "transactionType" && documentType === "BARANGAY_ID" && !validUntilEdited) {
+          setDetail("validUntil", defaultIdValidUntil(form.getValues("issueDate"), String(nextValue).toLowerCase(), selectedResident).date)
+        }
       } else if (field.name === "sectorIdNumber") {
         form.setValue("sectors", [{ sectorId: form.getValues("sectors")?.[0]?.sectorId ?? 1, idNumber: String(nextValue) }], { shouldDirty: true })
       } else if (field.name === "validUntil") { setValidUntilEdited(true); setDetail(field.name, nextValue) }
@@ -411,6 +417,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       {messageNode}
       {field.type === "multiselect" && field.maxSelected ? <span className="text-xs font-normal text-muted-foreground">{t("issuances.new.detailsStep.chooseUpTo", { count: field.maxSelected })}</span> : null}
       {field.help ? <span className="text-xs font-normal text-muted-foreground">{fieldHelp(field.help, t)}</span> : null}
+      {field.name === "validUntil" && documentType === "BARANGAY_ID" ? (() => {
+        const noteKey = idValidityNoteKey(issueDate, String((details as unknown as Record<string, unknown>).transactionType ?? "new"), selectedResident)
+        return noteKey ? <span className="text-xs font-normal text-muted-foreground">{t(noteKey)}</span> : null
+      })() : null}
     </div>
   }
 
@@ -1037,7 +1047,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
               <DocumentTypePicker value={documentType} onChange={changeDocumentType} disabled={isCorrection} />
               <div className="flex flex-wrap items-end gap-x-6 gap-y-2 border-t pt-4">
                 <div className={cn(fieldLabelClass, "w-full sm:w-64")}><label htmlFor="issuance-date">{t("issuances.new.documentStep.dateOnDocument")}</label>
-                  <DateField id="issuance-date" value={issueDate} min={earliestIssueDate()} max={localIsoDate()} onChange={(nextDate) => { form.setValue("issueDate", nextDate, { shouldDirty: true }); if (documentType === "BARANGAY_ID" && !validUntilEdited && nextDate) { const validDate = new Date(`${nextDate}T00:00:00`); validDate.setFullYear(validDate.getFullYear() + 1); setDetail("validUntil", localIsoDate(validDate)) } }} />
+                  <DateField id="issuance-date" value={issueDate} min={earliestIssueDate()} max={localIsoDate()} onChange={(nextDate) => { form.setValue("issueDate", nextDate, { shouldDirty: true }); if (documentType === "BARANGAY_ID" && !validUntilEdited && nextDate) { setDetail("validUntil", defaultIdValidUntil(nextDate, String((form.getValues("details") as unknown as Record<string, unknown>).transactionType ?? "new"), selectedResident).date) } }} />
                 </div>
                 <p className="flex flex-wrap items-center gap-x-4 gap-y-1 pb-3 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><Printer className="size-3.5" aria-hidden="true" />{config.printMode === "overlay" ? t("issuances.new.documentStep.printsOverlay") : t("issuances.new.documentStep.printsFull")}</span>

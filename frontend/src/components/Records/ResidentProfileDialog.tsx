@@ -31,11 +31,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
-import {
-  civilStatusLabel,
-  residentTypeLabel,
-  sexLabel,
-} from "@/lib/residentLabels"
+import { civilStatusLabel, sexLabel } from "@/lib/residentLabels"
 import { formatBusinessDate, residentAddress } from "@/lib/residents"
 
 type ResidentProfileDialogProps = {
@@ -189,11 +185,28 @@ export function ResidentProfileDialog({
                     : dash,
               ],
               [
-                t("records.profile.fields.residentType"),
-                resident.resident_type
-                  ? residentTypeLabel(resident.resident_type, t)
+                t("records.profile.fields.residencyType"),
+                resident.residency_type
+                  ? t(`records.residency.${resident.residency_type}`)
                   : dash,
               ],
+              ...(resident.residency_type === "new" ||
+              resident.residency_type === "renting"
+                ? [
+                    [
+                      t("records.profile.fields.voterProof"),
+                      resident.voter_proof_verified_at
+                        ? t("records.profile.voterProofVerified", {
+                            date: formatBusinessDate(
+                              resident.voter_proof_verified_at,
+                            ),
+                            name:
+                              resident.voter_proof_verified_by_name ?? dash,
+                          })
+                        : t("records.profile.voterProofNotVerified"),
+                    ] as [string, string],
+                  ]
+                : []),
               [
                 t("records.profile.fields.voter"),
                 voterLabel(resident.voter_registration),

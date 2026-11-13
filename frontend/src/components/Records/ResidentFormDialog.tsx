@@ -28,11 +28,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { civilStatusLabel, residentTypeLabel } from "@/lib/residentLabels"
+import { civilStatusLabel } from "@/lib/residentLabels"
 import {
   civilStatuses,
   readApiError,
-  residentTypes,
+  residencyTypes,
   suffixes,
 } from "@/lib/residents"
 
@@ -52,6 +52,9 @@ type FormState = {
   resident_since_birth: boolean
   resident_type: string
   voter_registration: string
+  residency_type: string
+  proof_verified: boolean
+  proof_date: string
   emergency_contact_name: string
   emergency_contact_address: string
   emergency_contact_phone: string
@@ -75,6 +78,9 @@ function emptyForm(): FormState {
     resident_since_birth: false,
     resident_type: "",
     voter_registration: "",
+    residency_type: "",
+    proof_verified: false,
+    proof_date: "",
     emergency_contact_name: "",
     emergency_contact_address: "",
     emergency_contact_phone: "",
@@ -101,6 +107,9 @@ function formFromResident(resident: ResidentPublic): FormState {
     resident_since_birth: Boolean(resident.resident_since_birth),
     resident_type: resident.resident_type ?? "",
     voter_registration: resident.voter_registration ?? "",
+    residency_type: resident.residency_type ?? "",
+    proof_verified: Boolean(resident.voter_proof_verified_at),
+    proof_date: resident.voter_proof_verified_at ?? "",
     emergency_contact_name: resident.emergency_contact_name ?? "",
     emergency_contact_address: resident.emergency_contact_address ?? "",
     emergency_contact_phone: resident.emergency_contact_phone ?? "",
@@ -132,6 +141,8 @@ function buildBody(form: FormState): ResidentCreate {
     resident_type: text(form.resident_type),
     voter_registration: (form.voter_registration ||
       null) as ResidentCreate["voter_registration"],
+    residency_type: (form.residency_type ||
+      null) as ResidentCreate["residency_type"],
     emergency_contact_name: text(form.emergency_contact_name),
     emergency_contact_address: text(form.emergency_contact_address),
     emergency_contact_phone: text(form.emergency_contact_phone),
@@ -150,6 +161,7 @@ type ResidentFormDialogProps = {
     resident: ResidentPublic,
     mode: "created" | "updated" | "unchanged",
     photoError?: string,
+    proofError?: string,
   ) => void
 }
 
@@ -220,6 +232,39 @@ export function ResidentFormDialog({
               query: confirmDuplicate ? { confirm_duplicate: true } : undefined,
             })
           ).data
+      // Proof of voter registration has its own endpoints (and audit rows); it
+      // only applies to a new or renting resident.
+      let proofError = ""
+      const wasVerified = resident?.voter_proof_verified_at ?? ""
+      const wantsProof =
+        (form.residency_type === "new" || form.residency_type === "renting") &&
+        form.proof_verified
+      const proofDate = form.proof_date || todayManila()
+      const proofChanged = wantsProof
+        ? proofDate !== wasVerified
+        : Boolean(wasVerified) &&
+          (form.residency_type === "new" || form.residency_type === "renting")
+      if (proofChanged) {
+        try {
+          if (wasVerified) {
+            saved = (
+              await ResidentsService.clearVoterProof({
+                path: { resident_id: saved.id },
+              })
+            ).data
+          }
+          if (wantsProof) {
+            saved = (
+              await ResidentsService.verifyVoterProof({
+                path: { resident_id: saved.id },
+                body: { verified_on: proofDate },
+              })
+            ).data
+          }
+        } catch (caughtProof) {
+          proofError = readApiError(caughtProof).message
+        }
+      }
       let photoError = ""
       if (photoDataUrl) {
         try {
@@ -243,6 +288,7 @@ export function ResidentFormDialog({
         saved,
         resident ? (unchanged ? "unchanged" : "updated") : "created",
         photoError || undefined,
+        proofError || undefined,
       )
     } catch (caught) {
       const failure = readApiError(caught)
@@ -546,18 +592,20 @@ export function ResidentFormDialog({
                   {t("records.form.sinceBirth")}
                 </span>
               </label>
-              <label htmlFor="resident-form-type" className={labelClass}>
-                {t("records.form.residentType")}
+              <label htmlFor="resident-form-residency" className={labelClass}>
+                {t("records.form.residencyType")}
                 <Select
-                  id="resident-form-type"
-                  value={form.resident_type}
-                  onChange={(event) => set("resident_type", event.target.value)}
+                  id="resident-form-residency"
+                  value={form.residency_type}
+                  onChange={(event) =>
+                    set("residency_type", event.target.value)
+                  }
                   className={formControlClass}
                 >
                   <option value="">{t("records.form.notSet")}</option>
-                  {residentTypes.map((item) => (
+                  {residencyTypes.map((item) => (
                     <option key={item} value={item}>
-                      {residentTypeLabel(item, t)}
+                      {t(`records.residency.${item}`)}
                     </option>
                   ))}
                 </Select>
@@ -581,6 +629,58 @@ export function ResidentFormDialog({
                   </option>
                 </Select>
               </label>
+              {form.residency_type === "new" ||
+              form.residency_type === "renting" ? (
+                <div className="flex flex-col gap-2 text-sm font-medium sm:col-span-2 lg:col-span-3">
+                  <span className="flex min-h-11 items-center gap-2 font-normal sm:min-h-6">
+                    <input
+                      id="resident-form-proof"
+                      type="checkbox"
+                      checked={form.proof_verified}
+                      onChange={(event) => {
+                        set("proof_verified", event.target.checked)
+                        if (event.target.checked && !form.proof_date)
+                          set("proof_date", todayManila())
+                      }}
+                    />
+                    <label htmlFor="resident-form-proof">
+                      {t("records.form.proofVerified")}
+                    </label>
+                  </span>
+                  {form.proof_verified ? (
+                    <label
+                      htmlFor="resident-form-proof-date"
+                      className={`${labelClass} sm:max-w-xs`}
+                    >
+                      {t("records.form.proofDate")}
+                      <input
+                        id="resident-form-proof-date"
+                        type="date"
+                        max={todayManila()}
+                        value={form.proof_date}
+                        onChange={(event) =>
+                          set("proof_date", event.target.value)
+                        }
+                        className={formControlClass}
+                      />
+                    </label>
+                  ) : null}
+                  {resident?.voter_proof_verified_by_name &&
+                  form.proof_verified &&
+                  form.proof_date === resident.voter_proof_verified_at ? (
+                    <span className="text-xs font-normal text-muted-foreground">
+                      {t("records.form.proofRecordedBy", {
+                        name: resident.voter_proof_verified_by_name,
+                      })}
+                    </span>
+                  ) : null}
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {form.proof_verified
+                      ? t("records.form.proofHelpVerified")
+                      : t("records.form.proofHelpUnverified")}
+                  </span>
+                </div>
+              ) : null}
             </ModalSection>
 
             <ModalSection

@@ -204,6 +204,8 @@
       "duplicate_of": "Repeat of",
       "original_status": "was",
       "archive_reason": "archive reason",
+      "verified_on": "verified on",
+      "previous_verified_on": "was verified on",
       "fields": "fields",
       "field": "field",
       "file_name": "file name",
@@ -259,6 +261,8 @@
         "restore": "Resident restored",
         "photo_set": "Resident photo added",
         "photo_remove": "Resident photo removed",
+        "voter_proof_verify": "Voter-registration proof recorded",
+        "voter_proof_clear": "Voter-registration proof cleared",
         "view": "Resident record viewed",
         "list": "Resident list viewed"
       },
@@ -590,7 +594,13 @@
       "added": "{{name}} was added.",
       "updated": "{{name}} was updated.",
       "unchanged": "No changes were made to {{name}}.",
-      "photoFailed": "{{message}} Photo upload failed: {{error}}"
+      "photoFailed": "{{message}} Photo upload failed: {{error}}",
+      "proofFailed": "{{message}} The voter-registration proof was not saved: {{error}}"
+    },
+    "residency": {
+      "regular": "Regular resident",
+      "new": "New resident",
+      "renting": "Renting resident"
     },
     "labels": {
       "sex": {
@@ -637,6 +647,12 @@
       "residentSince": "Resident since (year)",
       "sinceBirth": "Has lived here since birth",
       "residentType": "Resident type",
+      "residencyType": "Residency type",
+      "proofVerified": "Proof of voter registration verified",
+      "proofDate": "Date verified",
+      "proofRecordedBy": "Recorded by {{name}}",
+      "proofHelpVerified": "The next Barangay ID uses the regular 1-year validity. IDs already issued do not change.",
+      "proofHelpUnverified": "Until proof of voter registration is verified, the next Barangay ID is valid for 6 months.",
       "voter": "Voter registration",
       "registered": "Registered",
       "unregistered": "Unregistered",
@@ -671,6 +687,8 @@
       "title": "Resident Profile",
       "description": "Review resident details, family and sector information, ID records, and issuance history.",
       "noAddress": "No address on record",
+      "voterProofVerified": "Verified on {{date}} by {{name}}",
+      "voterProofNotVerified": "Not yet verified",
       "tabsAria": "Resident profile sections",
       "tabs": {
         "details": "Details",
@@ -696,6 +714,8 @@
         "residentSince": "Resident since",
         "sinceBirth": "Since birth",
         "residentType": "Resident type",
+        "residencyType": "Residency type",
+        "voterProof": "Voter registration proof",
         "voter": "Voter registration",
         "emergency": "Emergency contact",
         "emergencyAddress": "Emergency contact address",
@@ -1110,6 +1130,10 @@
         "keepEditing": "Keep editing",
         "closeKeepDraft": "Close, keep draft",
         "discard": "Discard changes"
+      },
+      "validityNote": {
+        "sixMonths": "Valid for 6 months: this resident is new or renting and proof of voter registration is not yet verified. You can change the date.",
+        "replacement": "A replacement keeps the validity of the card it replaces. You can change the date."
       },
       "sameDay": {
         "title": "Issue another copy for the same day?",

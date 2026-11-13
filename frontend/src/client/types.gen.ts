@@ -1891,6 +1891,10 @@ export type ResidentCreate = {
      */
     voter_registration?: 'registered' | 'unregistered' | null;
     /**
+     * Residency Type
+     */
+    residency_type?: 'regular' | 'new' | 'renting' | null;
+    /**
      * Emergency Contact Name
      */
     emergency_contact_name?: string | null;
@@ -1977,6 +1981,10 @@ export type ResidentPublic = {
      */
     voter_registration?: 'registered' | 'unregistered' | null;
     /**
+     * Residency Type
+     */
+    residency_type?: 'regular' | 'new' | 'renting' | null;
+    /**
      * Emergency Contact Name
      */
     emergency_contact_name?: string | null;
@@ -2012,6 +2020,22 @@ export type ResidentPublic = {
      * Id Status
      */
     id_status: 'none' | 'valid' | 'expiring_soon' | 'expired';
+    /**
+     * Id Valid Until
+     */
+    id_valid_until?: string | null;
+    /**
+     * Id Validity Months
+     */
+    id_validity_months?: 6 | 12;
+    /**
+     * Voter Proof Verified At
+     */
+    voter_proof_verified_at?: string | null;
+    /**
+     * Voter Proof Verified By Name
+     */
+    voter_proof_verified_by_name?: string | null;
     /**
      * Status
      */
@@ -2124,6 +2148,10 @@ export type ResidentUpdate = {
      * Voter Registration
      */
     voter_registration?: 'registered' | 'unregistered' | null;
+    /**
+     * Residency Type
+     */
+    residency_type?: 'regular' | 'new' | 'renting' | null;
     /**
      * Emergency Contact Name
      */
@@ -2687,6 +2715,18 @@ export type ValidationError = {
     };
 };
 
+/**
+ * VoterProofRequest
+ *
+ * Day the proof was seen; the server uses today (Manila) when it is left out.
+ */
+export type VoterProofRequest = {
+    /**
+     * Verified On
+     */
+    verified_on?: string | null;
+};
+
 export type loginLoginAccessTokenData = {
     body: Body_login_login_access_token;
     path?: never;
@@ -3189,6 +3229,66 @@ export type residentsUpdateResidentResponses = {
 };
 
 export type residentsUpdateResidentResponse = residentsUpdateResidentResponses[keyof residentsUpdateResidentResponses];
+
+export type residentsVerifyVoterProofData = {
+    body: VoterProofRequest;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}/voter-proof';
+};
+
+export type residentsVerifyVoterProofErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsVerifyVoterProofError = residentsVerifyVoterProofErrors[keyof residentsVerifyVoterProofErrors];
+
+export type residentsVerifyVoterProofResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentPublic;
+};
+
+export type residentsVerifyVoterProofResponse = residentsVerifyVoterProofResponses[keyof residentsVerifyVoterProofResponses];
+
+export type residentsClearVoterProofData = {
+    body?: never;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}/voter-proof/clear';
+};
+
+export type residentsClearVoterProofErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsClearVoterProofError = residentsClearVoterProofErrors[keyof residentsClearVoterProofErrors];
+
+export type residentsClearVoterProofResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentPublic;
+};
+
+export type residentsClearVoterProofResponse = residentsClearVoterProofResponses[keyof residentsClearVoterProofResponses];
 
 export type residentsArchiveResidentData = {
     body: ArchiveRequest;

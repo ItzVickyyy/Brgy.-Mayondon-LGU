@@ -47,9 +47,11 @@ These close the gaps found when the database plan was reviewed. They are **desig
 | `street_id` | FK `streets`, optional |
 | `purok` | smallint, greater than 0, optional |
 | `resident_since_year`, `resident_since_birth` | smallint and bool (default false). `CHECK`: not both set |
-| `resident_type` | text, optional. **Open (D-48):** the prototype has this field but no doc lists its values |
+| `resident_type` | text, optional. **Legacy (D-48):** free text, no longer shown in the form; kept so imported values are not lost. Superseded by `residency_type` |
+| `residency_type` | text, `CHECK` in (`regular`, `new`, `renting`), optional; empty counts as regular (patch 61) |
+| `voter_proof_verified_at`, `voter_proof_verified_by_user_id` | date and FK to `user` (`ON DELETE SET NULL`), optional. The day staff saw proof of voter registration and who recorded it. `CHECK`: a verifier needs a date. Changed only by `POST /residents/{id}/voter-proof` and `.../clear` (admin and staff, audited as `resident.voter_proof_verify` and `resident.voter_proof_clear`); only for `new` or `renting` residents |
 | `id_number` | text, unique where not null (decision 2) |
-| `voter_registration` | text, `CHECK` in (`registered`, `unregistered`), optional. Rules for proof of registration are open (D-18) |
+| `voter_registration` | text, `CHECK` in (`registered`, `unregistered`), optional. The client's list remark; it is not proof (see `voter_proof_verified_at`) |
 | `emergency_contact_name`, `_address`, `_phone` | text, optional |
 | `status` | text, `CHECK` in (`active`, `archived`), default `active` |
 | `archive_reason`, `archived_at`, `archived_by_user_id` | all required when `status = 'archived'` (`CHECK`), otherwise null. Residents are archived, never deleted (D-26) |

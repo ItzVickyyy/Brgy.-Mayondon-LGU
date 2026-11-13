@@ -208,9 +208,13 @@ export function FamilySectorView({ streets, onViewProfile }: Props) {
                               {residentAddress(resident, streets) || "—"}
                             </td>
                             <td className="px-4 py-3 align-middle sm:px-5">
-                              {resident.resident_type
-                                ? residentTypeLabel(resident.resident_type, t)
-                                : "—"}
+                              {resident.residency_type
+                                ? t(
+                                    `records.residency.${resident.residency_type}`,
+                                  )
+                                : resident.resident_type
+                                  ? residentTypeLabel(resident.resident_type, t)
+                                  : "—"}
                             </td>
                             <td className="px-4 py-3 text-right align-middle sm:px-5">
                               <Button

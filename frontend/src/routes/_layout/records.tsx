@@ -686,7 +686,7 @@ function RecordsManagement() {
         resident={formResident}
         streets={streets}
         sectors={sectors}
-        onSaved={(saved, mode, photoError) => {
+        onSaved={(saved, mode, photoError, proofError) => {
           setFormOpen(false)
           const savedMessage =
             mode === "created"
@@ -694,13 +694,19 @@ function RecordsManagement() {
               : mode === "unchanged"
                 ? t("records.notices.unchanged", { name: saved.full_name })
                 : t("records.notices.updated", { name: saved.full_name })
+          const withProof = proofError
+            ? t("records.notices.proofFailed", {
+                message: savedMessage,
+                error: proofError,
+              })
+            : savedMessage
           setNotice(
             photoError
               ? t("records.notices.photoFailed", {
-                  message: savedMessage,
+                  message: withProof,
                   error: photoError,
                 })
-              : savedMessage,
+              : withProof,
           )
           setErrorNotice("")
           setSelectedResident((current) =>

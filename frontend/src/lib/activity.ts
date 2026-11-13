@@ -10,6 +10,8 @@ const activityKeys = {
   "resident.restore": "activity.actions.resident.restore",
   "resident.photo_set": "activity.actions.resident.photo_set",
   "resident.photo_remove": "activity.actions.resident.photo_remove",
+  "resident.voter_proof_verify": "activity.actions.resident.voter_proof_verify",
+  "resident.voter_proof_clear": "activity.actions.resident.voter_proof_clear",
   "resident.view": "activity.actions.resident.view",
   "resident.list": "activity.actions.resident.list",
   "barangay_id.list": "activity.actions.barangay_id.list",

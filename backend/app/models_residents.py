@@ -28,6 +28,7 @@ SUFFIXES = ("Jr.", "Sr.", "II", "III", "IV", "V")
 SEXES = ("Male", "Female")
 CIVIL_STATUSES = ("Single", "Married", "Legally Separated", "Widow/Widower")
 VOTER_STATUSES = ("registered", "unregistered")
+RESIDENCY_TYPES = ("regular", "new", "renting")
 STATUSES = ("active", "archived")
 PHOTO_TYPES = ("image/png", "image/webp")
 MAX_PHOTO_BYTES = 307200
@@ -62,6 +63,17 @@ class Resident(SQLModel, table=True):
             "voter_registration IS NULL OR "
             + _in_list("voter_registration", VOTER_STATUSES),
             name="ck_residents_voter_registration",
+        ),
+        CheckConstraint(
+            "residency_type IS NULL OR " + _in_list("residency_type", RESIDENCY_TYPES),
+            name="ck_residents_residency_type",
+        ),
+        # The verifying account may later be deleted (ON DELETE SET NULL), so only
+        # "an account is named without a date" is refused.
+        CheckConstraint(
+            "voter_proof_verified_by_user_id IS NULL OR "
+            "voter_proof_verified_at IS NOT NULL",
+            name="ck_residents_voter_proof",
         ),
         CheckConstraint(_in_list("status", STATUSES), name="ck_residents_status"),
         CheckConstraint("purok IS NULL OR purok > 0", name="ck_residents_purok"),
@@ -120,6 +132,13 @@ class Resident(SQLModel, table=True):
     resident_type: str | None = Field(default=None, max_length=100)  # open: D-48
     id_number: str | None = Field(default=None, max_length=50)
     voter_registration: str | None = Field(default=None, max_length=20)
+    # regular / new / renting; empty counts as regular (patch 61).
+    residency_type: str | None = Field(default=None, max_length=10)
+    # The day staff saw proof of voter registration. Empty = not verified.
+    voter_proof_verified_at: date | None = None
+    voter_proof_verified_by_user_id: uuid.UUID | None = Field(
+        default=None, foreign_key="user.id", ondelete="SET NULL"
+    )
     emergency_contact_name: str | None = Field(default=None, max_length=255)
     emergency_contact_address: str | None = Field(default=None, max_length=500)
     emergency_contact_phone: str | None = Field(default=None, max_length=30)
@@ -229,6 +248,7 @@ class ResidentFields(SQLModel):
     resident_type: str | None = Field(default=None, max_length=100)
     id_number: str | None = Field(default=None, max_length=50)
     voter_registration: Literal["registered", "unregistered"] | None = None
+    residency_type: Literal["regular", "new", "renting"] | None = None
     emergency_contact_name: str | None = Field(default=None, max_length=255)
     emergency_contact_address: str | None = Field(default=None, max_length=500)
     emergency_contact_phone: str | None = Field(default=None, max_length=30)
@@ -291,6 +311,7 @@ class ResidentUpdate(SQLModel):
     resident_type: str | None = Field(default=None, max_length=100)
     id_number: str | None = Field(default=None, max_length=50)
     voter_registration: Literal["registered", "unregistered"] | None = None
+    residency_type: Literal["regular", "new", "renting"] | None = None
     emergency_contact_name: str | None = Field(default=None, max_length=255)
     emergency_contact_address: str | None = Field(default=None, max_length=500)
     emergency_contact_phone: str | None = Field(default=None, max_length=30)
@@ -310,6 +331,26 @@ class ArchiveRequest(SQLModel):
     ]
 
 
+def id_validity_months(
+    residency_type: str | None, voter_proof_verified_at: date | None
+) -> Literal[6, 12]:
+    """How long the NEXT Barangay ID is normally valid (derived, never stored).
+
+    New or renting residents get 6 months until proof of voter registration is
+    verified; everyone else gets 12. An ID already issued is never changed by
+    this: the rule only sets the default of a new issuance.
+    """
+    if residency_type in ("new", "renting") and voter_proof_verified_at is None:
+        return 6
+    return 12
+
+
+class VoterProofRequest(SQLModel):
+    """Day the proof was seen; the server uses today (Manila) when it is left out."""
+
+    verified_on: date | None = None
+
+
 class ResidentPublic(ResidentFields):
     id: uuid.UUID
     full_name: str
@@ -317,6 +358,10 @@ class ResidentPublic(ResidentFields):
     sector_ids: list[int]
     has_photo: bool
     id_status: Literal["none", "valid", "expiring_soon", "expired"]
+    id_valid_until: date | None = None
+    id_validity_months: Literal[6, 12] = 12
+    voter_proof_verified_at: date | None = None
+    voter_proof_verified_by_name: str | None = None
     status: str
     archive_reason: str | None
     archived_at: datetime | None

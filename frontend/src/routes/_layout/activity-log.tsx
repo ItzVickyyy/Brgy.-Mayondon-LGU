@@ -52,6 +52,8 @@ const detailKeyLabels = {
   duplicate_of: "activity.detailKeys.duplicate_of",
   original_status: "activity.detailKeys.original_status",
   archive_reason: "activity.detailKeys.archive_reason",
+  verified_on: "activity.detailKeys.verified_on",
+  previous_verified_on: "activity.detailKeys.previous_verified_on",
   created: "activity.detailKeys.created",
   updated: "activity.detailKeys.updated",
   skipped: "activity.detailKeys.skipped",

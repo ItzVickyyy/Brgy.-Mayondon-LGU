@@ -178,6 +178,9 @@ function toResidentRecord(
     street,
     purok: resident.purok ?? undefined,
     residentType: resident.resident_type ?? "",
+    residencyType: resident.residency_type ?? undefined,
+    idValidityMonths: resident.id_validity_months,
+    idValidUntil: resident.id_valid_until ?? undefined,
     idNumber: resident.id_number ?? "",
     idStatus: "None",
     registration:

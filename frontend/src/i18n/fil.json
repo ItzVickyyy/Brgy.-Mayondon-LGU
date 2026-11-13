@@ -204,6 +204,8 @@
       "duplicate_of": "Ulit ng",
       "original_status": "dating",
       "archive_reason": "dahilan ng pag-archive",
+      "verified_on": "napatunayan noong",
+      "previous_verified_on": "dating napatunayan noong",
       "fields": "mga field",
       "field": "field",
       "file_name": "pangalan ng file",
@@ -259,6 +261,8 @@
         "restore": "Naibalik ang residente",
         "photo_set": "Naidagdag ang larawan ng residente",
         "photo_remove": "Naalis ang larawan ng residente",
+        "voter_proof_verify": "Naitala ang patunay ng rehistro bilang botante",
+        "voter_proof_clear": "Binura ang patunay ng rehistro bilang botante",
         "view": "Tiningnan ang talaan ng residente",
         "list": "Tiningnan ang listahan ng mga residente"
       },
@@ -590,7 +594,13 @@
       "added": "Naidagdag si {{name}}.",
       "updated": "Na-update si {{name}}.",
       "unchanged": "Walang binago kay {{name}}.",
-      "photoFailed": "{{message}} Nabigo ang pag-upload ng larawan: {{error}}"
+      "photoFailed": "{{message}} Nabigo ang pag-upload ng larawan: {{error}}",
+      "proofFailed": "{{message}} Hindi nai-save ang patunay ng rehistro bilang botante: {{error}}"
+    },
+    "residency": {
+      "regular": "Karaniwang residente",
+      "new": "Bagong residente",
+      "renting": "Nangungupahang residente"
     },
     "labels": {
       "sex": {
@@ -637,6 +647,12 @@
       "residentSince": "Residente mula (taon)",
       "sinceBirth": "Dito na nakatira mula pagkapanganak",
       "residentType": "Uri ng residente",
+      "residencyType": "Uri ng paninirahan",
+      "proofVerified": "Napatunayan ang patunay ng rehistro bilang botante",
+      "proofDate": "Petsa ng pagpapatunay",
+      "proofRecordedBy": "Itinala ni {{name}}",
+      "proofHelpVerified": "Ang susunod na Barangay ID ay may karaniwang bisa na 1 taon. Hindi magbabago ang mga ID na naibigay na.",
+      "proofHelpUnverified": "Hangga't hindi napapatunayan ang rehistro bilang botante, ang susunod na Barangay ID ay may bisa na 6 na buwan.",
       "voter": "Rehistro bilang botante",
       "registered": "Rehistrado",
       "unregistered": "Hindi rehistrado",
@@ -671,6 +687,8 @@
       "title": "Profile ng Residente",
       "description": "Suriin ang mga detalye ng residente, impormasyon ng pamilya at sektor, mga talaan ng ID, at kasaysayan ng pag-isyu.",
       "noAddress": "Walang tirahang nakatala",
+      "voterProofVerified": "Napatunayan noong {{date}} ni {{name}}",
+      "voterProofNotVerified": "Hindi pa napapatunayan",
       "tabsAria": "Mga seksyon ng profile ng residente",
       "tabs": {
         "details": "Mga Detalye",
@@ -696,6 +714,8 @@
         "residentSince": "Residente mula",
         "sinceBirth": "Mula pagkapanganak",
         "residentType": "Uri ng residente",
+        "residencyType": "Uri ng paninirahan",
+        "voterProof": "Patunay ng rehistro bilang botante",
         "voter": "Rehistro bilang botante",
         "emergency": "Contact sa oras ng emergency",
         "emergencyAddress": "Tirahan ng emergency contact",
@@ -1110,6 +1130,10 @@
         "keepEditing": "Ituloy ang pag-edit",
         "closeKeepDraft": "Isara, itabi ang draft",
         "discard": "Itapon ang mga pagbabago"
+      },
+      "validityNote": {
+        "sixMonths": "May bisa na 6 na buwan: bago o nangungupahan ang residenteng ito at hindi pa napapatunayan ang rehistro bilang botante. Maaari mong baguhin ang petsa.",
+        "replacement": "Pinananatili ng kapalit na card ang bisa ng card na pinapalitan nito. Maaari mong baguhin ang petsa."
       },
       "sameDay": {
         "title": "Mag-isyu ng isa pang kopya para sa parehong araw?",

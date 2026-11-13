@@ -7,7 +7,7 @@ audit row in the same transaction. Audit details hold field names, never values.
 """
 
 import uuid
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
@@ -34,7 +34,9 @@ from app.models_residents import (
     ResidentUpdate,
     ResidentSectorCount,
     SectorSummary,
+    VoterProofRequest,
     build_full_name,
+    id_validity_months,
 )
 
 router = APIRouter(prefix="/residents", tags=["residents"])
@@ -79,14 +81,12 @@ def _photo_ids(session: Session, resident_ids: list[uuid.UUID]) -> set[uuid.UUID
     )
 
 
-def _id_statuses(
+def _id_valid_untils(
     session: Session, resident_ids: list[uuid.UUID]
-) -> dict[uuid.UUID, Literal["none", "valid", "expiring_soon", "expired"]]:
-    statuses: dict[uuid.UUID, Literal["none", "valid", "expiring_soon", "expired"]] = {
-        resident_id: "none" for resident_id in resident_ids
-    }
+) -> dict[uuid.UUID, date]:
+    """The ``valid_until`` of each resident's latest issued, unarchived ID."""
     if not resident_ids:
-        return statuses
+        return {}
 
     latest = (
         select(col(Issuance.id).label("id"))
@@ -111,23 +111,43 @@ def _id_statuses(
             col(IssuanceBarangayId.issuance_id) == col(Issuance.id),
         )
     ).all()
+    return {resident_id: valid_until for resident_id, valid_until in rows}
+
+
+def _id_status_of(
+    valid_until: date | None,
+) -> Literal["none", "valid", "expiring_soon", "expired"]:
+    if valid_until is None:
+        return "none"
     today = today_manila()
-    soon = today + timedelta(days=ID_EXPIRING_SOON_DAYS)
-    for resident_id, valid_until in rows:
-        if valid_until < today:
-            statuses[resident_id] = "expired"
-        elif valid_until <= soon:
-            statuses[resident_id] = "expiring_soon"
-        else:
-            statuses[resident_id] = "valid"
-    return statuses
+    if valid_until < today:
+        return "expired"
+    if valid_until <= today + timedelta(days=ID_EXPIRING_SOON_DAYS):
+        return "expiring_soon"
+    return "valid"
+
+
+def _verifier_names(
+    session: Session, residents: list[Resident]
+) -> dict[uuid.UUID, str]:
+    """Full name (else e-mail) of the account that recorded each voter proof."""
+    user_ids = {
+        r.voter_proof_verified_by_user_id
+        for r in residents
+        if r.voter_proof_verified_by_user_id is not None
+    }
+    if not user_ids:
+        return {}
+    users = session.exec(select(User).where(col(User.id).in_(user_ids))).all()
+    return {u.id: (u.full_name or u.email) for u in users}
 
 
 def _to_public(
     resident: Resident,
     sectors: list[int],
     has_photo: bool,
-    id_status: Literal["none", "valid", "expiring_soon", "expired"],
+    id_valid_until: date | None,
+    verifier_name: str | None = None,
 ) -> ResidentPublic:
     data = resident.model_dump()
     return ResidentPublic.model_validate(
@@ -137,7 +157,12 @@ def _to_public(
             "age": age_on(resident.birthdate),
             "sector_ids": sectors,
             "has_photo": has_photo,
-            "id_status": id_status,
+            "id_status": _id_status_of(id_valid_until),
+            "id_valid_until": id_valid_until,
+            "id_validity_months": id_validity_months(
+                resident.residency_type, resident.voter_proof_verified_at
+            ),
+            "voter_proof_verified_by_name": verifier_name,
         }
     )
 
@@ -147,7 +172,10 @@ def _public(session: Session, resident: Resident) -> ResidentPublic:
         resident,
         _sector_ids(session, [resident.id])[resident.id],
         resident.id in _photo_ids(session, [resident.id]),
-        _id_statuses(session, [resident.id])[resident.id],
+        _id_valid_untils(session, [resident.id]).get(resident.id),
+        _verifier_names(session, [resident]).get(
+            resident.voter_proof_verified_by_user_id  # type: ignore[arg-type]
+        ),
     )
 
 
@@ -250,7 +278,8 @@ def list_residents(
     ids = [r.id for r in rows]
     sectors = _sector_ids(session, ids)
     photos = _photo_ids(session, ids)
-    id_statuses = _id_statuses(session, ids)
+    valid_untils = _id_valid_untils(session, ids)
+    verifiers = _verifier_names(session, list(rows))
     if not search_words(q) and rows:
         record_read_event(
             session,
@@ -262,7 +291,13 @@ def list_residents(
         )
     return ResidentsPublic(
         data=[
-            _to_public(r, sectors[r.id], r.id in photos, id_statuses[r.id])
+            _to_public(
+                r,
+                sectors[r.id],
+                r.id in photos,
+                valid_untils.get(r.id),
+                verifiers.get(r.voter_proof_verified_by_user_id),  # type: ignore[arg-type]
+            )
             for r in rows
         ],
         count=count,
@@ -452,6 +487,113 @@ def update_resident(
         record_type="resident",
         record_id=resident.id,
         details={"fields": sorted(changed_fields)},
+    )
+    session.commit()
+    session.refresh(resident)
+    return _public(session, resident)
+
+
+def _proof_resident(session: Session, resident_id: uuid.UUID) -> Resident:
+    """Lock the resident row and refuse archived ones."""
+    resident = session.exec(
+        select(Resident).where(Resident.id == resident_id).with_for_update()
+    ).first()
+    if resident is None:
+        raise HTTPException(status_code=404, detail="Resident not found")
+    if resident.status == "archived":
+        raise HTTPException(
+            status_code=409, detail="Archived residents cannot be edited; restore first"
+        )
+    return resident
+
+
+@router.post("/{resident_id}/voter-proof", response_model=ResidentPublic)
+def verify_voter_proof(
+    *,
+    resident_id: uuid.UUID,
+    session: SessionDep,
+    user: EditUser,
+    body: VoterProofRequest,
+) -> Any:
+    """Record that proof of voter registration was seen (new or renting only).
+
+    It changes the DEFAULT validity of the next Barangay ID only; an ID that is
+    already issued is never touched.
+    """
+    resident = _proof_resident(session, resident_id)
+    if resident.residency_type not in ("new", "renting"):
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "not_new_or_renting",
+                "message": "Only a new or renting resident needs proof of "
+                "voter registration",
+            },
+        )
+    if resident.voter_proof_verified_at is not None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "already_verified",
+                "message": "Proof is already recorded; clear it first to change it",
+            },
+        )
+    verified_on = body.verified_on or today_manila()
+    if verified_on > today_manila():
+        raise HTTPException(
+            status_code=422,
+            detail={
+                "code": "verified_on_future",
+                "message": "The verification date cannot be in the future",
+            },
+        )
+    resident.voter_proof_verified_at = verified_on
+    resident.voter_proof_verified_by_user_id = user.id
+    resident.updated_at = _now()
+    resident.updated_by_user_id = user.id
+    session.add(resident)
+    record_audit_event(
+        session,
+        action="resident.voter_proof_verify",
+        actor=user,
+        module=MODULE,
+        record_type="resident",
+        record_id=resident.id,
+        details={"verified_on": verified_on.isoformat()},
+    )
+    session.commit()
+    session.refresh(resident)
+    return _public(session, resident)
+
+
+@router.post("/{resident_id}/voter-proof/clear", response_model=ResidentPublic)
+def clear_voter_proof(
+    resident_id: uuid.UUID, session: SessionDep, user: EditUser
+) -> Any:
+    """Undo a recorded verification (for example a wrong date)."""
+    resident = _proof_resident(session, resident_id)
+    previous = resident.voter_proof_verified_at
+    if previous is None:
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "not_verified",
+                "message": "No voter-registration proof is recorded",
+            },
+        )
+    resident.voter_proof_verified_at = None
+    resident.voter_proof_verified_by_user_id = None
+    resident.updated_at = _now()
+    resident.updated_by_user_id = user.id
+    session.add(resident)
+    record_audit_event(
+        session,
+        action="resident.voter_proof_clear",
+        actor=user,
+        module=MODULE,
+        record_type="resident",
+        record_id=resident.id,
+        details={"previous_verified_on": previous.isoformat()},
     )
     session.commit()
     session.refresh(resident)
