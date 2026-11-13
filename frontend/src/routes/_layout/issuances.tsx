@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { CheckCircle2, Plus, Settings2, X } from "lucide-react"
+import { Plus, Settings2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { CalibrationPanel } from "@/components/Issuances/CalibrationPanel"
@@ -17,6 +17,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { pageTitle } from "@/config/site"
+import { notify } from "@/lib/notifications"
 
 export const Route = createFileRoute("/_layout/issuances")({
   component: IssuancesManagement,
@@ -41,8 +42,6 @@ function IssuancesManagement() {
   const queryClient = useQueryClient()
   const [printSetupOpen, setPrintSetupOpen] = useState(false)
   const { print: printStoredIssuance, overlay: printOverlay } = usePrintIssuance()
-  // A saved-form notice is stored as a kind so it follows a language switch; messages from the history list are plain text.
-  const [notice, setNotice] = useState<string | { kind: "draft" | "issued"; ref: string }>("")
 
   return (
     <div className="flex flex-col gap-6">
@@ -79,21 +78,6 @@ function IssuancesManagement() {
         </div>
       </header>
 
-      {notice && (
-        <div
-          role="status"
-          className="print:hidden flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm"
-        >
-          <CheckCircle2
-            className="mt-0.5 size-4 shrink-0 text-brand"
-            aria-hidden="true"
-          />
-          <p className="flex-1">{typeof notice === "string" ? notice : notice.kind === "issued" ? t("issuances.noticeIssued", { ref: notice.ref }) : notice.ref === "Draft" ? t("issuances.noticeDraftPlain") : t("issuances.noticeDraft", { ref: notice.ref })}</p>
-          <Button variant="ghost" size="icon" className="size-11" onClick={() => setNotice("")} aria-label={t("issuances.dismissMessage")}>
-            <X aria-hidden="true" />
-          </Button>
-        </div>
-      )}
 
       <NewIssuanceDialog
         open={isSimplifiedDialogOpen}
@@ -122,12 +106,14 @@ function IssuancesManagement() {
             void queryClient.invalidateQueries({ queryKey: [key] })
           }
           if (meta?.auto) return
-          setNotice({ kind: record.status === "draft" ? "draft" : "issued", ref: record.referenceNo })
+          if (record.status !== "draft") notify({ key: "issuances.noticeIssued", values: { ref: record.referenceNo } })
+          else if (record.referenceNo === "Draft") notify({ key: "issuances.noticeDraftPlain" })
+          else notify({ key: "issuances.noticeDraft", values: { ref: record.referenceNo } })
         }}
       />
 
       <IssuanceHistory
-        onNotice={setNotice}
+        onNotice={notify}
         onContinueDraft={(id) => {
           setInitialDraftId(id)
           setIsSimplifiedDialogOpen(true)

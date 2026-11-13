@@ -27,6 +27,18 @@
     "learnMore": "Learn more",
     "logout": "Logout"
   },
+  "notifications": {
+    "title": "Notifications",
+    "bell": "Notifications",
+    "bellUnread": "Notifications, {{count}} unread",
+    "unreadCount": "{{count}} unread",
+    "unread": "Unread",
+    "markRead": "Mark as read",
+    "markAllRead": "Mark all as read",
+    "clearAll": "Clear all notifications",
+    "empty": "No notifications yet",
+    "emptyHint": "Messages about what you save, issue or back up will appear here."
+  },
   "logoutDialog": {
     "title": "Log out?",
     "message": "Are you sure you want to log out of your account?",
@@ -614,6 +626,13 @@
       "added": "{{name}} was added.",
       "updated": "{{name}} was updated.",
       "unchanged": "No changes were made to {{name}}.",
+      "photoFailedStored": "{{message}} The photo upload failed.",
+      "proofFailedStored": "{{message}} The voter-registration proof was not saved.",
+      "archivedStored": "A resident record was archived.",
+      "restoredStored": "A resident record was restored.",
+      "addedStored": "A resident record was added.",
+      "updatedStored": "A resident record was updated.",
+      "unchangedStored": "No changes were made to a resident record.",
       "photoFailed": "{{message}} Photo upload failed: {{error}}",
       "proofFailed": "{{message}} The voter-registration proof was not saved: {{error}}"
     },

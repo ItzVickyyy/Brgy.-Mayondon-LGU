@@ -5,15 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import {
-  Archive,
-  CheckCircle2,
-  CreditCard,
-  Search,
-  UserRound,
-  Users,
-  X,
-} from "lucide-react"
+import { Archive, CreditCard, Search, UserRound, Users, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
@@ -46,6 +38,7 @@ import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { notify } from "@/lib/notifications"
 import { residentTypeLabel } from "@/lib/residentLabels"
 import {
   formatBusinessDate,
@@ -119,7 +112,6 @@ function RecordsManagement() {
   const [restoreTarget, setRestoreTarget] = useState<ResidentPublic | null>(
     null,
   )
-  const [notice, setNotice] = useState("")
   const [errorNotice, setErrorNotice] = useState("")
   const [selectedResident, setSelectedResident] =
     useState<ResidentPublic | null>(null)
@@ -223,12 +215,13 @@ function RecordsManagement() {
         })
       ).data,
     onSuccess: (resident) => {
-      setNotice(t("records.notices.archived", { name: resident.full_name }))
+      notify({ key: "records.notices.archivedStored" }, "success", {
+        toastText: t("records.notices.archived", { name: resident.full_name }),
+      })
       setErrorNotice("")
       refreshResidents()
     },
     onError: (error) => {
-      setNotice("")
       setErrorNotice(readApiError(error).message)
     },
   })
@@ -241,12 +234,13 @@ function RecordsManagement() {
         })
       ).data,
     onSuccess: (resident) => {
-      setNotice(t("records.notices.restored", { name: resident.full_name }))
+      notify({ key: "records.notices.restoredStored" }, "success", {
+        toastText: t("records.notices.restored", { name: resident.full_name }),
+      })
       setErrorNotice("")
       refreshResidents()
     },
     onError: (error) => {
-      setNotice("")
       setErrorNotice(readApiError(error).message)
     },
   })
@@ -254,7 +248,6 @@ function RecordsManagement() {
   function openForm(resident: ResidentPublic | null) {
     setFormResident(resident)
     setFormOpen(true)
-    setNotice("")
     setErrorNotice("")
   }
 
@@ -302,7 +295,6 @@ function RecordsManagement() {
             aria-selected={view === tab.id}
             onClick={() => {
               setView(tab.id)
-              setNotice("")
             }}
             className="min-h-11 rounded-md px-3"
           >
@@ -310,28 +302,6 @@ function RecordsManagement() {
           </Button>
         ))}
       </div>
-
-      {notice && (
-        <div
-          role="status"
-          className="flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm"
-        >
-          <CheckCircle2
-            className="mt-0.5 size-4 shrink-0 text-brand"
-            aria-hidden="true"
-          />
-          <p className="flex-1">{notice}</p>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-11"
-            onClick={() => setNotice("")}
-            aria-label={t("records.dismissMessage")}
-          >
-            <X aria-hidden="true" />
-          </Button>
-        </div>
-      )}
 
       {errorNotice && (
         <div
@@ -688,25 +658,41 @@ function RecordsManagement() {
         sectors={sectors}
         onSaved={(saved, mode, photoError, proofError) => {
           setFormOpen(false)
-          const savedMessage =
+          const savedKey =
             mode === "created"
-              ? t("records.notices.added", { name: saved.full_name })
+              ? "added"
               : mode === "unchanged"
-                ? t("records.notices.unchanged", { name: saved.full_name })
-                : t("records.notices.updated", { name: saved.full_name })
-          const withProof = proofError
-            ? t("records.notices.proofFailed", {
-                message: savedMessage,
-                error: proofError,
-              })
-            : savedMessage
-          setNotice(
-            photoError
-              ? t("records.notices.photoFailed", {
-                  message: withProof,
-                  error: photoError,
-                })
-              : withProof,
+                ? "unchanged"
+                : "updated"
+          // The toast names the resident and gives the upload errors; the
+          // saved notice has neither (errors can hold file names or paths).
+          const compose = (base: string, stored: boolean) => {
+            const withProof = proofError
+              ? t(
+                  stored
+                    ? "records.notices.proofFailedStored"
+                    : "records.notices.proofFailed",
+                  { message: base, error: proofError },
+                )
+              : base
+            return photoError
+              ? t(
+                  stored
+                    ? "records.notices.photoFailedStored"
+                    : "records.notices.photoFailed",
+                  { message: withProof, error: photoError },
+                )
+              : withProof
+          }
+          notify(
+            compose(t(`records.notices.${savedKey}Stored`), true),
+            photoError || proofError ? "warning" : "success",
+            {
+              toastText: compose(
+                t(`records.notices.${savedKey}`, { name: saved.full_name }),
+                false,
+              ),
+            },
           )
           setErrorNotice("")
           setSelectedResident((current) =>

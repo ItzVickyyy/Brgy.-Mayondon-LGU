@@ -8,7 +8,6 @@ import {
   HardDriveDownload,
   RotateCcw,
   ShieldCheck,
-  X,
 } from "lucide-react"
 import { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
@@ -31,6 +30,7 @@ import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { isSystemAdministrator } from "@/lib/access"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
+import { notify } from "@/lib/notifications"
 import { handleError } from "@/utils"
 
 export const Route = createFileRoute("/_layout/backup-restore")({
@@ -92,9 +92,11 @@ function formatSize(bytes: number | null) {
   return `${formatLocaleNumber(Math.max(1, bytes / 1024), options)} KB`
 }
 
-type Notice =
-  | { key: "created" | "verified" | "downloaded"; name: string }
-  | { key: "restoreChecked"; name: string }
+type NoticeKey = "created" | "verified" | "downloaded" | "restoreChecked"
+
+function notice(key: NoticeKey, name: string) {
+  notify({ key: `admin.backup.notices.${key}`, values: { name } })
+}
 
 // The word the person must type; it is compared in code, so it is never translated.
 const RESTORE_WORD = "RESTORE"
@@ -105,7 +107,6 @@ function BackupRestore() {
   const queryClient = useQueryClient()
   const { showErrorToast } = useCustomToast()
   const admin = isSystemAdministrator(user)
-  const [notice, setNotice] = useState<Notice | null>(null)
   const [confirmRestore, setConfirmRestore] = useState(false)
   const [selectedBackup, setSelectedBackup] = useState("")
   const [restoreConfirmation, setRestoreConfirmation] = useState("")
@@ -128,8 +129,7 @@ function BackupRestore() {
   const createMutation = useMutation({
     mutationFn: async () => (await BackupsService.createBackup()).data,
     onSuccess: (run) => {
-      if (run.status === "ok")
-        setNotice({ key: "created", name: run.file_name ?? "" })
+      if (run.status === "ok") notice("created", run.file_name ?? "")
     },
     onError: (err: Error) => handleError.call(showErrorToast, err),
     onSettled: refresh,
@@ -138,8 +138,7 @@ function BackupRestore() {
     mutationFn: async (id: string) =>
       (await BackupsService.verifyBackup({ path: { backup_id: id } })).data,
     onSuccess: (run) => {
-      if (run.status === "ok")
-        setNotice({ key: "verified", name: run.file_name ?? "" })
+      if (run.status === "ok") notice("verified", run.file_name ?? "")
     },
     onError: (err: Error) => handleError.call(showErrorToast, err),
     onSettled: refresh,
@@ -149,7 +148,7 @@ function BackupRestore() {
       (await BackupsService.requestRestore({ path: { backup_id: id } })).data,
     onSuccess: (result) => {
       setRestoreCommand({ name: result.file_name, command: result.command })
-      setNotice({ key: "restoreChecked", name: result.file_name })
+      notice("restoreChecked", result.file_name)
       setConfirmRestore(false)
       setRestoreConfirmation("")
     },
@@ -169,7 +168,7 @@ function BackupRestore() {
       link.download = run.file_name ?? "backup.dump"
       link.click()
       URL.revokeObjectURL(url)
-      setNotice({ key: "downloaded", name: run.file_name ?? "" })
+      notice("downloaded", run.file_name ?? "")
     } catch (err) {
       handleError.call(showErrorToast, err as Error)
     }
@@ -225,30 +224,6 @@ function BackupRestore() {
               components={{ code: <code className="font-mono" /> }}
             />
           </p>
-        </div>
-      ) : null}
-
-      {notice ? (
-        <div
-          role="status"
-          className="flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm"
-        >
-          <CheckCircle2
-            className="mt-0.5 size-4 shrink-0 text-brand"
-            aria-hidden="true"
-          />
-          <p className="flex-1">
-            {t(`admin.backup.notices.${notice.key}`, { name: notice.name })}
-          </p>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-11"
-            onClick={() => setNotice(null)}
-            aria-label={t("admin.backup.dismiss")}
-          >
-            <X aria-hidden="true" />
-          </Button>
         </div>
       ) : null}
 

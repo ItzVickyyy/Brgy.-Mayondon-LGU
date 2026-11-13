@@ -168,7 +168,7 @@ def main() -> int:
     def known(revision: str) -> bool:
         try:
             return script.get_revision(revision) is not None
-        except CommandError, RevisionError:
+        except (CommandError, RevisionError):
             return False
 
     try:

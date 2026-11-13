@@ -18,6 +18,7 @@ import { UsersService } from "@/client"
 import { Footer } from "@/components/Common/Footer"
 import { IdleSignOut } from "@/components/Common/IdleSignOut"
 import { KeyboardShortcuts } from "@/components/Common/KeyboardShortcuts"
+import { NotificationBell } from "@/components/Common/NotificationBell"
 import { AppShellSkeleton } from "@/components/Common/PageSkeleton"
 import { SecurityQuestionsBanner } from "@/components/SecurityQuestions/SecurityQuestionsBanner"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
@@ -31,6 +32,7 @@ import {
 } from "@/components/ui/sidebar"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 import { getLocale } from "@/lib/locale"
+import { setNotificationOwner } from "@/lib/notifications"
 
 export const Route = createFileRoute("/_layout")({
   component: Layout,
@@ -90,6 +92,12 @@ function Layout() {
     }
   }, [])
 
+  // The saved notices belong to the signed-in account.
+  const currentUserId = currentUser?.id
+  useEffect(() => {
+    setNotificationOwner(currentUserId ? String(currentUserId) : null)
+  }, [currentUserId])
+
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) await document.exitFullscreen()
     else await document.documentElement.requestFullscreen()
@@ -143,6 +151,9 @@ function Layout() {
           </div>
 
           <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
+            {currentUserId ? (
+              <NotificationBell ownerId={String(currentUserId)} />
+            ) : null}
             <Button
               type="button"
               variant="outline"

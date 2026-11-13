@@ -1,15 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { ParseKeys, TFunction } from "i18next"
-import {
-  BarChart3,
-  CheckCircle2,
-  Clock3,
-  Download,
-  FileCheck2,
-  FileUp,
-  X,
-} from "lucide-react"
+import { BarChart3, Clock3, Download, FileCheck2, FileUp } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -40,6 +32,7 @@ import {
   formatLocaleDate,
   formatLocaleNumber,
 } from "@/lib/locale"
+import { notify } from "@/lib/notifications"
 
 export const Route = createFileRoute("/_layout/reports")({
   component: Reports,
@@ -55,6 +48,13 @@ type NoticeKey =
   | "csvStarted"
   | "previewBeforePrint"
   | "notRecorded"
+
+function notice(key: NoticeKey) {
+  notify(
+    { key: `admin.reports.notices.${key}` },
+    key === "csvStarted" ? "success" : "warning",
+  )
+}
 
 const periodKeys = {
   week: "admin.reports.periods.week",
@@ -163,7 +163,6 @@ function Reports() {
   // The preview always follows the two selects: it loads with the page and
   // again whenever either select changes, with no button to press.
   const applied = { report, period }
-  const [notice, setNotice] = useState<NoticeKey | "">("")
   // While true, every row of the report is on the page so a print is complete.
   const [printAll, setPrintAll] = useState(false)
 
@@ -269,7 +268,6 @@ function Reports() {
 
   // The preview is always on screen; the button only reloads the figures.
   function previewReport() {
-    setNotice("")
     void queryClient.invalidateQueries({
       predicate: (query) => String(query.queryKey[0]).startsWith("reports-"),
     })
@@ -414,19 +412,19 @@ function Reports() {
       })
       return true
     } catch {
-      setNotice("notRecorded")
+      notice("notRecorded")
       return false
     }
   }
 
   async function exportReport() {
     if (!applied) {
-      setNotice("previewBeforeExport")
+      notice("previewBeforeExport")
       return
     }
     const csvRows = buildCsvRows()
     if (!csvRows) {
-      setNotice("notLoaded")
+      notice("notLoaded")
       return
     }
     if (!(await recordExport("csv"))) return
@@ -442,20 +440,19 @@ function Reports() {
     link.download = `management-report-${applied.report}-${applied.period}.csv`
     link.click()
     URL.revokeObjectURL(url)
-    setNotice("csvStarted")
+    notice("csvStarted")
   }
 
   async function printReport() {
     if (!applied) {
-      setNotice("previewBeforePrint")
+      notice("previewBeforePrint")
       return
     }
     if (!buildCsvRows()) {
-      setNotice("notLoaded")
+      notice("notLoaded")
       return
     }
     if (!(await recordExport("print"))) return
-    setNotice("")
     setPrintAll(true)
   }
 
@@ -928,27 +925,6 @@ function Reports() {
         </div>
       </div>
 
-      {notice ? (
-        <div
-          role="status"
-          className="flex items-start gap-3 rounded-lg border border-brand/30 bg-brand/5 px-4 py-3 text-sm print:hidden"
-        >
-          <CheckCircle2
-            className="mt-0.5 size-4 shrink-0 text-brand"
-            aria-hidden="true"
-          />
-          <p className="flex-1">{t(`admin.reports.notices.${notice}`)}</p>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setNotice("")}
-            aria-label={t("admin.reports.dismiss")}
-          >
-            <X aria-hidden="true" />
-          </Button>
-        </div>
-      ) : null}
-
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 print:hidden">
         <StatCard
           icon={FileCheck2}
@@ -997,7 +973,6 @@ function Reports() {
                 value={report}
                 onChange={(event) => {
                   setReport(event.target.value as ReportType)
-                  setNotice("")
                 }}
                 className={`${formControlClass} min-w-52 font-normal`}
               >
@@ -1028,7 +1003,6 @@ function Reports() {
                 value={period}
                 onChange={(event) => {
                   setPeriod(event.target.value as Period)
-                  setNotice("")
                 }}
                 className={`${formControlClass} min-w-40 font-normal`}
               >

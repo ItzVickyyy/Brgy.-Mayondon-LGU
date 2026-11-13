@@ -27,6 +27,18 @@
     "learnMore": "Alamin pa",
     "logout": "Mag-logout"
   },
+  "notifications": {
+    "title": "Mga Abiso",
+    "bell": "Mga abiso",
+    "bellUnread": "Mga abiso, {{count}} ang hindi pa nababasa",
+    "unreadCount": "{{count}} ang hindi pa nababasa",
+    "unread": "Hindi pa nababasa",
+    "markRead": "Markahang nabasa na",
+    "markAllRead": "Markahang nabasa na ang lahat",
+    "clearAll": "I-clear ang lahat ng abiso",
+    "empty": "Wala pang abiso",
+    "emptyHint": "Dito lalabas ang mga mensahe tungkol sa mga na-save, na-isyu o na-back up mo."
+  },
   "logoutDialog": {
     "title": "Mag-log out?",
     "message": "Sigurado ka bang gusto mong mag-log out sa iyong account?",
@@ -613,6 +625,13 @@
       "restored": "Naibalik si {{name}}.",
       "added": "Naidagdag si {{name}}.",
       "updated": "Na-update si {{name}}.",
+      "photoFailedStored": "{{message}} Nabigo ang pag-upload ng larawan.",
+      "proofFailedStored": "{{message}} Hindi nai-save ang patunay ng rehistro bilang botante.",
+      "archivedStored": "May na-archive na talaan ng residente.",
+      "restoredStored": "May naibalik na talaan ng residente.",
+      "addedStored": "May naidagdag na talaan ng residente.",
+      "updatedStored": "May na-update na talaan ng residente.",
+      "unchangedStored": "Walang ginawang pagbabago sa isang talaan ng residente.",
       "unchanged": "Walang binago kay {{name}}.",
       "photoFailed": "{{message}} Nabigo ang pag-upload ng larawan: {{error}}",
       "proofFailed": "{{message}} Hindi nai-save ang patunay ng rehistro bilang botante: {{error}}"

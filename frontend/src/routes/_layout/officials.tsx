@@ -46,6 +46,7 @@ import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { getLocaleOr } from "@/lib/locale"
+import { notify } from "@/lib/notifications"
 import { readApiError } from "@/lib/residents"
 
 type OfficialRecord = {
@@ -176,13 +177,17 @@ function OfficialsManagement() {
   const [termStart, setTermStart] = useState("2026-11-01")
   const [termEnd, setTermEnd] = useState("2029-10-31")
   const [error, setError] = useState("")
-  const [notice, setNotice] = useState<"" | "added" | "updated">("")
 
   const mutation = useMutation({
     mutationFn: saveChange,
     onSuccess: (_result, change) => {
       setError("")
-      setNotice(change.kind === "create" ? "added" : "updated")
+      notify({
+        key:
+          change.kind === "create"
+            ? "admin.officials.noticeAdded"
+            : "admin.officials.noticeUpdated",
+      })
       setFormOpen(false)
       setEndTermOfficial(null)
       // The issuance form keeps its own copy of the officials list; drop it so
@@ -193,7 +198,6 @@ function OfficialsManagement() {
       void queryClient.invalidateQueries({ queryKey: ["issuance-lookups"] })
     },
     onError: (caught) => {
-      setNotice("")
       setError(readApiError(caught).message)
     },
   })
@@ -229,7 +233,6 @@ function OfficialsManagement() {
 
   function clearMessages() {
     setError("")
-    setNotice("")
   }
 
   function openAddForm() {
@@ -320,16 +323,6 @@ function OfficialsManagement() {
         </Button>
       </div>
 
-      {notice ? (
-        <p
-          role="status"
-          className="rounded-lg border bg-card p-3 text-sm font-medium"
-        >
-          {notice === "added"
-            ? t("admin.officials.noticeAdded")
-            : t("admin.officials.noticeUpdated")}
-        </p>
-      ) : null}
       {error && !formOpen && !endTermOfficial ? (
         <p
           role="alert"

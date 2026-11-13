@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Brgy. Mayondon LGU</title>
+    <script>
+      // Apply the saved theme before the first paint so a reload does not flash
+      // white first. Keep the key and the default ("dark") in step with
+      // ThemeProvider in src/main.tsx.
+      (() => {
+        var theme = "dark";
+        try {
+          theme = localStorage.getItem("vite-ui-theme") || "dark";
+          if (theme === "system") {
+            theme = window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+          }
+        } catch {}
+        document.documentElement.classList.add(theme === "light" ? "light" : "dark");
+      })();
+    </script>
+    <link rel="icon" type="image/png" href="/assets/images/Barangay Mayondon Logo.png" />
+    <script type="module" crossorigin src="/assets/index-BGwRjOcI.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-hePW80VL.js">
+    <link rel="modulepreload" crossorigin href="/assets/useAuth-DmVVzPOA.js">
+    <link rel="modulepreload" crossorigin href="/assets/link-QOWox9vf.js">
+    <link rel="modulepreload" crossorigin href="/assets/useMatch-DFOPjaq3.js">
+    <link rel="modulepreload" crossorigin href="/assets/preload-helper-Dg0wYzWC.js">
+    <link rel="modulepreload" crossorigin href="/assets/schemas-CXzQY1GX.js">
+    <link rel="modulepreload" crossorigin href="/assets/site-BhileeNN.js">
+    <link rel="stylesheet" crossorigin href="/assets/index-D9eAWy_l.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
