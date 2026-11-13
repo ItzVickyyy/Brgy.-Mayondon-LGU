@@ -123,6 +123,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const [saving, setSaving] = useState(false)
   const [successRecord, setSuccessRecord] = useState<MockIssuance | null>(null)
   const [duplicate, setDuplicate] = useState<{ referenceNo: string; issueDate: string } | null>(null)
+  const [sameDay, setSameDay] = useState<{ referenceNo: string; issueDate: string; andPrint: boolean } | null>(null)
   const [formError, setFormError] = useState("")
   const [discardOpen, setDiscardOpen] = useState(false)
   const [changeResidentOpen, setChangeResidentOpen] = useState(false)
@@ -557,7 +558,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     }
   }
 
-  async function issue(andPrint = false) {
+  async function issue(andPrint = false, confirmedDuplicate = false) {
     if (!selectedResident) {
       setFormError(t("issuances.new.errors.selectResidentIssue"))
       return
@@ -613,8 +614,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       }
       const existingDraftId = draftIdRef.current
       const record = existingDraftId
-        ? await issuanceApi.issueDraft(existingDraftId, raw)
-        : await issuanceApi.createIssuance(raw)
+        ? await issuanceApi.issueDraft(existingDraftId, raw, confirmedDuplicate)
+        : await issuanceApi.createIssuance(raw, confirmedDuplicate)
       // Issue an existing draft in place so a correction keeps its original-document link.
       if (existingDraftId) {
         draftIdRef.current = null
@@ -627,7 +628,13 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       onSaved(record)
       if (andPrint) handlePrint(record)
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : t("issuances.new.errors.issue"))
+      if ((error as { code?: string }).code === "duplicate_same_day") {
+        // The server asks for a confirmation: nothing was issued and the draft is kept.
+        const info = (error as { detail?: Record<string, unknown> }).detail ?? {}
+        setSameDay({ referenceNo: String(info.reference_no ?? ""), issueDate: String(info.issue_date ?? ""), andPrint })
+      } else {
+        setFormError(error instanceof Error ? error.message : t("issuances.new.errors.issue"))
+      }
     } finally {
       setSaving(false)
     }
@@ -697,6 +704,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setPreviewOpen(false)
     setSuccessRecord(null)
     setDuplicate(null)
+    setSameDay(null)
     setFormError("")
     setAttempted(false)
     setQuickAttempted(false)
@@ -1219,6 +1227,18 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       onConfirm={() => {
         if (pendingDocumentType) applyDocumentType(pendingDocumentType)
         setPendingDocumentType(null)
+      }}
+    />
+    <ConfirmDialog
+      open={sameDay !== null}
+      onOpenChange={(nextOpen) => { if (!nextOpen) setSameDay(null) }}
+      title={t("issuances.new.sameDay.title")}
+      description={t("issuances.new.sameDay.description", { reference: sameDay?.referenceNo ?? "", date: sameDay?.issueDate ?? "" })}
+      confirmLabel={t("issuances.new.sameDay.confirm")}
+      onConfirm={() => {
+        const pending = sameDay
+        setSameDay(null)
+        if (pending) void issue(pending.andPrint, true)
       }}
     />
   </Dialog>

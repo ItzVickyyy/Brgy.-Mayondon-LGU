@@ -1040,7 +1040,10 @@ export const issuanceApi = {
   },
 
   /** Saves a draft, or saves and issues when the input says `issued`. */
-  async createIssuance(input: IssuanceInput): Promise<CreateIssuanceResult> {
+  async createIssuance(
+    input: IssuanceInput,
+    confirmDuplicate = false,
+  ): Promise<CreateIssuanceResult> {
     let draftId: string | undefined
     try {
       const data = await loadLookups()
@@ -1055,7 +1058,7 @@ export const issuanceApi = {
         !input.purposeId && purposeName && !purposeIdFor(input, data)
       const issued = await IssuancesService.issue({
         path: { issuance_id: draftId },
-        body: needsName ? { purpose_name: purposeName } : undefined,
+        body: issueBody(needsName ? purposeName : undefined, confirmDuplicate),
       })
       if (needsName) refreshLookups()
       draftId = undefined
@@ -1130,7 +1133,7 @@ export const issuanceApi = {
   },
 
   /** Updates and issues an existing draft without losing its correction link or reference. */
-  async issueDraft(id: string, input: IssuanceInput) {
+  async issueDraft(id: string, input: IssuanceInput, confirmDuplicate = false) {
     try {
       const data = await loadLookups()
       await applyResidentUpdates(input)
@@ -1143,7 +1146,7 @@ export const issuanceApi = {
         !input.purposeId && purposeName && !purposeIdFor(input, data)
       const issued = await IssuancesService.issue({
         path: { issuance_id: id },
-        body: needsName ? { purpose_name: purposeName } : undefined,
+        body: issueBody(needsName ? purposeName : undefined, confirmDuplicate),
       })
       if (needsName) refreshLookups()
       return await finish(issued.data)
@@ -1155,6 +1158,15 @@ export const issuanceApi = {
 
 const purposeLabels = new Map<number, string>()
 const tricycleIssuance = new Map<string, string>()
+
+/** The body of the issue call: only what was asked for, nothing at all when empty. */
+function issueBody(purposeName: string | undefined, confirmDuplicate: boolean) {
+  if (!purposeName && !confirmDuplicate) return undefined
+  return {
+    ...(purposeName ? { purpose_name: purposeName } : {}),
+    ...(confirmDuplicate ? { confirm_duplicate: true } : {}),
+  }
+}
 
 async function applyResidentUpdates(input: IssuanceInput) {
   const updates = input.residentUpdates as ResidentPatch | undefined

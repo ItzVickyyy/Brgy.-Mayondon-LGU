@@ -1331,6 +1331,12 @@ export type IssueRequest = {
      * Purpose Name
      */
     purpose_name?: string | null;
+    /**
+     * Confirm Duplicate
+     *
+     * Set to true to issue even though the same resident already has the same document dated the same day. The earlier one stays valid.
+     */
+    confirm_duplicate?: boolean;
 };
 
 /**

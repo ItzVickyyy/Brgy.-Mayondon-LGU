@@ -477,6 +477,7 @@ def test_reference_numbers_are_unique_and_increase(
             client,
             staff_token_headers,
             _clearance(client, staff_token_headers, res["id"])["id"],
+            confirm_duplicate=True,
         )["reference_no"]
         for _ in range(3)
     ]
@@ -588,9 +589,9 @@ def test_free_documents_share_the_foc_receipt(
             client, staff_token_headers, res["id"], payment={"is_free": True}
         )
         assert (
-            _issue(client, staff_token_headers, draft["id"])["payment"][
-                "official_receipt_no"
-            ]
+            _issue(client, staff_token_headers, draft["id"], confirm_duplicate=True)[
+                "payment"
+            ]["official_receipt_no"]
             == "FOC"
         )
 
@@ -620,6 +621,7 @@ def test_new_purpose_is_remembered_only_when_issued(
         staff_token_headers,
         _clearance(client, staff_token_headers, res["id"])["id"],
         purpose_name=name.upper().lower(),
+        confirm_duplicate=True,
     )
     assert again["purpose_id"] == row.id
     db.execute(delete(Issuance).where(col(Issuance.purpose_id) == row.id))

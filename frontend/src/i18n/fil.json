@@ -201,6 +201,7 @@
     "you": "Ikaw",
     "youWithName": "{{name}} (Ikaw)",
     "detailKeys": {
+      "duplicate_of": "Ulit ng",
       "fields": "mga field",
       "field": "field",
       "file_name": "pangalan ng file",
@@ -1081,6 +1082,11 @@
         "keepEditing": "Ituloy ang pag-edit",
         "closeKeepDraft": "Isara, itabi ang draft",
         "discard": "Itapon ang mga pagbabago"
+      },
+      "sameDay": {
+        "title": "Mag-isyu ng isa pang kopya para sa parehong araw?",
+        "description": "May dokumentong ito na ang residenteng ito na may petsang {{date}} ({{reference}}). Kung magpapatuloy ka, mananatili sa talaan ang dalawang kopya at parehong balido, at itatala sa Activity Log na paulit-ulit ang pangalawa.",
+        "confirm": "Isyu pa rin"
       },
       "changeType": {
         "title": "Palitan ang uri ng dokumento?",
@@ -2102,6 +2108,7 @@
     "issuance": {
       "missingSections": "Pakikumpleto ang mga sumusunod: {{sections}}.",
       "missingResidentFields": "May kulang na impormasyon sa rekord ng residente: {{fields}}.",
+      "duplicateSameDay": "May dokumentong ito na ang residenteng ito na may parehong petsa ({{reference}}). Kumpirmahin para mag-isyu ng isa pang kopya.",
       "possibleDuplicate": "May nakatala nang residente na kapareho ang pangalan at petsa ng kapanganakan. Hanapin muna siya sa listahan sa halip na magdagdag ng panibagong rekord.",
       "tricycleMismatch": "Nakatala na ang plate number o motor number na ito kasama ng ibang detalye ng traysikel. Suriin ang mga numero, tatak, kulay, at asosasyon.",
       "tricycleConflict": "Magkaibang traysikel ang nakatala para sa plate number at motor number. Suriin ang dalawang numero.",

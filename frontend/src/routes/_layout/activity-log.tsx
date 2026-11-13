@@ -49,6 +49,7 @@ const detailKeyLabels = {
   rows: "activity.detailKeys.rows",
   role: "activity.detailKeys.role",
   reason: "activity.detailKeys.reason",
+  duplicate_of: "activity.detailKeys.duplicate_of",
   created: "activity.detailKeys.created",
   updated: "activity.detailKeys.updated",
   skipped: "activity.detailKeys.skipped",

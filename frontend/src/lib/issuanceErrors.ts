@@ -48,6 +48,10 @@ export function issuanceErrorMessage(error: unknown): string {
       return i18n.t("apiErrors.issuance.missingResidentFields", {
         fields: list(body.fields, fieldWords),
       })
+    case "duplicate_same_day":
+      return i18n.t("apiErrors.issuance.duplicateSameDay", {
+        reference: String(body.reference_no ?? ""),
+      })
     case "possible_duplicate":
       return i18n.t("apiErrors.issuance.possibleDuplicate")
     case "tricycle_mismatch":

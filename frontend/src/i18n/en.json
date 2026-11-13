@@ -201,6 +201,7 @@
     "you": "You",
     "youWithName": "{{name}} (You)",
     "detailKeys": {
+      "duplicate_of": "Repeat of",
       "fields": "fields",
       "field": "field",
       "file_name": "file name",
@@ -1081,6 +1082,11 @@
         "keepEditing": "Keep editing",
         "closeKeepDraft": "Close, keep draft",
         "discard": "Discard changes"
+      },
+      "sameDay": {
+        "title": "Issue another copy for the same day?",
+        "description": "This resident already has this document dated {{date}} ({{reference}}). If you continue, both copies stay on record and both stay valid, and the Activity Log will note that the second one is a repeat.",
+        "confirm": "Issue anyway"
       },
       "changeType": {
         "title": "Change document type?",
@@ -2102,6 +2108,7 @@
     "issuance": {
       "missingSections": "Please fill in: {{sections}}.",
       "missingResidentFields": "The resident record is missing: {{fields}}.",
+      "duplicateSameDay": "This resident already has this document dated the same day ({{reference}}). Confirm to issue another copy.",
       "possibleDuplicate": "A resident with the same name and birthdate is already on file. Search for them above instead of adding them again.",
       "tricycleMismatch": "This plate or motor number is already on file with different tricycle details. Check the numbers, make, color and association.",
       "tricycleConflict": "The plate number and the motor number belong to two different tricycles on file. Check both numbers.",

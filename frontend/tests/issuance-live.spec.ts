@@ -543,8 +543,10 @@ test("staff: issue a new ID, refuse a second new one, then renew", async () => {
     message:
       "This resident already has a Barangay ID. Choose Renewal or Replacement instead.",
   })
+  // A same-day second copy needs the clerk's confirmation (patch 59).
   const renewal = await issuanceApi.createIssuance(
     idInput(idResidentId, "renewal", { validUntil: `${nextYear + 1}-12-31` }),
+    true,
   )
   expect(renewal.status).toBe("issued")
 })
@@ -776,8 +778,10 @@ test("archived resident: staff cannot archive, admin can, and nothing new can be
       )
     ).map((r) => r.id),
   ).toContain(resident.id)
+  // The first Residency was issued today, so this repeat needs confirmation.
   const again = await issuanceApi.createIssuance(
     inputs(resident.id).RESIDENCY.input,
+    true,
   )
   expect(again.status).toBe("issued")
 })

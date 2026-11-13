@@ -11,6 +11,7 @@ Maps every input in the **New Issuance** dialog to a proposed table and column, 
 3. **Snapshot at issue time.** When status becomes `issued`, the resident's printed values are copied into `issuance_resident_snapshot`, so a later edit to the resident never changes a document that was already handed out.
 4. **Document-specific data lives in its own detail table**, not as nullable columns on `issuances`. This keeps `issuances` small and lets each document evolve independently.
 5. **Issued records are never edited or deleted.** Corrections create a new row (`corrects_issuance_id`, `correction_reason`). Voiding sets `status = voided` plus `void_reason` (admin only). Issuing a correction also voids the document it replaces, automatically and in the same transaction (reason "Replaced by correction ISS-…", audit event `issuance.void` with `replaced_by` and `automatic`); this is allowed for staff because they may correct.
+   Same-day repeats: for document types that are not one-per-resident, issuing a second copy for the same resident with the same issue date is refused with 409 `duplicate_same_day` until the request carries `confirm_duplicate: true` (the New Issuance dialog asks "Issue anyway"). Only issued copies count; voided copies and a correction's own original do not. Both copies stay issued and valid; no unique constraint.
 
 ## Settled design decisions (Nov 5, 2026)
 
@@ -76,7 +77,7 @@ A database trigger blocks UPDATE, DELETE and TRUNCATE. Since patch 57 the single
 | `occurred_at` | timestamptz, default now |
 | `actor_user_id` | FK `user`, nullable, `ON DELETE SET NULL` |
 | `actor_email` | text, copied at write time |
-| `action` | text, for example `issuance.issue`, `issuance.void`, `issuance.print` (written by `POST /issuances/{id}/printed` just before the browser print dialog opens; `details.copy` counts prints of that document, 2 or more are reprints; the print does not start if the row cannot be written), `resident.archive`, `user.role_change`, and the READ rows `resident.view`, `resident.list`, `barangay_id.list` (see `docs/11` section G item 6) `report.export` and `audit.prune` |
+| `action` | text, for example `issuance.issue` (details include `duplicate_of`, the earlier reference number, when staff confirmed a second copy of the same document for the same resident on the same issue date), `issuance.void`, `issuance.print` (written by `POST /issuances/{id}/printed` just before the browser print dialog opens; `details.copy` counts prints of that document, 2 or more are reprints; the print does not start if the row cannot be written), `resident.archive`, `user.role_change`, and the READ rows `resident.view`, `resident.list`, `barangay_id.list` (see `docs/11` section G item 6) `report.export` and `audit.prune` |
 | `module`, `record_type`, `record_id` | text. `record_id` is text so any table can be referenced |
 | `outcome` | text, `CHECK` in (`success`, `failed`, `denied`) |
 | `reason` | text, required for void, correction and archive |

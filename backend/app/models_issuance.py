@@ -678,6 +678,13 @@ class IssueRequest(SQLModel):
     """Optional body of ``POST /issuances/{id}/issue``."""
 
     purpose_name: str | None = Field(default=None, max_length=150)
+    confirm_duplicate: bool = Field(
+        default=False,
+        description=(
+            "Set to true to issue even though the same resident already has "
+            "the same document dated the same day. The earlier one stays valid."
+        ),
+    )
 
 
 class ReasonRequest(SQLModel):

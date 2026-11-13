@@ -1027,6 +1027,38 @@ def issue(
         ).first()
         card = _prepare_id_card(session, issuance, resident)
 
+    # Last of the checks, so the more specific messages above come first.
+    duplicate_of: str | None = None
+    if not doc_type.one_per_resident:
+        # Lock the resident so two clerks issuing at once both see each other.
+        session.exec(
+            select(Resident.id).where(Resident.id == resident.id).with_for_update()
+        ).first()
+        same_day = select(Issuance.reference_no).where(
+            Issuance.resident_id == issuance.resident_id,
+            Issuance.document_type_id == issuance.document_type_id,
+            Issuance.issue_date == issuance.issue_date,
+            Issuance.status == "issued",
+            Issuance.id != issuance.id,
+        )
+        if issuance.corrects_issuance_id is not None:
+            # A correction replaces its original; that is not a duplicate.
+            same_day = same_day.where(Issuance.id != issuance.corrects_issuance_id)
+        earlier = session.exec(same_day.order_by(col(Issuance.issued_at))).first()
+        if earlier is not None:
+            if not (body and body.confirm_duplicate):
+                raise HTTPException(
+                    status_code=409,
+                    detail={
+                        "code": "duplicate_same_day",
+                        "message": "This resident already has this document "
+                        "dated the same day",
+                        "reference_no": earlier,
+                        "issue_date": issuance.issue_date.isoformat(),
+                    },
+                )
+            duplicate_of = earlier
+
     purpose_added = _resolve_purpose(
         session, issuance, body.purpose_name if body else None
     )
@@ -1074,6 +1106,8 @@ def issue(
         details["id_transaction"] = card.transaction_type
     if purpose_added:
         details["purpose_added"] = True
+    if duplicate_of is not None:
+        details["duplicate_of"] = duplicate_of
     if issuance.corrects_issuance_id is not None:
         details["corrects"] = str(issuance.corrects_issuance_id)
     record_audit_event(

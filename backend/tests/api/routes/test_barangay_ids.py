@@ -92,7 +92,8 @@ def _issue_card(
 ) -> dict:
     transaction = str(card.pop("transaction_type", "new"))
     draft = _draft(client, headers, resident_id, _card(transaction, **card))  # type: ignore[arg-type]
-    return _issue(client, headers, draft["id"])
+    # Cards for one resident are often issued the same day in these tests.
+    return _issue(client, headers, draft["id"], confirm_duplicate=True)
 
 
 def _resident_number(client: TestClient, headers: Headers, resident_id: str) -> str:
@@ -290,6 +291,7 @@ def test_renewal_and_replacement_keep_history(
         client,
         staff_token_headers,
         _draft(client, staff_token_headers, res["id"], _card("renewal"))["id"],
+        confirm_duplicate=True,
     )
     assert renewal["barangay_id"]["id_number"] == number
     # A replacement may carry a new number, which becomes the current one.
