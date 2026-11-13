@@ -546,6 +546,7 @@
       "cancelTitle": "Kanselahin ang pag-import na ito?",
       "cancelDescription": "Buburahin ang mga na-upload na hanay at walang mase-save.",
       "done": "Tapos na ang pag-import ng {{file}}.",
+      "doneStored": "Tapos na ang pag-import ng masterlist.",
       "resultLabels": {
         "created": "Nagawa",
         "updated": "Na-update",

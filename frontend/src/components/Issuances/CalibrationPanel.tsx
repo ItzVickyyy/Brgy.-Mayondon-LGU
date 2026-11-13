@@ -5,6 +5,7 @@ import { CalibrationSheet } from "@/components/Issuances/CalibrationSheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { notify } from "@/lib/notifications"
 import {
   clampOffset,
   getOffset,
@@ -33,7 +34,12 @@ export function CalibrationPanel() {
   const save = () => {
     const clean = clampOffset(offset)
     setOffset(clean)
-    setSaved(saveOffset(templateId, clean))
+    if (saveOffset(templateId, clean)) {
+      setSaved(null)
+      notify({ key: "issuances.printing.calibration.saved" })
+    } else {
+      setSaved(false)
+    }
   }
   const printSheet = () => {
     setPrinting(true)
@@ -121,9 +127,6 @@ export function CalibrationPanel() {
           {t("issuances.printing.calibration.reset")}
         </Button>
       </div>
-      {saved === true && (
-        <p className="text-sm">{t("issuances.printing.calibration.saved")}</p>
-      )}
       {saved === false && (
         <p className="text-sm text-destructive">
           {t("issuances.printing.calibration.saveFailed")}

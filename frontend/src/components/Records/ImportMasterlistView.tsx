@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { importProblemText } from "@/lib/importProblems"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
+import { notify } from "@/lib/notifications"
 import { cn } from "@/lib/utils"
 import { handleError } from "@/utils"
 
@@ -217,6 +218,10 @@ export function ImportMasterlistView() {
     onSuccess: (data) => {
       setBatch(data)
       setStep("results")
+      // The file name stays on screen only; the saved notice has none.
+      notify({ key: "records.import.doneStored" }, "success", {
+        toastText: t("records.import.done", { file: data.file_name }),
+      })
       queryClient.invalidateQueries({ queryKey: ["residents"] })
       refreshHistory()
     },
@@ -646,12 +651,6 @@ export function ImportMasterlistView() {
 
       {step === "results" && batch ? (
         <div className="mt-4 space-y-4">
-          <p
-            role="status"
-            className="rounded-lg border border-emerald-300 bg-emerald-50 p-3 text-sm font-medium text-emerald-900 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-200"
-          >
-            {t("records.import.done", { file: batch.file_name })}
-          </p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {(["created", "updated", "skipped", "failed"] as const).map(
               (kind) => (

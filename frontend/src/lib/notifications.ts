@@ -115,7 +115,7 @@ export function notificationText(item: NotificationItem): string {
 export function notify(
   input: NotificationInput,
   tone: "success" | "warning" = "success",
-  options?: { toastText?: string },
+  options?: { toastText?: string; toastTitle?: string },
 ) {
   const entry: NotificationItem =
     typeof input === "string"
@@ -126,10 +126,14 @@ export function notify(
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     createdAt: Date.now(),
   }
-  commit([item, ...items])
+  // Nobody is signed in (sign-in and password pages): there is no list to put
+  // the notice in, so it is shown on screen only.
+  if (owner) commit([item, ...items])
   const text = options?.toastText ?? notificationText(item)
-  if (tone === "warning") toast.warning(text)
-  else toast.success(text)
+  const extra = options?.toastTitle ? { description: text } : undefined
+  const heading = options?.toastTitle ?? text
+  if (tone === "warning") toast.warning(heading, extra)
+  else toast.success(heading, extra)
 }
 
 export function markNotificationRead(id: string) {

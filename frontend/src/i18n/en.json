@@ -546,6 +546,7 @@
       "cancelTitle": "Cancel this import?",
       "cancelDescription": "The uploaded rows will be deleted and nothing will be saved.",
       "done": "The import of {{file}} is finished.",
+      "doneStored": "The masterlist import is finished.",
       "resultLabels": {
         "created": "Created",
         "updated": "Updated",

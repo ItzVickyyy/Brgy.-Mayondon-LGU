@@ -13,6 +13,7 @@ import {
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
 import { Button } from "@/components/ui/button"
+import { notify } from "@/lib/notifications"
 import { readApiError } from "@/lib/residents"
 
 type LookupKind = "street" | "association"
@@ -78,20 +79,20 @@ function LookupListPanel({
   const [editingName, setEditingName] = useState("")
   const [deleteTarget, setDeleteTarget] = useState<LookupItem | null>(null)
   const [error, setError] = useState("")
-  const [notice, setNotice] = useState("")
 
   const mutation = useMutation({
     mutationFn: (input: { action: LookupAction; name?: string; id?: number }) =>
       changeLookup(kind, input.action, input.name, input.id),
     onSuccess: (_result, input) => {
       setError("")
-      setNotice(
-        input.action === "create"
-          ? t("records.lookups.notices.added")
-          : input.action === "rename"
-            ? t("records.lookups.notices.renamed")
-            : t("records.lookups.notices.deleted"),
-      )
+      notify({
+        key:
+          input.action === "create"
+            ? "records.lookups.notices.added"
+            : input.action === "rename"
+              ? "records.lookups.notices.renamed"
+              : "records.lookups.notices.deleted",
+      })
       setNewName("")
       setEditingId(null)
       setEditingName("")
@@ -102,7 +103,6 @@ function LookupListPanel({
       const failure = readApiError(caught)
       const status = (caught as { response?: { status?: number } }).response
         ?.status
-      setNotice("")
       setError(
         status === 409 && input.action === "delete"
           ? t("records.lookups.inUse")
@@ -113,7 +113,6 @@ function LookupListPanel({
 
   function startEdit(item: LookupItem) {
     setError("")
-    setNotice("")
     setEditingId(item.id)
     setEditingName(item.name)
   }
@@ -162,14 +161,6 @@ function LookupListPanel({
         </Button>
       </form>
 
-      {notice ? (
-        <p
-          role="status"
-          className="border-b px-4 py-3 text-sm text-emerald-700 dark:text-emerald-400"
-        >
-          {notice}
-        </p>
-      ) : null}
       {error ? (
         <p role="alert" className="border-b px-4 py-3 text-sm text-destructive">
           {error}
@@ -260,7 +251,6 @@ function LookupListPanel({
                       className="text-destructive hover:text-destructive"
                       onClick={() => {
                         setError("")
-                        setNotice("")
                         setDeleteTarget(item)
                       }}
                     >
