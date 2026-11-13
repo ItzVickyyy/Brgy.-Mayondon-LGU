@@ -526,6 +526,32 @@ def test_archive_hides_resident_blocks_edits_and_restores(
     )
 
 
+def test_archived_resident_shows_who_archived_and_restore_clears_it(
+    client: TestClient,
+    staff_token_headers: Headers,
+    superuser_token_headers: Headers,
+) -> None:
+    created = _create(client, staff_token_headers)
+    rid = created["id"]
+    assert created["archived_by_name"] is None
+    archived = client.post(
+        f"{API}/residents/{rid}/archive",
+        headers=superuser_token_headers,
+        json={"reason": "Moved away"},
+    ).json()
+    assert archived["archived_by_name"]
+    listed = client.get(
+        f"{API}/residents/",
+        headers=staff_token_headers,
+        params={"q": created["last_name"], "status": "archived"},
+    ).json()
+    assert listed["data"][0]["archived_by_name"] == archived["archived_by_name"]
+    restored = client.post(
+        f"{API}/residents/{rid}/restore", headers=superuser_token_headers
+    ).json()
+    assert restored["archived_by_name"] is None
+
+
 def audit_reason(db: Session, rid: str) -> str | None:
     rows = _audit(db, "resident.archive", rid)
     return rows[0].reason if rows else None

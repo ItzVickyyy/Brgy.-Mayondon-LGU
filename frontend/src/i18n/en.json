@@ -369,6 +369,7 @@
       "description": "Residents who were archived, with the reason and the date. An administrator can restore a resident to the active list.",
       "columns": {
         "archivedOn": "Archived on",
+        "archivedBy": "Archived by",
         "reason": "Reason"
       },
       "empty": {

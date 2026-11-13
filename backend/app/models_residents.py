@@ -365,6 +365,7 @@ class ResidentPublic(ResidentFields):
     status: str
     archive_reason: str | None
     archived_at: datetime | None
+    archived_by_name: str | None = None
     created_at: datetime
     updated_at: datetime
 

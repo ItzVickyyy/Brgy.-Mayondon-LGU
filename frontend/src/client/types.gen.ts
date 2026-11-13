@@ -2049,6 +2049,10 @@ export type ResidentPublic = {
      */
     archived_at: string | null;
     /**
+     * Archived By Name
+     */
+    archived_by_name?: string | null;
+    /**
      * Created At
      */
     created_at: string;

@@ -68,7 +68,13 @@ export function ArchivedResidentsView({
   const start = total ? pageIndex * pageSize + 1 : 0
   const end = Math.min((pageIndex + 1) * pageSize, total)
 
-  const columns = ["resident", "archivedOn", "reason", "actions"] as const
+  const columns = [
+    "resident",
+    "archivedOn",
+    "archivedBy",
+    "reason",
+    "actions",
+  ] as const
 
   return (
     <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
@@ -106,7 +112,7 @@ export function ArchivedResidentsView({
       ) : (
         <>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
+            <table className="w-full min-w-[820px] text-left text-sm">
               <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                 <tr>
                   {columns.map((column) => (
@@ -139,6 +145,9 @@ export function ArchivedResidentsView({
                             timeZone: "Asia/Manila",
                           })
                         : "—"}
+                    </td>
+                    <td className="px-4 py-3 align-middle sm:px-5">
+                      {resident.archived_by_name || "—"}
                     </td>
                     <td className="max-w-[320px] px-4 py-3 align-middle sm:px-5">
                       <p className="line-clamp-2 break-words">

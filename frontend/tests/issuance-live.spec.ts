@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test"
 import {
   ActivityService,
   DashboardService,
+  IssuancesService,
   LookupsService,
   OfficialsService,
   ReportsService,
@@ -883,4 +884,66 @@ test("activity log: staff see only their own rows, admin sees everyone's", async
   expect(onlyStaff.data.every((row) => row.actor_user_id === staffId)).toBe(
     true,
   )
+})
+
+test("same day: a second copy needs confirmation and keeps both", async () => {
+  useToken(adminToken || token)
+  const resident = await newResident("sameday")
+  const { input } = inputs(resident.id).RESIDENCY
+  const first = await issuanceApi.createIssuance(input)
+  expect(first.status).toBe("issued")
+
+  const refused = await issuanceApi
+    .createIssuance(input)
+    .then(() => null)
+    .catch((error: { status?: number; code?: string }) => error)
+  expect(refused?.status).toBe(409)
+  expect(refused?.code).toBe("duplicate_same_day")
+
+  const second = await issuanceApi.createIssuance(input, true)
+  expect(second.status).toBe("issued")
+  expect(second.id).not.toBe(first.id)
+  expect((await issuanceApi.getIssuance(first.id))?.status).toBe("issued")
+})
+
+test("archive: admin hides an issued document, restore brings it back unchanged", async () => {
+  useToken(adminToken || token)
+  const resident = await newResident("archiveissuance")
+  const issued = await issuanceApi.createIssuance(
+    inputs(resident.id).RESIDENCY.input,
+  )
+  const id = issued.id
+  const listed = async (archived: "exclude" | "only") =>
+    (
+      await IssuancesService.listIssuances({
+        query: { archived, limit: 100, q: `Check${run}` },
+      })
+    ).data.data.map((row) => row.id)
+
+  expect(await listed("exclude")).toContain(id)
+  const archived = (
+    await IssuancesService.archive({
+      path: { issuance_id: id },
+      body: { reason: "Filed away after the audit" },
+    })
+  ).data
+  expect(archived.status).toBe("issued")
+  expect(await listed("exclude")).not.toContain(id)
+  expect(await listed("only")).toContain(id)
+
+  expect(
+    await statusOf(
+      IssuancesService.archive({
+        path: { issuance_id: id },
+        body: { reason: "Again" },
+      }),
+    ),
+  ).toBe(409)
+
+  const restored = (
+    await IssuancesService.restore({ path: { issuance_id: id } })
+  ).data
+  expect(restored.status).toBe("issued")
+  expect(restored.reference_no).toBe(archived.reference_no)
+  expect(await listed("exclude")).toContain(id)
 })

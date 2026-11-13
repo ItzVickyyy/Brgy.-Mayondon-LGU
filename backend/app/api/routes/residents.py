@@ -130,12 +130,14 @@ def _id_status_of(
 def _verifier_names(
     session: Session, residents: list[Resident]
 ) -> dict[uuid.UUID, str]:
-    """Full name (else e-mail) of the account that recorded each voter proof."""
-    user_ids = {
-        r.voter_proof_verified_by_user_id
-        for r in residents
-        if r.voter_proof_verified_by_user_id is not None
-    }
+    """Full name (else e-mail) of the accounts that recorded a voter proof or
+    archived a resident, keyed by user id."""
+    user_ids: set[uuid.UUID] = set()
+    for r in residents:
+        if r.voter_proof_verified_by_user_id is not None:
+            user_ids.add(r.voter_proof_verified_by_user_id)
+        if r.archived_by_user_id is not None:
+            user_ids.add(r.archived_by_user_id)
     if not user_ids:
         return {}
     users = session.exec(select(User).where(col(User.id).in_(user_ids))).all()
@@ -148,6 +150,7 @@ def _to_public(
     has_photo: bool,
     id_valid_until: date | None,
     verifier_name: str | None = None,
+    archiver_name: str | None = None,
 ) -> ResidentPublic:
     data = resident.model_dump()
     return ResidentPublic.model_validate(
@@ -163,19 +166,20 @@ def _to_public(
                 resident.residency_type, resident.voter_proof_verified_at
             ),
             "voter_proof_verified_by_name": verifier_name,
+            "archived_by_name": archiver_name,
         }
     )
 
 
 def _public(session: Session, resident: Resident) -> ResidentPublic:
+    names = _verifier_names(session, [resident])
     return _to_public(
         resident,
         _sector_ids(session, [resident.id])[resident.id],
         resident.id in _photo_ids(session, [resident.id]),
         _id_valid_untils(session, [resident.id]).get(resident.id),
-        _verifier_names(session, [resident]).get(
-            resident.voter_proof_verified_by_user_id  # type: ignore[arg-type]
-        ),
+        names.get(resident.voter_proof_verified_by_user_id),  # type: ignore[arg-type]
+        names.get(resident.archived_by_user_id),  # type: ignore[arg-type]
     )
 
 
@@ -297,6 +301,7 @@ def list_residents(
                 r.id in photos,
                 valid_untils.get(r.id),
                 verifiers.get(r.voter_proof_verified_by_user_id),  # type: ignore[arg-type]
+                verifiers.get(r.archived_by_user_id),  # type: ignore[arg-type]
             )
             for r in rows
         ],
