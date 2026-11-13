@@ -62,7 +62,6 @@ type PendingAction = {
   action: "void" | "discard" | "correct" | "archive" | "restore"
 }
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50]
 const historyColumns = [
   "resident",
   "document",
@@ -921,7 +920,6 @@ export function IssuanceHistory({
               pageCount={pageCount}
               onPageChange={setPageIndex}
               pageSize={pageSize}
-              pageSizeOptions={PAGE_SIZE_OPTIONS}
               pageSizeLabel={t("issuances.history.pageSize")}
               onPageSizeChange={setPageSize}
             />
