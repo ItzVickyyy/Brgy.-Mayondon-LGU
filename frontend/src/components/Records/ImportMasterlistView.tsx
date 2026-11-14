@@ -116,7 +116,7 @@ function rowName(mapped: Record<string, unknown> | null | undefined) {
 export function ImportMasterlistView() {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const { showErrorToast } = useCustomToast()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
 
   const [step, setStep] = useState<Step>("select")
   const [file, setFile] = useState<File | null>(null)
@@ -183,6 +183,7 @@ export function ImportMasterlistView() {
       setFieldToHeader(invertMapping(data.suggested_mapping))
       setStep("map")
       refreshHistory()
+      showSuccessToast(t("records.import.toasts.uploaded"))
     },
     onError,
   })
@@ -204,6 +205,7 @@ export function ImportMasterlistView() {
       setRowFilter("all")
       setPageIndex(0)
       setStep("preview")
+      showSuccessToast(t("records.import.toasts.mappingSaved"))
     },
     onError,
   })
@@ -241,6 +243,7 @@ export function ImportMasterlistView() {
     onSuccess: () => {
       reset()
       refreshHistory()
+      showSuccessToast(t("records.import.toasts.cancelled"))
     },
     onError,
   })
@@ -258,6 +261,7 @@ export function ImportMasterlistView() {
       link.download = "import-errors.csv"
       link.click()
       URL.revokeObjectURL(url)
+      showSuccessToast(t("records.import.toasts.reportDownloaded"))
     } catch (err) {
       onError(err as Error)
     }

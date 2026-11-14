@@ -130,6 +130,7 @@ function BackupRestore() {
     mutationFn: async () => (await BackupsService.createBackup()).data,
     onSuccess: (run) => {
       if (run.status === "ok") notice("created", run.file_name ?? "")
+      else showErrorToast(t("admin.backup.failures.create"))
     },
     onError: (err: Error) => handleError.call(showErrorToast, err),
     onSettled: refresh,
@@ -139,6 +140,7 @@ function BackupRestore() {
       (await BackupsService.verifyBackup({ path: { backup_id: id } })).data,
     onSuccess: (run) => {
       if (run.status === "ok") notice("verified", run.file_name ?? "")
+      else showErrorToast(t("admin.backup.failures.verify"))
     },
     onError: (err: Error) => handleError.call(showErrorToast, err),
     onSettled: refresh,

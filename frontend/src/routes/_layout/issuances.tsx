@@ -118,7 +118,16 @@ function IssuancesManagement() {
           setInitialDraftId(id)
           setIsSimplifiedDialogOpen(true)
         }}
-        onPrint={(item, mode) => printStoredIssuance(item.id, mode)}
+        onPrint={async (item, mode) => {
+          const message = await printStoredIssuance(item.id, mode)
+          // Only "opened the print dialog" is good news; every other answer
+          // (busy, not found, voided, no template, not recorded) is a warning.
+          if (message && message !== t("issuances.printing.notices.opened")) {
+            notify(message, "warning")
+            return ""
+          }
+          return message
+        }}
       />
 
       <Dialog open={printSetupOpen} onOpenChange={setPrintSetupOpen}>

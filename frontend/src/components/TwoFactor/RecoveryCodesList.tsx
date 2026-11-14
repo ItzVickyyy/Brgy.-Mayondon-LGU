@@ -15,7 +15,7 @@ export function RecoveryCodesList({ codes }: Props) {
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(text)
-      showSuccessToast(t("twoFactor.codes.copied"), { keep: false })
+      showSuccessToast(t("twoFactor.codes.copied"))
     } catch {
       showErrorToast(t("twoFactor.codes.copyFailed"))
     }

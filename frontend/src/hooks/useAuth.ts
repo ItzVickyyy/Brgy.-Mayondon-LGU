@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
 import { useEffect } from "react"
+import { useTranslation } from "react-i18next"
 
 import {
   type Body_login_login_access_token as AccessToken,
@@ -20,7 +21,8 @@ const isLoggedIn = () => {
 const useAuth = () => {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const { showErrorToast } = useCustomToast()
+  const { t } = useTranslation()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
 
   const { data: user, error: userError } = useQuery<UserPublic | null, Error>({
     queryKey: ["currentUser"],
@@ -74,7 +76,10 @@ const useAuth = () => {
   const loginMutation = useMutation({
     mutationFn: login,
     onSuccess: ({ signedIn }) => {
-      if (signedIn) navigate({ to: "/" })
+      if (signedIn) {
+        showSuccessToast(t("common.toast.signedIn"))
+        navigate({ to: "/" })
+      }
     },
     onError: handleError.bind(showErrorToast),
   })
@@ -87,13 +92,17 @@ const useAuth = () => {
       return finishSignIn(response.data)
     },
     onSuccess: (signedIn) => {
-      if (signedIn) navigate({ to: "/" })
+      if (signedIn) {
+        showSuccessToast(t("common.toast.signedIn"))
+        navigate({ to: "/" })
+      }
     },
   })
 
   const logout = () => {
     localStorage.removeItem("access_token")
     navigate({ to: "/login" })
+    showSuccessToast(t("common.toast.signedOut"))
   }
 
   return {

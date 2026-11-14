@@ -547,6 +547,12 @@
       "cancelDescription": "The uploaded rows will be deleted and nothing will be saved.",
       "done": "The import of {{file}} is finished.",
       "doneStored": "The masterlist import is finished.",
+      "toasts": {
+        "uploaded": "The file was uploaded. Match its columns to the resident fields.",
+        "mappingSaved": "The column matching was saved and the rows were checked.",
+        "cancelled": "The import was cancelled and nothing was saved.",
+        "reportDownloaded": "The error report was downloaded."
+      },
       "resultLabels": {
         "created": "Created",
         "updated": "Updated",
@@ -1929,6 +1935,10 @@
         "verified": "Backup {{name}} was checked and is readable.",
         "downloaded": "Download of {{name}} started.",
         "restoreChecked": "Restore request for {{name}} recorded."
+      },
+      "failures": {
+        "create": "The backup could not be created. See the list for details.",
+        "verify": "The backup check failed. See the list for details."
       }
     }
   },
@@ -2340,7 +2350,9 @@
       "error": "Something went wrong!",
       "myAccountUpdated": "My Account updated successfully",
       "passwordUpdated": "Password updated successfully",
-      "recoveryLinkSent": "If that email is registered, a recovery link was sent"
+      "recoveryLinkSent": "If that email is registered, a recovery link was sent",
+      "signedIn": "You are signed in. Welcome back!",
+      "signedOut": "You have been logged out."
     },
     "errorPage": {
       "code": "Error",

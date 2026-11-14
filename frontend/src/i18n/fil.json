@@ -547,6 +547,12 @@
       "cancelDescription": "Buburahin ang mga na-upload na hanay at walang mase-save.",
       "done": "Tapos na ang pag-import ng {{file}}.",
       "doneStored": "Tapos na ang pag-import ng masterlist.",
+      "toasts": {
+        "uploaded": "Na-upload ang file. Itugma ang mga column nito sa mga field ng residente.",
+        "mappingSaved": "Na-save ang pagtutugma ng mga column at nasuri ang mga hanay.",
+        "cancelled": "Kinansela ang pag-import at walang na-save.",
+        "reportDownloaded": "Na-download ang ulat ng mga error."
+      },
       "resultLabels": {
         "created": "Nagawa",
         "updated": "Na-update",
@@ -1929,6 +1935,10 @@
         "verified": "Nasuri ang backup na {{name}} at nababasa ito.",
         "downloaded": "Nagsimula ang pag-download ng {{name}}.",
         "restoreChecked": "Naitala ang kahilingang mag-restore para sa {{name}}."
+      },
+      "failures": {
+        "create": "Hindi nagawa ang backup. Tingnan ang listahan para sa detalye.",
+        "verify": "Nabigo ang pagsusuri ng backup. Tingnan ang listahan para sa detalye."
       }
     }
   },
@@ -2340,7 +2350,9 @@
       "error": "May nangyaring error!",
       "myAccountUpdated": "Matagumpay na na-update ang Aking Account",
       "passwordUpdated": "Matagumpay na na-update ang password",
-      "recoveryLinkSent": "Kung nakarehistro ang email na iyon, may ipinadalang link sa pagbawi"
+      "recoveryLinkSent": "Kung nakarehistro ang email na iyon, may ipinadalang link sa pagbawi",
+      "signedIn": "Naka-sign in ka na. Maligayang pagbabalik!",
+      "signedOut": "Nag-log out ka na."
     },
     "errorPage": {
       "code": "Error",

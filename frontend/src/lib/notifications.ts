@@ -115,7 +115,7 @@ export function notificationText(item: NotificationItem): string {
 export function notify(
   input: NotificationInput,
   tone: "success" | "warning" = "success",
-  options?: { toastText?: string; toastTitle?: string },
+  options?: { toastText?: string },
 ) {
   const entry: NotificationItem =
     typeof input === "string"
@@ -130,10 +130,8 @@ export function notify(
   // the notice in, so it is shown on screen only.
   if (owner) commit([item, ...items])
   const text = options?.toastText ?? notificationText(item)
-  const extra = options?.toastTitle ? { description: text } : undefined
-  const heading = options?.toastTitle ?? text
-  if (tone === "warning") toast.warning(heading, extra)
-  else toast.success(heading, extra)
+  if (tone === "warning") toast.warning(text)
+  else toast.success(text)
 }
 
 export function markNotificationRead(id: string) {

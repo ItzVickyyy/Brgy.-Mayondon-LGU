@@ -1,24 +1,16 @@
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 
-import { notify } from "@/lib/notifications"
-
+// Toasts are immediate feedback for the person who just acted. They are NOT
+// kept anywhere: the bell in the top bar holds only curated notices (see
+// `lib/notifications.ts`), never a copy of every toast.
 const useCustomToast = () => {
   const { t } = useTranslation()
 
-  // A success message is also kept in the bell in the top bar (it keeps the
-  // language it was written in). Pass `{ keep: false }` for tiny feedback that
-  // is not worth keeping, such as "copied". Callers must not put resident
-  // names or server error text in `description`.
-  const showSuccessToast = (
-    description: string,
-    options?: { keep?: boolean },
-  ) => {
-    if (options?.keep === false) {
-      toast.success(t("common.toast.success"), { description })
-      return
-    }
-    notify(description, "success", { toastTitle: t("common.toast.success") })
+  const showSuccessToast = (description: string) => {
+    toast.success(t("common.toast.success"), {
+      description,
+    })
   }
 
   const showErrorToast = (description: string) => {

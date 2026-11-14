@@ -5,7 +5,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { Archive, CreditCard, Search, UserRound, Users, X } from "lucide-react"
+import { Archive, CreditCard, Search, UserRound, Users } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
@@ -37,6 +37,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
+import useCustomToast from "@/hooks/useCustomToast"
 import { isSystemAdministrator } from "@/lib/access"
 import { notify } from "@/lib/notifications"
 import { residentTypeLabel } from "@/lib/residentLabels"
@@ -112,7 +113,7 @@ function RecordsManagement() {
   const [restoreTarget, setRestoreTarget] = useState<ResidentPublic | null>(
     null,
   )
-  const [errorNotice, setErrorNotice] = useState("")
+  const { showErrorToast } = useCustomToast()
   const [selectedResident, setSelectedResident] =
     useState<ResidentPublic | null>(null)
   const [formOpen, setFormOpen] = useState(false)
@@ -218,11 +219,10 @@ function RecordsManagement() {
       notify({ key: "records.notices.archivedStored" }, "success", {
         toastText: t("records.notices.archived", { name: resident.full_name }),
       })
-      setErrorNotice("")
       refreshResidents()
     },
     onError: (error) => {
-      setErrorNotice(readApiError(error).message)
+      showErrorToast(readApiError(error).message)
     },
   })
 
@@ -237,18 +237,16 @@ function RecordsManagement() {
       notify({ key: "records.notices.restoredStored" }, "success", {
         toastText: t("records.notices.restored", { name: resident.full_name }),
       })
-      setErrorNotice("")
       refreshResidents()
     },
     onError: (error) => {
-      setErrorNotice(readApiError(error).message)
+      showErrorToast(readApiError(error).message)
     },
   })
 
   function openForm(resident: ResidentPublic | null) {
     setFormResident(resident)
     setFormOpen(true)
-    setErrorNotice("")
   }
 
   const tabs: { id: View; label: string }[] = [
@@ -302,24 +300,6 @@ function RecordsManagement() {
           </Button>
         ))}
       </div>
-
-      {errorNotice && (
-        <div
-          role="alert"
-          className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive"
-        >
-          <p className="flex-1">{errorNotice}</p>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-11"
-            onClick={() => setErrorNotice("")}
-            aria-label={t("records.dismissError")}
-          >
-            <X aria-hidden="true" />
-          </Button>
-        </div>
-      )}
 
       {view === "residents" && (
         <>
@@ -694,7 +674,6 @@ function RecordsManagement() {
               ),
             },
           )
-          setErrorNotice("")
           setSelectedResident((current) =>
             current && current.id === saved.id ? saved : current,
           )
