@@ -9,7 +9,7 @@
 #   3. builds the program, starts it and waits until it is healthy
 #   4. creates the administrator account
 #   5. makes the backup key pair (you type the passphrase) and turns encryption on
-#   6. registers the daily backup task
+#   6. registers the daily backup task and the start-at-sign-in task
 #   7. opens the firewall for the office network (asks Windows for permission)
 #   8. puts a "Barangay Mayondon" shortcut on the desktop
 #
@@ -237,6 +237,12 @@ try {
     Write-Warning "The backup task was not set up: $($_.Exception.Message). Run scripts\register-backup-task.ps1 by hand."
 }
 
+try {
+    & (Join-Path $PSScriptRoot "register-start-task.ps1")
+} catch {
+    Write-Warning "The start-at-sign-in task was not set up: $($_.Exception.Message). Run scripts\register-start-task.ps1 by hand."
+}
+
 # ------------------------------------------------------------ 7. firewall
 Step "7/8  Firewall for the office network"
 try {
@@ -288,4 +294,4 @@ if ($adminPasswordShown) {
     Clear-Host
 }
 Write-Host "Next, signed in as the administrator (docs/11 section F): add the streets and puroks, create staff accounts with each person present, and ask everyone to set their security questions."
-Write-Host "Also: Docker Desktop > Settings > General > 'Start Docker Desktop when you sign in to your computer' must be ticked."
+Write-Host "The program starts by itself when this Windows user signs in (task 'Mayondon Start at Sign-in'). Tick Docker Desktop > Settings > General > 'Start Docker Desktop when you sign in' as well. Check anytime with Check-Mayondon.cmd."
