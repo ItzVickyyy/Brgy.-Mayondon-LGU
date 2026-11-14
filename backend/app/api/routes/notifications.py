@@ -55,6 +55,8 @@ CATEGORIES: dict[str, str] = {
     "auth.mfa_disabled": "security",
     "auth.mfa_codes_renewed": "security",
     "auth.mfa_reset_by_admin": "security",
+    "auth.mfa_required_set": "security",
+    "auth.mfa_required_cleared": "security",
     "auth.recovery_questions_set": "security",
     "auth.recovery_reset_by_admin": "security",
     "auth.recovery_success": "security",
@@ -86,6 +88,8 @@ STAFF_ABOUT_ME = (
     "user.temp_password_set",
     "user.unlock",
     "auth.mfa_reset_by_admin",
+    "auth.mfa_required_set",
+    "auth.mfa_required_cleared",
     "auth.recovery_reset_by_admin",
 )
 # Staff (b): their own security events.

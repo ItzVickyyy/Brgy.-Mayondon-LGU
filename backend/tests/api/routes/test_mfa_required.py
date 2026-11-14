@@ -125,3 +125,34 @@ def test_cannot_ask_while_the_server_has_no_key(
     user, _ = create_user_with_role(db, UserRole.staff)
     monkeypatch.setattr(settings, "MFA_ENCRYPTION_KEY", "")
     assert _ask(client, superuser_token_headers, user, True).status_code == 409
+
+
+def test_the_ask_shows_in_the_bell_for_the_person_and_the_admin_only(
+    client: TestClient, db: Session, superuser_token_headers: dict[str, str]
+) -> None:
+    user, password = create_user_with_role(db, UserRole.staff)
+    other, other_password = create_user_with_role(db, UserRole.staff)
+    headers = user_authentication_headers(
+        client=client, email=user.email, password=password
+    )
+    other_headers = user_authentication_headers(
+        client=client, email=other.email, password=other_password
+    )
+    url = f"{API}/notifications/"
+    assert _ask(client, superuser_token_headers, user, True).status_code == 200
+
+    def found(hdrs: dict[str, str], action: str) -> list[dict]:
+        data = client.get(url, headers=hdrs).json()["data"]
+        return [i for i in data if i["action"] == action]
+
+    mine = found(headers, "auth.mfa_required_set")
+    assert len(mine) == 1
+    assert mine[0]["target_is_me"] is True and mine[0]["actor_is_me"] is False
+    assert mine[0]["category"] == "security"
+    assert found(other_headers, "auth.mfa_required_set") == []
+    seen = found(superuser_token_headers, "auth.mfa_required_set")
+    assert any(i["target_is_me"] is False and i["actor_is_me"] for i in seen)
+
+    assert _ask(client, superuser_token_headers, user, False).status_code == 200
+    assert len(found(headers, "auth.mfa_required_cleared")) == 1
+    assert found(other_headers, "auth.mfa_required_cleared") == []
