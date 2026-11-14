@@ -4,6 +4,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query"
+import { useNavigate } from "@tanstack/react-router"
 import { Bell, BellOff, Check, CheckCheck } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -21,7 +22,26 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { getLocale } from "@/lib/locale"
 import { noticeSentence } from "@/lib/notifications"
-import { type SetupReminder, useSetupReminders } from "./useSetupReminders"
+import {
+  type ReminderSeverity,
+  SEVERITY_ORDER,
+  type SetupReminder,
+  useSetupReminders,
+} from "./useSetupReminders"
+
+// Red = needs action now, orange = soon, green = optional.
+const SEVERITY_BOX: Record<ReminderSeverity, string> = {
+  urgent:
+    "border-red-300 bg-red-50 text-red-900 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200",
+  soon: "border-orange-300 bg-orange-50 text-orange-900 dark:border-orange-500/40 dark:bg-orange-500/10 dark:text-orange-200",
+  optional:
+    "border-green-300 bg-green-50 text-green-900 dark:border-green-500/40 dark:bg-green-500/10 dark:text-green-200",
+}
+const SEVERITY_DOT: Record<ReminderSeverity, string> = {
+  urgent: "bg-red-600",
+  soon: "bg-orange-500",
+  optional: "bg-green-600",
+}
 
 // The list comes from the server (the audit log, filtered by role) and the
 // read state is kept per person there, so it is the same on every computer.
@@ -101,13 +121,27 @@ function ReminderRow({
   reminder: SetupReminder
   onAction: (id: SetupReminder["id"]) => void
 }) {
+  const { t } = useTranslation()
   return (
     <li
       data-testid={reminder.testId}
-      className="border-b border-amber-300 bg-amber-50 px-3 py-3 text-amber-900 last:border-b-0 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
+      data-severity={reminder.severity}
+      className={`border-b px-3 py-3 last:border-b-0 ${SEVERITY_BOX[reminder.severity]}`}
     >
-      <p className="break-words text-sm leading-5">{reminder.text}</p>
-      <div className="mt-2 flex flex-wrap items-center gap-2">
+      <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide">
+        {t(`notifications.priority.${reminder.severity}`)}
+      </p>
+      {reminder.title ? (
+        <p className="break-words text-sm font-medium leading-5">
+          {reminder.title}
+        </p>
+      ) : null}
+      <p
+        className={`break-words text-sm leading-5 ${reminder.title ? "mt-1" : ""}`}
+      >
+        {reminder.text}
+      </p>
+      <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
         <Button
           type="button"
           size="sm"
@@ -261,8 +295,19 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
   ]
   const teaser = useTeaserLoop(teaserMessages, menuOpen)
 
+  const navigate = useNavigate()
+  const topSeverity =
+    SEVERITY_ORDER.find((level) =>
+      reminders.some((r) => r.severity === level),
+    ) ?? "optional"
+
   const startReminder = (id: SetupReminder["id"]) => {
     setMenuOpen(false)
+    const target = reminders.find((r) => r.id === id)?.to
+    if (target) {
+      void navigate({ to: target })
+      return
+    }
     // Let the menu finish closing before a dialog opens (focus handling).
     window.setTimeout(() => {
       if (id === "securityQuestions") setQuestionsOpen(true)
@@ -270,13 +315,32 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
     }, 80)
   }
 
-  const label =
+  const unreadLabel =
     unreadCount > 0
       ? t("notifications.bellUnread", { count: unreadCount })
       : t("notifications.bell")
+  const label =
+    reminders.length > 0
+      ? `${unreadLabel}, ${t("notifications.reminderCount", { count: reminders.length })}`
+      : unreadLabel
 
   return (
     <div className="relative">
+      <div
+        aria-hidden="true"
+        data-testid="notification-teaser"
+        data-visible={teaser.visible ? "true" : "false"}
+        className={`pointer-events-none absolute right-full top-1/2 z-20 mr-3 w-max max-w-[min(16rem,calc(100vw-8rem))] -translate-y-1/2 origin-right transition-all duration-300 ease-out motion-reduce:hidden ${
+          teaser.visible
+            ? "translate-x-0 opacity-100"
+            : "translate-x-1 opacity-0"
+        }`}
+      >
+        <div className="relative rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background shadow-md">
+          <span className="absolute -right-1 top-1/2 size-2 -translate-y-1/2 rotate-45 bg-foreground" />
+          <span className="block truncate">{teaser.text}</span>
+        </div>
+      </div>
       <DropdownMenu
         open={menuOpen}
         onOpenChange={(open) => {
@@ -303,12 +367,16 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
               >
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
-            ) : reminders.length > 0 ? (
+            ) : null}
+            {reminders.length > 0 ? (
               <span
                 data-testid="notification-reminder-dot"
+                data-severity={topSeverity}
                 aria-hidden="true"
-                className="absolute -right-1 -top-1 size-3 rounded-full border-2 border-background bg-amber-500"
-              />
+                className={`absolute -left-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold leading-none text-white tabular-nums ${SEVERITY_DOT[topSeverity]}`}
+              >
+                {reminders.length}
+              </span>
             ) : null}
           </Button>
         </DropdownMenuTrigger>
@@ -381,21 +449,6 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
           )}
         </DropdownMenuContent>
       </DropdownMenu>
-      <div
-        aria-hidden="true"
-        data-testid="notification-teaser"
-        data-visible={teaser.visible ? "true" : "false"}
-        className={`pointer-events-none absolute right-0 top-full z-20 mt-2 w-max max-w-[min(16rem,calc(100vw-1.5rem))] origin-top-right transition-all duration-300 ease-out motion-reduce:hidden ${
-          teaser.visible
-            ? "translate-y-0 opacity-100"
-            : "-translate-y-1 opacity-0"
-        }`}
-      >
-        <div className="relative rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background shadow-md">
-          <span className="absolute -top-1 right-3 size-2 rotate-45 bg-foreground" />
-          <span className="block truncate">{teaser.text}</span>
-        </div>
-      </div>
       {/* Outside the menu and always mounted: when two-factor turns on, the
         reminder goes away but the dialog must stay open to show the one-time
         recovery codes. */}

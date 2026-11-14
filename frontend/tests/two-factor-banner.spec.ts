@@ -129,6 +129,33 @@ test("the administrator is always shown the banner", async ({ page }) => {
   )
 })
 
+test("the dot on the bell shows how many reminders are open, in the colour of the most urgent", async ({
+  page,
+}) => {
+  test.skip(
+    !(await serverHasKey(await adminHeaders())),
+    "The server has no MFA_ENCRYPTION_KEY",
+  )
+  await logInUser(page, firstSuperuser, firstSuperuserPassword)
+  const dot = page.getByTestId("notification-reminder-dot")
+  await expect(dot).toBeVisible()
+  // Two-factor is urgent (red) for an administrator; the number is the count.
+  await expect(dot).toHaveAttribute("data-severity", "urgent")
+  await expect(dot).toHaveText(/^\d+$/)
+  await page.getByTestId("notification-bell").click()
+  await expect(page.getByTestId("two-factor-banner")).toHaveAttribute(
+    "data-severity",
+    "urgent",
+  )
+  // The buttons sit on the right of the row.
+  const row = await page.getByTestId("two-factor-banner").boundingBox()
+  const button = await page
+    .getByTestId("two-factor-banner")
+    .getByRole("button")
+    .boundingBox()
+  expect(button!.x + button!.width).toBeGreaterThan(row!.x + row!.width - 24)
+})
+
 test("the bell shows a short looping message for what needs attention", async ({
   page,
 }) => {

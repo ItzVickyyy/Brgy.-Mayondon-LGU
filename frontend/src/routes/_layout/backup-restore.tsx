@@ -210,25 +210,6 @@ function BackupRestore() {
         </div>
       </div>
 
-      {listQuery.data && !toolAvailable ? (
-        <div
-          role="status"
-          className="rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
-        >
-          <p className="font-medium">{t("admin.backup.unavailable.title")}</p>
-          <p className="mt-1">
-            <Trans
-              i18nKey="admin.backup.unavailable.howTo"
-              values={{
-                command: ".\\scripts\\backup-db.ps1",
-                folder: "backups",
-              }}
-              components={{ code: <code className="font-mono" /> }}
-            />
-          </p>
-        </div>
-      ) : null}
-
       {restoreCommand ? (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
           <p className="font-semibold">

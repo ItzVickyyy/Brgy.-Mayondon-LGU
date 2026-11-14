@@ -43,10 +43,18 @@
     "removedTarget": "a removed user",
     "eventFailed": "An action by {{actor}} did not complete.",
     "emptyHintShared": "Activity on accounts, security, backups and imports will appear here.",
+    "reminderCount": "{{count}} to do",
+    "openBackup": "Open Backup page",
+    "priority": {
+      "urgent": "Urgent",
+      "soon": "Soon",
+      "optional": "Optional"
+    },
     "needsAttention": "Needs your attention",
     "teaser": {
       "securityQuestions": "Set your recovery questions",
-      "twoFactor": "Set up two-factor sign-in"
+      "twoFactor": "Set up two-factor sign-in",
+      "backupTool": "Backup tool is missing"
     },
     "events": {
       "user_create": "{{actor}} created a user account for {{target}}.",
