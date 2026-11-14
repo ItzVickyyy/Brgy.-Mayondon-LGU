@@ -101,6 +101,7 @@ const useAuth = () => {
 
   const logout = () => {
     localStorage.removeItem("access_token")
+    queryClient.removeQueries({ queryKey: ["notifications"] })
     navigate({ to: "/login" })
     showSuccessToast(t("common.toast.signedOut"))
   }

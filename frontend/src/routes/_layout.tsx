@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/sidebar"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 import { getLocale } from "@/lib/locale"
-import { setNotificationOwner } from "@/lib/notifications"
 
 export const Route = createFileRoute("/_layout")({
   component: Layout,
@@ -92,11 +91,7 @@ function Layout() {
     }
   }, [])
 
-  // The saved notices belong to the signed-in account.
   const currentUserId = currentUser?.id
-  useEffect(() => {
-    setNotificationOwner(currentUserId ? String(currentUserId) : null)
-  }, [currentUserId])
 
   const toggleFullscreen = async () => {
     if (document.fullscreenElement) await document.exitFullscreen()

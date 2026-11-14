@@ -347,6 +347,7 @@ def update_user(
         for f in changed_fields
         if f not in ("password", "reset_to_default_password", "unlock")
     )
+    previous_active = db_user.is_active
     db_user = crud.update_user(
         session=session, db_user=db_user, user_in=user_in, temporary=temporary
     )
@@ -360,7 +361,15 @@ def update_user(
             module="users",
             record_type="user",
             record_id=db_user.id,
-            details={"fields": changed_fields},
+            details={
+                "fields": changed_fields,
+                # Lets the notification bell say activated or deactivated.
+                **(
+                    {"is_active": db_user.is_active}
+                    if db_user.is_active != previous_active
+                    else {}
+                ),
+            },
         )
     if user_in.unlock:
         record_audit_event(

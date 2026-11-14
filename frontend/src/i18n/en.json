@@ -37,7 +37,64 @@
     "markAllRead": "Mark all as read",
     "clearAll": "Clear all notifications",
     "empty": "No notifications yet",
-    "emptyHint": "Messages about what you save, issue or back up will appear here."
+    "emptyHint": "Messages about what you save, issue or back up will appear here.",
+    "you": "You",
+    "removedActor": "A removed user",
+    "removedTarget": "a removed user",
+    "eventFailed": "An action by {{actor}} did not complete.",
+    "emptyHintShared": "Activity on accounts, security, backups and imports will appear here.",
+    "events": {
+      "user_create": "{{actor}} created a user account for {{target}}.",
+      "user_update": "{{actor}} updated the account of {{target}}.",
+      "user_update__me": "{{actor}} updated your account.",
+      "user_activated": "{{actor}} activated the account of {{target}}.",
+      "user_activated__me": "{{actor}} activated your account.",
+      "user_deactivated": "{{actor}} deactivated the account of {{target}}.",
+      "user_deactivated__me": "{{actor}} deactivated your account.",
+      "user_role_change": "{{actor}} changed the role of {{target}}.",
+      "user_role_change__me": "{{actor}} changed your role.",
+      "user_delete": "{{actor}} deleted the account of {{target}}.",
+      "user_delete_self": "{{actor}} deleted their own account.",
+      "user_delete_self__self": "You deleted your own account.",
+      "user_temp_password_set": "{{actor}} reset the password of {{target}}.",
+      "user_temp_password_set__me": "{{actor}} reset your password.",
+      "user_unlock": "{{actor}} unlocked the account of {{target}}.",
+      "user_unlock__me": "{{actor}} unlocked your account.",
+      "user_password_change": "{{actor}} changed their password.",
+      "user_password_change__self": "You changed your password.",
+      "auth_mfa_enabled": "{{actor}} turned on two-factor sign-in.",
+      "auth_mfa_disabled": "{{actor}} turned off two-factor sign-in.",
+      "auth_mfa_codes_renewed": "{{actor}} made new recovery codes for two-factor sign-in.",
+      "auth_mfa_reset_by_admin": "{{actor}} reset two-factor sign-in for {{target}}.",
+      "auth_mfa_reset_by_admin__me": "{{actor}} reset your two-factor sign-in.",
+      "auth_recovery_questions_set": "{{actor}} saved security questions for password recovery.",
+      "auth_recovery_reset_by_admin": "{{actor}} cleared the security questions of {{target}}.",
+      "auth_recovery_reset_by_admin__me": "{{actor}} cleared your security questions.",
+      "auth_recovery_success": "{{actor}} reset their password using security questions.",
+      "auth_recovery_success__self": "You reset your password using your security questions.",
+      "auth_mfa_recovery_code_used": "{{actor}} signed in with a two-factor recovery code.",
+      "auth_secrets_rotate": "The system's secret keys were changed.",
+      "auth_account_locked": "The account of {{actor}} was locked after several failed sign-in attempts.",
+      "auth_account_locked__self": "Your account was locked after several failed sign-in attempts.",
+      "backup_create": "{{actor}} created a database backup.",
+      "backup_create__failed": "A database backup could not be created.",
+      "backup_verify": "{{actor}} checked a database backup.",
+      "backup_verify__failed": "A database backup did not pass its check.",
+      "backup_restore_requested": "{{actor}} recorded a database restore request.",
+      "import_upload": "{{actor}} uploaded a masterlist file for import.",
+      "import_commit": "{{actor}} finished a masterlist import.",
+      "import_commit__failed": "A masterlist import could not be finished.",
+      "import_cancel": "{{actor}} cancelled a masterlist import.",
+      "id_series_update": "{{actor}} changed the Barangay ID number series.",
+      "official_create": "{{actor}} added a barangay official.",
+      "official_update": "{{actor}} updated a barangay official.",
+      "street_create": "{{actor}} added a street to the list.",
+      "street_rename": "{{actor}} renamed a street in the list.",
+      "street_delete": "{{actor}} removed a street from the list.",
+      "tricycle_association_create": "{{actor}} added a tricycle association to the list.",
+      "tricycle_association_rename": "{{actor}} renamed a tricycle association in the list.",
+      "tricycle_association_delete": "{{actor}} removed a tricycle association from the list."
+    }
   },
   "logoutDialog": {
     "title": "Log out?",
@@ -295,6 +352,28 @@
       "barangay_id": {
         "list": "Barangay ID list viewed"
       },
+      "backup": {
+        "create": "Database backup created",
+        "verify": "Database backup checked",
+        "restore_requested": "Restore request recorded",
+        "download": "Database backup downloaded"
+      },
+      "import": {
+        "upload": "Masterlist file uploaded",
+        "preview": "Masterlist import previewed",
+        "commit": "Masterlist import finished",
+        "cancel": "Masterlist import cancelled"
+      },
+      "street": {
+        "create": "Street added",
+        "rename": "Street renamed",
+        "delete": "Street removed"
+      },
+      "tricycle_association": {
+        "create": "Tricycle association added",
+        "rename": "Tricycle association renamed",
+        "delete": "Tricycle association removed"
+      },
       "id_series": {
         "update": "Barangay ID number series changed"
       },
@@ -312,6 +391,7 @@
         "login": "Signed in",
         "login_failed": "Sign-in failed",
         "secrets_rotate": "System secrets changed",
+        "account_locked": "Account locked after failed sign-ins",
         "recovery_questions_set": "Recovery questions set",
         "recovery_failed": "Password recovery failed",
         "recovery_success": "Password recovered with questions",

@@ -1,7 +1,14 @@
-import { Bell, BellOff, Check, CheckCheck, Trash2 } from "lucide-react"
+import {
+  type QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query"
+import { Bell, BellOff, Check, CheckCheck } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { type NotificationItem, NotificationsService } from "@/client"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -11,24 +18,28 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { getLocale } from "@/lib/locale"
-import {
-  clearNotifications,
-  markAllNotificationsRead,
-  markNotificationRead,
-  type NotificationItem,
-  notificationText,
-  useNotifications,
-} from "@/lib/notifications"
+import { noticeSentence } from "@/lib/notifications"
+
+// The list comes from the server (the audit log, filtered by role) and the
+// read state is kept per person there, so it is the same on every computer.
+// It is refreshed about every 45 seconds while the page is visible, when the
+// window gets focus again and when the menu opens. No websockets.
+// The key carries the account, so one person's list is never drawn for the
+// next person who signs in on the same browser.
+const queryKeyFor = (ownerId: string) => ["notifications", ownerId] as const
+const REFRESH_MS = 45_000
 
 const MINUTE = 60_000
 const HOUR = 60 * MINUTE
 const DAY = 24 * HOUR
 
-function timeAgo(createdAt: number, now: number): string {
+type BellData = { data: NotificationItem[]; unread_count: number }
+
+function timeAgo(occurredAt: string, now: number): string {
   const formatter = new Intl.RelativeTimeFormat(getLocale(), {
     numeric: "auto",
   })
-  const age = Math.max(0, now - createdAt)
+  const age = Math.max(0, now - Date.parse(occurredAt))
   if (age < MINUTE) return formatter.format(0, "second")
   if (age < HOUR) return formatter.format(-Math.floor(age / MINUTE), "minute")
   if (age < DAY) return formatter.format(-Math.floor(age / HOUR), "hour")
@@ -45,14 +56,20 @@ function useNow() {
   return now
 }
 
-function NotificationRow({ item }: { item: NotificationItem }) {
+function NotificationRow({
+  item,
+  onRead,
+}: {
+  item: NotificationItem
+  onRead: (id: number) => void
+}) {
   const now = useNow()
   const { t } = useTranslation()
-  const text = notificationText(item)
   return (
     <li
       data-testid="notification-item"
       data-read={item.read ? "true" : "false"}
+      data-action={item.action}
       className={`flex items-start gap-3 border-b px-3 py-3 last:border-b-0 ${
         item.read ? "" : "bg-brand/5"
       }`}
@@ -60,7 +77,11 @@ function NotificationRow({ item }: { item: NotificationItem }) {
       <span
         aria-hidden="true"
         className={`mt-1.5 size-2 shrink-0 rounded-full ${
-          item.read ? "bg-transparent" : "bg-brand"
+          item.read
+            ? "bg-transparent"
+            : item.outcome === "success"
+              ? "bg-brand"
+              : "bg-destructive"
         }`}
       />
       <div className="min-w-0 flex-1">
@@ -72,10 +93,10 @@ function NotificationRow({ item }: { item: NotificationItem }) {
           {item.read ? null : (
             <span className="sr-only">{t("notifications.unread")}: </span>
           )}
-          {text}
+          {noticeSentence(item)}
         </p>
         <p className="mt-1 text-xs text-muted-foreground">
-          {timeAgo(item.createdAt, now)}
+          {timeAgo(item.occurred_at, now)}
         </p>
       </div>
       {item.read ? null : (
@@ -86,7 +107,7 @@ function NotificationRow({ item }: { item: NotificationItem }) {
           className="size-8 shrink-0 text-muted-foreground"
           aria-label={t("notifications.markRead")}
           title={t("notifications.markRead")}
-          onClick={() => markNotificationRead(item.id)}
+          onClick={() => onRead(item.id)}
         >
           <Check className="size-4" aria-hidden="true" />
         </Button>
@@ -95,16 +116,71 @@ function NotificationRow({ item }: { item: NotificationItem }) {
   )
 }
 
+function patchCache(
+  queryClient: QueryClient,
+  key: readonly unknown[],
+  change: (current: BellData) => BellData,
+) {
+  queryClient.setQueryData<BellData>(key, (current) =>
+    current ? change(current) : current,
+  )
+}
+
 export function NotificationBell({ ownerId }: { ownerId: string }) {
   const { t } = useTranslation()
-  const { notifications, unreadCount } = useNotifications(ownerId)
+  const queryClient = useQueryClient()
+  const queryKey = queryKeyFor(ownerId)
+
+  const bell = useQuery({
+    queryKey,
+    queryFn: async () => (await NotificationsService.listNotifications()).data,
+    refetchInterval: REFRESH_MS,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
+    staleTime: 15_000,
+  })
+  const notifications = bell.data?.data ?? []
+  const unreadCount = bell.data?.unread_count ?? 0
+
+  const markOne = useMutation({
+    mutationFn: async (id: number) =>
+      NotificationsService.markNotificationRead({
+        path: { notification_id: id },
+      }),
+    onMutate: (id) =>
+      patchCache(queryClient, queryKey, (current) => {
+        const wasUnread = current.data.some((i) => i.id === id && !i.read)
+        return {
+          data: current.data.map((i) =>
+            i.id === id ? { ...i, read: true } : i,
+          ),
+          unread_count: Math.max(0, current.unread_count - (wasUnread ? 1 : 0)),
+        }
+      }),
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  })
+
+  const markAll = useMutation({
+    mutationFn: async () => NotificationsService.markAllNotificationsRead(),
+    onMutate: () =>
+      patchCache(queryClient, queryKey, (current) => ({
+        data: current.data.map((i) => ({ ...i, read: true })),
+        unread_count: 0,
+      })),
+    onSettled: () => queryClient.invalidateQueries({ queryKey }),
+  })
+
   const label =
     unreadCount > 0
       ? t("notifications.bellUnread", { count: unreadCount })
       : t("notifications.bell")
 
   return (
-    <DropdownMenu>
+    <DropdownMenu
+      onOpenChange={(open) => {
+        if (open) void bell.refetch()
+      }}
+    >
       <DropdownMenuTrigger asChild>
         <Button
           type="button"
@@ -141,32 +217,18 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
               </span>
             ) : null}
           </DropdownMenuLabel>
-          <div className="flex items-center gap-1">
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={unreadCount === 0}
-              aria-label={t("notifications.markAllRead")}
-              title={t("notifications.markAllRead")}
-              onClick={markAllNotificationsRead}
-            >
-              <CheckCheck className="size-4" aria-hidden="true" />
-            </Button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={notifications.length === 0}
-              aria-label={t("notifications.clearAll")}
-              title={t("notifications.clearAll")}
-              onClick={clearNotifications}
-            >
-              <Trash2 className="size-4" aria-hidden="true" />
-            </Button>
-          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-8"
+            disabled={unreadCount === 0}
+            aria-label={t("notifications.markAllRead")}
+            title={t("notifications.markAllRead")}
+            onClick={() => markAll.mutate()}
+          >
+            <CheckCheck className="size-4" aria-hidden="true" />
+          </Button>
         </div>
         <DropdownMenuSeparator className="m-0" />
         {notifications.length === 0 ? (
@@ -177,13 +239,17 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
             />
             <p className="text-sm font-medium">{t("notifications.empty")}</p>
             <p className="text-xs text-muted-foreground">
-              {t("notifications.emptyHint")}
+              {t("notifications.emptyHintShared")}
             </p>
           </div>
         ) : (
           <ul className="max-h-[min(24rem,60vh)] overflow-y-auto">
             {notifications.map((item) => (
-              <NotificationRow key={item.id} item={item} />
+              <NotificationRow
+                key={item.id}
+                item={item}
+                onRead={(id) => markOne.mutate(id)}
+              />
             ))}
           </ul>
         )}

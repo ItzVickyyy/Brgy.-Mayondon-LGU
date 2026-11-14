@@ -1762,6 +1762,68 @@ export type NewPassword = {
 };
 
 /**
+ * NotificationItem
+ *
+ * One notice. Never carries ``reason``, ``details``, file names or ids.
+ */
+export type NotificationItem = {
+    /**
+     * Id
+     */
+    id: number;
+    /**
+     * Occurred At
+     */
+    occurred_at: string;
+    /**
+     * Action
+     */
+    action: string;
+    /**
+     * Category
+     */
+    category: string;
+    /**
+     * Outcome
+     */
+    outcome: string;
+    /**
+     * Actor Name
+     */
+    actor_name: string | null;
+    /**
+     * Actor Is Me
+     */
+    actor_is_me: boolean;
+    /**
+     * Target Name
+     */
+    target_name: string | null;
+    /**
+     * Target Is Me
+     */
+    target_is_me: boolean;
+    /**
+     * Read
+     */
+    read: boolean;
+};
+
+/**
+ * NotificationsPublic
+ */
+export type NotificationsPublic = {
+    /**
+     * Data
+     */
+    data: Array<NotificationItem>;
+    /**
+     * Unread Count
+     */
+    unread_count: number;
+};
+
+/**
  * OfficialCreate
  */
 export type OfficialCreate = {
@@ -5097,6 +5159,68 @@ export type activityActivityOptionsResponses = {
 };
 
 export type activityActivityOptionsResponse = activityActivityOptionsResponses[keyof activityActivityOptionsResponses];
+
+export type notificationsListNotificationsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/notifications/';
+};
+
+export type notificationsListNotificationsResponses = {
+    /**
+     * Successful Response
+     */
+    200: NotificationsPublic;
+};
+
+export type notificationsListNotificationsResponse = notificationsListNotificationsResponses[keyof notificationsListNotificationsResponses];
+
+export type notificationsMarkAllNotificationsReadData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/notifications/read-all';
+};
+
+export type notificationsMarkAllNotificationsReadResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type notificationsMarkAllNotificationsReadResponse = notificationsMarkAllNotificationsReadResponses[keyof notificationsMarkAllNotificationsReadResponses];
+
+export type notificationsMarkNotificationReadData = {
+    body?: never;
+    path: {
+        /**
+         * Notification Id
+         */
+        notification_id: number;
+    };
+    query?: never;
+    url: '/api/v1/notifications/{notification_id}/read';
+};
+
+export type notificationsMarkNotificationReadErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type notificationsMarkNotificationReadError = notificationsMarkNotificationReadErrors[keyof notificationsMarkNotificationReadErrors];
+
+export type notificationsMarkNotificationReadResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type notificationsMarkNotificationReadResponse = notificationsMarkNotificationReadResponses[keyof notificationsMarkNotificationReadResponses];
 
 export type dashboardDashboardData = {
     body?: never;

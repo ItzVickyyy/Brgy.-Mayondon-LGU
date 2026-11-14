@@ -68,8 +68,11 @@ def test_login_while_locked_is_recorded_as_locked(
 
     rows = _rows(db, email)
     assert rows[-1].details == {"reason": "locked"}
-    # The attempt that triggered the lock is still an ordinary wrong password.
-    assert rows[-2].details == {"reason": "incorrect_password"}
+    # The attempt that triggered the lock is still an ordinary wrong password,
+    # followed by one "account locked" row (patch 75: it feeds the bell).
+    assert rows[-2].action == "auth.account_locked"
+    assert rows[-3].details == {"reason": "incorrect_password"}
+    assert [row.action for row in rows].count("auth.account_locked") == 1
 
 
 def test_inactive_account_login_is_denied_and_recorded(

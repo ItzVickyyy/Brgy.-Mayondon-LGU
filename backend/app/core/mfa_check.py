@@ -91,11 +91,18 @@ def register_failure(session: Session, user: User, *, reason: str) -> None:
     """Count a wrong code toward the sign-in lock-out and record it."""
     session.rollback()
     session.refresh(user)
+    was_locked = user.locked_until is not None and (
+        user.locked_until
+        if user.locked_until.tzinfo
+        else user.locked_until.replace(tzinfo=UTC)
+    ) > datetime.now(UTC)
     user.failed_login_attempts += 1
+    just_locked = False
     if user.failed_login_attempts >= settings.LOGIN_MAX_FAILED_ATTEMPTS:
         user.locked_until = datetime.now(UTC) + timedelta(
             minutes=settings.LOGIN_LOCKOUT_MINUTES
         )
+        just_locked = not was_locked
     session.add(user)
     record_audit_event(
         session,
@@ -105,6 +112,14 @@ def register_failure(session: Session, user: User, *, reason: str) -> None:
         module="auth",
         details={"reason": reason},
     )
+    if just_locked:
+        record_audit_event(
+            session,
+            action="auth.account_locked",
+            actor=user,
+            outcome="failed",
+            module="auth",
+        )
     session.commit()
 
 

@@ -37,7 +37,64 @@
     "markAllRead": "Markahang nabasa na ang lahat",
     "clearAll": "I-clear ang lahat ng abiso",
     "empty": "Wala pang abiso",
-    "emptyHint": "Dito lalabas ang mga mensahe tungkol sa mga na-save, na-isyu o na-back up mo."
+    "emptyHint": "Dito lalabas ang mga mensahe tungkol sa mga na-save, na-isyu o na-back up mo.",
+    "you": "Ikaw",
+    "removedActor": "Isang inalis na user",
+    "removedTarget": "isang inalis na user",
+    "eventFailed": "Hindi natapos ang isang gawain ni {{actor}}.",
+    "emptyHintShared": "Dito lalabas ang mga gawain sa account, seguridad, backup at import.",
+    "events": {
+      "user_create": "{{actor}} ang gumawa ng user account para kay {{target}}.",
+      "user_update": "{{actor}} ang nag-update ng account ni {{target}}.",
+      "user_update__me": "{{actor}} ang nag-update ng account mo.",
+      "user_activated": "{{actor}} ang nag-activate ng account ni {{target}}.",
+      "user_activated__me": "{{actor}} ang nag-activate ng account mo.",
+      "user_deactivated": "{{actor}} ang nag-deactivate ng account ni {{target}}.",
+      "user_deactivated__me": "{{actor}} ang nag-deactivate ng account mo.",
+      "user_role_change": "{{actor}} ang nagpalit ng role ni {{target}}.",
+      "user_role_change__me": "{{actor}} ang nagpalit ng role mo.",
+      "user_delete": "{{actor}} ang nag-delete ng account ni {{target}}.",
+      "user_delete_self": "{{actor}} ang nag-delete ng sariling account.",
+      "user_delete_self__self": "Ikaw ang nag-delete ng sarili mong account.",
+      "user_temp_password_set": "{{actor}} ang nag-reset ng password ni {{target}}.",
+      "user_temp_password_set__me": "{{actor}} ang nag-reset ng password mo.",
+      "user_unlock": "{{actor}} ang nag-unlock ng account ni {{target}}.",
+      "user_unlock__me": "{{actor}} ang nag-unlock ng account mo.",
+      "user_password_change": "{{actor}} ang nagpalit ng sariling password.",
+      "user_password_change__self": "Pinalitan mo ang iyong password.",
+      "auth_mfa_enabled": "{{actor}} ang nag-on ng two-factor sign-in.",
+      "auth_mfa_disabled": "{{actor}} ang nag-off ng two-factor sign-in.",
+      "auth_mfa_codes_renewed": "{{actor}} ang gumawa ng bagong recovery codes para sa two-factor sign-in.",
+      "auth_mfa_reset_by_admin": "{{actor}} ang nag-reset ng two-factor sign-in ni {{target}}.",
+      "auth_mfa_reset_by_admin__me": "{{actor}} ang nag-reset ng two-factor sign-in mo.",
+      "auth_recovery_questions_set": "{{actor}} ang nag-save ng mga tanong pangseguridad para sa pag-recover ng password.",
+      "auth_recovery_reset_by_admin": "{{actor}} ang nag-clear ng mga tanong pangseguridad ni {{target}}.",
+      "auth_recovery_reset_by_admin__me": "{{actor}} ang nag-clear ng mga tanong pangseguridad mo.",
+      "auth_recovery_success": "{{actor}} ang nag-reset ng sariling password gamit ang mga tanong pangseguridad.",
+      "auth_recovery_success__self": "Ni-reset mo ang iyong password gamit ang mga tanong pangseguridad.",
+      "auth_mfa_recovery_code_used": "{{actor}} ang nag-sign in gamit ang recovery code.",
+      "auth_secrets_rotate": "Pinalitan ang mga lihim na susi ng sistema.",
+      "auth_account_locked": "Na-lock ang account ni {{actor}} matapos ang ilang bigong pag-sign in.",
+      "auth_account_locked__self": "Na-lock ang account mo matapos ang ilang bigong pag-sign in.",
+      "backup_create": "{{actor}} ang gumawa ng backup ng database.",
+      "backup_create__failed": "Hindi nagawa ang backup ng database.",
+      "backup_verify": "{{actor}} ang nag-check ng backup ng database.",
+      "backup_verify__failed": "Hindi pumasa sa check ang isang backup ng database.",
+      "backup_restore_requested": "{{actor}} ang nag-record ng kahilingang i-restore ang database.",
+      "import_upload": "{{actor}} ang nag-upload ng masterlist file para sa import.",
+      "import_commit": "{{actor}} ang nakatapos ng masterlist import.",
+      "import_commit__failed": "Hindi natapos ang isang masterlist import.",
+      "import_cancel": "{{actor}} ang nag-cancel ng masterlist import.",
+      "id_series_update": "{{actor}} ang nagpalit ng serye ng numero ng Barangay ID.",
+      "official_create": "{{actor}} ang nagdagdag ng opisyal ng barangay.",
+      "official_update": "{{actor}} ang nag-update ng opisyal ng barangay.",
+      "street_create": "{{actor}} ang nagdagdag ng kalye sa listahan.",
+      "street_rename": "{{actor}} ang nagpalit ng pangalan ng kalye sa listahan.",
+      "street_delete": "{{actor}} ang nag-alis ng kalye sa listahan.",
+      "tricycle_association_create": "{{actor}} ang nagdagdag ng samahan ng tricycle sa listahan.",
+      "tricycle_association_rename": "{{actor}} ang nagpalit ng pangalan ng samahan ng tricycle sa listahan.",
+      "tricycle_association_delete": "{{actor}} ang nag-alis ng samahan ng tricycle sa listahan."
+    }
   },
   "logoutDialog": {
     "title": "Mag-log out?",
@@ -295,6 +352,28 @@
       "barangay_id": {
         "list": "Tiningnan ang listahan ng Barangay ID"
       },
+      "backup": {
+        "create": "Nagawa ang backup ng database",
+        "verify": "Na-check ang backup ng database",
+        "restore_requested": "Na-record ang kahilingang mag-restore",
+        "download": "Na-download ang backup ng database"
+      },
+      "import": {
+        "upload": "Na-upload ang masterlist file",
+        "preview": "Na-preview ang masterlist import",
+        "commit": "Natapos ang masterlist import",
+        "cancel": "Na-cancel ang masterlist import"
+      },
+      "street": {
+        "create": "Nadagdag ang kalye",
+        "rename": "Napalitan ang pangalan ng kalye",
+        "delete": "Naalis ang kalye"
+      },
+      "tricycle_association": {
+        "create": "Nadagdag ang samahan ng tricycle",
+        "rename": "Napalitan ang pangalan ng samahan ng tricycle",
+        "delete": "Naalis ang samahan ng tricycle"
+      },
       "id_series": {
         "update": "Binago ang serye ng numero ng Barangay ID"
       },
@@ -312,6 +391,7 @@
         "login": "Nag-sign in",
         "login_failed": "Nabigo ang pag-sign in",
         "secrets_rotate": "Pinalitan ang mga lihim ng sistema",
+        "account_locked": "Na-lock ang account dahil sa bigong pag-sign in",
         "recovery_questions_set": "Naitakda ang mga tanong sa pagbawi",
         "recovery_failed": "Nabigo ang pagbawi ng password",
         "recovery_success": "Nabawi ang password gamit ang mga tanong",

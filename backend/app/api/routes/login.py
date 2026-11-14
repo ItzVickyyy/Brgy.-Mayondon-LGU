@@ -75,6 +75,17 @@ def login_access_token(
                 details={"reason": "locked" if was_locked else "incorrect_password"},
                 commit=True,
             )
+            if not was_locked and _is_locked_now(existing):
+                # This failure is the one that locked the account: tell the
+                # administrators once (it shows in the notification bell).
+                record_audit_event(
+                    session,
+                    action="auth.account_locked",
+                    actor=existing,
+                    outcome="failed",
+                    module="auth",
+                    commit=True,
+                )
         raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
         record_audit_event(
@@ -93,6 +104,15 @@ def login_access_token(
             mfa_token=security.create_mfa_token(user.id, user.hashed_password),
         )
     return _finish_login(session, user)
+
+
+def _is_locked_now(user: Any) -> bool:
+    until = user.locked_until
+    if until is None:
+        return False
+    if until.tzinfo is None:
+        until = until.replace(tzinfo=UTC)
+    return bool(until > datetime.now(UTC))
 
 
 def _finish_login(session: SessionDep, user: Any) -> LoginResult:

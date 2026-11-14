@@ -10,6 +10,7 @@ from app.api.routes import (
     login,
     lookups,
     mfa,
+    notifications,
     officials,
     private,
     reports,
@@ -41,6 +42,7 @@ def create_api_router(
     router.include_router(issuances.router)
     router.include_router(barangay_ids.router)
     router.include_router(activity.router)
+    router.include_router(notifications.router)
     router.include_router(dashboard.router)
     router.include_router(reports.router)
     router.include_router(backups.router)
