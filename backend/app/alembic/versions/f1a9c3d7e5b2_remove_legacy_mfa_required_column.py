@@ -15,10 +15,7 @@ depends_on = None
 
 def upgrade() -> None:
     inspector = sa.inspect(op.get_bind())
-    columns = {
-        column["name"]
-        for column in inspector.get_columns("user")
-    }
+    columns = {column["name"] for column in inspector.get_columns("user")}
 
     if "mfa_required" in columns:
         op.drop_column(
