@@ -38,6 +38,10 @@ test.describe("Admin user management", () => {
     // Toast descriptions can disappear before Playwright observes them.
     await expect(page.getByRole("dialog")).not.toBeVisible()
 
+    // The table is paged; with many users the new one may not be on the first
+    // page, so search for it first.
+    await page.getByPlaceholder("Search name or email").fill(email)
+
     const userRow = page.getByRole("row").filter({ hasText: email })
     await expect(userRow).toBeVisible()
   })
@@ -80,6 +84,9 @@ test.describe("Admin user management", () => {
     await page.getByRole("button", { name: "Save" }).click()
 
     await expect(page.getByRole("dialog")).not.toBeVisible()
+
+    // Search by e-mail first (the table is paged; see the create test).
+    await page.getByPlaceholder("Search name or email").fill(email)
 
     const userRow = page.getByRole("row").filter({ hasText: email })
     await userRow.getByRole("button", { name: "Edit", exact: true }).click()
