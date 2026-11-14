@@ -23,6 +23,7 @@ import { AppShellSkeleton } from "@/components/Common/PageSkeleton"
 import { SecurityQuestionsBanner } from "@/components/SecurityQuestions/SecurityQuestionsBanner"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
 import { User } from "@/components/Sidebar/User"
+import { TwoFactorBanner } from "@/components/TwoFactor/TwoFactorBanner"
 import { useTheme } from "@/components/theme-provider"
 import { Button } from "@/components/ui/button"
 import {
@@ -201,6 +202,7 @@ function Layout() {
           </div>
         </header>
         <SecurityQuestionsBanner />
+        <TwoFactorBanner />
         <main
           id="main-content"
           tabIndex={-1}

@@ -74,15 +74,25 @@ export function TwoFactorCard() {
                 >
                   {t("twoFactor.newCodes")}
                 </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="min-h-11 sm:min-h-9"
-                  onClick={() => setManage("disable")}
-                >
-                  {t("twoFactor.turnOff")}
-                </Button>
+                {data?.required ? null : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="min-h-11 sm:min-h-9"
+                    onClick={() => setManage("disable")}
+                  >
+                    {t("twoFactor.turnOff")}
+                  </Button>
+                )}
               </div>
+              {data?.required ? (
+                <p
+                  className="text-xs text-muted-foreground"
+                  data-testid="mfa-required-note"
+                >
+                  {t("twoFactor.requiredNote")}
+                </p>
+              ) : null}
             </>
           ) : (
             <div>

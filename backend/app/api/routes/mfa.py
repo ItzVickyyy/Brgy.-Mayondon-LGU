@@ -27,6 +27,7 @@ from app.models_security import (
     MfaConfigured,
     MfaRecoveryCode,
     MfaRecoveryCodes,
+    MfaRequiredSet,
     MfaSetup,
     MfaSetupRequest,
     MfaStatus,
@@ -79,6 +80,7 @@ def read_my_mfa(session: SessionDep, current_user: CurrentUser) -> MfaStatus:
     return MfaStatus(
         available=mfa.is_available(),
         enabled=current_user.mfa_enabled,
+        required=current_user.mfa_required,
         setup_pending=(
             not current_user.mfa_enabled and bool(current_user.mfa_secret_encrypted)
         ),
@@ -151,6 +153,14 @@ def disable_mfa(
     authenticator code or a recovery code)."""
     if not current_user.mfa_enabled:
         raise HTTPException(status_code=409, detail="Two-factor sign-in is not on.")
+    if current_user.mfa_required:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "An administrator asked you to use two-factor sign-in, so it "
+                "cannot be turned off here. Ask the administrator."
+            ),
+        )
     _check_password(current_user, body.current_password)
     if mfa_check.is_locked(current_user):
         raise HTTPException(status_code=400, detail=REFUSED)
@@ -223,7 +233,7 @@ def read_user_mfa(session: SessionDep, user_id: uuid.UUID) -> MfaConfigured:
     target = session.get(User, user_id)
     if not target:
         raise HTTPException(status_code=404, detail="User not found")
-    return MfaConfigured(enabled=target.mfa_enabled)
+    return MfaConfigured(enabled=target.mfa_enabled, required=target.mfa_required)
 
 
 @router.delete(
@@ -276,3 +286,53 @@ def reset_user_mfa(
     )
     session.commit()
     return Message(message="Two-factor sign-in turned off for this person")
+
+
+@router.put(
+    "/users/{user_id}/mfa-required",
+    response_model=MfaConfigured,
+    dependencies=[Depends(require_user_admin)],
+)
+def set_user_mfa_required(
+    session: SessionDep,
+    user_id: uuid.UUID,
+    current_user: CurrentUser,
+    body: MfaRequiredSet,
+) -> MfaConfigured:
+    """Administrator only: ask a STAFF person to use two-factor (or stop asking).
+
+    It is a request: the person still sets it up on their own phone (the secret
+    never goes to the administrator) and it never blocks a sign-in. While it is
+    set the person cannot turn two-factor off. An admin reset or the server
+    command does not clear it, so a person whose phone was reset is asked again."""
+    if not mfa.is_available():
+        raise HTTPException(status_code=409, detail=NOT_AVAILABLE)
+    target = session.get(User, user_id)
+    if not target:
+        raise HTTPException(status_code=404, detail="User not found")
+    if target.id == current_user.id:
+        raise HTTPException(
+            status_code=400, detail="You cannot ask yourself; turn it on in My Account."
+        )
+    if is_admin(target):
+        raise HTTPException(
+            status_code=400,
+            detail="Administrators are always asked to use two-factor sign-in.",
+        )
+    if target.mfa_required != body.required:
+        target.mfa_required = body.required
+        session.add(target)
+        record_audit_event(
+            session,
+            action=(
+                "auth.mfa_required_set"
+                if body.required
+                else "auth.mfa_required_cleared"
+            ),
+            actor=current_user,
+            module="auth",
+            record_type="user",
+            record_id=target.id,
+        )
+        session.commit()
+    return MfaConfigured(enabled=target.mfa_enabled, required=target.mfa_required)

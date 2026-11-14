@@ -1645,6 +1645,10 @@ export type MfaConfigured = {
      * Enabled
      */
     enabled: boolean;
+    /**
+     * Required
+     */
+    required?: boolean;
 };
 
 /**
@@ -1671,6 +1675,16 @@ export type MfaRecoveryCodes = {
      * Recovery Codes
      */
     recovery_codes: Array<string>;
+};
+
+/**
+ * MfaRequiredSet
+ */
+export type MfaRequiredSet = {
+    /**
+     * Required
+     */
+    required: boolean;
 };
 
 /**
@@ -1715,6 +1729,10 @@ export type MfaStatus = {
      * Enabled
      */
     enabled: boolean;
+    /**
+     * Required
+     */
+    required?: boolean;
     /**
      * Setup Pending
      */
@@ -3571,6 +3589,36 @@ export type twoFactorReadUserMfaResponses = {
 };
 
 export type twoFactorReadUserMfaResponse = twoFactorReadUserMfaResponses[keyof twoFactorReadUserMfaResponses];
+
+export type twoFactorSetUserMfaRequiredData = {
+    body: MfaRequiredSet;
+    path: {
+        /**
+         * User Id
+         */
+        user_id: string;
+    };
+    query?: never;
+    url: '/api/v1/users/{user_id}/mfa-required';
+};
+
+export type twoFactorSetUserMfaRequiredErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type twoFactorSetUserMfaRequiredError = twoFactorSetUserMfaRequiredErrors[keyof twoFactorSetUserMfaRequiredErrors];
+
+export type twoFactorSetUserMfaRequiredResponses = {
+    /**
+     * Successful Response
+     */
+    200: MfaConfigured;
+};
+
+export type twoFactorSetUserMfaRequiredResponse = twoFactorSetUserMfaRequiredResponses[keyof twoFactorSetUserMfaRequiredResponses];
 
 export type usersReadUsersData = {
     body?: never;

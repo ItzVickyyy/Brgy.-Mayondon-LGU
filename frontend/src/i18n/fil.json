@@ -401,7 +401,9 @@
         "mfa_failed": "Tinanggihan ang code ng two-factor",
         "mfa_recovery_code_used": "Gumamit ng recovery code sa pag-sign in",
         "mfa_codes_renewed": "Gumawa ng bagong recovery code",
-        "mfa_reset_by_admin": "Ini-off ng administrator ang two-factor"
+        "mfa_reset_by_admin": "Ini-off ng administrator ang two-factor",
+        "mfa_required_set": "Hiniling ng administrator ang two-factor",
+        "mfa_required_cleared": "Binawi ang paghiling ng two-factor"
       },
       "user": {
         "create": "Nagawa ang account",
@@ -2119,6 +2121,12 @@
     "unavailable": "Hindi pa naka-set up ang two-factor na pag-sign in sa server na ito. Magtanong sa System Administrator.",
     "codesLeft_one": "{{count}} recovery code na lang.",
     "codesLeft_other": "{{count}} recovery code na lang.",
+    "requiredNote": "Hiniling ng isang administrator na gumamit ka ng two-factor na pag-sign in, kaya hindi ito maaaring i-off dito.",
+    "banner": {
+      "admin": "I-set up ang two-factor na pag-sign in. Bilang administrator, lagi kang hinihilingang gumamit nito; pinoprotektahan nito ang account na kayang magbago sa lahat ng iba.",
+      "staff": "Hiniling ng isang administrator na i-on mo ang two-factor na pag-sign in. Mga dalawang minuto lang ito at kailangan ng authenticator app sa telepono mo.",
+      "action": "Itakda ngayon"
+    },
     "turnOn": "I-on ang two-factor",
     "turnOff": "I-off",
     "newCodes": "Kumuha ng bagong recovery code",
@@ -2182,7 +2190,14 @@
       "adminNote": "Sa server computer lang maaaring i-reset ang two-factor ng isang administrator (tingnan ang gabay sa Deployment).",
       "confirmTitle": "I-off ang two-factor na pag-sign in?",
       "confirmMessage": "Password lang ang gagamitin ni {{name}} sa pag-sign in at maaari niyang i-set up muli ang two-factor. Gamitin ito kapag nawala ang telepono.",
-      "reset": "Na-off ang two-factor na pag-sign in para sa taong ito"
+      "reset": "Na-off ang two-factor na pag-sign in para sa taong ito",
+      "askedLabel": "Hinilinging gumamit ng two-factor",
+      "yes": "Oo",
+      "no": "Hindi",
+      "ask": "Hilingin ito",
+      "stopAsking": "Itigil ang paghiling",
+      "asked": "Hihilingin sa taong ito na i-on ang two-factor na pag-sign in.",
+      "stopped": "Hindi na hinihilingan ang taong ito na gumamit ng two-factor na pag-sign in."
     }
   },
   "securityQuestions": {

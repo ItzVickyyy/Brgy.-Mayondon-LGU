@@ -172,6 +172,12 @@ class User(UserBase, table=True):
     mfa_enrolled_at: datetime | None = Field(
         default=None, sa_type=DateTime(timezone=True)
     )
+    # An administrator asked this STAFF person to use two-factor (patch 77).
+    # It is a request, never a block: it does not stop a sign-in.
+    mfa_required: bool = Field(
+        default=False,
+        sa_column_kwargs={"server_default": false()},
+    )
 
 
 class PasswordRecoveryRateLimit(SQLModel, table=True):

@@ -147,6 +147,20 @@ const EditUser = ({
       ).data,
     enabled: isOpen && !isEditingSelf,
   })
+  const setMfaRequired = useMutation({
+    mutationFn: (required: boolean) =>
+      TwoFactorService.factorSetUserMfaRequired({
+        path: { user_id: user.id },
+        body: { required },
+      }),
+    onSuccess: (_data, required) => {
+      showSuccessToast(
+        required ? t("twoFactor.admin.asked") : t("twoFactor.admin.stopped"),
+      )
+      queryClient.invalidateQueries({ queryKey: mfaKey })
+    },
+    onError: handleError.bind(showErrorToast),
+  })
   const resetMfa = useMutation({
     mutationFn: () =>
       TwoFactorService.factorResetUserMfa({ path: { user_id: user.id } }),
@@ -384,6 +398,37 @@ const EditUser = ({
                       <span className="basis-full text-xs text-muted-foreground">
                         {t("twoFactor.admin.adminNote")}
                       </span>
+                    ) : null}
+                    {mfaStatus.data &&
+                    !user.is_superuser &&
+                    user.role !== "admin" ? (
+                      <div
+                        className="flex basis-full flex-wrap items-center justify-between gap-2 border-t pt-2"
+                        data-testid="user-mfa-required"
+                      >
+                        <span className="text-sm">
+                          {t("twoFactor.admin.askedLabel")}:{" "}
+                          <strong>
+                            {mfaStatus.data.required
+                              ? t("twoFactor.admin.yes")
+                              : t("twoFactor.admin.no")}
+                          </strong>
+                        </span>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="min-h-11 sm:min-h-8"
+                          disabled={setMfaRequired.isPending}
+                          onClick={() =>
+                            setMfaRequired.mutate(!mfaStatus.data.required)
+                          }
+                        >
+                          {mfaStatus.data.required
+                            ? t("twoFactor.admin.stopAsking")
+                            : t("twoFactor.admin.ask")}
+                        </Button>
+                      </div>
                     ) : null}
                   </div>
                   <FormField

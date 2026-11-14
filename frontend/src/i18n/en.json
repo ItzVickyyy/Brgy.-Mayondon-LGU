@@ -401,7 +401,9 @@
         "mfa_failed": "Two-factor code refused",
         "mfa_recovery_code_used": "Recovery code used to sign in",
         "mfa_codes_renewed": "New recovery codes made",
-        "mfa_reset_by_admin": "Two-factor turned off by administrator"
+        "mfa_reset_by_admin": "Two-factor turned off by administrator",
+        "mfa_required_set": "Two-factor requested by administrator",
+        "mfa_required_cleared": "Two-factor request withdrawn"
       },
       "user": {
         "create": "Account created",
@@ -2119,6 +2121,12 @@
     "unavailable": "Two-factor sign-in is not set up on this server yet. Ask the System Administrator.",
     "codesLeft_one": "{{count}} recovery code left.",
     "codesLeft_other": "{{count}} recovery codes left.",
+    "requiredNote": "An administrator asked you to use two-factor sign-in, so it cannot be turned off here.",
+    "banner": {
+      "admin": "Set up two-factor sign-in. As an administrator you are always asked to use it; it protects the account that can change everyone else's.",
+      "staff": "An administrator asked you to turn on two-factor sign-in. It takes about two minutes and needs an authenticator app on your phone.",
+      "action": "Set up now"
+    },
     "turnOn": "Turn on two-factor",
     "turnOff": "Turn off",
     "newCodes": "Get new recovery codes",
@@ -2182,7 +2190,14 @@
       "adminNote": "An administrator's two-factor can only be reset from the server computer (see the Deployment guide).",
       "confirmTitle": "Turn off two-factor sign-in?",
       "confirmMessage": "{{name}} will sign in with the password only and can set two-factor up again. Use this when the phone was lost.",
-      "reset": "Two-factor sign-in turned off for this person"
+      "reset": "Two-factor sign-in turned off for this person",
+      "askedLabel": "Asked to use two-factor",
+      "yes": "Yes",
+      "no": "No",
+      "ask": "Ask to use it",
+      "stopAsking": "Stop asking",
+      "asked": "This person will be asked to turn on two-factor sign-in.",
+      "stopped": "This person is no longer asked to use two-factor sign-in."
     }
   },
   "securityQuestions": {

@@ -450,10 +450,16 @@ def test_admin_resets_a_staff_persons_two_factor(
 ) -> None:
     user, password, _, secret, _ = _enrol(client, db)
     url = f"{API}/users/{user.id}/mfa"
-    assert client.get(url, headers=superuser_token_headers).json() == {"enabled": True}
+    assert client.get(url, headers=superuser_token_headers).json() == {
+        "enabled": True,
+        "required": False,
+    }
     r = client.delete(url, headers=superuser_token_headers)
     assert r.status_code == 200, r.text
-    assert client.get(url, headers=superuser_token_headers).json() == {"enabled": False}
+    assert client.get(url, headers=superuser_token_headers).json() == {
+        "enabled": False,
+        "required": False,
+    }
     assert _password_step(client, user, password).json()["access_token"]
     db.expire_all()
     admin = db.exec(select(User).where(User.email == settings.FIRST_SUPERUSER)).one()

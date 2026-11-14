@@ -105,6 +105,8 @@ class MfaStatus(SQLModel):
     # False while the server has no MFA_ENCRYPTION_KEY: nothing can be set up.
     available: bool
     enabled: bool
+    # An administrator asked this person to use two-factor (patch 77).
+    required: bool = False
     # A secret was made but never confirmed with a code.
     setup_pending: bool = False
     enrolled_at: datetime | None = None
@@ -115,6 +117,11 @@ class MfaStatus(SQLModel):
 
 class MfaConfigured(SQLModel):
     enabled: bool
+    required: bool = False
+
+
+class MfaRequiredSet(SQLModel):
+    required: bool
 
 
 class MfaSetupRequest(SQLModel):
