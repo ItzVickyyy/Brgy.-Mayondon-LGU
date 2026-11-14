@@ -32,6 +32,10 @@ test("make a backup, check it, and get the restore command", async ({
   const download = await downloadPromise
   expect(download.suggestedFilename()).toMatch(/^mayondon-db-.*\.dump$/)
   await expect(page.getByText(/Download of .* started/)).toBeVisible()
+  // Closing the row menu gives focus back to its button and scrolls the page
+  // up to it. Wait for that, or it can happen after the dropdown below opens
+  // and move the page away from it.
+  await expect(row.getByRole("button", { name: /more/i })).toBeFocused()
 
   // Restore: choose the backup, type the word, get the command (nothing is restored).
   const archive = page.getByLabel("Backup archive")
