@@ -237,7 +237,9 @@ const EditUser = ({
                 {t("admin.users.form.editDescription")}
               </DialogDescription>
             </DialogHeader>
-            <div className={`${modalBody} grid gap-4 sm:grid-cols-2`}>
+            <div
+              className={`${modalBody} grid auto-rows-min gap-4 sm:grid-cols-2`}
+            >
               <FormField
                 control={form.control}
                 name="email"
