@@ -177,7 +177,7 @@ function Login() {
               control={form.control}
               name="username"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative">
                   <FormLabel>{t("login.emailLabel")}</FormLabel>
                   <FormControl>
                     <Input
@@ -189,7 +189,7 @@ function Login() {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage className="text-xs" />
+                  <FormMessage className="absolute top-full left-0 mt-0.5 min-h-0 text-xs leading-4" />
                 </FormItem>
               )}
             />
@@ -198,7 +198,7 @@ function Login() {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="relative">
                   <div className="flex items-center">
                     <FormLabel>{t("login.passwordLabel")}</FormLabel>
                     <RouterLink
@@ -217,7 +217,7 @@ function Login() {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage className="text-xs" />
+                  <FormMessage className="absolute top-full left-0 mt-0.5 min-h-0 text-xs leading-4" />
                 </FormItem>
               )}
             />
