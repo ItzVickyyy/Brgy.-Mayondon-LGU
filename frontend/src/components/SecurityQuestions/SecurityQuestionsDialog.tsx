@@ -3,6 +3,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { SecurityQuestionsService, type SecurityQuestionsSet } from "@/client"
+import { FieldError } from "@/components/Common/FieldError"
 import {
   modalBody,
   modalFooter,
@@ -163,26 +164,20 @@ export function SecurityQuestionsDialog({ open, onOpenChange }: Props) {
             </div>
           ))}
 
-          {submitted && errors.questions ? (
-            <p role="alert" className="text-sm text-destructive">
-              {t("securityQuestions.dialog.validation.distinctQuestions")}
-            </p>
-          ) : null}
-          {submitted && errors.answerRequired ? (
-            <p role="alert" className="text-sm text-destructive">
-              {t("securityQuestions.dialog.validation.required")}
-            </p>
-          ) : null}
-          {submitted && !errors.answerRequired && errors.answerMin ? (
-            <p role="alert" className="text-sm text-destructive">
-              {t("securityQuestions.dialog.validation.answerMin")}
-            </p>
-          ) : null}
-          {submitted && errors.answerDistinct ? (
-            <p role="alert" className="text-sm text-destructive">
-              {t("securityQuestions.dialog.validation.distinctAnswers")}
-            </p>
-          ) : null}
+          {/* One line, always in the page: the password box below does not move when a message comes and goes. */}
+          <FieldError className="min-h-5 text-sm leading-5">
+            {submitted
+              ? errors.questions
+                ? t("securityQuestions.dialog.validation.distinctQuestions")
+                : errors.answerRequired
+                  ? t("securityQuestions.dialog.validation.required")
+                  : errors.answerMin
+                    ? t("securityQuestions.dialog.validation.answerMin")
+                    : errors.answerDistinct
+                      ? t("securityQuestions.dialog.validation.distinctAnswers")
+                      : null
+              : null}
+          </FieldError>
 
           <div className="grid gap-2">
             <Label htmlFor="sq-current-password">

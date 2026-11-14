@@ -8,6 +8,7 @@ import {
   useState,
 } from "react"
 import { useTranslation } from "react-i18next"
+import { FieldError } from "@/components/Common/FieldError"
 import { formControlClass } from "@/components/Common/formStyles"
 import { formatPaperDate, monthNames } from "@/lib/issuance-format"
 import { formatLocaleDate } from "@/lib/locale"
@@ -445,6 +446,10 @@ type DateFieldProps = {
   startView?: "days" | "years"
   /** Show the "Today" shortcut. Turn off for birthdates. */
   showToday?: boolean
+  /** Message of the form (for example "Fill this in") shown on the line under the box. */
+  message?: string
+  /** id of that line, so the box can point to it with aria-describedby. */
+  messageId?: string
 }
 
 /**
@@ -462,6 +467,8 @@ export function DateField({
   placeholder,
   startView = "days",
   showToday = true,
+  message,
+  messageId,
 }: DateFieldProps) {
   const { t } = useTranslation()
   const wrapperRef = useRef<HTMLDivElement>(null)
@@ -534,116 +541,119 @@ export function DateField({
   }
 
   return (
-    // biome-ignore lint/a11y/noStaticElementInteractions: closes the calendar when focus leaves the whole control
-    <div
-      ref={wrapperRef}
-      role="presentation"
-      className="relative min-w-0"
-      onBlur={(event) => {
-        const next = event.relatedTarget as Node | null
-        if (next && !wrapperRef.current?.contains(next)) setOpen(false)
-      }}
-    >
-      <input
-        ref={inputRef}
-        id={id}
-        type="text"
-        inputMode="text"
-        autoComplete="off"
-        value={typed ?? display}
-        placeholder={placeholder ?? t("issuances.new.date.choose")}
-        role="combobox"
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-controls={open ? `${id ?? "date"}-calendar` : undefined}
-        aria-invalid={invalid || rejected ? true : undefined}
-        aria-describedby={
-          [describedBy, rejected ? hintId : undefined]
-            .filter(Boolean)
-            .join(" ") || undefined
-        }
-        onFocus={() => {
-          if (!skipFocusOpen.current) setOpen(true)
+    <>
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: closes the calendar when focus leaves the whole control */}
+      <div
+        ref={wrapperRef}
+        role="presentation"
+        className="relative min-w-0"
+        onBlur={(event) => {
+          const next = event.relatedTarget as Node | null
+          if (next && !wrapperRef.current?.contains(next)) setOpen(false)
         }}
-        onClick={() => setOpen(true)}
-        onChange={(event) => onType(event.target.value)}
-        onBlur={() => {
-          const text = typed?.trim() ?? ""
-          if (text) {
-            const parsed = parseLooseDate(text)
-            if (!parsed) setRejected("unreadable")
-            else if ((min && parsed < min) || (max && parsed > max))
-              setRejected("outOfRange")
-            else setRejected(null)
-          }
-          setTyped(null)
-        }}
-        onKeyDown={onKeyDown}
-        className={cn(
-          formControlClass,
-          "pr-10",
-          (invalid || rejected) && "border-destructive",
-        )}
-      />
-      {rejected ? (
-        <p id={hintId} className="mt-1 text-xs text-destructive">
-          {rejected === "unreadable"
-            ? t("issuances.new.date.unreadable")
-            : t("issuances.new.date.outOfRange")}
-        </p>
-      ) : null}
-      <button
-        type="button"
-        tabIndex={-1}
-        aria-label={
-          open
-            ? t("issuances.new.date.closeCalendar")
-            : t("issuances.new.date.openCalendar")
-        }
-        onMouseDown={(event) => event.preventDefault()}
-        onClick={() => {
-          if (open) setOpen(false)
-          else {
-            inputRef.current?.focus()
-            setOpen(true)
-          }
-        }}
-        className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground"
       >
-        <CalendarDays className="size-4" aria-hidden="true" />
-      </button>
-      {open ? (
-        <div
-          ref={panelRef}
-          id={`${id ?? "date"}-calendar`}
-          role="dialog"
-          aria-label={t("issuances.new.date.calendar")}
-          data-popover-open="true"
-          onMouseDown={(event) => {
-            // Keep the text box focused unless a real control inside needs focus.
-            if (!(event.target as HTMLElement).closest("button"))
-              event.preventDefault()
+        <input
+          ref={inputRef}
+          id={id}
+          type="text"
+          inputMode="text"
+          autoComplete="off"
+          value={typed ?? display}
+          placeholder={placeholder ?? t("issuances.new.date.choose")}
+          role="combobox"
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          aria-controls={open ? `${id ?? "date"}-calendar` : undefined}
+          aria-invalid={invalid || rejected ? true : undefined}
+          aria-describedby={
+            [describedBy, rejected ? hintId : undefined]
+              .filter(Boolean)
+              .join(" ") || undefined
+          }
+          onFocus={() => {
+            if (!skipFocusOpen.current) setOpen(true)
           }}
+          onClick={() => setOpen(true)}
+          onChange={(event) => onType(event.target.value)}
+          onBlur={() => {
+            const text = typed?.trim() ?? ""
+            if (text) {
+              const parsed = parseLooseDate(text)
+              if (!parsed) setRejected("unreadable")
+              else if ((min && parsed < min) || (max && parsed > max))
+                setRejected("outOfRange")
+              else setRejected(null)
+            }
+            setTyped(null)
+          }}
+          onKeyDown={onKeyDown}
           className={cn(
-            panelClass,
-            "w-[19rem] max-w-[calc(100vw-2rem)]",
-            upward ? "bottom-full mb-1" : "top-full mt-1",
+            formControlClass,
+            "pr-10",
+            (invalid || rejected) && "border-destructive",
           )}
+        />
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-label={
+            open
+              ? t("issuances.new.date.closeCalendar")
+              : t("issuances.new.date.openCalendar")
+          }
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => {
+            if (open) setOpen(false)
+            else {
+              inputRef.current?.focus()
+              setOpen(true)
+            }
+          }}
+          className="absolute inset-y-0 right-0 flex w-10 items-center justify-center text-muted-foreground"
         >
-          <Calendar
-            value={isoValue}
-            min={min}
-            max={max}
-            startView={startView}
-            showToday={showToday}
-            onSelect={select}
-            onDone={() => {
-              setOpen(false)
-              refocus()
+          <CalendarDays className="size-4" aria-hidden="true" />
+        </button>
+        {open ? (
+          <div
+            ref={panelRef}
+            id={`${id ?? "date"}-calendar`}
+            role="dialog"
+            aria-label={t("issuances.new.date.calendar")}
+            data-popover-open="true"
+            onMouseDown={(event) => {
+              // Keep the text box focused unless a real control inside needs focus.
+              if (!(event.target as HTMLElement).closest("button"))
+                event.preventDefault()
             }}
-          />
-        </div>
-      ) : null}
-    </div>
+            className={cn(
+              panelClass,
+              "w-[19rem] max-w-[calc(100vw-2rem)]",
+              upward ? "bottom-full mb-1" : "top-full mt-1",
+            )}
+          >
+            <Calendar
+              value={isoValue}
+              min={min}
+              max={max}
+              startView={startView}
+              showToday={showToday}
+              onSelect={select}
+              onDone={() => {
+                setOpen(false)
+                refocus()
+              }}
+            />
+          </div>
+        ) : null}
+      </div>
+      {/* Always in the page with room for two lines (the date hint wraps in a narrow column), so the boxes below do not move when a message comes and goes. */}
+      <FieldError id={rejected ? hintId : messageId} className="min-h-8">
+        {rejected === "unreadable"
+          ? t("issuances.new.date.unreadable")
+          : rejected === "outOfRange"
+            ? t("issuances.new.date.outOfRange")
+            : message}
+      </FieldError>
+    </>
   )
 }
