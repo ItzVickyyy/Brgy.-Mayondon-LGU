@@ -4,6 +4,7 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { BarangayIdsService } from "@/client"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
+import { FieldError } from "@/components/Common/FieldError"
 import { formControlClass } from "@/components/Common/formStyles"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
 import type { ResidentRecord } from "@/components/Records/records-sample-data"
@@ -391,7 +392,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     const describedBy = fieldError || missingNow ? `${fieldId}-error` : undefined
     const labelText = <>{fieldLabel(field.label, t)}{field.required ? <span className="text-destructive"> *</span> : null}</>
     const message = fieldError || (missingNow ? t("issuances.new.detailsStep.fillIn") : "")
-    const messageNode = message ? <span id={`${fieldId}-error`} className="text-xs font-normal text-destructive" role="alert">{message}</span> : null
+    const messageNode = <FieldError id={`${fieldId}-error`}>{message}</FieldError>
     if (field.type === "checkbox") {
       return <div key={field.name} className={cn("flex min-h-11 items-center", field.group === "payment" && "sm:self-end")}>
         <CheckField id={fieldId} checked={Boolean(value)} onChange={(checked) => onValueChange(checked)} label={fieldLabel(field.label, t)} invalid={invalid} describedBy={describedBy} />
@@ -815,9 +816,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     }
   }
 
-  const quickError = (key: keyof typeof quickMissing) => quickAttempted && quickMissing[key]
-    ? <span id={`quickadd-${key}-error`} role="alert" className="text-xs font-normal text-destructive">{t("issuances.new.resident.errors.fillThis")}</span>
-    : null
+  const quickError = (key: keyof typeof quickMissing) => <FieldError id={`quickadd-${key}-error`}>{quickAttempted && quickMissing[key] ? t("issuances.new.resident.errors.fillThis") : null}</FieldError>
   const quickInvalid = (key: keyof typeof quickMissing) => quickAttempted && quickMissing[key]
 
   const needsAddress = Boolean(selectedResident) && (!selectedResident?.houseNumber?.trim() || !selectedResident?.street?.trim() || !selectedResident?.purok)

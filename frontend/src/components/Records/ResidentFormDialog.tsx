@@ -8,6 +8,7 @@ import {
   type ResidentPublic,
   ResidentsService,
 } from "@/client"
+import { FieldError } from "@/components/Common/FieldError"
 import { formControlClass } from "@/components/Common/formStyles"
 import {
   ModalSection,
@@ -166,7 +167,6 @@ type ResidentFormDialogProps = {
 }
 
 const labelClass = "flex flex-col gap-2 text-sm font-medium"
-const errorClass = "text-xs font-normal text-destructive"
 
 /** The red asterisk of a required field; the input itself says "required". */
 function RequiredMark() {
@@ -363,14 +363,9 @@ export function ResidentFormDialog({
                       : undefined
                   }
                 />
-                {showFirstError ? (
-                  <span
-                    id="resident-form-first-name-error"
-                    className={errorClass}
-                  >
-                    {t("records.form.errors.firstName")}
-                  </span>
-                ) : null}
+                <FieldError id="resident-form-first-name-error">
+                  {showFirstError ? t("records.form.errors.firstName") : null}
+                </FieldError>
               </label>
               <label className={labelClass}>
                 {t("records.form.middleName")}
@@ -396,14 +391,9 @@ export function ResidentFormDialog({
                     showLastError ? "resident-form-last-name-error" : undefined
                   }
                 />
-                {showLastError ? (
-                  <span
-                    id="resident-form-last-name-error"
-                    className={errorClass}
-                  >
-                    {t("records.form.errors.lastName")}
-                  </span>
-                ) : null}
+                <FieldError id="resident-form-last-name-error">
+                  {showLastError ? t("records.form.errors.lastName") : null}
+                </FieldError>
               </label>
               <label htmlFor="resident-form-suffix" className={labelClass}>
                 {t("records.form.suffix")}

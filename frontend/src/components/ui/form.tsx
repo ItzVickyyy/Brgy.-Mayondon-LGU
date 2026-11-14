@@ -137,15 +137,23 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   const { error, formMessageId } = useFormField()
   const body = error ? String(error?.message ?? "") : props.children
 
+  // Always rendered with a fixed height, so the boxes below do not jump when
+  // a message appears or goes away.
   if (!body) {
-    return null
+    return (
+      <p
+        data-slot="form-message"
+        aria-hidden="true"
+        className={cn("min-h-5 text-sm leading-5", className)}
+      />
+    )
   }
 
   return (
     <p
       data-slot="form-message"
       id={formMessageId}
-      className={cn("text-destructive text-sm", className)}
+      className={cn("text-destructive min-h-5 text-sm leading-5", className)}
       {...props}
     >
       {body}
