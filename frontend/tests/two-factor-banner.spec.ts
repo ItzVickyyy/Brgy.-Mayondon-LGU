@@ -83,20 +83,25 @@ test("a staff member sees the banner only after being asked, enrols from it and 
   const created = await createUser({ email, password })
   await logInUser(page, email, password)
 
-  // Not asked yet: no banner.
+  // Not asked yet: no reminder in the bell.
+  await page.getByTestId("notification-bell").click()
+  await expect(page.getByTestId("notification-bell")).toHaveAttribute(
+    "aria-expanded",
+    "true",
+  )
   await expect(page.getByTestId("two-factor-banner")).toHaveCount(0)
+  await page.keyboard.press("Escape")
 
   // Asked: the banner and a bell notice appear.
   await ask(created.id, true)
   await page.reload()
   const banner = page.getByTestId("two-factor-banner")
+  await page.getByTestId("notification-bell").click()
   await expect(banner).toBeVisible()
   await expect(banner).toContainText("An administrator asked you")
-  await page.getByTestId("notification-bell").click()
   await expect(page.getByTestId("notification-item").first()).toContainText(
     "asked you to use two-factor sign-in",
   )
-  await page.keyboard.press("Escape")
 
   // Enrol from the banner. The recovery codes must stay on screen after the
   // banner goes away.
@@ -117,10 +122,35 @@ test("the administrator is always shown the banner", async ({ page }) => {
     "The server has no MFA_ENCRYPTION_KEY",
   )
   await logInUser(page, firstSuperuser, firstSuperuserPassword)
+  await page.getByTestId("notification-bell").click()
   await expect(page.getByTestId("two-factor-banner")).toBeVisible()
   await expect(page.getByTestId("two-factor-banner")).toContainText(
     "As an administrator you are always asked",
   )
+})
+
+test("the bell shows a short looping message for what needs attention", async ({
+  page,
+}) => {
+  test.skip(
+    !(await serverHasKey(await adminHeaders())),
+    "The server has no MFA_ENCRYPTION_KEY",
+  )
+  await logInUser(page, firstSuperuser, firstSuperuserPassword)
+  const teaser = page.getByTestId("notification-teaser")
+  // It appears, goes away, and appears again (a loop).
+  await expect(teaser).toHaveAttribute("data-visible", "true", {
+    timeout: 8000,
+  })
+  await expect(teaser).toHaveAttribute("data-visible", "false", {
+    timeout: 8000,
+  })
+  await expect(teaser).toHaveAttribute("data-visible", "true", {
+    timeout: 10000,
+  })
+  // While the list is open the bubble stays hidden.
+  await page.getByTestId("notification-bell").click()
+  await expect(teaser).toHaveAttribute("data-visible", "false")
 })
 
 test("Edit User can ask a staff person to use two-factor and stop asking", async ({

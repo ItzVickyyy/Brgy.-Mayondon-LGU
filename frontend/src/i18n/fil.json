@@ -43,6 +43,11 @@
     "removedTarget": "Inalis na User",
     "eventFailed": "Hindi natapos ang isang gawain ni {{actor}}.",
     "emptyHintShared": "Dito lalabas ang mga gawain sa account, seguridad, backup at import.",
+    "needsAttention": "Kailangan ng iyong pansin",
+    "teaser": {
+      "securityQuestions": "Itakda ang mga tanong sa pagbawi",
+      "twoFactor": "I-set up ang two-factor na pag-sign in"
+    },
     "events": {
       "user_create": "{{actor}} ang gumawa ng user account para kay {{target}}.",
       "user_update": "{{actor}} ang nag-update ng account ni {{target}}.",

@@ -43,6 +43,11 @@
     "removedTarget": "a removed user",
     "eventFailed": "An action by {{actor}} did not complete.",
     "emptyHintShared": "Activity on accounts, security, backups and imports will appear here.",
+    "needsAttention": "Needs your attention",
+    "teaser": {
+      "securityQuestions": "Set your recovery questions",
+      "twoFactor": "Set up two-factor sign-in"
+    },
     "events": {
       "user_create": "{{actor}} created a user account for {{target}}.",
       "user_update": "{{actor}} updated the account of {{target}}.",
