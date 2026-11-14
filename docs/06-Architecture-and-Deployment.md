@@ -221,6 +221,8 @@ Host rules: do not publish the PostgreSQL port to the LAN; keep the firewall on;
 
 **One-time setup by the team:** install and configure Docker Desktop; copy the approved package and configure the production `.env`; load images; initialize PostgreSQL, apply migrations, create the approved admin; configure Docker Desktop to start at Windows startup/sign-in; confirm restart policies and healthy services; configure firewall and LAN access; create a desktop shortcut or bookmark; document shutdown, restart, update, backup, restore and troubleshooting.
 
+**Installer and updater (patch 91, not yet run on a real computer):** `Install-Mayondon.cmd` and `Update-Mayondon.cmd` in the project folder do the one-time setup and every update without typing commands; see `docs/11-Host-Checks.md` section H.
+
 **Intended daily workflow:** turn on the host and sign in to Windows as required → Docker and the containers start per configuration → wait until the app is ready → open the shortcut (`http://localhost:8000` on the host, `http://<host-LAN-IP>:8000` elsewhere) → staff sign in. The host may also be a clerk workstation.
 
 **Limitations to verify**

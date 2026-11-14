@@ -122,6 +122,28 @@ Done so far (patches 51 to 57 and 62). More items are added here as each patch l
    **Notes.** The new database password is visible to Postgres during the change; the default Postgres setting does not write it to a log. Adminer, if you use the development files on another computer, needs the new password too. A person's own sign-in password is never touched except the administrator's.
 12. **Still to do for step 15** (owner's answers of November 11: protect against a stolen host PC, other computers on the LAN, a lost backup copy and staff reading too much; the backup passphrase is kept written and sealed by the administrator): run item 11 on the real system after the masterlist import (owner's written word first); removing the committed dump (step 4); a decision on a private repository.
 
+## H. One-click install and update (patch 91; written, NOT yet run on a real computer)
+
+**Why.** Nobody at the barangay should have to type commands. Two files in the project folder do the work: `Install-Mayondon.cmd` (once) and `Update-Mayondon.cmd` (for every new version). Double-click them; they open a black window that asks plain questions. They run the same PowerShell scripts as the manual steps above (`scripts\install.ps1`, `scripts\update.ps1`), so every step can still be done by hand.
+
+**What the installer does** (safe to run again; it never replaces an existing `.env`, a database or a backup key):
+1. Checks Docker Desktop is running and starts it if it can.
+2. Makes `.env` from `.env.example` with NEW random values for `SECRET_KEY`, the database password and `MFA_ENCRYPTION_KEY`, sets `COMPOSE_FILE=compose.yml` (so the development files and Adminer are never used), and asks for the administrator's e-mail and password (Enter = it makes a strong password and shows it once). It refuses to continue if a database from an earlier installation exists but `.env` is missing (a new password would lock the program out of its data).
+3. Builds the program, starts it and waits until it is healthy (the first build needs the internet and takes several minutes).
+4. Creates the administrator account (`app.initial_data`).
+5. Makes the backup key pair (you type the passphrase; **write it on paper and seal it**), copies the private key to the USB drive you name and removes it from the computer only after the copy is the same size, then sets `BACKUP_REQUIRE_ENCRYPTION=true`.
+6. Registers the daily backup task (17:00 by default; `-BackupTime`, `-BackupCopyTo "E:\MayondonBackups"`) and makes a first backup.
+7. Opens the firewall for the office network on the Private profile only (`scripts\open-firewall.ps1`, asks Windows for permission): port 8000, or 443 and 80 with HTTPS. It never opens 5432.
+8. Puts a "Barangay Mayondon" shortcut on the desktop and prints the address for the other computers.
+
+HTTPS by name: `Install-Mayondon.cmd -HttpsHost brgy-mayondon.test`, then item 7 above (trust the certificate on each computer, name in the hosts file or the router).
+
+**Update.** `Update-Mayondon.cmd`: (1) makes a backup and STOPS if it fails; (2) gets the new version, by `git pull` (needs internet) or `Update-Mayondon.cmd -From <folder>` for a newer copy of the project folder on a USB drive (`.env`, `backups\` and the database are not touched); (3) tags the running image `backend:previous` and builds the new one while the old one keeps running; (4) restarts and waits for healthy; (5) prints the `[migrate]` line from the log. On failure it changes nothing further and prints the way back, because the database may already be newer than the old program (restore the backup, then rebuild the old commit). The program also saves its own `mayondon-premigrate-*` copy before changing the database.
+
+**Not done by the installer (by choice).** It cannot tick Docker Desktop's "Start Docker Desktop when you sign in" (section B): do that by hand and run check B. It does not import the masterlist, add streets or create staff accounts (section F). It does not change BitLocker (item 8 of G). It does not remove Adminer, Mailpit or any container.
+
+**Checks (run on a clean Windows computer with synthetic data first).** (a) Double-click `Install-Mayondon.cmd` on a computer with Docker Desktop and no `.env`: pass = it ends with DONE, `docker compose -f compose.yml ps` shows only `db` and `backend`, and `http://localhost:8000` opens the sign-in page. (b) Sign in with the e-mail and password chosen. (c) `backups\` holds `backup-public.pem` and a `.dump.enc` file, and there is no `backup-private.pem` on the computer; the USB drive holds it. (d) `Get-ScheduledTask "Mayondon Database Backup"` exists. (e) From a second computer `http://<address>:8000` opens. (f) Run `Install-Mayondon.cmd` again: nothing is replaced, no error. (g) Make a small change, then `Update-Mayondon.cmd`: backup first, then healthy, `[migrate] ... up to date`. (h) Restart Windows (section B).
+
 ## Result sheet
 
 Copy this table into a new file or the final report and fill it in.
@@ -140,3 +162,4 @@ Copy this table into a new file or the final report and fill it in.
 | F. Streets added, accounts created, secrets changed | | | | | |
 | G. BitLocker on, recovery key stored away, start-up choice (TPM only or PIN) | | | | | |
 | G. HTTPS (padlock, camera on 2nd PC) | | | | | |
+| H. One-click install and update (checks a to h) | | | | | |
