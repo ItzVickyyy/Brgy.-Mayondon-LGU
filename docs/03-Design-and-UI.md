@@ -208,3 +208,5 @@ Branch `draft/admin-portal` contains frontend pages for Dashboard, Records Manag
 8. Test Staff and System Administrator views separately, including direct navigation to restricted routes.
 9. Confirm role and authorization behavior **in the backend**, and audit logging, before any real data.
 10. Replace fictional data only after an approved data plan exists. Do not claim client approval based on the prototype.
+
+**Collapsed sidebar (patch 86).** In the icon-only sidebar every icon shows its name in a bubble on hover. The section labels ("Records and Documents", "Administration") are hidden there and are pulled up over the icon above them, so they now ignore the mouse (`pointer-events-none` in `SidebarGroupLabel` when collapsed); before, the bubble of the icon under a label never appeared. Spec: `tests/sidebar-collapsed.spec.ts`.
