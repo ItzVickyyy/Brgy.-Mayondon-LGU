@@ -40,7 +40,7 @@
     "emptyHint": "Dito lalabas ang mga mensahe tungkol sa mga na-save, na-isyu o na-back up mo.",
     "you": "Ikaw",
     "removedActor": "Isang inalis na user",
-    "removedTarget": "isang inalis na user",
+    "removedTarget": "Inalis na User",
     "eventFailed": "Hindi natapos ang isang gawain ni {{actor}}.",
     "emptyHintShared": "Dito lalabas ang mga gawain sa account, seguridad, backup at import.",
     "events": {
