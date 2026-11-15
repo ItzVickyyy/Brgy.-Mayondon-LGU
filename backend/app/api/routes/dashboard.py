@@ -44,8 +44,7 @@ router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 # The dashboard shows what Staff and Admin can already read: issuance work.
 DashboardUser = Annotated[User, Depends(require_permission(Permission.ISSUANCE_WRITE))]
 
-MAX_EXPIRING = 10
-MAX_MONTHS = 24  # the bar chart shows at most this many of the latest months
+MAX_EXPIRING = 5  # the dashboard list shows only the soonest few; the cards count all
 
 
 @router.get("/", response_model=DashboardPublic)
@@ -100,7 +99,8 @@ def dashboard(
     else:
         first_month = first_issue_date(session) or month_start.start
     assert first_month is not None
-    months = months_in(first_month, today)[-MAX_MONTHS:]
+    # Every month is sent: the page groups a long Overall range into years.
+    months = months_in(first_month, today)
     per_month = monthly_issued(session, resolve_period("overall", today))
     over_time = [
         MonthCount(month=f"{m:%Y-%m}", count=per_month.get(f"{m:%Y-%m}", 0))

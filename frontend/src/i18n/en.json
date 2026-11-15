@@ -208,12 +208,17 @@
       "stats": {
         "total": "Total issued",
         "average": "Monthly average",
-        "peak": "Busiest month"
+        "peak": "Busiest month",
+        "averageYear": "Yearly average",
+        "peakYear": "Busiest year"
       },
       "table": {
         "month": "Month",
-        "count": "Documents issued"
-      }
+        "count": "Documents issued",
+        "year": "Year"
+      },
+      "descriptionYear": "Yearly issuance volume",
+      "noteYear": "Each bar is one year; the current year counts up to today."
     },
     "byType": {
       "title": "Issuances by Document Type",
@@ -231,7 +236,8 @@
       "inDays_one": "Expires in {{count}} day",
       "inDays_other": "Expires in {{count}} days",
       "empty": "No records are expiring soon.",
-      "openHistory": "Open issuance history"
+      "openHistory": "Open issuance history",
+      "showing": "Showing the {{shown}} soonest of {{total}}. Open the issuance history to see them all."
     },
     "recent": {
       "title": "Recent Activities",

@@ -245,11 +245,47 @@ def test_dashboard_expiring_cards_and_list(
     assert after["summary"]["clearance_window_days"] == 30
     assert after["summary"]["id_window_days"] == 30
     assert soon["id"] in {row["issuance_id"] for row in after["expiring"]} or (
-        len(after["expiring"]) == 10  # a busy database may push it past the limit
+        len(after["expiring"]) == 5  # a busy database may push it past the limit
     )
     assert all(row["status"] == "expiring_soon" for row in after["expiring"])
     days = [row["days_left"] for row in after["expiring"]]
     assert days == sorted(days) and all(0 <= d <= 30 for d in days)
+
+
+def test_dashboard_expiring_list_shows_only_five_but_the_card_counts_all(
+    client: TestClient, staff_token_headers: Headers, street_id: int
+) -> None:
+    today = today_manila()
+    before = _get(client, staff_token_headers, f"{DASH}/")["summary"]
+    for days_left in range(1, 8):  # seven clearances, all expiring soon
+        _issue_clearance(
+            client,
+            staff_token_headers,
+            street_id,
+            issue_date=add_months(today, -2) + timedelta(days=days_left),
+        )
+    after = _get(client, staff_token_headers, f"{DASH}/")
+    assert after["summary"]["clearances_expiring"] == before["clearances_expiring"] + 7
+    assert len(after["expiring"]) == 5
+    days = [row["days_left"] for row in after["expiring"]]
+    assert days == sorted(days)  # the soonest five
+
+
+def test_dashboard_overall_sends_every_month_since_the_first_issue(
+    client: TestClient, staff_token_headers: Headers, street_id: int
+) -> None:
+    # The page groups a long Overall range into years, so the API must not
+    # cut the history at the latest 24 months.
+    old = add_months(today_manila(), -40)
+    _issue_clearance(client, staff_token_headers, street_id, issue_date=old)
+    body = _get(client, staff_token_headers, f"{DASH}/", period="overall")
+    months = [row["month"] for row in body["issuances_over_time"]]
+    assert len(months) >= 41
+    assert months[0] <= f"{old:%Y-%m}"
+    assert months[-1] == f"{today_manila():%Y-%m}"
+    assert months == sorted(set(months))
+    year = _get(client, staff_token_headers, f"{DASH}/", period="year")
+    assert len(year["issuances_over_time"]) <= 12
 
 
 def test_a_renewed_clearance_is_no_longer_expiring_or_expired(

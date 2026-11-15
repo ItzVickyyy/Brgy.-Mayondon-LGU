@@ -208,12 +208,17 @@
       "stats": {
         "total": "Kabuuang naisyu",
         "average": "Karaniwan kada buwan",
-        "peak": "Pinakamaraming buwan"
+        "peak": "Pinakamaraming buwan",
+        "averageYear": "Karaniwan kada taon",
+        "peakYear": "Pinakamaraming taon"
       },
       "table": {
         "month": "Buwan",
-        "count": "Mga naisyung dokumento"
-      }
+        "count": "Mga naisyung dokumento",
+        "year": "Taon"
+      },
+      "descriptionYear": "Taunang dami ng naisyu",
+      "noteYear": "Isang taon ang bawat bar; binibilang ang kasalukuyang taon hanggang ngayon."
     },
     "byType": {
       "title": "Mga Naisyu ayon sa Uri ng Dokumento",
@@ -231,7 +236,8 @@
       "inDays_one": "Mag-e-expire sa loob ng {{count}} araw",
       "inDays_other": "Mag-e-expire sa loob ng {{count}} araw",
       "empty": "Walang talaang malapit nang mag-expire.",
-      "openHistory": "Buksan ang kasaysayan ng pag-isyu"
+      "openHistory": "Buksan ang kasaysayan ng pag-isyu",
+      "showing": "Ipinapakita ang {{shown}} na pinakamalapit sa {{total}}. Buksan ang kasaysayan ng pag-isyu para makita lahat."
     },
     "recent": {
       "title": "Mga Kamakailang Aktibidad",

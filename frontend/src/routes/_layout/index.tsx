@@ -215,27 +215,52 @@ function Dashboard() {
   const dashboard = dashboardQuery.data
   const summary = dashboard?.summary
   const months = dashboard?.issuances_over_time ?? []
-  const maxMonthly = Math.max(0, ...months.map((item) => item.count))
+  // Overall can reach back many years. Past two years of months the bars would
+  // be a long scroll, so each bar becomes one year (the current year is counted
+  // up to today). Shorter ranges and every other period stay monthly.
+  const byYear = period === "overall" && months.length > 24
+  const bars = byYear
+    ? Object.values(
+        months.reduce<Record<string, { key: string; count: number }>>(
+          (acc, item) => {
+            const year = item.month.slice(0, 4)
+            acc[year] = {
+              key: year,
+              count: (acc[year]?.count ?? 0) + item.count,
+            }
+            return acc
+          },
+          {},
+        ),
+      ).map((item) => ({ ...item, label: item.key, fullLabel: item.key }))
+    : months.map((item) => ({
+        key: item.month,
+        count: item.count,
+        label: monthLabel(item.month),
+        fullLabel: monthLabel(item.month, true),
+      }))
+  const maxMonthly = Math.max(0, ...bars.map((item) => item.count))
   const { top: chartTop, ticks: chartTicks } = niceScale(maxMonthly)
-  const monthsTotal = months.reduce((sum, item) => sum + item.count, 0)
-  const monthsAverage = months.length > 0 ? monthsTotal / months.length : 0
-  const peakMonth = months.reduce<(typeof months)[number] | null>(
+  const monthsTotal = bars.reduce((sum, item) => sum + item.count, 0)
+  const monthsAverage = bars.length > 0 ? monthsTotal / bars.length : 0
+  const peakMonth = bars.reduce<(typeof bars)[number] | null>(
     (best, item) => (best === null || item.count > best.count ? item : best),
     null,
   )
   const chartYears = yearRange(months.map((item) => item.month))
-  // A long range (Overall can show 24 months) scrolls sideways inside the
-  // card; start at the newest month.
+  // A long range scrolls sideways inside the card; start at the newest bar.
   const plotScroller = useRef<HTMLDivElement>(null)
   // biome-ignore lint/correctness/useExhaustiveDependencies: run again when the range changes
   useEffect(() => {
     const box = plotScroller.current
     if (box) box.scrollLeft = box.scrollWidth
-  }, [months.length, period])
-  const hasOverTimeData = months.length > 0 && monthsTotal > 0
+  }, [bars.length, period])
+  const hasOverTimeData = bars.length > 0 && monthsTotal > 0
   const types = dashboard?.by_document_type ?? []
   const totalByType = dashboard?.total_issued ?? 0
   const expiring = dashboard?.expiring ?? []
+  const expiringTotal =
+    (summary?.clearances_expiring ?? 0) + (summary?.barangay_ids_expiring ?? 0)
   const activities = activityQuery.data?.data ?? []
   const expiryText = (daysLeft: number) =>
     daysLeft <= 0
@@ -401,7 +426,11 @@ function Dashboard() {
             <div className="min-w-0 flex-1">
               <SectionHeading
                 title={t("dashboard.overTime.title")}
-                description={t("dashboard.overTime.description")}
+                description={t(
+                  byYear
+                    ? "dashboard.overTime.descriptionYear"
+                    : "dashboard.overTime.description",
+                )}
               />
             </div>
             {chartYears ? (
@@ -418,21 +447,29 @@ function Dashboard() {
                 value={formatLocaleNumber(monthsTotal)}
               />
               <OverTimeStat
-                label={t("dashboard.overTime.stats.average")}
+                label={t(
+                  byYear
+                    ? "dashboard.overTime.stats.averageYear"
+                    : "dashboard.overTime.stats.average",
+                )}
                 value={formatLocaleNumber(monthsAverage, {
                   maximumFractionDigits: 1,
                 })}
               />
               <OverTimeStat
-                label={t("dashboard.overTime.stats.peak")}
-                value={`${monthLabel(peakMonth.month, true)} · ${formatLocaleNumber(peakMonth.count)}`}
+                label={t(
+                  byYear
+                    ? "dashboard.overTime.stats.peakYear"
+                    : "dashboard.overTime.stats.peak",
+                )}
+                value={`${peakMonth.fullLabel} · ${formatLocaleNumber(peakMonth.count)}`}
               />
             </dl>
           ) : null}
 
           {dashboardQuery.isLoading ? <ChartSkeleton /> : null}
 
-          {months.length > 0 ? (
+          {bars.length > 0 ? (
             <>
               {/* The chart grows to fill the card, so a taller neighbour in the
                   grid never leaves empty space above the footnote. */}
@@ -463,7 +500,7 @@ function Dashboard() {
                 >
                   <div
                     className="flex flex-1 flex-col"
-                    style={{ minWidth: `${months.length * 40}px` }}
+                    style={{ minWidth: `${bars.length * 40}px` }}
                   >
                     <div className="relative min-h-[14.5rem] flex-1">
                       <div className="absolute inset-x-0 top-6 bottom-0">
@@ -475,10 +512,10 @@ function Dashboard() {
                           />
                         ))}
                         <div className="absolute inset-0 flex items-end gap-2 sm:gap-3">
-                          {months.map((item, index) => (
+                          {bars.map((item, index) => (
                             <div
-                              key={`${period}-${item.month}`}
-                              title={`${monthLabel(item.month, true)}: ${formatLocaleNumber(item.count)}`}
+                              key={`${period}-${item.key}`}
+                              title={`${item.fullLabel}: ${formatLocaleNumber(item.count)}`}
                               className="group relative flex h-full flex-1 items-end justify-center"
                             >
                               {/* Solid by default; softer on hover. The bar rises
@@ -503,12 +540,12 @@ function Dashboard() {
                       </div>
                     </div>
                     <div className="mt-2 flex gap-2 sm:gap-3">
-                      {months.map((item) => (
+                      {bars.map((item) => (
                         <span
-                          key={item.month}
+                          key={item.key}
                           className="flex-1 truncate text-center text-xs text-muted-foreground"
                         >
-                          {monthLabel(item.month)}
+                          {item.label}
                         </span>
                       ))}
                     </div>
@@ -524,14 +561,20 @@ function Dashboard() {
                   <caption>{t("dashboard.overTime.title")}</caption>
                   <thead>
                     <tr>
-                      <th scope="col">{t("dashboard.overTime.table.month")}</th>
+                      <th scope="col">
+                        {t(
+                          byYear
+                            ? "dashboard.overTime.table.year"
+                            : "dashboard.overTime.table.month",
+                        )}
+                      </th>
                       <th scope="col">{t("dashboard.overTime.table.count")}</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {months.map((item) => (
-                      <tr key={item.month}>
-                        <th scope="row">{monthLabel(item.month, true)}</th>
+                    {bars.map((item) => (
+                      <tr key={item.key}>
+                        <th scope="row">{item.fullLabel}</th>
                         <td>{formatLocaleNumber(item.count)}</td>
                       </tr>
                     ))}
@@ -541,7 +584,7 @@ function Dashboard() {
             </>
           ) : null}
 
-          {months.length === 0 && !dashboardQuery.isLoading ? (
+          {bars.length === 0 && !dashboardQuery.isLoading ? (
             <div className="mt-5 flex min-h-52 flex-1 flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-center">
               <BarChart3
                 className="size-6 text-muted-foreground"
@@ -555,6 +598,7 @@ function Dashboard() {
 
           <p className="mt-4 border-t pt-3 text-xs text-muted-foreground">
             {t("dashboard.overTime.note")}
+            {byYear ? ` ${t("dashboard.overTime.noteYear")}` : ""}
           </p>
         </article>
 
@@ -657,6 +701,14 @@ function Dashboard() {
               </p>
             ) : null}
           </div>
+          {expiringTotal > expiring.length ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t("dashboard.expiring.showing", {
+                shown: expiring.length,
+                total: formatLocaleNumber(expiringTotal),
+              })}
+            </p>
+          ) : null}
           <Link
             to="/issuances"
             className="mt-3 inline-flex min-h-11 items-center font-semibold text-brand hover:underline"
