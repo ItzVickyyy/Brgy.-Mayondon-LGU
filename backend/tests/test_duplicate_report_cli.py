@@ -102,3 +102,20 @@ def test_it_writes_nothing() -> None:
             session.exec(select(func.count()).select_from(Resident)).one() == residents
         )
         assert session.exec(select(func.count()).select_from(AuditLog)).one() == audit
+
+
+def test_show_lists_same_birthday_groups_only_when_asked(
+    db: Session, capsys: pytest.CaptureFixture[str]
+) -> None:
+    last = f"Xx{_tag()}"
+    _add(db, "Nena", last, "Reyes", date(1971, 9, 9))
+    _add(db, "NENA", last, "R.", date(1971, 9, 9))
+    _add(db, "Nena", last, "Reyes", date(1972, 1, 1))
+    assert cli.main([]) == 0
+    assert last not in capsys.readouterr().out
+    assert cli.main(["--show"]) == 0
+    out = capsys.readouterr().out
+    assert "PERSONAL DATA BELOW" in out
+    assert out.count(last) == 2
+    assert "born 1971-09-09" in out
+    assert "1972-01-01" not in out

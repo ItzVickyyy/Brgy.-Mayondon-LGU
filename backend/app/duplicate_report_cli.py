@@ -91,18 +91,66 @@ def build_report(session: Session) -> dict[str, int]:
     }
 
 
+def find_same_birthday_groups(session: Session) -> list[list[Resident]]:
+    """Groups of residents with the same first name, last name and birthdate."""
+    groups: dict[tuple[str, str, str], list[Resident]] = {}
+    for person in session.exec(select(Resident)).all():
+        if person.birthdate is None:
+            continue
+        key = (
+            name_key(person.first_name),
+            name_key(person.last_name),
+            person.birthdate.isoformat(),
+        )
+        groups.setdefault(key, []).append(person)
+    found = [people for people in groups.values() if len(people) > 1]
+    for people in found:
+        people.sort(key=lambda p: (p.status, name_key(p.middle_name)))
+    found.sort(key=lambda people: (name_key(people[0].last_name), people[0].birthdate))
+    return found
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Count possible duplicate residents (read-only, counts only)."
+        description="Count possible duplicate residents (read-only)."
     )
-    parser.parse_args(argv)
+    parser.add_argument(
+        "--show",
+        action="store_true",
+        help=(
+            "Also list the residents of each same-birthday group (names and "
+            "birthdates) on this screen only. Do not copy or share the output."
+        ),
+    )
+    args = parser.parse_args(argv)
     with Session(engine) as session:
         session.execute(text("SET TRANSACTION READ ONLY"))
         report = build_report(session)
+        groups = [
+            [
+                (
+                    f"  - {p.first_name} {p.middle_name or '-'} {p.last_name} "
+                    f"{p.suffix or ''}".rstrip()
+                    + f", born {p.birthdate}, {p.status}"
+                )
+                for p in people
+            ]
+            for people in (find_same_birthday_groups(session) if args.show else [])
+        ]
         session.rollback()
     say("Possible duplicate residents (counts only, nothing was changed):")
     for name, value in report.items():
         say(f"  {name}: {value}")
+    if args.show:
+        say("")
+        say("PERSONAL DATA BELOW: read it here, do not copy, paste or share it.")
+        if not groups:
+            say("No residents share a first name, last name and birthdate.")
+        for number, people in enumerate(groups, start=1):
+            say(f"Group {number}: same first name, last name and birthdate")
+            for line in people:
+                say(line)
+        say("")
     say(
         "A count above zero means: search a few of those people in Records and "
         "decide by eye. There is no merge tool."
