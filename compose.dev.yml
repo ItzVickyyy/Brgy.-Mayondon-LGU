@@ -1,0 +1,28 @@
+# Separate DEVELOPMENT stack with its own database full of sample data.
+# It never touches the real system: own project name, own database volume, own
+# images, own backups folder, own ports. Use it only through scripts/dev-db.ps1
+# (or the full command in docs/12-Development-Database.md):
+#
+#   docker compose -p mayondon-dev --env-file .env.dev -f compose.yml -f compose.dev.yml ...
+#
+# The ports (5433, 8002) and the sample accounts come from .env.dev
+# (copy .env.dev.example). Never put real resident data into this stack.
+services:
+  db:
+    restart: "no"
+    environment:
+      POSTGRES_DB: app_dev
+
+  backend:
+    # A different image name, so building here never replaces the real
+    # system's backend:latest image.
+    image: backend-dev:latest
+    restart: "no"
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:?Variable not set}@db:5432/app_dev
+      FASTAPI_ENV: development
+      ENABLE_DEV_ROUTES: "true"
+    volumes:
+      # Same container path as in compose.yml, so this REPLACES the real
+      # ./backups mount: dev backups never land beside the real ones.
+      - ./backups-dev:/backups

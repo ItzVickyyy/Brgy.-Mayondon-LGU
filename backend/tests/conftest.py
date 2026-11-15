@@ -1,3 +1,4 @@
+import os
 from collections.abc import Generator
 
 import pytest
@@ -14,8 +15,31 @@ from tests.utils.user import authentication_token_from_email, staff_headers
 from tests.utils.utils import get_superuser_token_headers
 
 
+def _refuse_real_database() -> None:
+    """The test teardown deletes every resident, issuance and account.
+
+    Stop before that can happen to the real database (called ``app``). Allowed:
+    a database whose name ends in ``_dev`` or ``_test``, the CI runner (``CI`` is
+    set there), or ``ALLOW_TESTS_ON_THIS_DATABASE=1`` for a throwaway database.
+    """
+    name = (settings.DATABASE_URL.path or "").lstrip("/")
+    if (
+        name.endswith(("_dev", "_test"))
+        or os.environ.get("CI")
+        or os.environ.get("ALLOW_TESTS_ON_THIS_DATABASE")
+    ):
+        return
+    pytest.exit(
+        f"Refusing to run the tests on database '{name}': they delete all residents, "
+        "issuances and accounts. Point DATABASE_URL at the development database "
+        "(docs/12-Development-Database.md) or set ALLOW_TESTS_ON_THIS_DATABASE=1.",
+        returncode=2,
+    )
+
+
 @pytest.fixture(scope="session", autouse=True)
 def db() -> Generator[Session]:
+    _refuse_real_database()
     with Session(engine) as session:
         init_db(session)
         # Per-IP recovery attempts pile up across local runs and make
