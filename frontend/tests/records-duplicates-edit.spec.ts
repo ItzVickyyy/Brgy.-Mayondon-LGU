@@ -58,5 +58,5 @@ test("editing a name-only record: address saves quietly, a matching birthdate wa
   await expect(matches).toContainText(tag)
   await expect(matches).toContainText("born 1985-02-03")
   await page.getByRole("button", { name: "Save anyway" }).click()
-  await expect(page.getByText(/was updated/)).toBeVisible()
+  await expect(page.getByText(/was updated/).first()).toBeVisible()
 })

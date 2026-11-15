@@ -324,14 +324,14 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
         aria-hidden="true"
         data-testid="notification-teaser"
         data-visible={teaser.visible ? "true" : "false"}
-        className={`pointer-events-none absolute right-full top-1/2 z-20 mr-3 w-max max-w-[min(16rem,calc(100vw-8rem))] -translate-y-1/2 origin-right transition-all duration-300 ease-out motion-reduce:hidden ${
+        className={`pointer-events-none fixed right-3 top-16 z-20 w-max max-w-[min(16rem,calc(100vw-1.5rem))] origin-right sm:absolute sm:right-full sm:top-1/2 sm:mr-3 sm:-translate-y-1/2 transition-all duration-300 ease-out motion-reduce:hidden ${
           teaser.visible
             ? "translate-x-0 opacity-100"
             : "translate-x-1 opacity-0"
         }`}
       >
         <div className="relative rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background shadow-md">
-          <span className="absolute -right-1 top-1/2 size-2 -translate-y-1/2 rotate-45 bg-foreground" />
+          <span className="absolute -right-1 top-1/2 hidden size-2 -translate-y-1/2 rotate-45 bg-foreground sm:block" />
           <span className="block truncate">{teaser.text}</span>
         </div>
       </div>

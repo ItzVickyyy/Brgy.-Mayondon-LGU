@@ -239,7 +239,11 @@ function LookupListPanel({
             {shown.map((item) => (
               <li
                 key={item.id}
-                className="flex flex-col gap-2 px-4 py-2.5 hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between"
+                className={`flex gap-2 px-4 py-2.5 hover:bg-muted/30 ${
+                  editingId === item.id
+                    ? "flex-col sm:flex-row sm:items-center sm:justify-between"
+                    : "items-center justify-between"
+                }`}
               >
                 {editingId === item.id ? (
                   <>
