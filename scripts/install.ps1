@@ -276,11 +276,20 @@ if (-not [string]::IsNullOrWhiteSpace($HttpsHost)) {
 
 # --------------------------------------------------------------- summary
 $ip = $null
+# The office address is the one of the adapter that has a default gateway (the Wi-Fi or cable to the router).
+# Taking "the first address" picked Docker's or WSL's own virtual adapter (172.x.x.x) on the first real run.
 try {
-    $ip = (Get-NetIPAddress -AddressFamily IPv4 -ErrorAction Stop |
-        Where-Object { $_.IPAddress -notmatch "^(127|169\.254)\." -and $_.PrefixOrigin -ne "WellKnown" } |
-        Select-Object -First 1).IPAddress
+    $ip = (Get-NetIPConfiguration -ErrorAction Stop |
+        Where-Object { $_.IPv4DefaultGateway -and $_.IPv4Address -and $_.NetAdapter.Status -eq "Up" -and $_.InterfaceAlias -notmatch "vEthernet|WSL|Docker|VirtualBox|VMware|Hyper-V" } |
+        Select-Object -First 1).IPv4Address.IPAddress
 } catch { }
+if (-not $ip) {
+    try {
+        $ip = (Get-NetIPAddress -AddressFamily IPv4 -ErrorAction Stop |
+            Where-Object { $_.IPAddress -notmatch "^(127|169\.254)\." -and $_.PrefixOrigin -ne "WellKnown" -and $_.InterfaceAlias -notmatch "vEthernet|WSL|Docker|VirtualBox|VMware|Hyper-V" } |
+            Select-Object -First 1).IPAddress
+    } catch { }
+}
 
 Write-Host ""
 Write-Host "==================== DONE ====================" -ForegroundColor Green
