@@ -905,9 +905,12 @@ export const issuanceApi = {
       const data = await loadLookups()
       const body = await toResidentUpdate(patch, data)
       if (Object.keys(body).length) {
+        // This screen has no place to show the namesake warning, so it never
+        // asks; the Records form does (patch 99).
         await ResidentsService.updateResident({
           path: { resident_id: id },
           body,
+          query: { confirm_duplicate: true },
         })
       }
       if (patch.photoUrl?.startsWith("data:"))

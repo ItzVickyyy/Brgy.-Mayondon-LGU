@@ -118,6 +118,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const [activeResidentMatch, setActiveResidentMatch] = useState(0)
   const [selectedResident, setSelectedResident] = useState<ResidentRecord | null>(null)
   const [quickAdd, setQuickAdd] = useState<QuickResidentInput>(emptyQuickAdd)
+  // Set at once on a click, so a fast double click cannot start a second save.
+  const actionLock = useRef(false)
+  const quickLock = useRef(false)
   const [residentUpdates, setResidentUpdates] = useState<ResidentPatch>({})
   const [selectedSector, setSelectedSector] = useState<string | string[]>("")
   const [sectorManuallySelected, setSectorManuallySelected] = useState(false)
@@ -568,6 +571,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       setFormError(t("issuances.new.errors.selectResidentDraft"))
       return
     }
+    if (actionLock.current) return
+    actionLock.current = true
     setSaving(true)
     try {
       const record = await persistDraft(false)
@@ -575,6 +580,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       onOpenChange(false)
       resetDialog()
     } finally {
+      actionLock.current = false
       setSaving(false)
     }
   }
@@ -606,6 +612,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       goToFirstMissing()
       return
     }
+    // A second click before the first answer must not issue twice (patch 99).
+    if (actionLock.current) return
+    actionLock.current = true
     setSaving(true)
     setFormError("")
     try {
@@ -657,6 +666,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         setFormError(error instanceof Error ? error.message : t("issuances.new.errors.issue"))
       }
     } finally {
+      actionLock.current = false
       setSaving(false)
     }
   }
@@ -770,6 +780,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       target?.focus()
       return
     }
+    if (quickLock.current) return
+    quickLock.current = true
     setQuickSaving(true)
     try {
       if (editingResident && selectedResident) {
@@ -812,6 +824,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         setFormError(failure.message || (editingResident ? t("issuances.new.resident.errors.updateFailed") : t("issuances.new.resident.errors.addFailed")))
       }
     } finally {
+      quickLock.current = false
       setQuickSaving(false)
     }
   }

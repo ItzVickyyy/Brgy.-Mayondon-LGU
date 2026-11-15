@@ -22,6 +22,7 @@ from pydantic import ValidationError
 from sqlalchemy import func as sa_func
 from sqlmodel import Session, col, select
 
+from app.core.duplicates import name_key
 from app.core.search import fold_text
 from app.core.text_repair import fix_mojibake
 from app.models_foundation import Street
@@ -544,8 +545,8 @@ def classify_batch(session: Session, batch: ImportBatch) -> dict[str, int]:
         ).all():
             if person.birthdate is not None:
                 person_key = (
-                    person.first_name.casefold(),
-                    person.last_name.casefold(),
+                    name_key(person.first_name),
+                    name_key(person.last_name),
                     person.birthdate,
                 )
                 # Prefer an active record when namesakes exist.
@@ -580,10 +581,10 @@ def classify_batch(session: Session, batch: ImportBatch) -> dict[str, int]:
                 if mapped.get("birthdate")
                 else None
             )
+            first_key = name_key(mapped["first_name"])
+            last_key = name_key(mapped["last_name"])
             key: tuple[str, str, date] | None = (
-                (mapped["first_name"].casefold(), mapped["last_name"].casefold(), born)
-                if born
-                else None
+                (first_key, last_key, born) if born and first_key and last_key else None
             )
             if key is not None and key in seen_people:
                 classification = "duplicate"

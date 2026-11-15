@@ -17,6 +17,7 @@ from sqlmodel import Session, col, delete, select
 from app.api.deps import SessionDep, require_permission
 from app.core.audit import record_audit_event, record_read_event
 from app.core.dates import age_on, today_manila
+from app.core.duplicates import find_possible_duplicates, lock_person
 from app.core.permissions import Permission
 from app.core.search import search_words, word_matches
 from app.models import User
@@ -359,6 +360,47 @@ def read_resident(resident_id: uuid.UUID, session: SessionDep, user: EditUser) -
     return _public(session, resident)
 
 
+def _refuse_possible_duplicates(
+    session: Session,
+    *,
+    first_name: str,
+    middle_name: str | None,
+    last_name: str,
+    suffix: str | None,
+    birthdate: date | None,
+    except_id: uuid.UUID | None = None,
+) -> None:
+    """409 ``possible_duplicate`` naming who matched; the clerk may confirm."""
+    matches = find_possible_duplicates(
+        session,
+        first_name=first_name,
+        middle_name=middle_name,
+        last_name=last_name,
+        suffix=suffix,
+        birthdate=birthdate,
+        except_id=except_id,
+    )
+    if not matches:
+        return
+    raise HTTPException(
+        status_code=409,
+        detail={
+            "code": "possible_duplicate",
+            "message": "A resident with the same name and birthdate exists.",
+            "resident_ids": [str(m.id) for m in matches],
+            "matches": [
+                {
+                    "id": str(m.id),
+                    "full_name": build_full_name(m),
+                    "birthdate": m.birthdate.isoformat() if m.birthdate else None,
+                    "status": m.status,
+                }
+                for m in matches
+            ],
+        },
+    )
+
+
 @router.post("/", response_model=ResidentPublic, status_code=201)
 def create_resident(
     *,
@@ -375,23 +417,18 @@ def create_resident(
         session, street_id=body.street_id, sector_ids=body.sector_ids
     )
     _check_id_number_free(session, body.id_number)
-    if body.birthdate is not None and not confirm_duplicate:
-        matches = session.exec(
-            select(Resident.id).where(
-                sa_func.lower(Resident.first_name) == body.first_name.lower(),
-                sa_func.lower(Resident.last_name) == body.last_name.lower(),
-                Resident.birthdate == body.birthdate,
-            )
-        ).all()
-        if matches:
-            raise HTTPException(
-                status_code=409,
-                detail={
-                    "code": "possible_duplicate",
-                    "message": "A resident with the same name and birthdate exists.",
-                    "resident_ids": [str(m) for m in matches],
-                },
-            )
+    # Two clerks adding the same person at once must see each other, so the
+    # check and the insert run under one lock on the person (released at commit).
+    lock_person(session, body.first_name, body.last_name, body.birthdate)
+    if not confirm_duplicate:
+        _refuse_possible_duplicates(
+            session,
+            first_name=body.first_name,
+            middle_name=body.middle_name,
+            last_name=body.last_name,
+            suffix=body.suffix,
+            birthdate=body.birthdate,
+        )
     now = _now()
     resident = Resident.model_validate(
         body.model_dump(exclude={"sector_ids"}),
@@ -420,7 +457,14 @@ def create_resident(
 
 @router.patch("/{resident_id}", response_model=ResidentPublic)
 def update_resident(
-    *, resident_id: uuid.UUID, session: SessionDep, user: EditUser, body: ResidentUpdate
+    *,
+    resident_id: uuid.UUID,
+    session: SessionDep,
+    user: EditUser,
+    body: ResidentUpdate,
+    confirm_duplicate: Annotated[
+        bool, Query(description="Set true after the clerk confirms a namesake")
+    ] = False,
 ) -> Any:
     resident = _get_or_404(session, resident_id)
     if resident.status == "archived":
@@ -474,6 +518,25 @@ def update_resident(
         )
         if current_sector_ids != set(sector_ids):
             changed_fields.append("sector_ids")
+    identity_fields = {"first_name", "middle_name", "last_name", "suffix", "birthdate"}
+    if identity_fields & set(changed_fields):
+        # Renaming someone into an existing person is a duplicate too.
+        def _after(key: str) -> Any:
+            return changes[key] if key in changes else getattr(resident, key)
+
+        lock_person(
+            session, _after("first_name"), _after("last_name"), _after("birthdate")
+        )
+        if not confirm_duplicate:
+            _refuse_possible_duplicates(
+                session,
+                first_name=_after("first_name"),
+                middle_name=_after("middle_name"),
+                last_name=_after("last_name"),
+                suffix=_after("suffix"),
+                birthdate=_after("birthdate"),
+                except_id=resident.id,
+            )
     if not changed_fields:
         # Saved with nothing changed: no new timestamp and no Activity Log row.
         return _public(session, resident)

@@ -830,7 +830,10 @@
       "duplicate": {
         "title": "Posibleng doble",
         "description": "May residente nang may parehong pangalan at petsa ng kapanganakan sa talaan. Suriin ang listahan bago mag-save ng pangalawang kopya.",
-        "saveAnyway": "I-save pa rin"
+        "saveAnyway": "I-save pa rin",
+        "born": "ipinanganak noong {{date}}",
+        "noBirthdate": "walang naitalang kapanganakan",
+        "archived": "naka-archive"
       },
       "cancel": "Kanselahin",
       "saving": "Sine-save...",

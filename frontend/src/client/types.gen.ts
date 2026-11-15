@@ -4038,7 +4038,14 @@ export type residentsUpdateResidentData = {
          */
         resident_id: string;
     };
-    query?: never;
+    query?: {
+        /**
+         * Confirm Duplicate
+         *
+         * Set true after the clerk confirms a namesake
+         */
+        confirm_duplicate?: boolean;
+    };
     url: '/api/v1/residents/{resident_id}';
 };
 

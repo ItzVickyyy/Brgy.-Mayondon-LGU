@@ -1,5 +1,5 @@
 import { UserRound } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import {
@@ -183,6 +183,26 @@ function todayManila() {
   return new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Manila" })
 }
 
+type DuplicateMatch = {
+  id: string
+  full_name: string
+  birthdate: string | null
+  status: string
+}
+
+/** The matches the server names in a possible-duplicate answer (may be absent). */
+function readDuplicateMatches(detail: unknown): DuplicateMatch[] {
+  const list = (detail as { matches?: unknown } | undefined)?.matches
+  if (!Array.isArray(list)) return []
+  return list.filter(
+    (item): item is DuplicateMatch =>
+      typeof item === "object" &&
+      item !== null &&
+      typeof (item as DuplicateMatch).id === "string" &&
+      typeof (item as DuplicateMatch).full_name === "string",
+  )
+}
+
 export function ResidentFormDialog({
   open,
   onOpenChange,
@@ -196,6 +216,11 @@ export function ResidentFormDialog({
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
   const [duplicate, setDuplicate] = useState(false)
+  // Who the server says is already on record (name and birthdate only).
+  const [matches, setMatches] = useState<DuplicateMatch[]>([])
+  // A second click or Enter before the first save answers must not add a
+  // second record; state alone is too slow because it updates after a render.
+  const submitting = useRef(false)
   // Set by the first Save click; the missing-field messages show from then on.
   const [submitted, setSubmitted] = useState(false)
   const [photoDataUrl, setPhotoDataUrl] = useState("")
@@ -205,6 +230,7 @@ export function ResidentFormDialog({
     setForm(resident ? formFromResident(resident) : emptyForm())
     setError("")
     setDuplicate(false)
+    setMatches([])
     setSubmitted(false)
     setPhotoDataUrl("")
   }, [open, resident])
@@ -212,9 +238,12 @@ export function ResidentFormDialog({
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }))
     setDuplicate(false)
+    setMatches([])
   }
 
   async function submit(confirmDuplicate: boolean) {
+    if (submitting.current) return
+    submitting.current = true
     setSaving(true)
     setError("")
     try {
@@ -224,6 +253,7 @@ export function ResidentFormDialog({
             await ResidentsService.updateResident({
               path: { resident_id: resident.id },
               body,
+              query: confirmDuplicate ? { confirm_duplicate: true } : undefined,
             })
           ).data
         : (
@@ -292,9 +322,12 @@ export function ResidentFormDialog({
       )
     } catch (caught) {
       const failure = readApiError(caught)
-      if (failure.code === "possible_duplicate") setDuplicate(true)
-      else setError(failure.message)
+      if (failure.code === "possible_duplicate") {
+        setDuplicate(true)
+        setMatches(readDuplicateMatches(failure.detail))
+      } else setError(failure.message)
     } finally {
+      submitting.current = false
       setSaving(false)
     }
   }
@@ -760,6 +793,24 @@ export function ResidentFormDialog({
                 <p className="mt-1">
                   {t("records.form.duplicate.description")}
                 </p>
+                {matches.length > 0 ? (
+                  <ul
+                    className="mt-2 list-disc ps-5"
+                    data-testid="duplicate-matches"
+                  >
+                    {matches.map((match) => (
+                      <li key={match.id}>
+                        {match.full_name}
+                        {match.birthdate
+                          ? `, ${t("records.form.duplicate.born", { date: match.birthdate })}`
+                          : `, ${t("records.form.duplicate.noBirthdate")}`}
+                        {match.status === "archived"
+                          ? ` (${t("records.form.duplicate.archived")})`
+                          : ""}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
                 <Button
                   type="button"
                   variant="outline"

@@ -830,7 +830,10 @@
       "duplicate": {
         "title": "Possible duplicate",
         "description": "A resident with the same name and birthdate is already on record. Check the list before saving a second copy.",
-        "saveAnyway": "Save anyway"
+        "saveAnyway": "Save anyway",
+        "born": "born {{date}}",
+        "noBirthdate": "no birthdate on record",
+        "archived": "archived"
       },
       "cancel": "Cancel",
       "saving": "Saving...",

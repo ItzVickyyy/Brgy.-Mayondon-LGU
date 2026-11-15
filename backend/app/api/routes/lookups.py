@@ -11,11 +11,13 @@ from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy import func as sa_func
+from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, select
 
 from app.api.deps import CurrentUser, SessionDep, require_permission
 from app.core.audit import record_audit_event
+from app.core.masterlist_import import street_key
 from app.core.permissions import Permission
 from app.models import User
 from app.models_foundation import (
@@ -82,10 +84,23 @@ def list_tricycle_associations(
 def _name_taken(
     session: Session, model: Any, name: str, *, except_id: int | None = None
 ) -> bool:
-    stmt = select(model.id).where(sa_func.lower(model.name) == name.lower())
+    """True when another item has the same name once case, accents, spacing,
+    punctuation and ``St.``/``Street`` are ignored (``Rizal St.`` is ``Rizal Street``).
+
+    The lists are short (dozens of names), so the comparison is done here. A
+    lock keeps two administrators from adding the same name at the same moment;
+    it is released when the request commits.
+    """
+    session.execute(
+        text("SELECT pg_advisory_xact_lock(hashtext(:key))").bindparams(
+            key=f"lookup:{model.__tablename__}"
+        )
+    )
+    wanted = street_key(name)
+    stmt = select(model.id, model.name)
     if except_id is not None:
         stmt = stmt.where(model.id != except_id)
-    return session.exec(stmt).first() is not None
+    return any(street_key(other) == wanted for _id, other in session.exec(stmt).all())
 
 
 def _get_or_404(session: Session, model: Any, item_id: int, label: str) -> Any:
