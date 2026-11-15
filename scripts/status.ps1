@@ -23,22 +23,29 @@ if (-not $dockerOk) {
     Bad "Docker Desktop is not running. Open it and wait, or run scripts\start-mayondon.ps1."
 } else {
     Ok "Docker Desktop is running."
-    $backendId = (docker compose -f compose.yml ps -q backend | Out-String).Trim()
-    if (-not $backendId) {
+    # Without .env, Docker Compose prints a wall of "variable not set" errors: say it once, in plain words.
+    $notInstalled = -not (Test-Path .env)
+    if ($notInstalled) { Bad "The program is not installed yet (.env is missing). Double-click Install-Mayondon.cmd." }
+    $backendId = if ($notInstalled) { "" } else { (docker compose -f compose.yml ps -q backend 2>$null | Out-String).Trim() }
+    if ($notInstalled) {
+        # nothing more to ask Docker Compose here
+    } elseif (-not $backendId) {
         Bad "The program is not started. Run scripts\start-mayondon.ps1."
     } else {
         $health = (docker inspect --format "{{.State.Health.Status}}" $backendId 2>$null | Out-String).Trim()
         if ($health -eq "healthy") { Ok "The program is healthy." } else { Bad "The program is '$health' (not healthy). Run: docker compose -f compose.yml logs backend --tail 30" }
     }
-    $dbId = (docker compose -f compose.yml ps -q db | Out-String).Trim()
-    if (-not $dbId) { Bad "The database container is not running." }
-    $services = (docker compose -f compose.yml ps --services | Out-String) -split "`r?`n" | Where-Object { $_ }
-    $extra = $services | Where-Object { $_ -notin @("db", "backend", "caddy") }
-    if ($extra) { Warn "Development services are running here: $($extra -join ', '). The real system should show only db, backend (and caddy with HTTPS)." }
+    if (-not $notInstalled) {
+        $dbId = (docker compose -f compose.yml ps -q db 2>$null | Out-String).Trim()
+        if (-not $dbId) { Bad "The database container is not running." }
+        $services = (docker compose -f compose.yml ps --services 2>$null | Out-String) -split "`r?`n" | Where-Object { $_ }
+        $extra = $services | Where-Object { $_ -notin @("db", "backend", "caddy") }
+        if ($extra) { Warn "Development services are running here: $($extra -join ', '). The real system should show only db, backend (and caddy with HTTPS)." }
 
-    $log = (docker compose -f compose.yml logs backend --tail 80 2>&1 | Out-String)
-    $line = ($log -split "`r?`n" | Where-Object { $_ -match "\[migrate\]" } | Select-Object -Last 1)
-    if ($line -match "STOP") { Bad $line.Trim() } elseif ($line) { Ok $line.Trim() }
+        $log = (docker compose -f compose.yml logs backend --tail 80 2>&1 | Out-String)
+        $line = ($log -split "`r?`n" | Where-Object { $_ -match "\[migrate\]" } | Select-Object -Last 1)
+        if ($line -match "STOP") { Bad $line.Trim() } elseif ($line) { Ok $line.Trim() }
+    }
 }
 
 # Web answer
@@ -52,7 +59,7 @@ try {
 }
 
 # Settings
-if (-not (Test-Path .env)) { Bad ".env is missing." } else {
+if (-not (Test-Path .env)) { if ($dockerOk) { } else { Bad ".env is missing." } } else {
     $envText = Get-Content .env -Raw
     if ($envText -match "(?m)^COMPOSE_FILE=compose\.yml\s*$") { Ok "Development files are switched off (COMPOSE_FILE)." } else { Bad "COMPOSE_FILE=compose.yml is missing from .env: a plain 'docker compose up' would start Adminer and development mode." }
     if ($envText -match "(?m)^(SECRET_KEY|POSTGRES_PASSWORD|FIRST_SUPERUSER_PASSWORD)=replace-with") { Bad "A sample secret is still in .env." }
