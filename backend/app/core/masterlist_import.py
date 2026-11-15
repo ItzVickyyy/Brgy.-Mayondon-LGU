@@ -9,6 +9,7 @@ as one typed in by hand.
 Error messages never contain cell values, so they are safe to keep and export.
 """
 
+import collections
 import csv
 import io
 import re
@@ -40,6 +41,8 @@ LOOKUP_CHUNK = 5000
 MAX_UNZIPPED_BYTES = 50 * 1024 * 1024
 MAX_COLUMNS = 60
 MAX_CELL_CHARS = 1000
+# ``streets.name`` length.
+MAX_STREET_CHARS = 150
 
 # Resident fields an admin may map a column to. ``street`` is matched by name
 # against the streets lookup and stored as ``street_id``.
@@ -438,6 +441,64 @@ def _street_lookup(session: Session) -> dict[str, int]:
         if len(ids) == 1 and key not in lookup:
             lookup[key] = next(iter(ids))
     return lookup
+
+
+def _street_header(batch: ImportBatch) -> str | None:
+    for header, field in (batch.mapping or {}).items():
+        if field == "street":
+            return header
+    return None
+
+
+def missing_streets(session: Session, batch: ImportBatch) -> list[tuple[str, int]]:
+    """Street names in the staged rows that the streets list does not know.
+
+    Returns ``(name, rows)`` for each missing street, most rows first. Spellings
+    that ``street_key`` treats as one street (``J. Aquino`` and ``J Aquino``) count
+    together and are shown under their most common spelling. A name longer than
+    the streets list allows is left out: its rows stay errors.
+    """
+    header = _street_header(batch)
+    if header is None:
+        return []
+    known = _street_lookup(session)
+    spellings: dict[str, collections.Counter[str]] = {}
+    for raw in session.exec(
+        select(ImportRow.raw).where(ImportRow.batch_id == batch.id)
+    ).all():
+        value = (raw or {}).get(header)
+        if not value:
+            continue
+        key = street_key(value)
+        if not key or key in known:
+            continue
+        spellings.setdefault(key, collections.Counter())[" ".join(value.split())] += 1
+    found = [
+        (counter.most_common(1)[0][0], sum(counter.values()))
+        for counter in spellings.values()
+    ]
+    found = [item for item in found if len(item[0]) <= MAX_STREET_CHARS]
+    return sorted(found, key=lambda item: (-item[1], item[0].casefold()))
+
+
+def add_missing_streets(session: Session, batch: ImportBatch) -> int:
+    """Create the streets ``missing_streets`` lists. Returns how many were added.
+
+    Does not commit. A street whose exact name already exists is not added twice.
+    """
+    names = [name for name, _rows in missing_streets(session, batch)]
+    if not names:
+        return 0
+    existing = set(session.exec(select(Street.name)).all())
+    added = 0
+    for name in names:
+        if name in existing:
+            continue
+        session.add(Street(name=name))
+        existing.add(name)
+        added += 1
+    session.flush()
+    return added
 
 
 def _chunks(values: list[Any]) -> Iterable[list[Any]]:

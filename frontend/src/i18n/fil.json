@@ -637,6 +637,14 @@
       "noRows": "Walang maipapakitang hanay",
       "noRowsDescription": "Walang hanay na tugma sa filter na ito.",
       "downloadErrors": "I-download ang ulat ng problema (CSV)",
+      "streets": {
+        "title": "May mga kalyeng wala pa sa listahan ng mga kalye",
+        "description": "{{rows}} hanay ang gumagamit ng {{n}} pangalan ng kalye na hindi pa kilala ng sistema. Idagdag ang mga ito at tatanggapin ang mga hanay na iyon. Suriin muna ang baybay: idaragdag ang bawat pangalan ayon sa nakikita rito.",
+        "rowsLabel": "{{n}} hanay",
+        "add": "Idagdag ang {{n}} kalye at suriin muli",
+        "adding": "Nagdaragdag…",
+        "loadError": "Hindi ma-load ang mga kalyeng kulang."
+      },
       "commit": "I-import",
       "importing": "Nag-i-import…",
       "confirmTitle": "I-import ang mga residenteng ito?",
@@ -650,7 +658,8 @@
         "uploaded": "Na-upload ang file. Itugma ang mga column nito sa mga field ng residente.",
         "mappingSaved": "Na-save ang pagtutugma ng mga column at nasuri ang mga hanay.",
         "cancelled": "Kinansela ang pag-import at walang na-save.",
-        "reportDownloaded": "Na-download ang ulat ng mga error."
+        "reportDownloaded": "Na-download ang ulat ng mga error.",
+        "streetsAdded": "Naidagdag ang mga kalye at nasuri muli ang mga hanay."
       },
       "resultLabels": {
         "created": "Nagawa",

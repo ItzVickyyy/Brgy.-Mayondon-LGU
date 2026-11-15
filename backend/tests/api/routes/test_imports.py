@@ -828,3 +828,116 @@ def test_previous_mapping_is_suggested_next_time(
         _csv([["Yan", "Zed", "1991-01-01"]], headers=odd),
     ).json()
     assert second["suggested_mapping"] == mapping
+
+
+def _street_batch(
+    client: TestClient, headers: dict[str, str], streets: list[str]
+) -> dict[str, Any]:
+    last = _tag()
+    rows = [[f"Ana{i}", last, "", "", "", "", s, "", ""] for i, s in enumerate(streets)]
+    batch = _upload(client, headers, _csv(rows)).json()
+    mapped = _map(client, headers, batch)
+    assert mapped.status_code == 200, mapped.text
+    return mapped.json()
+
+
+def test_missing_streets_are_listed_and_can_be_added(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    tag = _tag()
+    new_street = f"Zq {tag} Compound"
+    other = f"Zr {tag} Village"
+    batch = _street_batch(
+        client,
+        superuser_token_headers,
+        [new_street, new_street, new_street.upper(), other],
+    )
+    assert batch["counts"] == {"new": 0, "duplicate": 0, "error": 4}
+
+    listed = client.get(
+        f"{API}/{batch['id']}/missing-streets", headers=superuser_token_headers
+    )
+    assert listed.status_code == 200, listed.text
+    body = listed.json()
+    # Case differences are one street; the most common spelling is offered.
+    assert body["count"] == 2
+    assert body["data"][0] == {"name": new_street, "rows": 3}
+    assert body["data"][1] == {"name": other, "rows": 1}
+
+    added = client.post(
+        f"{API}/{batch['id']}/missing-streets", headers=superuser_token_headers
+    )
+    assert added.status_code == 200, added.text
+    assert added.json()["counts"] == {"new": 4, "duplicate": 0, "error": 0}
+    with Session(engine) as session:
+        names = set(
+            session.exec(
+                select(Street.name).where(col(Street.name).in_([new_street, other]))
+            ).all()
+        )
+        assert names == {new_street, other}
+    audit = _audit("import.streets_added", batch["id"])
+    assert len(audit) == 1
+    assert audit[0].details["streets"] == 2
+    assert new_street not in str(audit[0].details)
+
+    # Nothing is left to add, and a second click changes nothing.
+    again = client.get(
+        f"{API}/{batch['id']}/missing-streets", headers=superuser_token_headers
+    )
+    assert again.json() == {"data": [], "count": 0}
+    repeat = client.post(
+        f"{API}/{batch['id']}/missing-streets", headers=superuser_token_headers
+    )
+    assert repeat.status_code == 200
+    added_counts = sorted(
+        a.details["streets"] for a in _audit("import.streets_added", batch["id"])
+    )
+    assert added_counts == [0, 2]
+
+
+def test_known_streets_and_blank_streets_are_not_offered(
+    client: TestClient, superuser_token_headers: dict[str, str], street: Street
+) -> None:
+    batch = _street_batch(client, superuser_token_headers, [street.name, ""])
+    listed = client.get(
+        f"{API}/{batch['id']}/missing-streets", headers=superuser_token_headers
+    )
+    assert listed.json() == {"data": [], "count": 0}
+
+
+def test_adding_streets_needs_a_mapped_open_batch_and_an_administrator(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    staff_token_headers: dict[str, str],
+) -> None:
+    batch = _upload(
+        client,
+        superuser_token_headers,
+        _csv([["Ana", _tag(), "", "", "", "", f"Zs {_tag()} Road", "", ""]]),
+    ).json()
+    url = f"{API}/{batch['id']}/missing-streets"
+    # Not mapped yet: the street column is not known.
+    assert client.get(url, headers=superuser_token_headers).json()["count"] == 0
+    assert client.post(url, headers=superuser_token_headers).status_code == 409
+    assert client.get(url, headers=staff_token_headers).status_code == 403
+    assert client.post(url, headers=staff_token_headers).status_code == 403
+
+    client.delete(f"{API}/{batch['id']}", headers=superuser_token_headers)
+    assert client.post(url, headers=superuser_token_headers).status_code == 409
+    assert client.get(url, headers=superuser_token_headers).status_code == 409
+
+
+def test_a_street_name_too_long_for_the_list_stays_an_error(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    long_name = "L" * (mi.MAX_STREET_CHARS + 1)
+    batch = _street_batch(client, superuser_token_headers, [long_name])
+    listed = client.get(
+        f"{API}/{batch['id']}/missing-streets", headers=superuser_token_headers
+    )
+    assert listed.json()["count"] == 0
+    added = client.post(
+        f"{API}/{batch['id']}/missing-streets", headers=superuser_token_headers
+    )
+    assert added.json()["counts"]["error"] == 1

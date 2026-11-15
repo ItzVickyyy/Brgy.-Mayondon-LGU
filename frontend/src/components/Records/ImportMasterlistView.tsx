@@ -157,6 +157,18 @@ export function ImportMasterlistView() {
     enabled: step === "preview" && Boolean(batchId),
   })
 
+  const hasRowErrors = (batch?.counts?.error ?? 0) > 0
+  const streetsQuery = useQuery({
+    queryKey: ["imports", batchId, "missing-streets", batch?.counts?.error],
+    queryFn: async () =>
+      (
+        await ImportsService.listMissingStreets({
+          path: { batch_id: batchId as string },
+        })
+      ).data,
+    enabled: step === "preview" && Boolean(batchId) && hasRowErrors,
+  })
+
   function refreshHistory() {
     queryClient.invalidateQueries({ queryKey: ["imports", "history"] })
     queryClient.invalidateQueries({ queryKey: ["reports-summary"] })
@@ -206,6 +218,24 @@ export function ImportMasterlistView() {
       setPageIndex(0)
       setStep("preview")
       showSuccessToast(t("records.import.toasts.mappingSaved"))
+    },
+    onError,
+  })
+
+  const addStreetsMutation = useMutation({
+    mutationFn: async () =>
+      (
+        await ImportsService.addMissingStreets({
+          path: { batch_id: batchId as string },
+        })
+      ).data,
+    onSuccess: (data) => {
+      setBatch(data)
+      setRowFilter("all")
+      setPageIndex(0)
+      queryClient.invalidateQueries({ queryKey: ["lookups", "streets"] })
+      queryClient.invalidateQueries({ queryKey: ["imports", batchId] })
+      showSuccessToast(t("records.import.toasts.streetsAdded"))
     },
     onError,
   })
@@ -276,6 +306,7 @@ export function ImportMasterlistView() {
     uploadMutation.isPending ||
     mappingMutation.isPending ||
     commitMutation.isPending ||
+    addStreetsMutation.isPending ||
     cancelMutation.isPending
   const canCommit =
     counts.new > 0 || (duplicateAction === "update" && counts.duplicate > 0)
@@ -538,6 +569,59 @@ export function ImportMasterlistView() {
           <p className="text-sm text-muted-foreground">
             {t(`records.import.duplicateNote.${duplicateAction}`)}
           </p>
+
+          {hasRowErrors && streetsQuery.isError ? (
+            <ErrorState
+              title={t("records.import.streets.loadError")}
+              onRetry={() => streetsQuery.refetch()}
+            />
+          ) : null}
+          {hasRowErrors && (streetsQuery.data?.count ?? 0) > 0 ? (
+            <div
+              className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4"
+              data-testid="missing-streets"
+            >
+              <p className="font-medium">{t("records.import.streets.title")}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("records.import.streets.description", {
+                  rows: formatNumber(
+                    (streetsQuery.data?.data ?? []).reduce(
+                      (sum, item) => sum + item.rows,
+                      0,
+                    ),
+                  ),
+                  n: formatNumber(streetsQuery.data?.count ?? 0),
+                })}
+              </p>
+              <ul className="mt-3 grid max-h-56 gap-x-6 gap-y-1 overflow-y-auto text-sm sm:grid-cols-2">
+                {(streetsQuery.data?.data ?? []).map((item) => (
+                  <li
+                    key={item.name}
+                    className="flex min-w-0 justify-between gap-3"
+                  >
+                    <span className="truncate">{item.name}</span>
+                    <span className="shrink-0 text-muted-foreground">
+                      {t("records.import.streets.rowsLabel", {
+                        n: formatNumber(item.rows),
+                      })}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <Button
+                className="mt-3 min-h-11"
+                type="button"
+                disabled={busy}
+                onClick={() => addStreetsMutation.mutate()}
+              >
+                {addStreetsMutation.isPending
+                  ? t("records.import.streets.adding")
+                  : t("records.import.streets.add", {
+                      n: formatNumber(streetsQuery.data?.count ?? 0),
+                    })}
+              </Button>
+            </div>
+          ) : null}
 
           <div className="overflow-hidden rounded-xl border">
             <div className="flex flex-wrap gap-2 border-b p-3">

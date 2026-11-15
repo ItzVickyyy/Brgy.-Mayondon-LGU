@@ -80,6 +80,16 @@ class ImportRowPublic(BaseModel):
     mapped: dict[str, Any] | None
 
 
+class MissingStreetPublic(BaseModel):
+    name: str
+    rows: int
+
+
+class MissingStreetsPublic(BaseModel):
+    data: list[MissingStreetPublic]
+    count: int
+
+
 class ImportRowsPublic(BaseModel):
     data: list[ImportRowPublic]
     count: int
@@ -225,6 +235,49 @@ def set_mapping(
         record_type="import",
         record_id=batch.id,
         details={"file_name": batch.file_name, **counts},
+    )
+    session.commit()
+    session.refresh(batch)
+    return _public(batch)
+
+
+@router.get("/{batch_id}/missing-streets", response_model=MissingStreetsPublic)
+def list_missing_streets(
+    batch_id: uuid.UUID, session: SessionDep, _user: ImportUser
+) -> Any:
+    """Street names in the file that the streets list does not have yet."""
+    batch = _get_or_404(session, batch_id)
+    _require_open(batch)
+    found = mi.missing_streets(session, batch)
+    return MissingStreetsPublic(
+        data=[MissingStreetPublic(name=n, rows=r) for n, r in found],
+        count=len(found),
+    )
+
+
+@router.post("/{batch_id}/missing-streets", response_model=ImportBatchPublic)
+def add_missing_streets(
+    batch_id: uuid.UUID, session: SessionDep, user: ImportUser
+) -> Any:
+    """Add the missing streets to the streets list, then check the rows again.
+
+    Nothing is imported. The administrator has just seen the list of names.
+    """
+    batch = _get_or_404(session, batch_id)
+    _require_open(batch)
+    if batch.status != "mapped" or not batch.mapping:
+        raise HTTPException(status_code=409, detail="Map the columns first")
+    added = mi.add_missing_streets(session, batch)
+    batch.counts = mi.classify_batch(session, batch)
+    session.add(batch)
+    record_audit_event(
+        session,
+        action="import.streets_added",
+        actor=user,
+        module="records",
+        record_type="import",
+        record_id=batch.id,
+        details={"file_name": batch.file_name, "streets": added, **batch.counts},
     )
     session.commit()
     session.refresh(batch)

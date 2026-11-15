@@ -637,6 +637,14 @@
       "noRows": "No rows to show",
       "noRowsDescription": "No rows match this filter.",
       "downloadErrors": "Download problem report (CSV)",
+      "streets": {
+        "title": "Some streets are not in the streets list",
+        "description": "{{rows}} rows use {{n}} street names that the system does not know yet. Add them and those rows will be accepted. Check the spellings first: each name is added exactly as shown here.",
+        "rowsLabel": "{{n}} rows",
+        "add": "Add {{n}} streets and check again",
+        "adding": "Adding…",
+        "loadError": "The missing streets could not be loaded."
+      },
       "commit": "Import",
       "importing": "Importing…",
       "confirmTitle": "Import these residents?",
@@ -650,7 +658,8 @@
         "uploaded": "The file was uploaded. Match its columns to the resident fields.",
         "mappingSaved": "The column matching was saved and the rows were checked.",
         "cancelled": "The import was cancelled and nothing was saved.",
-        "reportDownloaded": "The error report was downloaded."
+        "reportDownloaded": "The error report was downloaded.",
+        "streetsAdded": "The streets were added and the rows were checked again."
       },
       "resultLabels": {
         "created": "Created",

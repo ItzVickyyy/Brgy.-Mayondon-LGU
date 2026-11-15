@@ -1752,6 +1752,34 @@ export type MfaStatus = {
 };
 
 /**
+ * MissingStreetPublic
+ */
+export type MissingStreetPublic = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Rows
+     */
+    rows: number;
+};
+
+/**
+ * MissingStreetsPublic
+ */
+export type MissingStreetsPublic = {
+    /**
+     * Data
+     */
+    data: Array<MissingStreetPublic>;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
  * MonthCount
  */
 export type MonthCount = {
@@ -5795,6 +5823,66 @@ export type importsSetMappingResponses = {
 };
 
 export type importsSetMappingResponse = importsSetMappingResponses[keyof importsSetMappingResponses];
+
+export type importsListMissingStreetsData = {
+    body?: never;
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string;
+    };
+    query?: never;
+    url: '/api/v1/imports/{batch_id}/missing-streets';
+};
+
+export type importsListMissingStreetsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type importsListMissingStreetsError = importsListMissingStreetsErrors[keyof importsListMissingStreetsErrors];
+
+export type importsListMissingStreetsResponses = {
+    /**
+     * Successful Response
+     */
+    200: MissingStreetsPublic;
+};
+
+export type importsListMissingStreetsResponse = importsListMissingStreetsResponses[keyof importsListMissingStreetsResponses];
+
+export type importsAddMissingStreetsData = {
+    body?: never;
+    path: {
+        /**
+         * Batch Id
+         */
+        batch_id: string;
+    };
+    query?: never;
+    url: '/api/v1/imports/{batch_id}/missing-streets';
+};
+
+export type importsAddMissingStreetsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type importsAddMissingStreetsError = importsAddMissingStreetsErrors[keyof importsAddMissingStreetsErrors];
+
+export type importsAddMissingStreetsResponses = {
+    /**
+     * Successful Response
+     */
+    200: ImportBatchPublic;
+};
+
+export type importsAddMissingStreetsResponse = importsAddMissingStreetsResponses[keyof importsAddMissingStreetsResponses];
 
 export type importsListRowsData = {
     body?: never;
