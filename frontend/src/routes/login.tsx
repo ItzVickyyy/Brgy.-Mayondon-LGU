@@ -5,7 +5,8 @@ import {
   redirect,
 } from "@tanstack/react-router"
 import type { TFunction } from "i18next"
-import { useMemo, useState } from "react"
+import { Lock, LockKeyhole, Mail } from "lucide-react"
+import { type CSSProperties, useMemo, useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
@@ -28,6 +29,12 @@ import { pageTitle } from "@/config/site"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 
 type FormData = { username: string; password: string }
+
+/** Staggers the entrance of each block (see auth-layout.css). */
+const delay = (ms: number) => ({ "--rise-delay": `${ms}ms` }) as CSSProperties
+
+const iconClass =
+  "pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground transition-colors group-hover:text-foreground group-focus-within:text-brand"
 
 function getLoginErrorMessage(error: unknown, t: TFunction): string {
   const candidate = error as {
@@ -136,7 +143,10 @@ function Login() {
           onSubmit={form.handleSubmit(onSubmit)}
           className="flex flex-col gap-6"
         >
-          <div className="flex flex-col gap-1">
+          <div className="auth-rise flex flex-col gap-1" style={delay(60)}>
+            <div className="mb-3 flex size-12 items-center justify-center rounded-xl bg-brand/10 text-brand ring-1 ring-brand/20">
+              <LockKeyhole aria-hidden="true" className="size-6" />
+            </div>
             <h1 className="text-2xl font-bold tracking-tight">
               {t("login.title")}
             </h1>
@@ -177,18 +187,21 @@ function Login() {
               control={form.control}
               name="username"
               render={({ field }) => (
-                <FormItem className="relative">
+                <FormItem className="auth-rise relative" style={delay(120)}>
                   <FormLabel>{t("login.emailLabel")}</FormLabel>
-                  <FormControl>
-                    <Input
-                      data-testid="email-input"
-                      placeholder={t("login.emailPlaceholder")}
-                      type="email"
-                      autoComplete="username"
-                      className="h-11"
-                      {...field}
-                    />
-                  </FormControl>
+                  <div className="group relative">
+                    <Mail aria-hidden="true" className={iconClass} />
+                    <FormControl>
+                      <Input
+                        data-testid="email-input"
+                        placeholder={t("login.emailPlaceholder")}
+                        type="email"
+                        autoComplete="username"
+                        className="h-11 pl-10 hover:border-ring/50"
+                        {...field}
+                      />
+                    </FormControl>
+                  </div>
                   <FormMessage className="absolute top-full left-0 mt-0.5 min-h-0 text-xs leading-4" />
                 </FormItem>
               )}
@@ -198,25 +211,28 @@ function Login() {
               control={form.control}
               name="password"
               render={({ field }) => (
-                <FormItem className="relative">
+                <FormItem className="auth-rise relative" style={delay(180)}>
                   <div className="flex items-center">
                     <FormLabel>{t("login.passwordLabel")}</FormLabel>
                     <RouterLink
                       to="/recover-password"
-                      className="ml-auto text-sm font-medium text-brand underline-offset-4 hover:underline"
+                      className="ml-auto text-sm font-medium text-brand underline-offset-4 transition-colors hover:text-brand/80 hover:underline"
                     >
                       {t("login.forgotPassword")}
                     </RouterLink>
                   </div>
-                  <FormControl>
-                    <PasswordInput
-                      data-testid="password-input"
-                      placeholder={t("login.passwordPlaceholder")}
-                      autoComplete="current-password"
-                      className="h-11"
-                      {...field}
-                    />
-                  </FormControl>
+                  <div className="group relative">
+                    <Lock aria-hidden="true" className={iconClass} />
+                    <FormControl>
+                      <PasswordInput
+                        data-testid="password-input"
+                        placeholder={t("login.passwordPlaceholder")}
+                        autoComplete="current-password"
+                        className="h-11 pl-10"
+                        {...field}
+                      />
+                    </FormControl>
+                  </div>
                   <FormMessage className="absolute top-full left-0 mt-0.5 min-h-0 text-xs leading-4" />
                 </FormItem>
               )}
@@ -224,7 +240,8 @@ function Login() {
 
             <LoadingButton
               type="submit"
-              className="h-11 w-full"
+              className="auth-rise auth-cta h-11 w-full hover:-translate-y-0.5 hover:shadow-md motion-reduce:hover:translate-y-0"
+              style={delay(240)}
               loading={loginMutation.isPending}
             >
               {t("login.submit")}
