@@ -10,7 +10,7 @@ import {
   IdCard,
   Users,
 } from "lucide-react"
-import { type CSSProperties, useState } from "react"
+import { type CSSProperties, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { ActivityService, DashboardService } from "@/client"
@@ -224,6 +224,14 @@ function Dashboard() {
     null,
   )
   const chartYears = yearRange(months.map((item) => item.month))
+  // A long range (Overall can show 24 months) scrolls sideways inside the
+  // card; start at the newest month.
+  const plotScroller = useRef<HTMLDivElement>(null)
+  // biome-ignore lint/correctness/useExhaustiveDependencies: run again when the range changes
+  useEffect(() => {
+    const box = plotScroller.current
+    if (box) box.scrollLeft = box.scrollWidth
+  }, [months.length, period])
   const hasOverTimeData = months.length > 0 && monthsTotal > 0
   const types = dashboard?.by_document_type ?? []
   const totalByType = dashboard?.total_issued ?? 0
@@ -382,8 +390,10 @@ function Dashboard() {
         </article>
       </section>
 
-      <section className="grid gap-4 xl:grid-cols-[1.5fr_1fr]">
-        <article className="flex flex-col rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+      {/* minmax(0, ...) and min-w-0: a 24-month chart must scroll inside its
+            card instead of stretching the grid column and the page. */}
+      <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
+        <article className="flex min-w-0 flex-col rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
             <div className="hidden rounded-lg bg-brand/10 p-2.5 text-brand sm:block">
               <BarChart3 className="size-5" aria-hidden="true" />
@@ -447,12 +457,13 @@ function Dashboard() {
 
                 {/* plot area: scrolls sideways when the range is long */}
                 <div
+                  ref={plotScroller}
                   className="flex min-w-0 flex-1 flex-col overflow-x-auto pb-1"
                   aria-hidden="true"
                 >
                   <div
                     className="flex flex-1 flex-col"
-                    style={{ minWidth: `${months.length * 44}px` }}
+                    style={{ minWidth: `${months.length * 40}px` }}
                   >
                     <div className="relative min-h-[14.5rem] flex-1">
                       <div className="absolute inset-x-0 top-6 bottom-0">
@@ -547,7 +558,7 @@ function Dashboard() {
           </p>
         </article>
 
-        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+        <article className="min-w-0 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col items-start gap-2">
             <SectionHeading
               title={t("dashboard.byType.title")}

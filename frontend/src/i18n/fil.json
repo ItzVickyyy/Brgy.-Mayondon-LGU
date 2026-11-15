@@ -1044,7 +1044,13 @@
       "deleteDescription": "Burahin ang {{name}}? Hindi maaaring burahin ang mga item na ginagamit na ng mga talaan ng residente o franchise.",
       "thisItem": "item na ito",
       "enterName": "Maglagay ng pangalan.",
-      "itemMissing": "Nawawala ang napiling item sa listahan."
+      "itemMissing": "Nawawala ang napiling item sa listahan.",
+      "count": "{{count}} lahat",
+      "filterLabel": "I-filter ayon sa pangalan",
+      "filterPlaceholder": "I-filter ayon sa pangalan",
+      "noMatches": "Walang pangalang tumutugma sa “{{query}}”.",
+      "renameItem": "Palitan ang pangalan ng {{name}}",
+      "deleteItem": "Burahin ang {{name}}"
     }
   },
   "issuances": {

@@ -129,7 +129,7 @@ test("the administrator is always shown the banner", async ({ page }) => {
   )
 })
 
-test("the dot on the bell shows how many reminders are open, in the colour of the most urgent", async ({
+test("the bell has one red dot that counts the open reminders", async ({
   page,
 }) => {
   test.skip(
@@ -137,11 +137,13 @@ test("the dot on the bell shows how many reminders are open, in the colour of th
     "The server has no MFA_ENCRYPTION_KEY",
   )
   await logInUser(page, firstSuperuser, firstSuperuserPassword)
-  const dot = page.getByTestId("notification-reminder-dot")
+  const dot = page.getByTestId("notification-badge")
   await expect(dot).toBeVisible()
-  // Two-factor is urgent (red) for an administrator; the number is the count.
-  await expect(dot).toHaveAttribute("data-severity", "urgent")
-  await expect(dot).toHaveText(/^\d+$/)
+  // Only one dot, and it counts unread notices plus reminders. Two-factor is
+  // always open for an administrator here, so there is at least one reminder.
+  await expect(page.getByTestId("notification-badge")).toHaveCount(1)
+  await expect(dot).toHaveText(/^(\d+|99\+)$/)
+  expect(Number(await dot.getAttribute("data-reminders"))).toBeGreaterThan(0)
   await page.getByTestId("notification-bell").click()
   await expect(page.getByTestId("two-factor-banner")).toHaveAttribute(
     "data-severity",

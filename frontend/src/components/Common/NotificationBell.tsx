@@ -24,7 +24,6 @@ import { getLocale } from "@/lib/locale"
 import { noticeSentence } from "@/lib/notifications"
 import {
   type ReminderSeverity,
-  SEVERITY_ORDER,
   type SetupReminder,
   useSetupReminders,
 } from "./useSetupReminders"
@@ -36,11 +35,6 @@ const SEVERITY_BOX: Record<ReminderSeverity, string> = {
   soon: "border-orange-300 bg-orange-50 text-orange-900 dark:border-orange-500/40 dark:bg-orange-500/10 dark:text-orange-200",
   optional:
     "border-green-300 bg-green-50 text-green-900 dark:border-green-500/40 dark:bg-green-500/10 dark:text-green-200",
-}
-const SEVERITY_DOT: Record<ReminderSeverity, string> = {
-  urgent: "bg-red-600",
-  soon: "bg-orange-500",
-  optional: "bg-green-600",
 }
 
 // The list comes from the server (the audit log, filtered by role) and the
@@ -296,10 +290,6 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
   const teaser = useTeaserLoop(teaserMessages, menuOpen)
 
   const navigate = useNavigate()
-  const topSeverity =
-    SEVERITY_ORDER.find((level) =>
-      reminders.some((r) => r.severity === level),
-    ) ?? "optional"
 
   const startReminder = (id: SetupReminder["id"]) => {
     setMenuOpen(false)
@@ -314,6 +304,10 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
       else setTwoFactorOpen(true)
     }, 80)
   }
+
+  // One red dot, top right: unread notices plus open reminders. The menu
+  // itself keeps them apart ("Needs your attention" first, then the notices).
+  const badgeCount = unreadCount + reminders.length
 
   const unreadLabel =
     unreadCount > 0
@@ -359,23 +353,15 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
             title={t("notifications.bell")}
           >
             <Bell className="size-4" aria-hidden="true" />
-            {unreadCount > 0 ? (
+            {badgeCount > 0 ? (
               <span
                 data-testid="notification-badge"
+                data-unread={unreadCount}
+                data-reminders={reminders.length}
                 aria-hidden="true"
                 className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-semibold leading-none text-white tabular-nums"
               >
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </span>
-            ) : null}
-            {reminders.length > 0 ? (
-              <span
-                data-testid="notification-reminder-dot"
-                data-severity={topSeverity}
-                aria-hidden="true"
-                className={`absolute -left-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-semibold leading-none text-white tabular-nums ${SEVERITY_DOT[topSeverity]}`}
-              >
-                {reminders.length}
+                {badgeCount > 99 ? "99+" : badgeCount}
               </span>
             ) : null}
           </Button>

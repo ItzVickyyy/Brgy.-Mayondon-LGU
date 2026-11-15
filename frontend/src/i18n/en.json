@@ -1044,7 +1044,13 @@
       "deleteDescription": "Delete {{name}}? Items already used by resident or franchise records cannot be deleted.",
       "thisItem": "this item",
       "enterName": "Enter a name.",
-      "itemMissing": "The selected list item is missing."
+      "itemMissing": "The selected list item is missing.",
+      "count": "{{count}} total",
+      "filterLabel": "Filter by name",
+      "filterPlaceholder": "Filter by name",
+      "noMatches": "No names match “{{query}}”.",
+      "renameItem": "Rename {{name}}",
+      "deleteItem": "Delete {{name}}"
     }
   },
   "issuances": {

@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import i18n from "i18next"
-import { Pencil, Plus, Save, Trash2, X } from "lucide-react"
-import { type FormEvent, useState } from "react"
+import { Pencil, Plus, Save, Search, Trash2, X } from "lucide-react"
+import { type FormEvent, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { type LookupItem, LookupsService } from "@/client"
@@ -79,6 +79,23 @@ function LookupListPanel({
   const [editingName, setEditingName] = useState("")
   const [deleteTarget, setDeleteTarget] = useState<LookupItem | null>(null)
   const [error, setError] = useState("")
+  const [filter, setFilter] = useState("")
+
+  // Alphabetical, numbers in natural order, so a new name lands where it belongs.
+  const sorted = useMemo(
+    () =>
+      [...items].sort((a, b) =>
+        a.name.localeCompare(b.name, undefined, {
+          numeric: true,
+          sensitivity: "base",
+        }),
+      ),
+    [items],
+  )
+  const query = filter.trim().toLowerCase()
+  const shown = query
+    ? sorted.filter((item) => item.name.toLowerCase().includes(query))
+    : sorted
 
   const mutation = useMutation({
     mutationFn: (input: { action: LookupAction; name?: string; id?: number }) =>
@@ -132,9 +149,19 @@ function LookupListPanel({
   return (
     <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
       <div className="border-b p-4 sm:p-5">
-        <h2 className="font-semibold tracking-tight">
-          {t(`records.lookups.${kind}.title`)}
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-semibold tracking-tight">
+            {t(`records.lookups.${kind}.title`)}
+          </h2>
+          {!loading && !failed ? (
+            <span
+              data-testid={`${kind}-count`}
+              className="shrink-0 rounded-full border bg-muted/40 px-2.5 py-0.5 text-xs font-medium tabular-nums text-muted-foreground"
+            >
+              {t("records.lookups.count", { count: items.length })}
+            </span>
+          ) : null}
+        </div>
         <p className="mt-1 text-sm text-muted-foreground">
           {t(`records.lookups.${kind}.description`)}
         </p>
@@ -181,88 +208,123 @@ function LookupListPanel({
           description={t("records.lookups.emptyDescription")}
         />
       ) : (
-        <ul className="divide-y">
-          {items.map((item) => (
-            <li
-              key={item.id}
-              className="flex flex-col gap-2 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
-            >
-              {editingId === item.id ? (
-                <>
-                  <label className="min-w-0 flex-1">
-                    <span className="sr-only">
-                      {t("records.lookups.editLabel", { name: item.name })}
+        <>
+          {items.length > 6 ? (
+            <div className="relative border-b p-3">
+              <label className="sr-only" htmlFor={`${kind}-filter`}>
+                {t("records.lookups.filterLabel")}
+              </label>
+              <Search
+                className="pointer-events-none absolute left-6 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                aria-hidden="true"
+              />
+              <input
+                id={`${kind}-filter`}
+                type="search"
+                value={filter}
+                onChange={(event) => setFilter(event.target.value)}
+                className={`${formControlClass} pl-9`}
+                placeholder={t("records.lookups.filterPlaceholder")}
+              />
+            </div>
+          ) : null}
+          {/* The list scrolls inside the card, so 26 streets never make the
+              page (or the neighbouring card) long. */}
+          <ul className="max-h-[26rem] divide-y overflow-y-auto">
+            {shown.length === 0 ? (
+              <li className="px-4 py-6 text-center text-sm text-muted-foreground">
+                {t("records.lookups.noMatches", { query: filter.trim() })}
+              </li>
+            ) : null}
+            {shown.map((item) => (
+              <li
+                key={item.id}
+                className="flex flex-col gap-2 px-4 py-2.5 hover:bg-muted/30 sm:flex-row sm:items-center sm:justify-between"
+              >
+                {editingId === item.id ? (
+                  <>
+                    <label className="min-w-0 flex-1">
+                      <span className="sr-only">
+                        {t("records.lookups.editLabel", { name: item.name })}
+                      </span>
+                      <input
+                        // biome-ignore lint/a11y/noAutofocus: the field appears only after the person chose Edit
+                        autoFocus
+                        value={editingName}
+                        onChange={(event) => setEditingName(event.target.value)}
+                        className={formControlClass}
+                        maxLength={150}
+                      />
+                    </label>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        size="sm"
+                        disabled={!editingName.trim() || mutation.isPending}
+                        onClick={() =>
+                          mutation.mutate({
+                            action: "rename",
+                            id: item.id,
+                            name: editingName.trim(),
+                          })
+                        }
+                      >
+                        <Save aria-hidden="true" />
+                        {t("records.lookups.save")}
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={cancelEdit}
+                      >
+                        <X aria-hidden="true" />
+                        {t("records.lookups.cancel")}
+                      </Button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <span className="min-w-0 break-words text-sm font-medium">
+                      {item.name}
                     </span>
-                    <input
-                      // biome-ignore lint/a11y/noAutofocus: the field appears only after the person chose Edit
-                      autoFocus
-                      value={editingName}
-                      onChange={(event) => setEditingName(event.target.value)}
-                      className={formControlClass}
-                      maxLength={150}
-                    />
-                  </label>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      disabled={!editingName.trim() || mutation.isPending}
-                      onClick={() =>
-                        mutation.mutate({
-                          action: "rename",
-                          id: item.id,
-                          name: editingName.trim(),
-                        })
-                      }
-                    >
-                      <Save aria-hidden="true" />
-                      {t("records.lookups.save")}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      onClick={cancelEdit}
-                    >
-                      <X aria-hidden="true" />
-                      {t("records.lookups.cancel")}
-                    </Button>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <span className="min-w-0 break-words font-medium">
-                    {item.name}
-                  </span>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={() => startEdit(item)}
-                    >
-                      <Pencil aria-hidden="true" />
-                      {t("records.lookups.rename")}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="ghost"
-                      className="text-destructive hover:text-destructive"
-                      onClick={() => {
-                        setError("")
-                        setDeleteTarget(item)
-                      }}
-                    >
-                      <Trash2 aria-hidden="true" />
-                      {t("records.lookups.delete")}
-                    </Button>
-                  </div>
-                </>
-              )}
-            </li>
-          ))}
-        </ul>
+                    <div className="flex shrink-0 justify-end gap-1">
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="size-8 text-muted-foreground"
+                        aria-label={t("records.lookups.renameItem", {
+                          name: item.name,
+                        })}
+                        title={t("records.lookups.rename")}
+                        onClick={() => startEdit(item)}
+                      >
+                        <Pencil aria-hidden="true" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="icon"
+                        variant="ghost"
+                        className="size-8 text-destructive hover:text-destructive"
+                        aria-label={t("records.lookups.deleteItem", {
+                          name: item.name,
+                        })}
+                        title={t("records.lookups.delete")}
+                        onClick={() => {
+                          setError("")
+                          setDeleteTarget(item)
+                        }}
+                      >
+                        <Trash2 aria-hidden="true" />
+                      </Button>
+                    </div>
+                  </>
+                )}
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       <ConfirmDialog
@@ -296,7 +358,7 @@ export function LookupListsView() {
   })
 
   return (
-    <div className="grid gap-4 xl:grid-cols-2">
+    <div className="grid items-start gap-4 xl:grid-cols-2">
       <LookupListPanel
         kind="street"
         items={streetsQuery.data ?? []}
