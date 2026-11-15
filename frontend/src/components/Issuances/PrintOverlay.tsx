@@ -21,15 +21,37 @@ function measureText(text: string, sizePt: number): number {
 type Props = {
   data: PrintData
   offset?: Offset // calibration offset in pt (step 4)
+  backgrounds?: string[] // the barangay's own blank form, one image per sheet, printed behind the values ("form and data")
   preview?: boolean // show on screen for calibration/verification; never used for real printing
 }
 
 /** Renders the overlay for `data` into document.body. Call `window.print()` while it is mounted. */
-export function PrintOverlay({ data, offset, preview = false }: Props) {
-  const pages = useMemo(
-    () => layoutOverlay(data, measureText, offset),
-    [data, offset],
-  )
+export function PrintOverlay({
+  data,
+  offset,
+  backgrounds,
+  preview = false,
+}: Props) {
+  const pages = useMemo(() => {
+    const laid = layoutOverlay(data, measureText, offset)
+    if (!backgrounds?.length) return laid
+    // Every sheet that has a form image prints, also one without a typed value. An empty entry means "not part of this form".
+    const sheets = new Set([
+      ...laid.map((p) => p.page),
+      ...backgrounds.flatMap((url, page) => (url ? [page] : [])),
+    ])
+    return [...sheets]
+      .sort((x, y) => x - y)
+      .map(
+        (page) =>
+          laid.find((p) => p.page === page) ?? {
+            page,
+            texts: [],
+            marks: [],
+            photo: undefined,
+          },
+      )
+  }, [data, offset, backgrounds])
   return createPortal(
     <div className="print-overlay-root" data-preview={preview}>
       <style>{printOverlayCss}</style>
@@ -39,6 +61,14 @@ export function PrintOverlay({ data, offset, preview = false }: Props) {
           key={page.page}
           data-page={page.page}
         >
+          {backgrounds?.[page.page] && (
+            <img
+              className="print-overlay-bg"
+              src={backgrounds[page.page]}
+              alt=""
+              style={{ left: 0, top: 0, width: "612pt", height: "792pt" }}
+            />
+          )}
           {page.photo && (
             <img
               src={page.photo.url}

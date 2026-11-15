@@ -58,6 +58,8 @@ The Print button on an issued History row prints in one of two modes; the arrow 
 - **Data only (pre-printed paper)**: the rule above. This is the default.
 - **Form and data (blank paper)**: the form is typeset on one Letter page with the letterhead, a faint logo watermark, the labels and lines, and the typed values. The wording is copied from the Word files in `docs/reference/document-templates/`. Signatures, the thumbmark and the dry seal are still never created: the thumbmark box and the "DRY SEAL" caption are only markers for staff.
 
+**Form and data uses the barangay's own form (patch 105).** The page is the image of the barangay's blank Word file (`docs/Barangay-softcopies/`), exported to PDF by Word itself and turned into page images by `scripts/build-print-forms.py` (`public/assets/print-forms/`, listed in `src/lib/print/formBackgrounds.ts`). The typed values go on top at the same positions as in data-only mode, so the two modes print the same sheet. The form is never retyped or redrawn: if the barangay changes a Word file, export it again and run the script. A form with no image yet still prints from the typeset copy in `PrintForm.tsx`; that copy is a stopgap, not the template. Only blank forms may be used (no resident data on any page).
+
 Both modes cover the six types that have a print template. Reprint is no longer in the three-dot menu. The typeset forms have not been compared with paper by the client; confirm the letterhead e-mail addresses, the motto spelling and the signatory names on them before relying on blank-paper printing.
 
 ## 4. Form-by-form typed content

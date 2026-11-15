@@ -6,6 +6,7 @@ import { PrintOverlay } from "@/components/Issuances/PrintOverlay"
 import { printMessage } from "@/lib/issuanceLabels"
 import type { PrintData } from "@/lib/print/buildPrintData"
 import { getOffset } from "@/lib/print/calibration"
+import { formBackgrounds } from "@/lib/print/formBackgrounds"
 import { loadPrintData } from "@/lib/print/loadPrintData"
 import { getPrintMode, type PrintMode } from "@/lib/print/printMode"
 
@@ -102,7 +103,15 @@ export function usePrintIssuance(): {
     print,
     overlay: data ? (
       mode === "form" ? (
-        <PrintForm data={data} />
+        // The barangay's own form as the page, the typed values on top; the typeset copy only when that form has no image yet.
+        formBackgrounds[data.templateId] ? (
+          <PrintOverlay
+            data={data}
+            backgrounds={formBackgrounds[data.templateId]}
+          />
+        ) : (
+          <PrintForm data={data} />
+        )
       ) : (
         <PrintOverlay data={data} offset={getOffset(data.templateId)} />
       )
