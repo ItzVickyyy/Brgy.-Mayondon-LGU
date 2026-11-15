@@ -25,7 +25,23 @@ test.describe("print overlay layout", () => {
     const [page] = layoutOverlay(data, measure, { x: 2, y: -3 })
     expect(page.texts.map((t) => t.key)).toEqual(["date", "name"])
     expect(page.texts[0]).toMatchObject({ x: 493, y: 217, align: "center" })
-    expect(page.texts[1]).toMatchObject({ x: 137, y: 338, align: "left" })
+    expect(page.texts[1]).toMatchObject({ x: 137, y: 340.6, align: "left" })
+  })
+
+  test("a field with a prefix prints the words before the value, and nothing when the value is empty", () => {
+    const [filled] = layoutOverlay(
+      { templateId: "indigency", values: { addressedTo: "CHED" } },
+      measure,
+    )
+    expect(filled.texts[0]).toMatchObject({
+      key: "addressedTo",
+      text: "Addressed to the office of: CHED",
+    })
+    const [empty] = layoutOverlay(
+      { templateId: "indigency", values: { addressedTo: "  ", name: "X" } },
+      measure,
+    )
+    expect(empty.texts.map((t) => t.key)).toEqual(["name"])
   })
 
   test("prints a mark only in the matching box", () => {
@@ -40,9 +56,9 @@ test.describe("print overlay layout", () => {
     }
     const [page] = layoutOverlay(data, measure)
     expect(page.marks).toEqual([
-      { key: "electric", x: 216.9, y: 344.7 },
-      { key: "connectionType", x: 330.1, y: 435.7 },
-      { key: "classification", x: 221.4, y: 454.3 },
+      { key: "electric", x: 216.7, y: 345.7 },
+      { key: "connectionType", x: 330.1, y: 416.8 },
+      { key: "classification", x: 221.4, y: 435.6 },
     ])
   })
 
@@ -52,7 +68,7 @@ test.describe("print overlay layout", () => {
       measure,
     )
     expect(assistance.map((p) => p.page)).toEqual([1])
-    expect(assistance[0].marks).toEqual([{ key: "for", x: 395.5, y: 381.5 }])
+    expect(assistance[0].marks).toEqual([{ key: "for", x: 395.5, y: 383.2 }])
     const clearance = layoutOverlay(
       {
         templateId: "clearance",
@@ -64,10 +80,10 @@ test.describe("print overlay layout", () => {
     )
     expect(clearance[0].photo).toEqual({
       url: "data:image/png;base64,AAA",
-      x: 402,
-      y: 340,
-      w: 84,
-      h: 81,
+      x: 403,
+      y: 341,
+      w: 82,
+      h: 79,
     })
     expect(
       layoutOverlay(

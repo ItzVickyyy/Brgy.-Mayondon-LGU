@@ -66,8 +66,9 @@ export function layoutOverlay(
     const texts: OverlayText[] = []
     for (const field of template.fields) {
       if ((field.page ?? 0) !== page) continue
-      const text = (data.values[field.key] ?? "").trim()
-      if (!text) continue
+      const value = (data.values[field.key] ?? "").trim()
+      if (!value) continue
+      const text = `${field.prefix ?? ""}${value}`
       texts.push({
         key: field.key,
         text,
