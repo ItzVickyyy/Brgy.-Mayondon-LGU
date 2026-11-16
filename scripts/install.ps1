@@ -199,10 +199,16 @@ if (Test-Path -LiteralPath $publicKey) {
     if (Test-Path -LiteralPath $privateKey) {
         Write-Host ""
         Write-Host "Plug in the USB drive that will be kept AWAY from this computer."
-        $usb = (Read-Host "Type its folder (for example E:\) or press Enter to do this later by hand").Trim()
+        $usb = (Read-Host "Type its folder (for example E:\) or press Enter to do this later by hand").Trim().Trim('"').Trim()
+        if ($usb -match '^[A-Za-z]$') { $usb = $usb + ":\" }
+        elseif ($usb -match '^[A-Za-z]:$') { $usb = $usb + "\" }
         if ($usb) {
             try {
-                New-Item -ItemType Directory -Path $usb -Force | Out-Null
+                # A drive root such as D:\ already exists and New-Item refuses it
+                # ("The path is not of a legal form"), so only make a folder that is missing.
+                if (-not (Test-Path -LiteralPath $usb -PathType Container)) {
+                    New-Item -ItemType Directory -Path $usb -Force | Out-Null
+                }
                 $target = Join-Path $usb "backup-private.pem"
                 Copy-Item -LiteralPath $privateKey -Destination $target -Force
                 if ((Get-Item -LiteralPath $target).Length -ne (Get-Item -LiteralPath $privateKey).Length) {
