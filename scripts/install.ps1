@@ -20,6 +20,8 @@
 #           -BackupCopyTo "E:\MayondonBackups"   second location for backups
 #           -NoBrowser                      do not open the program at sign-in
 #           -NoAutoUpdate                   do not register the daily automatic update
+#           -AllNetworks                    firewall rule for every network profile (local subnet only),
+#                                           for an office Wi-Fi that Windows calls 'Public'
 #           -UpdateTime 12:30               time of the automatic update
 # This script never prints or stores a secret except the one-time message that
 # shows a generated administrator password on screen.
@@ -31,6 +33,7 @@ param(
     [string]$BackupCopyTo,
     [switch]$NoBrowser,
     [switch]$NoAutoUpdate,
+    [switch]$AllNetworks,
     [string]$UpdateTime = "12:30"
 )
 
@@ -271,8 +274,9 @@ Step "7/8  Firewall for the office network"
 try {
     $ports = if ([string]::IsNullOrWhiteSpace($HttpsHost)) { "8000" } else { "443,80" }
     $fw = Join-Path $PSScriptRoot "open-firewall.ps1"
+    $fwExtra = if ($AllNetworks) { " -AllNetworks" } else { "" }
     Start-Process -FilePath "powershell.exe" -Verb RunAs -Wait `
-        -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$fw`" -Ports $ports"
+        -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$fw`" -Ports $ports$fwExtra"
     Write-Host "Firewall step finished (a Windows permission window may have appeared)."
 } catch {
     Write-Warning "The firewall was not changed ($($_.Exception.Message)). Run scripts\open-firewall.ps1 as administrator."

@@ -175,6 +175,8 @@ Scripts (run from the repo root with Compose running):
 .\scripts\test-backup-restore.ps1
 ```
 
+If Windows says "running scripts is disabled on this system", start each of them as `powershell -ExecutionPolicy Bypass -File .\scripts\<name>.ps1 <options>` (the scheduled tasks and the `.cmd` files already do this).
+
 The backup script creates a timestamped PostgreSQL custom-format dump in `backups\`, copies it out of the container and removes the temporary copy. `backups\` is git-ignored because dumps may contain resident data. The restore script requires typing `RESTORE`, verifies PostgreSQL can read the archive **before** stopping the backend, uses `pg_restore --exit-on-error`, and restarts the backend only after success. After a restore, verify login, representative records, document generation and main workflows; do not assume success because the command finished. Use only a backup from a compatible application/database version.
 
 The PowerShell smoke test creates a uniquely named temporary database, inserts a test value, creates a dump, changes the value, restores the dump, and verifies that the original value returns. It then removes the temporary database and test dump. It never targets the application database. The Docker Compose CI workflow runs this test against a real PostgreSQL container. Run it on the intended Windows host before accepting the backup procedure. The restore script's optional `-Confirmation RESTORE` argument is intended for automated tests. Normal manual restores continue to prompt for confirmation.

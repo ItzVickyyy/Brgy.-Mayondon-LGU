@@ -20,6 +20,8 @@ cd C:\Users\vocjo\Projects\Brgy.-Mayondon-LGU
 .\scripts\dev-db.ps1 up
 ```
 
+If Windows says "running scripts is disabled on this system", start every `.ps1` in this file like this: `powershell -ExecutionPolicy Bypass -File .\scripts\dev-db.ps1 up`.
+
 The first run copies `.env.dev.example` to `.env.dev`, builds the `backend-dev` image,
 starts the database, creates the two sample accounts and adds the sample data
 (8 streets, 10 officials, 400 residents, about 6 in 100 archived). Open

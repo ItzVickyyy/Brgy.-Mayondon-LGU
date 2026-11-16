@@ -101,13 +101,17 @@ if (-not (Test-Path (Join-Path $repoRoot ".git"))) {
     }
 }
 
-# Network profile: the firewall rule opens port 8000 on Private networks only
+# Network profile: by default the firewall rule opens the program on Private networks only
 try {
     $publicNet = @(Get-NetConnectionProfile -ErrorAction Stop | Where-Object {
         $_.NetworkCategory -eq "Public" -and $_.IPv4Connectivity -notin @("Disconnected", "NoTraffic") -and
         $_.InterfaceAlias -notmatch "vEthernet|WSL|Docker|VirtualBox|VMware|Hyper-V|Loopback" })
     if ($publicNet.Count -gt 0) {
-        Warn "Windows treats the network '$($publicNet[0].Name)' as Public, so other office computers cannot open the program. Set it to Private: Settings > Network > the network > Network profile type > Private."
+        $webRules = @(Get-NetFirewallRule -DisplayName "Mayondon web *" -ErrorAction SilentlyContinue | Where-Object { "$($_.Enabled)" -eq "True" })
+        $coversPublic = @($webRules | Where-Object { "$($_.Profile)" -match "Any|Public|All" }).Count -gt 0
+        if (-not $coversPublic) {
+            Warn "Windows treats the network '$($publicNet[0].Name)' as Public and the firewall rule covers Private networks only, so other office computers cannot open the program. Fix it in a window opened with 'Run as administrator' (without it Windows answers 'Access is denied'): either set the network to Private (Settings > Network > the network > Network profile type), or run: powershell -ExecutionPolicy Bypass -File .\scripts\open-firewall.ps1 -AllNetworks (allows only computers on the same local network)."
+        }
     }
 } catch { }
 
