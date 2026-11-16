@@ -90,6 +90,17 @@ foreach ($name in @("Mayondon Database Backup", "Mayondon Start at Sign-in")) {
     if (Get-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue) { Ok "Scheduled task '$name' exists." } else { Warn "Scheduled task '$name' is missing." }
 }
 
+# Automatic update (installed copies only; a Git clone is a development computer)
+if (-not (Test-Path (Join-Path $repoRoot ".git"))) {
+    if (Get-ScheduledTask -TaskName "Mayondon Auto Update" -ErrorAction SilentlyContinue) { Ok "Scheduled task 'Mayondon Auto Update' exists." }
+    else { Warn "Scheduled task 'Mayondon Auto Update' is missing, so updates are not installed by themselves. Run: powershell -ExecutionPolicy Bypass -File .\scripts\register-update-task.ps1" }
+    $autoFile = Join-Path $backups "last-autoupdate.json"
+    if (Test-Path $autoFile) {
+        $a = Get-Content $autoFile -Raw | ConvertFrom-Json
+        if ($a.ok) { Ok "Automatic update ($($a.finished_at)): $($a.message)" } else { Bad "Automatic update needs attention ($($a.finished_at)): $($a.message)" }
+    }
+}
+
 # Network profile: the firewall rule opens port 8000 on Private networks only
 try {
     $publicNet = @(Get-NetConnectionProfile -ErrorAction Stop | Where-Object {

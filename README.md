@@ -32,7 +32,7 @@ that serves the frontend and API together, follow [`docs/06-Architecture-and-Dep
 The LAN deployment guide is a preparation guide, not proof of a verified client installation.
 
 
-**Installing on the server computer:** double-click `Install-Mayondon.cmd` (and `Update-Mayondon.cmd` for later versions; `Start-Mayondon.cmd` starts the program by hand if it is stopped, `Check-Mayondon.cmd` shows whether everything is fine). Details and checks: [`docs/11-Host-Checks.md`](docs/11-Host-Checks.md) section H.
+**Installing on the server computer:** double-click `Install-Mayondon.cmd` (and `Update-Mayondon.cmd` for later versions; `Start-Mayondon.cmd` starts the program by hand if it is stopped, `Check-Mayondon.cmd` shows whether everything is fine). After installation the program also opens in the browser when the Windows user signs in, and installs the approved version (branch `production`) by itself once a day. Details and checks: [`docs/11-Host-Checks.md`](docs/11-Host-Checks.md) section H.
 
 Log in with `FIRST_SUPERUSER` / `FIRST_SUPERUSER_PASSWORD` from the root `.env`.
 There is no public sign-up: an admin creates accounts from the **Admin** page.

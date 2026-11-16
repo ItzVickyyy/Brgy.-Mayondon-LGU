@@ -26,6 +26,9 @@ backend/app/frontend/
 *.dump.enc
 *.pem
 
+# Written by scripts/auto-update.ps1: the commit this copy was last updated to
+/.installed-commit
+
 # The office HTTPS root certificate is made per computer by scripts/export-https-root.ps1
 /mayondon-office-root.crt
 

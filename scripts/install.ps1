@@ -9,7 +9,8 @@
 #   3. builds the program, starts it and waits until it is healthy
 #   4. creates the administrator account
 #   5. makes the backup key pair (you type the passphrase) and turns encryption on
-#   6. registers the daily backup task and the start-at-sign-in task
+#   6. registers the daily backup task, the start-at-sign-in task (it also opens the
+#      program in the browser) and the daily automatic update task
 #   7. opens the firewall for the office network (asks Windows for permission)
 #   8. puts a "Barangay Mayondon" shortcut on the desktop
 #
@@ -17,6 +18,9 @@
 #           -AdminEmail you@example.com     skips the question
 #           -BackupTime 17:00               time of the daily backup
 #           -BackupCopyTo "E:\MayondonBackups"   second location for backups
+#           -NoBrowser                      do not open the program at sign-in
+#           -NoAutoUpdate                   do not register the daily automatic update
+#           -UpdateTime 12:30               time of the automatic update
 # This script never prints or stores a secret except the one-time message that
 # shows a generated administrator password on screen.
 
@@ -24,7 +28,10 @@ param(
     [string]$AdminEmail,
     [string]$HttpsHost,
     [string]$BackupTime = "17:00",
-    [string]$BackupCopyTo
+    [string]$BackupCopyTo,
+    [switch]$NoBrowser,
+    [switch]$NoAutoUpdate,
+    [string]$UpdateTime = "12:30"
 )
 
 $ErrorActionPreference = "Stop"
@@ -244,9 +251,19 @@ try {
 }
 
 try {
-    & (Join-Path $PSScriptRoot "register-start-task.ps1")
+    $startArgs = @{}
+    if ($NoBrowser) { $startArgs.NoBrowser = $true }
+    & (Join-Path $PSScriptRoot "register-start-task.ps1") @startArgs
 } catch {
     Write-Warning "The start-at-sign-in task was not set up: $($_.Exception.Message). Run scripts\register-start-task.ps1 by hand."
+}
+
+if (-not $NoAutoUpdate) {
+    try {
+        & (Join-Path $PSScriptRoot "register-update-task.ps1") -Time $UpdateTime
+    } catch {
+        Write-Warning "The automatic update task was not set up: $($_.Exception.Message). Run scripts\register-update-task.ps1 by hand."
+    }
 }
 
 # ------------------------------------------------------------ 7. firewall
@@ -309,4 +326,5 @@ if ($adminPasswordShown) {
     Clear-Host
 }
 Write-Host "Next, signed in as the administrator (docs/11 section F): add the streets and puroks, create staff accounts with each person present, and ask everyone to set their security questions."
-Write-Host "The program starts by itself when this Windows user signs in (task 'Mayondon Start at Sign-in'). Tick Docker Desktop > Settings > General > 'Start Docker Desktop when you sign in' as well. Check anytime with Check-Mayondon.cmd."
+Write-Host "The program starts by itself when this Windows user signs in (task 'Mayondon Start at Sign-in')$(if (-not $NoBrowser) { ' and opens in the browser' }). Tick Docker Desktop > Settings > General > 'Start Docker Desktop when you sign in' as well. Check anytime with Check-Mayondon.cmd."
+if (-not $NoAutoUpdate) { Write-Host "Updates: every day at $UpdateTime the program installs the newest approved version by itself (task 'Mayondon Auto Update'); it makes a backup first. See docs/11 section H." }
