@@ -145,12 +145,6 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "An overview of document issuance, upcoming expiries, and work requiring attention.",
-    "cta": {
-      "ariaLabel": "Create an issuance",
-      "title": "Ready to issue a document?",
-      "description": "Start a new document request for a resident.",
-      "button": "Create issuance"
-    },
     "period": {
       "label": "Period",
       "ariaLabel": "Dashboard reporting period",

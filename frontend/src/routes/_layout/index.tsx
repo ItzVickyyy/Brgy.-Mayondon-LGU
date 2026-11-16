@@ -8,9 +8,7 @@ import {
   Clock3,
   FileCheck2,
   IdCard,
-  Plus,
   Users,
-  Zap,
 } from "lucide-react"
 import { type CSSProperties, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -92,15 +90,6 @@ function niceScale(max: number) {
   return { top, ticks }
 }
 
-// Closer to expiry means louder: red inside a week, amber inside two.
-function expiryPillClass(daysLeft: number) {
-  if (daysLeft <= 7)
-    return "border-red-300 bg-red-100 text-red-900 dark:border-red-500/50 dark:bg-red-950 dark:text-red-100"
-  if (daysLeft <= 14)
-    return "border-amber-300 bg-amber-100 text-amber-900 dark:border-amber-500/50 dark:bg-amber-950 dark:text-amber-100"
-  return "border-border bg-muted text-foreground"
-}
-
 function OverTimeStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 rounded-lg border bg-muted/40 px-3 py-2.5">
@@ -114,66 +103,39 @@ function OverTimeStat({ label, value }: { label: string; value: string }) {
   )
 }
 
-// Each summary card has its own color so the four can be told apart at a glance.
-const summaryTones = {
-  green: {
-    bar: "border-t-emerald-600",
-    chip: "bg-emerald-600 text-white",
-  },
-  amber: {
-    bar: "border-t-amber-500",
-    chip: "bg-amber-500 text-amber-950",
-  },
-  orange: {
-    bar: "border-t-orange-600",
-    chip: "bg-orange-600 text-white",
-  },
-  sky: {
-    bar: "border-t-sky-600",
-    chip: "bg-sky-600 text-white",
-  },
-} as const
-
 function SummaryCard({
   title,
   value,
   loading,
   description,
   icon: Icon,
-  tone,
 }: {
   title: string
   value: number | undefined
   loading: boolean
   description: string
   icon: typeof Users
-  tone: keyof typeof summaryTones
 }) {
-  const colors = summaryTones[tone]
   return (
-    <article
-      className={`rounded-xl border border-t-4 bg-card p-4 shadow-md sm:p-5 ${colors.bar}`}
-    >
+    <article className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-semibold text-foreground">{title}</p>
-          <p className="mt-2 text-3xl font-extrabold tracking-tight tabular-nums sm:text-4xl">
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">
             {value !== undefined ? (
               <AnimatedNumber value={value} />
             ) : loading ? (
-              <Skeleton className="h-10 w-16" />
+              <Skeleton className="h-9 w-16" />
             ) : (
               "–"
             )}
           </p>
         </div>
-        <div className={`rounded-lg p-3 shadow-sm ${colors.chip}`}>
-          <Icon className="size-6" aria-hidden="true" />
+        <div className="rounded-md bg-brand/10 p-2.5 text-brand">
+          <Icon className="size-5" aria-hidden="true" />
         </div>
       </div>
-      <p className="mt-3 text-xs font-medium text-muted-foreground">
-        {description}
-      </p>
+      <p className="mt-3 text-xs text-muted-foreground">{description}</p>
     </article>
   )
 }
@@ -222,46 +184,11 @@ function SectionHeading({
 }) {
   return (
     <div>
-      <h2 className="text-lg font-bold tracking-tight">{title}</h2>
+      <h2 className="font-semibold tracking-tight">{title}</h2>
       {description ? (
-        <p className="mt-0.5 text-sm text-muted-foreground">{description}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{description}</p>
       ) : null}
     </div>
-  )
-}
-
-// A card with a tinted header band, so every block on the page starts with a
-// clear, bold title instead of floating on the same white.
-function Panel({
-  icon: Icon,
-  title,
-  description,
-  aside,
-  className = "",
-  children,
-}: {
-  icon: typeof Users
-  title: string
-  description?: string
-  aside?: React.ReactNode
-  className?: string
-  children: React.ReactNode
-}) {
-  return (
-    <article
-      className={`flex min-w-0 flex-col overflow-hidden rounded-xl border bg-card shadow-md ${className}`}
-    >
-      <header className="flex items-center gap-3 border-b bg-primary/10 px-4 py-3.5 dark:bg-primary/25 sm:px-5">
-        <div className="rounded-lg bg-primary p-2 text-primary-foreground shadow-sm">
-          <Icon className="size-5" aria-hidden="true" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <SectionHeading title={title} description={description} />
-        </div>
-        {aside}
-      </header>
-      <div className="flex flex-1 flex-col p-4 sm:p-5">{children}</div>
-    </article>
   )
 }
 
@@ -346,7 +273,6 @@ function Dashboard() {
       description: t("dashboard.quickActions.findResident.description"),
       to: "/records",
       icon: Users,
-      chip: "bg-sky-600 text-white",
     },
     {
       key: "createIssuance",
@@ -354,7 +280,6 @@ function Dashboard() {
       description: t("dashboard.quickActions.createIssuance.description"),
       to: "/issuances",
       icon: FileCheck2,
-      chip: "bg-emerald-600 text-white",
     },
     {
       key: "reviewHistory",
@@ -362,7 +287,6 @@ function Dashboard() {
       description: t("dashboard.quickActions.reviewHistory.description"),
       to: "/issuances",
       icon: CalendarDays,
-      chip: "bg-violet-600 text-white",
     },
     {
       key: "viewActivity",
@@ -370,7 +294,6 @@ function Dashboard() {
       description: t("dashboard.quickActions.viewActivity.description"),
       to: "/activity-log",
       icon: Activity,
-      chip: "bg-orange-600 text-white",
     },
   ] as const
 
@@ -378,7 +301,7 @@ function Dashboard() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="mt-1 text-3xl font-extrabold tracking-tight sm:text-4xl">
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             {t("dashboard.title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -412,38 +335,6 @@ function Dashboard() {
         </label>
       </div>
 
-      <section
-        aria-label={t("dashboard.cta.ariaLabel")}
-        className="relative overflow-hidden rounded-xl bg-primary text-primary-foreground shadow-lg"
-      >
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -right-10 -top-16 size-56 rounded-full bg-white/10"
-        />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute -bottom-20 right-28 size-48 rounded-full bg-white/10"
-        />
-        <div className="relative flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-7">
-          <div className="min-w-0">
-            <h2 className="text-xl font-extrabold tracking-tight sm:text-2xl">
-              {t("dashboard.cta.title")}
-            </h2>
-            <p className="mt-1 text-sm text-primary-foreground/85">
-              {t("dashboard.cta.description")}
-            </p>
-          </div>
-          <a
-            href="/issuances?new=1"
-            data-testid="create-issuance-cta"
-            className="inline-flex min-h-12 shrink-0 items-center justify-center gap-2 rounded-lg bg-amber-400 px-6 text-base font-bold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:bg-amber-300 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-primary motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-          >
-            <Plus className="size-5" aria-hidden="true" />
-            {t("dashboard.cta.button")}
-          </a>
-        </div>
-      </section>
-
       {dashboardQuery.isLoading ? (
         <LoadingState title={t("dashboard.loading")} lines={0} />
       ) : null}
@@ -465,7 +356,6 @@ function Dashboard() {
           loading={dashboardQuery.isLoading}
           description={t("dashboard.summary.issuedThisMonth.description")}
           icon={FileCheck2}
-          tone="green"
         />
         <SummaryCard
           title={t("dashboard.summary.clearancesExpiring.title")}
@@ -475,7 +365,6 @@ function Dashboard() {
             days: summary?.clearance_window_days ?? 30,
           })}
           icon={Clock3}
-          tone="amber"
         />
         <SummaryCard
           title={t("dashboard.summary.idsExpiring.title")}
@@ -485,7 +374,6 @@ function Dashboard() {
             days: summary?.id_window_days ?? 30,
           })}
           icon={IdCard}
-          tone="orange"
         />
         <SummaryCard
           title={t("dashboard.summary.pending.title")}
@@ -493,61 +381,67 @@ function Dashboard() {
           loading={dashboardQuery.isLoading}
           description={t("dashboard.summary.pending.description")}
           icon={Users}
-          tone="sky"
         />
       </section>
 
       <section aria-label={t("dashboard.quickActions.ariaLabel")}>
-        <Panel icon={Zap} title={t("dashboard.quickActions.title")}>
-          <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
+        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <SectionHeading title={t("dashboard.quickActions.title")} />
+          <div className="mt-3 grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
             {quickActions.map((item) => (
               <Link
                 key={item.key}
                 to={item.to}
-                className="action-card group flex min-h-20 items-center gap-3 rounded-xl border-2 bg-card px-3.5 py-3 shadow-md"
+                className="action-card group flex min-h-14 items-center gap-3 rounded-lg border bg-card px-3 py-2"
               >
-                <span className={`rounded-xl p-3 shadow-sm ${item.chip}`}>
-                  <item.icon className="size-6" aria-hidden="true" />
+                <span className="action-chip rounded-md p-1.5">
+                  <item.icon className="size-5" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="action-title block text-base font-bold leading-5">
+                  <span className="action-title block font-semibold leading-5">
                     {item.title}
                   </span>
-                  <span className="mt-0.5 block text-sm leading-5 text-muted-foreground">
+                  <span className="block text-sm leading-5 text-muted-foreground">
                     {item.description}
                   </span>
                 </span>
                 <ChevronRight
-                  className="action-arrow size-6 shrink-0"
+                  className="action-arrow size-5 shrink-0"
                   aria-hidden="true"
                 />
               </Link>
             ))}
           </div>
-        </Panel>
+        </article>
       </section>
 
       {/* minmax(0, ...) and min-w-0: a 24-month chart must scroll inside its
             card instead of stretching the grid column and the page. */}
       <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <Panel
-          icon={BarChart3}
-          title={t("dashboard.overTime.title")}
-          description={t(
-            byYear
-              ? "dashboard.overTime.descriptionYear"
-              : "dashboard.overTime.description",
-          )}
-          aside={
-            chartYears ? (
-              <span className="shrink-0 rounded-full bg-primary px-3 py-1 text-sm font-bold tabular-nums text-primary-foreground">
+        <article className="flex min-w-0 flex-col rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <div className="flex items-start gap-3">
+            <div className="hidden rounded-lg bg-brand/10 p-2.5 text-brand sm:block">
+              <BarChart3 className="size-5" aria-hidden="true" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <SectionHeading
+                title={t("dashboard.overTime.title")}
+                description={t(
+                  byYear
+                    ? "dashboard.overTime.descriptionYear"
+                    : "dashboard.overTime.description",
+                )}
+              />
+            </div>
+            {chartYears ? (
+              <span className="shrink-0 rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-sm font-semibold tabular-nums text-brand">
                 {chartYears}
               </span>
-            ) : null
-          }
-        >
+            ) : null}
+          </div>
+
           {hasOverTimeData && peakMonth ? (
-            <dl className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <dl className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
               <OverTimeStat
                 label={t("dashboard.overTime.stats.total")}
                 value={formatLocaleNumber(monthsTotal)}
@@ -706,14 +600,16 @@ function Dashboard() {
             {t("dashboard.overTime.note")}
             {byYear ? ` ${t("dashboard.overTime.noteYear")}` : ""}
           </p>
-        </Panel>
+        </article>
 
-        <Panel
-          icon={FileCheck2}
-          title={t("dashboard.byType.title")}
-          description={t("dashboard.byType.description")}
-        >
-          <div className="space-y-4">
+        <article className="min-w-0 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <div className="flex flex-col items-start gap-2">
+            <SectionHeading
+              title={t("dashboard.byType.title")}
+              description={t("dashboard.byType.description")}
+            />
+          </div>
+          <div className="mt-5 space-y-4">
             {dashboardQuery.isLoading
               ? Array.from({ length: 4 }, (_, index) => (
                   <div key={index} className="space-y-2" aria-hidden="true">
@@ -732,7 +628,7 @@ function Dashboard() {
                     <AnimatedNumber value={item.count} />
                   </span>
                 </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-muted">
+                <div className="h-2 overflow-hidden rounded-full bg-muted">
                   <div
                     className="bar-grow h-full rounded-full bg-brand"
                     style={
@@ -755,32 +651,34 @@ function Dashboard() {
             <span className="text-muted-foreground">
               {t("dashboard.byType.total")}
             </span>
-            <span className="text-lg font-extrabold tabular-nums">
+            <span className="font-semibold tabular-nums">
               <AnimatedNumber value={totalByType} />
             </span>
           </div>
-        </Panel>
+        </article>
       </section>
 
       <section className="grid gap-4">
-        <Panel
-          icon={Clock3}
-          title={t("dashboard.expiring.title")}
-          description={t("dashboard.expiring.description")}
-        >
+        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <div className="flex flex-col items-start gap-2">
+            <SectionHeading
+              title={t("dashboard.expiring.title")}
+              description={t("dashboard.expiring.description")}
+            />
+          </div>
           {dashboardQuery.isLoading ? (
-            <div>
+            <div className="mt-4">
               <RowsSkeleton />
             </div>
           ) : null}
-          <div className="divide-y">
+          <div className="mt-4 divide-y">
             {expiring.map((item) => (
               <div
                 key={item.issuance_id}
                 className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div>
-                  <p className="font-semibold">{item.resident_name}</p>
+                  <p className="font-medium">{item.resident_name}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {t("dashboard.expiring.line", {
                       kind:
@@ -792,9 +690,7 @@ function Dashboard() {
                     })}
                   </p>
                 </div>
-                <span
-                  className={`inline-flex min-h-8 items-center self-start rounded-full border px-3 text-xs font-bold sm:self-center ${expiryPillClass(item.days_left)}`}
-                >
+                <span className="inline-flex min-h-8 items-center self-start rounded-full border px-3 text-xs font-semibold sm:self-center">
                   {expiryText(item.days_left)}
                 </span>
               </div>
@@ -815,29 +711,37 @@ function Dashboard() {
           ) : null}
           <Link
             to="/issuances"
-            className="mt-4 inline-flex min-h-11 items-center gap-2 self-start rounded-lg border-2 border-primary px-4 font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground dark:border-brand dark:text-brand dark:hover:bg-brand dark:hover:text-background"
+            className="mt-3 inline-flex min-h-11 items-center font-semibold text-brand hover:underline"
           >
             {t("dashboard.expiring.openHistory")}
-            <ChevronRight className="size-4" aria-hidden="true" />
           </Link>
-        </Panel>
+        </article>
       </section>
 
-      <Panel
-        icon={Activity}
-        title={t("dashboard.recent.title")}
-        description={
-          isAdmin
-            ? t("dashboard.recent.descriptionAdmin")
-            : t("dashboard.recent.descriptionStaff")
-        }
-      >
-        {activityQuery.isLoading ? (
+      <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+        <div className="flex items-start gap-3">
+          <div className="rounded-lg bg-brand/10 p-2.5 text-brand">
+            <Activity className="size-5" aria-hidden="true" />
+          </div>
           <div>
+            <div className="flex flex-col items-start gap-2">
+              <SectionHeading
+                title={t("dashboard.recent.title")}
+                description={
+                  isAdmin
+                    ? t("dashboard.recent.descriptionAdmin")
+                    : t("dashboard.recent.descriptionStaff")
+                }
+              />
+            </div>
+          </div>
+        </div>
+        {activityQuery.isLoading ? (
+          <div className="mt-4">
             <RowsSkeleton rows={4} />
           </div>
         ) : null}
-        <div className="divide-y">
+        <div className="mt-4 divide-y">
           {activities.map((activity) => {
             const reference =
               typeof activity.details?.reference_no === "string"
@@ -857,7 +761,7 @@ function Dashboard() {
                 className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
               >
                 <div>
-                  <p className="text-sm font-semibold">
+                  <p className="text-sm font-medium">
                     {activityTitle(activity.action, t)}
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
@@ -888,7 +792,7 @@ function Dashboard() {
         <p className="mt-2 text-xs text-muted-foreground">
           {t("dashboard.recent.note")}
         </p>
-      </Panel>
+      </section>
     </div>
   )
 }

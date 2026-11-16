@@ -29,12 +29,6 @@ function getPreselectedResident() {
   return new URLSearchParams(window.location.search).get("resident") ?? ""
 }
 
-// The dashboard's "Create issuance" button opens this page with ?new=1.
-function wantsNewIssuance() {
-  if (typeof window === "undefined") return false
-  return new URLSearchParams(window.location.search).get("new") === "1"
-}
-
 function getPreselectedType(): DocumentCode | undefined {
   if (typeof window === "undefined") return undefined
   const type = new URLSearchParams(window.location.search).get("type") ?? ""
@@ -43,7 +37,7 @@ function getPreselectedType(): DocumentCode | undefined {
 
 function IssuancesManagement() {
   const { t } = useTranslation()
-  const [isSimplifiedDialogOpen, setIsSimplifiedDialogOpen] = useState(() => Boolean(getPreselectedResident()) || wantsNewIssuance())
+  const [isSimplifiedDialogOpen, setIsSimplifiedDialogOpen] = useState(() => Boolean(getPreselectedResident()))
   const [initialDraftId, setInitialDraftId] = useState("")
   const queryClient = useQueryClient()
   const [printSetupOpen, setPrintSetupOpen] = useState(false)
@@ -91,12 +85,11 @@ function IssuancesManagement() {
           setIsSimplifiedDialogOpen(next)
           if (!next) setInitialDraftId("")
           if (!next && typeof window !== "undefined") {
-            // Drop ?resident=, ?type= and ?new= so the next "New Issuance" opens blank.
+            // Drop ?resident= and ?type= so the next "New Issuance" opens blank.
             const params = new URLSearchParams(window.location.search)
-            if (params.has("resident") || params.has("type") || params.has("new")) {
+            if (params.has("resident") || params.has("type")) {
               params.delete("resident")
               params.delete("type")
-              params.delete("new")
               const query = params.toString()
               window.history.replaceState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`)
             }
