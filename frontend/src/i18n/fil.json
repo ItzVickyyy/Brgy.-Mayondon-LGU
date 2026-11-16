@@ -145,6 +145,12 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Pangkalahatang tanaw sa pag-isyu ng dokumento, mga malapit nang mag-expire, at mga gawaing nangangailangan ng pansin.",
+    "cta": {
+      "ariaLabel": "Gumawa ng pag-isyu",
+      "title": "Handa ka na bang mag-isyu ng dokumento?",
+      "description": "Magsimula ng bagong kahilingan sa dokumento para sa isang residente.",
+      "button": "Gumawa ng pag-isyu"
+    },
     "period": {
       "label": "Panahon",
       "ariaLabel": "Panahon ng ulat sa dashboard",
