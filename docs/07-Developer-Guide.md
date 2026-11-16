@@ -42,7 +42,7 @@ Until the architecture is validated at the client site:
 > - **`master`** holds documentation and planning.
 > - **`draft/admin-portal`** holds the UI and supporting code, and **the Version 1 demo runs from it**.
 > - **`Foundation`** is frozen as a read-only reference. As of Nov 1 it contained no commit that `master` lacks (check with `git rev-list --count origin/master..origin/Foundation` before relying on this). Do not commit to it, rename it or delete it.
-> - The planned `production` branch is still not created.
+> - The `Production` branch was created on Nov 16, 2026 (patch 111/112) as the release branch the barangay computer updates from; its name starts with a capital P.
 >
 > The root README was updated to match.
 >
@@ -76,15 +76,15 @@ The **Branch sync check** workflow (`.github/workflows/branch-sync-check.yml`, *
 | Branch | Purpose | Rules |
 |---|---|---|
 | `master` | Integration branch for reviewed work | Features that passed review and required checks; not automatically production-ready |
-| `production` | Release/deployment branch | Only tested, approved releases; deploy only after the hosting process is verified |
+| `Production` | Release/deployment branch | Only tested, approved releases; deploy only after the hosting process is verified |
 
-Do not create `production`, rename `Foundation`, or merge `Foundation` into `master` unless the team explicitly reviews and changes the plan. Short-lived task branches: `feature/`, `fix/`, `hotfix/`, `docs/`, `chore/` + a short name. Keep each branch to one task.
+The `Production` branch now exists and is the release branch of the barangay computer (it installs what `Production` points to, see below). Do not rename `Foundation`, or merge `Foundation` into `master` unless the team explicitly reviews and changes the plan. Short-lived task branches: `feature/`, `fix/`, `hotfix/`, `docs/`, `chore/` + a short name. Keep each branch to one task.
 
 **Feature workflow:** check the task and acceptance criteria against client-approved requirements → start from the latest `master` → create a prefixed branch → implement the smallest complete change with tests/docs → run checks → push and open a PR to `master` explaining what, why, how tested and known limits → a teammate reviews (never approve your own PR) → fix feedback and wait for CI → merge only when satisfied; resolve conflicts deliberately and re-run affected checks.
 
-**Release workflow:** confirm `master` matches client-approved requirements → test the complete system (backend, frontend, migrations, integration, deployment config) → release PR `master` → `production` reviewed for scope, evidence, migration/rollback, secrets/config and checklist → merge after approval and passing checks → deploy only after the real process is verified → record the version and any issues. A branch named `production` does not prove anything is deployed. **From patch 111 an installed barangay computer updates itself from `production` once a day (`scripts/auto-update.ps1`, docs/11 section H). A push to `production` is therefore a release to the real office: never push work in progress there, never force-push it, and note the commit in the release record.**
+**Release workflow:** confirm `master` matches client-approved requirements → test the complete system (backend, frontend, migrations, integration, deployment config) → release PR `master` → `Production` reviewed for scope, evidence, migration/rollback, secrets/config and checklist → merge after approval and passing checks → deploy only after the real process is verified → record the version and any issues. A branch named `Production` does not prove anything is deployed. **From patch 111 an installed barangay computer updates itself from `Production` once a day (`scripts/auto-update.ps1`, docs/11 section H). A push to `Production` is therefore a release to the real office: never push work in progress there, never force-push it, and note the commit in the release record.**
 
-**Hotfix:** branch `hotfix/<name>` from `production`, make and test the smallest safe fix, PR to `production`, then ensure the fix is in `master`. Not for unfinished features.
+**Hotfix:** branch `hotfix/<name>` from `Production`, make and test the smallest safe fix, PR to `Production`, then ensure the fix is in `master`. Not for unfinished features.
 
 ## 5. Review and pull-request checklist
 

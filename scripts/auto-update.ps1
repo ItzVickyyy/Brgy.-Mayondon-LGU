@@ -4,7 +4,7 @@
 #   .\scripts\auto-update.ps1                 does it now
 #
 # What it does:
-#   1. Asks GitHub which commit the APPROVED branch points to (default: "production",
+#   1. Asks GitHub which commit the APPROVED branch points to (default: "Production",
 #      the release branch of docs/07 section 4). Only that branch is ever installed,
 #      never "master", so work in progress cannot reach the barangay computer.
 #   2. If that commit is already installed, or already failed here once, it stops.
@@ -24,7 +24,7 @@
 
 param(
     [string]$Repo = "ItzVickyyy/Brgy.-Mayondon-LGU",
-    [string]$Ref = "production",
+    [string]$Ref = "Production",
     [switch]$CheckOnly,
     # Only for tests: where the GitHub API and the archive downloads come from.
     [string]$ApiBase = "https://api.github.com",

@@ -7,8 +7,8 @@
 # Test it afterwards:  .\scripts\auto-update.ps1 -CheckOnly
 #
 # The task installs only the commit that the branch given by -Ref (default
-# "production") points to. That branch holds approved releases only (docs/07
-# section 4); the team creates it on purpose with "git push origin master:production"
+# "Production") points to. That branch holds approved releases only (docs/07
+# section 4); the team creates it on purpose with "git push origin master:Production"
 # when a version is approved. Until it exists the task finds nothing to install.
 # Pointing -Ref at "master" would put every unreviewed change on the real computer.
 #
@@ -23,7 +23,7 @@ param(
     # Time of day, 24-hour, for example 12:30.
     [string]$Time = "12:30",
     [string]$Repo = "ItzVickyyy/Brgy.-Mayondon-LGU",
-    [string]$Ref = "production",
+    [string]$Ref = "Production",
     [string]$TaskName = "Mayondon Auto Update",
     [switch]$Unregister
 )

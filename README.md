@@ -32,7 +32,7 @@ that serves the frontend and API together, follow [`docs/06-Architecture-and-Dep
 The LAN deployment guide is a preparation guide, not proof of a verified client installation.
 
 
-**Installing on the server computer:** double-click `Install-Mayondon.cmd` (and `Update-Mayondon.cmd` for later versions; `Start-Mayondon.cmd` starts the program by hand if it is stopped, `Check-Mayondon.cmd` shows whether everything is fine). After installation the program also opens in the browser when the Windows user signs in, and installs the approved version (branch `production`) by itself once a day. Details and checks: [`docs/11-Host-Checks.md`](docs/11-Host-Checks.md) section H.
+**Installing on the server computer:** double-click `Install-Mayondon.cmd` (and `Update-Mayondon.cmd` for later versions; `Start-Mayondon.cmd` starts the program by hand if it is stopped, `Check-Mayondon.cmd` shows whether everything is fine). After installation the program also opens in the browser when the Windows user signs in, and installs the approved version (branch `Production`) by itself once a day. Details and checks: [`docs/11-Host-Checks.md`](docs/11-Host-Checks.md) section H.
 
 Log in with `FIRST_SUPERUSER` / `FIRST_SUPERUSER_PASSWORD` from the root `.env`.
 There is no public sign-up: an admin creates accounts from the **Admin** page.
@@ -54,14 +54,15 @@ branching strategy, review checklist, testing guidance, and developer roles.
 - `draft/admin-portal` is not ahead of `master`. Do not start new work on it unless the team decides to keep using it.
 - Until the team decides otherwise, make changes on a short-lived `feature/`, `fix/`, `docs/` or `chore/` branch cut from `master` and open a pull request.
 - `Foundation` is frozen as a read-only reference. Do not commit to, rename or delete it.
-- Do not create the planned `production` branch unless the team explicitly
-  reviews and changes the branch plan. See
+- `Production` is the release branch (capital P). Only push tested, approved
+  versions to it, never force-push it: installed barangay computers update
+  themselves from it. See
   [`docs/07-Developer-Guide.md`](docs/07-Developer-Guide.md) section 4.
 
 **Planned branch policy after client approval and team review:**
 - `master` will be the integration branch for reviewed changes that pass the
   required checks.
-- `production` will contain only approved, tested releases intended for
+- `Production` will contain only approved, tested releases intended for
   deployment. Deployment remains unverified until the real hosting process is
   tested.
 - Use short-lived `feature/`, `fix/`, `hotfix/`, `docs/`, and `chore/`
