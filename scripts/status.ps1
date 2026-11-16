@@ -20,7 +20,7 @@ if (Get-Command docker -ErrorAction SilentlyContinue) {
     $dockerOk = ($LASTEXITCODE -eq 0)
 }
 if (-not $dockerOk) {
-    Bad "Docker Desktop is not running. Open it and wait, or run scripts\start-mayondon.ps1."
+    Bad "Docker Desktop is not running. Double-click Start-Mayondon.cmd, or open Docker Desktop and wait until it says it is running."
 } else {
     Ok "Docker Desktop is running."
     # Without .env, Docker Compose prints a wall of "variable not set" errors: say it once, in plain words.
@@ -30,7 +30,7 @@ if (-not $dockerOk) {
     if ($notInstalled) {
         # nothing more to ask Docker Compose here
     } elseif (-not $backendId) {
-        Bad "The program is not started. Run scripts\start-mayondon.ps1."
+        Bad "The program is not started. Double-click Start-Mayondon.cmd (or sign out of Windows and sign in again), then run this check again."
     } else {
         $health = (docker inspect --format "{{.State.Health.Status}}" $backendId 2>$null | Out-String).Trim()
         if ($health -eq "healthy") { Ok "The program is healthy." } else { Bad "The program is '$health' (not healthy). Run: docker compose -f compose.yml logs backend --tail 30" }
@@ -42,7 +42,7 @@ if (-not $dockerOk) {
         $extra = $services | Where-Object { $_ -notin @("db", "backend", "caddy") }
         if ($extra) { Warn "Development services are running here: $($extra -join ', '). The real system should show only db, backend (and caddy with HTTPS)." }
 
-        $log = (docker compose -f compose.yml logs backend --tail 80 2>&1 | Out-String)
+        $log = (docker compose -f compose.yml logs backend --tail 500 2>&1 | Out-String)
         $line = ($log -split "`r?`n" | Where-Object { $_ -match "\[migrate\]" } | Select-Object -Last 1)
         if ($line -match "STOP") { Bad $line.Trim() } elseif ($line) { Ok $line.Trim() }
     }
@@ -69,8 +69,12 @@ if (-not (Test-Path .env)) { if ($dockerOk) { } else { Bad ".env is missing." } 
 
 # Backups
 $backups = Join-Path $repoRoot "backups"
-if (Test-Path (Join-Path $backups "backup-private.pem")) { Warn "backup-private.pem is on this computer. Copy it to the USB drive and delete it here." }
-if (-not (Test-Path (Join-Path $backups "backup-public.pem"))) { Warn "No backup key yet (backups would be unencrypted)." }
+if (Test-Path (Join-Path $backups "backup-private.pem")) { Warn "backup-private.pem is on this computer. Copy ONLY that file to the USB drive and delete it here. Leave backup-public.pem in the backups folder: the program needs it to make backups." }
+if (-not (Test-Path (Join-Path $backups "backup-public.pem"))) {
+    $encRequired = (Test-Path .env) -and ((Get-Content .env -Raw) -match "(?m)^BACKUP_REQUIRE_ENCRYPTION=true\s*$")
+    if ($encRequired) { Bad "backup-public.pem is missing from the backups folder, so every backup is being REFUSED. Put it back (copy it from the USB drive) or make a new key (docs/11 section G)." }
+    else { Warn "No backup key yet (backups would be unencrypted)." }
+}
 $newest = Get-ChildItem -LiteralPath $backups -Filter "mayondon-db-*" -File -ErrorAction SilentlyContinue |
     Where-Object { $_.Name -match '\.dump(\.enc)?$' } | Sort-Object LastWriteTime | Select-Object -Last 1
 if (-not $newest) { Bad "There is no backup file yet." } else {
@@ -85,6 +89,16 @@ if (Test-Path $lastRun) {
 foreach ($name in @("Mayondon Database Backup", "Mayondon Start at Sign-in")) {
     if (Get-ScheduledTask -TaskName $name -ErrorAction SilentlyContinue) { Ok "Scheduled task '$name' exists." } else { Warn "Scheduled task '$name' is missing." }
 }
+
+# Network profile: the firewall rule opens port 8000 on Private networks only
+try {
+    $publicNet = @(Get-NetConnectionProfile -ErrorAction Stop | Where-Object {
+        $_.NetworkCategory -eq "Public" -and $_.IPv4Connectivity -notin @("Disconnected", "NoTraffic") -and
+        $_.InterfaceAlias -notmatch "vEthernet|WSL|Docker|VirtualBox|VMware|Hyper-V|Loopback" })
+    if ($publicNet.Count -gt 0) {
+        Warn "Windows treats the network '$($publicNet[0].Name)' as Public, so other office computers cannot open the program. Set it to Private: Settings > Network > the network > Network profile type > Private."
+    }
+} catch { }
 
 # Disk
 try {

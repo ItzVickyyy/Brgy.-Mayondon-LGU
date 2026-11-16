@@ -29,4 +29,14 @@ foreach ($port in $Ports) {
         -Protocol TCP -LocalPort $port -Profile Private | Out-Null
     Write-Host "Allowed inbound TCP $port on Private networks."
 }
-Write-Host "If the office network is set to 'Public' in Windows, change it to 'Private' (Settings > Network)."
+$publicNet = @(Get-NetConnectionProfile -ErrorAction SilentlyContinue | Where-Object {
+    $_.NetworkCategory -eq "Public" -and $_.IPv4Connectivity -notin @("Disconnected", "NoTraffic") -and
+    $_.InterfaceAlias -notmatch "vEthernet|WSL|Docker|VirtualBox|VMware|Hyper-V|Loopback" })
+if ($publicNet.Count -gt 0) {
+    Write-Host ""
+    Write-Host "WARNING: Windows treats '$($publicNet[0].Name)' as a PUBLIC network. The rule above does not apply there," -ForegroundColor Yellow
+    Write-Host "so other computers cannot open the program. Set it to Private: Settings > Network > the network > Network profile type > Private." -ForegroundColor Yellow
+    Start-Sleep -Seconds 15
+} else {
+    Write-Host "If the office network is ever set to 'Public' in Windows, change it to 'Private' (Settings > Network)."
+}

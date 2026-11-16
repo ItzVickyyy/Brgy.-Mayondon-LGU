@@ -92,7 +92,7 @@ while ((Get-Date) -lt $deadline) {
 
 # ------------------------------------------------------------- 5. check
 Step "5/5  Checking"
-$log = (Invoke-Quiet { docker compose -f compose.yml logs backend --tail 60 2>&1 } | Out-String)
+$log = (Invoke-Quiet { docker compose -f compose.yml logs backend --tail 500 2>&1 } | Out-String)
 $migrateLine = ($log -split "`r?`n" | Where-Object { $_ -match "\[migrate\]" } | Select-Object -Last 1)
 if ($migrateLine) { Write-Host $migrateLine }
 
