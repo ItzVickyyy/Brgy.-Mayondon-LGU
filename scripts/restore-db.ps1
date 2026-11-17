@@ -69,20 +69,36 @@ if ($resolvedBackup.EndsWith(".enc", [System.StringComparison]::OrdinalIgnoreCas
     }
     $backupFolder = Join-Path (Get-Location) "backups"
     New-Item -ItemType Directory -Path $backupFolder -Force | Out-Null
+    $backupFolderFull = (Resolve-Path -LiteralPath $backupFolder).ProviderPath.TrimEnd("\")
     $tempName = "restore-temp-$([guid]::NewGuid().ToString('N')).dump"
-    $decryptedTemp = Join-Path $backupFolder $tempName
+    $decryptedTemp = Join-Path $backupFolderFull $tempName
+    $script:staged = @()
+    # Docker Desktop cannot always see a USB drive (a drive plugged in after Docker started shows up
+    # EMPTY inside a container), so a mount of the key's folder would fail with a misleading "wrong
+    # passphrase". The key (and a backup kept outside backups\) is copied into backups\ for the few
+    # seconds the decryption takes, and always deleted afterwards.
+    function Copy-IntoBackups([string]$path) {
+        $parent = (Split-Path -Parent $path).TrimEnd("\")
+        if ($parent -ieq $backupFolderFull) { return (Split-Path -Leaf $path) }
+        $name = "restore-temp-$([guid]::NewGuid().ToString('N'))-$(Split-Path -Leaf $path)"
+        $copy = Join-Path $backupFolderFull $name
+        Copy-Item -LiteralPath $path -Destination $copy -Force
+        $script:staged += $copy
+        return $name
+    }
     try {
+        $inName = Copy-IntoBackups $resolvedBackup
+        $keyName = Copy-IntoBackups $resolvedKey
         docker compose -f compose.yml run --rm -T --no-deps -e MIGRATE_ON_START=false -e BACKUP_PASSPHRASE `
-            -v "$((Split-Path -Parent $resolvedBackup)):/in:ro" `
-            -v "$((Split-Path -Parent $resolvedKey)):/keys:ro" `
             backend python -m app.backup_cli decrypt `
-            --in "/in/$(Split-Path -Leaf $resolvedBackup)" `
-            --key "/keys/$(Split-Path -Leaf $resolvedKey)" `
+            --in "/backups/$inName" `
+            --key "/backups/$keyName" `
             --out "/backups/$tempName"
         $decryptExit = $LASTEXITCODE
     }
     finally {
         Remove-Item Env:BACKUP_PASSPHRASE -ErrorAction SilentlyContinue
+        foreach ($copy in $script:staged) { Remove-Item -LiteralPath $copy -Force -ErrorAction SilentlyContinue }
     }
     if ($decryptExit -ne 0 -or -not (Test-Path -LiteralPath $decryptedTemp)) {
         Remove-Item -LiteralPath $decryptedTemp -Force -ErrorAction SilentlyContinue

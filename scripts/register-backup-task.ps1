@@ -54,7 +54,7 @@ if (-not (Test-Path -LiteralPath $script -PathType Leaf)) {
     throw "scheduled-backup.ps1 was not found next to this script."
 }
 
-$arguments = "-NoProfile -ExecutionPolicy Bypass -File `"$script`" -KeepCopies $KeepCopies"
+$arguments = "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File `"$script`" -KeepCopies $KeepCopies"
 if (-not [string]::IsNullOrWhiteSpace($CopyTo)) {
     $arguments += " -CopyTo `"$CopyTo`""
 }
