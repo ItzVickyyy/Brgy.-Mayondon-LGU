@@ -137,7 +137,7 @@ def get_password_reset_token_email(token: str) -> str | None:
             token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
         )
         return str(decoded_token["sub"])
-    except (InvalidTokenError, KeyError, TypeError):
+    except InvalidTokenError, KeyError, TypeError:
         return None
 
 
@@ -153,5 +153,5 @@ def verify_password_reset_token(token: str, hashed_password: str) -> str | None:
         ):
             return None
         return str(decoded_token["sub"])
-    except (InvalidTokenError, KeyError, TypeError):
+    except InvalidTokenError, KeyError, TypeError:
         return None

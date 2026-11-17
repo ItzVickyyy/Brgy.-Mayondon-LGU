@@ -1,4 +1,3 @@
-import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -107,7 +106,9 @@ def authenticate(*, session: Session, email: str, password: str) -> User | None:
     if not verified:
         db_user.failed_login_attempts += 1
         if db_user.failed_login_attempts >= settings.LOGIN_MAX_FAILED_ATTEMPTS:
-            db_user.locked_until = now + timedelta(minutes=settings.LOGIN_LOCKOUT_MINUTES)
+            db_user.locked_until = now + timedelta(
+                minutes=settings.LOGIN_LOCKOUT_MINUTES
+            )
         session.add(db_user)
         session.commit()
         return None

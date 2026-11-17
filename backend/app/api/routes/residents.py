@@ -31,9 +31,9 @@ from app.models_residents import (
     ResidentPhoto,
     ResidentPublic,
     ResidentSector,
+    ResidentSectorCount,
     ResidentsPublic,
     ResidentUpdate,
-    ResidentSectorCount,
     SectorSummary,
     VoterProofRequest,
     build_full_name,
@@ -112,7 +112,7 @@ def _id_valid_untils(
             col(IssuanceBarangayId.issuance_id) == col(Issuance.id),
         )
     ).all()
-    return {resident_id: valid_until for resident_id, valid_until in rows}
+    return dict(rows)
 
 
 def _id_status_of(

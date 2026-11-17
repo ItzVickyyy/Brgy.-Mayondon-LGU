@@ -14,7 +14,7 @@ from app.models import PasswordRecoveryRateLimit
 
 def _bucket_key(kind: str, value: str) -> str:
     """Create a keyed, non-reversible identifier for a rate-limit bucket."""
-    message = f"password-recovery:{kind}:{value}".encode("utf-8")
+    message = f"password-recovery:{kind}:{value}".encode()
     return hmac.new(
         settings.SECRET_KEY.encode("utf-8"), message, hashlib.sha256
     ).hexdigest()

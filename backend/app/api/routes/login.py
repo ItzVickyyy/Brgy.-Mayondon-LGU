@@ -28,8 +28,8 @@ from app.models import (
 from app.models_security import MfaLogin
 from app.utils import (
     generate_password_reset_token,
-    get_password_reset_token_email,
     generate_reset_password_email,
+    get_password_reset_token_email,
     send_email,
     verify_password_reset_token,
 )
@@ -216,7 +216,9 @@ def recover_password(
         email=email,
         client_ip=request.client.host if request.client else None,
     )
-    user = None if rate_limited else crud.get_user_by_email(session=session, email=email)
+    user = (
+        None if rate_limited else crud.get_user_by_email(session=session, email=email)
+    )
 
     if not settings.emails_enabled:
         return Message(

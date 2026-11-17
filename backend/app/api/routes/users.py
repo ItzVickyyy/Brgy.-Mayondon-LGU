@@ -67,9 +67,7 @@ def read_users(
     return UsersPublic(data=users_public, count=count)
 
 
-@router.post(
-    "/", dependencies=[Depends(require_user_admin)], response_model=UserPublic
-)
+@router.post("/", dependencies=[Depends(require_user_admin)], response_model=UserPublic)
 def create_user(
     *, session: SessionDep, user_in: UserCreateByAdmin, current_user: CurrentUser
 ) -> Any:
@@ -86,12 +84,15 @@ def create_user(
 
     user = crud.create_user(
         session=session,
-        user_create=UserCreate(
-            **user_in.model_dump(), password=DEFAULT_PASSWORD
-        ),
+        user_create=UserCreate(**user_in.model_dump(), password=DEFAULT_PASSWORD),
         temporary=True,
     )
-    record_admin_action(actor_id=current_user.id, action="user.create", target_type="user", target_id=user.id)
+    record_admin_action(
+        actor_id=current_user.id,
+        action="user.create",
+        target_type="user",
+        target_id=user.id,
+    )
     record_audit_event(
         session,
         action="user.create",
@@ -159,7 +160,10 @@ def update_user_me(
 
 @router.patch("/me/password", response_model=Message)
 def update_password_me(
-    *, session: SessionDep, body: UpdatePassword, current_user: CurrentUserAllowTemporary
+    *,
+    session: SessionDep,
+    body: UpdatePassword,
+    current_user: CurrentUserAllowTemporary,
 ) -> Any:
     """
     Update own password.
@@ -335,9 +339,7 @@ def update_user(
             detail="Use Change password to change your own password.",
         )
     if user_in.unlock and is_self:
-        raise HTTPException(
-            status_code=400, detail="An account cannot unlock itself."
-        )
+        raise HTTPException(status_code=400, detail="An account cannot unlock itself.")
     temporary = user_in.reset_to_default_password and not is_self
     if temporary:
         # Never keep the flag or the default in the stored fields or the log.
@@ -353,7 +355,12 @@ def update_user(
     )
     unlock_only = user_in.unlock and not changed_fields and not temporary
     if not unlock_only:
-        record_admin_action(actor_id=current_user.id, action="user.update", target_type="user", target_id=db_user.id)
+        record_admin_action(
+            actor_id=current_user.id,
+            action="user.update",
+            target_type="user",
+            target_id=db_user.id,
+        )
         record_audit_event(
             session,
             action="user.update",
@@ -391,7 +398,12 @@ def update_user(
             details={"reason": "password_reset"},
         )
     if db_user.role != previous_role:
-        record_admin_action(actor_id=current_user.id, action="user.role_change", target_type="user", target_id=db_user.id)
+        record_admin_action(
+            actor_id=current_user.id,
+            action="user.role_change",
+            target_type="user",
+            target_id=db_user.id,
+        )
         record_audit_event(
             session,
             action="user.role_change",
@@ -435,5 +447,10 @@ def delete_user(
     )
     session.delete(user)
     session.commit()
-    record_admin_action(actor_id=current_user.id, action="user.delete", target_type="user", target_id=user_id)
+    record_admin_action(
+        actor_id=current_user.id,
+        action="user.delete",
+        target_type="user",
+        target_id=user_id,
+    )
     return Message(message="User deleted successfully")

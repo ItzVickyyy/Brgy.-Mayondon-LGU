@@ -249,6 +249,8 @@ class NewPassword(SQLModel):
 
 # Foundation tables (lookups, officials, audit log). Imported last so they can
 # reuse helpers above and so Alembic sees every table through ``app.models``.
+# Registration order matters: keep isort off for this block.
+# isort: off
 from app import models_foundation  # noqa: E402,F401
 from app import models_residents  # noqa: E402,F401
 from app import models_issuance  # noqa: E402,F401
@@ -256,3 +258,4 @@ from app import models_backup  # noqa: E402,F401
 from app import models_import  # noqa: E402,F401
 from app import models_security  # noqa: E402,F401
 from app import models_notification  # noqa: E402,F401
+# isort: on
