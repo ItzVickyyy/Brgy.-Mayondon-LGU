@@ -154,7 +154,13 @@ try {
                 Finish "failed" $false "The approved version $short is not a newer version of the installed one ($($cmp.status)), so it was not installed. Ask the developers." $target 1
             }
         } catch {
-            Finish "failed" $false "GitHub could not compare the installed version with $short ($($_.Exception.Message)), so nothing was changed. Ask the developers." $target 1
+            $http = Get-ErrorCode $_
+            if ($http -eq 404 -or $http -eq 422) {
+                # GitHub does not know the installed commit (or the two are unrelated): a developer must look.
+                Finish "failed" $false "GitHub could not compare the installed version with $short ($($_.Exception.Message)), so nothing was changed. Ask the developers." $target 1
+            }
+            # A network hiccup must not mark the version as failed for good: try again tomorrow.
+            Finish "skipped" $true "GitHub could not be reached to compare versions ($($_.Exception.Message)); nothing was changed, will try again tomorrow."
         }
     }
 
