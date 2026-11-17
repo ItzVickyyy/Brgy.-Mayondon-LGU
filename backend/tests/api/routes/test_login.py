@@ -5,14 +5,13 @@ from fastapi.testclient import TestClient
 from pwdlib.hashers.bcrypt import BcryptHasher
 from sqlmodel import Session
 
+from app.api.routes.login import recover_password_html_content
 from app.core.config import settings
 from app.core.password_recovery import is_password_recovery_rate_limited
-from app.api.routes.login import recover_password_html_content
 from app.core.security import get_password_hash, verify_password
 from app.crud import create_user
 from app.models import PasswordRecoveryRateLimit, User, UserCreate
 from app.utils import generate_password_reset_token
-from tests.utils.user import user_authentication_headers
 from tests.utils.utils import random_email, random_lower_string
 
 
@@ -43,9 +42,7 @@ def test_get_access_token_unknown_email(client: TestClient) -> None:
         "password": "some-incorrect-password",
     }
 
-    response = client.post(
-        f"{settings.API_V1_STR}/login/access-token", data=login_data
-    )
+    response = client.post(f"{settings.API_V1_STR}/login/access-token", data=login_data)
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Incorrect email or password"}
@@ -142,10 +139,14 @@ def test_reset_password(client: TestClient, db: Session) -> None:
     )
     user = create_user(session=db, user_create=user_create)
     user.failed_login_attempts = settings.LOGIN_MAX_FAILED_ATTEMPTS
-    user.locked_until = datetime.now(UTC) + timedelta(minutes=settings.LOGIN_LOCKOUT_MINUTES)
+    user.locked_until = datetime.now(UTC) + timedelta(
+        minutes=settings.LOGIN_LOCKOUT_MINUTES
+    )
     db.add(user)
     db.commit()
-    token = generate_password_reset_token(email=email, hashed_password=user.hashed_password)
+    token = generate_password_reset_token(
+        email=email, hashed_password=user.hashed_password
+    )
     data = {"new_password": new_password, "token": token}
 
     r = client.post(
@@ -244,7 +245,6 @@ def test_login_with_argon2_password_keeps_hash(client: TestClient, db: Session) 
     assert user.hashed_password.startswith("$argon2")
 
 
-
 def test_login_locks_account_after_failed_attempts(
     client: TestClient, db: Session
 ) -> None:
@@ -297,6 +297,7 @@ def test_successful_login_clears_expired_lockout(
     assert user.failed_login_attempts == 0
     assert user.locked_until is None
 
+
 def test_password_recovery_sends_email_for_registered_user(
     client: TestClient, db: Session
 ) -> None:
@@ -310,7 +311,9 @@ def test_password_recovery_sends_email_for_registered_user(
         patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
         patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
     ):
-        response = client.post(f"{settings.API_V1_STR}/password-recovery", json={"email": email})
+        response = client.post(
+            f"{settings.API_V1_STR}/password-recovery", json={"email": email}
+        )
 
     assert response.status_code == 200
     assert response.json() == {
@@ -329,7 +332,9 @@ def test_password_recovery_does_not_send_email_for_unknown_user(
         patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
         patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
     ):
-        response = client.post(f"{settings.API_V1_STR}/password-recovery", json={"email": email})
+        response = client.post(
+            f"{settings.API_V1_STR}/password-recovery", json={"email": email}
+        )
 
     assert response.status_code == 200
     assert response.json() == {
@@ -338,9 +343,7 @@ def test_password_recovery_does_not_send_email_for_unknown_user(
     send_email_mock.assert_not_called()
 
 
-def test_reset_password_token_cannot_be_reused(
-    client: TestClient, db: Session
-) -> None:
+def test_reset_password_token_cannot_be_reused(client: TestClient, db: Session) -> None:
     email = random_email()
     user = create_user(
         session=db,
@@ -363,6 +366,7 @@ def test_reset_password_token_cannot_be_reused(
     assert second_response.status_code == 400
     assert second_response.json() == {"detail": "Invalid token"}
 
+
 def test_development_password_recovery_preview_generates_bound_token(
     db: Session,
 ) -> None:
@@ -376,6 +380,7 @@ def test_development_password_recovery_preview_generates_bound_token(
 
     assert response.status_code == 200
     assert "reset-password" in response.body.decode()
+
 
 def test_password_recovery_throttles_email_delivery(
     client: TestClient, db: Session
@@ -394,20 +399,19 @@ def test_password_recovery_throttles_email_delivery(
         patch("app.core.config.settings.PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_IP", 1000),
     ):
         responses = [
-            client.post(f"{settings.API_V1_STR}/password-recovery", json={"email": email})
+            client.post(
+                f"{settings.API_V1_STR}/password-recovery", json={"email": email}
+            )
             for _ in range(3)
         ]
 
     assert all(response.status_code == 200 for response in responses)
     assert all(
         response.json()
-        == {
-            "message": "If that email is registered, we sent a password recovery link"
-        }
+        == {"message": "If that email is registered, we sent a password recovery link"}
         for response in responses
     )
     assert send_email_mock.call_count == 2
-
 
 
 def test_password_recovery_cleans_up_old_rate_limit_buckets(
@@ -452,7 +456,6 @@ def test_password_recovery_throttles_shared_client_ip(
     assert results == [False, False, True]
 
 
-
 def test_access_token_is_invalidated_after_password_reset(
     client: TestClient, db: Session
 ) -> None:
@@ -483,6 +486,4 @@ def test_access_token_is_invalidated_after_password_reset(
         headers={"Authorization": f"Bearer {old_access_token}"},
     )
     assert protected_response.status_code == 403
-    assert protected_response.json() == {
-        "detail": "Could not validate credentials"
-    }
+    assert protected_response.json() == {"detail": "Could not validate credentials"}

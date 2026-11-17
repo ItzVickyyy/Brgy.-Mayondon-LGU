@@ -27,7 +27,9 @@ def _rows(db: Session, email: str) -> list[AuditLog]:
 
 def _new_user(db: Session, **extra: object) -> tuple[str, str]:
     email, password = random_email(), random_lower_string()
-    create_user(session=db, user_create=UserCreate(email=email, password=password, **extra))
+    create_user(
+        session=db, user_create=UserCreate(email=email, password=password, **extra)
+    )
     return email, password
 
 

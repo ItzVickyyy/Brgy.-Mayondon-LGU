@@ -9,8 +9,8 @@ from sqlmodel import Session, select
 
 from app.core.config import settings
 from app.core.dates import today_manila
-from app.models_issuance import IssuanceBarangayId
 from app.core.permissions import has_permission as real_has_permission
+from app.models_issuance import IssuanceBarangayId
 from tests.api.routes.test_issuances import (  # noqa: F401  (fixtures are reused)
     _audit,
     _doc,
@@ -272,6 +272,7 @@ def test_resident_response_reports_latest_id_status(
     db.commit()
     response = client.get(resident_url, headers=headers)
     assert response.json()["id_status"] == "expired"
+
 
 # --- Renewal, replacement and history ---------------------------------------------
 
@@ -562,4 +563,3 @@ def test_id_list_ignores_other_documents_and_drafts(
     )
     _issue(client, staff_token_headers, r.json()["id"])
     assert _listed(client, staff_token_headers, q=res["last_name"]) == []
-

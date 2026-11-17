@@ -124,8 +124,7 @@ def test_frontend_origins_trims_and_deduplicates_configured_hosts() -> None:
     settings = make_settings(
         FRONTEND_HOST="http://localhost:5173",
         FRONTEND_HOSTS=(
-            " https://example.com,https://preview.example.com, "
-            "https://example.com "
+            " https://example.com,https://preview.example.com, https://example.com "
         ),
     )
 

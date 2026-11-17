@@ -285,9 +285,7 @@ def test_update_password_me(
         data={"username": settings.FIRST_SUPERUSER, "password": new_password},
     )
     assert fresh_login.status_code == 200
-    fresh_headers = {
-        "Authorization": f"Bearer {fresh_login.json()['access_token']}"
-    }
+    fresh_headers = {"Authorization": f"Bearer {fresh_login.json()['access_token']}"}
     old_data = {
         "current_password": new_password,
         "new_password": settings.FIRST_SUPERUSER_PASSWORD,
