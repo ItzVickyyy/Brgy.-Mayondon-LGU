@@ -6,7 +6,7 @@ from datetime import UTC, datetime, timedelta
 
 from sqlalchemy import case, delete
 from sqlalchemy.dialects.postgresql import insert
-from sqlmodel import Session
+from sqlmodel import Session, col
 
 from app.core.config import settings
 from app.models import PasswordRecoveryRateLimit
@@ -24,25 +24,27 @@ def _increment_bucket(
     session: Session, *, key: str, now: datetime, cutoff: datetime
 ) -> int:
     """Atomically increment a fixed-window bucket across app instances."""
-    table = PasswordRecoveryRateLimit.__table__
-    statement = insert(PasswordRecoveryRateLimit).values(
+    bucket_key = col(PasswordRecoveryRateLimit.bucket_key)
+    window_started_at = col(PasswordRecoveryRateLimit.window_started_at)
+    attempts = col(PasswordRecoveryRateLimit.attempts)
+    insert_statement = insert(PasswordRecoveryRateLimit).values(
         bucket_key=key,
         window_started_at=now,
         attempts=1,
     )
-    statement = statement.on_conflict_do_update(
-        index_elements=[table.c.bucket_key],
+    statement = insert_statement.on_conflict_do_update(
+        index_elements=[bucket_key],
         set_={
             "window_started_at": case(
-                (table.c.window_started_at <= cutoff, now),
-                else_=table.c.window_started_at,
+                (window_started_at <= cutoff, now),
+                else_=window_started_at,
             ),
             "attempts": case(
-                (table.c.window_started_at <= cutoff, 1),
-                else_=table.c.attempts + 1,
+                (window_started_at <= cutoff, 1),
+                else_=attempts + 1,
             ),
         },
-    ).returning(table.c.attempts)
+    ).returning(attempts)
     return int(session.execute(statement).scalar_one())
 
 
@@ -74,7 +76,7 @@ def is_password_recovery_rate_limited(
     )
     session.execute(
         delete(PasswordRecoveryRateLimit).where(
-            PasswordRecoveryRateLimit.window_started_at <= cleanup_cutoff
+            col(PasswordRecoveryRateLimit.window_started_at) <= cleanup_cutoff
         )
     )
     session.commit()

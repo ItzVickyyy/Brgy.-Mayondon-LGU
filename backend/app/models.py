@@ -19,7 +19,7 @@ class UserRole(StrEnum):
     staff = "staff"
 
 
-def _reconcile_role(model: UserCreate | UserUpdate) -> None:
+def _reconcile_role(model: UserBase | UserUpdate) -> None:
     """Keep ``role`` and the legacy ``is_superuser`` flag describing the same thing.
 
     Clients may send either field. ``role`` is the source of truth; the flag is

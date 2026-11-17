@@ -41,7 +41,7 @@ def update_user(
     if user_data.pop("unlock", False):
         db_user.failed_login_attempts = 0
         db_user.locked_until = None
-    extra_data = {}
+    extra_data: dict[str, Any] = {}
     if "password" in user_data:
         password = user_data["password"]
         hashed_password = get_password_hash(password)
