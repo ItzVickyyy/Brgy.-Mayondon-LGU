@@ -95,6 +95,12 @@ Step "5/5  Checking"
 $log = (Invoke-Quiet { docker compose -f compose.yml logs backend --tail 500 2>&1 } | Out-String)
 $migrateLine = ($log -split "`r?`n" | Where-Object { $_ -match "\[migrate\]" } | Select-Object -Last 1)
 if ($migrateLine) { Write-Host $migrateLine }
+elseif ($healthy) {
+    # The [migrate] line is not in the log tail: ask the database instead.
+    $cur = (Invoke-Quiet { docker compose -f compose.yml exec -T backend alembic current 2>&1 } | Out-String)
+    $rev = ($cur -split "`r?`n" | Where-Object { $_ -match "^[0-9a-f]{12}\b" } | Select-Object -Last 1)
+    if ($rev) { Write-Host "Database revision: $($rev.Trim())" }
+}
 
 if ($healthy -and $log -notmatch "\[migrate\] STOP") {
     Write-Host ""

@@ -9,11 +9,13 @@
 # It never opens the database port (5432).
 
 param(
-    [int[]]$Ports = @(8000),
+    # Strings on purpose: "powershell -File ... -Ports 443,80" hands over ONE string "443,80".
+    [string[]]$Ports = @("8000"),
     [switch]$AllNetworks
 )
 
 $ErrorActionPreference = "Stop"
+$Ports = @($Ports | ForEach-Object { "$_" -split "[,; ]+" } | Where-Object { $_ } | ForEach-Object { [int]$_ })
 
 $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
 ).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)

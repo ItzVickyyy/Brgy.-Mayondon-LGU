@@ -45,6 +45,13 @@ if (-not $dockerOk) {
         $log = (docker compose -f compose.yml logs backend --tail 500 2>&1 | Out-String)
         $line = ($log -split "`r?`n" | Where-Object { $_ -match "\[migrate\]" } | Select-Object -Last 1)
         if ($line -match "STOP") { Bad $line.Trim() } elseif ($line) { Ok $line.Trim() }
+        else {
+            # On a backend that has run for hours the [migrate] line has scrolled out of the log: ask the database.
+            $cur = (docker compose -f compose.yml exec -T backend alembic current 2>&1 | Out-String)
+            $rev = ($cur -split "`r?`n" | Where-Object { $_ -match "^[0-9a-f]{12}\b" } | Select-Object -Last 1)
+            if ($rev -match "\(head\)") { Ok "Database is up to date ($(($rev.Trim() -split ' ')[0]))." }
+            elseif ($rev) { Warn "The database is at revision $(($rev.Trim() -split ' ')[0]), which is not the newest the program knows. Restart the program (Start-Mayondon.cmd) and check again." }
+        }
     }
 }
 
