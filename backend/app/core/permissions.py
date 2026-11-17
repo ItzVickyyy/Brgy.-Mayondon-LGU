@@ -5,10 +5,11 @@ This is the single place that maps roles to permissions. Routes ask for a
 change without touching every endpoint.
 
 The matrix follows docs/05-Roles-Security-and-Privacy.md section A3. It is a
-**proposal, not a client-approved policy** (D-10, D-11). Several permissions
-below have no endpoint yet (records, issuance, reports and backup are still
-frontend prototypes); they are declared now so each new endpoint is protected
-from its first commit. Deny by default: an unknown role has no permissions.
+**proposal, not a client-approved policy** (D-10, D-11). Every permission below
+has an endpoint except ``REGISTRATIONS_REVIEW`` (open registration is off, so
+there is nothing to review yet); it stays declared so that a future review
+endpoint is protected from its first commit. Deny by default: an unknown role
+has no permissions.
 """
 
 from enum import StrEnum
