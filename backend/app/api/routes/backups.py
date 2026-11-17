@@ -121,6 +121,8 @@ def request_restore(
     run = _get_or_404(session, backup_id)
     if run.status != "ok" or not run.file_name:
         raise HTTPException(status_code=409, detail="This backup cannot be restored")
+    # Checking a backup never changes its file name; keep the str just proved.
+    file_name = run.file_name
     run = backup_service.verify_backup(session, run, actor=user)
     if run.status != "ok":
         raise HTTPException(
@@ -134,16 +136,16 @@ def request_restore(
         module="backup",
         record_type="backup",
         record_id=run.id,
-        details={"file_name": run.file_name},
+        details={"file_name": file_name},
         commit=True,
     )
     return RestoreRequestPublic(
-        file_name=run.file_name,
+        file_name=file_name,
         command=(
-            f".\\scripts\\restore-db.ps1 -BackupFile .\\backups\\{run.file_name}"
+            f".\\scripts\\restore-db.ps1 -BackupFile .\\backups\\{file_name}"
             + (
                 " -KeyFile <path to your private key file>"
-                if run.file_name.endswith(".enc")
+                if file_name.endswith(".enc")
                 else ""
             )
         ),

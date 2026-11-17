@@ -18,6 +18,7 @@ from sqlmodel import Session, col, select
 
 from app import backup_cli
 from app.core import backup as backup_service
+from app.core import backup_crypto
 from app.core.config import settings
 from app.core.db import engine
 from app.models_backup import BackupRun
@@ -312,6 +313,33 @@ def test_restore_request_checks_the_file_and_gives_the_command(
     refused = client.post(url, headers=superuser_token_headers)
     assert refused.status_code == 409
     assert len(_audit("backup.restore_requested", made["id"])) == 1
+
+
+def test_restore_request_for_an_encrypted_backup_asks_for_the_key_file(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    backup_folder: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    public_pem, _private_pem = backup_crypto.generate_keypair("a long test passphrase")
+    key_file = backup_folder / "backup-public.pem"
+    key_file.write_bytes(public_pem)
+    monkeypatch.setattr(settings, "BACKUP_PUBLIC_KEY_FILE", str(key_file))
+    made = _make(client, superuser_token_headers)
+    assert made["file_name"].endswith(".dump.enc")
+
+    response = client.post(
+        f"{API}/backups/{made['id']}/restore-request", headers=superuser_token_headers
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["file_name"] == made["file_name"]
+    assert body["command"] == (
+        f".\\scripts\\restore-db.ps1 -BackupFile .\\backups\\{made['file_name']}"
+        " -KeyFile <path to your private key file>"
+    )
+    events = _audit("backup.restore_requested", made["id"])
+    assert len(events) == 1 and events[0].details == {"file_name": made["file_name"]}
 
 
 # --- Retention and safety ---------------------------------------------------
