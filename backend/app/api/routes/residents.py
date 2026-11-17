@@ -105,7 +105,7 @@ def _id_valid_untils(
         .subquery()
     )
     rows = session.exec(
-        select(Issuance.resident_id, IssuanceBarangayId.valid_until)
+        select(col(Issuance.resident_id), col(IssuanceBarangayId.valid_until))
         .join(latest, latest.c.id == col(Issuance.id))
         .join(
             IssuanceBarangayId,
@@ -318,7 +318,7 @@ def sector_summary(session: SessionDep, _user: EditUser) -> Any:
     sectors they belong to, so it is not the sum of the rows.
     """
     rows = session.exec(
-        select(Sector.id, Sector.name, sa_func.count(Resident.id))
+        select(col(Sector.id), col(Sector.name), sa_func.count(col(Resident.id)))
         .select_from(Sector)
         .outerjoin(ResidentSector, col(ResidentSector.sector_id) == col(Sector.id))
         .outerjoin(
@@ -332,6 +332,7 @@ def sector_summary(session: SessionDep, _user: EditUser) -> Any:
         (
             ResidentSectorCount(sector_id=sid, name=name, active_residents=n)
             for sid, name, n in rows
+            if sid is not None  # a primary key is never empty; narrows the type
         ),
         key=lambda item: item.name.casefold(),
     )
