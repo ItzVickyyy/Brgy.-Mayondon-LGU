@@ -23,6 +23,7 @@ from urllib.parse import unquote
 
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PublicKey
 from sqlalchemy import text
+from sqlalchemy.engine import Connection
 from sqlmodel import Session, col, select
 
 from app.core import backup_crypto
@@ -189,7 +190,7 @@ def _new_file_name() -> str:
     return f"mayondon-db-{now:%Y%m%d-%H%M%S}-{now.microsecond // 1000:03d}.dump"
 
 
-def _acquire_lock():  # noqa: ANN202
+def _acquire_lock() -> Connection | None:
     """Hold a database-wide lock on a dedicated connection; None if it is taken."""
     connection = engine.connect()
     got = connection.execute(
@@ -201,7 +202,7 @@ def _acquire_lock():  # noqa: ANN202
     return connection
 
 
-def _release_lock(connection) -> None:  # noqa: ANN001
+def _release_lock(connection: Connection) -> None:
     try:
         connection.execute(text("SELECT pg_advisory_unlock(:key)"), {"key": _LOCK_KEY})
     finally:

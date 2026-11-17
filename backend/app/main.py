@@ -1,10 +1,11 @@
 from collections.abc import Awaitable, Callable
 from pathlib import Path
+from typing import Any
 
 import sentry_sdk
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.openapi.docs import get_swagger_ui_html
-from fastapi.responses import FileResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 from starlette.routing import Match
@@ -60,7 +61,7 @@ async def add_security_headers(
 
 
 @app.get("/docs", include_in_schema=False)
-def custom_swagger_ui_html():
+def custom_swagger_ui_html() -> HTMLResponse:
     return get_swagger_ui_html(
         openapi_url=app.openapi_url or f"{settings.API_V1_STR}/openapi.json",
         title=f"{settings.PROJECT_NAME} - API documentation",
@@ -69,7 +70,7 @@ def custom_swagger_ui_html():
 
 
 @app.get("/favicon.svg", include_in_schema=False)
-def favicon():
+def favicon() -> Response:
     for icon_path in BRGY_ICON_PATHS:
         if icon_path.is_file():
             return FileResponse(icon_path, media_type="image/svg+xml")
@@ -107,7 +108,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
     methods=["POST", "PUT", "PATCH", "DELETE"],
     include_in_schema=False,
 )
-def unknown_api_write(request: Request, _rest_of_path: str):
+def unknown_api_write(request: Request, _rest_of_path: str) -> None:
     """Reached only when no real route took a write request under /api/.
 
     A path that exists for other methods keeps the usual 405. A path that does
@@ -119,7 +120,7 @@ def unknown_api_write(request: Request, _rest_of_path: str):
     own_paths = {"/api/{_rest_of_path:path}", "/{full_path:path}", "/"}
     allowed = []
     for method in ("GET", "POST", "PUT", "PATCH", "DELETE"):
-        scope = {
+        scope: dict[str, Any] = {
             "type": "http",
             "path": path,
             "method": method,
@@ -152,11 +153,11 @@ if FRONTEND_DIR.is_dir():
     FRONTEND_ROOT = FRONTEND_DIR.resolve()
 
     @app.get("/", include_in_schema=False)
-    def frontend_index():
+    def frontend_index() -> FileResponse:
         return FileResponse(FRONTEND_ROOT / "index.html")
 
     @app.get("/{full_path:path}", include_in_schema=False)
-    def frontend_routes(full_path: str):
+    def frontend_routes(full_path: str) -> FileResponse:
         if full_path == "api" or full_path.startswith("api/"):
             raise HTTPException(status_code=404, detail="Not Found")
 

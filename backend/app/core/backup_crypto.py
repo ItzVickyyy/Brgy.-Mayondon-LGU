@@ -27,6 +27,7 @@ import os
 import struct
 from collections.abc import Iterator
 from pathlib import Path
+from typing import BinaryIO
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives import hashes, serialization
@@ -102,7 +103,7 @@ def _nonce(prefix: bytes, index: int) -> bytes:
     return prefix + struct.pack(">Q", index)
 
 
-def _chunks(handle) -> Iterator[tuple[bytes, bool]]:  # noqa: ANN001
+def _chunks(handle: BinaryIO) -> Iterator[tuple[bytes, bool]]:
     """Yield ``(data, is_last)``; always yields at least one chunk."""
     current = handle.read(CHUNK_SIZE)
     while True:
@@ -132,7 +133,7 @@ def encrypt_file(source: Path, destination: Path, public_key: X25519PublicKey) -
             writer.write(struct.pack(">I", len(sealed)) + sealed)
 
 
-def _read_header(handle) -> bytes:  # noqa: ANN001
+def _read_header(handle: BinaryIO) -> bytes:
     header = handle.read(_HEADER_SIZE)
     if len(header) != _HEADER_SIZE or not header.startswith(MAGIC):
         raise CryptoError("This is not an encrypted Mayondon backup.")
