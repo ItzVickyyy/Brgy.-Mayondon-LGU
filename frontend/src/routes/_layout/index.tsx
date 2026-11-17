@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { createFileRoute, Link } from "@tanstack/react-router"
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
   Activity,
   BarChart3,
@@ -8,6 +8,7 @@ import {
   Clock3,
   FileCheck2,
   IdCard,
+  Plus,
   Users,
 } from "lucide-react"
 import { type CSSProperties, useEffect, useRef, useState } from "react"
@@ -17,6 +18,7 @@ import { ActivityService, DashboardService } from "@/client"
 import { AnimatedNumber } from "@/components/Common/AnimatedNumber"
 import { ErrorState, LoadingState } from "@/components/Common/FeedbackState"
 import { Select } from "@/components/Common/Select"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
@@ -121,7 +123,7 @@ function SummaryCard({
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="mt-2 text-2xl font-semibold tracking-tight tabular-nums sm:text-3xl">
+          <p className="mt-2 text-2xl font-extrabold tracking-tight tabular-nums sm:text-3xl">
             {value !== undefined ? (
               <AnimatedNumber value={value} />
             ) : loading ? (
@@ -196,6 +198,7 @@ function Dashboard() {
   const { t } = useTranslation()
   const { user } = useAuth()
   const isAdmin = Boolean(user?.is_superuser)
+  const navigate = useNavigate()
   const [period, setPeriod] = useState<Period>("overall")
   const dashboardQuery = useQuery({
     queryKey: ["dashboard", period],
@@ -308,31 +311,44 @@ function Dashboard() {
             {t("dashboard.subtitle")}
           </p>
         </div>
-        <label
-          htmlFor="dashboard-period"
-          className="flex items-center gap-2 self-start text-sm sm:self-auto"
-        >
-          <CalendarDays
-            className="size-4 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <span className="text-muted-foreground">
-            {t("dashboard.period.label")}
-          </span>
-          <Select
-            id="dashboard-period"
-            aria-label={t("dashboard.period.ariaLabel")}
-            value={period}
-            onChange={(event) => setPeriod(event.target.value as Period)}
-            className="min-h-11 min-w-40 rounded-md border bg-background px-3 text-base transition-colors hover:border-ring/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <label
+            htmlFor="dashboard-period"
+            className="flex items-center gap-2 self-start text-sm sm:self-auto"
           >
-            {periods.map((value) => (
-              <option key={value} value={value}>
-                {t(`dashboard.period.${value}`)}
-              </option>
-            ))}
-          </Select>
-        </label>
+            <CalendarDays
+              className="size-4 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <span className="text-muted-foreground">
+              {t("dashboard.period.label")}
+            </span>
+            <Select
+              id="dashboard-period"
+              aria-label={t("dashboard.period.ariaLabel")}
+              value={period}
+              onChange={(event) => setPeriod(event.target.value as Period)}
+              className="min-h-11 min-w-40 rounded-md border bg-background px-3 text-base transition-colors hover:border-ring/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              {periods.map((value) => (
+                <option key={value} value={value}>
+                  {t(`dashboard.period.${value}`)}
+                </option>
+              ))}
+            </Select>
+          </label>
+          {/* Call to action: opens Issuances with the New Issuance dialog ready. */}
+          <Button
+            type="button"
+            className="min-h-11 w-full sm:w-auto"
+            onClick={() =>
+              void navigate({ to: "/issuances", search: { new: 1 } })
+            }
+          >
+            <Plus aria-hidden="true" />
+            {t("dashboard.issueDocument")}
+          </Button>
+        </div>
       </div>
 
       {dashboardQuery.isLoading ? (
@@ -392,7 +408,7 @@ function Dashboard() {
               <Link
                 key={item.key}
                 to={item.to}
-                className="action-card group flex min-h-14 items-center gap-3 rounded-lg border bg-card px-3 py-2"
+                className="action-card group flex min-h-14 items-center gap-3 rounded-lg border px-3 py-2"
               >
                 <span className="action-chip rounded-md p-1.5">
                   <item.icon className="size-5" aria-hidden="true" />
@@ -401,7 +417,7 @@ function Dashboard() {
                   <span className="action-title block font-semibold leading-5">
                     {item.title}
                   </span>
-                  <span className="block text-sm leading-5 text-muted-foreground">
+                  <span className="action-desc block text-sm leading-5">
                     {item.description}
                   </span>
                 </span>

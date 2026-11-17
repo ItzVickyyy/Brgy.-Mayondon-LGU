@@ -21,6 +21,11 @@ import { notify } from "@/lib/notifications"
 
 export const Route = createFileRoute("/_layout/issuances")({
   component: IssuancesManagement,
+  // Keep every param; only `new` is typed so the Dashboard can link with it.
+  validateSearch: (search: Record<string, unknown>): { new?: 1 } => ({
+    ...search,
+    ...(search.new === 1 || search.new === "1" ? { new: 1 as const } : {}),
+  }),
   head: () => ({ meta: [{ title: pageTitle("Issuances Management") }] }),
 })
 
@@ -37,7 +42,11 @@ function getPreselectedType(): DocumentCode | undefined {
 
 function IssuancesManagement() {
   const { t } = useTranslation()
-  const [isSimplifiedDialogOpen, setIsSimplifiedDialogOpen] = useState(() => Boolean(getPreselectedResident()))
+  // The Dashboard "Issue Document" button arrives here with ?new=1.
+  const { new: openNew } = Route.useSearch()
+  const [isSimplifiedDialogOpen, setIsSimplifiedDialogOpen] = useState(
+    () => Boolean(getPreselectedResident()) || openNew === 1,
+  )
   const [initialDraftId, setInitialDraftId] = useState("")
   const queryClient = useQueryClient()
   const [printSetupOpen, setPrintSetupOpen] = useState(false)
@@ -85,9 +94,10 @@ function IssuancesManagement() {
           setIsSimplifiedDialogOpen(next)
           if (!next) setInitialDraftId("")
           if (!next && typeof window !== "undefined") {
-            // Drop ?resident= and ?type= so the next "New Issuance" opens blank.
+            // Drop ?resident=, ?type= and ?new= so the next "New Issuance" opens blank.
             const params = new URLSearchParams(window.location.search)
-            if (params.has("resident") || params.has("type")) {
+            if (params.has("resident") || params.has("type") || params.has("new")) {
+              params.delete("new")
               params.delete("resident")
               params.delete("type")
               const query = params.toString()

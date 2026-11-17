@@ -145,6 +145,7 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "An overview of document issuance, upcoming expiries, and work requiring attention.",
+    "issueDocument": "Issue Document",
     "period": {
       "label": "Period",
       "ariaLabel": "Dashboard reporting period",
