@@ -42,7 +42,10 @@ try {
         Get-ChildItem -LiteralPath $backupDirectory -Filter "mayondon-db-*.dump" -File -ErrorAction SilentlyContinue |
             ForEach-Object { $_.FullName }
     )
-    & $backupScript
+    # -AllowPlain: backup-db.ps1 refuses to write a plain file once backups\backup-public.pem exists
+    # (every real installation). This dump holds ONLY the temporary test database (one test row, no
+    # resident data) and is deleted at the end, so a plain file is harmless here.
+    & $backupScript -AllowPlain
     if ($LASTEXITCODE -ne 0) {
         throw "The backup script failed."
     }

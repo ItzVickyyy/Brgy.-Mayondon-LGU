@@ -86,6 +86,7 @@ if ($resolvedBackup.EndsWith(".enc", [System.StringComparison]::OrdinalIgnoreCas
         $script:staged += $copy
         return $name
     }
+    $decryptExit = $null
     try {
         $inName = Copy-IntoBackups $resolvedBackup
         $keyName = Copy-IntoBackups $resolvedKey
@@ -99,6 +100,9 @@ if ($resolvedBackup.EndsWith(".enc", [System.StringComparison]::OrdinalIgnoreCas
     finally {
         Remove-Item Env:BACKUP_PASSPHRASE -ErrorAction SilentlyContinue
         foreach ($copy in $script:staged) { Remove-Item -LiteralPath $copy -Force -ErrorAction SilentlyContinue }
+        # Stopped before the decryption reported back (Ctrl+C, an error): do not leave a half-written
+        # plain copy of the database in backups\.
+        if ($null -eq $decryptExit) { Remove-Item -LiteralPath $decryptedTemp -Force -ErrorAction SilentlyContinue }
     }
     if ($decryptExit -ne 0 -or -not (Test-Path -LiteralPath $decryptedTemp)) {
         Remove-Item -LiteralPath $decryptedTemp -Force -ErrorAction SilentlyContinue
@@ -108,10 +112,16 @@ if ($resolvedBackup.EndsWith(".enc", [System.StringComparison]::OrdinalIgnoreCas
 }
 
 $containerPath = "/tmp/mayondon-restore-$([guid]::NewGuid().ToString('N')).dump"
-docker cp "$resolvedBackup" "$($containerId):$containerPath"
-$copyExit = $LASTEXITCODE
-if ($decryptedTemp) {
-    Remove-Item -LiteralPath $decryptedTemp -Force -ErrorAction SilentlyContinue
+$copyExit = 1
+try {
+    docker cp "$resolvedBackup" "$($containerId):$containerPath"
+    $copyExit = $LASTEXITCODE
+}
+finally {
+    # The plain copy of an encrypted backup never outlives this step, even when it is interrupted.
+    if ($decryptedTemp) {
+        Remove-Item -LiteralPath $decryptedTemp -Force -ErrorAction SilentlyContinue
+    }
 }
 if ($copyExit -ne 0) {
     throw "Copying the backup into the database container failed."
