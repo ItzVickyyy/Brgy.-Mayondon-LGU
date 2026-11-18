@@ -2,7 +2,7 @@
 
 Design source: docs/09-Issuance-Form-Data-Map.md. Implemented here: Barangay
 Clearance, Franchise Clearance, Utility (Electrical/Water) Clearance,
-Certificate of Indigency, Residency, Assistance, Marginalized Sector,
+Certificate of Indigency, Residency, Assistance,
 First-Time Jobseeker and Barangay ID.
 
 Rules that shape the tables:
@@ -81,10 +81,6 @@ DOCUMENT_RULES: dict[str, dict[str, tuple[str, ...]]] = {
         "sections": ("assistance", "sectors"),
         "resident_fields": ("resident_since", *ADDRESS_FIELDS),
     },
-    "MARGINALIZED_SECTOR": {
-        "sections": ("marginalized", "sectors"),
-        "resident_fields": ADDRESS_FIELDS,
-    },
     "FIRST_TIME_JOBSEEKER": {
         "sections": ("jobseeker",),
         "resident_fields": (
@@ -115,7 +111,6 @@ DOCUMENT_RULES: dict[str, dict[str, tuple[str, ...]]] = {
 SECTOR_LIMITS: dict[str, tuple[int, int]] = {
     "INDIGENCY": (1, 2),
     "ASSISTANCE": (1, 1),
-    "MARGINALIZED_SECTOR": (1, 1),
 }
 ASSISTANCE_TYPES = ("financial", "medical", "burial")
 ID_TRANSACTION_TYPES = ("new", "renewal", "replacement")
@@ -132,7 +127,6 @@ ALL_SECTIONS = (
     "utility",
     "indigency",
     "franchise",
-    "marginalized",
     "assistance",
     "jobseeker",
     "barangay_id",
@@ -382,19 +376,15 @@ class IssuanceFranchise(SQLModel, table=True):
     tricycle_id: int = Field(foreign_key="tricycles.id", ondelete="RESTRICT")
 
 
-class IssuanceMarginalizedSector(SQLModel, table=True):
-    """Sensitive: the health condition is masked everywhere except the audited
-    single-issuance read (decision 3). Never log or export it."""
-
-    __tablename__ = "issuance_marginalized_sector"
-
-    issuance_id: uuid.UUID = Field(
-        foreign_key="issuances.id", primary_key=True, ondelete="CASCADE"
-    )
-    health_condition: str = Field(max_length=500)
-
-
 class IssuanceAssistance(SQLModel, table=True):
+    """Assistance Certification (also the former Marginalized Sector document).
+
+    ``assistance_type`` is NULL only on rows carried over from the retired
+    Marginalized Sector document; the clerk must pick a type before such a
+    record can be issued again. ``health_condition`` is sensitive: masked
+    everywhere except the audited single-issuance read (decision 3). Never log
+    or export it."""
+
     __tablename__ = "issuance_assistance"
     __table_args__ = (
         CheckConstraint(
@@ -411,7 +401,8 @@ class IssuanceAssistance(SQLModel, table=True):
     issuance_id: uuid.UUID = Field(
         foreign_key="issuances.id", primary_key=True, ondelete="CASCADE"
     )
-    assistance_type: str = Field(max_length=20)
+    assistance_type: str | None = Field(default=None, max_length=20)
+    health_condition: str | None = Field(default=None, max_length=500)
     for_self: bool = Field(
         default=True,
         sa_column=Column(Boolean, nullable=False, server_default=text("true")),
@@ -658,25 +649,26 @@ class FranchiseIn(SQLModel):
     ]
 
 
-class MarginalizedIn(SQLModel):
-    health_condition: Annotated[
-        str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)
-    ]
-
-
 class AssistanceIn(SQLModel):
     assistance_type: Literal["financial", "medical", "burial"]
+    # Required for medical assistance only; dropped for the other types.
+    health_condition: str | None = Field(default=None, max_length=500)
     for_self: bool = True
     beneficiary_name: str | None = Field(default=None, max_length=255)
     beneficiary_relationship: str | None = Field(default=None, max_length=100)
 
-    @field_validator("beneficiary_name", "beneficiary_relationship")
+    @field_validator("beneficiary_name", "beneficiary_relationship", "health_condition")
     @classmethod
     def _blank_to_none(cls, value: str | None) -> str | None:
         return _clean(value)
 
     @model_validator(mode="after")
     def _beneficiary_rule(self) -> AssistanceIn:
+        if self.assistance_type == "medical":
+            if not self.health_condition:
+                raise ValueError("health_condition is required for medical assistance")
+        else:
+            self.health_condition = None
         if self.for_self:
             # The form hides these when the resident asks for themselves.
             self.beneficiary_name = None
@@ -727,7 +719,6 @@ class IssuanceCreate(SQLModel):
     utility: UtilityIn | None = None
     indigency: IndigencyIn | None = None
     franchise: FranchiseIn | None = None
-    marginalized: MarginalizedIn | None = None
     assistance: AssistanceIn | None = None
     jobseeker: JobseekerIn | None = None
     barangay_id: BarangayIdIn | None = None
@@ -762,7 +753,6 @@ class IssuanceUpdate(SQLModel):
     utility: UtilityIn | None = None
     indigency: IndigencyIn | None = None
     franchise: FranchiseIn | None = None
-    marginalized: MarginalizedIn | None = None
     assistance: AssistanceIn | None = None
     jobseeker: JobseekerIn | None = None
     barangay_id: BarangayIdIn | None = None
@@ -847,12 +837,9 @@ class FranchisePublic(SQLModel):
     plate_number: str
 
 
-class MarginalizedPublic(SQLModel):
-    health_condition: str  # "[restricted]" except on the audited single read
-
-
 class AssistancePublic(SQLModel):
-    assistance_type: str
+    assistance_type: str | None
+    health_condition: str | None  # "[restricted]" except on the audited single read
     for_self: bool
     beneficiary_name: str | None
     beneficiary_relationship: str | None
@@ -921,7 +908,6 @@ class IssuancePublic(IssuanceListItem):
     utility: UtilityPublic | None = None
     indigency: IndigencyPublic | None = None
     franchise: FranchisePublic | None = None
-    marginalized: MarginalizedPublic | None = None
     assistance: AssistancePublic | None = None
     jobseeker: JobseekerPublic | None = None
     barangay_id: BarangayIdPublic | None = None

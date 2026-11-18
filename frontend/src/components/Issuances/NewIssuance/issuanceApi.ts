@@ -415,7 +415,6 @@ const detailSections: Record<DocumentCode, string[]> = {
   RESIDENCY: ["identification", "payment"],
   INDIGENCY: ["sectors", "indigency"],
   ASSISTANCE: ["sectors", "assistance"],
-  MARGINALIZED_SECTOR: ["sectors", "marginalized"],
   FIRST_TIME_JOBSEEKER: ["jobseeker"],
   BARANGAY_ID: ["barangay_id"],
 }
@@ -522,12 +521,21 @@ async function buildSections(input: IssuanceInput, data: LookupData) {
       break
     case "ASSISTANCE": {
       const forSelf = details.forSelf !== false
+      const medical = details.assistanceType === "medical"
+      const condition = text(details.healthCondition as string)
+      // The API answers "[restricted]" except when one record is opened. It is
+      // never sent back, and the section is left out (not nulled) so the stored
+      // condition is not deleted.
+      if (medical && condition === "[restricted]") break
       sections.assistance =
-        forSelf ||
-        (text(details.beneficiaryName as string) &&
-          text(details.beneficiaryRelationship as string))
+        details.assistanceType &&
+        (forSelf ||
+          (text(details.beneficiaryName as string) &&
+            text(details.beneficiaryRelationship as string))) &&
+        (!medical || condition)
           ? {
               assistance_type: details.assistanceType,
+              health_condition: medical ? condition : null,
               for_self: forSelf,
               beneficiary_name: forSelf
                 ? null
@@ -536,14 +544,6 @@ async function buildSections(input: IssuanceInput, data: LookupData) {
                 ? null
                 : orNull(details.beneficiaryRelationship as string),
             }
-          : null
-      break
-    }
-    case "MARGINALIZED_SECTOR": {
-      const condition = text(details.healthCondition as string)
-      sections.marginalized =
-        condition && condition !== "[restricted]"
-          ? { health_condition: condition }
           : null
       break
     }
@@ -691,21 +691,16 @@ function toMockIssuance(issuance: IssuancePublic): MockIssuance {
     case "ASSISTANCE":
       details = {
         type: code,
-        assistanceType: (assistance?.assistance_type ?? "financial") as
+        // Empty only on a record carried over from the old Marginalized Sector document.
+        assistanceType: (assistance?.assistance_type ?? "") as
           | "financial"
           | "medical"
           | "burial",
+        healthCondition: assistance?.health_condition ?? undefined,
         forSelf: assistance?.for_self ?? true,
         beneficiaryName: assistance?.beneficiary_name ?? undefined,
         beneficiaryRelationship:
           assistance?.beneficiary_relationship ?? undefined,
-      }
-      break
-    case "MARGINALIZED_SECTOR":
-      // The API answers "[restricted]" except when a single record is opened; never treat it as data.
-      details = {
-        type: code,
-        healthCondition: issuance.marginalized?.health_condition ?? "",
       }
       break
     case "FIRST_TIME_JOBSEEKER":

@@ -25,10 +25,10 @@ def test_item_table_is_gone(db: Session) -> None:
     assert exists is None
 
 
-def test_document_types_seeded_with_nine_kinds(db: Session) -> None:
+def test_document_types_seeded_with_eight_kinds(db: Session) -> None:
     rows = db.exec(select(DocumentType)).all()
     by_code = {r.code: r for r in rows}
-    assert len(rows) == 9
+    assert len(rows) == 8
     assert by_code["BARANGAY_CLEARANCE"].validity_months == 2
     assert by_code["FIRST_TIME_JOBSEEKER"].validity_months == 12
     assert by_code["FIRST_TIME_JOBSEEKER"].one_per_resident is True

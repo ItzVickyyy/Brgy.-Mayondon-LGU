@@ -89,6 +89,8 @@ const fieldHelpKeys = {
     "issuances.new.fieldHelp.witnessIssuer",
   'Only if someone other than the resident asked for it. Printed after "Requested by:".':
     "issuances.new.fieldHelp.requestedBy",
+  "Confidential. Kept in the record but not printed on the certificate.":
+    "issuances.new.fieldHelp.healthConditionConfidential",
   "Type the number printed on the card. Leave it as shown to keep the resident's current number.":
     "issuances.new.fieldHelp.barangayIdNumber",
 } as const satisfies Record<string, ParseKeys>
@@ -159,6 +161,8 @@ const validationKeys = {
     "issuances.new.validation.beneficiaryName",
   "Relationship is required when assistance is for someone else.":
     "issuances.new.validation.beneficiaryRelationship",
+  "Health condition is required for medical assistance.":
+    "issuances.new.validation.healthCondition",
   "Details must match the selected document type.":
     "issuances.new.validation.typeMismatch",
   "Purpose is required.": "issuances.new.validation.purposeRequired",

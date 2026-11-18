@@ -11,6 +11,5 @@ export const formBackgrounds: Partial<Record<PrintTemplateId, string[]>> = {
   franchise: ["/assets/print-forms/franchise-0.png"],
   utility: ["/assets/print-forms/utility-0.png"],
   indigency: ["/assets/print-forms/indigency-0.png"],
-  marginalized: ["/assets/print-forms/marginalized-0.png"],
   assistance: ["", "/assets/print-forms/assistance-1.png"],
 }

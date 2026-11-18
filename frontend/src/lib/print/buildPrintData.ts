@@ -49,7 +49,6 @@ export const templateIdByDocumentCode: Partial<
   FRANCHISE_CLEARANCE: "franchise",
   UTILITY_CLEARANCE: "utility",
   INDIGENCY: "indigency",
-  MARGINALIZED_SECTOR: "marginalized",
   ASSISTANCE: "assistance",
 }
 
@@ -128,8 +127,6 @@ export function buildPrintData(
   }
   if (details.type === "INDIGENCY")
     values.addressedTo = details.addressedToOffice
-  if (details.type === "MARGINALIZED_SECTOR")
-    values.healthCondition = details.healthCondition
   if (details.type === "ASSISTANCE") {
     values.assistanceType = cap(details.assistanceType)
     values.for = details.forSelf ? "Myself" : "Someone else"

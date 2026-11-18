@@ -1298,11 +1298,6 @@
           "short": "Assistance Certification",
           "hint": "Financial, medical, burial"
         },
-        "MARGINALIZED_SECTOR": {
-          "name": "Marginalized Sector (Pagpapatunay)",
-          "short": "Marginalized Sector",
-          "hint": "Filipino sector certification"
-        },
         "FIRST_TIME_JOBSEEKER": {
           "name": "First-Time Jobseeker",
           "short": "First-Time Jobseeker",
@@ -1419,6 +1414,7 @@
         "receiptRequired": "Official receipt number is required unless free of charge.",
         "beneficiaryName": "Name is required when assistance is for someone else.",
         "beneficiaryRelationship": "Relationship is required when assistance is for someone else.",
+        "healthCondition": "Health condition is required for medical assistance.",
         "typeMismatch": "Details must match the selected document type.",
         "purposeRequired": "Purpose is required.",
         "chooseSector": "Choose a sector.",
@@ -1480,6 +1476,7 @@
         "stampBox": "Printed in the stamp box.",
         "witnessIssuer": "The person who issues this document.",
         "requestedBy": "Only if someone other than the resident asked for it. Printed after \"Requested by:\".",
+        "healthConditionConfidential": "Confidential. Kept in the record but not printed on the certificate.",
         "barangayIdNumber": "Type the number printed on the card. Leave it as shown to keep the resident's current number."
       },
       "options": {
@@ -1704,7 +1701,6 @@
           "franchise": "Franchise Clearance",
           "utility": "Electrical and Water",
           "indigency": "Indigency",
-          "marginalized": "Marginalized Sector",
           "assistance": "Assistance Certification"
         }
       }

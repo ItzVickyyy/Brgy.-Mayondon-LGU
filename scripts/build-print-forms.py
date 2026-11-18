@@ -7,7 +7,7 @@ exactly what Word shows; a different program lays the text out differently and w
 
 Input folder, BLANK forms only (no resident data on any page):
   clearance.pdf, franchise.pdf, utility.pdf, indigency.pdf   one page each, Letter
-  marginalized-assistance.pdf                                 page 1 = PAGPAPATUNAY, page 2 = CERTIFICATION, both blank
+  marginalized-assistance.pdf                                 page 1 = PAGPAPATUNAY (retired, not printed), page 2 = CERTIFICATION; both blank
 
 Usage (needs poppler: pdftoppm, pdfinfo, pdftotext):
   python3 scripts/build-print-forms.py <folder-with-pdfs> [--dpi 200]
@@ -28,7 +28,6 @@ SPEC = {
     "franchise": ("franchise.pdf", 1, {0: 1}),
     "utility": ("utility.pdf", 1, {0: 1}),
     "indigency": ("indigency.pdf", 1, {0: 1}),
-    "marginalized": ("marginalized-assistance.pdf", 2, {0: 1}),
     "assistance": ("marginalized-assistance.pdf", 2, {1: 2}),
 }
 

@@ -36,10 +36,6 @@ const validDetails = {
     assistanceType: "financial",
     forSelf: true,
   },
-  MARGINALIZED_SECTOR: {
-    type: "MARGINALIZED_SECTOR",
-    healthCondition: "Fictional test condition",
-  },
   FIRST_TIME_JOBSEEKER: {
     type: "FIRST_TIME_JOBSEEKER",
     educationalAttainment: "College",
@@ -101,6 +97,23 @@ test("assistance requires beneficiary details when the request is for someone el
       forSelf: false,
     }).success,
   ).toBe(false)
+})
+
+test("medical assistance needs a health condition; the other types do not", () => {
+  const base = { type: "ASSISTANCE", forSelf: true } as const
+  const parse = (extra: Record<string, unknown>) =>
+    documentDetailsSchema.safeParse({ ...base, ...extra })
+  expect(parse({ assistanceType: "medical" }).success).toBe(false)
+  expect(
+    parse({ assistanceType: "medical", healthCondition: "   " }).success,
+  ).toBe(false)
+  expect(
+    parse({ assistanceType: "medical", healthCondition: "Asthma" }).success,
+  ).toBe(true)
+  expect(parse({ assistanceType: "financial" }).success).toBe(true)
+  expect(parse({ assistanceType: "burial" }).success).toBe(true)
+  // A record carried over from the old Marginalized Sector document has no type.
+  expect(parse({ assistanceType: "" }).success).toBe(false)
 })
 
 test("First-Time Jobseeker rejects an empty educational attainment", () => {
@@ -207,24 +220,30 @@ test("history lists redact sensitive health conditions while authorized detail r
   mockIssuanceStore.reset()
   await seedResident()
   const record = await issuanceApi.createIssuance({
-    documentType: "MARGINALIZED_SECTOR",
+    documentType: "ASSISTANCE",
     issueDate: "2026-11-03",
     residentId: "RES-0001",
     signatoryOfficialId: "OFF-002",
     sectors: [{ sectorId: 5, idNumber: "SYNTHETIC-SECTOR-ID" }],
     details: {
-      type: "MARGINALIZED_SECTOR",
+      type: "ASSISTANCE",
+      assistanceType: "medical",
+      forSelf: true,
       healthCondition: "Fictional sensitive test value",
     },
     status: "issued",
   })
   const list = await issuanceApi.listIssuances()
   expect(list[0]?.payload.details).toEqual({
-    type: "MARGINALIZED_SECTOR",
+    type: "ASSISTANCE",
+    assistanceType: "medical",
+    forSelf: true,
     healthCondition: "[restricted]",
   })
   expect((await issuanceApi.getIssuance(record.id))?.payload.details).toEqual({
-    type: "MARGINALIZED_SECTOR",
+    type: "ASSISTANCE",
+    assistanceType: "medical",
+    forSelf: true,
     healthCondition: "Fictional sensitive test value",
   })
   mockIssuanceStore.reset()

@@ -714,7 +714,6 @@ export function IssuanceHistory({
                       "FRANCHISE_CLEARANCE",
                       "UTILITY_CLEARANCE",
                       "INDIGENCY",
-                      "MARGINALIZED_SECTOR",
                       "ASSISTANCE",
                     ].includes(item.document_type_code)
                     const styleKey = statusStyleKey[item.status] ?? item.status

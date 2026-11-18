@@ -48,7 +48,6 @@ export type PrintTemplateId =
   | "franchise"
   | "utility"
   | "indigency"
-  | "marginalized"
   | "assistance"
 
 // Every template with a print layout today is a Short (Letter) document. A Long template adds `paperSize: "long"`.
@@ -157,23 +156,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       },
     ],
   },
-  // Page 1 of Barangay_Certification_of_Marginalized_Sector.docx (Pagpapatunay). Blanks sit in justified text, so x is approximate.
-  marginalized: {
-    id: "marginalized",
-    documentCode: "MARGINALIZED_SECTOR",
-    paperSize: "short",
-    paper,
-    fields: [
-      { key: "name", x: 261, y: 231.2, w: 190 },
-      { key: "address", x: 74, y: 274.4, w: 240 },
-      { key: "sector", x: 131, y: 318, w: 215 },
-      { key: "name", x: 294, y: 361.5, w: 200 },
-      { key: "healthCondition", x: 181, y: 405.1, w: 200 },
-      { key: "day", x: 240, y: 457, w: 22, align: "center" },
-      { key: "month", x: 273, y: 457, w: 125 },
-    ],
-  },
-  // Page 2 of the same file (Certification for assistance request).
+  // Page 2 of Barangay_Certification_of_Marginalized_Sector.docx (Certification for assistance request). The health condition is stored but not printed: the form has no line for it.
   assistance: {
     id: "assistance",
     documentCode: "ASSISTANCE",

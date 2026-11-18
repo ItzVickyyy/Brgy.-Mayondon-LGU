@@ -202,9 +202,6 @@ test.describe("document catalog metadata", () => {
     expect(documentMeta["First-Time Jobseeker Certification"].paper.size).toBe(
       "long",
     )
-    expect(
-      documentMeta["Marginalized Sector Certification (Pagpapatunay)"].language,
-    ).toBe("fil")
   })
 
   test("maps older history names to the current catalog names", () => {
@@ -215,8 +212,12 @@ test.describe("document catalog metadata", () => {
     expect(normalizeDocumentType("First-Time Jobseekers Certification")).toBe(
       "First-Time Jobseeker Certification",
     )
+    // The old Marginalized Sector document was merged into Assistance.
     expect(normalizeDocumentType("Marginalized Sector")).toBe(
-      "Marginalized Sector Certification (Pagpapatunay)",
+      "Certification (assistance request)",
+    )
+    expect(normalizeDocumentType("Pagpapatunay")).toBe(
+      "Certification (assistance request)",
     )
   })
 

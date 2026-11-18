@@ -72,7 +72,6 @@ from app.models_issuance import (
     IssuanceIdentification,
     IssuanceIndigency,
     IssuanceListItem,
-    IssuanceMarginalizedSector,
     IssuancePayment,
     IssuancePublic,
     IssuanceResidentSnapshot,
@@ -82,7 +81,6 @@ from app.models_issuance import (
     IssuanceUtility,
     IssueRequest,
     JobseekerPublic,
-    MarginalizedPublic,
     PaymentPublic,
     PrintedRequest,
     ReasonRequest,
@@ -418,13 +416,6 @@ def _apply_sections(
             _replace_one(
                 session, IssuanceFranchise, issuance.id, {"tricycle_id": tricycle.id}
             )
-    if "marginalized" in sent and "marginalized" in allowed:
-        _replace_one(
-            session,
-            IssuanceMarginalizedSector,
-            issuance.id,
-            None if data.marginalized is None else data.marginalized.model_dump(),
-        )
     if "assistance" in sent and "assistance" in allowed:
         _replace_one(
             session,
@@ -552,14 +543,20 @@ def _public(
         data["franchise"] = FranchisePublic.model_validate(
             {**tricycle.model_dump(), "tricycle_id": tricycle.id}
         )
-    marg = session.get(IssuanceMarginalizedSector, issuance.id)
-    if marg:
-        data["marginalized"] = MarginalizedPublic(
-            health_condition=marg.health_condition if reveal_sensitive else RESTRICTED
-        )
     assist = session.get(IssuanceAssistance, issuance.id)
     if assist:
-        data["assistance"] = AssistancePublic.model_validate(assist.model_dump())
+        data["assistance"] = AssistancePublic.model_validate(
+            {
+                **assist.model_dump(),
+                "health_condition": (
+                    None
+                    if assist.health_condition is None
+                    else assist.health_condition
+                    if reveal_sensitive
+                    else RESTRICTED
+                ),
+            }
+        )
     job = session.get(IssuanceFirstTimeJobseeker, issuance.id)
     if job:
         data["jobseeker"] = JobseekerPublic.model_validate(job.model_dump())
@@ -704,7 +701,8 @@ def get_issuance(
     The row names the field, never the value.
     """
     issuance = _get_or_404(session, issuance_id)
-    if session.get(IssuanceMarginalizedSector, issuance.id) is None:
+    assist = session.get(IssuanceAssistance, issuance.id)
+    if assist is None or assist.health_condition is None:
         return _public(session, issuance)
     record_audit_event(
         session,
@@ -783,9 +781,10 @@ def _missing_sections(session: Session, issuance: Issuance, code: str) -> list[s
         "utility": session.get(IssuanceUtility, issuance.id) is not None,
         "indigency": session.get(IssuanceIndigency, issuance.id) is not None,
         "franchise": session.get(IssuanceFranchise, issuance.id) is not None,
-        "marginalized": session.get(IssuanceMarginalizedSector, issuance.id)
-        is not None,
-        "assistance": session.get(IssuanceAssistance, issuance.id) is not None,
+        # A carried-over row without a type does not count (clerk must pick one).
+        "assistance": (assist := session.get(IssuanceAssistance, issuance.id))
+        is not None
+        and assist.assistance_type is not None,
         "jobseeker": session.get(IssuanceFirstTimeJobseeker, issuance.id) is not None,
         "barangay_id": session.get(IssuanceBarangayId, issuance.id) is not None,
         "sectors": session.exec(
@@ -1370,7 +1369,6 @@ def correct(
         IssuanceUtility,
         IssuanceIndigency,
         IssuanceFranchise,
-        IssuanceMarginalizedSector,
         IssuanceAssistance,
         IssuanceFirstTimeJobseeker,
         IssuanceBarangayId,

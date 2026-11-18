@@ -11,7 +11,6 @@ const shortDocuments = [
   "Certification of Residency",
   "Certificate of Indigency",
   "Certification (assistance request)",
-  "Marginalized Sector Certification (Pagpapatunay)",
 ]
 
 test.describe("paper sizes (Short = 8.5 x 11 in, Long = 8.5 x 13 in)", () => {

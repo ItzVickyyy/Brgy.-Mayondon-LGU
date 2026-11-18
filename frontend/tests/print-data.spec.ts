@@ -169,19 +169,27 @@ test.describe("buildPrintData", () => {
       ),
     ).toBeNull()
     const data = buildPrintData(
-      make("MARGINALIZED_SECTOR", {
+      make("ASSISTANCE", {
         sectors: [{ sectorId: 2 }],
-        details: { type: "MARGINALIZED_SECTOR", healthCondition: "Asthma" },
+        details: {
+          type: "ASSISTANCE",
+          assistanceType: "medical",
+          forSelf: true,
+          healthCondition: "Asthma",
+        },
       }),
       lookups,
     )!
-    const allowed = new Set(
-      printTemplates.marginalized.fields.map((f) => f.key),
-    )
+    const allowed = new Set([
+      ...printTemplates.assistance.fields.map((f) => f.key),
+      ...(printTemplates.assistance.marks ?? []).map((m) => m.key),
+    ])
     expect(Object.keys(data.values).every((key) => allowed.has(key))).toBe(true)
     expect(data.values).toMatchObject({
       name: "JUAN SANTOS DELA CRUZ",
-      healthCondition: "Asthma",
+      assistanceType: "Medical",
     })
+    // The health condition is confidential: stored, never printed.
+    expect(JSON.stringify(data.values)).not.toContain("Asthma")
   })
 })

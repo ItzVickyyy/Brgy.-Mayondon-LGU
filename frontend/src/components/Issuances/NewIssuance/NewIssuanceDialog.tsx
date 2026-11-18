@@ -58,7 +58,6 @@ const printedNameType: Record<DocumentCode, string> = {
   RESIDENCY: "Certification of Residency",
   INDIGENCY: "Certificate of Indigency",
   ASSISTANCE: "Certification (assistance request)",
-  MARGINALIZED_SECTOR: "Marginalized Sector Certification (Pagpapatunay)",
   FIRST_TIME_JOBSEEKER: "First-Time Jobseeker Certification",
   BARANGAY_ID: "Barangay ID",
 }
@@ -980,7 +979,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     ...(needsPhoto ? [{ label: "Photo", value: selectedResident && (residentUpdates.photoUrl || selectedResident.photoUrl) ? t("issuances.new.previewRows.taken") : "" }] : []),
     { label: "Date on document", value: issueDate },
     ...(config.signatoryMode === "select" ? [{ label: "Signatory", value: currentOfficials.find((official) => official.id === form.watch("signatoryOfficialId"))?.name ?? "________________________" }] : []),
-    ...config.fields.filter((field) => field.name !== "remarks").map((field) => ({ label: field.label, value: previewValue(field) })),
+    ...config.fields.filter((field) => field.name !== "remarks" && field.name !== "healthCondition").map((field) => ({ label: field.label, value: previewValue(field) })),
     { label: "Remarks", value: form.watch("remarks") ?? "" },
     ...(config.residentNeeds.includes("residentSince") ? [{ label: documentType === "RESIDENCY" ? "Residing since" : "Years of residency", value: selectedResident ? (() => { const source = { ...selectedResident, ...residentUpdates }; if (documentType === "RESIDENCY") return source.residentSinceBirth || source.residentSince === 0 ? t("issuances.new.previewRows.sinceBirth") : source.residentSince === undefined ? "" : String(source.residentSince); if (source.residentSinceBirth) return calculateAge(source.birthdate ?? selectedResident.birthdate, issueDate); return !source.residentSince ? "" : String(Math.max(0, new Date(`${issueDate}T00:00:00`).getFullYear() - source.residentSince)) })() : "" }] : []),
   ]

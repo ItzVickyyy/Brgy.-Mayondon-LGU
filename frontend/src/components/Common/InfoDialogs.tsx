@@ -329,10 +329,7 @@ export function HelpDialog(props: DialogProps) {
             </li>
             <li>
               <strong>Assistance Certification</strong> (financial, medical or
-              burial)
-            </li>
-            <li>
-              <strong>Marginalized Sector (Pagpapatunay)</strong>
+              burial; medical also records the health condition)
             </li>
             <li>
               <strong>First-Time Jobseeker</strong> (one per resident, valid for
@@ -359,8 +356,8 @@ export function HelpDialog(props: DialogProps) {
           <p>
             After issuing, choose Print. Most documents print only the filled-in
             details onto the barangay's pre-printed forms, so load the right
-            form in the printer first. Residency, Marginalized Sector and
-            First-Time Jobseeker print as full pages.
+            form in the printer first. Residency and First-Time Jobseeker print
+            as full pages.
           </p>
         </Section>
         <Section title="Reprint">

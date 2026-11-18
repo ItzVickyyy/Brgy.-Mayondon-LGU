@@ -1,7 +1,8 @@
 # ruff: noqa: F811  (fixtures imported from test_issuances are used as parameters)
-"""Residency, Assistance, Marginalized Sector and First-Time Jobseeker issuance."""
+"""Residency, Assistance (with the health condition) and First-Time Jobseeker issuance."""
 
 import json
+import uuid
 from datetime import date
 
 from fastapi.testclient import TestClient
@@ -10,6 +11,7 @@ from sqlmodel import Session, col, select
 from app.core.config import settings
 from app.core.dates import add_months
 from app.models_foundation import AuditLog, Street
+from app.models_issuance import IssuanceAssistance
 from tests.api.routes.test_issuances import (  # noqa: F401  (fixtures are reused)
     _doc,
     _ident,
@@ -179,7 +181,7 @@ def test_assistance_needs_exactly_one_sector_and_residing_since(
 ) -> None:
     res = _resident(client, staff_token_headers, street_id)
     s1, s2 = _sector_ids(client, staff_token_headers)[:2]
-    assistance = {"assistance_type": "medical"}
+    assistance = {"assistance_type": "medical", "health_condition": SECRET}
     _draft(
         client,
         staff_token_headers,
@@ -209,19 +211,25 @@ def test_assistance_needs_exactly_one_sector_and_residing_since(
     assert _issue(client, staff_token_headers, draft["id"])["status"] == "issued"
 
 
-# --- Marginalized sector and the health condition ------------------------------
+# --- Medical assistance and the health condition -------------------------------
 
 
 def _marginalized(
     client: TestClient, headers: Headers, resident_id: str, **extra: object
 ) -> dict:
+    """A medical Assistance draft that carries the health condition."""
+    client.patch(
+        f"{API}/residents/{resident_id}",
+        headers=headers,
+        json={"resident_since_year": 2000},
+    )
     sector = _sector_ids(client, headers)[0]
     return _draft(
         client,
         headers,
-        "MARGINALIZED_SECTOR",
+        "ASSISTANCE",
         resident_id,
-        marginalized={"health_condition": SECRET},
+        assistance={"assistance_type": "medical", "health_condition": SECRET},
         sectors=[{"sector_id": sector, "sector_id_number": "PWD-0001"}],
         **extra,
     )
@@ -232,7 +240,7 @@ def test_health_condition_is_masked_in_every_response_but_the_single_read(
 ) -> None:
     res = _resident(client, staff_token_headers, street_id)
     created = _marginalized(client, staff_token_headers, res["id"])
-    assert created["marginalized"] == {"health_condition": "[restricted]"}
+    assert created["assistance"]["health_condition"] == "[restricted]"
     assert created["sectors"][0]["sector_id_number"] == "PWD-0001"
     assert SECRET not in json.dumps(created)
 
@@ -245,18 +253,18 @@ def test_health_condition_is_masked_in_every_response_but_the_single_read(
         f"{ISS}/", headers=staff_token_headers, params={"resident_id": res["id"]}
     )
     assert SECRET not in listing.text
-    assert "marginalized" not in listing.json()["data"][0]
+    assert "assistance" not in listing.json()["data"][0]
 
     issued = _issue(client, staff_token_headers, created["id"])
     assert SECRET not in json.dumps(issued)
-    assert issued["marginalized"]["health_condition"] == "[restricted]"
+    assert issued["assistance"]["health_condition"] == "[restricted]"
 
     # Only the single read returns the value, and each read is audited.
     assert _view_audit_rows(db, created["id"]) == []
     for expected_rows in (1, 2):
         single = client.get(f"{ISS}/{created['id']}", headers=staff_token_headers)
         assert single.status_code == 200
-        assert single.json()["marginalized"]["health_condition"] == SECRET
+        assert single.json()["assistance"]["health_condition"] == SECRET
         assert len(_view_audit_rows(db, created["id"])) == expected_rows
 
 
@@ -307,38 +315,63 @@ def test_admin_can_read_the_condition_and_it_is_audited(
     res = _resident(client, staff_token_headers, street_id)
     draft = _marginalized(client, staff_token_headers, res["id"])
     r = client.get(f"{ISS}/{draft['id']}", headers=superuser_token_headers)
-    assert r.json()["marginalized"]["health_condition"] == SECRET
+    assert r.json()["assistance"]["health_condition"] == SECRET
     rows = _view_audit_rows(db, draft["id"])
     assert len(rows) == 1 and rows[0].actor_email == settings.FIRST_SUPERUSER
 
 
-def test_marginalized_rules(
+def test_health_condition_rules(
     client: TestClient, staff_token_headers: Headers, street_id: int
 ) -> None:
-    res = _resident(client, staff_token_headers, street_id)
-    s1, s2 = _sector_ids(client, staff_token_headers)[:2]
-    # An empty condition and two sectors are both rejected.
-    _draft(
-        client,
-        staff_token_headers,
-        "MARGINALIZED_SECTOR",
-        res["id"],
-        expect=422,
-        marginalized={"health_condition": "   "},
-        sectors=[{"sector_id": s1}],
-    )
-    _draft(
-        client,
-        staff_token_headers,
-        "MARGINALIZED_SECTOR",
-        res["id"],
-        expect=422,
-        marginalized={"health_condition": SECRET},
-        sectors=[{"sector_id": s1}, {"sector_id": s2}],
-    )
-    draft = _draft(client, staff_token_headers, "MARGINALIZED_SECTOR", res["id"])
+    res = _resident(client, staff_token_headers, street_id, resident_since_year=2000)
+    s1 = _sector_ids(client, staff_token_headers)[0]
+    sectors = [{"sector_id": s1}]
+
+    def create(assistance: dict, expect: int = 201) -> dict:
+        return _draft(
+            client,
+            staff_token_headers,
+            "ASSISTANCE",
+            res["id"],
+            expect,
+            assistance=assistance,
+            sectors=sectors,
+        )
+
+    # Medical needs a condition (blank counts as missing).
+    create({"assistance_type": "medical"}, 422)
+    create({"assistance_type": "medical", "health_condition": "   "}, 422)
+    # Financial and burial never keep one, even if the form still holds it.
+    for kind in ("financial", "burial"):
+        row = create({"assistance_type": kind, "health_condition": SECRET})
+        assert row["assistance"]["health_condition"] is None
+        assert SECRET not in json.dumps(row)
+        single = client.get(f"{ISS}/{row['id']}", headers=staff_token_headers).json()
+        assert single["assistance"]["health_condition"] is None
+
+
+def test_carried_over_row_without_a_type_cannot_be_issued_until_one_is_chosen(
+    client: TestClient, staff_token_headers: Headers, street_id: int, db: Session
+) -> None:
+    res = _resident(client, staff_token_headers, street_id, resident_since_year=2000)
+    draft = _marginalized(client, staff_token_headers, res["id"])
+    # What the migration leaves behind for an old Marginalized Sector record.
+    row = db.get(IssuanceAssistance, uuid.UUID(draft["id"]))
+    assert row is not None
+    row.assistance_type = None
+    db.add(row)
+    db.commit()
+    shown = client.get(f"{ISS}/{draft['id']}", headers=staff_token_headers).json()
+    assert shown["assistance"]["assistance_type"] is None
+    assert shown["assistance"]["health_condition"] == SECRET
     code, body = _issue_status(client, staff_token_headers, draft["id"])
-    assert code == 422 and body["detail"]["sections"] == ["marginalized", "sectors"]
+    assert code == 422 and body["detail"]["sections"] == ["assistance"]
+    client.patch(
+        f"{ISS}/{draft['id']}",
+        headers=staff_token_headers,
+        json={"assistance": {"assistance_type": "medical", "health_condition": SECRET}},
+    )
+    assert _issue(client, staff_token_headers, draft["id"])["status"] == "issued"
 
 
 def test_correction_copies_the_condition_without_exposing_it(
@@ -358,10 +391,10 @@ def test_correction_copies_the_condition_without_exposing_it(
     assert r.status_code == 201
     assert SECRET not in r.text
     draft = r.json()
-    assert draft["marginalized"]["health_condition"] == "[restricted]"
+    assert draft["assistance"]["health_condition"] == "[restricted]"
     assert draft["sectors"][0]["sector_id_number"] == "PWD-0001"
     single = client.get(f"{ISS}/{draft['id']}", headers=staff_token_headers).json()
-    assert single["marginalized"]["health_condition"] == SECRET
+    assert single["assistance"]["health_condition"] == SECRET
 
 
 def test_unauthenticated_cannot_read_a_document(client: TestClient) -> None:

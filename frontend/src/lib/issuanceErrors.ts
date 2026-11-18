@@ -24,7 +24,6 @@ const sectionWords: Record<string, string> = {
   utility: "utility details",
   indigency: "indigency details",
   franchise: "tricycle details",
-  marginalized: "health condition",
   assistance: "assistance details",
   jobseeker: "jobseeker details",
   barangay_id: "ID card details",

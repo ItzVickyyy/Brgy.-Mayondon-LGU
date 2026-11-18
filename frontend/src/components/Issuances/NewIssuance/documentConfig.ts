@@ -13,7 +13,6 @@ export type DocumentCode =
   | "RESIDENCY"
   | "INDIGENCY"
   | "ASSISTANCE"
-  | "MARGINALIZED_SECTOR"
   | "FIRST_TIME_JOBSEEKER"
   | "BARANGAY_ID"
 
@@ -432,6 +431,15 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
         group: "main",
       },
       {
+        name: "healthCondition",
+        label: "Health condition",
+        type: "textarea",
+        required: true,
+        group: "main",
+        showWhen: (values) => values.assistanceType === "medical",
+        help: "Confidential. Kept in the record but not printed on the certificate.",
+      },
+      {
         name: "for",
         label: "For",
         type: "radio",
@@ -454,36 +462,6 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
         required: true,
         group: "main",
         showWhen: (values) => values.for === "Someone else",
-      },
-    ],
-  },
-  MARGINALIZED_SECTOR: {
-    code: "MARGINALIZED_SECTOR",
-    name: "Marginalized Sector (Pagpapatunay)",
-    shortName: "Marginalized Sector",
-    category: "certification",
-    hint: "Filipino sector certification",
-    printMode: "full_page",
-    validityMonths: null,
-    onePerResident: false,
-    signatoryMode: "select",
-    signatoryDefault: "Barangay Kagawad",
-    residentNeeds: [],
-    fields: [
-      {
-        name: "sector",
-        label: "Sector",
-        type: "select",
-        required: true,
-        options: sectorOptions,
-        group: "main",
-      },
-      {
-        name: "healthCondition",
-        label: "Health condition",
-        type: "textarea",
-        required: true,
-        group: "main",
       },
     ],
   },

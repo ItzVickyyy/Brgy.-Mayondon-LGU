@@ -222,9 +222,9 @@ def test_sensitive_read_is_logged_without_the_value(
     draft = _certificate_draft(
         client,
         staff_token_headers,
-        "MARGINALIZED_SECTOR",
+        "ASSISTANCE",
         res["id"],
-        marginalized={"health_condition": SECRET},
+        assistance={"assistance_type": "medical", "health_condition": SECRET},
         sectors=[{"sector_id": _sector_ids(client, staff_token_headers)[0]}],
     )
     got = client.get(f"{API}/issuances/{draft['id']}", headers=staff_token_headers)

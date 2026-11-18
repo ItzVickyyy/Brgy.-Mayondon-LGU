@@ -41,7 +41,7 @@ Full wording and reasons are in [09](09-Issuance-Form-Data-Map.md), *Settled des
 | # | Decision | Reason |
 |---|---|---|
 | 13 | Printing is **typed values on pre-printed forms only**. Never print letterhead, labels, fixed text, signatures, dry-seal label or footer. | [04](04-Documents-and-Printing.md) section 3 |
-| 14 | **Six templates exist:** Clearance, Franchise, Electrical/Water, Indigency, Marginalized Sector (Pagpapatunay), Assistance certification. **Residency, First-Time Jobseekers and Barangay ID have no template.** | [04](04-Documents-and-Printing.md) section 6 |
+| 14 | **Five templates exist:** Clearance, Franchise, Electrical/Water, Indigency, Assistance certification (the Marginalized Sector / Pagpapatunay certificate was merged into it; there are 8 document types). **Residency, First-Time Jobseekers and Barangay ID have no template.** | [04](04-Documents-and-Printing.md) section 6 |
 | 15 | **Records created in the old Issuances form cannot print** (no stored issuance id). Only New Issuance records can. | Print data needs `fields.mockIssuanceId` |
 | 16 | Photo: camera capture and "Upload photo", both with local background removal (no external upload). | Resident photos must never leave the computer |
 

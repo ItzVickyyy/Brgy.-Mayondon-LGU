@@ -39,8 +39,6 @@ export function defaultDetails(code: DocumentCode): DocumentDetails {
       return { type: code, addressedToOffice: "" }
     case "ASSISTANCE":
       return { type: code, assistanceType: "financial", forSelf: true }
-    case "MARGINALIZED_SECTOR":
-      return { type: code, healthCondition: "" }
     case "FIRST_TIME_JOBSEEKER":
       return {
         type: code,

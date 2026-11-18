@@ -63,10 +63,8 @@ const detailsSchemas = {
     forSelf: z.boolean(),
     beneficiaryName: z.string().optional(),
     beneficiaryRelationship: z.string().optional(),
-  }),
-  MARGINALIZED_SECTOR: z.object({
-    type: z.literal("MARGINALIZED_SECTOR"),
-    healthCondition: nonEmpty,
+    // Medical assistance only; confidential and never printed.
+    healthCondition: z.string().optional(),
   }),
   FIRST_TIME_JOBSEEKER: z.object({
     type: z.literal("FIRST_TIME_JOBSEEKER"),
@@ -95,11 +93,20 @@ export const documentDetailsSchema = z
     detailsSchemas.RESIDENCY,
     detailsSchemas.INDIGENCY,
     detailsSchemas.ASSISTANCE,
-    detailsSchemas.MARGINALIZED_SECTOR,
     detailsSchemas.FIRST_TIME_JOBSEEKER,
     detailsSchemas.BARANGAY_ID,
   ])
   .superRefine((value, context) => {
+    if (
+      value.type === "ASSISTANCE" &&
+      value.assistanceType === "medical" &&
+      !value.healthCondition?.trim()
+    )
+      context.addIssue({
+        code: "custom",
+        path: ["healthCondition"],
+        message: "Health condition is required for medical assistance.",
+      })
     if (value.type === "ASSISTANCE" && !value.forSelf) {
       if (!value.beneficiaryName?.trim())
         context.addIssue({
@@ -131,7 +138,6 @@ const baseIssuanceSchema = z
       "RESIDENCY",
       "INDIGENCY",
       "ASSISTANCE",
-      "MARGINALIZED_SECTOR",
       "FIRST_TIME_JOBSEEKER",
       "BARANGAY_ID",
     ]),
@@ -177,9 +183,7 @@ const baseIssuanceSchema = z
         })
       }
       if (
-        ["INDIGENCY", "ASSISTANCE", "MARGINALIZED_SECTOR"].includes(
-          value.documentType,
-        ) &&
+        ["INDIGENCY", "ASSISTANCE"].includes(value.documentType) &&
         !value.sectors?.length
       ) {
         context.addIssue({
@@ -199,7 +203,7 @@ const baseIssuanceSchema = z
         })
       }
       if (
-        ["ASSISTANCE", "MARGINALIZED_SECTOR"].includes(value.documentType) &&
+        value.documentType === "ASSISTANCE" &&
         (value.sectors?.length ?? 0) !== 1
       ) {
         context.addIssue({
@@ -210,12 +214,9 @@ const baseIssuanceSchema = z
       }
       if (
         signatoryRules.available &&
-        [
-          "RESIDENCY",
-          "ASSISTANCE",
-          "MARGINALIZED_SECTOR",
-          "FIRST_TIME_JOBSEEKER",
-        ].includes(value.documentType) &&
+        ["RESIDENCY", "ASSISTANCE", "FIRST_TIME_JOBSEEKER"].includes(
+          value.documentType,
+        ) &&
         !value.signatoryOfficialId
       ) {
         context.addIssue({

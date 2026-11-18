@@ -73,7 +73,7 @@ def test_staff_and_admin_read_seeded_lookups(
         r = client.get(f"{LK}/document-types", headers=headers)
         assert r.status_code == 200
         kinds = {d["code"]: d for d in r.json()}
-        assert len(kinds) == 9
+        assert len(kinds) == 8
         assert kinds["BARANGAY_CLEARANCE"]["validity_months"] == 2
         assert kinds["FIRST_TIME_JOBSEEKER"]["one_per_resident"] is True
         for path in ("streets", "tricycle-associations"):

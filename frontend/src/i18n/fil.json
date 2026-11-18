@@ -1298,11 +1298,6 @@
           "short": "Sertipikasyon para sa Tulong",
           "hint": "Pinansyal, medikal, libing"
         },
-        "MARGINALIZED_SECTOR": {
-          "name": "Marginalized Sector (Pagpapatunay)",
-          "short": "Marginalized Sector",
-          "hint": "Sertipikasyon ng sektor sa Filipino"
-        },
         "FIRST_TIME_JOBSEEKER": {
           "name": "First-Time Jobseeker",
           "short": "First-Time Jobseeker",
@@ -1419,6 +1414,7 @@
         "receiptRequired": "Kailangan ang numero ng opisyal na resibo maliban kung libre.",
         "beneficiaryName": "Kailangan ang pangalan kapag para sa ibang tao ang tulong.",
         "beneficiaryRelationship": "Kailangan ang ugnayan kapag para sa ibang tao ang tulong.",
+        "healthCondition": "Kailangan ang kondisyong pangkalusugan para sa tulong medikal.",
         "typeMismatch": "Dapat tumugma ang mga detalye sa napiling uri ng dokumento.",
         "purposeRequired": "Kailangan ang layunin.",
         "chooseSector": "Pumili ng sektor.",
@@ -1480,6 +1476,7 @@
         "stampBox": "Ipi-print sa kahon ng selyo.",
         "witnessIssuer": "Ang taong nag-iisyu ng dokumentong ito.",
         "requestedBy": "Kung may ibang humiling maliban sa residente lamang. Ipi-print pagkatapos ng \"Requested by:\".",
+        "healthConditionConfidential": "Kumpidensyal. Naka-save sa talaan ngunit hindi ipi-print sa sertipikasyon.",
         "barangayIdNumber": "I-type ang numerong nakaimprenta sa card. Iwanan ito kung ano ang nakikita para manatili ang kasalukuyang numero ng residente."
       },
       "options": {
@@ -1704,7 +1701,6 @@
           "franchise": "Franchise Clearance",
           "utility": "Kuryente at Tubig",
           "indigency": "Indigency",
-          "marginalized": "Marginalized Sector",
           "assistance": "Sertipikasyon ng Tulong"
         }
       }

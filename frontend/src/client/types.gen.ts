@@ -180,6 +180,10 @@ export type AssistanceIn = {
      */
     assistance_type: 'financial' | 'medical' | 'burial';
     /**
+     * Health Condition
+     */
+    health_condition?: string | null;
+    /**
      * For Self
      */
     for_self?: boolean;
@@ -200,7 +204,11 @@ export type AssistancePublic = {
     /**
      * Assistance Type
      */
-    assistance_type: string;
+    assistance_type: string | null;
+    /**
+     * Health Condition
+     */
+    health_condition: string | null;
     /**
      * For Self
      */
@@ -1120,7 +1128,6 @@ export type IssuanceCreate = {
     utility?: UtilityIn | null;
     indigency?: IndigencyIn | null;
     franchise?: FranchiseIn | null;
-    marginalized?: MarginalizedIn | null;
     assistance?: AssistanceIn | null;
     jobseeker?: JobseekerIn | null;
     barangay_id?: BarangayIdIn | null;
@@ -1309,7 +1316,6 @@ export type IssuancePublic = {
     utility?: UtilityPublic | null;
     indigency?: IndigencyPublic | null;
     franchise?: FranchisePublic | null;
-    marginalized?: MarginalizedPublic | null;
     assistance?: AssistancePublic | null;
     jobseeker?: JobseekerPublic | null;
     barangay_id?: BarangayIdPublic | null;
@@ -1395,7 +1401,6 @@ export type IssuanceUpdate = {
     utility?: UtilityIn | null;
     indigency?: IndigencyIn | null;
     franchise?: FranchiseIn | null;
-    marginalized?: MarginalizedIn | null;
     assistance?: AssistanceIn | null;
     jobseeker?: JobseekerIn | null;
     barangay_id?: BarangayIdIn | null;
@@ -1589,26 +1594,6 @@ export type MappingRequest = {
      * Duplicate Action
      */
     duplicate_action?: 'skip' | 'update';
-};
-
-/**
- * MarginalizedIn
- */
-export type MarginalizedIn = {
-    /**
-     * Health Condition
-     */
-    health_condition: string;
-};
-
-/**
- * MarginalizedPublic
- */
-export type MarginalizedPublic = {
-    /**
-     * Health Condition
-     */
-    health_condition: string;
 };
 
 /**

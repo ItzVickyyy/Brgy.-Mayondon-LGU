@@ -332,49 +332,6 @@ function Indigency({ data }: { data: PrintData }) {
   )
 }
 
-function Marginalized({ data }: { data: PrintData }) {
-  const x = data.values
-  return (
-    <>
-      <Letterhead contact="Telephone No.: (049) 502-2443   Gmail Address: lgudonmayon@gmail.com" />
-      <h1 className="pf-center-title" style={{ marginTop: 24 }}>
-        PAGPAPATUNAY
-      </h1>
-      <p style={{ margin: "0 0 14pt" }}>Sa Kinauukulan:</p>
-      <p className="pf-para">
-        Ito ay nagpapatunay na si{" "}
-        <span className="pf-fill">{v(x, "name")}</span>, may sapat ang gulang
-        naninirahan at may pahatirang sulat{" "}
-        <span className="pf-fill">{v(x, "address")}</span>, Mayondon, Los Baños
-        Laguna ay nabibilang sa Marginalized Sector sa aming barangay. Siya ay
-        pumapailalim sa sector ng{" "}
-        <span className="pf-fill">{v(x, "sector")}</span>.
-      </p>
-      <p className="pf-para">
-        Pagpapatunay na si <span className="pf-fill">{v(x, "name")}</span> ay
-        nangangailangan ng tulong medical o pinansiyal dahil sa kanyang
-        kondisyong pangkalusugan na{" "}
-        <span className="pf-fill">{v(x, "healthCondition")}</span>.
-      </p>
-      <p className="pf-para">
-        Ginawa ngayong ika-
-        <span className="pf-fill" style={{ minWidth: 24 }}>
-          {v(x, "day")}
-        </span>{" "}
-        ng{" "}
-        <span className="pf-fill" style={{ minWidth: 110 }}>
-          {v(x, "month")}
-        </span>
-        .
-      </p>
-      <div className="pf-sig">
-        <div className="pf-seal">DRY SEAL</div>
-        <Signatory name="HON. DANILO V. APOLINARIO" position="BRGY. KAGAWAD" />
-      </div>
-    </>
-  )
-}
-
 function Assistance({ data }: { data: PrintData }) {
   const x = data.values
   const type = v(x, "assistanceType")
@@ -464,7 +421,6 @@ const forms: Record<
   franchise: Franchise,
   utility: Utility,
   indigency: Indigency,
-  marginalized: Marginalized,
   assistance: Assistance,
 }
 

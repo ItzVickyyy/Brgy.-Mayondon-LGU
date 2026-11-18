@@ -177,20 +177,8 @@ function inputs(
         sectors: [{ sectorId: 1 }],
         details: {
           type: "ASSISTANCE",
-          assistanceType: "financial",
+          assistanceType: "medical",
           forSelf: true,
-        },
-      },
-    },
-    MARGINALIZED_SECTOR: {
-      sectors: ["Senior Citizen"],
-      input: {
-        ...base,
-        documentType: "MARGINALIZED_SECTOR",
-        signatoryOfficialId: signatoryId,
-        sectors: [{ sectorId: 1 }],
-        details: {
-          type: "MARGINALIZED_SECTOR",
           healthCondition: "Fictional test condition",
         },
       },
@@ -231,7 +219,6 @@ const codes: DocumentCode[] = [
   "RESIDENCY",
   "INDIGENCY",
   "ASSISTANCE",
-  "MARGINALIZED_SECTOR",
   "FIRST_TIME_JOBSEEKER",
   "BARANGAY_ID",
 ]

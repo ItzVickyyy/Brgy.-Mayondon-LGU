@@ -22,7 +22,7 @@ These close the gaps found when the database plan was reviewed. They are **desig
 |---|---|---|---|---|
 | 1 | Resident photos | Stored in the database in `resident_photos` as `bytea`: one row per resident, the processed PNG or WebP, at most 300 KB (checked by the API), type checked from the file's first bytes and not its name. There is **no `photo_url` column**. Photos are served only through an authenticated endpoint. | The backup script dumps only PostgreSQL, so files on disk would be missed by every backup and restore. Photos must never leave the host. A separate table keeps image bytes out of list queries. | D-18, D-35 |
 | 2 | Barangay ID numbers | `residents.id_number` is the **current** number (unique when set). `issuance_barangay_id.id_number` is the number printed on that card. Every new, renewal or replacement ID is its own issuance row, so history is kept. | Goal GOAL-02: history must not be overwritten. | D-43 (numbering series built in patch 65, off until an administrator sets it; the barangay still has to confirm the latest number and the renewal rule) |
-| 3 | Sensitive health condition | **No new permission.** Staff issue the Marginalized Sector certification, so they must be able to enter and print the value. List endpoints always return `[restricted]`. Only the single-issuance endpoint returns the value, and only to someone with `issuance.write`. Each read of the value is written to the audit log as `issuance.view_sensitive`. The value never appears in logs, exports or reports. | A "sensitive read" permission staff must hold anyway would restrict nothing. Masking by endpoint plus an audit trail does. | D-25 |
+| 3 | Sensitive health condition | **No new permission.** Staff issue the Assistance certification for medical requests, so they must be able to enter and print the value. List endpoints always return `[restricted]`. Only the single-issuance endpoint returns the value, and only to someone with `issuance.write`. Each read of the value is written to the audit log as `issuance.view_sensitive`. The value never appears in logs, exports or reports. | A "sensitive read" permission staff must hold anyway would restrict nothing. Masking by endpoint plus an audit trail does. | D-25 |
 | 4 | Name fields | Residents use **`suffix`** (the form and API contract already use it). `user.extension_name` stays until the account cleanup. | Different table, different owner of the field. | — |
 | 5 | Dates and time zone | Moments are `timestamptz` (UTC). Business dates are `date`: birthdate, `issue_date`, `date_of_issue`, `valid_until`, `date_of_payment`. "Today" and every expiry are computed in `Asia/Manila` (a `BUSINESS_TIMEZONE` setting), never from the server's UTC date. | The Docker host runs on UTC, so a document issued before 8 AM would carry yesterday's date. | — |
 | 6 | Derived values | Age and ID status (Valid, Expiring soon, Expired, None) are computed when read, from the birthdate and the latest issued ID's `valid_until`. They are not stored. `issuances.expires_on` **is** stored, because the rule in force at issue time must stay with the document. | Stored copies go stale. | D-21 (expiring-soon threshold) |
@@ -227,7 +227,7 @@ Source: the stamp box and receipt cells of the office's current *Clearance Issui
 | Date of payment | `payment.dateOfPayment` | `date_of_payment` | date, default today. Printed in the "DOCUMENTARY STAMP TAX PAID" box. Shown for Clearance, Franchise and Electrical/Water only; not in the future |
 | Certified by (initials) | `payment.certifiedBy` | `certified_by` | text, optional. Printed in the same stamp box. Same documents as above |
 
-### `issuance_sectors` (N:1 to `issuances`, Indigency 1–2, Assistance 1, Marginalized 1)
+### `issuance_sectors` (N:1 to `issuances`, Indigency 1–2, Assistance 1)
 
 | Form input | Form key | Column | Rule |
 |---|---|---|---|
@@ -249,7 +249,7 @@ Source: the stamp box and receipt cells of the office's current *Clearance Issui
 | `issuance_building` | Location → `location` (default `Barangay Mayondon`). Identification and payment use the shared tables. **Open:** the sheet has a few unlabeled check marks that are not captured yet |
 | `issuance_philhealth` | **Removed.** PhilHealth Certification is no longer a document type, so this table is not needed |
 | `issuance_assistance` | Assistance requested → `assistance_type` (`financial`, `medical`, `burial`); For → `for_self` (bool); Name → `beneficiary_name`; Relationship → `beneficiary_relationship` (both required when `for_self` is false) |
-| `issuance_marginalized_sector` | Health condition → `health_condition`. **Sensitive:** masked as `[restricted]` in every list, returned only by the single-issuance endpoint, and each read is audited (decision 3) |
+| `issuance_assistance` | Health condition → `health_condition` (required for medical assistance, dropped otherwise; `assistance_type` is NULL only on records carried over from the retired Marginalized Sector table, which cannot be issued until a type is chosen). **Sensitive:** masked as `[restricted]` in every list, returned only by the single-issuance endpoint, and each read is audited (decision 3) |
 | `issuance_first_time_jobseeker` | Educational attainment → `educational_attainment`; Course → `course` (default `N/A`); JobStart beneficiary → `is_jobstart_beneficiary` (bool); Witness → `witness_official_id` (FK `officials`). "Parts to print" is a print-time choice and is **not stored**. Rule: one issued row per resident, enforced with a partial unique index on `(resident_id)` where `status = 'issued'` |
 | `issuance_barangay_id` | Transaction → `transaction_type` (`new`, `renewal`, `replacement`); Valid until → `valid_until`; `id_number` (the number printed on this card). The number is assigned on issue and also becomes the resident's current number (`residents.id_number`), so each card keeps its own history row (decision 2). **Rules as built:** the clerk types `valid_until` (validity length is open, D-18) and, for a new card, the number (series is open, D-43); a renewal or replacement keeps the resident's current number unless another is typed. `new` is refused when the resident already has a card or a number on record; `renewal` and `replacement` need one of them. A number held by another resident is refused. `expires_on` is set to `valid_until`. Issue needs birthdate, birth place, civil status, sex, the address trio, the three emergency contact fields and a photo on the resident record. A voided card leaves `residents.id_number` unchanged |
 
@@ -267,7 +267,7 @@ Collected inline in step 2 only when the chosen document needs them and the reco
 | Clearance, Jobseeker, ID | `civil_status` |
 | Jobseeker, ID | `sex` |
 | Residency, Jobseeker, Assistance | `resident_since_year`, `resident_since_birth` |
-| Assistance, Marginalized | `resident_sectors` |
+| Assistance | `resident_sectors` |
 | ID | photo (`resident_photos`), `emergency_contact_name`, `emergency_contact_address`, `emergency_contact_phone` |
 
 ## New resident (quick add in step 2)

@@ -214,7 +214,6 @@ export const documentTypes = [
   "Certification of Residency",
   "Certificate of Indigency",
   "Certification (assistance request)",
-  "Marginalized Sector Certification (Pagpapatunay)",
   "First-Time Jobseeker Certification",
 ] as const
 
@@ -258,10 +257,6 @@ export const documentCardInfo: Record<string, { name: string; hint: string }> =
     "Certification (assistance request)": {
       name: "Assistance Certification",
       hint: "Financial, medical, burial",
-    },
-    "Marginalized Sector Certification (Pagpapatunay)": {
-      name: "Marginalized Sector",
-      hint: "Filipino sector certification",
     },
     "First-Time Jobseeker Certification": {
       name: "First-Time Jobseeker",
@@ -342,18 +337,6 @@ export const documentMeta: Record<string, DocumentMeta> = {
     hasReceiptStamp: false,
     hint: "Financial, medical, burial",
   },
-  "Marginalized Sector Certification (Pagpapatunay)": {
-    shortName: "Marginalized Sector",
-    group: "Certifications",
-    language: "fil",
-    paper: { size: "short", orientation: "portrait" },
-    printMode: "full-page",
-    validity: null,
-    signatory: "select",
-    onePerResident: false,
-    hasReceiptStamp: false,
-    hint: "Filipino sector certification",
-  },
   "First-Time Jobseeker Certification": {
     shortName: "First-Time Jobseeker",
     group: "Certifications",
@@ -376,7 +359,6 @@ export const historyDocumentTypes = [
   "Certification of Residency",
   "Certificate of Indigency",
   "Certification (assistance request)",
-  "Marginalized Sector Certification (Pagpapatunay)",
   "First-Time Jobseeker Certification",
 ]
 
@@ -397,12 +379,12 @@ const documentTypeAliases: Record<string, string> = {
   "certification (assistance request)": "Certification (assistance request)",
   "residency certification": "Certification of Residency",
   "certification of residency": "Certification of Residency",
-  "marginalized sector": "Marginalized Sector Certification (Pagpapatunay)",
-  "marginalized sector certification":
-    "Marginalized Sector Certification (Pagpapatunay)",
+  // The old Marginalized Sector document was merged into Assistance (patch 141).
+  "marginalized sector": "Certification (assistance request)",
+  "marginalized sector certification": "Certification (assistance request)",
   "marginalized sector certification (pagpapatunay)":
-    "Marginalized Sector Certification (Pagpapatunay)",
-  pagpapatunay: "Marginalized Sector Certification (Pagpapatunay)",
+    "Certification (assistance request)",
+  pagpapatunay: "Certification (assistance request)",
   "first-time jobseekers certification": "First-Time Jobseeker Certification",
   "first-time jobseeker certification": "First-Time Jobseeker Certification",
 }

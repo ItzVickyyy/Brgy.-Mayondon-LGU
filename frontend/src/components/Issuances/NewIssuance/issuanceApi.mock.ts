@@ -415,11 +415,9 @@ export const issuanceApi = {
       payload: {
         ...payload,
         details:
-          payload.details.type === "MARGINALIZED_SECTOR"
-            ? {
-                type: "MARGINALIZED_SECTOR" as const,
-                healthCondition: "[restricted]",
-              }
+          payload.details.type === "ASSISTANCE" &&
+          payload.details.healthCondition
+            ? { ...payload.details, healthCondition: "[restricted]" }
             : payload.details,
       },
     }))

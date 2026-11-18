@@ -191,7 +191,7 @@ def test_dashboard_counts_follow_issuing(
     )
     assert after["total_issued"] == before["total_issued"] + 1
     assert after["total_issued"] == sum(t["count"] for t in after["by_document_type"])
-    assert len(after["by_document_type"]) == 9  # every type, zeros included
+    assert len(after["by_document_type"]) == 8  # every type, zeros included
     clearance = _type_row({"data": after["by_document_type"]}, "BARANGAY_CLEARANCE")[
         "count"
     ]
@@ -402,7 +402,7 @@ def test_issuances_by_type_counts_issued_voided_and_corrections(
     assert after["total_issued"] == sum(r["issued"] for r in after["data"])
     assert after["total_voided"] == sum(r["voided"] for r in after["data"])
     assert after["total_corrections"] == sum(r["corrections"] for r in after["data"])
-    assert len(after["data"]) == 9
+    assert len(after["data"]) == 8
     shares = [r["share_percent"] for r in after["data"] if r["share_percent"]]
     assert abs(sum(shares) - 100) < 1  # rounding only
 

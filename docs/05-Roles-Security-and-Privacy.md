@@ -38,7 +38,7 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 | Barangay IDs: create, renew, print (done through Issuance Management, ID document type) | Allowed | Allowed |
 | Records Management, Barangay IDs: override validity rules | No | Allowed |
 | Records Management, Barangay IDs: set up the ID number series, and type an ID number by hand while the series is on (the same permission, `id.override`, guards all three; no new permission) | No | Allowed |
-| Marginalized Sector health condition (value) | Allowed on the single record only; masked in lists; each read is audited | Same |
+| Assistance health condition (medical assistance only; value) | Allowed on the single record only; masked in lists; each read is audited | Same |
 | Activity Log | Own activity | All users, with filters |
 | Notification bell (top bar) | Only notices about their own account: something an administrator did to it (details changed, role changed, password or two-factor or recovery questions reset, unlocked, asked or no longer asked to use two-factor) and their own security events (password changed, two-factor on or off, new codes, recovery questions set, recovery completed, locked after failed sign-ins). Never backups, imports, configuration or other people's accounts | Every notice in the catalog, whoever did it, their own too: accounts, security, backups, imports, configuration. Never residents or issuances |
 | My Account, User Settings | Allowed | Allowed |
@@ -58,7 +58,7 @@ No account `status` column is planned. Accounts are created only by the System A
 
 Append-only history for sensitive actions: who, when, affected record, reason where required. Ordinary users cannot rewrite or delete entries; any retention/cleanup must be explicitly controlled and documented. Never log passwords, tokens, reset links or unnecessary resident data **(D-24)**.
 
-Design: an `audit_log` table whose rows cannot be updated or deleted (a database trigger rejects it), written in the same transaction as the change it records. The actor's email is copied into the row so history survives account changes. Columns are in [09](09-Issuance-Form-Data-Map.md). Reading the Marginalized Sector health condition is itself an audited action.
+Design: an `audit_log` table whose rows cannot be updated or deleted (a database trigger rejects it), written in the same transaction as the change it records. The actor's email is copied into the row so history survives account changes. Columns are in [09](09-Issuance-Form-Data-Map.md). Reading the Assistance health condition is itself an audited action.
 
 ### A6. Account lifecycle
 
