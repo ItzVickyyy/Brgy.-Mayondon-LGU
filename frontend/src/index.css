@@ -188,6 +188,16 @@
     animation: page-enter 200ms ease-out backwards;
   }
 
+  /* A small grid of dots for the page backdrop (AppBackdrop). An SVG tile with
+     one solid-colour dot, so it is not a gradient; navy in light, light blue in
+     dark, both at a low opacity. */
+  .app-backdrop-dots {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='3' cy='3' r='1.6' fill='%231e3a6e' fill-opacity='0.14'/%3E%3C/svg%3E");
+  }
+  .dark .app-backdrop-dots {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='3' cy='3' r='1.6' fill='%237fb0ff' fill-opacity='0.16'/%3E%3C/svg%3E");
+  }
+
   .bar-rise {
     animation: bar-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
     animation-delay: var(--bar-delay, 0ms);

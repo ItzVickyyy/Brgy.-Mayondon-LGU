@@ -15,6 +15,7 @@ import {
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { UsersService } from "@/client"
+import { AppBackdrop } from "@/components/Common/AppBackdrop"
 import { Footer } from "@/components/Common/Footer"
 import { IdleSignOut } from "@/components/Common/IdleSignOut"
 import { KeyboardShortcuts } from "@/components/Common/KeyboardShortcuts"
@@ -202,9 +203,10 @@ function Layout() {
         <main
           id="main-content"
           tabIndex={-1}
-          className="flex-1 p-4 outline-none sm:p-6 md:p-8"
+          className="relative flex-1 p-4 outline-none sm:p-6 md:p-8"
         >
-          <div key={pathname} className="page-enter mx-auto max-w-7xl">
+          <AppBackdrop />
+          <div key={pathname} className="page-enter relative mx-auto max-w-7xl">
             <Outlet />
           </div>
         </main>
