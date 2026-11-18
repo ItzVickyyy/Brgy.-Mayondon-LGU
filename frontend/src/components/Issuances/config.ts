@@ -128,6 +128,15 @@ export const addressedOfficeOptions = [
   "Mental Hospital - Mandaluyong City",
   "Laguna District Bay Laguna",
 ]
+/** Static fixture mirrored by the educational_attainments migration for mock tests. */
+export const educationalAttainmentOptions = [
+  "Elementary",
+  "Junior High School",
+  "Senior High School",
+  "Vocational",
+  "College",
+  "Postgraduate",
+]
 export const purposeNoteOptions = ["NOT APPLICABLE FOR LOAN PURPOSES"]
 export const indigencySectorOptions = [
   "Urban Poor",

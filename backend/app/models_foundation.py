@@ -93,6 +93,18 @@ class AddressedOffice(SQLModel, table=True):
     name: str = Field(max_length=150, unique=True)
 
 
+class EducationalAttainment(SQLModel, table=True):
+    """Suggested educational-attainment values for First-Time Jobseeker forms.
+
+    Issuances keep the selected text as a historical snapshot.
+    """
+
+    __tablename__ = "educational_attainments"
+
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(max_length=150, unique=True)
+
+
 class Street(SQLModel, table=True):
     __tablename__ = "streets"
 

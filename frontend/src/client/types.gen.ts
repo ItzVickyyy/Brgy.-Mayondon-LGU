@@ -4600,6 +4600,76 @@ export type lookupsDeleteAddressedOfficeResponses = {
 
 export type lookupsDeleteAddressedOfficeResponse = lookupsDeleteAddressedOfficeResponses[keyof lookupsDeleteAddressedOfficeResponses];
 
+export type lookupsListEducationalAttainmentsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/educational-attainments';
+};
+
+export type lookupsListEducationalAttainmentsResponses = {
+    200: Array<LookupItem>;
+};
+
+export type lookupsListEducationalAttainmentsResponse = lookupsListEducationalAttainmentsResponses[keyof lookupsListEducationalAttainmentsResponses];
+
+export type lookupsCreateEducationalAttainmentData = {
+    body: LookupNameIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/educational-attainments';
+};
+
+export type lookupsCreateEducationalAttainmentErrors = {
+    422: HTTPValidationError;
+};
+
+export type lookupsCreateEducationalAttainmentError = lookupsCreateEducationalAttainmentErrors[keyof lookupsCreateEducationalAttainmentErrors];
+
+export type lookupsCreateEducationalAttainmentResponses = {
+    201: LookupItem;
+};
+
+export type lookupsCreateEducationalAttainmentResponse = lookupsCreateEducationalAttainmentResponses[keyof lookupsCreateEducationalAttainmentResponses];
+
+export type lookupsRenameEducationalAttainmentData = {
+    body: LookupNameIn;
+    path: { item_id: number };
+    query?: never;
+    url: '/api/v1/lookups/educational-attainments/{item_id}';
+};
+
+export type lookupsRenameEducationalAttainmentErrors = {
+    422: HTTPValidationError;
+};
+
+export type lookupsRenameEducationalAttainmentError = lookupsRenameEducationalAttainmentErrors[keyof lookupsRenameEducationalAttainmentErrors];
+
+export type lookupsRenameEducationalAttainmentResponses = {
+    200: LookupItem;
+};
+
+export type lookupsRenameEducationalAttainmentResponse = lookupsRenameEducationalAttainmentResponses[keyof lookupsRenameEducationalAttainmentResponses];
+
+export type lookupsDeleteEducationalAttainmentData = {
+    body?: never;
+    path: { item_id: number };
+    query?: never;
+    url: '/api/v1/lookups/educational-attainments/{item_id}';
+};
+
+export type lookupsDeleteEducationalAttainmentErrors = {
+    422: HTTPValidationError;
+};
+
+export type lookupsDeleteEducationalAttainmentError = lookupsDeleteEducationalAttainmentErrors[keyof lookupsDeleteEducationalAttainmentErrors];
+
+export type lookupsDeleteEducationalAttainmentResponses = {
+    204: void;
+};
+
+export type lookupsDeleteEducationalAttainmentResponse = lookupsDeleteEducationalAttainmentResponses[keyof lookupsDeleteEducationalAttainmentResponses];
+
 export type lookupsListStreetsData = {
     body?: never;
     path?: never;

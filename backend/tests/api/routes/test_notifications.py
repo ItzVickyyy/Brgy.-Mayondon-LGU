@@ -164,8 +164,13 @@ def test_staff_never_see_backup_import_or_configuration(
     office_cfg = _audit(
         db, admin, "addressed_office.rename", module="lookups", record_id="7"
     )
+    attainment_cfg = _audit(
+        db, admin, "educational_attainment.rename", module="lookups", record_id="6"
+    )
     imp = _audit(db, admin, "import.commit", module="imports", details={"file": "z"})
-    ids = {ok.id, bad.id, cfg.id, purpose_cfg.id, office_cfg.id, imp.id}
+    ids = {
+        ok.id, bad.id, cfg.id, purpose_cfg.id, office_cfg.id, attainment_cfg.id, imp.id
+    }
     staff_body = _bell(client, head)
     assert not ids & {i["id"] for i in staff_body["data"]}
     assert not {"backup", "import", "configuration"} & {
@@ -179,6 +184,7 @@ def test_staff_never_see_backup_import_or_configuration(
     assert got[cfg.id]["category"] == "configuration"
     assert got[purpose_cfg.id]["category"] == "configuration"
     assert got[office_cfg.id]["category"] == "configuration"
+    assert got[attainment_cfg.id]["category"] == "configuration"
     assert got[imp.id]["category"] == "import"
     # No reason, details, file names or record ids ever leave the server.
     text = client.get(URL, headers=superuser_token_headers).text

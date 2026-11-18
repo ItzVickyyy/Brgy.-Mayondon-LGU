@@ -162,6 +162,9 @@
       "sector_rename": "{{actor}} renamed a sector in the list.",
       "sector_delete": "{{actor}} removed a sector from the list.",
       "tricycle_association_delete": "{{actor}} removed a tricycle association from the list.",
+      "educational_attainment_create": "{{actor}} added an educational-attainment choice to the list.",
+      "educational_attainment_rename": "{{actor}} renamed an educational-attainment choice.",
+      "educational_attainment_delete": "{{actor}} removed an educational-attainment choice from the list.",
       "addressed_office_create": "{{actor}} added an addressed-office suggestion to the list.",
       "addressed_office_rename": "{{actor}} renamed an addressed-office suggestion.",
       "addressed_office_delete": "{{actor}} removed an addressed-office suggestion from the list.",
@@ -460,6 +463,11 @@
         "create": "Sector added",
         "rename": "Sector renamed",
         "delete": "Sector removed"
+      },
+      "educational_attainment": {
+        "create": "Educational-attainment choice added",
+        "rename": "Educational-attainment choice renamed",
+        "delete": "Educational-attainment choice removed"
       },
       "addressed_office": {
         "create": "Addressed office suggestion added",
@@ -1125,6 +1133,18 @@
         "empty": "No sectors yet",
         "deleteTitle": "Delete sector?"
       },
+      "educationalAttainment": {
+        "title": "Educational Attainment",
+        "description": "Choices for the First-Time Jobseeker certificate. Existing issued certificates keep the value saved at issue time.",
+        "newName": "New educational attainment",
+        "placeholder": "Enter educational attainment",
+        "loading": "Loading educational attainments...",
+        "loadError": "Could not load educational attainments",
+        "empty": "No educational attainments yet",
+        "deleteTitle": "Delete educational attainment?",
+        "deleteDescription": "Remove {{name}} from future choices? Existing issued certificates will keep the value saved on them.",
+        "deleteDescription": "Remove {{name}} from future choices? Existing issued certificates will keep the value saved on them."
+      },
       "addressedOffice": {
         "title": "Addressed Office Suggestions",
         "description": "Suggested offices for the Certificate of Indigency. Clerks can still type another addressee. Changes affect future suggestions; issued certificates keep their original office text.",
@@ -1204,7 +1224,8 @@
         "street": "Streets",
         "association": "Tricycle associations",
         "purpose": "Purposes",
-        "addressedOffice": "Addressed offices"
+        "addressedOffice": "Addressed offices",
+        "educationalAttainment": "Educational attainment"
       }
     },
     "printSetup": {

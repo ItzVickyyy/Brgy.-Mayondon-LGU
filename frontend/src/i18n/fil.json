@@ -162,6 +162,9 @@
       "sector_rename": "{{actor}} ang nagpalit ng pangalan ng sektor sa listahan.",
       "sector_delete": "{{actor}} ang nag-alis ng sektor sa listahan.",
       "tricycle_association_delete": "{{actor}} ang nag-alis ng samahan ng tricycle sa listahan.",
+      "educational_attainment_create": "{{actor}} ang nagdagdag ng antas ng edukasyon sa listahan.",
+      "educational_attainment_rename": "{{actor}} ang nagpalit ng pangalan ng antas ng edukasyon.",
+      "educational_attainment_delete": "{{actor}} ang nag-alis ng antas ng edukasyon sa listahan.",
       "addressed_office_create": "{{actor}} ang nagdagdag ng mungkahing opisina sa listahan.",
       "addressed_office_rename": "{{actor}} ang nagpalit ng pangalan ng mungkahing opisina.",
       "addressed_office_delete": "{{actor}} ang nag-alis ng mungkahing opisina sa listahan.",
@@ -460,6 +463,11 @@
         "create": "Nadagdag ang sektor",
         "rename": "Napalitan ang pangalan ng sektor",
         "delete": "Naalis ang sektor"
+      },
+      "educational_attainment": {
+        "create": "Nadagdag ang pagpipiliang antas ng edukasyon",
+        "rename": "Napalitan ang pangalan ng antas ng edukasyon",
+        "delete": "Naalis ang antas ng edukasyon"
       },
       "addressed_office": {
         "create": "Nadagdag ang mungkahing opisina",
@@ -1125,6 +1133,18 @@
         "empty": "Wala pang sektor",
         "deleteTitle": "Burahin ang sektor?"
       },
+      "educationalAttainment": {
+        "title": "Natapos na antas ng edukasyon",
+        "description": "Mga pagpipilian para sa First-Time Jobseeker certificate. Mananatili ang halagang naka-save sa mga naisyung sertipiko.",
+        "newName": "Bagong antas ng edukasyon",
+        "placeholder": "Ilagay ang antas ng edukasyon",
+        "loading": "Nilo-load ang mga antas ng edukasyon...",
+        "loadError": "Hindi ma-load ang mga antas ng edukasyon",
+        "empty": "Wala pang mga antas ng edukasyon",
+        "deleteTitle": "Burahin ang antas ng edukasyon?",
+        "deleteDescription": "Alisin ang {{name}} sa mga susunod na pagpipilian? Mananatili ang halagang naka-save sa mga naisyung sertipiko.",
+        "deleteDescription": "Alisin ang {{name}} sa mga susunod na pagpipilian? Mananatili ang halagang naka-save sa mga naisyung sertipiko."
+      },
       "addressedOffice": {
         "title": "Mga mungkahing opisina",
         "description": "Mga mungkahing opisina para sa Certificate of Indigency. Maaari pa ring mag-type ng ibang tatanggap ang clerk. Para lamang sa mga susunod na mungkahi ang mga pagbabago; mananatili ang orihinal na teksto sa mga naisyung sertipiko.",
@@ -1204,7 +1224,8 @@
         "street": "Mga kalye",
         "association": "Mga asosasyon ng traysikel",
         "purpose": "Mga layunin",
-        "addressedOffice": "Mga opisina"
+        "addressedOffice": "Mga opisina",
+        "educationalAttainment": "Antas ng edukasyon"
       }
     },
     "printSetup": {

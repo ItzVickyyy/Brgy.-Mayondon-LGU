@@ -89,6 +89,8 @@ export type IssuanceLookups = {
   purposeChoices: { id: number; name: string }[]
   /** Admin-managed suggestions for the Indigency addressee field. */
   addressedOfficeChoices: { id: number; name: string }[]
+  /** Admin-managed suggestions for First-Time Jobseeker educational attainment. */
+  educationalAttainmentChoices: { id: number; name: string }[]
   sectors: string[]
   idTypes: string[]
   /** The ID types as saved on the server (real ids), in the order the form lists them. */

@@ -1,9 +1,9 @@
 """Lookup lists for forms and admin upkeep of editable lists.
 
 Any signed-in user may read every list. Document types are seeded and read-only.
-Issuance purposes, sectors, ID types and addressed-office suggestions are
-admin-managed. Streets and tricycle associations have the same admin-only
-upkeep. Referenced lookup items cannot be removed (409). Addressed-office
+Issuance purposes, sectors, ID types, addressed-office suggestions and
+educational-attainment suggestions are admin-managed. Streets and tricycle
+associations have the same admin-only upkeep. Referenced lookup items cannot be removed (409). Addressed-office
 suggestions are not foreign keys: issued Indigency records retain the office
 text entered at issue time, so suggestions can be removed without changing
 history.
@@ -25,6 +25,7 @@ from app.models import User
 from app.models_foundation import (
     AddressedOffice,
     DocumentType,
+    EducationalAttainment,
     IdType,
     IssuancePurpose,
     Sector,
@@ -80,6 +81,13 @@ def list_addressed_offices(
     session: SessionDep, _user: CurrentUser
 ) -> list[LookupItem]:
     return _names(session, AddressedOffice)
+
+
+@router.get("/educational-attainments", response_model=list[LookupItem])
+def list_educational_attainments(
+    session: SessionDep, _user: CurrentUser
+) -> list[LookupItem]:
+    return _names(session, EducationalAttainment)
 
 
 @router.get("/streets", response_model=list[LookupItem])
@@ -305,6 +313,49 @@ def delete_addressed_office(
         item_id,
         label="addressed office",
         record_type="addressed_office",
+    )
+
+
+@router.post("/educational-attainments", response_model=LookupItem, status_code=201)
+def create_educational_attainment(
+    body: LookupNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _create(
+        session,
+        user,
+        EducationalAttainment,
+        body,
+        label="educational attainment",
+        record_type="educational_attainment",
+    )
+
+
+@router.patch("/educational-attainments/{item_id}", response_model=LookupItem)
+def rename_educational_attainment(
+    item_id: int, body: LookupNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _rename(
+        session,
+        user,
+        EducationalAttainment,
+        item_id,
+        body,
+        label="educational attainment",
+        record_type="educational_attainment",
+    )
+
+
+@router.delete("/educational-attainments/{item_id}", status_code=204)
+def delete_educational_attainment(
+    item_id: int, session: SessionDep, user: ManageUser
+) -> Response:
+    return _remove(
+        session,
+        user,
+        EducationalAttainment,
+        item_id,
+        label="educational attainment",
+        record_type="educational_attainment",
     )
 
 

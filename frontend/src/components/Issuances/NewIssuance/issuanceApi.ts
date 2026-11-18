@@ -51,6 +51,7 @@ type LookupData = {
   idTypes: LookupItem[]
   purposes: LookupItem[]
   addressedOffices: LookupItem[]
+  educationalAttainments: LookupItem[]
   streets: LookupItem[]
   associations: LookupItem[]
   officials: OfficialChoice[]
@@ -67,6 +68,7 @@ function loadLookups(): Promise<LookupData> {
         idTypes,
         purposes,
         addressedOffices,
+        educationalAttainments,
         streets,
         associations,
         officials,
@@ -76,6 +78,7 @@ function loadLookups(): Promise<LookupData> {
         LookupsService.listIdTypes(),
         LookupsService.listIssuancePurposes(),
         LookupsService.listAddressedOffices(),
+        LookupsService.listEducationalAttainments(),
         LookupsService.listStreets(),
         LookupsService.listTricycleAssociations(),
         OfficialsService.listOfficials({ query: { status: "current" } }),
@@ -86,6 +89,7 @@ function loadLookups(): Promise<LookupData> {
         idTypes: idTypes.data,
         purposes: purposes.data,
         addressedOffices: addressedOffices.data,
+        educationalAttainments: educationalAttainments.data,
         streets: streets.data,
         associations: associations.data,
         officials: officials.data.map((official) => ({
@@ -934,6 +938,9 @@ export const issuanceApi = {
         .sort((a, b) => a.id - b.id)
         .map(({ id, name }) => ({ id, name })),
       addressedOfficeChoices: [...data.addressedOffices]
+        .sort((a, b) => a.id - b.id)
+        .map(({ id, name }) => ({ id, name })),
+      educationalAttainmentChoices: [...data.educationalAttainments]
         .sort((a, b) => a.id - b.id)
         .map(({ id, name }) => ({ id, name })),
       sectors: byId(data.sectors),

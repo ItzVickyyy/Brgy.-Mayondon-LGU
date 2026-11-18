@@ -1,5 +1,6 @@
 import {
   clearancePurposeOptions,
+  educationalAttainmentOptions,
   idTypeOptions,
   indigencyPurposeOptions,
   indigencySectorOptions,
@@ -488,14 +489,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
         label: "Educational attainment",
         type: "select",
         required: true,
-        options: [
-          "Elementary",
-          "Junior High School",
-          "Senior High School",
-          "Vocational",
-          "College",
-          "Postgraduate",
-        ],
+        options: educationalAttainmentOptions,
         group: "main",
       },
       {

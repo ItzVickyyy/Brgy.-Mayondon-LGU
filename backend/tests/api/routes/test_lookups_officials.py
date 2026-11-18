@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.models_foundation import (
     AddressedOffice,
     AuditLog,
+    EducationalAttainment,
     IdType,
     IssuancePurpose,
     Official,
@@ -42,6 +43,11 @@ def _tidy_up(db: Session) -> Generator[None]:
     db.execute(
         delete(AddressedOffice).where(col(AddressedOffice.name).like("ZZ test %"))
     )
+    db.execute(
+        delete(EducationalAttainment).where(
+            col(EducationalAttainment.name).like("ZZ test %")
+        )
+    )
     db.commit()
 
 
@@ -66,6 +72,7 @@ def test_lookups_require_login(client: TestClient) -> None:
         "id-types",
         "issuance-purposes",
         "addressed-offices",
+        "educational-attainments",
         "streets",
         "tricycle-associations",
     ):
@@ -83,6 +90,7 @@ def test_staff_and_admin_read_seeded_lookups(
         "id-types": 16,
         "issuance-purposes": 38,
         "addressed-offices": 7,
+        "educational-attainments": 6,
     }
     for headers in (staff_token_headers, superuser_token_headers):
         for path, count in expected.items():
@@ -781,4 +789,81 @@ def test_admin_addressed_office_suggestion_lifecycle(
         "addressed_office.create",
         "addressed_office.rename",
         "addressed_office.delete",
+    }
+
+
+def test_staff_cannot_change_educational_attainment_suggestions(
+    client: TestClient,
+    db: Session,
+    staff_token_headers: dict[str, str],
+    superuser_token_headers: dict[str, str],
+) -> None:
+    created = client.post(
+        f"{LK}/educational-attainments",
+        json={"name": _name("ZZ test attainment")},
+        headers=superuser_token_headers,
+    )
+    assert created.status_code == 201
+    item_id = created.json()["id"]
+    assert client.post(
+        f"{LK}/educational-attainments",
+        json={"name": "Nope"},
+        headers=staff_token_headers,
+    ).status_code == 403
+    assert client.patch(
+        f"{LK}/educational-attainments/{item_id}",
+        json={"name": "Nope"},
+        headers=staff_token_headers,
+    ).status_code == 403
+    assert client.delete(
+        f"{LK}/educational-attainments/{item_id}", headers=staff_token_headers
+    ).status_code == 403
+    client.delete(
+        f"{LK}/educational-attainments/{item_id}",
+        headers=superuser_token_headers,
+    )
+
+
+def test_admin_educational_attainment_suggestion_lifecycle(
+    client: TestClient, db: Session, superuser_token_headers: dict[str, str]
+) -> None:
+    for body in ({"name": "   "}, {"name": "x" * 151}):
+        assert client.post(
+            f"{LK}/educational-attainments",
+            json=body,
+            headers=superuser_token_headers,
+        ).status_code == 422
+    name = _name("ZZ test attainment")
+    created = client.post(
+        f"{LK}/educational-attainments",
+        json={"name": name},
+        headers=superuser_token_headers,
+    )
+    assert created.status_code == 201, created.text
+    item_id = created.json()["id"]
+    duplicate = client.post(
+        f"{LK}/educational-attainments",
+        json={"name": name.upper()},
+        headers=superuser_token_headers,
+    )
+    assert duplicate.status_code == 409
+    renamed = _name("ZZ test renamed attainment")
+    updated = client.patch(
+        f"{LK}/educational-attainments/{item_id}",
+        json={"name": renamed},
+        headers=superuser_token_headers,
+    )
+    assert updated.status_code == 200, updated.text
+    listed = client.get(
+        f"{LK}/educational-attainments", headers=superuser_token_headers
+    ).json()
+    assert {"id": item_id, "name": renamed} in listed
+    assert client.delete(
+        f"{LK}/educational-attainments/{item_id}",
+        headers=superuser_token_headers,
+    ).status_code == 204
+    assert set(_audit_actions(db, str(item_id))) == {
+        "educational_attainment.create",
+        "educational_attainment.rename",
+        "educational_attainment.delete",
     }

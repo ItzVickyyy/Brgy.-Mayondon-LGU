@@ -169,7 +169,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const purposeChoices = lookupsQuery.data?.purposeChoices ?? []
   const purposeNames = purposeChoices.map((item) => item.name)
   const addressedOfficeChoices = lookupsQuery.data?.addressedOfficeChoices ?? []
-  const config = (seriesOn || idTypeChoices.length > 0 || sectorChoices.length > 0 || purposeNames.length > 0 || addressedOfficeChoices.length > 0
+  const educationalAttainmentChoices = lookupsQuery.data?.educationalAttainmentChoices ?? []
+  const config = (seriesOn || idTypeChoices.length > 0 || sectorChoices.length > 0 || purposeNames.length > 0 || addressedOfficeChoices.length > 0 || educationalAttainmentChoices.length > 0
     ? { ...baseConfig, fields: baseConfig.fields.map((candidate) => (
         seriesOn && candidate.name === "idNumber"
           ? { ...candidate, required: false }
@@ -181,7 +182,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                 ? { ...candidate, options: documentType === "RESIDENCY" ? purposeNames.filter((name) => !residencyExcludedPurposes.includes(name)) : purposeNames }
                 : candidate.name === "addressedToOffice" && addressedOfficeChoices.length > 0
                   ? { ...candidate, options: addressedOfficeChoices.map((item) => item.name) }
-                  : candidate
+                  : candidate.name === "educationalAttainment" && educationalAttainmentChoices.length > 0
+                    ? { ...candidate, options: educationalAttainmentChoices.map((item) => item.name) }
+                    : candidate
       )) }
     : baseConfig) as typeof baseConfig
   // Read during render so react-hook-form keeps isDirty up to date for the discard prompt.

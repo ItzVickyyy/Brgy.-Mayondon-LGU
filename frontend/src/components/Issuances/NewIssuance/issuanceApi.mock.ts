@@ -1,6 +1,7 @@
 import {
   addressedOfficeOptions,
   clearancePurposeOptions,
+  educationalAttainmentOptions,
   indigencyPurposeOptions,
 } from "@/components/Issuances/config"
 import type { ResidentRecord } from "@/components/Records/records-sample-data"
@@ -36,6 +37,9 @@ const addressedOfficeChoices = addressedOfficeOptions.map((name, index) => ({
   id: index + 1,
   name,
 }))
+const educationalAttainmentChoices = educationalAttainmentOptions.map(
+  (name, index) => ({ id: index + 1, name }),
+)
 let associations = ["Mayondon Tricycle Operators and Drivers Association"]
 let mockTricycles: {
   id: string
@@ -208,6 +212,7 @@ export const issuanceApi = {
       purposes: [...purposes],
       purposeChoices: [...purposeChoices],
       addressedOfficeChoices: [...addressedOfficeChoices],
+      educationalAttainmentChoices: [...educationalAttainmentChoices],
       sectors: [...indigencySectorOptions],
       idTypes: [...new Set(["CTC", ...idTypeOptions])],
       idTypeChoices: [...new Set(["CTC", ...idTypeOptions])].map(
