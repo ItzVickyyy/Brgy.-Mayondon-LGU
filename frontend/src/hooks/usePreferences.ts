@@ -5,6 +5,7 @@ import {
   getPreferences,
   loadUserPreferences,
   type Preferences,
+  type PreferenceTheme,
   subscribePreferences,
   unloadUserPreferences,
   updatePreferences,
@@ -41,12 +42,15 @@ export function usePreferences() {
     subscribePreferences,
     getPreferences,
   )
-  const { resolvedTheme, setTheme } = useTheme()
+  const { theme: themeSetting, resolvedTheme, setTheme } = useTheme()
 
   return {
     preferences,
+    /** What the page looks like now: "light" or "dark". */
     theme: resolvedTheme,
-    setTheme: (theme: "light" | "dark") => {
+    /** What the person chose: "system", "light" or "dark". */
+    themeSetting,
+    setTheme: (theme: PreferenceTheme) => {
       setTheme(theme)
       updatePreferences({ theme })
     },
@@ -54,8 +58,8 @@ export function usePreferences() {
     setFontSize: (fontSize: Preferences["fontSize"]) =>
       updatePreferences({ fontSize }),
     reset: () => {
-      setTheme("dark")
-      updatePreferences({ theme: "dark", accent: "navy", fontSize: "medium" })
+      setTheme("system")
+      updatePreferences({ theme: "system", accent: "navy", fontSize: "medium" })
     },
   }
 }

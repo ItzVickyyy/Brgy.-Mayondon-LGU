@@ -33,6 +33,7 @@
     "description": "Saved on this computer for your account only.",
     "theme": {
       "label": "Theme",
+      "system": "System default",
       "light": "Light",
       "dark": "Dark"
     },
@@ -42,7 +43,12 @@
       "teal": "Teal",
       "green": "Green",
       "purple": "Purple",
-      "maroon": "Maroon"
+      "maroon": "Maroon",
+      "rose": "Rose",
+      "bronze": "Bronze",
+      "olive": "Olive",
+      "sky": "Sky",
+      "slate": "Slate"
     },
     "fontSize": {
       "label": "Font size",

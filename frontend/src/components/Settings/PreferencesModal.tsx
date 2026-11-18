@@ -1,4 +1,4 @@
-import { Check, Moon, Sun } from "lucide-react"
+import { Check, Monitor, Moon, Sun } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dialog"
 import { usePreferences } from "@/hooks/usePreferences"
 import {
+  ACCENT_CHROMA,
   ACCENT_HUES,
   ACCENTS,
   type Accent,
@@ -55,6 +56,7 @@ function Choice({
   checked,
   onSelect,
   testId,
+  className,
   children,
 }: {
   name: string
@@ -62,10 +64,11 @@ function Choice({
   checked: boolean
   onSelect: () => void
   testId: string
+  className?: string
   children: ReactNode
 }) {
   return (
-    <label className={choiceBase}>
+    <label className={cn(choiceBase, className)}>
       <input
         type="radio"
         name={name}
@@ -94,14 +97,21 @@ export function PreferencesModal({
   onOpenChange: (open: boolean) => void
 }) {
   const { t } = useTranslation()
-  const { preferences, theme, setTheme, setAccent, setFontSize, reset } =
-    usePreferences()
+  const {
+    preferences,
+    theme,
+    themeSetting,
+    setTheme,
+    setAccent,
+    setFontSize,
+    reset,
+  } = usePreferences()
 
   // Swatches show the colour as it will look in the theme in use now.
   const swatchColor = (accent: Accent) =>
     theme === "dark"
-      ? `oklch(0.5 0.14 ${ACCENT_HUES[accent]})`
-      : `oklch(0.36 0.1 ${ACCENT_HUES[accent]})`
+      ? `oklch(0.5 ${0.14 * ACCENT_CHROMA[accent]} ${ACCENT_HUES[accent]})`
+      : `oklch(0.36 ${0.1 * ACCENT_CHROMA[accent]} ${ACCENT_HUES[accent]})`
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -115,25 +125,47 @@ export function PreferencesModal({
         </DialogHeader>
 
         <div className={cn(modalBody, "space-y-6")}>
-          <Group label={t("preferences.theme.label")} className="grid-cols-2">
+          <Group label={t("preferences.theme.label")} className="grid-cols-3">
+            <Choice
+              name="pref-theme"
+              value="system"
+              checked={themeSetting === "system"}
+              onSelect={() => setTheme("system")}
+              testId="pref-theme-system"
+              className="px-1.5 text-center leading-tight"
+            >
+              <Monitor
+                className="hidden size-4 shrink-0 sm:block"
+                aria-hidden="true"
+              />
+              {t("preferences.theme.system")}
+            </Choice>
             <Choice
               name="pref-theme"
               value="light"
-              checked={theme === "light"}
+              checked={themeSetting === "light"}
               onSelect={() => setTheme("light")}
               testId="pref-theme-light"
+              className="px-1.5 text-center leading-tight"
             >
-              <Sun className="size-4" aria-hidden="true" />
+              <Sun
+                className="hidden size-4 shrink-0 sm:block"
+                aria-hidden="true"
+              />
               {t("preferences.theme.light")}
             </Choice>
             <Choice
               name="pref-theme"
               value="dark"
-              checked={theme === "dark"}
+              checked={themeSetting === "dark"}
               onSelect={() => setTheme("dark")}
               testId="pref-theme-dark"
+              className="px-1.5 text-center leading-tight"
             >
-              <Moon className="size-4" aria-hidden="true" />
+              <Moon
+                className="hidden size-4 shrink-0 sm:block"
+                aria-hidden="true"
+              />
               {t("preferences.theme.dark")}
             </Choice>
           </Group>

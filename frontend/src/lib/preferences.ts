@@ -8,12 +8,24 @@
  * choice follows the person on that computer, not to another computer.
  *
  * The accent is a fixed set only (no free colour picker). Each accent keeps the
- * same lightness and chroma as the navy default and only changes the hue, and
+ * same lightness and chroma as the navy default and only changes the hue (slate
+ * also lowers the chroma), and
  * every one was checked for WCAG AA contrast in both themes (see index.css).
  * The font size sets the root size, so every rem-based size scales with it.
  */
 
-export const ACCENTS = ["navy", "teal", "green", "purple", "maroon"] as const
+export const ACCENTS = [
+  "navy",
+  "teal",
+  "green",
+  "purple",
+  "maroon",
+  "rose",
+  "bronze",
+  "olive",
+  "sky",
+  "slate",
+] as const
 export type Accent = (typeof ACCENTS)[number]
 
 /** Hue (oklch) of each accent; must match `--accent-hue` in index.css. */
@@ -23,12 +35,31 @@ export const ACCENT_HUES: Record<Accent, number> = {
   green: 152,
   purple: 305,
   maroon: 15,
+  rose: 345,
+  bronze: 55,
+  olive: 115,
+  sky: 232,
+  slate: 250,
+}
+
+/** Slate is a muted grey-blue: the same hue family as navy with 30% of its chroma. */
+export const ACCENT_CHROMA: Record<Accent, number> = {
+  navy: 1,
+  teal: 1,
+  green: 1,
+  purple: 1,
+  maroon: 1,
+  rose: 1,
+  bronze: 1,
+  olive: 1,
+  sky: 1,
+  slate: 0.3,
 }
 
 export const FONT_SIZES = ["small", "medium", "large"] as const
 export type FontSize = (typeof FONT_SIZES)[number]
 
-export type PreferenceTheme = "light" | "dark"
+export type PreferenceTheme = "light" | "dark" | "system"
 
 export type Preferences = {
   /** Only set once the person has chosen a theme themselves. */
@@ -61,7 +92,9 @@ export function readPreferences(userId: string): Preferences {
     const data = JSON.parse(raw) as Record<string, unknown>
     return {
       theme:
-        data.theme === "light" || data.theme === "dark"
+        data.theme === "light" ||
+        data.theme === "dark" ||
+        data.theme === "system"
           ? data.theme
           : undefined,
       accent: isAccent(data.accent) ? data.accent : DEFAULT_PREFERENCES.accent,

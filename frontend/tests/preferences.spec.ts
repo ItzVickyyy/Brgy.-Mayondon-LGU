@@ -32,8 +32,8 @@ test.describe("Preferences", () => {
     await expect(dialog.getByText("Theme", { exact: true })).toBeVisible()
     await expect(dialog.getByText("Accent colour")).toBeVisible()
     await expect(dialog.getByText("Font size")).toBeVisible()
-    // A fixed set only: five accents, no free colour picker.
-    await expect(dialog.locator('input[name="pref-accent"]')).toHaveCount(5)
+    // A fixed set only: ten accents, no free colour picker.
+    await expect(dialog.locator('input[name="pref-accent"]')).toHaveCount(10)
     await expect(dialog.locator('input[type="color"]')).toHaveCount(0)
   })
 
@@ -78,22 +78,48 @@ test.describe("Preferences", () => {
     expect(await primary()).toBe(navy)
   })
 
-  test("theme can be chosen here and Reset restores the defaults", async ({
+  test("System default is the default theme and follows the computer", async ({
     page,
   }) => {
+    await page.emulateMedia({ colorScheme: "dark" })
+    const dialog = await openPreferences(page)
+    await expect(dialog.getByTestId("pref-theme-system")).toBeChecked()
+    await expect(page.locator("html")).toHaveClass(/dark/)
+
+    await page.emulateMedia({ colorScheme: "light" })
+    await expect(page.locator("html")).toHaveClass(/light/)
+    await expect(page.locator("html")).not.toHaveClass(/dark/)
+  })
+
+  test("a chosen theme overrides the system, and Reset restores the defaults", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: "dark" })
     const dialog = await openPreferences(page)
     await choose(page, "pref-theme-light")
     await expect(page.locator("html")).toHaveClass(/light/)
+    await expect(dialog.getByTestId("pref-theme-light")).toBeChecked()
     await choose(page, "pref-accent-maroon")
     await choose(page, "pref-size-large")
 
     await dialog.getByRole("button", { name: "Reset to defaults" }).click()
+    // Back to System default, which here is dark.
+    await expect(dialog.getByTestId("pref-theme-system")).toBeChecked()
     await expect(page.locator("html")).toHaveClass(/dark/)
     await expect(page.locator("html")).not.toHaveAttribute("data-accent")
     await expect(page.locator("html")).not.toHaveAttribute("data-font-size")
     await expect(dialog.getByTestId("pref-accent-navy")).toBeChecked()
     await dialog.getByRole("button", { name: "Done" }).click()
     await expect(dialog).toBeHidden()
+  })
+
+  test("the new accents apply, including the muted slate", async ({ page }) => {
+    await openPreferences(page)
+    for (const accent of ["rose", "bronze", "olive", "sky", "slate"]) {
+      await choose(page, `pref-accent-${accent}`)
+      await expect(page.locator("html")).toHaveAttribute("data-accent", accent)
+    }
+    await choose(page, "pref-accent-navy")
   })
 
   test("choices are saved per user, in this browser only", async ({ page }) => {

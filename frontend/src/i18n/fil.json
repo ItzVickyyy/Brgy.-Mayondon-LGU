@@ -33,6 +33,7 @@
     "description": "Naka-save sa computer na ito, para sa iyong account lamang.",
     "theme": {
       "label": "Tema",
+      "system": "Default ng sistema",
       "light": "Maliwanag",
       "dark": "Madilim"
     },
@@ -42,7 +43,12 @@
       "teal": "Teal",
       "green": "Berde",
       "purple": "Ube",
-      "maroon": "Maroon"
+      "maroon": "Maroon",
+      "rose": "Rosas",
+      "bronze": "Tanso",
+      "olive": "Olibo",
+      "sky": "Langit",
+      "slate": "Slate"
     },
     "fontSize": {
       "label": "Laki ng titik",
