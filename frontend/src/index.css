@@ -119,6 +119,58 @@
   --sidebar-ring: oklch(0.8 0.12 85);
 }
 
+/* Preferences: accent colour. Navy is the default above (no attribute). Each
+   other accent keeps the navy lightness and chroma and only changes the hue, so
+   the contrast is unchanged: brand and primary text 8:1 or better on the page,
+   cards and tints in light; dark brand text 6.4:1 or better; white on primary
+   buttons 10:1 (light) and 4.9:1 or better (dark); focus rings 3:1 or better.
+   Set from JavaScript (lib/preferences.ts); the hues must match. */
+html[data-accent="teal"] {
+  --accent-hue: 200;
+}
+html[data-accent="green"] {
+  --accent-hue: 152;
+}
+html[data-accent="purple"] {
+  --accent-hue: 305;
+}
+html[data-accent="maroon"] {
+  --accent-hue: 15;
+}
+html[data-accent] {
+  --primary: oklch(0.36 0.1 var(--accent-hue));
+  --brand: oklch(0.36 0.1 var(--accent-hue));
+  --ring: oklch(0.5 0.12 var(--accent-hue));
+  --accent: oklch(0.935 0.014 var(--accent-hue));
+  --accent-foreground: oklch(0.3 0.08 var(--accent-hue));
+  --chart-1: oklch(0.4 0.11 var(--accent-hue));
+  --sidebar: oklch(0.27 0.06 var(--accent-hue));
+}
+html.dark[data-accent] {
+  --primary: oklch(0.5 0.14 var(--accent-hue));
+  --brand: oklch(0.78 0.1 var(--accent-hue));
+  --ring: oklch(0.65 0.12 var(--accent-hue));
+  --accent: oklch(0.31 0.045 var(--accent-hue));
+  --accent-foreground: oklch(0.96 0.006 250);
+  --chart-1: oklch(0.65 0.13 var(--accent-hue));
+  --sidebar: oklch(0.21 0.05 var(--accent-hue));
+}
+
+/* Preferences: font size. Everything is sized in rem, so the root size scales
+   the whole application. Medium (16px) is the browser default and sets nothing.
+   Printed documents are laid out in fixed units and keep the default. */
+html[data-font-size="small"] {
+  font-size: 14px;
+}
+html[data-font-size="large"] {
+  font-size: 18px;
+}
+@media print {
+  html[data-font-size] {
+    font-size: 16px;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -188,14 +240,16 @@
     animation: page-enter 200ms ease-out backwards;
   }
 
-  /* A small grid of dots for the page backdrop (AppBackdrop). An SVG tile with
-     one solid-colour dot, so it is not a gradient; navy in light, light blue in
-     dark, both at a low opacity. */
+  /* A small grid of dots for the page backdrop (AppBackdrop). One solid
+     colour (the accent, at a low opacity) cut into a dot grid with a mask, so it
+     is not a gradient and follows the accent colour and the theme. */
   .app-backdrop-dots {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='3' cy='3' r='1.6' fill='%231e3a6e' fill-opacity='0.14'/%3E%3C/svg%3E");
+    background-color: color-mix(in oklab, var(--brand) 14%, transparent);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='3' cy='3' r='1.6'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='3' cy='3' r='1.6'/%3E%3C/svg%3E");
   }
   .dark .app-backdrop-dots {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='3' cy='3' r='1.6' fill='%237fb0ff' fill-opacity='0.16'/%3E%3C/svg%3E");
+    background-color: color-mix(in oklab, var(--brand) 16%, transparent);
   }
 
   .bar-rise {

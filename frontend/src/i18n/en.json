@@ -23,9 +23,35 @@
     "ariaLabel": "User menu",
     "fallbackName": "User",
     "myAccount": "My Account",
+    "preferences": "Preferences",
     "getHelp": "Get help",
     "learnMore": "Learn more",
     "logout": "Logout"
+  },
+  "preferences": {
+    "title": "Preferences",
+    "description": "Saved on this computer for your account only.",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "accent": {
+      "label": "Accent colour",
+      "navy": "Navy",
+      "teal": "Teal",
+      "green": "Green",
+      "purple": "Purple",
+      "maroon": "Maroon"
+    },
+    "fontSize": {
+      "label": "Font size",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large"
+    },
+    "reset": "Reset to defaults",
+    "done": "Done"
   },
   "notifications": {
     "title": "Notifications",

@@ -14,7 +14,11 @@ import { ThemeProvider } from "./components/theme-provider"
 import { Toaster } from "./components/ui/sonner"
 import "./index.css"
 import "./i18n"
+import { applyRememberedAppearance } from "./lib/preferences"
 import { routeTree } from "./routeTree.gen"
+
+// Accent colour and font size of the last signed-in user, before the first paint.
+applyRememberedAppearance()
 
 client.setConfig({
   baseURL: import.meta.env.VITE_API_URL ?? "",

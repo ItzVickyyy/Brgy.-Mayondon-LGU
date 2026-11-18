@@ -4,12 +4,14 @@ import {
   Info,
   Languages,
   LogOut,
+  SlidersHorizontal,
   UserRound,
 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { HelpDialog, LearnMoreDialog } from "@/components/Common/InfoDialogs"
 import { MyAccountModal } from "@/components/Settings/MyAccountModal"
+import { PreferencesModal } from "@/components/Settings/PreferencesModal"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -42,6 +44,7 @@ export function User({
   const { logout } = useAuth()
   const { isMobile, setOpenMobile } = useSidebar()
   const [accountOpen, setAccountOpen] = useState(false)
+  const [preferencesOpen, setPreferencesOpen] = useState(false)
   const { t, i18n } = useTranslation()
   const selectedLanguage: Language =
     i18n.resolvedLanguage === "fil" ? "fil" : "en"
@@ -132,6 +135,10 @@ export function User({
               <UserRound className="size-4" />
               {t("userMenu.myAccount")}
             </DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => setPreferencesOpen(true)}>
+              <SlidersHorizontal className="size-4" />
+              {t("userMenu.preferences")}
+            </DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger className="gap-2 data-[state=open]:text-foreground">
                 <Languages className="size-4 text-muted-foreground" />
@@ -198,6 +205,10 @@ export function User({
         open={accountOpen}
         onOpenChange={setAccountOpen}
         user={user}
+      />
+      <PreferencesModal
+        open={preferencesOpen}
+        onOpenChange={setPreferencesOpen}
       />
       <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
       <LearnMoreDialog open={learnOpen} onOpenChange={setLearnOpen} />

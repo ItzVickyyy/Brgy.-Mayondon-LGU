@@ -23,9 +23,35 @@
     "ariaLabel": "Menu ng user",
     "fallbackName": "User",
     "myAccount": "Aking Account",
+    "preferences": "Mga Kagustuhan",
     "getHelp": "Humingi ng tulong",
     "learnMore": "Alamin pa",
     "logout": "Mag-logout"
+  },
+  "preferences": {
+    "title": "Mga Kagustuhan",
+    "description": "Naka-save sa computer na ito, para sa iyong account lamang.",
+    "theme": {
+      "label": "Tema",
+      "light": "Maliwanag",
+      "dark": "Madilim"
+    },
+    "accent": {
+      "label": "Kulay ng accent",
+      "navy": "Navy",
+      "teal": "Teal",
+      "green": "Berde",
+      "purple": "Ube",
+      "maroon": "Maroon"
+    },
+    "fontSize": {
+      "label": "Laki ng titik",
+      "small": "Maliit",
+      "medium": "Katamtaman",
+      "large": "Malaki"
+    },
+    "reset": "Ibalik sa default",
+    "done": "Tapos na"
   },
   "notifications": {
     "title": "Mga Abiso",

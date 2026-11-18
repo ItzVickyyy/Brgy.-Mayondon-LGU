@@ -23,7 +23,6 @@ import { NotificationBell } from "@/components/Common/NotificationBell"
 import { AppShellSkeleton } from "@/components/Common/PageSkeleton"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
 import { User } from "@/components/Sidebar/User"
-import { useTheme } from "@/components/theme-provider"
 import { Button } from "@/components/ui/button"
 import {
   SidebarInset,
@@ -31,6 +30,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
+import { useLoadPreferences, usePreferences } from "@/hooks/usePreferences"
 import { getLocale } from "@/lib/locale"
 
 export const Route = createFileRoute("/_layout")({
@@ -61,8 +61,10 @@ function Layout() {
   // Subscribes this component to language changes so the clock is re-formatted.
   const { t } = useTranslation()
   const [now, setNow] = useState(() => new Date())
-  const { theme, setTheme } = useTheme()
   const { user: currentUser } = useAuth()
+  // The person's saved theme, accent colour and font size (Preferences).
+  useLoadPreferences(currentUser?.id ? String(currentUser.id) : undefined)
+  const { theme, setTheme } = usePreferences()
   const isDark = theme === "dark"
   const [isFullscreen, setIsFullscreen] = useState(false)
   // A soft shadow under the sticky header once the page has scrolled.
