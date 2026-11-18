@@ -80,6 +80,19 @@ class TricycleAssociation(SQLModel, table=True):
     name: str = Field(max_length=150, unique=True)
 
 
+class AddressedOffice(SQLModel, table=True):
+    """Suggested addressees for Certificates of Indigency.
+
+    Issuances keep the entered office text as a historical snapshot; this list
+    only supplies reusable suggestions for future forms.
+    """
+
+    __tablename__ = "addressed_offices"
+
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(max_length=150, unique=True)
+
+
 class Street(SQLModel, table=True):
     __tablename__ = "streets"
 

@@ -211,3 +211,7 @@ The developer journals (`docs/Developers-Journal/`) and the bug and issue log (`
 - **Networking 2:** network setup, connectivity, security and operation at the client's site.
 
 Do not mark a milestone complete until its required work **and** client approvals are actually done. The local setup prepares the Week 15 demo but does not replace client-approved requirements, testing, deployment or Networking 2 work.
+
+### Addressed-office suggestions
+
+`AddressedOffice` rows are administrator-managed suggestions for the Indigency `addressedToOffice` combobox. Any signed-in user can read the list; only `LOOKUPS_MANAGE` users can add, rename or delete suggestions. The combobox remains free-text so a clerk can enter an office not on the list. `IssuanceIndigency.addressed_to_office` remains a text snapshot, not a foreign key: changing or deleting a suggestion affects future choices only and never rewrites an already issued certificate.

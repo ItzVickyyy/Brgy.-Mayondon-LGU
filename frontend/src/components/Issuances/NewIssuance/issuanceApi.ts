@@ -50,6 +50,7 @@ type LookupData = {
   sectors: LookupItem[]
   idTypes: LookupItem[]
   purposes: LookupItem[]
+  addressedOffices: LookupItem[]
   streets: LookupItem[]
   associations: LookupItem[]
   officials: OfficialChoice[]
@@ -65,6 +66,7 @@ function loadLookups(): Promise<LookupData> {
         sectors,
         idTypes,
         purposes,
+        addressedOffices,
         streets,
         associations,
         officials,
@@ -73,6 +75,7 @@ function loadLookups(): Promise<LookupData> {
         LookupsService.listSectors(),
         LookupsService.listIdTypes(),
         LookupsService.listIssuancePurposes(),
+        LookupsService.listAddressedOffices(),
         LookupsService.listStreets(),
         LookupsService.listTricycleAssociations(),
         OfficialsService.listOfficials({ query: { status: "current" } }),
@@ -82,6 +85,7 @@ function loadLookups(): Promise<LookupData> {
         sectors: sectors.data,
         idTypes: idTypes.data,
         purposes: purposes.data,
+        addressedOffices: addressedOffices.data,
         streets: streets.data,
         associations: associations.data,
         officials: officials.data.map((official) => ({
@@ -98,7 +102,7 @@ function loadLookups(): Promise<LookupData> {
   return lookupPromise
 }
 
-/** Forget the cached lists (after a street, association or purpose was added). */
+/** Forget the cached lists after an administrator changes a lookup. */
 export function refreshLookups() {
   lookupPromise = null
 }
@@ -927,6 +931,9 @@ export const issuanceApi = {
       // Ordered by id: the print code reads these lists by id.
       purposes: byId(data.purposes),
       purposeChoices: [...data.purposes]
+        .sort((a, b) => a.id - b.id)
+        .map(({ id, name }) => ({ id, name })),
+      addressedOfficeChoices: [...data.addressedOffices]
         .sort((a, b) => a.id - b.id)
         .map(({ id, name }) => ({ id, name })),
       sectors: byId(data.sectors),

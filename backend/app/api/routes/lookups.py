@@ -1,12 +1,12 @@
-"""Lookup lists for the forms (read) and admin upkeep of two of them (write).
+"""Lookup lists for forms and admin upkeep of editable lists.
 
-Any signed-in user may read every list. Document types and issuance
-purposes are seeded by migration and read-only here. Sectors and ID types are
-seeded by migration and may be added, renamed and removed by an administrator.
-Streets and tricycle associations start empty; adding, renaming and removing
-them, and the same for sectors and ID types, needs LOOKUPS_MANAGE (System
-Administrator only). An item
-that is already in use cannot be removed (409): rename it instead.
+Any signed-in user may read every list. Document types are seeded and read-only.
+Issuance purposes, sectors, ID types and addressed-office suggestions are
+admin-managed. Streets and tricycle associations have the same admin-only
+upkeep. Referenced lookup items cannot be removed (409). Addressed-office
+suggestions are not foreign keys: issued Indigency records retain the office
+text entered at issue time, so suggestions can be removed without changing
+history.
 """
 
 from typing import Annotated, Any
@@ -23,6 +23,7 @@ from app.core.masterlist_import import street_key
 from app.core.permissions import Permission
 from app.models import User
 from app.models_foundation import (
+    AddressedOffice,
     DocumentType,
     IdType,
     IssuancePurpose,
@@ -72,6 +73,13 @@ def list_id_types(session: SessionDep, _user: CurrentUser) -> list[LookupItem]:
 @router.get("/issuance-purposes", response_model=list[LookupItem])
 def list_issuance_purposes(session: SessionDep, _user: CurrentUser) -> list[LookupItem]:
     return _names(session, IssuancePurpose)
+
+
+@router.get("/addressed-offices", response_model=list[LookupItem])
+def list_addressed_offices(
+    session: SessionDep, _user: CurrentUser
+) -> list[LookupItem]:
+    return _names(session, AddressedOffice)
 
 
 @router.get("/streets", response_model=list[LookupItem])
@@ -254,6 +262,49 @@ def delete_issuance_purpose(
         item_id,
         label="purpose",
         record_type="issuance_purpose",
+    )
+
+
+@router.post("/addressed-offices", response_model=LookupItem, status_code=201)
+def create_addressed_office(
+    body: LookupNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _create(
+        session,
+        user,
+        AddressedOffice,
+        body,
+        label="addressed office",
+        record_type="addressed_office",
+    )
+
+
+@router.patch("/addressed-offices/{item_id}", response_model=LookupItem)
+def rename_addressed_office(
+    item_id: int, body: LookupNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _rename(
+        session,
+        user,
+        AddressedOffice,
+        item_id,
+        body,
+        label="addressed office",
+        record_type="addressed_office",
+    )
+
+
+@router.delete("/addressed-offices/{item_id}", status_code=204)
+def delete_addressed_office(
+    item_id: int, session: SessionDep, user: ManageUser
+) -> Response:
+    return _remove(
+        session,
+        user,
+        AddressedOffice,
+        item_id,
+        label="addressed office",
+        record_type="addressed_office",
     )
 
 

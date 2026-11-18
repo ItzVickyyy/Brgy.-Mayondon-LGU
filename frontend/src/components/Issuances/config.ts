@@ -118,7 +118,7 @@ export const indigencyPurposeOptions = [
   "BIR Tax Exemption for Scholarship Requirement",
   "Work Requirement",
 ]
-/** Offices the Certificate of Indigency is usually addressed to. Names of elected officials are not listed because they change; staff type them in the box. */
+/** Static fixture mirrored by the addressed_offices migration for mock issuance tests. */
 export const addressedOfficeOptions = [
   "CHED",
   "DOH",

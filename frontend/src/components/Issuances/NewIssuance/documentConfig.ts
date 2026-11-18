@@ -1,5 +1,4 @@
 import {
-  addressedOfficeOptions,
   clearancePurposeOptions,
   idTypeOptions,
   indigencyPurposeOptions,
@@ -388,7 +387,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
         label: "Office addressed to",
         type: "combobox",
         required: true,
-        options: addressedOfficeOptions,
+        options: [],
         group: "main",
       },
       {

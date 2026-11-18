@@ -4530,6 +4530,76 @@ export type lookupsListIssuancePurposesResponses = {
 
 export type lookupsListIssuancePurposesResponse = lookupsListIssuancePurposesResponses[keyof lookupsListIssuancePurposesResponses];
 
+export type lookupsListAddressedOfficesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/addressed-offices';
+};
+
+export type lookupsListAddressedOfficesResponses = {
+    200: Array<LookupItem>;
+};
+
+export type lookupsListAddressedOfficesResponse = lookupsListAddressedOfficesResponses[keyof lookupsListAddressedOfficesResponses];
+
+export type lookupsCreateAddressedOfficeData = {
+    body: LookupNameIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/addressed-offices';
+};
+
+export type lookupsCreateAddressedOfficeErrors = {
+    422: HTTPValidationError;
+};
+
+export type lookupsCreateAddressedOfficeError = lookupsCreateAddressedOfficeErrors[keyof lookupsCreateAddressedOfficeErrors];
+
+export type lookupsCreateAddressedOfficeResponses = {
+    201: LookupItem;
+};
+
+export type lookupsCreateAddressedOfficeResponse = lookupsCreateAddressedOfficeResponses[keyof lookupsCreateAddressedOfficeResponses];
+
+export type lookupsRenameAddressedOfficeData = {
+    body: LookupNameIn;
+    path: { item_id: number };
+    query?: never;
+    url: '/api/v1/lookups/addressed-offices/{item_id}';
+};
+
+export type lookupsRenameAddressedOfficeErrors = {
+    422: HTTPValidationError;
+};
+
+export type lookupsRenameAddressedOfficeError = lookupsRenameAddressedOfficeErrors[keyof lookupsRenameAddressedOfficeErrors];
+
+export type lookupsRenameAddressedOfficeResponses = {
+    200: LookupItem;
+};
+
+export type lookupsRenameAddressedOfficeResponse = lookupsRenameAddressedOfficeResponses[keyof lookupsRenameAddressedOfficeResponses];
+
+export type lookupsDeleteAddressedOfficeData = {
+    body?: never;
+    path: { item_id: number };
+    query?: never;
+    url: '/api/v1/lookups/addressed-offices/{item_id}';
+};
+
+export type lookupsDeleteAddressedOfficeErrors = {
+    422: HTTPValidationError;
+};
+
+export type lookupsDeleteAddressedOfficeError = lookupsDeleteAddressedOfficeErrors[keyof lookupsDeleteAddressedOfficeErrors];
+
+export type lookupsDeleteAddressedOfficeResponses = {
+    204: void;
+};
+
+export type lookupsDeleteAddressedOfficeResponse = lookupsDeleteAddressedOfficeResponses[keyof lookupsDeleteAddressedOfficeResponses];
+
 export type lookupsListStreetsData = {
     body?: never;
     path?: never;

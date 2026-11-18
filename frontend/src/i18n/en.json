@@ -162,6 +162,9 @@
       "sector_rename": "{{actor}} renamed a sector in the list.",
       "sector_delete": "{{actor}} removed a sector from the list.",
       "tricycle_association_delete": "{{actor}} removed a tricycle association from the list.",
+      "addressed_office_create": "{{actor}} added an addressed-office suggestion to the list.",
+      "addressed_office_rename": "{{actor}} renamed an addressed-office suggestion.",
+      "addressed_office_delete": "{{actor}} removed an addressed-office suggestion from the list.",
       "issuance_purpose_create": "{{actor}} added an issuance purpose to the list.",
       "issuance_purpose_rename": "{{actor}} renamed an issuance purpose in the list.",
       "issuance_purpose_delete": "{{actor}} removed an issuance purpose from the list."
@@ -457,6 +460,11 @@
         "create": "Sector added",
         "rename": "Sector renamed",
         "delete": "Sector removed"
+      },
+      "addressed_office": {
+        "create": "Addressed office suggestion added",
+        "rename": "Addressed office suggestion renamed",
+        "delete": "Addressed office suggestion removed"
       },
       "issuance_purpose": {
         "create": "Issuance purpose added",
@@ -1117,6 +1125,17 @@
         "empty": "No sectors yet",
         "deleteTitle": "Delete sector?"
       },
+      "addressedOffice": {
+        "title": "Addressed Office Suggestions",
+        "description": "Suggested offices for the Certificate of Indigency. Clerks can still type another addressee. Changes affect future suggestions; issued certificates keep their original office text.",
+        "newName": "New office suggestion",
+        "placeholder": "Enter office name",
+        "loading": "Loading office suggestions...",
+        "loadError": "Could not load office suggestions",
+        "empty": "No office suggestions yet",
+        "deleteTitle": "Delete office suggestion?",
+        "deleteDescription": "Remove {{name}} from future suggestions? Existing issued certificates will keep the office text saved on them."
+      },
       "purpose": {
         "title": "Issuance Purposes",
         "description": "Shared choices used on clearance and certification forms. Renaming a purpose also changes how existing issuances and reports are labelled.",
@@ -1184,7 +1203,8 @@
         "sector": "Sectors",
         "street": "Streets",
         "association": "Tricycle associations",
-        "purpose": "Purposes"
+        "purpose": "Purposes",
+        "addressedOffice": "Addressed offices"
       }
     },
     "printSetup": {

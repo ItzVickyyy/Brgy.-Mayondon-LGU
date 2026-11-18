@@ -33,7 +33,7 @@ class DocumentTypePublic(SQLModel):
 
 
 class LookupNameIn(SQLModel):
-    """Body for adding or renaming a street or tricycle association."""
+    """Body for adding or renaming an editable lookup item."""
 
     name: str = Field(min_length=1, max_length=150)
 

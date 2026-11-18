@@ -305,9 +305,9 @@ The reference-number rule matters for the real backend: use a database sequence 
 
 ## Lookup tables
 
-Suggestion lists seeded from the office's workbook: Barangay Clearance purposes (30), Certificate of Indigency purposes (9), offices addressed to (7, no names of elected officials because they change) and ID types (now includes `PRC ID`). Purposes typed by staff are remembered once a document is issued; offices are not yet.
+Suggestion lists seeded from the office's workbook: Barangay Clearance purposes (30), Certificate of Indigency purposes (9), offices addressed to (7, no names of elected officials because they change) and ID types (now includes `PRC ID`). Purposes typed by staff are remembered once a document is issued. Addressed-office suggestions are administrator-managed in `addressed_offices`; the `addressed_to_office` value on an issued Indigency record remains a text snapshot.
 
-`document_types(code, name, category, print_mode, validity_months, one_per_resident, signatory_default_position)` · `issuance_purposes` · `sectors` · `id_types` · `officials` (defined above) · `tricycle_associations` · `streets`.
+`document_types(code, name, category, print_mode, validity_months, one_per_resident, signatory_default_position)` · `issuance_purposes` · `sectors` · `id_types` · `addressed_offices` (suggestions only) · `officials` (defined above) · `tricycle_associations` · `streets`.
 
 `document_types` mirrors `documentConfig.ts`. Seeding it from that file keeps the form and the database in sync.
 

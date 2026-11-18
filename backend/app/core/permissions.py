@@ -28,7 +28,7 @@ class Permission(StrEnum):
     USERS_MANAGE = "users.manage"  # user accounts, roles, access
     REGISTRATIONS_REVIEW = "registrations.review"
     OFFICIALS_MANAGE = "officials.manage"
-    LOOKUPS_MANAGE = "lookups.manage"  # editable issuance and address lookup lists
+    LOOKUPS_MANAGE = "lookups.manage"  # editable issuance, address and suggestion lists
     RECORDS_IMPORT = "records.import"  # import masterlist
     RECORDS_ARCHIVE = "records.archive"
     ISSUANCE_VOID = "issuance.void"

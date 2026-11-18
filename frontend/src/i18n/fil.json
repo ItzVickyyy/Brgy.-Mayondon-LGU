@@ -162,6 +162,9 @@
       "sector_rename": "{{actor}} ang nagpalit ng pangalan ng sektor sa listahan.",
       "sector_delete": "{{actor}} ang nag-alis ng sektor sa listahan.",
       "tricycle_association_delete": "{{actor}} ang nag-alis ng samahan ng tricycle sa listahan.",
+      "addressed_office_create": "{{actor}} ang nagdagdag ng mungkahing opisina sa listahan.",
+      "addressed_office_rename": "{{actor}} ang nagpalit ng pangalan ng mungkahing opisina.",
+      "addressed_office_delete": "{{actor}} ang nag-alis ng mungkahing opisina sa listahan.",
       "issuance_purpose_create": "{{actor}} ang nagdagdag ng layunin ng dokumento sa listahan.",
       "issuance_purpose_rename": "{{actor}} ang nagpalit ng pangalan ng layunin ng dokumento sa listahan.",
       "issuance_purpose_delete": "{{actor}} ang nag-alis ng layunin ng dokumento sa listahan."
@@ -457,6 +460,11 @@
         "create": "Nadagdag ang sektor",
         "rename": "Napalitan ang pangalan ng sektor",
         "delete": "Naalis ang sektor"
+      },
+      "addressed_office": {
+        "create": "Nadagdag ang mungkahing opisina",
+        "rename": "Napalitan ang pangalan ng mungkahing opisina",
+        "delete": "Naalis ang mungkahing opisina"
       },
       "issuance_purpose": {
         "create": "Nadagdag ang layunin ng dokumento",
@@ -1117,6 +1125,17 @@
         "empty": "Wala pang sektor",
         "deleteTitle": "Burahin ang sektor?"
       },
+      "addressedOffice": {
+        "title": "Mga mungkahing opisina",
+        "description": "Mga mungkahing opisina para sa Certificate of Indigency. Maaari pa ring mag-type ng ibang tatanggap ang clerk. Para lamang sa mga susunod na mungkahi ang mga pagbabago; mananatili ang orihinal na teksto sa mga naisyung sertipiko.",
+        "newName": "Bagong mungkahing opisina",
+        "placeholder": "Ilagay ang pangalan ng opisina",
+        "loading": "Nilo-load ang mga mungkahing opisina...",
+        "loadError": "Hindi ma-load ang mga mungkahing opisina",
+        "empty": "Wala pang mungkahing opisina",
+        "deleteTitle": "Burahin ang mungkahing opisina?",
+        "deleteDescription": "Alisin ang {{name}} sa mga susunod na mungkahi? Mananatili ang tekstong naka-save sa mga naisyung sertipiko."
+      },
       "purpose": {
         "title": "Mga layunin ng dokumento",
         "description": "Mga pinagsasaluhang pagpipilian sa mga porma ng clearance at sertipikasyon. Kapag pinalitan ang pangalan, magbabago rin ang label sa mga dating isyu at ulat.",
@@ -1184,7 +1203,8 @@
         "sector": "Mga sektor",
         "street": "Mga kalye",
         "association": "Mga asosasyon ng traysikel",
-        "purpose": "Mga layunin"
+        "purpose": "Mga layunin",
+        "addressedOffice": "Mga opisina"
       }
     },
     "printSetup": {

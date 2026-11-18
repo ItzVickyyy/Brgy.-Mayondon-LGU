@@ -1,4 +1,5 @@
 import {
+  addressedOfficeOptions,
   clearancePurposeOptions,
   indigencyPurposeOptions,
 } from "@/components/Issuances/config"
@@ -31,6 +32,10 @@ let issuanceCounter = 0
 let streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
 let purposes = [...new Set([...clearancePurposeOptions, ...indigencyPurposeOptions])]
 const purposeChoices = purposes.map((name, index) => ({ id: index + 1, name }))
+const addressedOfficeChoices = addressedOfficeOptions.map((name, index) => ({
+  id: index + 1,
+  name,
+}))
 let associations = ["Mayondon Tricycle Operators and Drivers Association"]
 let mockTricycles: {
   id: string
@@ -202,6 +207,7 @@ export const issuanceApi = {
       documentTypes: Object.values(documentConfig),
       purposes: [...purposes],
       purposeChoices: [...purposeChoices],
+      addressedOfficeChoices: [...addressedOfficeChoices],
       sectors: [...indigencySectorOptions],
       idTypes: [...new Set(["CTC", ...idTypeOptions])],
       idTypeChoices: [...new Set(["CTC", ...idTypeOptions])].map(

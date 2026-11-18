@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { notify } from "@/lib/notifications"
 import { readApiError } from "@/lib/residents"
 
-type LookupKind = "street" | "association" | "idType" | "sector" | "purpose"
+type LookupKind = "street" | "association" | "idType" | "sector" | "purpose" | "addressedOffice"
 type LookupAction = "create" | "rename" | "delete"
 
 /** The most characters a name may have: it matches the column in the database. */
@@ -27,6 +27,7 @@ const NAME_LIMIT: Record<LookupKind, number> = {
   idType: 50,
   sector: 100,
   purpose: 150,
+  addressedOffice: 150,
 }
 
 async function changeLookup(
@@ -43,6 +44,8 @@ async function changeLookup(
       return (await LookupsService.createSector({ body: { name } })).data
     if (kind === "purpose")
       return (await LookupsService.createIssuancePurpose({ body: { name } })).data
+    if (kind === "addressedOffice")
+      return (await LookupsService.createAddressedOffice({ body: { name } })).data
     return kind === "street"
       ? (await LookupsService.createStreet({ body: { name } })).data
       : (await LookupsService.createTricycleAssociation({ body: { name } }))
@@ -73,6 +76,13 @@ async function changeLookup(
           body: { name },
         })
       ).data
+    if (kind === "addressedOffice")
+      return (
+        await LookupsService.renameAddressedOffice({
+          path: { item_id: id },
+          body: { name },
+        })
+      ).data
     return kind === "street"
       ? (
           await LookupsService.renameStreet({
@@ -94,6 +104,8 @@ async function changeLookup(
     await LookupsService.deleteSector({ path: { item_id: id } })
   } else if (kind === "purpose") {
     await LookupsService.deleteIssuancePurpose({ path: { item_id: id } })
+  } else if (kind === "addressedOffice") {
+    await LookupsService.deleteAddressedOffice({ path: { item_id: id } })
   } else if (kind === "street") {
     await LookupsService.deleteStreet({ path: { street_id: id } })
   } else {
@@ -383,9 +395,15 @@ export function LookupListPanel({
           if (!open) setDeleteTarget(null)
         }}
         title={t(`records.lookups.${kind}.deleteTitle`)}
-        description={t("records.lookups.deleteDescription", {
-          name: deleteTarget?.name ?? t("records.lookups.thisItem"),
-        })}
+        description={
+          kind === "addressedOffice"
+            ? t("records.lookups.addressedOffice.deleteDescription", {
+                name: deleteTarget?.name ?? t("records.lookups.thisItem"),
+              })
+            : t("records.lookups.deleteDescription", {
+                name: deleteTarget?.name ?? t("records.lookups.thisItem"),
+              })
+        }
         confirmLabel={t("records.lookups.delete")}
         destructive
         onConfirm={() => {
@@ -438,6 +456,10 @@ const LIST_QUERIES = {
   purpose: {
     key: "issuance-purposes",
     load: () => LookupsService.listIssuancePurposes(),
+  },
+  addressedOffice: {
+    key: "addressed-offices",
+    load: () => LookupsService.listAddressedOffices(),
   },
 } as const
 

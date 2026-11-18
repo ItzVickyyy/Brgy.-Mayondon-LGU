@@ -9,6 +9,7 @@ from sqlmodel import Session, col, delete, select
 
 from app.core.config import settings
 from app.models_foundation import (
+    AddressedOffice,
     AuditLog,
     IdType,
     IssuancePurpose,
@@ -38,6 +39,9 @@ def _tidy_up(db: Session) -> Generator[None]:
     db.execute(
         delete(IssuancePurpose).where(col(IssuancePurpose.name).like("ZZ test %"))
     )
+    db.execute(
+        delete(AddressedOffice).where(col(AddressedOffice.name).like("ZZ test %"))
+    )
     db.commit()
 
 
@@ -61,6 +65,7 @@ def test_lookups_require_login(client: TestClient) -> None:
         "sectors",
         "id-types",
         "issuance-purposes",
+        "addressed-offices",
         "streets",
         "tricycle-associations",
     ):
@@ -73,7 +78,12 @@ def test_staff_and_admin_read_seeded_lookups(
     staff_token_headers: dict[str, str],
     superuser_token_headers: dict[str, str],
 ) -> None:
-    expected = {"sectors": 11, "id-types": 16, "issuance-purposes": 38}
+    expected = {
+        "sectors": 11,
+        "id-types": 16,
+        "issuance-purposes": 38,
+        "addressed-offices": 7,
+    }
     for headers in (staff_token_headers, superuser_token_headers):
         for path, count in expected.items():
             r = client.get(f"{LK}/{path}", headers=headers)
@@ -695,3 +705,80 @@ def test_issuance_purpose_validation_and_duplicate_names(
         f"{LK}/issuance-purposes/{first.json()['id']}",
         headers=superuser_token_headers,
     )
+
+
+def test_staff_cannot_change_addressed_office_suggestions(
+    client: TestClient,
+    db: Session,
+    staff_token_headers: dict[str, str],
+    superuser_token_headers: dict[str, str],
+) -> None:
+    created = client.post(
+        f"{LK}/addressed-offices",
+        json={"name": _name("ZZ test office")},
+        headers=superuser_token_headers,
+    )
+    assert created.status_code == 201
+    item_id = created.json()["id"]
+    assert client.post(
+        f"{LK}/addressed-offices",
+        json={"name": "Nope"},
+        headers=staff_token_headers,
+    ).status_code == 403
+    assert client.patch(
+        f"{LK}/addressed-offices/{item_id}",
+        json={"name": "Nope"},
+        headers=staff_token_headers,
+    ).status_code == 403
+    assert client.delete(
+        f"{LK}/addressed-offices/{item_id}", headers=staff_token_headers
+    ).status_code == 403
+    client.delete(
+        f"{LK}/addressed-offices/{item_id}", headers=superuser_token_headers
+    )
+
+
+def test_admin_addressed_office_suggestion_lifecycle(
+    client: TestClient, db: Session, superuser_token_headers: dict[str, str]
+) -> None:
+    for body in ({"name": "   "}, {"name": "x" * 151}):
+        assert client.post(
+            f"{LK}/addressed-offices",
+            json=body,
+            headers=superuser_token_headers,
+        ).status_code == 422
+    name = _name("ZZ test office")
+    created = client.post(
+        f"{LK}/addressed-offices",
+        json={"name": f"  {name}  "},
+        headers=superuser_token_headers,
+    )
+    assert created.status_code == 201, created.text
+    item = created.json()
+    assert item["name"] == name
+    item_id = item["id"]
+    duplicate = client.post(
+        f"{LK}/addressed-offices",
+        json={"name": name.upper()},
+        headers=superuser_token_headers,
+    )
+    assert duplicate.status_code == 409
+    renamed = _name("ZZ test renamed office")
+    updated = client.patch(
+        f"{LK}/addressed-offices/{item_id}",
+        json={"name": renamed},
+        headers=superuser_token_headers,
+    )
+    assert updated.status_code == 200, updated.text
+    listed = client.get(
+        f"{LK}/addressed-offices", headers=superuser_token_headers
+    ).json()
+    assert {"id": item_id, "name": renamed} in listed
+    assert client.delete(
+        f"{LK}/addressed-offices/{item_id}", headers=superuser_token_headers
+    ).status_code == 204
+    assert set(_audit_actions(db, str(item_id))) == {
+        "addressed_office.create",
+        "addressed_office.rename",
+        "addressed_office.delete",
+    }

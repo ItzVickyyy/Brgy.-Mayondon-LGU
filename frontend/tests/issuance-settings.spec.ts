@@ -31,7 +31,7 @@ test.describe("Issuance settings", () => {
     await page.getByRole("button", { name: "Issuance settings" }).click()
     const dialog = page.getByTestId("issuance-settings")
     await expect(dialog).toBeVisible()
-    await expect(dialog.getByRole("tab")).toHaveCount(6)
+    await expect(dialog.getByRole("tab")).toHaveCount(7)
     await expect(dialog.getByTestId("settings-tab-printing")).toHaveAttribute(
       "aria-selected",
       "true",
@@ -211,4 +211,65 @@ test("an administrator can add, rename and delete an issuance purpose, and the N
     .getByRole("button", { name: "Delete", exact: true })
     .click()
   await expect(settings.getByText(renamed, { exact: true })).toHaveCount(0)
+})
+
+
+test("an administrator can maintain addressed-office suggestions for Indigency", async ({
+  page,
+  request,
+}) => {
+  const token = await adminToken(request)
+  const headers = { Authorization: `Bearer ${token}` }
+  const street = await request.post("/api/v1/lookups/streets", {
+    headers,
+    data: { name: `Office St ${randomLetters(6)}` },
+  })
+  const streetId = (await street.json()).id as number
+  const last = `Office${randomLetters(6)}`
+  await request.post("/api/v1/residents/", {
+    headers,
+    data: { first_name: "Alex", last_name: last, street_id: streetId },
+  })
+  const name = `ZZ Office ${randomLetters(6)}`
+  const renamed = `${name} Updated`
+
+  await page.goto("/issuances")
+  await page.getByRole("button", { name: "Issuance settings" }).click()
+  const settings = page.getByTestId("issuance-settings")
+  await settings.getByTestId("settings-tab-addressedOffice").click()
+  await settings.getByLabel("New office suggestion").fill(name)
+  await settings.getByRole("button", { name: "Add" }).click()
+  await expect(settings.getByText(name, { exact: true })).toBeVisible()
+  await settings.getByRole("button", { name: `Rename ${name}` }).click()
+  await settings.getByRole("textbox").last().fill(renamed)
+  await settings.getByRole("button", { name: "Save" }).click()
+  await expect(settings.getByText(renamed, { exact: true })).toBeVisible()
+  await page.keyboard.press("Escape")
+
+  await page.getByRole("button", { name: "New Issuance" }).click()
+  const form = page.getByRole("dialog").last()
+  await form.getByRole("combobox", { name: /resident/i }).fill(last)
+  await page.getByRole("option").first().click()
+  await form
+    .locator("label:has(input[type=radio])")
+    .filter({ hasText: /Indigency/ })
+    .first()
+    .click()
+  const office = form.getByRole("combobox", { name: /Office addressed to/i })
+  await office.click()
+  await expect(page.getByRole("option", { name: renamed })).toBeVisible()
+  await page.getByRole("option", { name: renamed }).click()
+  await expect(office).toHaveValue(renamed)
+
+  await page.goto("/issuances")
+  await page.getByRole("button", { name: "Issuance settings" }).click()
+  const reopened = page.getByTestId("issuance-settings")
+  await reopened.getByTestId("settings-tab-addressedOffice").click()
+  await reopened.getByRole("button", { name: `Delete ${renamed}` }).click()
+  await page
+    .getByRole("dialog")
+    .filter({ hasText: "Delete office suggestion?" })
+    .getByRole("button", { name: "Delete", exact: true })
+    .click()
+  await expect(reopened.getByText(renamed, { exact: true })).toHaveCount(0)
 })
