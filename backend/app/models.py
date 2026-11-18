@@ -103,6 +103,11 @@ class UserUpdate(SQLModel):
     is_superuser: bool | None = None
     role: UserRole | None = None
     full_name: str | None = Field(default=None, max_length=255)
+    # Name parts; when any is sent the display name is rebuilt from them.
+    first_name: str | None = Field(default=None, max_length=100)
+    middle_name: str | None = Field(default=None, max_length=100)
+    last_name: str | None = Field(default=None, max_length=100)
+    extension_name: str | None = Field(default=None, max_length=20)
     password: str | None = Field(default=None, min_length=12, max_length=128)
     # Administrator only, for another account: back to the default password,
     # with a forced change at the next sign-in.
@@ -202,6 +207,15 @@ class UserPublic(UserBase):
             return None
         aware = value if value.tzinfo else value.replace(tzinfo=UTC)
         return value if aware > datetime.now(UTC) else None
+
+
+class UserCreated(UserPublic):
+    """Response of POST /users/: the new account plus whether the default
+    password was sent to the person by e-mail. When it was not (no mail server,
+    or the send failed) the administrator hands the default password over in
+    person, so the screen shows it once."""
+
+    password_emailed: bool = False
 
 
 class UsersPublic(SQLModel):

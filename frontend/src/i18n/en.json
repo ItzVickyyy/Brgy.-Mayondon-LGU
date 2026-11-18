@@ -379,7 +379,8 @@
       "next_number": "next number",
       "id_number_source": "number from",
       "question_ids": "questions",
-      "method": "method"
+      "method": "method",
+      "password_emailed": "password emailed"
     },
     "modules": {
       "records": "Resident Records",
@@ -1776,8 +1777,18 @@
           "passwordRequired": "Password is required",
           "passwordMin": "Password must be at least 12 characters",
           "confirmRequired": "Please confirm your password",
-          "mismatch": "The passwords don't match"
-        }
+          "mismatch": "The passwords don't match",
+          "firstName": "Enter the first name",
+          "lastName": "Enter the last name",
+          "emailReserved": "This kind of address cannot be used (.local, .test, .invalid and similar). Use another address"
+        },
+        "addNotice": "The account starts with the default password, and the person must change it at first sign-in. It is emailed when the address is real and email is set up; otherwise it is shown once after you save.",
+        "emailHint": "Any email address works, even one that does not exist. A real address receives the default password by email.",
+        "createdTitle": "Account created",
+        "createdNotEmailed": "No email was sent. Give {{name}} the default password below in person. They must change it the first time they sign in.",
+        "defaultPasswordLabel": "Default password",
+        "createdOnce": "This password is shown only now. If it is needed again, use the password reset option in Edit User.",
+        "done": "Done"
       },
       "delete": {
         "menu": "Delete User",
@@ -1804,7 +1815,8 @@
         "deleted": "The user was deleted successfully",
         "updated": "User updated successfully",
         "reactivated": "User account reactivated",
-        "deactivated": "User account deactivated"
+        "deactivated": "User account deactivated",
+        "createdEmailed": "User created and the default password was emailed to {{email}}"
       }
     },
     "officials": {

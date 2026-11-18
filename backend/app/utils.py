@@ -38,7 +38,12 @@ def send_email(
     email_to: str,
     subject: str = "",
     html_content: str = "",
-) -> None:
+) -> bool:
+    """Send one e-mail. Returns True only when the mail server accepted it.
+
+    Delivery problems (no network, refused address) never raise: the library
+    reports them in the response, so callers that must not fail because of
+    e-mail can simply look at the result."""
     assert settings.emails_enabled, "no provided configuration for email variables"
     assert settings.EMAILS_FROM_EMAIL  # For type checker
     message = emails.message.Message(
@@ -57,6 +62,7 @@ def send_email(
         smtp_options["password"] = settings.SMTP_PASSWORD
     response = message.send(to=email_to, smtp=smtp_options)
     logger.info(f"send email result: {response}")
+    return bool(getattr(response, "success", False))
 
 
 def generate_test_email(email_to: str) -> EmailData:
@@ -86,18 +92,19 @@ def generate_reset_password_email(email_to: str, email: str, token: str) -> Emai
     return EmailData(html_content=html_content, subject=subject)
 
 
-def generate_new_account_email(email_to: str, username: str, token: str) -> EmailData:
+def generate_new_account_email(
+    email_to: str, username: str, password: str
+) -> EmailData:
     project_name = settings.PROJECT_NAME
     subject = f"{project_name} - Set up your account"
-    link = f"{settings.FRONTEND_HOST}/reset-password?token={token}"
     html_content = render_email_template(
         template_name="new_account.html",
         context={
             "project_name": project_name,
             "username": username,
             "email": email_to,
-            "valid_hours": settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS,
-            "link": link,
+            "password": password,
+            "link": settings.FRONTEND_HOST,
         },
     )
     return EmailData(html_content=html_content, subject=subject)

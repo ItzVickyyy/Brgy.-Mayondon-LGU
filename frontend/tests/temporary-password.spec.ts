@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import { fillNewUser, saveNewUser } from "./utils/adminUsers"
 import { randomEmail, randomPassword } from "./utils/random"
 
 test("temporary password forces a change before the user can access the system", async ({
@@ -10,11 +11,11 @@ test("temporary password forces a change before the user can access the system",
 
   await page.goto("/admin")
   await page.getByRole("button", { name: "Add User" }).click()
-  await page.getByPlaceholder("Email", { exact: true }).fill(email)
-  await page.getByPlaceholder("Full name").fill("Temporary Password Test")
+  await fillNewUser(page, { email, first: "Temporary", last: "Password Test" })
   await page.getByLabel("Is active?").check()
-  await page.getByRole("button", { name: "Save" }).click()
+  await saveNewUser(page)
 
+  await page.getByPlaceholder("Search name or email").fill(email)
   const userRow = page.getByRole("row").filter({ hasText: email })
   await expect(userRow).toBeVisible()
   await expect(
@@ -38,7 +39,7 @@ test("temporary password forces a change before the user can access the system",
   ).toBeVisible()
 
   await page.goto("/records")
-  await page.waitForURL(/\/change-password$/)
+  await expect(page).toHaveURL(/\/change-password$/)
 
   await page.getByTestId("current-password-input").fill(temporaryPassword)
   await page.getByTestId("new-password-input").fill(newPassword)

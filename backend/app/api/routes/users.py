@@ -1,3 +1,4 @@
+import logging
 import uuid
 from typing import Any
 
@@ -21,6 +22,7 @@ from app.models import (
     User,
     UserCreate,
     UserCreateByAdmin,
+    UserCreated,
     UserPublic,
     UserRegister,
     UserRole,
@@ -29,11 +31,9 @@ from app.models import (
     UserUpdateMe,
 )
 from app.models_issuance import Issuance
-from app.utils import (
-    generate_new_account_email,
-    generate_password_reset_token,
-    send_email,
-)
+from app.utils import generate_new_account_email, send_email
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -67,13 +67,54 @@ def read_users(
     return UsersPublic(data=users_public, count=count)
 
 
-@router.post("/", dependencies=[Depends(require_user_admin)], response_model=UserPublic)
+def _clean_name(value: str | None) -> str | None:
+    cleaned = " ".join((value or "").split())
+    return cleaned or None
+
+
+def _full_name_from_parts(
+    first: str | None, middle: str | None, last: str | None, extension: str | None
+) -> str | None:
+    """First Middle Last Extension, or None when no name part was entered."""
+    parts = [_clean_name(p) for p in (first, middle, last, extension)]
+    return " ".join(p for p in parts if p) or None
+
+
+def _email_default_password(user: User) -> bool:
+    """Try to e-mail the default password. Never raises: an account must be
+    created whether or not the address is real or a mail server is reachable
+    (the office network may be offline)."""
+    if not settings.emails_enabled:
+        return False
+    try:
+        email_data = generate_new_account_email(
+            email_to=user.email, username=user.email, password=DEFAULT_PASSWORD
+        )
+        return send_email(
+            email_to=user.email,
+            subject=email_data.subject,
+            html_content=email_data.html_content,
+        )
+    except Exception:
+        logger.warning("Could not e-mail the default password for a new account")
+        return False
+
+
+@router.post(
+    "/", dependencies=[Depends(require_user_admin)], response_model=UserCreated
+)
 def create_user(
     *, session: SessionDep, user_in: UserCreateByAdmin, current_user: CurrentUser
 ) -> Any:
     """
     Create new user. The account starts with the default password and must
     change it at the first sign-in; no password is accepted in the request.
+
+    The name parts are tidied and the display name (``full_name``) is built
+    from them. The default password is e-mailed when a mail server is set up
+    and accepts the message; otherwise ``password_emailed`` is false and the
+    administrator gives the password to the person. A failed e-mail never
+    blocks the account.
     """
     user = crud.get_user_by_email(session=session, email=user_in.email)
     if user:
@@ -82,11 +123,21 @@ def create_user(
             detail="The user with this email already exists in the system.",
         )
 
+    data = user_in.model_dump()
+    for key in ("first_name", "middle_name", "last_name", "extension_name"):
+        data[key] = _clean_name(data.get(key))
+    data["full_name"] = _full_name_from_parts(
+        data["first_name"],
+        data["middle_name"],
+        data["last_name"],
+        data["extension_name"],
+    ) or _clean_name(data.get("full_name"))
     user = crud.create_user(
         session=session,
-        user_create=UserCreate(**user_in.model_dump(), password=DEFAULT_PASSWORD),
+        user_create=UserCreate(**data, password=DEFAULT_PASSWORD),
         temporary=True,
     )
+    password_emailed = _email_default_password(user)
     record_admin_action(
         actor_id=current_user.id,
         action="user.create",
@@ -100,7 +151,7 @@ def create_user(
         module="users",
         record_type="user",
         record_id=user.id,
-        details={"role": str(user.role)},
+        details={"role": str(user.role), "password_emailed": password_emailed},
     )
     record_audit_event(
         session,
@@ -112,19 +163,10 @@ def create_user(
         details={"reason": "account_created"},
         commit=True,
     )
-    if settings.emails_enabled and user_in.email:
-        setup_token = generate_password_reset_token(
-            email=user.email, hashed_password=user.hashed_password
-        )
-        email_data = generate_new_account_email(
-            email_to=user.email, username=user.email, token=setup_token
-        )
-        send_email(
-            email_to=user_in.email,
-            subject=email_data.subject,
-            html_content=email_data.html_content,
-        )
-    return user
+    return UserCreated(
+        **UserPublic.model_validate(user).model_dump(),
+        password_emailed=password_emailed,
+    )
 
 
 @router.patch("/me", response_model=UserPublic)
@@ -310,6 +352,25 @@ def update_user(
             raise HTTPException(
                 status_code=409, detail="User with this email already exists"
             )
+
+    name_parts = ("first_name", "middle_name", "last_name", "extension_name")
+    if any(part in user_in.model_fields_set for part in name_parts):
+        # Keep the display name in step with the parts (a part may be cleared).
+        merged = {
+            part: (
+                getattr(user_in, part)
+                if part in user_in.model_fields_set
+                else getattr(db_user, part)
+            )
+            for part in name_parts
+        }
+        user_in = user_in.model_copy(
+            update={
+                **{part: _clean_name(value) for part, value in merged.items()},
+                "full_name": _full_name_from_parts(*merged.values())
+                or db_user.full_name,
+            }
+        )
 
     previous_role = db_user.role
     loses_admin = user_in.is_active is False or (

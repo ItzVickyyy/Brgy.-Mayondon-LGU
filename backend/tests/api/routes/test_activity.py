@@ -294,7 +294,10 @@ def test_account_changes_are_logged_without_passwords(
         if row["action"] == "user.temp_password_set"
     )
     assert reasons == ["account_created", "password_reset"]
-    assert by_action["user.create"]["details"] == {"role": "staff"}
+    assert by_action["user.create"]["details"] == {
+        "role": "staff",
+        "password_emailed": False,
+    }
     # Field names only; the model also marks is_superuser when the role is set.
     assert set(by_action["user.update"]["details"]["fields"]) >= {"role"}
     assert "password" not in by_action["user.update"]["details"]["fields"]

@@ -2865,6 +2865,106 @@ export type UserCreateByAdmin = {
 };
 
 /**
+ * UserCreated
+ *
+ * Response of POST /users/: the new account plus whether the default
+ * password was sent to the person by e-mail. When it was not (no mail server,
+ * or the send failed) the administrator hands the default password over in
+ * person, so the screen shows it once.
+ */
+export type UserCreated = {
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Is Active
+     */
+    is_active?: boolean;
+    /**
+     * Is Superuser
+     */
+    is_superuser?: boolean;
+    role?: UserRole;
+    /**
+     * Full Name
+     */
+    full_name?: string | null;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Middle Name
+     */
+    middle_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Extension Name
+     */
+    extension_name?: string | null;
+    /**
+     * Sex
+     */
+    sex?: string | null;
+    /**
+     * Civil Status
+     */
+    civil_status?: string | null;
+    /**
+     * Birthdate
+     */
+    birthdate?: string | null;
+    /**
+     * Birthplace
+     */
+    birthplace?: string | null;
+    /**
+     * Phone Number
+     */
+    phone_number?: string | null;
+    /**
+     * Address
+     */
+    address?: string | null;
+    /**
+     * Governing Lgu
+     */
+    governing_lgu?: string | null;
+    /**
+     * Profile Photo Url
+     */
+    profile_photo_url?: string | null;
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Created At
+     */
+    created_at?: string | null;
+    /**
+     * Must Change Password
+     */
+    must_change_password?: boolean;
+    /**
+     * Mfa Enabled
+     */
+    mfa_enabled?: boolean;
+    /**
+     * Locked Until
+     */
+    locked_until?: string | null;
+    /**
+     * Password Emailed
+     */
+    password_emailed?: boolean;
+};
+
+/**
  * UserPublic
  */
 export type UserPublic = {
@@ -3001,6 +3101,22 @@ export type UserUpdate = {
      * Full Name
      */
     full_name?: string | null;
+    /**
+     * First Name
+     */
+    first_name?: string | null;
+    /**
+     * Middle Name
+     */
+    middle_name?: string | null;
+    /**
+     * Last Name
+     */
+    last_name?: string | null;
+    /**
+     * Extension Name
+     */
+    extension_name?: string | null;
     /**
      * Password
      */
@@ -3710,7 +3826,7 @@ export type usersCreateUserResponses = {
     /**
      * Successful Response
      */
-    200: UserPublic;
+    200: UserCreated;
 };
 
 export type usersCreateUserResponse = usersCreateUserResponses[keyof usersCreateUserResponses];

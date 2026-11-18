@@ -84,6 +84,7 @@ const detailKeyLabels = {
   report: "activity.detailKeys.report",
   period: "activity.detailKeys.period",
   keep_days: "activity.detailKeys.keep_days",
+  password_emailed: "activity.detailKeys.password_emailed",
 } as const satisfies Record<string, ParseKeys>
 
 const moduleKeys = {

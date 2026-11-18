@@ -387,6 +387,12 @@ export class UsersService {
      *
      * Create new user. The account starts with the default password and must
      * change it at the first sign-in; no password is accepted in the request.
+     *
+     * The name parts are tidied and the display name (``full_name``) is built
+     * from them. The default password is e-mailed when a mail server is set up
+     * and accepts the message; otherwise ``password_emailed`` is false and the
+     * administrator gives the password to the person. A failed e-mail never
+     * blocks the account.
      */
     public static createUser<ThrowOnError extends boolean = true>(options: Options<usersCreateUserData, ThrowOnError>) {
         return (options.client ?? client).post<usersCreateUserResponses, usersCreateUserErrors, ThrowOnError>({

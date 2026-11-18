@@ -7,7 +7,11 @@ import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
 
-import { type UserCreateByAdmin, UsersService } from "@/client"
+import {
+  type UserCreateByAdmin,
+  type UserCreated,
+  UsersService,
+} from "@/client"
 import { formControlClass } from "@/components/Common/formStyles"
 import {
   modalBody,
@@ -31,6 +35,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -42,10 +47,38 @@ import { DEFAULT_PASSWORD } from "@/config/site"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
 
+// Endings the server's address check refuses (reserved names). Any other
+// well-formed address is accepted, whether or not it really exists.
+const RESERVED_ENDINGS = [
+  ".arpa",
+  ".invalid",
+  ".local",
+  ".localhost",
+  ".onion",
+  ".test",
+]
+
 const buildSchema = (t: TFunction) =>
   z.object({
-    email: z.email({ message: t("admin.users.form.validation.email") }),
-    full_name: z.string().optional(),
+    email: z
+      .email({ message: t("admin.users.form.validation.email") })
+      .refine(
+        (value) =>
+          !RESERVED_ENDINGS.some((ending) =>
+            value.toLowerCase().endsWith(ending),
+          ),
+        { message: t("admin.users.form.validation.emailReserved") },
+      ),
+    first_name: z
+      .string()
+      .trim()
+      .min(1, { message: t("admin.users.form.validation.firstName") }),
+    middle_name: z.string().optional(),
+    last_name: z
+      .string()
+      .trim()
+      .min(1, { message: t("admin.users.form.validation.lastName") }),
+    extension_name: z.string().optional(),
     // Existing API role flag. A pending/rejected workflow needs a separate backend status field.
     is_superuser: z.boolean(),
     is_active: z.boolean(),
@@ -57,6 +90,8 @@ const AddUser = () => {
   const { t } = useTranslation()
   const formSchema = useMemo(() => buildSchema(t), [t])
   const [isOpen, setIsOpen] = useState(false)
+  // Set when the default password could not be emailed: it is shown once.
+  const [handOver, setHandOver] = useState<UserCreated | null>(null)
   const queryClient = useQueryClient()
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
@@ -66,25 +101,41 @@ const AddUser = () => {
     criteriaMode: "all",
     defaultValues: {
       email: "",
-      full_name: "",
+      first_name: "",
+      middle_name: "",
+      last_name: "",
+      extension_name: "",
       is_superuser: false,
       is_active: true,
     },
   })
 
   const mutation = useMutation({
-    mutationFn: (data: UserCreateByAdmin) =>
-      UsersService.createUser({ body: data }),
-    onSuccess: () => {
-      showSuccessToast(t("admin.users.notifications.created"))
+    mutationFn: async (data: UserCreateByAdmin) =>
+      (await UsersService.createUser({ body: data })).data,
+    onSuccess: (created: UserCreated) => {
       form.reset()
-      setIsOpen(false)
+      if (created.password_emailed) {
+        showSuccessToast(
+          t("admin.users.notifications.createdEmailed", {
+            email: created.email,
+          }),
+        )
+        setIsOpen(false)
+      } else {
+        setHandOver(created)
+      }
     },
     onError: handleError.bind(showErrorToast),
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["users"] })
     },
   })
+
+  const closeDialog = (open: boolean) => {
+    setIsOpen(open)
+    if (!open) setHandOver(null)
+  }
 
   const onSubmit = (data: FormData) => {
     // No password is sent: the account starts with the default password.
@@ -93,7 +144,7 @@ const AddUser = () => {
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog open={isOpen} onOpenChange={closeDialog}>
       <DialogTrigger asChild>
         <Button className="min-h-11">
           <Plus className="mr-2" />
@@ -101,131 +152,237 @@ const AddUser = () => {
         </Button>
       </DialogTrigger>
       <DialogContent className={`${modalShell} sm:max-w-2xl`}>
-        <DialogHeader className={modalHeader}>
-          <DialogTitle className="text-xl">
-            {t("admin.users.form.addTitle")}
-          </DialogTitle>
-          <DialogDescription>
-            {t("admin.users.form.addDescription")}
-          </DialogDescription>
-        </DialogHeader>
-        <Form {...form}>
-          <form
-            className="flex min-h-0 flex-1 flex-col"
-            onSubmit={form.handleSubmit(onSubmit)}
-          >
-            <div className={`${modalBody} grid gap-4 sm:grid-cols-2`}>
-              <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground sm:col-span-2">
-                {t("admin.users.form.tempNotice", {
-                  password: DEFAULT_PASSWORD,
+        {handOver ? (
+          <>
+            <DialogHeader className={modalHeader}>
+              <DialogTitle className="text-xl">
+                {t("admin.users.form.createdTitle")}
+              </DialogTitle>
+              <DialogDescription>
+                {t("admin.users.form.createdNotEmailed", {
+                  name: handOver.full_name || handOver.email,
                 })}
-              </p>
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>
-                      {t("admin.users.form.email")}{" "}
-                      <span className="text-destructive">*</span>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("admin.users.form.emailPlaceholder")}
-                        type="email"
-                        {...field}
-                        required
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="full_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("admin.users.form.fullName")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("admin.users.form.fullNamePlaceholder")}
-                        type="text"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="is_superuser"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("admin.users.form.role")}</FormLabel>
-                    <FormControl>
-                      <Select
-                        className={formControlClass}
-                        value={field.value ? "admin" : "staff"}
-                        onChange={(event) =>
-                          field.onChange(event.target.value === "admin")
-                        }
-                      >
-                        <option value="staff">
-                          {t("admin.users.roleStaff")}
-                        </option>
-                        <option value="admin">
-                          {t("admin.users.roleAdmin")}
-                        </option>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem className="flex min-h-11 items-center gap-3 space-y-0 self-end rounded-md border bg-background px-3 sm:mb-0">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="font-normal">
-                      {t("admin.users.form.isActive")}
-                    </FormLabel>
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <DialogFooter className={modalFooter}>
-              <DialogClose asChild>
-                <Button
-                  variant="outline"
-                  className="min-h-11"
-                  disabled={mutation.isPending}
+              </DialogDescription>
+            </DialogHeader>
+            <div className={`${modalBody} grid gap-3`} data-testid="hand-over">
+              <div className="rounded-md border border-brand/20 bg-brand/10 px-4 py-3">
+                <p className="text-sm text-muted-foreground">
+                  {t("admin.users.form.defaultPasswordLabel")}
+                </p>
+                <p
+                  className="select-all font-mono text-xl font-semibold tracking-wide text-foreground"
+                  data-testid="default-password"
                 >
-                  {t("admin.users.form.cancel")}
-                </Button>
-              </DialogClose>
-              <LoadingButton
+                  {DEFAULT_PASSWORD}
+                </p>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {t("admin.users.form.createdOnce")}
+              </p>
+            </div>
+            <DialogFooter className={modalFooter}>
+              <Button
                 className="min-h-11"
-                type="submit"
-                loading={mutation.isPending}
+                type="button"
+                onClick={() => closeDialog(false)}
               >
-                {t("admin.users.form.save")}
-              </LoadingButton>
+                {t("admin.users.form.done")}
+              </Button>
             </DialogFooter>
-          </form>
-        </Form>
+          </>
+        ) : (
+          <>
+            <DialogHeader className={modalHeader}>
+              <DialogTitle className="text-xl">
+                {t("admin.users.form.addTitle")}
+              </DialogTitle>
+              <DialogDescription>
+                {t("admin.users.form.addDescription")}
+              </DialogDescription>
+            </DialogHeader>
+            <Form {...form}>
+              <form
+                className="flex min-h-0 flex-1 flex-col"
+                onSubmit={form.handleSubmit(onSubmit)}
+              >
+                <div className={`${modalBody} grid gap-4 sm:grid-cols-2`}>
+                  <p className="rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground sm:col-span-2">
+                    {t("admin.users.form.addNotice")}
+                  </p>
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="sm:col-span-2">
+                        <FormLabel>
+                          {t("admin.users.form.email")}{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t("admin.users.form.emailPlaceholder")}
+                            type="email"
+                            maxLength={255}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormDescription>
+                          {t("admin.users.form.emailHint")}
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="first_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t("account.fields.firstName")}{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t("account.placeholders.firstName")}
+                            type="text"
+                            maxLength={100}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="middle_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("account.fields.middleName")}</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t("account.placeholders.middleName")}
+                            type="text"
+                            maxLength={100}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="last_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t("account.fields.lastName")}{" "}
+                          <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t("account.placeholders.lastName")}
+                            type="text"
+                            maxLength={100}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="extension_name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          {t("account.fields.extensionName")}
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder={t(
+                              "account.placeholders.extensionName",
+                            )}
+                            type="text"
+                            maxLength={20}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="is_superuser"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("admin.users.form.role")}</FormLabel>
+                        <FormControl>
+                          <Select
+                            className={formControlClass}
+                            value={field.value ? "admin" : "staff"}
+                            onChange={(event) =>
+                              field.onChange(event.target.value === "admin")
+                            }
+                          >
+                            <option value="staff">
+                              {t("admin.users.roleStaff")}
+                            </option>
+                            <option value="admin">
+                              {t("admin.users.roleAdmin")}
+                            </option>
+                          </Select>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="is_active"
+                    render={({ field }) => (
+                      <FormItem className="flex min-h-11 items-center gap-3 space-y-0 self-end rounded-md border bg-background px-3 sm:mb-0">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          {t("admin.users.form.isActive")}
+                        </FormLabel>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <DialogFooter className={modalFooter}>
+                  <DialogClose asChild>
+                    <Button
+                      variant="outline"
+                      className="min-h-11"
+                      disabled={mutation.isPending}
+                    >
+                      {t("admin.users.form.cancel")}
+                    </Button>
+                  </DialogClose>
+                  <LoadingButton
+                    className="min-h-11"
+                    type="submit"
+                    loading={mutation.isPending}
+                  >
+                    {t("admin.users.form.save")}
+                  </LoadingButton>
+                </DialogFooter>
+              </form>
+            </Form>
+          </>
+        )}
       </DialogContent>
     </Dialog>
   )

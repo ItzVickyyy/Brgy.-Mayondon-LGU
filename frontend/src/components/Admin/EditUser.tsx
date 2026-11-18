@@ -53,7 +53,10 @@ const buildSchema = (t: TFunction) =>
   z
     .object({
       email: z.email({ message: t("admin.users.form.validation.email") }),
-      full_name: z.string().optional(),
+      first_name: z.string().optional(),
+      middle_name: z.string().optional(),
+      last_name: z.string().optional(),
+      extension_name: z.string().optional(),
       password: z
         .string()
         .min(12, { message: t("admin.users.form.validation.passwordMin") })
@@ -103,7 +106,10 @@ const EditUser = ({
     criteriaMode: "all",
     defaultValues: {
       email: user.email,
-      full_name: user.full_name ?? undefined,
+      first_name: user.first_name ?? "",
+      middle_name: user.middle_name ?? "",
+      last_name: user.last_name ?? "",
+      extension_name: user.extension_name ?? "",
       is_superuser: user.is_superuser,
       is_active: user.is_active,
       reset_to_default_password: false,
@@ -264,14 +270,72 @@ const EditUser = ({
 
               <FormField
                 control={form.control}
-                name="full_name"
+                name="first_name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>{t("admin.users.form.fullName")}</FormLabel>
+                    <FormLabel>{t("account.fields.firstName")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={t("admin.users.form.fullNamePlaceholder")}
+                        placeholder={t("account.placeholders.firstName")}
                         type="text"
+                        maxLength={100}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="middle_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("account.fields.middleName")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("account.placeholders.middleName")}
+                        type="text"
+                        maxLength={100}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="last_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("account.fields.lastName")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("account.placeholders.lastName")}
+                        type="text"
+                        maxLength={100}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="extension_name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{t("account.fields.extensionName")}</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder={t("account.placeholders.extensionName")}
+                        type="text"
+                        maxLength={20}
                         {...field}
                       />
                     </FormControl>

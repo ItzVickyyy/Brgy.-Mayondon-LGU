@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test"
 import { firstSuperuser, firstSuperuserPassword } from "./config.ts"
+import { fillNewUser, saveNewUser } from "./utils/adminUsers"
 import { createUser } from "./utils/privateApi"
 import { randomEmail, randomPassword } from "./utils/random"
 import { chooseOption } from "./utils/select"
@@ -25,18 +26,14 @@ test.describe("Admin user management", () => {
     await page.goto("/admin")
 
     const email = randomEmail()
-    const fullName = "Test User Admin"
 
     await page.getByRole("button", { name: "Add User" }).click()
 
-    await page.getByPlaceholder("Email", { exact: true }).fill(email)
-    await page.getByPlaceholder("Full name").fill(fullName)
-
-    await page.getByRole("button", { name: "Save" }).click()
+    await fillNewUser(page, { email, first: "Test", last: "User Admin" })
 
     // Assert the outcome of the operation rather than the transient toast.
     // Toast descriptions can disappear before Playwright observes them.
-    await expect(page.getByRole("dialog")).not.toBeVisible()
+    await saveNewUser(page)
 
     // The table is paged; with many users the new one may not be on the first
     // page, so search for it first.
@@ -53,7 +50,7 @@ test.describe("Admin user management", () => {
 
     await page.getByRole("button", { name: "Add User" }).click()
 
-    await page.getByPlaceholder("Email", { exact: true }).fill(email)
+    await fillNewUser(page, { email })
 
     await chooseOption(
       page.getByRole("dialog").getByLabel("Role"),
@@ -62,10 +59,10 @@ test.describe("Admin user management", () => {
 
     await page.getByLabel("Is active?").check()
 
-    await page.getByRole("button", { name: "Save" }).click()
-
     // Verify the persisted role in the table instead of relying on a transient toast.
-    await expect(page.getByRole("dialog")).not.toBeVisible()
+    await saveNewUser(page)
+
+    await page.getByPlaceholder("Search name or email").fill(email)
 
     const userRow = page.getByRole("row").filter({ hasText: email })
     await expect(userRow.getByText("System Administrator")).toBeVisible()
@@ -75,15 +72,11 @@ test.describe("Admin user management", () => {
     await page.goto("/admin")
 
     const email = randomEmail()
-    const originalName = "Original Name"
     const updatedName = "Updated Name"
 
     await page.getByRole("button", { name: "Add User" }).click()
-    await page.getByPlaceholder("Email", { exact: true }).fill(email)
-    await page.getByPlaceholder("Full name").fill(originalName)
-    await page.getByRole("button", { name: "Save" }).click()
-
-    await expect(page.getByRole("dialog")).not.toBeVisible()
+    await fillNewUser(page, { email, first: "Original", last: "Name" })
+    await saveNewUser(page)
 
     // Search by e-mail first (the table is paged; see the create test).
     await page.getByPlaceholder("Search name or email").fill(email)
@@ -91,7 +84,8 @@ test.describe("Admin user management", () => {
     const userRow = page.getByRole("row").filter({ hasText: email })
     await userRow.getByRole("button", { name: "Edit", exact: true }).click()
 
-    await page.getByPlaceholder("Full name").fill(updatedName)
+    // The name is edited as parts; the row shows them joined.
+    await page.getByPlaceholder("Enter first name").fill("Updated")
     await page.getByRole("button", { name: "Save" }).click()
 
     await expect(page.getByRole("dialog")).not.toBeVisible()
@@ -104,10 +98,10 @@ test.describe("Admin user management", () => {
     const email = randomEmail()
 
     await page.getByRole("button", { name: "Add User" }).click()
-    await page.getByPlaceholder("Email", { exact: true }).fill(email)
-    await page.getByRole("button", { name: "Save" }).click()
+    await fillNewUser(page, { email })
+    await saveNewUser(page)
 
-    await expect(page.getByRole("dialog")).not.toBeVisible()
+    await page.getByPlaceholder("Search name or email").fill(email)
 
     const userRow = page.getByRole("row").filter({ hasText: email })
     await userRow.getByRole("button", { name: /^More actions for/ }).click()

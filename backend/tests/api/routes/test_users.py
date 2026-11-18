@@ -37,6 +37,14 @@ def test_get_users_normal_user_me(
     assert current_user["email"] == settings.EMAIL_TEST_USER
 
 
+def _mail_settings():
+    return (
+        patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
+        patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
+        patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
+    )
+
+
 def test_create_user_new_email(
     client: TestClient,
     superuser_token_headers: dict[str, str],
@@ -44,14 +52,22 @@ def test_create_user_new_email(
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     caplog.set_level(logging.INFO, logger="app.audit")
+    m1, m2, m3 = _mail_settings()
     with (
-        patch("app.api.routes.users.send_email", return_value=None) as send_email_mock,
-        patch("app.core.config.settings.SMTP_HOST", "smtp.example.com"),
-        patch("app.core.config.settings.SMTP_USER", "admin@example.com"),
-        patch("app.core.config.settings.EMAILS_FROM_EMAIL", "admin@example.com"),
+        patch("app.api.routes.users.send_email", return_value=True) as send_email_mock,
+        m1,
+        m2,
+        m3,
     ):
         username = random_email()
-        data = {"email": username, "password": "ignored-typed-password-1"}
+        data = {
+            "email": username,
+            "first_name": "  Maria ",
+            "middle_name": "Reyes",
+            "last_name": "Santos",
+            "extension_name": "Jr.",
+            "password": "ignored-typed-password-1",
+        }
         r = client.post(
             f"{settings.API_V1_STR}/users/",
             headers=superuser_token_headers,
@@ -62,14 +78,81 @@ def test_create_user_new_email(
         user = crud.get_user_by_email(session=db, email=username)
         assert user
         assert user.email == created_user["email"]
+        assert created_user["password_emailed"] is True
+        assert created_user["must_change_password"] is True
+        assert created_user["first_name"] == "Maria"
+        assert created_user["full_name"] == "Maria Reyes Santos Jr."
         send_email_mock.assert_called_once()
         sent_html = send_email_mock.call_args.kwargs["html_content"]
-        assert "reset-password?token=" in sent_html
+        assert DEFAULT_PASSWORD in sent_html
         assert "ignored-typed-password-1" not in sent_html
-        assert DEFAULT_PASSWORD not in sent_html
-        assert "Set Password" in sent_html
+        assert "reset-password?token=" not in sent_html
         assert '"action":"user.create"' in caplog.text
         assert '"target_type":"user"' in caplog.text
+        # The audit entry records how the password was handed over, never the
+        # password itself.
+        rows = client.get(
+            f"{settings.API_V1_STR}/activity/",
+            headers=superuser_token_headers,
+            params={"record_id": created_user["id"], "module": "users"},
+        ).json()["data"]
+        created = [row for row in rows if row["action"] == "user.create"]
+        assert len(created) == 1
+        assert created[0]["details"] == {"role": "staff", "password_emailed": True}
+        assert DEFAULT_PASSWORD not in str(rows)
+        assert DEFAULT_PASSWORD not in caplog.text
+        # The default password really signs the account in.
+        assert verify_password(DEFAULT_PASSWORD, user.hashed_password)
+
+
+def test_create_user_without_mail_server_reports_not_emailed(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    with patch("app.api.routes.users.send_email") as send_email_mock:
+        r = client.post(
+            f"{settings.API_V1_STR}/users/",
+            headers=superuser_token_headers,
+            json={"email": random_email(), "first_name": "Ana", "last_name": "Cruz"},
+        )
+    assert r.status_code == 200, r.text
+    assert r.json()["password_emailed"] is False
+    assert r.json()["full_name"] == "Ana Cruz"
+    send_email_mock.assert_not_called()
+
+
+@pytest.mark.parametrize("failure", ["refused", "error"])
+def test_create_user_survives_a_failed_email(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    db: Session,
+    failure: str,
+) -> None:
+    m1, m2, m3 = _mail_settings()
+    mock_kwargs = (
+        {"return_value": False} if failure == "refused" else {"side_effect": OSError}
+    )
+    with patch("app.api.routes.users.send_email", **mock_kwargs), m1, m2, m3:
+        email = random_email()
+        r = client.post(
+            f"{settings.API_V1_STR}/users/",
+            headers=superuser_token_headers,
+            json={"email": email, "first_name": "Ana", "last_name": "Cruz"},
+        )
+    assert r.status_code == 200, r.text
+    assert r.json()["password_emailed"] is False
+    assert crud.get_user_by_email(session=db, email=email) is not None
+
+
+def test_create_user_keeps_a_sent_full_name_when_no_name_parts(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    r = client.post(
+        f"{settings.API_V1_STR}/users/",
+        headers=superuser_token_headers,
+        json={"email": random_email(), "full_name": "Old Style"},
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["full_name"] == "Old Style"
 
 
 def test_get_existing_user_as_superuser(
@@ -755,3 +838,30 @@ def test_retrieve_users_rejects_invalid_pagination(
 
     assert negative_skip.status_code == 422
     assert excessive_limit.status_code == 422
+
+
+def test_admin_edit_of_name_parts_rebuilds_the_display_name(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    created = client.post(
+        f"{settings.API_V1_STR}/users/",
+        headers=superuser_token_headers,
+        json={
+            "email": random_email(),
+            "first_name": "Maria",
+            "middle_name": "Reyes",
+            "last_name": "Santos",
+        },
+    ).json()
+    assert created["full_name"] == "Maria Reyes Santos"
+    r = client.patch(
+        f"{settings.API_V1_STR}/users/{created['id']}",
+        headers=superuser_token_headers,
+        json={"last_name": " Cruz ", "middle_name": "", "extension_name": "Jr."},
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["first_name"] == "Maria"
+    assert body["middle_name"] is None
+    assert body["last_name"] == "Cruz"
+    assert body["full_name"] == "Maria Cruz Jr."

@@ -379,7 +379,8 @@
       "next_number": "susunod na numero",
       "id_number_source": "numero mula sa",
       "question_ids": "mga tanong",
-      "method": "paraan"
+      "method": "paraan",
+      "password_emailed": "naipadala ang password sa email"
     },
     "modules": {
       "records": "Mga Talaan ng Residente",
@@ -1776,8 +1777,18 @@
           "passwordRequired": "Kailangan ang password",
           "passwordMin": "Dapat hindi bababa sa 12 character ang password",
           "confirmRequired": "Pakikumpirma ang iyong password",
-          "mismatch": "Hindi magkatugma ang mga password"
-        }
+          "mismatch": "Hindi magkatugma ang mga password",
+          "firstName": "Ilagay ang pangalan",
+          "lastName": "Ilagay ang apelyido",
+          "emailReserved": "Hindi magagamit ang ganitong address (.local, .test, .invalid at kauri nito). Gumamit ng ibang address"
+        },
+        "addNotice": "Magsisimula ang account sa default na password, at kailangan itong palitan ng tao sa unang pag-sign in. Ipapadala ito sa email kung totoo ang address at naka-set up ang email; kung hindi, ipapakita ito nang isang beses pagkatapos mong i-save.",
+        "emailHint": "Anumang email address ay puwede, kahit hindi totoo. Ang totoong address ay makakatanggap ng default na password sa email.",
+        "createdTitle": "Nagawa na ang account",
+        "createdNotEmailed": "Walang naipadalang email. Ibigay kay {{name}} nang personal ang default na password sa ibaba. Kailangan nila itong palitan sa unang pag-sign in.",
+        "defaultPasswordLabel": "Default na password",
+        "createdOnce": "Ngayon lang ipinapakita ang password na ito. Kung kailanganin ulit, gamitin ang pag-reset ng password sa Edit User.",
+        "done": "Tapos na"
       },
       "delete": {
         "menu": "Burahin ang User",
@@ -1804,7 +1815,8 @@
         "deleted": "Matagumpay na nabura ang user",
         "updated": "Matagumpay na na-update ang user",
         "reactivated": "Muling na-activate ang account ng user",
-        "deactivated": "Na-deactivate ang account ng user"
+        "deactivated": "Na-deactivate ang account ng user",
+        "createdEmailed": "Nagawa ang user at ipinadala sa {{email}} ang default na password"
       }
     },
     "officials": {
