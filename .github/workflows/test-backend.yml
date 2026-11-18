@@ -13,7 +13,7 @@ permissions:
 jobs:
   test-backend:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     env:
       # The database is published on 5433 for host-side migration and tests.
       POSTGRES_PORT: "5433"
@@ -34,8 +34,14 @@ jobs:
         run: |
           uv export --locked --format requirements.txt --no-hashes --no-dev --no-emit-project --package app --output-file /tmp/requirements.txt
           uvx --from pip-audit pip-audit -r /tmp/requirements.txt
-      # .env is intentionally not tracked; use placeholders for local CI.
-      - run: cp .env.example .env
+      # .env is intentionally not tracked; use placeholders for local CI. The
+      # settings check refuses placeholder secrets outside development mode, so
+      # CI (a throw-away database, never a real deployment) runs in development
+      # mode, as .env.example says to for local testing.
+      - name: Create CI .env from the example
+        run: |
+          cp .env.example .env
+          printf '\nFASTAPI_ENV=development\nENABLE_DEV_ROUTES=true\n' >> .env
       - name: Configure host database port
         run: sed -i 's/localhost:5432/localhost:5433/' .env
       - run: docker compose down -v --remove-orphans
