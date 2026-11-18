@@ -10,6 +10,7 @@ import {
 import {
   documentConfig,
   documentConfigList,
+  residencyExcludedPurposes,
 } from "../src/components/Issuances/NewIssuance/documentConfig"
 import { getMissingFields } from "../src/components/Issuances/print-summary"
 import {
@@ -228,4 +229,14 @@ test.describe("document catalog metadata", () => {
     const witnesses = getWitnesses()
     expect(witnesses).toEqual([])
   })
+})
+
+test("Residency never offers the assistance purposes", () => {
+  const options = documentConfig.RESIDENCY.fields.find(
+    (field) => field.name === "purpose",
+  )?.options
+  expect(options?.length).toBeGreaterThan(0)
+  for (const purpose of residencyExcludedPurposes) {
+    expect(options).not.toContain(purpose)
+  }
 })

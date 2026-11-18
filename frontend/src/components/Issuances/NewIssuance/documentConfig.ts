@@ -40,6 +40,8 @@ export type DetailFieldConfig = {
   help?: string
   showWhen?: (values: Record<string, unknown>) => boolean
   maxSelected?: number
+  /** Shown but not editable; the value comes from the signed-in account. */
+  readOnly?: boolean
 }
 
 export type DocumentConfig = {
@@ -61,6 +63,16 @@ const purposeOptions = clearancePurposeOptions
 const sectorOptions = indigencySectorOptions
 const indigencyPurposes = Array.from(
   new Set([...indigencyPurposeOptions, ...purposeOptions]),
+)
+// These purposes belong to assistance documents. They are hidden from Residency
+// only; the lookup rows stay (Indigency and old issuances use them).
+export const residencyExcludedPurposes: readonly string[] = [
+  "Medical",
+  "Financial/Medical Assistance",
+  "Financial/Burial Assistance",
+]
+const residencyPurposes = purposeOptions.filter(
+  (purpose) => !residencyExcludedPurposes.includes(purpose),
 )
 const idOptions = Array.from(new Set(["CTC", ...idTypeOptions]))
 const issuePlace = "Los Baños, Laguna"
@@ -324,7 +336,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
         label: "Purpose",
         type: "combobox",
         required: true,
-        options: purposeOptions,
+        options: residencyPurposes,
         group: "main",
       },
       {
@@ -534,16 +546,12 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
         group: "main",
       },
       {
-        name: "witnessOfficialId",
+        name: "witnessName",
         label: "Witness",
-        type: "select",
-        required: true,
-        options: [
-          "Barangay Clerk",
-          "Administrative Assistant",
-          "SK Chairperson",
-        ],
+        type: "text",
+        readOnly: true,
         group: "main",
+        help: "The person who issues this document.",
       },
     ],
   },

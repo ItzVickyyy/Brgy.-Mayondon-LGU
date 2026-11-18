@@ -45,7 +45,7 @@ const validDetails = {
     educationalAttainment: "College",
     course: "N/A",
     isJobstartBeneficiary: false,
-    witnessOfficialId: "OFF-SAMPLE-01",
+    witnessName: "Sample Witness",
     parts: ["applicant_sheet", "oath", "certification"],
   },
   BARANGAY_ID: {
@@ -110,7 +110,7 @@ test("First-Time Jobseeker rejects an empty educational attainment", () => {
       educationalAttainment: "",
       course: "N/A",
       isJobstartBeneficiary: false,
-      witnessOfficialId: "OFF-SAMPLE-01",
+      witnessName: "Sample Witness",
       parts: ["applicant_sheet"],
     }).success,
   ).toBe(false)
@@ -162,7 +162,7 @@ test("First-Time Jobseeker is limited to one issued record per resident", async 
       educationalAttainment: "College",
       course: "N/A",
       isJobstartBeneficiary: false,
-      witnessOfficialId: "OFF-006",
+      witnessName: "Sample Witness",
       parts: ["applicant_sheet", "oath", "certification"] as (
         | "applicant_sheet"
         | "oath"

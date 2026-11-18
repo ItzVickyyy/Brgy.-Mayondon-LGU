@@ -1432,6 +1432,7 @@
       },
       "fieldHelp": {
         "stampBox": "Printed in the stamp box.",
+        "witnessIssuer": "The person who issues this document.",
         "requestedBy": "Only if someone other than the resident asked for it. Printed after \"Requested by:\".",
         "barangayIdNumber": "Type the number printed on the card. Leave it as shown to keep the resident's current number."
       },

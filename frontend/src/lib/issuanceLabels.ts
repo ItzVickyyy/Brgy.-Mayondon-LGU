@@ -85,6 +85,8 @@ export const fieldLabel = (label: string, t: TFunction) =>
 
 const fieldHelpKeys = {
   "Printed in the stamp box.": "issuances.new.fieldHelp.stampBox",
+  "The person who issues this document.":
+    "issuances.new.fieldHelp.witnessIssuer",
   'Only if someone other than the resident asked for it. Printed after "Requested by:".':
     "issuances.new.fieldHelp.requestedBy",
   "Type the number printed on the card. Leave it as shown to keep the resident's current number.":

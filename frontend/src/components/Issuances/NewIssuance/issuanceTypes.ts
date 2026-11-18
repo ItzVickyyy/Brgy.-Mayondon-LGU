@@ -124,11 +124,8 @@ export function missingFields(
   const needs = ["address", ...documentConfig[code].residentNeeds]
   return needs.filter((field) => {
     if (field === "address")
-      return (
-        !resident.houseNumber?.trim() ||
-        !resident.street?.trim() ||
-        !resident.purok
-      )
+      // The house number is optional; the street and the purok are required.
+      return !resident.street?.trim() || !resident.purok
     if (field === "birthDate") return !resident.birthdate
     if (field === "birthPlace") return !resident.birthplace
     if (field === "sex") return !resident.sex

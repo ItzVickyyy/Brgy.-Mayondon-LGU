@@ -9,7 +9,7 @@ from sqlmodel import Session, col, select
 
 from app.core.config import settings
 from app.core.dates import add_months
-from app.models_foundation import AuditLog
+from app.models_foundation import AuditLog, Street
 from tests.api.routes.test_issuances import (  # noqa: F401  (fixtures are reused)
     _doc,
     _ident,
@@ -368,6 +368,45 @@ def test_unauthenticated_cannot_read_a_document(client: TestClient) -> None:
     assert client.get(f"{ISS}/00000000-0000-0000-0000-000000000000").status_code == 401
 
 
+def test_residency_house_number_is_optional(
+    client: TestClient, staff_token_headers: Headers, street_id: int, db: Session
+) -> None:
+    """No house number: issuing works and the printed address skips it."""
+    res = _resident(
+        client,
+        staff_token_headers,
+        street_id,
+        house_number=None,
+        resident_since_birth=True,
+    )
+    draft = _draft(client, staff_token_headers, "RESIDENCY", res["id"])
+    issued = _issue(client, staff_token_headers, draft["id"])
+    assert issued["status"] == "issued"
+    street = db.get(Street, street_id)
+    assert street is not None
+    assert issued["snapshot"]["address_line"] == f"{street.name}, Purok 3"
+
+
+def test_street_and_purok_are_still_required_without_a_house_number(
+    client: TestClient, staff_token_headers: Headers
+) -> None:
+    res = _resident(
+        client,
+        staff_token_headers,
+        None,
+        house_number=None,
+        purok=None,
+        resident_since_birth=True,
+    )
+    draft = _draft(client, staff_token_headers, "RESIDENCY", res["id"])
+    code, body = _issue_status(client, staff_token_headers, draft["id"])
+    assert code == 422
+    assert body["detail"] == {
+        "code": "missing_resident_fields",
+        "fields": ["street_id", "purok"],
+    }
+
+
 # --- First-Time Jobseeker ------------------------------------------------------
 
 
@@ -422,6 +461,59 @@ def test_jobseeker_defaults_witness_and_expiry(
         issued["expires_on"]
         == add_months(date.fromisoformat(issued["issue_date"]), 12).isoformat()
     )
+
+
+def _name_the_user(client: TestClient, headers: Headers, **names: str) -> None:
+    r = client.patch(f"{API}/users/me", headers=headers, json=names)
+    assert r.status_code == 200, r.text
+
+
+def test_jobseeker_witness_is_the_signed_in_users_full_name(
+    client: TestClient, staff_token_headers: Headers, street_id: int
+) -> None:
+    _name_the_user(
+        client,
+        staff_token_headers,
+        first_name="Vic John",
+        middle_name="Oboza",
+        last_name="Salen",
+        extension_name="Jr.",
+    )
+    res = _jobseeker_resident(client, staff_token_headers, street_id)
+    # A name sent by the client is ignored: the server uses the account's name.
+    draft = _draft(
+        client,
+        staff_token_headers,
+        "FIRST_TIME_JOBSEEKER",
+        res["id"],
+        jobseeker={
+            "educational_attainment": "College",
+            "witness_name": "Somebody Else",
+        },
+    )
+    assert draft["jobseeker"]["witness_name"] == "Vic John Oboza Salen Jr."
+    issued = _issue(client, staff_token_headers, draft["id"])
+    assert issued["jobseeker"]["witness_name"] == "Vic John Oboza Salen Jr."
+    assert issued["jobseeker"]["witness_official_id"] is None
+
+
+def test_jobseeker_witness_is_refreshed_by_whoever_issues_it(
+    client: TestClient, staff_token_headers: Headers, street_id: int
+) -> None:
+    _name_the_user(client, staff_token_headers, first_name="Ana", last_name="Cruz")
+    res = _jobseeker_resident(client, staff_token_headers, street_id)
+    draft = _draft(
+        client,
+        staff_token_headers,
+        "FIRST_TIME_JOBSEEKER",
+        res["id"],
+        jobseeker={"educational_attainment": "College"},
+    )
+    assert draft["jobseeker"]["witness_name"] == "Ana Cruz"
+    # The same account is renamed before the document is issued.
+    _name_the_user(client, staff_token_headers, last_name="Reyes")
+    issued = _issue(client, staff_token_headers, draft["id"])
+    assert issued["jobseeker"]["witness_name"] == "Ana Reyes"
 
 
 def test_jobseeker_needs_birth_sex_civil_status_and_residing_since(

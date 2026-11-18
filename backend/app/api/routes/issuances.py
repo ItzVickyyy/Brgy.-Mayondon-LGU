@@ -293,6 +293,16 @@ def _resolve_tricycle(
     return created
 
 
+def _user_display_name(user: User) -> str:
+    """The signed-in user's full name for a printed witness line.
+
+    Built from the name parts when present, else ``full_name``, else the e-mail.
+    """
+    parts = [user.first_name, user.middle_name, user.last_name, user.extension_name]
+    built = " ".join(p.strip() for p in parts if p and p.strip())
+    return built or (user.full_name or "").strip() or user.email
+
+
 def _replace_one(
     session: Session,
     model: type[Any],
@@ -309,6 +319,7 @@ def _apply_sections(
     issuance: Issuance,
     code: str,
     data: IssuanceCreate | IssuanceUpdate,
+    user: User,
 ) -> None:
     rules = DOCUMENT_RULES[code]
     allowed = rules["sections"] + rules.get("optional_sections", ())
@@ -438,12 +449,12 @@ def _apply_sections(
             and session.get(Official, job.witness_official_id) is None
         ):
             raise HTTPException(status_code=422, detail="Unknown witness")
-        _replace_one(
-            session,
-            IssuanceFirstTimeJobseeker,
-            issuance.id,
-            None if job is None else job.model_dump(),
-        )
+        values = None if job is None else job.model_dump()
+        if values is not None:
+            # The witness is whoever prepares and issues the document, so the
+            # name is taken from the signed-in account, never from the request.
+            values["witness_name"] = _user_display_name(user)
+        _replace_one(session, IssuanceFirstTimeJobseeker, issuance.id, values)
 
 
 # --- Reading ------------------------------------------------------------------
@@ -677,7 +688,7 @@ def create_issuance(
     )
     session.add(issuance)
     session.flush()
-    _apply_sections(session, issuance, doc_type.code, body)
+    _apply_sections(session, issuance, doc_type.code, body, user)
     session.commit()
     session.refresh(issuance)
     return _public(session, issuance)
@@ -741,7 +752,7 @@ def update_draft(
     issuance.updated_at = datetime.now(UTC)
     session.add(issuance)
     session.flush()
-    _apply_sections(session, issuance, doc_type.code, body)
+    _apply_sections(session, issuance, doc_type.code, body, user)
     session.commit()
     session.refresh(issuance)
     return _public(session, issuance)
@@ -1233,6 +1244,13 @@ def issue(
     issuance.issued_at = now
     issuance.issued_by_user_id = user.id
     issuance.updated_at = now
+    if doc_type.code == "FIRST_TIME_JOBSEEKER":
+        # The witness is whoever issues the document, which may be a different
+        # user from the one who saved the draft.
+        job = session.get(IssuanceFirstTimeJobseeker, issuance.id)
+        if job is not None:
+            job.witness_name = _user_display_name(user)
+            session.add(job)
     if doc_type.validity_months:
         issuance.expires_on = add_months(issuance.issue_date, doc_type.validity_months)
     if card is not None:

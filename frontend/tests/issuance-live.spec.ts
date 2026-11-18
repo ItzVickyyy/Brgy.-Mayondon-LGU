@@ -205,7 +205,6 @@ function inputs(
           educationalAttainment: "College",
           course: "N/A",
           isJobstartBeneficiary: false,
-          witnessOfficialId: witnessId,
           parts: ["applicant_sheet", "oath", "certification"],
         },
       },
@@ -627,7 +626,8 @@ test("staff: a resident with missing details is told what to add", async () => {
   // Required fields depend on the document: Residency needs the address, not
   // the birthdate.
   expect(message).toContain("The resident record is missing:")
-  expect(message).toContain("house number")
+  // The house number is optional, so it is never listed as missing.
+  expect(message).not.toContain("house number")
   expect(message).toContain("street")
   expect(message).toContain("purok")
   expect(message).not.toContain("birthdate")

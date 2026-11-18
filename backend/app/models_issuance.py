@@ -44,7 +44,9 @@ DEFAULT_CLEARANCE_REMARKS = "NO DEROGATORY RECORD ON FILE"
 # Document types this patch can issue, with the parts each one needs.
 # Keys are ``document_types.code``. Resident fields are checked when issuing
 # (docs/09, "Values saved back to residents").
-ADDRESS_FIELDS = ("house_number", "street_id", "purok")
+# The house number is optional (many households have none); the street and the
+# purok are still required. The printed address skips an empty house number.
+ADDRESS_FIELDS = ("street_id", "purok")
 # ``sections`` are required to issue; ``optional_sections`` may be saved too.
 # ``resident_fields`` must be filled on the resident record to issue. The pseudo
 # field ``resident_since`` means "residing since" year or "since birth".
@@ -436,6 +438,10 @@ class IssuanceFirstTimeJobseeker(SQLModel, table=True):
     witness_official_id: uuid.UUID | None = Field(
         default=None, foreign_key="officials.id", ondelete="RESTRICT"
     )
+    # Full name of the user who issues the document, stored as text so the
+    # printed witness never changes when the account is renamed or removed.
+    # Older rows keep ``witness_official_id`` and have no name here.
+    witness_name: str | None = Field(default=None, max_length=255)
 
 
 class IssuanceBarangayId(SQLModel, table=True):
@@ -692,6 +698,8 @@ class JobseekerIn(SQLModel):
     ] = "N/A"
     is_jobstart_beneficiary: bool = False
     witness_official_id: uuid.UUID | None = None
+    # Ignored when sent: the server fills it from the signed-in user.
+    witness_name: str | None = Field(default=None, max_length=255)
 
 
 class BarangayIdIn(SQLModel):
@@ -855,6 +863,7 @@ class JobseekerPublic(SQLModel):
     course: str
     is_jobstart_beneficiary: bool
     witness_official_id: uuid.UUID | None
+    witness_name: str | None
 
 
 class BarangayIdPublic(SQLModel):

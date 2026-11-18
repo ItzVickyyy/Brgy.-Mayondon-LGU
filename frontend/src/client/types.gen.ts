@@ -1491,6 +1491,10 @@ export type JobseekerIn = {
      * Witness Official Id
      */
     witness_official_id?: string | null;
+    /**
+     * Witness Name
+     */
+    witness_name?: string | null;
 };
 
 /**
@@ -1513,6 +1517,10 @@ export type JobseekerPublic = {
      * Witness Official Id
      */
     witness_official_id: string | null;
+    /**
+     * Witness Name
+     */
+    witness_name: string | null;
 };
 
 /**

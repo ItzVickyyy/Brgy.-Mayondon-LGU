@@ -18,6 +18,7 @@ import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { documentName, fieldHelp, fieldLabel, fieldOptionLabel, validationMessage } from "@/lib/issuanceLabels"
 import { getLocaleOr } from "@/lib/locale"
 import { civilStatusLabel, sexLabel } from "@/lib/residentLabels"
+import { userFullName, userInitials } from "@/lib/userNames"
 import { cn } from "@/lib/utils"
 import { DateField } from "./DateField"
 import { DocumentTypePicker } from "./DocumentTypePicker"
@@ -71,7 +72,6 @@ const purokNumbers = [1, 2, 3, 4, 5, 6]
 const fieldLabelClass = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
 
 function normalizedOptionValue(fieldName: string, option: string) {
-  if (fieldName === "witnessOfficialId") return currentOfficials.find((official) => official.status === "Current" && official.name === option)?.id ?? option
   if (fieldName === "services" || fieldName === "connectionType" || fieldName === "classification" || fieldName === "assistanceType" || fieldName === "transactionType") return option.toLowerCase()
   if (fieldName === "isJobstartBeneficiary") return option === "Yes" ? "true" : "false"
   if (fieldName === "parts") return ({ "Applicant sheet": "applicant_sheet", Oath: "oath", Certification: "certification" } as Record<string, string>)[option] ?? option
@@ -172,6 +172,16 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   }, [allResidents, trimmedQuery, searchedQuery, selectedResident])
   const searching = Boolean(trimmedQuery) && !selectedResident && searchedQuery !== trimmedQuery && !searchFailed
 
+  // "Certified by (initials)" starts as the signed-in user's initials. It stays editable; a value the clerk
+  // typed, or the box of a saved draft, is never replaced.
+  const certifiedByTouched = useRef(false)
+  const signedInInitials = userInitials(signedInUser)
+  useEffect(() => {
+    if (!signedInInitials || certifiedByTouched.current) return
+    if (!payment || !stampDocuments.includes(documentType) || (payment.certifiedBy ?? "").trim()) return
+    form.setValue("payment", { ...payment, certifiedBy: signedInInitials } as never)
+  }, [form, signedInInitials, documentType, payment])
+
   useEffect(() => {
     if (!open || selectedResident || !trimmedQuery) { setSearchFailed(false); return }
     let cancelled = false
@@ -224,8 +234,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     form.setValue("identification", identityDocuments.includes(nextCode)
       ? { idTypeId: nextCode === "BARANGAY_CLEARANCE" ? 0 : 1, idNumber: "", placeOfIssue: "Los Baños, Laguna", dateOfIssue: localIsoDate() }
       : undefined)
+    certifiedByTouched.current = false
     form.setValue("payment", stampDocuments.includes(nextCode)
-      ? { officialReceiptNo: "", isFree: false, dateOfPayment: localIsoDate(), certifiedBy: "" }
+      ? { officialReceiptNo: "", isFree: false, dateOfPayment: localIsoDate(), certifiedBy: userInitials(signedInUser) }
       : identityDocuments.includes(nextCode) ? { officialReceiptNo: "", isFree: false } : undefined)
     const signatoryDefault = documentConfig[nextCode].signatoryDefault
     const signatory = signatoryDefault ? currentOfficials.find((official) => official.status === "Current" && official.position === signatoryDefault) : undefined
@@ -316,6 +327,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
   function setPayment(name: PaymentKey, value: string | boolean) {
     const current = form.getValues("payment") ?? { officialReceiptNo: "", isFree: false }
+    if (name === "certifiedBy") certifiedByTouched.current = true
     const next = { ...current, [name]: value }
     if (name === "isFree" && value === true) next.officialReceiptNo = "FOC"
     if (name === "isFree" && value === false && next.officialReceiptNo === "FOC") next.officialReceiptNo = ""
@@ -358,6 +370,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         : field.name === "for" ? ((details as unknown as Record<string, unknown>).forSelf === false ? "Someone else" : "Myself")
         : field.name === "relationship" ? (details as unknown as Record<string, unknown>).beneficiaryRelationship
         : field.name === "sectorIdNumber" ? form.watch("sectors")?.[0]?.idNumber ?? ""
+        : field.name === "witnessName" ? witnessDisplayName(details as unknown as Record<string, unknown>)
         : (details as unknown as Record<string, unknown>)[field.name]
     // idTypeId is stored as a number (lookup id) but the <select> options are ID names, so translate it back for display.
     const idTypeLabel = field.group === "identity" && field.name === "idType" ? (field.options ?? [])[Number(fieldValue ?? 0) - 1] ?? "" : undefined
@@ -388,7 +401,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       } else if (field.name === "validUntil") { setValidUntilEdited(true); setDetail(field.name, nextValue) }
       else setDetail(field.name, nextValue)
     }
-    const fieldOptions = field.name === "associationName" ? knownAssociations : field.name === "witnessOfficialId" ? currentOfficials.filter((official) => official.status === "Current").map((official) => official.name) : field.options ?? []
+    const fieldOptions = field.name === "associationName" ? knownAssociations : field.options ?? []
     const autoIdNumber = seriesOn && field.name === "idNumber"
     const missingNow = attempted && Boolean(field.required) && !fieldHasValue(field)
     const invalid = Boolean(fieldError) || missingNow
@@ -423,7 +436,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     } else if (field.type === "date") {
       control = <DateField id={fieldId} value={String(value)} min={field.group === "identity" || field.group === "payment" ? "1900-01-01" : undefined} max={field.group === "identity" || field.group === "payment" ? localIsoDate() : undefined} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} message={message} messageId={`${fieldId}-error`} />
     } else {
-      control = <input id={fieldId} type={field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive")} aria-invalid={invalid} aria-describedby={describedBy} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} readOnly={autoIdNumber && !canTypeIdNumber} placeholder={autoIdNumber ? (canTypeIdNumber ? t("issuances.new.series.adminPlaceholder", { number: seriesQuery.data?.preview ?? "" }) : t("issuances.new.series.placeholder")) : undefined} />
+      control = <input id={fieldId} type={field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive")} aria-invalid={invalid} aria-describedby={describedBy} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} readOnly={field.readOnly || (autoIdNumber && !canTypeIdNumber)} placeholder={autoIdNumber ? (canTypeIdNumber ? t("issuances.new.series.adminPlaceholder", { number: seriesQuery.data?.preview ?? "" }) : t("issuances.new.series.placeholder")) : undefined} />
     }
     return <div key={field.name} className={fieldLabelClass}>
       {field.type === "multiselect" ? <span id={`${fieldId}-label`}>{labelText}</span> : <label htmlFor={fieldId}>{labelText}</label>}
@@ -518,6 +531,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
             ? { ...record.payload.details, parts: ["applicant_sheet", "oath", "certification"] }
             : record.payload.details,
       }
+      certifiedByTouched.current = true
       form.reset(restored as never)
       setSelectedResident(resident)
       setAddressParts({ houseNumber: resident.houseNumber ?? "", street: resident.street ?? "", purok: resident.purok ?? 1 })
@@ -720,6 +734,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   }
 
   function resetDialog() {
+    certifiedByTouched.current = false
     form.reset()
     setSelectedResident(null)
     setEditingResident(false)
@@ -766,7 +781,6 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     birthdate: !quickAdd.birthdate,
     birthplace: birthplaceRequired && !(quickAdd.birthplace ?? "").trim(),
     sex: sexRequired && !quickAdd.sex,
-    houseNumber: !(quickAdd.houseNumber ?? "").trim(),
     street: !quickAdd.street.trim(),
   }
 
@@ -833,7 +847,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const quickText = (key: keyof typeof quickMissing) => quickAttempted && quickMissing[key] ? t("issuances.new.resident.errors.fillThis") : ""
   const quickInvalid = (key: keyof typeof quickMissing) => quickAttempted && quickMissing[key]
 
-  const needsAddress = Boolean(selectedResident) && (!selectedResident?.houseNumber?.trim() || !selectedResident?.street?.trim() || !selectedResident?.purok)
+  const needsAddress = Boolean(selectedResident) && (!selectedResident?.street?.trim() || !selectedResident?.purok)
   // The photo has its own step (see "Photo" below), so it is never listed in the yellow "details are missing" box.
   const needsPhoto = config.residentNeeds.includes("photo")
   const neededFromRecord: string[] = selectedResident
@@ -919,7 +933,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     else if (field.name === "sectorIdNumber") value = form.getValues("sectors")?.[0]?.idNumber
     else if (field.name === "for") value = detailValues.forSelf === false ? t("issuances.new.options.Someone else") : t("issuances.new.options.Myself")
     else if (field.name === "relationship") value = detailValues.beneficiaryRelationship
-    else if (field.name === "witnessOfficialId") value = currentOfficials.find((official) => official.id === detailValues.witnessOfficialId)?.name
+    else if (field.name === "witnessName") value = witnessDisplayName(detailValues)
     else value = detailValues[field.name]
     const previewOptionLabel = (item: unknown) => {
       const raw = String(item)
@@ -937,6 +951,16 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     if (!field.showWhen) return true
     const values = details as unknown as Record<string, unknown>
     return field.showWhen({ ...values, for: values.forSelf === false ? "Someone else" : "Myself" })
+  }
+
+  // The witness is whoever issues the document. A saved name wins (it is what was or will be printed);
+  // an older issuance may only have an official; otherwise it is the signed-in user.
+  function witnessDisplayName(detailValues: Record<string, unknown>): string {
+    const saved = String(detailValues.witnessName ?? "").trim()
+    if (saved) return saved
+    const legacyId = String(detailValues.legacyWitnessOfficialId ?? "")
+    if (legacyId) return currentOfficials.find((official) => official.id === legacyId)?.name ?? ""
+    return userFullName(signedInUser)
   }
 
   function fieldHasValue(field: DetailFieldConfig): boolean {
@@ -978,7 +1002,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const previewRows = Array.from(new Map(previewRowsRaw.map((row) => [row.label, row])).values()).map((row) => ({ ...row, label: previewLabel(row.label) }))
 
   const residentMissingLabels: { name: string; label: string }[] = (selectedResident ? getMissingResidentFields(selectedResident, documentType).filter((need) => {
-      if (need === "address") return !residentUpdates.address && (!selectedResident.houseNumber?.trim() || !selectedResident.street?.trim() || !selectedResident.purok)
+      if (need === "address") return !residentUpdates.address && (!selectedResident.street?.trim() || !selectedResident.purok)
       if (need === "birthDate") return !residentUpdates.birthdate && !selectedResident.birthdate
       if (need === "birthPlace") return !residentUpdates.birthplace && !selectedResident.birthplace
       if (need === "civilStatus") return !residentUpdates.civilStatus && !selectedResident.civilStatus
@@ -1116,7 +1140,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                     <div className={fieldLabelClass}><label htmlFor="quickadd-civil">{t("issuances.new.resident.fields.civilStatus")}</label><SelectField id="quickadd-civil" value={quickAdd.civilStatus} onChange={(next) => setQuickAdd((previous) => ({ ...previous, civilStatus: next }))} options={civilStatusOptions} /></div>
                   </div>
                   <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)_minmax(0,1fr)]">
-                    <label className={fieldLabelClass}><span>{t("issuances.new.resident.fields.houseNumber")} <span className="text-destructive">*</span></span><input id="quickadd-houseNumber" value={quickAdd.houseNumber ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, houseNumber: event.target.value }))} className={cn(formControlClass, quickInvalid("houseNumber") && "border-destructive")} aria-invalid={quickInvalid("houseNumber") || undefined} autoComplete="off" />{quickError("houseNumber")}</label>
+                    <label className={fieldLabelClass}><span>{t("issuances.new.resident.fields.houseNumber")}</span><input id="quickadd-houseNumber" value={quickAdd.houseNumber ?? ""} onChange={(event) => setQuickAdd((previous) => ({ ...previous, houseNumber: event.target.value }))} className={formControlClass} autoComplete="off" /></label>
                     <div className={fieldLabelClass}><label htmlFor="quickadd-street">{t("issuances.new.resident.fields.street")} <span className="text-destructive">*</span></label><ComboField id="quickadd-street" value={quickAdd.street} options={knownStreets} invalid={quickInvalid("street")} describedBy={quickInvalid("street") ? "quickadd-street-error" : undefined} onChange={(next) => setQuickAdd((previous) => ({ ...previous, street: next }))} />{quickError("street")}</div>
                     <div className={fieldLabelClass}><label htmlFor="quickadd-purok">{t("issuances.new.resident.fields.purok")}</label><SelectField id="quickadd-purok" value={String(quickAdd.purok)} onChange={(next) => setQuickAdd((previous) => ({ ...previous, purok: Number(next) }))} options={purokChoices} /></div>
                   </div>

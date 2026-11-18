@@ -1432,6 +1432,7 @@
       },
       "fieldHelp": {
         "stampBox": "Ipi-print sa kahon ng selyo.",
+        "witnessIssuer": "Ang taong nag-iisyu ng dokumentong ito.",
         "requestedBy": "Kung may ibang humiling maliban sa residente lamang. Ipi-print pagkatapos ng \"Requested by:\".",
         "barangayIdNumber": "I-type ang numerong nakaimprenta sa card. Iwanan ito kung ano ang nakikita para manatili ang kasalukuyang numero ng residente."
       },

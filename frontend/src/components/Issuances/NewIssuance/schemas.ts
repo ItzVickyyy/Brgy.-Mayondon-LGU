@@ -73,7 +73,10 @@ const detailsSchemas = {
     educationalAttainment: nonEmpty,
     course: nonEmpty,
     isJobstartBeneficiary: z.boolean(),
-    witnessOfficialId: nonEmpty,
+    // Filled by the server from the signed-in user; kept only for display.
+    witnessName: z.string().optional(),
+    // Older issuances stored an official instead of a name; shown when no name was saved.
+    legacyWitnessOfficialId: z.string().optional(),
     parts: z.array(z.enum(["applicant_sheet", "oath", "certification"])).min(1),
   }),
   BARANGAY_ID: z.object({
