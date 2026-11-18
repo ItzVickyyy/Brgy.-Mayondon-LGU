@@ -229,7 +229,7 @@ def account_activity(
 
     issued_stmt = (
         select(col(Issuance.issued_by_user_id), sa_func.count())
-        .where(Issuance.status.in_(["issued", "voided"]))  # type: ignore[attr-defined]
+        .where(col(Issuance.status).in_(["issued", "voided"]))
         .where(col(Issuance.archived_at).is_(None))
         .where(col(Issuance.issued_at) < end)
         .group_by(col(Issuance.issued_by_user_id))

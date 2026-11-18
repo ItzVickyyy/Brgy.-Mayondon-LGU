@@ -666,7 +666,7 @@ def create_issuance(
     if remarks is None and doc_type.code == "BARANGAY_CLEARANCE":
         remarks = DEFAULT_CLEARANCE_REMARKS
     issuance = Issuance(
-        document_type_id=doc_type.id,  # type: ignore[arg-type]
+        document_type_id=body.document_type_id,
         resident_id=body.resident_id,
         issue_date=body.issue_date or today_manila(),
         purpose_id=body.purpose_id,
@@ -1357,11 +1357,13 @@ def correct(
     ):
         row = session.get(model, original.id)
         if row is not None:
-            session.add(model(**{**row.model_dump(), "issuance_id": draft.id}))
+            row_values: dict[str, Any] = {**row.model_dump(), "issuance_id": draft.id}
+            session.add(model(**row_values))
     for sector in session.exec(
         select(IssuanceSector).where(IssuanceSector.issuance_id == original.id)
     ).all():
-        session.add(IssuanceSector(**{**sector.model_dump(), "issuance_id": draft.id}))
+        sector_values: dict[str, Any] = {**sector.model_dump(), "issuance_id": draft.id}
+        session.add(IssuanceSector(**sector_values))
     record_audit_event(
         session,
         action="issuance.correct",

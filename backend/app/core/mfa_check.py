@@ -8,9 +8,10 @@ commit when their whole action succeeds.
 """
 
 from datetime import UTC, datetime, timedelta
-from typing import Literal
+from typing import Any, Literal, cast
 
 from sqlalchemy import or_, update
+from sqlalchemy.engine import CursorResult
 from sqlmodel import Session, col, select
 
 from app.core import mfa
@@ -42,15 +43,21 @@ def _try_authenticator(session: Session, user: User, code: str) -> bool:
         return False
     # Replay protection: the step must be newer than the last accepted one.
     # Done in the database so two requests at once cannot both win.
-    result = session.execute(
-        update(User)
-        .where(
-            col(User.id) == user.id,
-            or_(col(User.mfa_last_step).is_(None), col(User.mfa_last_step) < step),
-        )
-        .values(mfa_last_step=step)
+    result = cast(
+        "CursorResult[Any]",
+        session.execute(
+            update(User)
+            .where(
+                col(User.id) == user.id,
+                or_(
+                    col(User.mfa_last_step).is_(None),
+                    col(User.mfa_last_step) < step,
+                ),
+            )
+            .values(mfa_last_step=step)
+        ),
     )
-    if result.rowcount != 1:  # type: ignore[attr-defined]
+    if result.rowcount != 1:
         return False
     session.refresh(user)
     return True
@@ -69,15 +76,18 @@ def _try_recovery(session: Session, user: User, code: str) -> bool:
             matched = row
     if matched is None:
         return False
-    result = session.execute(
-        update(MfaRecoveryCode)
-        .where(
-            col(MfaRecoveryCode.id) == matched.id,
-            col(MfaRecoveryCode.used_at).is_(None),
-        )
-        .values(used_at=datetime.now(UTC))
+    result = cast(
+        "CursorResult[Any]",
+        session.execute(
+            update(MfaRecoveryCode)
+            .where(
+                col(MfaRecoveryCode.id) == matched.id,
+                col(MfaRecoveryCode.used_at).is_(None),
+            )
+            .values(used_at=datetime.now(UTC))
+        ),
     )
-    return bool(result.rowcount == 1)  # type: ignore[attr-defined]
+    return bool(result.rowcount == 1)
 
 
 def check_code(session: Session, user: User, code: str) -> CodeKind | None:
