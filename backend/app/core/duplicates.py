@@ -53,7 +53,7 @@ def lock_person(
 ) -> None:
     """Serialise two requests about the same person until the first commits."""
     key = f"resident:{name_key(first_name)}:{name_key(last_name)}:{birthdate or ''}"
-    session.execute(
+    session.connection().execute(
         text("SELECT pg_advisory_xact_lock(hashtext(:key))").bindparams(
             bindparam("key", key)
         )

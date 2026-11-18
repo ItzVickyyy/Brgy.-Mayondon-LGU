@@ -124,7 +124,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     args = parser.parse_args(argv)
     with Session(engine) as session:
-        session.execute(text("SET TRANSACTION READ ONLY"))
+        session.connection().execute(text("SET TRANSACTION READ ONLY"))
         report = build_report(session)
         groups = [
             [

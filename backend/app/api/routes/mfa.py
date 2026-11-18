@@ -61,9 +61,7 @@ def _check_password(user: User, password: str) -> None:
 
 def _new_recovery_codes(session: SessionDep, user: User) -> list[str]:
     """Replace every recovery code with ten new ones; return them (plain, once)."""
-    session.execute(
-        delete(MfaRecoveryCode).where(col(MfaRecoveryCode.user_id) == user.id)
-    )
+    session.exec(delete(MfaRecoveryCode).where(col(MfaRecoveryCode.user_id) == user.id))
     codes = [mfa.new_recovery_code() for _ in range(mfa.RECOVERY_CODE_COUNT)]
     for code in codes:
         session.add(
@@ -211,9 +209,7 @@ def new_my_recovery_codes(
 
 
 def _clear_mfa(session: SessionDep, user: User) -> None:
-    session.execute(
-        delete(MfaRecoveryCode).where(col(MfaRecoveryCode.user_id) == user.id)
-    )
+    session.exec(delete(MfaRecoveryCode).where(col(MfaRecoveryCode.user_id) == user.id))
     user.mfa_enabled = False
     user.mfa_secret_encrypted = None
     user.mfa_last_step = None

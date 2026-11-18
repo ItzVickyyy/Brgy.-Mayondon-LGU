@@ -91,7 +91,7 @@ def _name_taken(
     lock keeps two administrators from adding the same name at the same moment;
     it is released when the request commits.
     """
-    session.execute(
+    session.connection().execute(
         text("SELECT pg_advisory_xact_lock(hashtext(:key))").bindparams(
             key=f"lookup:{model.__tablename__}"
         )

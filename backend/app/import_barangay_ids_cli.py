@@ -224,9 +224,11 @@ def run(
         issued_at = datetime.combine(
             card["issued"], time(12, 0), tzinfo=MANILA
         ).astimezone(UTC)
-        sequence_value = session.execute(
-            text("SELECT nextval('issuance_reference_seq')")
-        ).scalar_one()
+        sequence_value = (
+            session.connection()
+            .execute(text("SELECT nextval('issuance_reference_seq')"))
+            .scalar_one()
+        )
         issuance = Issuance(
             reference_no=f"ISS-{card['issued'].year}-{sequence_value:06d}",
             document_type_id=doc.id,

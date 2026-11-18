@@ -42,7 +42,7 @@ def prune_reads(session: Session, keep_days: int, *, delete_rows: bool) -> int:
     ).one()
     if not delete_rows or count == 0:
         return count
-    session.execute(delete(AuditLog).where(*old_reads))
+    session.exec(delete(AuditLog).where(*old_reads))
     record_audit_event(
         session,
         action="audit.prune",

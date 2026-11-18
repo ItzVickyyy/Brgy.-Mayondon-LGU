@@ -98,9 +98,7 @@ def _audit(session: Session, user: User, action: str) -> None:
 
 
 def reset_mfa(session: Session, user: User) -> None:
-    session.execute(
-        delete(MfaRecoveryCode).where(col(MfaRecoveryCode.user_id) == user.id)
-    )
+    session.exec(delete(MfaRecoveryCode).where(col(MfaRecoveryCode.user_id) == user.id))
     user.mfa_enabled = False
     user.mfa_secret_encrypted = None
     user.mfa_last_step = None
@@ -113,9 +111,7 @@ def reset_mfa(session: Session, user: User) -> None:
 
 
 def reset_questions(session: Session, user: User) -> None:
-    session.execute(
-        delete(SecurityAnswer).where(col(SecurityAnswer.user_id) == user.id)
-    )
+    session.exec(delete(SecurityAnswer).where(col(SecurityAnswer.user_id) == user.id))
     _audit(session, user, "auth.recovery_reset_by_admin")
     session.commit()
 

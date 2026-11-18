@@ -45,7 +45,7 @@ def _increment_bucket(
             ),
         },
     ).returning(attempts)
-    return int(session.execute(statement).scalar_one())
+    return int(session.exec(statement).scalar_one())
 
 
 def is_password_recovery_rate_limited(
@@ -74,7 +74,7 @@ def is_password_recovery_rate_limited(
     cleanup_cutoff = now - timedelta(
         minutes=settings.PASSWORD_RECOVERY_WINDOW_MINUTES * 2
     )
-    session.execute(
+    session.exec(
         delete(PasswordRecoveryRateLimit).where(
             col(PasswordRecoveryRateLimit.window_started_at) <= cleanup_cutoff
         )

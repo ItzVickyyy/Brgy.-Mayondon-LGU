@@ -1222,9 +1222,11 @@ def issue(
     purpose_added = _resolve_purpose(
         session, issuance, body.purpose_name if body else None
     )
-    sequence_value = session.execute(
-        text("SELECT nextval('issuance_reference_seq')")
-    ).scalar_one()
+    sequence_value = (
+        session.connection()
+        .execute(text("SELECT nextval('issuance_reference_seq')"))
+        .scalar_one()
+    )
     now = datetime.now(UTC)
     issuance.reference_no = f"ISS-{today_manila().year}-{sequence_value:06d}"
     issuance.status = "issued"

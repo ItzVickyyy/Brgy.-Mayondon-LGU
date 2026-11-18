@@ -106,7 +106,7 @@ def set_my_security_questions(
     if not verified:
         raise HTTPException(status_code=400, detail="Incorrect password")
     _validate_answers(body.answers)
-    session.execute(
+    session.exec(
         delete(SecurityAnswer).where(col(SecurityAnswer.user_id) == current_user.id)
     )
     now = datetime.now(UTC)
@@ -165,9 +165,7 @@ def clear_user_security_questions(
             status_code=400,
             detail="Change your own questions in My Account instead.",
         )
-    session.execute(
-        delete(SecurityAnswer).where(col(SecurityAnswer.user_id) == target.id)
-    )
+    session.exec(delete(SecurityAnswer).where(col(SecurityAnswer.user_id) == target.id))
     record_admin_action(
         actor_id=current_user.id,
         action="auth.recovery_reset_by_admin",
