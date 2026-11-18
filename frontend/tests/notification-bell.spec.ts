@@ -138,3 +138,33 @@ test("the administrator sees account notices for other people", async ({
       .first(),
   ).toBeVisible()
 })
+
+test("the list is grouped by day and can be limited to unread notices", async ({
+  page,
+}) => {
+  const email = randomEmail()
+  const password = randomPassword()
+  const created = await createUser({ email, password })
+  await logInUser(page, email, password)
+  await renameAsAdmin(created.id, "Group One")
+  await renameAsAdmin(created.id, "Group Two")
+
+  await page.getByTestId("notification-bell").click()
+  const items = page.getByTestId("notification-item")
+  await expect(items).toHaveCount(2)
+  // New notices fall under "Today".
+  await expect(page.getByRole("heading", { name: "Today" })).toBeVisible()
+
+  // Read one, then show only the unread ones.
+  await items.first().getByRole("button", { name: "Mark as read" }).click()
+  await expect.poll(() => unreadCount(page)).toBe(1)
+  await page.getByTestId("notification-filter-unread").click()
+  await expect(items).toHaveCount(1)
+  await expect(items.first()).toHaveAttribute("data-read", "false")
+
+  // Read the last one: the Unread view says so, All still lists both.
+  await items.first().getByRole("button", { name: "Mark as read" }).click()
+  await expect(page.getByTestId("notification-none-unread")).toBeVisible()
+  await page.getByTestId("notification-filter-all").click()
+  await expect(items).toHaveCount(2)
+})

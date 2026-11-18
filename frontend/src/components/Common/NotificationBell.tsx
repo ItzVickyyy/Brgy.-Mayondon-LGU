@@ -5,7 +5,18 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { useNavigate } from "@tanstack/react-router"
-import { Bell, BellOff, Check, CheckCheck } from "lucide-react"
+import {
+  Bell,
+  BellOff,
+  Check,
+  CheckCheck,
+  DatabaseBackup,
+  FileUp,
+  type LucideIcon,
+  ShieldCheck,
+  SlidersHorizontal,
+  UserRound,
+} from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -28,14 +39,45 @@ import {
   useSetupReminders,
 } from "./useSetupReminders"
 
-// Red = needs action now, orange = soon, green = optional.
-const SEVERITY_BOX: Record<ReminderSeverity, string> = {
-  urgent:
-    "border-red-300 bg-red-50 text-red-900 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200",
-  soon: "border-orange-300 bg-orange-50 text-orange-900 dark:border-orange-500/40 dark:bg-orange-500/10 dark:text-orange-200",
-  optional:
-    "border-green-300 bg-green-50 text-green-900 dark:border-green-500/40 dark:bg-green-500/10 dark:text-green-200",
+// Red = needs action now, orange = soon, green = optional. A reminder is a plain
+// card with a solid stripe on its left edge and a solid label (no tinted fill),
+// so the list stays calm and the colour only marks how soon it needs doing.
+const SEVERITY_STRIPE: Record<ReminderSeverity, string> = {
+  urgent: "border-l-red-600 dark:border-l-red-400",
+  soon: "border-l-orange-600 dark:border-l-orange-400",
+  optional: "border-l-green-700 dark:border-l-green-400",
 }
+const SEVERITY_LABEL: Record<ReminderSeverity, string> = {
+  urgent: "bg-red-700 text-white dark:bg-red-400 dark:text-red-950",
+  soon: "bg-orange-700 text-white dark:bg-orange-400 dark:text-orange-950",
+  optional: "bg-green-800 text-white dark:bg-green-400 dark:text-green-950",
+}
+
+// One icon per kind of notice, taken from the start of the audit action
+// ("user.update" -> account, "auth.mfa_enabled" -> security, and so on).
+function noticeIcon(action: string): LucideIcon {
+  const area = action.split(".")[0]
+  if (area === "user") return UserRound
+  if (area === "auth") return ShieldCheck
+  if (area === "backup") return DatabaseBackup
+  if (area === "import") return FileUp
+  return SlidersHorizontal
+}
+
+type DayGroup = "today" | "yesterday" | "earlier"
+
+// Groups by calendar day in this computer's time zone, newest first (the server
+// already sends them newest first, so the order inside a group is kept).
+function dayGroup(occurredAt: string, now: number): DayGroup {
+  const startOfToday = new Date(now)
+  startOfToday.setHours(0, 0, 0, 0)
+  const at = Date.parse(occurredAt)
+  if (at >= startOfToday.getTime()) return "today"
+  if (at >= startOfToday.getTime() - DAY) return "yesterday"
+  return "earlier"
+}
+
+const DAY_GROUPS: DayGroup[] = ["today", "yesterday", "earlier"]
 
 // The list comes from the server (the audit log, filtered by role) and the
 // read state is kept per person there, so it is the same on every computer.
@@ -120,9 +162,11 @@ function ReminderRow({
     <li
       data-testid={reminder.testId}
       data-severity={reminder.severity}
-      className={`border-b px-3 py-3 last:border-b-0 ${SEVERITY_BOX[reminder.severity]}`}
+      className={`mx-3 mb-2 rounded-md border border-l-4 bg-card px-3 py-3 text-card-foreground last:mb-3 ${SEVERITY_STRIPE[reminder.severity]}`}
     >
-      <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide">
+      <p
+        className={`mb-1.5 inline-block rounded-sm px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${SEVERITY_LABEL[reminder.severity]}`}
+      >
         {t(`notifications.priority.${reminder.severity}`)}
       </p>
       {reminder.title ? (
@@ -169,6 +213,8 @@ function NotificationRow({
 }) {
   const now = useNow()
   const { t } = useTranslation()
+  const Icon = noticeIcon(item.action)
+  const failed = item.outcome !== "success"
   return (
     <li
       data-testid="notification-item"
@@ -180,14 +226,16 @@ function NotificationRow({
     >
       <span
         aria-hidden="true"
-        className={`mt-1.5 size-2 shrink-0 rounded-full ${
-          item.read
-            ? "bg-transparent"
-            : item.outcome === "success"
-              ? "bg-brand"
-              : "bg-destructive"
+        className={`flex size-8 shrink-0 items-center justify-center rounded-full ${
+          failed
+            ? "bg-destructive text-white"
+            : item.read
+              ? "bg-muted text-muted-foreground"
+              : "bg-primary text-primary-foreground"
         }`}
-      />
+      >
+        <Icon className="size-4" />
+      </span>
       <div className="min-w-0 flex-1">
         <p
           className={`break-words text-sm leading-5 ${
@@ -208,7 +256,7 @@ function NotificationRow({
           type="button"
           variant="ghost"
           size="icon"
-          className="size-8 shrink-0 text-muted-foreground"
+          className="size-11 shrink-0 text-muted-foreground sm:size-8"
           aria-label={t("notifications.markRead")}
           title={t("notifications.markRead")}
           onClick={() => onRead(item.id)}
@@ -278,6 +326,14 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [questionsOpen, setQuestionsOpen] = useState(false)
   const [twoFactorOpen, setTwoFactorOpen] = useState(false)
+  const [filter, setFilter] = useState<"all" | "unread">("all")
+  const now = useNow()
+  const shown =
+    filter === "unread" ? notifications.filter((i) => !i.read) : notifications
+  const groups = DAY_GROUPS.map((group) => ({
+    group,
+    items: shown.filter((i) => dayGroup(i.occurred_at, now) === group),
+  })).filter((g) => g.items.length > 0)
 
   // Reminders first, then the newest unread notices (a few words of each).
   const teaserMessages = [
@@ -372,32 +428,64 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
           collisionPadding={8}
           className="max-h-[min(34rem,var(--radix-dropdown-menu-content-available-height))] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto p-0"
         >
-          <div className="flex items-center justify-between gap-2 px-3 py-2">
-            <DropdownMenuLabel className="p-0 text-sm font-semibold">
-              {t("notifications.title")}
-              {unreadCount > 0 ? (
-                <span className="ml-2 text-xs font-normal text-muted-foreground">
-                  {t("notifications.unreadCount", { count: unreadCount })}
+          <div className="sticky top-0 z-10 bg-popover">
+            <div className="flex items-center justify-between gap-2 border-t-2 border-t-brand px-3 py-2.5">
+              <DropdownMenuLabel className="p-0">
+                <span className="block text-sm font-semibold">
+                  {t("notifications.title")}
                 </span>
-              ) : null}
-            </DropdownMenuLabel>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-8"
-              disabled={unreadCount === 0}
-              aria-label={t("notifications.markAllRead")}
-              title={t("notifications.markAllRead")}
-              onClick={() => markAll.mutate()}
-            >
-              <CheckCheck className="size-4" aria-hidden="true" />
-            </Button>
+                <span className="block text-xs font-normal text-muted-foreground">
+                  {unreadCount > 0
+                    ? t("notifications.unreadCount", { count: unreadCount })
+                    : t("notifications.allCaughtUp")}
+                </span>
+              </DropdownMenuLabel>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="min-h-11 gap-1.5 px-2 text-xs sm:min-h-8"
+                disabled={unreadCount === 0}
+                aria-label={t("notifications.markAllRead")}
+                title={t("notifications.markAllRead")}
+                onClick={() => markAll.mutate()}
+              >
+                <CheckCheck className="size-4" aria-hidden="true" />
+                {t("notifications.markAllReadShort")}
+              </Button>
+            </div>
+            {notifications.length > 0 ? (
+              <fieldset
+                aria-label={t("notifications.filter.label")}
+                className="m-0 flex min-w-0 gap-1 border-0 border-b p-0 px-3 pb-2"
+              >
+                {(["all", "unread"] as const).map((value) => (
+                  <button
+                    key={value}
+                    type="button"
+                    data-testid={`notification-filter-${value}`}
+                    aria-pressed={filter === value}
+                    onClick={() => setFilter(value)}
+                    className={`min-h-11 rounded-md px-3 text-xs font-medium sm:min-h-8 ${
+                      filter === value
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    }`}
+                  >
+                    {t(`notifications.filter.${value}`)}
+                  </button>
+                ))}
+              </fieldset>
+            ) : (
+              <DropdownMenuSeparator className="m-0" />
+            )}
           </div>
-          <DropdownMenuSeparator className="m-0" />
           {reminders.length > 0 ? (
-            <section aria-label={t("notifications.needsAttention")}>
-              <h3 className="px-3 pb-1 pt-2 text-xs font-semibold text-muted-foreground">
+            <section
+              aria-label={t("notifications.needsAttention")}
+              className="border-b"
+            >
+              <h3 className="px-3 pb-2 pt-3 text-xs font-semibold text-muted-foreground">
                 {t("notifications.needsAttention")}
               </h3>
               <ul>
@@ -422,16 +510,33 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
                 {t("notifications.emptyHintShared")}
               </p>
             </div>
+          ) : shown.length === 0 ? (
+            <p
+              data-testid="notification-none-unread"
+              className="px-4 py-8 text-center text-sm text-muted-foreground"
+            >
+              {t("notifications.noUnread")}
+            </p>
           ) : (
-            <ul>
-              {notifications.map((item) => (
-                <NotificationRow
-                  key={item.id}
-                  item={item}
-                  onRead={(id) => markOne.mutate(id)}
-                />
-              ))}
-            </ul>
+            groups.map(({ group, items }) => (
+              <section
+                key={group}
+                aria-label={t(`notifications.group.${group}`)}
+              >
+                <h3 className="border-b bg-muted/40 px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+                  {t(`notifications.group.${group}`)}
+                </h3>
+                <ul>
+                  {items.map((item) => (
+                    <NotificationRow
+                      key={item.id}
+                      item={item}
+                      onRead={(id) => markOne.mutate(id)}
+                    />
+                  ))}
+                </ul>
+              </section>
+            ))
           )}
         </DropdownMenuContent>
       </DropdownMenu>

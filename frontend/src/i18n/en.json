@@ -32,6 +32,19 @@
     "bell": "Notifications",
     "bellUnread": "Notifications, {{count}} unread",
     "unreadCount": "{{count}} unread",
+    "allCaughtUp": "You're all caught up",
+    "markAllReadShort": "Mark all read",
+    "filter": {
+      "label": "Show",
+      "all": "All",
+      "unread": "Unread"
+    },
+    "group": {
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "earlier": "Earlier"
+    },
+    "noUnread": "Nothing unread. Everything has been read.",
     "unread": "Unread",
     "markRead": "Mark as read",
     "markAllRead": "Mark all as read",

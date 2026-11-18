@@ -32,6 +32,19 @@
     "bell": "Mga abiso",
     "bellUnread": "Mga abiso, {{count}} ang hindi pa nababasa",
     "unreadCount": "{{count}} ang hindi pa nababasa",
+    "allCaughtUp": "Nabasa mo na ang lahat",
+    "markAllReadShort": "Markahan lahat",
+    "filter": {
+      "label": "Ipakita",
+      "all": "Lahat",
+      "unread": "Hindi pa nabasa"
+    },
+    "group": {
+      "today": "Ngayon",
+      "yesterday": "Kahapon",
+      "earlier": "Mas maaga"
+    },
+    "noUnread": "Walang hindi pa nababasa. Nabasa na ang lahat.",
     "unread": "Hindi pa nababasa",
     "markRead": "Markahang nabasa na",
     "markAllRead": "Markahang nabasa na ang lahat",
