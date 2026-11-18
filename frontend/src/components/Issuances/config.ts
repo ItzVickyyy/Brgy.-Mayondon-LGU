@@ -1,3 +1,5 @@
+import type { PaperSize } from "@/lib/print/paperSizes"
+
 export type FieldType =
   | "text"
   | "date"
@@ -222,7 +224,7 @@ export type DocumentMeta = {
   shortName: string
   group: DocumentGroup
   language: "en" | "fil"
-  paper: { size: "letter" | "legal" | "a4"; orientation: "portrait" }
+  paper: { size: PaperSize; orientation: "portrait" }
   printMode: "values-only" | "full-page"
   validity: { months?: number; years?: number } | null
   signatory: "preprinted" | "select"
@@ -272,7 +274,7 @@ export const documentMeta: Record<string, DocumentMeta> = {
     shortName: "Barangay Clearance",
     group: "Clearances",
     language: "en",
-    paper: { size: "letter", orientation: "portrait" },
+    paper: { size: "short", orientation: "portrait" },
     printMode: "values-only",
     validity: { months: 2 },
     signatory: "preprinted",
@@ -284,7 +286,7 @@ export const documentMeta: Record<string, DocumentMeta> = {
     shortName: "Franchise Clearance",
     group: "Clearances",
     language: "en",
-    paper: { size: "letter", orientation: "portrait" },
+    paper: { size: "short", orientation: "portrait" },
     printMode: "values-only",
     validity: null,
     signatory: "preprinted",
@@ -296,7 +298,7 @@ export const documentMeta: Record<string, DocumentMeta> = {
     shortName: "Electrical & Water",
     group: "Clearances",
     language: "en",
-    paper: { size: "letter", orientation: "portrait" },
+    paper: { size: "short", orientation: "portrait" },
     printMode: "values-only",
     validity: null,
     signatory: "preprinted",
@@ -308,7 +310,7 @@ export const documentMeta: Record<string, DocumentMeta> = {
     shortName: "Residency",
     group: "Certifications",
     language: "en",
-    paper: { size: "letter", orientation: "portrait" },
+    paper: { size: "short", orientation: "portrait" },
     printMode: "full-page",
     validity: null,
     signatory: "select",
@@ -320,7 +322,7 @@ export const documentMeta: Record<string, DocumentMeta> = {
     shortName: "Certificate of Indigency",
     group: "Certifications",
     language: "en",
-    paper: { size: "letter", orientation: "portrait" },
+    paper: { size: "short", orientation: "portrait" },
     printMode: "values-only",
     validity: null,
     signatory: "preprinted",
@@ -332,7 +334,7 @@ export const documentMeta: Record<string, DocumentMeta> = {
     shortName: "Assistance Certification",
     group: "Certifications",
     language: "en",
-    paper: { size: "letter", orientation: "portrait" },
+    paper: { size: "short", orientation: "portrait" },
     printMode: "values-only",
     validity: null,
     signatory: "preprinted",
@@ -344,7 +346,7 @@ export const documentMeta: Record<string, DocumentMeta> = {
     shortName: "Marginalized Sector",
     group: "Certifications",
     language: "fil",
-    paper: { size: "letter", orientation: "portrait" },
+    paper: { size: "short", orientation: "portrait" },
     printMode: "full-page",
     validity: null,
     signatory: "select",
@@ -356,7 +358,7 @@ export const documentMeta: Record<string, DocumentMeta> = {
     shortName: "First-Time Jobseeker",
     group: "Certifications",
     language: "en",
-    paper: { size: "legal", orientation: "portrait" },
+    paper: { size: "long", orientation: "portrait" },
     printMode: "full-page",
     validity: { years: 1 },
     signatory: "select",

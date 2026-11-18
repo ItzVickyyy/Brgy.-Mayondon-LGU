@@ -6,7 +6,7 @@ import {
   SCALE_BAR_PT,
 } from "@/lib/print/calibration"
 import type { Offset } from "@/lib/print/overlayLayout"
-import { printOverlayCss } from "@/lib/print/overlayStyles"
+import { overlayCss } from "@/lib/print/overlayStyles"
 import { type PrintTemplateId, printTemplates } from "@/lib/print/templates"
 
 type Props = { templateId: PrintTemplateId; offset?: Offset; preview?: boolean }
@@ -19,11 +19,12 @@ export function CalibrationSheet({
 }: Props) {
   const { t } = useTranslation()
   const { widthPt, heightPt } = printTemplates[templateId].paper
+  const size = printTemplates[templateId].paperSize
   const pages = layoutCalibrationSheet(templateId, offset)
   const grid = "#9ca3af"
   return createPortal(
     <div className="print-overlay-root" data-preview={preview}>
-      <style>{printOverlayCss}</style>
+      <style>{overlayCss(size)}</style>
       {pages.map((page) => (
         <div
           className="print-overlay-page"

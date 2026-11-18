@@ -64,6 +64,8 @@ The Print button on an issued History row prints in one of two modes; the arrow 
 
 Both modes cover the six types that have a print template. Reprint is no longer in the three-dot menu. The typeset forms have not been compared with paper by the client; confirm the letterhead e-mail addresses, the motto spelling and the signatory names on them before relying on blank-paper printing.
 
+**Paper sizes (owner decision, Nov 18, 2026).** Short paper is Letter, 8.5 x 11 in: Barangay Clearance, Franchise Clearance, Electrical and Water, Residency, Indigency, Assistance Certification and Marginalized Sector. Long paper is 8.5 x 13 in: First-Time Jobseeker. Long here is the Philippine long bond, not US Legal (8.5 x 14 in); if the office stock is 8.5 x 14 in, change `paperDimensions.long` in `frontend/src/lib/print/paperSizes.ts` (the only place that decides it). The page size is set per document (`paper.size` in `documentMeta`) and per print template (`paperSize` in `templates.ts`); the print CSS `@page` rule, the on-screen page box, the form image and the calibration sheet all read it. Every print template that exists today is Short. Residency and First-Time Jobseeker still have no print template, so no Long page can print yet; when the Jobseeker layout is added, give it `paperSize: "long"`, and its form image must be 612 x 936 pt. The Long size has not been tried on the EPSON L3250: the printer must be set to the matching 8.5 x 13 in paper size (a user-defined size in the driver if the list lacks it), at 100% scale, with the paper tray set accordingly.
+
 ## 4. Form-by-form typed content
 
 ### 4.1 Barangay Clearance

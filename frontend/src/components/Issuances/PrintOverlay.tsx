@@ -7,7 +7,9 @@ import {
   layoutOverlay,
   type Offset,
 } from "@/lib/print/overlayLayout"
-import { printOverlayCss } from "@/lib/print/overlayStyles"
+import { overlayCss } from "@/lib/print/overlayStyles"
+import { paperDimensions } from "@/lib/print/paperSizes"
+import { printTemplates } from "@/lib/print/templates"
 
 let canvas: HTMLCanvasElement | undefined
 function measureText(text: string, sizePt: number): number {
@@ -52,9 +54,11 @@ export function PrintOverlay({
           },
       )
   }, [data, offset, backgrounds])
+  const size = printTemplates[data.templateId].paperSize
+  const { widthPt, heightPt } = paperDimensions[size]
   return createPortal(
     <div className="print-overlay-root" data-preview={preview}>
-      <style>{printOverlayCss}</style>
+      <style>{overlayCss(size)}</style>
       {pages.map((page) => (
         <div
           className="print-overlay-page"
@@ -66,7 +70,12 @@ export function PrintOverlay({
               className="print-overlay-bg"
               src={backgrounds[page.page]}
               alt=""
-              style={{ left: 0, top: 0, width: "612pt", height: "792pt" }}
+              style={{
+                left: 0,
+                top: 0,
+                width: `${widthPt}pt`,
+                height: `${heightPt}pt`,
+              }}
             />
           )}
           {page.photo && (

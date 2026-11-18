@@ -200,7 +200,7 @@ test.describe("document catalog metadata", () => {
       { years: 1 },
     )
     expect(documentMeta["First-Time Jobseeker Certification"].paper.size).toBe(
-      "legal",
+      "long",
     )
     expect(
       documentMeta["Marginalized Sector Certification (Pagpapatunay)"].language,

@@ -1,7 +1,9 @@
+import { type PaperSize, paperDimensions } from "./paperSizes"
+
 /**
  * Print overlay templates (one per pre-printed form). Data only, no rendering.
  *
- * Units are PostScript points (1/72 in) from the TOP-LEFT of a US Letter page (612 x 792),
+ * Units are PostScript points (1/72 in) from the TOP-LEFT of the page (Short = Letter, 612 x 792; see paperSizes.ts),
  * measured on the page images in public/assets/print-forms (made from docs/Barangay-softcopies/*.docx by scripts/build-print-forms.py; page 1 unless
  * `page` says otherwise). They are a first estimate: Word and LibreOffice lay out slightly
  * differently, so every template must be calibrated on real paper (docs/04 section 7).
@@ -35,7 +37,8 @@ export type PrintPhotoBox = {
 export type PrintTemplate = {
   id: PrintTemplateId
   documentCode: string
-  paper: { widthPt: 612; heightPt: 792 }
+  paperSize: PaperSize
+  paper: { widthPt: number; heightPt: number }
   fields: PrintFieldBox[]
   marks?: PrintMarkBox[]
   photo?: PrintPhotoBox
@@ -48,7 +51,11 @@ export type PrintTemplateId =
   | "marginalized"
   | "assistance"
 
-const paper = { widthPt: 612, heightPt: 792 } as const
+// Every template with a print layout today is a Short (Letter) document. A Long template adds `paperSize: "long"`.
+const paper = {
+  widthPt: paperDimensions.short.widthPt,
+  heightPt: paperDimensions.short.heightPt,
+}
 const date = (y: number): PrintFieldBox => ({
   key: "date",
   x: 491,
@@ -61,6 +68,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
   clearance: {
     id: "clearance",
     documentCode: "BARANGAY_CLEARANCE",
+    paperSize: "short",
     paper,
     fields: [
       date(199),
@@ -84,6 +92,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
   franchise: {
     id: "franchise",
     documentCode: "FRANCHISE_CLEARANCE",
+    paperSize: "short",
     paper,
     fields: [
       date(210),
@@ -104,6 +113,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
   utility: {
     id: "utility",
     documentCode: "UTILITY_CLEARANCE",
+    paperSize: "short",
     paper,
     fields: [
       date(233),
@@ -128,6 +138,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
   indigency: {
     id: "indigency",
     documentCode: "INDIGENCY",
+    paperSize: "short",
     paper,
     fields: [
       date(220),
@@ -150,6 +161,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
   marginalized: {
     id: "marginalized",
     documentCode: "MARGINALIZED_SECTOR",
+    paperSize: "short",
     paper,
     fields: [
       { key: "name", x: 261, y: 231.2, w: 190 },
@@ -165,6 +177,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
   assistance: {
     id: "assistance",
     documentCode: "ASSISTANCE",
+    paperSize: "short",
     paper,
     fields: [
       { key: "name", x: 203, y: 201.6, w: 165, page: 1 },

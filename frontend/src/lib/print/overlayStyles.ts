@@ -1,9 +1,11 @@
-// Shared by PrintOverlay and CalibrationSheet. Typed values only (docs/04 section 3): no labels, borders, logos or signatures. Letter paper, no margins, 100% scale.
-export const printOverlayCss = `
-@page { size: letter; margin: 0 }
+import { type PaperSize, pageRule, paperDimensions } from "./paperSizes"
+
+// Shared by PrintOverlay and CalibrationSheet. Typed values only (docs/04 section 3): no labels, borders, logos or signatures. No margins, 100% scale; the page size comes from the document (Short or Long).
+export const overlayCss = (size: PaperSize): string => `
+${pageRule(size)}
 .print-overlay-root { display: none }
 .print-overlay-root[data-preview="true"] { display: block; position: fixed; inset: 0; z-index: 9999; overflow: auto; background: #888; padding: 16px }
-.print-overlay-page { position: relative; width: 612pt; height: 792pt; overflow: hidden; background: #fff; margin: 0 auto 16px;
+.print-overlay-page { position: relative; width: ${paperDimensions[size].widthPt}pt; height: ${paperDimensions[size].heightPt}pt; overflow: hidden; background: #fff; margin: 0 auto 16px;
   font-family: Arial, Helvetica, sans-serif; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact }
 .print-overlay-page > * { position: absolute; white-space: nowrap }
 @media print {
@@ -16,3 +18,6 @@ export const printOverlayCss = `
   .print-overlay-page:last-child { break-after: auto }
 }
 `
+
+/** The Short (Letter) stylesheet, for callers and tests that do not care about the size. */
+export const printOverlayCss = overlayCss("short")

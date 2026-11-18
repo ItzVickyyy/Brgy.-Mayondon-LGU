@@ -1,6 +1,12 @@
 import type { CSSProperties, ReactNode } from "react"
 import { createPortal } from "react-dom"
 import type { PrintData } from "@/lib/print/buildPrintData"
+import {
+  type PaperSize,
+  pageRule,
+  paperDimensions,
+} from "@/lib/print/paperSizes"
+import { printTemplates } from "@/lib/print/templates"
 
 /**
  * Full one-page forms for blank paper ("form and data" print mode).
@@ -8,11 +14,11 @@ import type { PrintData } from "@/lib/print/buildPrintData"
  * and the dry seal are never filled in: the thumbmark box and the "DRY SEAL" caption are only
  * markers for staff.
  */
-export const printFormCss = `
-@page { size: letter; margin: 0 }
+export const formCss = (size: PaperSize): string => `
+${pageRule(size)}
 .print-form-root { display: none }
 .print-form-root[data-preview="true"] { display: block; position: fixed; inset: 0; z-index: 9999; overflow: auto; background: #888; padding: 16px }
-.pf-page { position: relative; width: 612pt; height: 792pt; overflow: hidden; background: #fff; margin: 0 auto 16px; box-sizing: border-box;
+.pf-page { position: relative; width: ${paperDimensions[size].widthPt}pt; height: ${paperDimensions[size].heightPt}pt; overflow: hidden; background: #fff; margin: 0 auto 16px; box-sizing: border-box;
   padding: 36pt 48pt 30pt; font-family: "Times New Roman", Times, serif; font-size: 11pt; line-height: 1.25; color: #000;
   display: flex; flex-direction: column; -webkit-print-color-adjust: exact; print-color-adjust: exact }
 .pf-page > * { position: relative; z-index: 1 }
@@ -472,7 +478,7 @@ export function PrintForm({ data, preview = false }: Props) {
   const Form = forms[data.templateId]
   return createPortal(
     <div className="print-form-root" data-preview={preview}>
-      <style>{printFormCss}</style>
+      <style>{formCss(printTemplates[data.templateId].paperSize)}</style>
       <div className="pf-page">
         <img className="pf-mark" src={LOGO} alt="" />
         <Form data={data} />
