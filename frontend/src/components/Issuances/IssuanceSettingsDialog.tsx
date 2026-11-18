@@ -19,9 +19,25 @@ import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { cn } from "@/lib/utils"
 
-type SettingsTab = "printing" | "idType" | "sector" | "street" | "association" | "purpose" | "addressedOffice" | "educationalAttainment"
+type SettingsTab =
+  | "printing"
+  | "idType"
+  | "sector"
+  | "street"
+  | "association"
+  | "purpose"
+  | "addressedOffice"
+  | "educationalAttainment"
 
-const LIST_TABS: SettingsTab[] = ["idType", "sector", "street", "association", "purpose", "addressedOffice", "educationalAttainment"]
+const LIST_TABS: SettingsTab[] = [
+  "idType",
+  "sector",
+  "street",
+  "association",
+  "purpose",
+  "addressedOffice",
+  "educationalAttainment",
+]
 
 /**
  * Issuance settings: Printing setup for everyone, plus the editable option lists

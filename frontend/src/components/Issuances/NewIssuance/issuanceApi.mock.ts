@@ -31,7 +31,9 @@ let residents: ResidentRecord[] = []
 let issuances: MockIssuance[] = []
 let issuanceCounter = 0
 let streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
-let purposes = [...new Set([...clearancePurposeOptions, ...indigencyPurposeOptions])]
+let purposes = [
+  ...new Set([...clearancePurposeOptions, ...indigencyPurposeOptions]),
+]
 const purposeChoices = purposes.map((name, index) => ({ id: index + 1, name }))
 const addressedOfficeChoices = addressedOfficeOptions.map((name, index) => ({
   id: index + 1,

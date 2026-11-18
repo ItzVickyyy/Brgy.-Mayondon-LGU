@@ -159,7 +159,6 @@ test.describe("Issuance settings", () => {
   })
 })
 
-
 test("an administrator can add, rename and delete an issuance purpose, and the New Issuance form follows", async ({
   page,
   request,
@@ -212,7 +211,6 @@ test("an administrator can add, rename and delete an issuance purpose, and the N
     .click()
   await expect(settings.getByText(renamed, { exact: true })).toHaveCount(0)
 })
-
 
 test("an administrator can maintain addressed-office suggestions for Indigency", async ({
   page,
@@ -274,7 +272,6 @@ test("an administrator can maintain addressed-office suggestions for Indigency",
   await expect(reopened.getByText(renamed, { exact: true })).toHaveCount(0)
 })
 
-
 test("an administrator can maintain First-Time Jobseeker educational-attainment choices", async ({
   page,
   request,
@@ -316,7 +313,9 @@ test("an administrator can maintain First-Time Jobseeker educational-attainment 
     .filter({ hasText: /First-Time Jobseeker/ })
     .first()
     .click()
-  const attainment = form.getByRole("combobox", { name: /Educational attainment/i })
+  const attainment = form.getByRole("combobox", {
+    name: /Educational attainment/i,
+  })
   await attainment.click()
   await expect(page.getByRole("option", { name: renamed })).toBeVisible()
 

@@ -17,7 +17,14 @@ import { Button } from "@/components/ui/button"
 import { notify } from "@/lib/notifications"
 import { readApiError } from "@/lib/residents"
 
-type LookupKind = "street" | "association" | "idType" | "sector" | "purpose" | "addressedOffice" | "educationalAttainment"
+type LookupKind =
+  | "street"
+  | "association"
+  | "idType"
+  | "sector"
+  | "purpose"
+  | "addressedOffice"
+  | "educationalAttainment"
 type LookupAction = "create" | "rename" | "delete"
 
 /** The most characters a name may have: it matches the column in the database. */
@@ -44,11 +51,15 @@ async function changeLookup(
     if (kind === "sector")
       return (await LookupsService.createSector({ body: { name } })).data
     if (kind === "purpose")
-      return (await LookupsService.createIssuancePurpose({ body: { name } })).data
+      return (await LookupsService.createIssuancePurpose({ body: { name } }))
+        .data
     if (kind === "addressedOffice")
-      return (await LookupsService.createAddressedOffice({ body: { name } })).data
+      return (await LookupsService.createAddressedOffice({ body: { name } }))
+        .data
     if (kind === "educationalAttainment")
-      return (await LookupsService.createEducationalAttainment({ body: { name } })).data
+      return (
+        await LookupsService.createEducationalAttainment({ body: { name } })
+      ).data
     return kind === "street"
       ? (await LookupsService.createStreet({ body: { name } })).data
       : (await LookupsService.createTricycleAssociation({ body: { name } }))

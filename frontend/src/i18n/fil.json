@@ -1142,7 +1142,6 @@
         "loadError": "Hindi ma-load ang mga antas ng edukasyon",
         "empty": "Wala pang mga antas ng edukasyon",
         "deleteTitle": "Burahin ang antas ng edukasyon?",
-        "deleteDescription": "Alisin ang {{name}} sa mga susunod na pagpipilian? Mananatili ang halagang naka-save sa mga naisyung sertipiko.",
         "deleteDescription": "Alisin ang {{name}} sa mga susunod na pagpipilian? Mananatili ang halagang naka-save sa mga naisyung sertipiko."
       },
       "addressedOffice": {

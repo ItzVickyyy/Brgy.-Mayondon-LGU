@@ -2,7 +2,7 @@
 
 import { type Client, formDataBodySerializer, type Options as Options2, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { activityActivityOptionsData, activityActivityOptionsResponses, activityListActivityData, activityListActivityErrors, activityListActivityResponses, backupsCreateBackupData, backupsCreateBackupResponses, backupsDownloadBackupData, backupsDownloadBackupErrors, backupsDownloadBackupResponses, backupsListBackupsData, backupsListBackupsErrors, backupsListBackupsResponses, backupsRequestRestoreData, backupsRequestRestoreErrors, backupsRequestRestoreResponses, backupsVerifyBackupData, backupsVerifyBackupErrors, backupsVerifyBackupResponses, barangayIdsGetSeriesData, barangayIdsGetSeriesResponses, barangayIdsListBarangayIdsData, barangayIdsListBarangayIdsErrors, barangayIdsListBarangayIdsResponses, barangayIdsSeriesStatusData, barangayIdsSeriesStatusResponses, barangayIdsUpdateSeriesData, barangayIdsUpdateSeriesErrors, barangayIdsUpdateSeriesResponses, dashboardDashboardData, dashboardDashboardErrors, dashboardDashboardResponses, importsAddMissingStreetsData, importsAddMissingStreetsErrors, importsAddMissingStreetsResponses, importsCancelImportData, importsCancelImportErrors, importsCancelImportResponses, importsCommitImportData, importsCommitImportErrors, importsCommitImportResponses, importsDownloadErrorReportData, importsDownloadErrorReportErrors, importsDownloadErrorReportResponses, importsListImportsData, importsListImportsErrors, importsListImportsResponses, importsListMissingStreetsData, importsListMissingStreetsErrors, importsListMissingStreetsResponses, importsListRowsData, importsListRowsErrors, importsListRowsResponses, importsReadImportData, importsReadImportErrors, importsReadImportResponses, importsSetMappingData, importsSetMappingErrors, importsSetMappingResponses, importsUploadImportData, importsUploadImportErrors, importsUploadImportResponses, issuancesArchiveData, issuancesArchiveErrors, issuancesArchiveResponses, issuancesCorrectData, issuancesCorrectErrors, issuancesCorrectResponses, issuancesCreateIssuanceData, issuancesCreateIssuanceErrors, issuancesCreateIssuanceResponses, issuancesDiscardDraftData, issuancesDiscardDraftErrors, issuancesDiscardDraftResponses, issuancesGetIssuanceData, issuancesGetIssuanceErrors, issuancesGetIssuanceResponses, issuancesIssueData, issuancesIssueErrors, issuancesIssueResponses, issuancesListIssuancesData, issuancesListIssuancesErrors, issuancesListIssuancesResponses, issuancesRecordPrintData, issuancesRecordPrintErrors, issuancesRecordPrintResponses, issuancesRestoreData, issuancesRestoreErrors, issuancesRestoreResponses, issuancesUpdateDraftData, issuancesUpdateDraftErrors, issuancesUpdateDraftResponses, issuancesVoidData, issuancesVoidErrors, issuancesVoidResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginLoginMfaData, loginLoginMfaErrors, loginLoginMfaResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, lookupsCreateIdTypeData, lookupsCreateIdTypeErrors, lookupsCreateIdTypeResponses, lookupsCreateEducationalAttainmentData, lookupsCreateEducationalAttainmentErrors, lookupsCreateEducationalAttainmentResponses, lookupsDeleteEducationalAttainmentData, lookupsDeleteEducationalAttainmentErrors, lookupsDeleteEducationalAttainmentResponses, lookupsListEducationalAttainmentsData, lookupsListEducationalAttainmentsResponses, lookupsRenameEducationalAttainmentData, lookupsRenameEducationalAttainmentErrors, lookupsRenameEducationalAttainmentResponses, lookupsCreateAddressedOfficeData, lookupsCreateAddressedOfficeErrors, lookupsCreateAddressedOfficeResponses, lookupsDeleteAddressedOfficeData, lookupsDeleteAddressedOfficeErrors, lookupsDeleteAddressedOfficeResponses, lookupsListAddressedOfficesData, lookupsListAddressedOfficesResponses, lookupsRenameAddressedOfficeData, lookupsRenameAddressedOfficeErrors, lookupsRenameAddressedOfficeResponses, lookupsCreateIssuancePurposeData, lookupsCreateIssuancePurposeErrors, lookupsCreateIssuancePurposeResponses, lookupsDeleteIssuancePurposeData, lookupsDeleteIssuancePurposeErrors, lookupsDeleteIssuancePurposeResponses, lookupsRenameIssuancePurposeData, lookupsRenameIssuancePurposeErrors, lookupsRenameIssuancePurposeResponses, lookupsCreateSectorData, lookupsCreateSectorErrors, lookupsCreateSectorResponses, lookupsCreateStreetData, lookupsCreateStreetErrors, lookupsCreateStreetResponses, lookupsCreateTricycleAssociationData, lookupsCreateTricycleAssociationErrors, lookupsCreateTricycleAssociationResponses, lookupsDeleteIdTypeData, lookupsDeleteIdTypeErrors, lookupsDeleteIdTypeResponses, lookupsDeleteSectorData, lookupsDeleteSectorErrors, lookupsDeleteSectorResponses, lookupsDeleteStreetData, lookupsDeleteStreetErrors, lookupsDeleteStreetResponses, lookupsDeleteTricycleAssociationData, lookupsDeleteTricycleAssociationErrors, lookupsDeleteTricycleAssociationResponses, lookupsListDocumentTypesData, lookupsListDocumentTypesResponses, lookupsListIdTypesData, lookupsListIdTypesResponses, lookupsListIssuancePurposesData, lookupsListIssuancePurposesResponses, lookupsListSectorsData, lookupsListSectorsResponses, lookupsListStreetsData, lookupsListStreetsResponses, lookupsListTricycleAssociationsData, lookupsListTricycleAssociationsResponses, lookupsRenameIdTypeData, lookupsRenameIdTypeErrors, lookupsRenameIdTypeResponses, lookupsRenameSectorData, lookupsRenameSectorErrors, lookupsRenameSectorResponses, lookupsRenameStreetData, lookupsRenameStreetErrors, lookupsRenameStreetResponses, lookupsRenameTricycleAssociationData, lookupsRenameTricycleAssociationErrors, lookupsRenameTricycleAssociationResponses, notificationsListNotificationsData, notificationsListNotificationsResponses, notificationsMarkAllNotificationsReadData, notificationsMarkAllNotificationsReadResponses, notificationsMarkNotificationReadData, notificationsMarkNotificationReadErrors, notificationsMarkNotificationReadResponses, officialsCreateOfficialData, officialsCreateOfficialErrors, officialsCreateOfficialResponses, officialsGetOfficialData, officialsGetOfficialErrors, officialsGetOfficialResponses, officialsListOfficialsData, officialsListOfficialsErrors, officialsListOfficialsResponses, officialsUpdateOfficialData, officialsUpdateOfficialErrors, officialsUpdateOfficialResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, reportsAccountActivityData, reportsAccountActivityErrors, reportsAccountActivityResponses, reportsExpiringData, reportsExpiringErrors, reportsExpiringResponses, reportsIssuancesByPurposeData, reportsIssuancesByPurposeErrors, reportsIssuancesByPurposeResponses, reportsIssuancesByTypeData, reportsIssuancesByTypeErrors, reportsIssuancesByTypeResponses, reportsRecordExportData, reportsRecordExportErrors, reportsRecordExportResponses, reportsRecordsOverviewData, reportsRecordsOverviewResponses, reportsSummaryData, reportsSummaryErrors, reportsSummaryResponses, residentsArchiveResidentData, residentsArchiveResidentErrors, residentsArchiveResidentResponses, residentsClearVoterProofData, residentsClearVoterProofErrors, residentsClearVoterProofResponses, residentsCreateResidentData, residentsCreateResidentErrors, residentsCreateResidentResponses, residentsDeletePhotoData, residentsDeletePhotoErrors, residentsDeletePhotoResponses, residentsGetPhotoData, residentsGetPhotoErrors, residentsGetPhotoResponses, residentsListResidentsData, residentsListResidentsErrors, residentsListResidentsResponses, residentsPutPhotoData, residentsPutPhotoErrors, residentsPutPhotoResponses, residentsReadResidentData, residentsReadResidentErrors, residentsReadResidentResponses, residentsRestoreResidentData, residentsRestoreResidentErrors, residentsRestoreResidentResponses, residentsSectorSummaryData, residentsSectorSummaryResponses, residentsUpdateResidentData, residentsUpdateResidentErrors, residentsUpdateResidentResponses, residentsVerifyVoterProofData, residentsVerifyVoterProofErrors, residentsVerifyVoterProofResponses, securityQuestionsClearUserSecurityQuestionsData, securityQuestionsClearUserSecurityQuestionsErrors, securityQuestionsClearUserSecurityQuestionsResponses, securityQuestionsReadMySecurityQuestionsData, securityQuestionsReadMySecurityQuestionsResponses, securityQuestionsReadUserSecurityQuestionsData, securityQuestionsReadUserSecurityQuestionsErrors, securityQuestionsReadUserSecurityQuestionsResponses, securityQuestionsRecoveryQuestionsData, securityQuestionsRecoveryQuestionsErrors, securityQuestionsRecoveryQuestionsResponses, securityQuestionsRecoveryResetData, securityQuestionsRecoveryResetErrors, securityQuestionsRecoveryResetResponses, securityQuestionsSetMySecurityQuestionsData, securityQuestionsSetMySecurityQuestionsErrors, securityQuestionsSetMySecurityQuestionsResponses, twoFactorDisableMfaData, twoFactorDisableMfaErrors, twoFactorDisableMfaResponses, twoFactorEnableMfaData, twoFactorEnableMfaErrors, twoFactorEnableMfaResponses, twoFactorNewMyRecoveryCodesData, twoFactorNewMyRecoveryCodesErrors, twoFactorNewMyRecoveryCodesResponses, twoFactorReadMyMfaData, twoFactorReadMyMfaResponses, twoFactorReadUserMfaData, twoFactorReadUserMfaErrors, twoFactorReadUserMfaResponses, twoFactorResetUserMfaData, twoFactorResetUserMfaErrors, twoFactorResetUserMfaResponses, twoFactorSetUserMfaRequiredData, twoFactorSetUserMfaRequiredErrors, twoFactorSetUserMfaRequiredResponses, twoFactorStartMfaSetupData, twoFactorStartMfaSetupErrors, twoFactorStartMfaSetupResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
+import type { activityActivityOptionsData, activityActivityOptionsResponses, activityListActivityData, activityListActivityErrors, activityListActivityResponses, backupsCreateBackupData, backupsCreateBackupResponses, backupsDownloadBackupData, backupsDownloadBackupErrors, backupsDownloadBackupResponses, backupsListBackupsData, backupsListBackupsErrors, backupsListBackupsResponses, backupsRequestRestoreData, backupsRequestRestoreErrors, backupsRequestRestoreResponses, backupsVerifyBackupData, backupsVerifyBackupErrors, backupsVerifyBackupResponses, barangayIdsGetSeriesData, barangayIdsGetSeriesResponses, barangayIdsListBarangayIdsData, barangayIdsListBarangayIdsErrors, barangayIdsListBarangayIdsResponses, barangayIdsSeriesStatusData, barangayIdsSeriesStatusResponses, barangayIdsUpdateSeriesData, barangayIdsUpdateSeriesErrors, barangayIdsUpdateSeriesResponses, dashboardDashboardData, dashboardDashboardErrors, dashboardDashboardResponses, importsAddMissingStreetsData, importsAddMissingStreetsErrors, importsAddMissingStreetsResponses, importsCancelImportData, importsCancelImportErrors, importsCancelImportResponses, importsCommitImportData, importsCommitImportErrors, importsCommitImportResponses, importsDownloadErrorReportData, importsDownloadErrorReportErrors, importsDownloadErrorReportResponses, importsListImportsData, importsListImportsErrors, importsListImportsResponses, importsListMissingStreetsData, importsListMissingStreetsErrors, importsListMissingStreetsResponses, importsListRowsData, importsListRowsErrors, importsListRowsResponses, importsReadImportData, importsReadImportErrors, importsReadImportResponses, importsSetMappingData, importsSetMappingErrors, importsSetMappingResponses, importsUploadImportData, importsUploadImportErrors, importsUploadImportResponses, issuancesArchiveData, issuancesArchiveErrors, issuancesArchiveResponses, issuancesCorrectData, issuancesCorrectErrors, issuancesCorrectResponses, issuancesCreateIssuanceData, issuancesCreateIssuanceErrors, issuancesCreateIssuanceResponses, issuancesDiscardDraftData, issuancesDiscardDraftErrors, issuancesDiscardDraftResponses, issuancesGetIssuanceData, issuancesGetIssuanceErrors, issuancesGetIssuanceResponses, issuancesIssueData, issuancesIssueErrors, issuancesIssueResponses, issuancesListIssuancesData, issuancesListIssuancesErrors, issuancesListIssuancesResponses, issuancesRecordPrintData, issuancesRecordPrintErrors, issuancesRecordPrintResponses, issuancesRestoreData, issuancesRestoreErrors, issuancesRestoreResponses, issuancesUpdateDraftData, issuancesUpdateDraftErrors, issuancesUpdateDraftResponses, issuancesVoidData, issuancesVoidErrors, issuancesVoidResponses, loginLoginAccessTokenData, loginLoginAccessTokenErrors, loginLoginAccessTokenResponses, loginLoginMfaData, loginLoginMfaErrors, loginLoginMfaResponses, loginRecoverPasswordData, loginRecoverPasswordErrors, loginRecoverPasswordHtmlContentData, loginRecoverPasswordHtmlContentErrors, loginRecoverPasswordHtmlContentResponses, loginRecoverPasswordResponses, loginResetPasswordData, loginResetPasswordErrors, loginResetPasswordResponses, loginTestTokenData, loginTestTokenResponses, lookupsCreateAddressedOfficeData, lookupsCreateAddressedOfficeErrors, lookupsCreateAddressedOfficeResponses, lookupsCreateEducationalAttainmentData, lookupsCreateEducationalAttainmentErrors, lookupsCreateEducationalAttainmentResponses, lookupsCreateIdTypeData, lookupsCreateIdTypeErrors, lookupsCreateIdTypeResponses, lookupsCreateIssuancePurposeData, lookupsCreateIssuancePurposeErrors, lookupsCreateIssuancePurposeResponses, lookupsCreateSectorData, lookupsCreateSectorErrors, lookupsCreateSectorResponses, lookupsCreateStreetData, lookupsCreateStreetErrors, lookupsCreateStreetResponses, lookupsCreateTricycleAssociationData, lookupsCreateTricycleAssociationErrors, lookupsCreateTricycleAssociationResponses, lookupsDeleteAddressedOfficeData, lookupsDeleteAddressedOfficeErrors, lookupsDeleteAddressedOfficeResponses, lookupsDeleteEducationalAttainmentData, lookupsDeleteEducationalAttainmentErrors, lookupsDeleteEducationalAttainmentResponses, lookupsDeleteIdTypeData, lookupsDeleteIdTypeErrors, lookupsDeleteIdTypeResponses, lookupsDeleteIssuancePurposeData, lookupsDeleteIssuancePurposeErrors, lookupsDeleteIssuancePurposeResponses, lookupsDeleteSectorData, lookupsDeleteSectorErrors, lookupsDeleteSectorResponses, lookupsDeleteStreetData, lookupsDeleteStreetErrors, lookupsDeleteStreetResponses, lookupsDeleteTricycleAssociationData, lookupsDeleteTricycleAssociationErrors, lookupsDeleteTricycleAssociationResponses, lookupsListAddressedOfficesData, lookupsListAddressedOfficesResponses, lookupsListDocumentTypesData, lookupsListDocumentTypesResponses, lookupsListEducationalAttainmentsData, lookupsListEducationalAttainmentsResponses, lookupsListIdTypesData, lookupsListIdTypesResponses, lookupsListIssuancePurposesData, lookupsListIssuancePurposesResponses, lookupsListSectorsData, lookupsListSectorsResponses, lookupsListStreetsData, lookupsListStreetsResponses, lookupsListTricycleAssociationsData, lookupsListTricycleAssociationsResponses, lookupsRenameAddressedOfficeData, lookupsRenameAddressedOfficeErrors, lookupsRenameAddressedOfficeResponses, lookupsRenameEducationalAttainmentData, lookupsRenameEducationalAttainmentErrors, lookupsRenameEducationalAttainmentResponses, lookupsRenameIdTypeData, lookupsRenameIdTypeErrors, lookupsRenameIdTypeResponses, lookupsRenameIssuancePurposeData, lookupsRenameIssuancePurposeErrors, lookupsRenameIssuancePurposeResponses, lookupsRenameSectorData, lookupsRenameSectorErrors, lookupsRenameSectorResponses, lookupsRenameStreetData, lookupsRenameStreetErrors, lookupsRenameStreetResponses, lookupsRenameTricycleAssociationData, lookupsRenameTricycleAssociationErrors, lookupsRenameTricycleAssociationResponses, notificationsListNotificationsData, notificationsListNotificationsResponses, notificationsMarkAllNotificationsReadData, notificationsMarkAllNotificationsReadResponses, notificationsMarkNotificationReadData, notificationsMarkNotificationReadErrors, notificationsMarkNotificationReadResponses, officialsCreateOfficialData, officialsCreateOfficialErrors, officialsCreateOfficialResponses, officialsGetOfficialData, officialsGetOfficialErrors, officialsGetOfficialResponses, officialsListOfficialsData, officialsListOfficialsErrors, officialsListOfficialsResponses, officialsUpdateOfficialData, officialsUpdateOfficialErrors, officialsUpdateOfficialResponses, privateCreateUserData, privateCreateUserErrors, privateCreateUserResponses, reportsAccountActivityData, reportsAccountActivityErrors, reportsAccountActivityResponses, reportsExpiringData, reportsExpiringErrors, reportsExpiringResponses, reportsIssuancesByPurposeData, reportsIssuancesByPurposeErrors, reportsIssuancesByPurposeResponses, reportsIssuancesByTypeData, reportsIssuancesByTypeErrors, reportsIssuancesByTypeResponses, reportsRecordExportData, reportsRecordExportErrors, reportsRecordExportResponses, reportsRecordsOverviewData, reportsRecordsOverviewResponses, reportsSummaryData, reportsSummaryErrors, reportsSummaryResponses, residentsArchiveResidentData, residentsArchiveResidentErrors, residentsArchiveResidentResponses, residentsClearVoterProofData, residentsClearVoterProofErrors, residentsClearVoterProofResponses, residentsCreateResidentData, residentsCreateResidentErrors, residentsCreateResidentResponses, residentsDeletePhotoData, residentsDeletePhotoErrors, residentsDeletePhotoResponses, residentsGetPhotoData, residentsGetPhotoErrors, residentsGetPhotoResponses, residentsListResidentsData, residentsListResidentsErrors, residentsListResidentsResponses, residentsPutPhotoData, residentsPutPhotoErrors, residentsPutPhotoResponses, residentsReadResidentData, residentsReadResidentErrors, residentsReadResidentResponses, residentsRestoreResidentData, residentsRestoreResidentErrors, residentsRestoreResidentResponses, residentsSectorSummaryData, residentsSectorSummaryResponses, residentsUpdateResidentData, residentsUpdateResidentErrors, residentsUpdateResidentResponses, residentsVerifyVoterProofData, residentsVerifyVoterProofErrors, residentsVerifyVoterProofResponses, securityQuestionsClearUserSecurityQuestionsData, securityQuestionsClearUserSecurityQuestionsErrors, securityQuestionsClearUserSecurityQuestionsResponses, securityQuestionsReadMySecurityQuestionsData, securityQuestionsReadMySecurityQuestionsResponses, securityQuestionsReadUserSecurityQuestionsData, securityQuestionsReadUserSecurityQuestionsErrors, securityQuestionsReadUserSecurityQuestionsResponses, securityQuestionsRecoveryQuestionsData, securityQuestionsRecoveryQuestionsErrors, securityQuestionsRecoveryQuestionsResponses, securityQuestionsRecoveryResetData, securityQuestionsRecoveryResetErrors, securityQuestionsRecoveryResetResponses, securityQuestionsSetMySecurityQuestionsData, securityQuestionsSetMySecurityQuestionsErrors, securityQuestionsSetMySecurityQuestionsResponses, twoFactorDisableMfaData, twoFactorDisableMfaErrors, twoFactorDisableMfaResponses, twoFactorEnableMfaData, twoFactorEnableMfaErrors, twoFactorEnableMfaResponses, twoFactorNewMyRecoveryCodesData, twoFactorNewMyRecoveryCodesErrors, twoFactorNewMyRecoveryCodesResponses, twoFactorReadMyMfaData, twoFactorReadMyMfaResponses, twoFactorReadUserMfaData, twoFactorReadUserMfaErrors, twoFactorReadUserMfaResponses, twoFactorResetUserMfaData, twoFactorResetUserMfaErrors, twoFactorResetUserMfaResponses, twoFactorSetUserMfaRequiredData, twoFactorSetUserMfaRequiredErrors, twoFactorSetUserMfaRequiredResponses, twoFactorStartMfaSetupData, twoFactorStartMfaSetupErrors, twoFactorStartMfaSetupResponses, usersCreateUserData, usersCreateUserErrors, usersCreateUserResponses, usersDeleteUserData, usersDeleteUserErrors, usersDeleteUserMeData, usersDeleteUserMeResponses, usersDeleteUserResponses, usersReadUserByIdData, usersReadUserByIdErrors, usersReadUserByIdResponses, usersReadUserMeData, usersReadUserMeResponses, usersReadUsersData, usersReadUsersErrors, usersReadUsersResponses, usersRegisterUserData, usersRegisterUserErrors, usersRegisterUserResponses, usersUpdatePasswordMeData, usersUpdatePasswordMeErrors, usersUpdatePasswordMeResponses, usersUpdateUserData, usersUpdateUserErrors, usersUpdateUserMeData, usersUpdateUserMeErrors, usersUpdateUserMeResponses, usersUpdateUserResponses, utilsHealthCheckData, utilsHealthCheckResponses, utilsTestEmailData, utilsTestEmailErrors, utilsTestEmailResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -40,7 +40,7 @@ export class LoginService {
             }
         });
     }
-    
+
     /**
      * Login Mfa
      *
@@ -59,7 +59,7 @@ export class LoginService {
             }
         });
     }
-    
+
     /**
      * Test Token
      *
@@ -73,7 +73,7 @@ export class LoginService {
             ...options
         });
     }
-    
+
     /**
      * Recover Password
      */
@@ -88,7 +88,7 @@ export class LoginService {
             }
         });
     }
-    
+
     /**
      * Reset Password
      *
@@ -105,7 +105,7 @@ export class LoginService {
             }
         });
     }
-    
+
     /**
      * Recover Password Html Content
      *
@@ -135,7 +135,7 @@ export class SecurityQuestionsService {
             ...options
         });
     }
-    
+
     /**
      * Set My Security Questions
      *
@@ -153,7 +153,7 @@ export class SecurityQuestionsService {
             }
         });
     }
-    
+
     /**
      * Clear User Security Questions
      *
@@ -167,7 +167,7 @@ export class SecurityQuestionsService {
             ...options
         });
     }
-    
+
     /**
      * Read User Security Questions
      *
@@ -181,7 +181,7 @@ export class SecurityQuestionsService {
             ...options
         });
     }
-    
+
     /**
      * Recovery Questions
      *
@@ -202,7 +202,7 @@ export class SecurityQuestionsService {
             }
         });
     }
-    
+
     /**
      * Recovery Reset
      *
@@ -236,7 +236,7 @@ export class TwoFactorService {
             ...options
         });
     }
-    
+
     /**
      * Start Mfa Setup
      *
@@ -254,7 +254,7 @@ export class TwoFactorService {
             }
         });
     }
-    
+
     /**
      * Enable Mfa
      *
@@ -273,7 +273,7 @@ export class TwoFactorService {
             }
         });
     }
-    
+
     /**
      * Disable Mfa
      *
@@ -292,7 +292,7 @@ export class TwoFactorService {
             }
         });
     }
-    
+
     /**
      * New My Recovery Codes
      *
@@ -310,7 +310,7 @@ export class TwoFactorService {
             }
         });
     }
-    
+
     /**
      * Reset User Mfa
      *
@@ -328,7 +328,7 @@ export class TwoFactorService {
             ...options
         });
     }
-    
+
     /**
      * Read User Mfa
      *
@@ -342,7 +342,7 @@ export class TwoFactorService {
             ...options
         });
     }
-    
+
     /**
      * Set User Mfa Required
      *
@@ -381,7 +381,7 @@ export class UsersService {
             ...options
         });
     }
-    
+
     /**
      * Create User
      *
@@ -406,7 +406,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Delete User Me
      *
@@ -420,7 +420,7 @@ export class UsersService {
             ...options
         });
     }
-    
+
     /**
      * Read User Me
      *
@@ -434,7 +434,7 @@ export class UsersService {
             ...options
         });
     }
-    
+
     /**
      * Update User Me
      *
@@ -452,7 +452,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Update Password Me
      *
@@ -470,7 +470,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Register User
      *
@@ -490,7 +490,7 @@ export class UsersService {
             }
         });
     }
-    
+
     /**
      * Delete User
      *
@@ -504,7 +504,7 @@ export class UsersService {
             ...options
         });
     }
-    
+
     /**
      * Read User By Id
      *
@@ -518,7 +518,7 @@ export class UsersService {
             ...options
         });
     }
-    
+
     /**
      * Update User
      *
@@ -558,7 +558,7 @@ export class ResidentsService {
             ...options
         });
     }
-    
+
     /**
      * Create Resident
      *
@@ -577,7 +577,7 @@ export class ResidentsService {
             }
         });
     }
-    
+
     /**
      * Sector Summary
      *
@@ -594,7 +594,7 @@ export class ResidentsService {
             ...options
         });
     }
-    
+
     /**
      * Read Resident
      *
@@ -609,7 +609,7 @@ export class ResidentsService {
             ...options
         });
     }
-    
+
     /**
      * Update Resident
      */
@@ -625,7 +625,7 @@ export class ResidentsService {
             }
         });
     }
-    
+
     /**
      * Verify Voter Proof
      *
@@ -646,7 +646,7 @@ export class ResidentsService {
             }
         });
     }
-    
+
     /**
      * Clear Voter Proof
      *
@@ -660,7 +660,7 @@ export class ResidentsService {
             ...options
         });
     }
-    
+
     /**
      * Archive Resident
      */
@@ -676,7 +676,7 @@ export class ResidentsService {
             }
         });
     }
-    
+
     /**
      * Restore Resident
      */
@@ -688,7 +688,7 @@ export class ResidentsService {
             ...options
         });
     }
-    
+
     /**
      * Delete Photo
      */
@@ -700,7 +700,7 @@ export class ResidentsService {
             ...options
         });
     }
-    
+
     /**
      * Get Photo
      */
@@ -712,7 +712,7 @@ export class ResidentsService {
             ...options
         });
     }
-    
+
     /**
      * Put Photo
      *
@@ -740,7 +740,7 @@ export class LookupsService {
             ...options
         });
     }
-    
+
     /**
      * List Sectors
      */
@@ -752,7 +752,7 @@ export class LookupsService {
             ...options
         });
     }
-    
+
     /**
      * Create Sector
      */
@@ -768,7 +768,7 @@ export class LookupsService {
             }
         });
     }
-    
+
     /**
      * List Id Types
      */
@@ -780,7 +780,7 @@ export class LookupsService {
             ...options
         });
     }
-    
+
     /**
      * Create Id Type
      */
@@ -796,7 +796,7 @@ export class LookupsService {
             }
         });
     }
-    
+
     /**
      * List Issuance Purposes
      */
@@ -808,7 +808,7 @@ export class LookupsService {
             ...options
         });
     }
-    
+
     /**
      * Create Issuance Purpose
      */
@@ -822,33 +822,6 @@ export class LookupsService {
                 'Content-Type': 'application/json',
                 ...options.headers
             }
-        });
-    }
-
-    /**
-     * Rename Issuance Purpose
-     */
-    public static renameIssuancePurpose<ThrowOnError extends boolean = true>(options: Options<lookupsRenameIssuancePurposeData, ThrowOnError>) {
-        return (options.client ?? client).patch<lookupsRenameIssuancePurposeResponses, lookupsRenameIssuancePurposeErrors, ThrowOnError>({
-            responseType: 'json',
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/lookups/issuance-purposes/{item_id}',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
-        });
-    }
-
-    /**
-     * Delete Issuance Purpose
-     */
-    public static deleteIssuancePurpose<ThrowOnError extends boolean = true>(options: Options<lookupsDeleteIssuancePurposeData, ThrowOnError>) {
-        return (options.client ?? client).delete<lookupsDeleteIssuancePurposeResponses, lookupsDeleteIssuancePurposeErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/lookups/issuance-purposes/{item_id}',
-            ...options
         });
     }
 
@@ -881,33 +854,6 @@ export class LookupsService {
     }
 
     /**
-     * Rename Addressed Office
-     */
-    public static renameAddressedOffice<ThrowOnError extends boolean = true>(options: Options<lookupsRenameAddressedOfficeData, ThrowOnError>) {
-        return (options.client ?? client).patch<lookupsRenameAddressedOfficeResponses, lookupsRenameAddressedOfficeErrors, ThrowOnError>({
-            responseType: 'json',
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/lookups/addressed-offices/{item_id}',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
-        });
-    }
-
-    /**
-     * Delete Addressed Office
-     */
-    public static deleteAddressedOffice<ThrowOnError extends boolean = true>(options: Options<lookupsDeleteAddressedOfficeData, ThrowOnError>) {
-        return (options.client ?? client).delete<lookupsDeleteAddressedOfficeResponses, lookupsDeleteAddressedOfficeErrors, ThrowOnError>({
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/lookups/addressed-offices/{item_id}',
-            ...options
-        });
-    }
-
-    /**
      * List Educational Attainments
      */
     public static listEducationalAttainments<ThrowOnError extends boolean = true>(options?: Options<lookupsListEducationalAttainmentsData, ThrowOnError>) {
@@ -936,13 +882,107 @@ export class LookupsService {
     }
 
     /**
-     * Rename Educational Attainment
+     * List Streets
      */
-    public static renameEducationalAttainment<ThrowOnError extends boolean = true>(options: Options<lookupsRenameEducationalAttainmentData, ThrowOnError>) {
-        return (options.client ?? client).patch<lookupsRenameEducationalAttainmentResponses, lookupsRenameEducationalAttainmentErrors, ThrowOnError>({
+    public static listStreets<ThrowOnError extends boolean = true>(options?: Options<lookupsListStreetsData, ThrowOnError>) {
+        return (options?.client ?? client).get<lookupsListStreetsResponses, unknown, ThrowOnError>({
             responseType: 'json',
             security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/lookups/educational-attainments/{item_id}',
+            url: '/api/v1/lookups/streets',
+            ...options
+        });
+    }
+
+    /**
+     * Create Street
+     */
+    public static createStreet<ThrowOnError extends boolean = true>(options: Options<lookupsCreateStreetData, ThrowOnError>) {
+        return (options.client ?? client).post<lookupsCreateStreetResponses, lookupsCreateStreetErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/streets',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+
+    /**
+     * List Tricycle Associations
+     */
+    public static listTricycleAssociations<ThrowOnError extends boolean = true>(options?: Options<lookupsListTricycleAssociationsData, ThrowOnError>) {
+        return (options?.client ?? client).get<lookupsListTricycleAssociationsResponses, unknown, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/tricycle-associations',
+            ...options
+        });
+    }
+
+    /**
+     * Create Tricycle Association
+     */
+    public static createTricycleAssociation<ThrowOnError extends boolean = true>(options: Options<lookupsCreateTricycleAssociationData, ThrowOnError>) {
+        return (options.client ?? client).post<lookupsCreateTricycleAssociationResponses, lookupsCreateTricycleAssociationErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/tricycle-associations',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+
+    /**
+     * Delete Issuance Purpose
+     */
+    public static deleteIssuancePurpose<ThrowOnError extends boolean = true>(options: Options<lookupsDeleteIssuancePurposeData, ThrowOnError>) {
+        return (options.client ?? client).delete<lookupsDeleteIssuancePurposeResponses, lookupsDeleteIssuancePurposeErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/issuance-purposes/{item_id}',
+            ...options
+        });
+    }
+
+    /**
+     * Rename Issuance Purpose
+     */
+    public static renameIssuancePurpose<ThrowOnError extends boolean = true>(options: Options<lookupsRenameIssuancePurposeData, ThrowOnError>) {
+        return (options.client ?? client).patch<lookupsRenameIssuancePurposeResponses, lookupsRenameIssuancePurposeErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/issuance-purposes/{item_id}',
+            ...options,
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            }
+        });
+    }
+
+    /**
+     * Delete Addressed Office
+     */
+    public static deleteAddressedOffice<ThrowOnError extends boolean = true>(options: Options<lookupsDeleteAddressedOfficeData, ThrowOnError>) {
+        return (options.client ?? client).delete<lookupsDeleteAddressedOfficeResponses, lookupsDeleteAddressedOfficeErrors, ThrowOnError>({
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/addressed-offices/{item_id}',
+            ...options
+        });
+    }
+
+    /**
+     * Rename Addressed Office
+     */
+    public static renameAddressedOffice<ThrowOnError extends boolean = true>(options: Options<lookupsRenameAddressedOfficeData, ThrowOnError>) {
+        return (options.client ?? client).patch<lookupsRenameAddressedOfficeResponses, lookupsRenameAddressedOfficeErrors, ThrowOnError>({
+            responseType: 'json',
+            security: [{ scheme: 'bearer', type: 'http' }],
+            url: '/api/v1/lookups/addressed-offices/{item_id}',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
@@ -963,25 +1003,13 @@ export class LookupsService {
     }
 
     /**
-     * List Streets
+     * Rename Educational Attainment
      */
-    public static listStreets<ThrowOnError extends boolean = true>(options?: Options<lookupsListStreetsData, ThrowOnError>) {
-        return (options?.client ?? client).get<lookupsListStreetsResponses, unknown, ThrowOnError>({
+    public static renameEducationalAttainment<ThrowOnError extends boolean = true>(options: Options<lookupsRenameEducationalAttainmentData, ThrowOnError>) {
+        return (options.client ?? client).patch<lookupsRenameEducationalAttainmentResponses, lookupsRenameEducationalAttainmentErrors, ThrowOnError>({
             responseType: 'json',
             security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/lookups/streets',
-            ...options
-        });
-    }
-    
-    /**
-     * Create Street
-     */
-    public static createStreet<ThrowOnError extends boolean = true>(options: Options<lookupsCreateStreetData, ThrowOnError>) {
-        return (options.client ?? client).post<lookupsCreateStreetResponses, lookupsCreateStreetErrors, ThrowOnError>({
-            responseType: 'json',
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/lookups/streets',
+            url: '/api/v1/lookups/educational-attainments/{item_id}',
             ...options,
             headers: {
                 'Content-Type': 'application/json',
@@ -989,35 +1017,7 @@ export class LookupsService {
             }
         });
     }
-    
-    /**
-     * List Tricycle Associations
-     */
-    public static listTricycleAssociations<ThrowOnError extends boolean = true>(options?: Options<lookupsListTricycleAssociationsData, ThrowOnError>) {
-        return (options?.client ?? client).get<lookupsListTricycleAssociationsResponses, unknown, ThrowOnError>({
-            responseType: 'json',
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/lookups/tricycle-associations',
-            ...options
-        });
-    }
-    
-    /**
-     * Create Tricycle Association
-     */
-    public static createTricycleAssociation<ThrowOnError extends boolean = true>(options: Options<lookupsCreateTricycleAssociationData, ThrowOnError>) {
-        return (options.client ?? client).post<lookupsCreateTricycleAssociationResponses, lookupsCreateTricycleAssociationErrors, ThrowOnError>({
-            responseType: 'json',
-            security: [{ scheme: 'bearer', type: 'http' }],
-            url: '/api/v1/lookups/tricycle-associations',
-            ...options,
-            headers: {
-                'Content-Type': 'application/json',
-                ...options.headers
-            }
-        });
-    }
-    
+
     /**
      * Delete Street
      */
@@ -1028,7 +1028,7 @@ export class LookupsService {
             ...options
         });
     }
-    
+
     /**
      * Rename Street
      */
@@ -1044,7 +1044,7 @@ export class LookupsService {
             }
         });
     }
-    
+
     /**
      * Delete Tricycle Association
      */
@@ -1055,7 +1055,7 @@ export class LookupsService {
             ...options
         });
     }
-    
+
     /**
      * Rename Tricycle Association
      */
@@ -1071,7 +1071,7 @@ export class LookupsService {
             }
         });
     }
-    
+
     /**
      * Delete Id Type
      */
@@ -1082,7 +1082,7 @@ export class LookupsService {
             ...options
         });
     }
-    
+
     /**
      * Rename Id Type
      */
@@ -1098,7 +1098,7 @@ export class LookupsService {
             }
         });
     }
-    
+
     /**
      * Delete Sector
      */
@@ -1109,7 +1109,7 @@ export class LookupsService {
             ...options
         });
     }
-    
+
     /**
      * Rename Sector
      */
@@ -1139,7 +1139,7 @@ export class OfficialsService {
             ...options
         });
     }
-    
+
     /**
      * Create Official
      */
@@ -1155,7 +1155,7 @@ export class OfficialsService {
             }
         });
     }
-    
+
     /**
      * Get Official
      */
@@ -1167,7 +1167,7 @@ export class OfficialsService {
             ...options
         });
     }
-    
+
     /**
      * Update Official
      */
@@ -1197,7 +1197,7 @@ export class IssuancesService {
             ...options
         });
     }
-    
+
     /**
      * Create Issuance
      *
@@ -1215,7 +1215,7 @@ export class IssuancesService {
             }
         });
     }
-    
+
     /**
      * Discard Draft
      *
@@ -1228,7 +1228,7 @@ export class IssuancesService {
             ...options
         });
     }
-    
+
     /**
      * Get Issuance
      *
@@ -1245,7 +1245,7 @@ export class IssuancesService {
             ...options
         });
     }
-    
+
     /**
      * Update Draft
      */
@@ -1261,7 +1261,7 @@ export class IssuancesService {
             }
         });
     }
-    
+
     /**
      * Issue
      *
@@ -1279,7 +1279,7 @@ export class IssuancesService {
             }
         });
     }
-    
+
     /**
      * Correct
      *
@@ -1300,7 +1300,7 @@ export class IssuancesService {
             }
         });
     }
-    
+
     /**
      * Record Print
      *
@@ -1320,7 +1320,7 @@ export class IssuancesService {
             }
         });
     }
-    
+
     /**
      * Void
      */
@@ -1336,7 +1336,7 @@ export class IssuancesService {
             }
         });
     }
-    
+
     /**
      * Archive
      *
@@ -1357,7 +1357,7 @@ export class IssuancesService {
             }
         });
     }
-    
+
     /**
      * Restore
      *
@@ -1395,7 +1395,7 @@ export class BarangayIdsService {
             ...options
         });
     }
-    
+
     /**
      * Series Status
      *
@@ -1409,7 +1409,7 @@ export class BarangayIdsService {
             ...options
         });
     }
-    
+
     /**
      * Get Series
      *
@@ -1423,7 +1423,7 @@ export class BarangayIdsService {
             ...options
         });
     }
-    
+
     /**
      * Update Series
      *
@@ -1459,7 +1459,7 @@ export class ActivityService {
             ...options
         });
     }
-    
+
     /**
      * Activity Options
      *
@@ -1489,7 +1489,7 @@ export class NotificationsService {
             ...options
         });
     }
-    
+
     /**
      * Mark All Notifications Read
      *
@@ -1503,7 +1503,7 @@ export class NotificationsService {
             ...options
         });
     }
-    
+
     /**
      * Mark Notification Read
      *
@@ -1545,7 +1545,7 @@ export class ReportsService {
             ...options
         });
     }
-    
+
     /**
      * Issuances By Type
      */
@@ -1557,7 +1557,7 @@ export class ReportsService {
             ...options
         });
     }
-    
+
     /**
      * Issuances By Purpose
      */
@@ -1569,7 +1569,7 @@ export class ReportsService {
             ...options
         });
     }
-    
+
     /**
      * Expiring
      *
@@ -1584,7 +1584,7 @@ export class ReportsService {
             ...options
         });
     }
-    
+
     /**
      * Account Activity
      *
@@ -1599,7 +1599,7 @@ export class ReportsService {
             ...options
         });
     }
-    
+
     /**
      * Records Overview
      *
@@ -1613,7 +1613,7 @@ export class ReportsService {
             ...options
         });
     }
-    
+
     /**
      * Record Export
      *
@@ -1646,7 +1646,7 @@ export class BackupsService {
             ...options
         });
     }
-    
+
     /**
      * Create Backup
      */
@@ -1658,7 +1658,7 @@ export class BackupsService {
             ...options
         });
     }
-    
+
     /**
      * Verify Backup
      */
@@ -1670,7 +1670,7 @@ export class BackupsService {
             ...options
         });
     }
-    
+
     /**
      * Download Backup
      */
@@ -1682,7 +1682,7 @@ export class BackupsService {
             ...options
         });
     }
-    
+
     /**
      * Request Restore
      *
@@ -1710,7 +1710,7 @@ export class ImportsService {
             ...options
         });
     }
-    
+
     /**
      * Upload Import
      *
@@ -1729,7 +1729,7 @@ export class ImportsService {
             }
         });
     }
-    
+
     /**
      * Cancel Import
      *
@@ -1743,7 +1743,7 @@ export class ImportsService {
             ...options
         });
     }
-    
+
     /**
      * Read Import
      */
@@ -1755,7 +1755,7 @@ export class ImportsService {
             ...options
         });
     }
-    
+
     /**
      * Set Mapping
      *
@@ -1773,7 +1773,7 @@ export class ImportsService {
             }
         });
     }
-    
+
     /**
      * List Missing Streets
      *
@@ -1787,7 +1787,7 @@ export class ImportsService {
             ...options
         });
     }
-    
+
     /**
      * Add Missing Streets
      *
@@ -1803,7 +1803,7 @@ export class ImportsService {
             ...options
         });
     }
-    
+
     /**
      * List Rows
      */
@@ -1815,7 +1815,7 @@ export class ImportsService {
             ...options
         });
     }
-    
+
     /**
      * Commit Import
      *
@@ -1832,7 +1832,7 @@ export class ImportsService {
             ...options
         });
     }
-    
+
     /**
      * Download Error Report
      *
@@ -1862,7 +1862,7 @@ export class UtilsService {
             ...options
         });
     }
-    
+
     /**
      * Health Check
      */

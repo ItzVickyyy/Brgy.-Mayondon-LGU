@@ -1579,7 +1579,7 @@ export type LookupItem = {
 /**
  * LookupNameIn
  *
- * Body for adding or renaming a street or tricycle association.
+ * Body for adding or renaming an editable lookup item.
  */
 export type LookupNameIn = {
     /**
@@ -4530,6 +4530,31 @@ export type lookupsListIssuancePurposesResponses = {
 
 export type lookupsListIssuancePurposesResponse = lookupsListIssuancePurposesResponses[keyof lookupsListIssuancePurposesResponses];
 
+export type lookupsCreateIssuancePurposeData = {
+    body: LookupNameIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/issuance-purposes';
+};
+
+export type lookupsCreateIssuancePurposeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsCreateIssuancePurposeError = lookupsCreateIssuancePurposeErrors[keyof lookupsCreateIssuancePurposeErrors];
+
+export type lookupsCreateIssuancePurposeResponses = {
+    /**
+     * Successful Response
+     */
+    201: LookupItem;
+};
+
+export type lookupsCreateIssuancePurposeResponse = lookupsCreateIssuancePurposeResponses[keyof lookupsCreateIssuancePurposeResponses];
+
 export type lookupsListAddressedOfficesData = {
     body?: never;
     path?: never;
@@ -4538,6 +4563,11 @@ export type lookupsListAddressedOfficesData = {
 };
 
 export type lookupsListAddressedOfficesResponses = {
+    /**
+     * Response Lookups-List Addressed Offices
+     *
+     * Successful Response
+     */
     200: Array<LookupItem>;
 };
 
@@ -4551,54 +4581,22 @@ export type lookupsCreateAddressedOfficeData = {
 };
 
 export type lookupsCreateAddressedOfficeErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type lookupsCreateAddressedOfficeError = lookupsCreateAddressedOfficeErrors[keyof lookupsCreateAddressedOfficeErrors];
 
 export type lookupsCreateAddressedOfficeResponses = {
+    /**
+     * Successful Response
+     */
     201: LookupItem;
 };
 
 export type lookupsCreateAddressedOfficeResponse = lookupsCreateAddressedOfficeResponses[keyof lookupsCreateAddressedOfficeResponses];
-
-export type lookupsRenameAddressedOfficeData = {
-    body: LookupNameIn;
-    path: { item_id: number };
-    query?: never;
-    url: '/api/v1/lookups/addressed-offices/{item_id}';
-};
-
-export type lookupsRenameAddressedOfficeErrors = {
-    422: HTTPValidationError;
-};
-
-export type lookupsRenameAddressedOfficeError = lookupsRenameAddressedOfficeErrors[keyof lookupsRenameAddressedOfficeErrors];
-
-export type lookupsRenameAddressedOfficeResponses = {
-    200: LookupItem;
-};
-
-export type lookupsRenameAddressedOfficeResponse = lookupsRenameAddressedOfficeResponses[keyof lookupsRenameAddressedOfficeResponses];
-
-export type lookupsDeleteAddressedOfficeData = {
-    body?: never;
-    path: { item_id: number };
-    query?: never;
-    url: '/api/v1/lookups/addressed-offices/{item_id}';
-};
-
-export type lookupsDeleteAddressedOfficeErrors = {
-    422: HTTPValidationError;
-};
-
-export type lookupsDeleteAddressedOfficeError = lookupsDeleteAddressedOfficeErrors[keyof lookupsDeleteAddressedOfficeErrors];
-
-export type lookupsDeleteAddressedOfficeResponses = {
-    204: void;
-};
-
-export type lookupsDeleteAddressedOfficeResponse = lookupsDeleteAddressedOfficeResponses[keyof lookupsDeleteAddressedOfficeResponses];
 
 export type lookupsListEducationalAttainmentsData = {
     body?: never;
@@ -4608,6 +4606,11 @@ export type lookupsListEducationalAttainmentsData = {
 };
 
 export type lookupsListEducationalAttainmentsResponses = {
+    /**
+     * Response Lookups-List Educational Attainments
+     *
+     * Successful Response
+     */
     200: Array<LookupItem>;
 };
 
@@ -4621,54 +4624,22 @@ export type lookupsCreateEducationalAttainmentData = {
 };
 
 export type lookupsCreateEducationalAttainmentErrors = {
+    /**
+     * Validation Error
+     */
     422: HTTPValidationError;
 };
 
 export type lookupsCreateEducationalAttainmentError = lookupsCreateEducationalAttainmentErrors[keyof lookupsCreateEducationalAttainmentErrors];
 
 export type lookupsCreateEducationalAttainmentResponses = {
+    /**
+     * Successful Response
+     */
     201: LookupItem;
 };
 
 export type lookupsCreateEducationalAttainmentResponse = lookupsCreateEducationalAttainmentResponses[keyof lookupsCreateEducationalAttainmentResponses];
-
-export type lookupsRenameEducationalAttainmentData = {
-    body: LookupNameIn;
-    path: { item_id: number };
-    query?: never;
-    url: '/api/v1/lookups/educational-attainments/{item_id}';
-};
-
-export type lookupsRenameEducationalAttainmentErrors = {
-    422: HTTPValidationError;
-};
-
-export type lookupsRenameEducationalAttainmentError = lookupsRenameEducationalAttainmentErrors[keyof lookupsRenameEducationalAttainmentErrors];
-
-export type lookupsRenameEducationalAttainmentResponses = {
-    200: LookupItem;
-};
-
-export type lookupsRenameEducationalAttainmentResponse = lookupsRenameEducationalAttainmentResponses[keyof lookupsRenameEducationalAttainmentResponses];
-
-export type lookupsDeleteEducationalAttainmentData = {
-    body?: never;
-    path: { item_id: number };
-    query?: never;
-    url: '/api/v1/lookups/educational-attainments/{item_id}';
-};
-
-export type lookupsDeleteEducationalAttainmentErrors = {
-    422: HTTPValidationError;
-};
-
-export type lookupsDeleteEducationalAttainmentError = lookupsDeleteEducationalAttainmentErrors[keyof lookupsDeleteEducationalAttainmentErrors];
-
-export type lookupsDeleteEducationalAttainmentResponses = {
-    204: void;
-};
-
-export type lookupsDeleteEducationalAttainmentResponse = lookupsDeleteEducationalAttainmentResponses[keyof lookupsDeleteEducationalAttainmentResponses];
 
 export type lookupsListStreetsData = {
     body?: never;
@@ -4755,6 +4726,186 @@ export type lookupsCreateTricycleAssociationResponses = {
 };
 
 export type lookupsCreateTricycleAssociationResponse = lookupsCreateTricycleAssociationResponses[keyof lookupsCreateTricycleAssociationResponses];
+
+export type lookupsDeleteIssuancePurposeData = {
+    body?: never;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/issuance-purposes/{item_id}';
+};
+
+export type lookupsDeleteIssuancePurposeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsDeleteIssuancePurposeError = lookupsDeleteIssuancePurposeErrors[keyof lookupsDeleteIssuancePurposeErrors];
+
+export type lookupsDeleteIssuancePurposeResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type lookupsDeleteIssuancePurposeResponse = lookupsDeleteIssuancePurposeResponses[keyof lookupsDeleteIssuancePurposeResponses];
+
+export type lookupsRenameIssuancePurposeData = {
+    body: LookupNameIn;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/issuance-purposes/{item_id}';
+};
+
+export type lookupsRenameIssuancePurposeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsRenameIssuancePurposeError = lookupsRenameIssuancePurposeErrors[keyof lookupsRenameIssuancePurposeErrors];
+
+export type lookupsRenameIssuancePurposeResponses = {
+    /**
+     * Successful Response
+     */
+    200: LookupItem;
+};
+
+export type lookupsRenameIssuancePurposeResponse = lookupsRenameIssuancePurposeResponses[keyof lookupsRenameIssuancePurposeResponses];
+
+export type lookupsDeleteAddressedOfficeData = {
+    body?: never;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/addressed-offices/{item_id}';
+};
+
+export type lookupsDeleteAddressedOfficeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsDeleteAddressedOfficeError = lookupsDeleteAddressedOfficeErrors[keyof lookupsDeleteAddressedOfficeErrors];
+
+export type lookupsDeleteAddressedOfficeResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type lookupsDeleteAddressedOfficeResponse = lookupsDeleteAddressedOfficeResponses[keyof lookupsDeleteAddressedOfficeResponses];
+
+export type lookupsRenameAddressedOfficeData = {
+    body: LookupNameIn;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/addressed-offices/{item_id}';
+};
+
+export type lookupsRenameAddressedOfficeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsRenameAddressedOfficeError = lookupsRenameAddressedOfficeErrors[keyof lookupsRenameAddressedOfficeErrors];
+
+export type lookupsRenameAddressedOfficeResponses = {
+    /**
+     * Successful Response
+     */
+    200: LookupItem;
+};
+
+export type lookupsRenameAddressedOfficeResponse = lookupsRenameAddressedOfficeResponses[keyof lookupsRenameAddressedOfficeResponses];
+
+export type lookupsDeleteEducationalAttainmentData = {
+    body?: never;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/educational-attainments/{item_id}';
+};
+
+export type lookupsDeleteEducationalAttainmentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsDeleteEducationalAttainmentError = lookupsDeleteEducationalAttainmentErrors[keyof lookupsDeleteEducationalAttainmentErrors];
+
+export type lookupsDeleteEducationalAttainmentResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type lookupsDeleteEducationalAttainmentResponse = lookupsDeleteEducationalAttainmentResponses[keyof lookupsDeleteEducationalAttainmentResponses];
+
+export type lookupsRenameEducationalAttainmentData = {
+    body: LookupNameIn;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/educational-attainments/{item_id}';
+};
+
+export type lookupsRenameEducationalAttainmentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsRenameEducationalAttainmentError = lookupsRenameEducationalAttainmentErrors[keyof lookupsRenameEducationalAttainmentErrors];
+
+export type lookupsRenameEducationalAttainmentResponses = {
+    /**
+     * Successful Response
+     */
+    200: LookupItem;
+};
+
+export type lookupsRenameEducationalAttainmentResponse = lookupsRenameEducationalAttainmentResponses[keyof lookupsRenameEducationalAttainmentResponses];
 
 export type lookupsDeleteStreetData = {
     body?: never;

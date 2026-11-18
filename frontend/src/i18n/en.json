@@ -1142,7 +1142,6 @@
         "loadError": "Could not load educational attainments",
         "empty": "No educational attainments yet",
         "deleteTitle": "Delete educational attainment?",
-        "deleteDescription": "Remove {{name}} from future choices? Existing issued certificates will keep the value saved on them.",
         "deleteDescription": "Remove {{name}} from future choices? Existing issued certificates will keep the value saved on them."
       },
       "addressedOffice": {
