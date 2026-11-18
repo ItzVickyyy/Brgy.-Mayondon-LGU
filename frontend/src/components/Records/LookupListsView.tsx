@@ -12,11 +12,12 @@ import {
   LoadingState,
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
+import { refreshLookups } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { Button } from "@/components/ui/button"
 import { notify } from "@/lib/notifications"
 import { readApiError } from "@/lib/residents"
 
-type LookupKind = "street" | "association"
+type LookupKind = "street" | "association" | "idType"
 type LookupAction = "create" | "rename" | "delete"
 
 async function changeLookup(
@@ -27,6 +28,8 @@ async function changeLookup(
 ): Promise<LookupItem | undefined> {
   if (action === "create") {
     if (!name) throw new Error(i18n.t("records.lookups.enterName"))
+    if (kind === "idType")
+      return (await LookupsService.createIdType({ body: { name } })).data
     return kind === "street"
       ? (await LookupsService.createStreet({ body: { name } })).data
       : (await LookupsService.createTricycleAssociation({ body: { name } }))
@@ -36,6 +39,13 @@ async function changeLookup(
   if (id === undefined) throw new Error(i18n.t("records.lookups.itemMissing"))
   if (action === "rename") {
     if (!name) throw new Error(i18n.t("records.lookups.enterName"))
+    if (kind === "idType")
+      return (
+        await LookupsService.renameIdType({
+          path: { item_id: id },
+          body: { name },
+        })
+      ).data
     return kind === "street"
       ? (
           await LookupsService.renameStreet({
@@ -51,7 +61,9 @@ async function changeLookup(
         ).data
   }
 
-  if (kind === "street") {
+  if (kind === "idType") {
+    await LookupsService.deleteIdType({ path: { item_id: id } })
+  } else if (kind === "street") {
     await LookupsService.deleteStreet({ path: { street_id: id } })
   } else {
     await LookupsService.deleteTricycleAssociation({ path: { item_id: id } })
@@ -59,7 +71,7 @@ async function changeLookup(
   return undefined
 }
 
-function LookupListPanel({
+export function LookupListPanel({
   kind,
   items,
   loading,
@@ -115,6 +127,9 @@ function LookupListPanel({
       setEditingName("")
       setDeleteTarget(null)
       void queryClient.invalidateQueries({ queryKey: ["lookups"] })
+      // The New Issuance form keeps its own copy of these lists: make it read them again.
+      refreshLookups()
+      void queryClient.invalidateQueries({ queryKey: ["issuance-lookups"] })
     },
     onError: (caught, input) => {
       const failure = readApiError(caught)
@@ -180,7 +195,7 @@ function LookupListPanel({
           onChange={(event) => setNewName(event.target.value)}
           className={formControlClass}
           placeholder={t(`records.lookups.${kind}.placeholder`)}
-          maxLength={150}
+          maxLength={kind === "idType" ? 50 : 150}
         />
         <Button type="submit" disabled={!newName.trim() || mutation.isPending}>
           <Plus aria-hidden="true" />
@@ -257,7 +272,7 @@ function LookupListPanel({
                         value={editingName}
                         onChange={(event) => setEditingName(event.target.value)}
                         className={formControlClass}
-                        maxLength={150}
+                        maxLength={kind === "idType" ? 50 : 150}
                       />
                     </label>
                     <div className="flex justify-end gap-2">
@@ -378,5 +393,32 @@ export function LookupListsView() {
         retry={() => void associationsQuery.refetch()}
       />
     </div>
+  )
+}
+
+const LIST_QUERIES = {
+  street: { key: "streets", load: () => LookupsService.listStreets() },
+  association: {
+    key: "tricycle-associations",
+    load: () => LookupsService.listTricycleAssociations(),
+  },
+  idType: { key: "id-types", load: () => LookupsService.listIdTypes() },
+} as const
+
+/** One editable list with its own loading: used inside Issuance settings. */
+export function LookupListSection({ kind }: { kind: LookupKind }) {
+  const source = LIST_QUERIES[kind]
+  const query = useQuery({
+    queryKey: ["lookups", source.key],
+    queryFn: async () => (await source.load()).data,
+  })
+  return (
+    <LookupListPanel
+      kind={kind}
+      items={query.data ?? []}
+      loading={query.isLoading}
+      failed={query.isError}
+      retry={() => void query.refetch()}
+    />
   )
 }

@@ -1,10 +1,11 @@
 """Lookup lists for the forms (read) and admin upkeep of two of them (write).
 
-Any signed-in user may read every list. Document types, sectors, ID types and
-issuance purposes are seeded by migration and read-only here. Streets and
-tricycle associations start empty; adding, renaming and removing them needs
-LOOKUPS_MANAGE (System Administrator only). A street or association that is
-already in use cannot be removed (409): rename it instead.
+Any signed-in user may read every list. Document types, sectors and issuance
+purposes are seeded by migration and read-only here. ID types are seeded by
+migration and may be added, renamed and removed by an administrator. Streets and
+tricycle associations start empty; adding, renaming and removing them, and the
+same for ID types, needs LOOKUPS_MANAGE (System Administrator only). An item
+that is already in use cannot be removed (409): rename it instead.
 """
 
 from typing import Annotated, Any
@@ -28,7 +29,12 @@ from app.models_foundation import (
     Street,
     TricycleAssociation,
 )
-from app.models_lookups import DocumentTypePublic, LookupItem, LookupNameIn
+from app.models_lookups import (
+    DocumentTypePublic,
+    IdTypeNameIn,
+    LookupItem,
+    LookupNameIn,
+)
 
 router = APIRouter(prefix="/lookups", tags=["lookups"])
 
@@ -78,7 +84,7 @@ def list_tricycle_associations(
     return _names(session, TricycleAssociation)
 
 
-# --- Admin upkeep for streets and tricycle associations ---------------------
+# --- Admin upkeep for streets, tricycle associations and ID types ----------
 
 
 def _name_taken(
@@ -152,7 +158,7 @@ def _rename(
     label: str,
     record_type: str,
 ) -> LookupItem:
-    item = _get_or_404(session, model, item_id, label.capitalize())
+    item = _get_or_404(session, model, item_id, label[0].upper() + label[1:])
     if _name_taken(session, model, body.name, except_id=item_id):
         raise HTTPException(status_code=409, detail=f"This {label} already exists")
     item.name = body.name
@@ -185,7 +191,7 @@ def _remove(
     label: str,
     record_type: str,
 ) -> Response:
-    item = _get_or_404(session, model, item_id, label.capitalize())
+    item = _get_or_404(session, model, item_id, label[0].upper() + label[1:])
     session.delete(item)
     record_audit_event(
         session,
@@ -269,4 +275,27 @@ def delete_tricycle_association(
         item_id,
         label="tricycle association",
         record_type="tricycle_association",
+    )
+
+
+@router.post("/id-types", response_model=LookupItem, status_code=201)
+def create_id_type(
+    body: IdTypeNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _create(session, user, IdType, body, label="ID type", record_type="id_type")
+
+
+@router.patch("/id-types/{item_id}", response_model=LookupItem)
+def rename_id_type(
+    item_id: int, body: IdTypeNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _rename(
+        session, user, IdType, item_id, body, label="ID type", record_type="id_type"
+    )
+
+
+@router.delete("/id-types/{item_id}", status_code=204)
+def delete_id_type(item_id: int, session: SessionDep, user: ManageUser) -> Response:
+    return _remove(
+        session, user, IdType, item_id, label="ID type", record_type="id_type"
     )

@@ -155,6 +155,9 @@
       "street_delete": "{{actor}} removed a street from the list.",
       "tricycle_association_create": "{{actor}} added a tricycle association to the list.",
       "tricycle_association_rename": "{{actor}} renamed a tricycle association in the list.",
+      "id_type_create": "{{actor}} added a valid ID type to the list.",
+      "id_type_rename": "{{actor}} renamed a valid ID type in the list.",
+      "id_type_delete": "{{actor}} removed a valid ID type from the list.",
       "tricycle_association_delete": "{{actor}} removed a tricycle association from the list."
     }
   },
@@ -438,6 +441,11 @@
         "create": "Street added",
         "rename": "Street renamed",
         "delete": "Street removed"
+      },
+      "id_type": {
+        "create": "Valid ID type added",
+        "rename": "Valid ID type renamed",
+        "delete": "Valid ID type removed"
       },
       "tricycle_association": {
         "create": "Tricycle association added",
@@ -1073,6 +1081,16 @@
         "empty": "No streets yet",
         "deleteTitle": "Delete street?"
       },
+      "idType": {
+        "title": "Valid IDs",
+        "description": "Choices for the Valid ID presented on issuance forms.",
+        "newName": "New valid ID name",
+        "placeholder": "Enter valid ID name",
+        "loading": "Loading valid IDs...",
+        "loadError": "Could not load valid IDs",
+        "empty": "No valid IDs yet",
+        "deleteTitle": "Delete valid ID?"
+      },
       "association": {
         "title": "Tricycle Associations",
         "description": "Used when recording franchise clearances.",
@@ -1113,12 +1131,24 @@
     "title": "Issuance Management",
     "subtitle": "Prepare Barangay IDs and certificates, print records, and review past issuances.",
     "printingSetup": "Printing setup",
+    "settingsButton": "Issuance settings",
     "newIssuance": "New Issuance",
     "print": "Print",
     "dismissMessage": "Dismiss message",
     "noticeDraft": "{{ref}} was saved as a draft.",
     "noticeDraftPlain": "The draft was saved as a draft.",
     "noticeIssued": "{{ref}} was recorded as issued.",
+    "settings": {
+      "title": "Issuance settings",
+      "description": "Printing setup, and the lists of choices used on issuance forms. Only administrators can change the lists.",
+      "descriptionStaff": "Line the typed text up with the pre-printed forms.",
+      "tabs": {
+        "printing": "Printing setup",
+        "idType": "Valid IDs",
+        "street": "Streets",
+        "association": "Tricycle associations"
+      }
+    },
     "printSetup": {
       "title": "Printing setup",
       "description": "Line the typed text up with the pre-printed forms. Saved on this computer only."

@@ -155,6 +155,9 @@
       "street_delete": "{{actor}} ang nag-alis ng kalye sa listahan.",
       "tricycle_association_create": "{{actor}} ang nagdagdag ng samahan ng tricycle sa listahan.",
       "tricycle_association_rename": "{{actor}} ang nagpalit ng pangalan ng samahan ng tricycle sa listahan.",
+      "id_type_create": "{{actor}} ang nagdagdag ng balidong ID sa listahan.",
+      "id_type_rename": "{{actor}} ang nagpalit ng pangalan ng balidong ID sa listahan.",
+      "id_type_delete": "{{actor}} ang nag-alis ng balidong ID sa listahan.",
       "tricycle_association_delete": "{{actor}} ang nag-alis ng samahan ng tricycle sa listahan."
     }
   },
@@ -438,6 +441,11 @@
         "create": "Nadagdag ang kalye",
         "rename": "Napalitan ang pangalan ng kalye",
         "delete": "Naalis ang kalye"
+      },
+      "id_type": {
+        "create": "Nadagdag ang balidong ID",
+        "rename": "Napalitan ang pangalan ng balidong ID",
+        "delete": "Naalis ang balidong ID"
       },
       "tricycle_association": {
         "create": "Nadagdag ang samahan ng tricycle",
@@ -1073,6 +1081,16 @@
         "empty": "Wala pang kalye",
         "deleteTitle": "Burahin ang kalye?"
       },
+      "idType": {
+        "title": "Mga balidong ID",
+        "description": "Mga mapagpipilian para sa balidong ID sa mga porma ng isyu.",
+        "newName": "Bagong pangalan ng balidong ID",
+        "placeholder": "Ilagay ang pangalan ng balidong ID",
+        "loading": "Nilo-load ang mga balidong ID...",
+        "loadError": "Hindi ma-load ang mga balidong ID",
+        "empty": "Wala pang balidong ID",
+        "deleteTitle": "Burahin ang balidong ID?"
+      },
       "association": {
         "title": "Mga Asosasyon ng Traysikel",
         "description": "Ginagamit sa pagtatala ng mga franchise clearance.",
@@ -1113,12 +1131,24 @@
     "title": "Pamamahala ng mga Isyu ng Dokumento",
     "subtitle": "Maghanda ng mga Barangay ID at sertipiko, mag-print ng mga talaan, at suriin ang mga nakaraang isyu.",
     "printingSetup": "Setup sa pag-print",
+    "settingsButton": "Mga setting ng isyu",
     "newIssuance": "Bagong Isyu",
     "print": "I-print",
     "dismissMessage": "Isara ang mensahe",
     "noticeDraft": "Na-save bilang draft ang {{ref}}.",
     "noticeDraftPlain": "Na-save bilang draft ang draft.",
     "noticeIssued": "Naitala bilang naisyu ang {{ref}}.",
+    "settings": {
+      "title": "Mga setting ng isyu",
+      "description": "Setup sa pag-print at ang mga listahan ng mapagpipilian sa mga porma. Mga administrator lang ang makapagbabago ng mga listahan.",
+      "descriptionStaff": "Ihanay ang tina-type na teksto sa mga naka-print nang porma.",
+      "tabs": {
+        "printing": "Setup sa pag-print",
+        "idType": "Mga balidong ID",
+        "street": "Mga kalye",
+        "association": "Mga asosasyon ng traysikel"
+      }
+    },
     "printSetup": {
       "title": "Setup sa pag-print",
       "description": "Iayon ang tinipang teksto sa mga pre-printed na porma. Nakaimbak lamang sa computer na ito."

@@ -87,6 +87,8 @@ export type IssuanceLookups = {
   purposes: string[]
   sectors: string[]
   idTypes: string[]
+  /** The ID types as saved on the server (real ids), in the order the form lists them. */
+  idTypeChoices: { id: number; name: string }[]
   puroks: string[]
   streets: string[]
   associations: string[]

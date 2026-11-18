@@ -788,6 +788,18 @@ export type IdStatusCounts = {
 };
 
 /**
+ * IdTypeNameIn
+ *
+ * Body for adding or renaming a valid ID type (the column holds 50 characters).
+ */
+export type IdTypeNameIn = {
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
  * IdentificationIn
  */
 export type IdentificationIn = {
@@ -4438,6 +4450,31 @@ export type lookupsListIdTypesResponses = {
 
 export type lookupsListIdTypesResponse = lookupsListIdTypesResponses[keyof lookupsListIdTypesResponses];
 
+export type lookupsCreateIdTypeData = {
+    body: IdTypeNameIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/id-types';
+};
+
+export type lookupsCreateIdTypeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsCreateIdTypeError = lookupsCreateIdTypeErrors[keyof lookupsCreateIdTypeErrors];
+
+export type lookupsCreateIdTypeResponses = {
+    /**
+     * Successful Response
+     */
+    201: LookupItem;
+};
+
+export type lookupsCreateIdTypeResponse = lookupsCreateIdTypeResponses[keyof lookupsCreateIdTypeResponses];
+
 export type lookupsListIssuancePurposesData = {
     body?: never;
     path?: never;
@@ -4661,6 +4698,66 @@ export type lookupsRenameTricycleAssociationResponses = {
 };
 
 export type lookupsRenameTricycleAssociationResponse = lookupsRenameTricycleAssociationResponses[keyof lookupsRenameTricycleAssociationResponses];
+
+export type lookupsDeleteIdTypeData = {
+    body?: never;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/id-types/{item_id}';
+};
+
+export type lookupsDeleteIdTypeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsDeleteIdTypeError = lookupsDeleteIdTypeErrors[keyof lookupsDeleteIdTypeErrors];
+
+export type lookupsDeleteIdTypeResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type lookupsDeleteIdTypeResponse = lookupsDeleteIdTypeResponses[keyof lookupsDeleteIdTypeResponses];
+
+export type lookupsRenameIdTypeData = {
+    body: IdTypeNameIn;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/id-types/{item_id}';
+};
+
+export type lookupsRenameIdTypeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsRenameIdTypeError = lookupsRenameIdTypeErrors[keyof lookupsRenameIdTypeErrors];
+
+export type lookupsRenameIdTypeResponses = {
+    /**
+     * Successful Response
+     */
+    200: LookupItem;
+};
+
+export type lookupsRenameIdTypeResponse = lookupsRenameIdTypeResponses[keyof lookupsRenameIdTypeResponses];
 
 export type officialsListOfficialsData = {
     body?: never;

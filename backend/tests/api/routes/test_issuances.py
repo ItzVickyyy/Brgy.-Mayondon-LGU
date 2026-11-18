@@ -13,6 +13,7 @@ from app.core.config import settings
 from app.core.dates import add_months, today_manila
 from app.models_foundation import (
     AuditLog,
+    IdType,
     IssuancePurpose,
     Official,
     Street,
@@ -44,6 +45,7 @@ def _tidy_up(db: Session) -> Generator[None]:
     db.execute(
         delete(IssuancePurpose).where(col(IssuancePurpose.name).like("ZZ test %"))
     )
+    db.execute(delete(IdType).where(col(IdType.name).like("ZZ test %")))
     db.commit()
 
 
@@ -1186,3 +1188,38 @@ def test_history_date_range_must_be_in_order(
         f"{ISS}/", headers=staff_token_headers, params={"date_from": "not-a-date"}
     )
     assert r.status_code == 422
+
+
+def test_id_type_in_use_cannot_be_deleted_but_can_be_renamed(
+    client: TestClient,
+    db: Session,
+    staff_token_headers: Headers,
+    superuser_token_headers: Headers,
+    street_id: int,
+) -> None:
+    """An ID type shown on an issuance stays; renaming it is the way to change it."""
+    admin = superuser_token_headers
+    r = client.post(
+        f"{API}/lookups/id-types",
+        headers=admin,
+        json={"name": f"ZZ test {random_lower_string()[:8]}"},
+    )
+    assert r.status_code == 201, r.text
+    id_type = r.json()
+    resident = _resident(client, staff_token_headers, street_id)
+    _clearance(
+        client,
+        staff_token_headers,
+        resident["id"],
+        identification={"id_type_id": id_type["id"], "id_number": "X-1"},
+    )
+    r = client.delete(f"{API}/lookups/id-types/{id_type['id']}", headers=admin)
+    assert r.status_code == 409
+    assert "in use" in r.json()["detail"]
+    assert db.get(IdType, id_type["id"]) is not None
+    r = client.patch(
+        f"{API}/lookups/id-types/{id_type['id']}",
+        headers=admin,
+        json={"name": f"ZZ test {random_lower_string()[:8]}"},
+    )
+    assert r.status_code == 200

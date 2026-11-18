@@ -369,7 +369,7 @@ export function HelpDialog(props: DialogProps) {
         <Section title="Text does not line up with the blanks">
           <Steps
             items={[
-              "On Issuance Management, choose Printing setup.",
+              "On Issuance Management, choose Issuance settings, then Printing setup.",
               "Print the calibration sheet on plain paper. Set the printer to 100% scale with no headers, footers or fit-to-page.",
               "Hold the sheet against the pre-printed form and check where the red boxes land.",
               "Enter how far to shift right and down (in points), then print the sheet again until the boxes sit on the blanks.",

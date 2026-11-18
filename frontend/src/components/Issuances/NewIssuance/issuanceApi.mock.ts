@@ -201,6 +201,9 @@ export const issuanceApi = {
       purposes: [...purposes],
       sectors: [...indigencySectorOptions],
       idTypes: [...new Set(["CTC", ...idTypeOptions])],
+      idTypeChoices: [...new Set(["CTC", ...idTypeOptions])].map(
+        (name, index) => ({ id: index + 1, name }),
+      ),
       puroks: [
         "Purok 1",
         "Purok 2",

@@ -130,7 +130,7 @@ Six print templates are currently defined in `frontend/src/lib/print/templates.t
 | Certificate of Indigency | `Barangay_Certification_of_Indigency.docx` | `indigency` |
 | Certification for assistance request (also replaces the retired Marginalized Sector / Pagpapatunay certificate; the health condition is never printed) | Page 2 of `Barangay_Certification_of_Marginalized_Sector.docx` | `assistance` |
 
-The Issuances page has a **Printing setup** screen for selecting a template, saving per-template X/Y calibration offsets, printing a calibration sheet and resetting offsets. Offsets are stored in browser local storage. The default positions are estimates and still require visual comparison and real-paper calibration.
+The Issuances page has an **Issuance settings** button (patch 142) that opens a pop-up; its **Printing setup** tab is a screen for selecting a template, saving per-template X/Y calibration offsets, printing a calibration sheet and resetting offsets. Offsets are stored in browser local storage. The default positions are estimates and still require visual comparison and real-paper calibration.
 
 The following documents have **no print template** yet: Residency, First-Time Jobseekers, Barangay ID front and Barangay ID back. (PhilHealth Certification was removed from the app entirely; it is no longer a document type.) Confirm the intended output and approved source format before adding templates.
 
@@ -158,7 +158,7 @@ Required fields and validation rules remain **unconfirmed**. Do not treat the pr
 4. Is residency duration entered manually or calculated from an approved start date?
 5. Which fields are mandatory for each document? **(D-14)**
 6. Dimensions, orientation, printer models and photo dimensions for each template. Does every workstation use the same printer settings? **(D-17)**
-7. Approved purposes, sector options, ID types, receipt values, default notes and "addressed to" wording.
+7. Approved purposes, sector options, ID types (editable by an administrator in Issuance settings since patch 142; the New Issuance form holds the real id of the chosen ID type, not its place in a list), receipt values, default notes and "addressed to" wording.
 8. Exact name and fields of the assistance certification — is it the Damayan form? **(D-13)**
 9. Where does the birthdate come from, and is the photo captured, uploaded or taken from an existing resident record? **(D-18)**
 10. Physical samples of both ID sides and the assistance certification for calibration.

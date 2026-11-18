@@ -419,13 +419,6 @@ const detailSections: Record<DocumentCode, string[]> = {
   BARANGAY_ID: ["barangay_id"],
 }
 
-function idTypeName(code: DocumentCode, index: number) {
-  const field = documentConfig[code].fields.find(
-    (item) => item.name === "idType",
-  )
-  return index > 0 ? (field?.options ?? [])[index - 1] : undefined
-}
-
 /**
  * Sections the form has filled in completely become API sections. A section that is
  * not complete is `null`, which removes it from a draft (the API refuses half-filled sections).
@@ -438,17 +431,17 @@ async function buildSections(input: IssuanceInput, data: LookupData) {
 
   if (allowed.includes("identification")) {
     const identification = input.identification
-    const typeName = identification
-      ? idTypeName(code, identification.idTypeId)
+    // The form holds the real id of the chosen ID type (0 = nothing chosen yet).
+    const typeId = identification?.idTypeId
+      ? data.idTypes.find((item) => item.id === identification.idTypeId)?.id
       : undefined
-    const typeId = typeName ? findByName(data.idTypes, typeName)?.id : undefined
     if (identification && text(identification.idNumber)) {
-      if (!typeName) {
+      if (!identification.idTypeId) {
         throw new Error("Choose a valid ID type before saving this issuance.")
       }
       if (!typeId) {
         throw new Error(
-          `The ID type "${typeName}" is no longer available. Ask an administrator to restore it, then try again.`,
+          "The chosen ID type is no longer available. Choose another ID type, then try again.",
         )
       }
       sections.identification = {
@@ -933,6 +926,9 @@ export const issuanceApi = {
       purposes: byId(data.purposes),
       sectors: byId(data.sectors),
       idTypes: byId(data.idTypes),
+      idTypeChoices: [...data.idTypes]
+        .sort((a, b) => a.id - b.id)
+        .map(({ id, name }) => ({ id, name })),
       puroks: [
         "Purok 1",
         "Purok 2",
@@ -949,27 +945,20 @@ export const issuanceApi = {
   },
 
   /**
-   * The form keeps an ID type and each sector as a position in its own option list
-   * (the list in documentConfig), while a saved issuance holds the lookup ids. This
-   * turns the saved ids back into positions by NAME, so it does not matter whether the
-   * database ids happen to follow the order of the lists in the code.
+   * The form keeps the real id of the chosen ID type, so nothing is looked up by its
+   * place in a list and an administrator may add, rename or remove ID types. Each
+   * sector is still kept as a position in its own option list (the list in
+   * documentConfig); this turns the saved sector ids back into positions by NAME.
    */
   async toFormPositions(
-    code: DocumentCode,
     payload: {
       identification?: { idTypeId: number } | undefined
       sectors?: { sectorId: number; idNumber?: string | undefined }[]
     },
   ) {
     const data = await loadLookups()
-    const idOptions =
-      documentConfig[code].fields.find((field) => field.name === "idType")
-        ?.options ?? []
-    const idName = data.idTypes.find(
-      (item) => item.id === payload.identification?.idTypeId,
-    )?.name
-    const idTypePosition = idName ? idOptions.indexOf(idName) + 1 : 0
-    if (payload.identification?.idTypeId && idTypePosition < 1) {
+    const idTypeId = payload.identification?.idTypeId ?? 0
+    if (idTypeId && !data.idTypes.some((item) => item.id === idTypeId)) {
       throw new Error(
         "The saved ID type is no longer available. Ask an administrator to restore it before continuing this draft.",
       )
@@ -987,7 +976,7 @@ export const issuanceApi = {
       sectors.push({ sectorId: position, idNumber: sector.idNumber })
       sectorNames.push(name)
     }
-    return { idTypePosition, sectors, sectorNames }
+    return { idTypeId, sectors, sectorNames }
   },
 
   async getOfficials(): Promise<OfficialChoice[]> {

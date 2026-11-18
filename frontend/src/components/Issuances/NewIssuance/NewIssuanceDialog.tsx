@@ -159,7 +159,13 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const seriesOn = documentType === "BARANGAY_ID" && seriesQuery.data?.enabled === true
   const canTypeIdNumber = isSystemAdministrator(signedInUser)
   const baseConfig = documentConfig[documentType]
-  const config = (seriesOn ? { ...baseConfig, fields: baseConfig.fields.map((candidate) => (candidate.name === "idNumber" ? { ...candidate, required: false } : candidate)) } : baseConfig) as typeof baseConfig
+  // The ID types come from the server so an administrator can add, rename or remove them (Issuance settings).
+  const idTypeChoices = lookupsQuery.data?.idTypeChoices ?? []
+  const idTypeNameOf = (id: unknown) => idTypeChoices.find((item) => item.id === Number(id))?.name ?? ""
+  const idTypeIdOf = (name: string) => idTypeChoices.find((item) => item.name === name)?.id ?? 0
+  const config = (seriesOn || idTypeChoices.length > 0
+    ? { ...baseConfig, fields: baseConfig.fields.map((candidate) => (seriesOn && candidate.name === "idNumber" ? { ...candidate, required: false } : candidate.name === "idType" && idTypeChoices.length > 0 ? { ...candidate, options: idTypeChoices.map((item) => item.name) } : candidate)) }
+    : baseConfig) as typeof baseConfig
   // Read during render so react-hook-form keeps isDirty up to date for the discard prompt.
   const formDirty = form.formState.isDirty
   const allResidents = useMemo(() => residents, [residents])
@@ -372,12 +378,12 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         : field.name === "witnessName" ? witnessDisplayName(details as unknown as Record<string, unknown>)
         : (details as unknown as Record<string, unknown>)[field.name]
     // idTypeId is stored as a number (lookup id) but the <select> options are ID names, so translate it back for display.
-    const idTypeLabel = field.group === "identity" && field.name === "idType" ? (field.options ?? [])[Number(fieldValue ?? 0) - 1] ?? "" : undefined
+    const idTypeLabel = field.group === "identity" && field.name === "idType" ? idTypeNameOf(fieldValue) : undefined
     const value = idTypeLabel ?? fieldValue ?? getDefaultToday(field.default)
     if (field.showWhen && !field.showWhen({ ...(details as unknown as Record<string, unknown>), for: (details as unknown as Record<string, unknown>).forSelf === false ? "Someone else" : "Myself" })) return null
     const onValueChange = (nextValue: string | boolean) => {
       if (field.group === "identity") {
-        if (field.name === "idType") setIdentity("idTypeId", Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1))
+        if (field.name === "idType") setIdentity("idTypeId", idTypeIdOf(String(nextValue)))
         else if (field.name === "idNumber") setIdentity("idNumber", String(nextValue))
         else if (field.name === "idPlaceOfIssue") setIdentity("placeOfIssue", String(nextValue))
         else setIdentity("dateOfIssue", String(nextValue))
@@ -512,14 +518,14 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         setSaving(false)
         return
       }
-      const positions = await issuanceApi.toFormPositions(record.documentType, record.payload)
+      const positions = await issuanceApi.toFormPositions(record.payload)
       const tricycle = record.documentType === "FRANCHISE_CLEARANCE"
         ? await issuanceApi.getTricycle((record.payload.details as { tricycleId?: string }).tricycleId)
         : undefined
       if (!active) return
       const restored = {
         ...record.payload,
-        identification: record.payload.identification ? { ...record.payload.identification, idTypeId: positions.idTypePosition } : undefined,
+        identification: record.payload.identification ? { ...record.payload.identification, idTypeId: positions.idTypeId } : undefined,
         sectors: positions.sectors,
         purposeText: issuanceApi.getPurposeLabel(record.payload.purposeId) ?? "",
         residentId: record.residentId,
@@ -921,7 +927,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       const identityValues = identification as unknown as Record<string, unknown> | undefined
       const key = field.name === "idType" ? "idTypeId" : field.name === "idNumber" ? "idNumber" : field.name === "idPlaceOfIssue" ? "placeOfIssue" : "dateOfIssue"
       value = identityValues?.[key]
-      if (field.name === "idType") value = field.options?.[Number(value ?? 0) - 1] ?? ""
+      if (field.name === "idType") value = idTypeNameOf(value)
     } else if (field.group === "payment") {
       const paymentValues = payment as unknown as Record<string, unknown> | undefined
       value = field.name === "isFree" ? paymentValues?.isFree ? t("issuances.new.options.Yes") : t("issuances.new.options.No") : paymentValues?.[paymentKeyOf(field.name)]

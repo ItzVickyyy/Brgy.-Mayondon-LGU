@@ -46,6 +46,12 @@ class LookupNameIn(SQLModel):
         return value
 
 
+class IdTypeNameIn(LookupNameIn):
+    """Body for adding or renaming a valid ID type (the column holds 50 characters)."""
+
+    name: str = Field(min_length=1, max_length=50)
+
+
 class OfficialPublic(SQLModel):
     id: uuid.UUID
     full_name: str

@@ -3,19 +3,12 @@ import { createFileRoute } from "@tanstack/react-router"
 import { Plus, Settings2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { CalibrationPanel } from "@/components/Issuances/CalibrationPanel"
 import { IssuanceHistory } from "@/components/Issuances/IssuanceHistory"
+import { IssuanceSettingsDialog } from "@/components/Issuances/IssuanceSettingsDialog"
 import { type DocumentCode, documentConfig } from "@/components/Issuances/NewIssuance/documentConfig"
 import { NewIssuanceDialog } from "@/components/Issuances/NewIssuance/NewIssuanceDialog"
 import { usePrintIssuance } from "@/components/Issuances/usePrintIssuance"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
 import { pageTitle } from "@/config/site"
 import { notify } from "@/lib/notifications"
 
@@ -73,7 +66,7 @@ function IssuancesManagement() {
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button type="button" variant="outline" className="min-h-11 w-full sm:w-auto" onClick={() => setPrintSetupOpen(true)}>
             <Settings2 aria-hidden="true" />
-            {t("issuances.printingSetup")}
+            {t("issuances.settingsButton")}
           </Button>
           <Button
             size="default"
@@ -140,15 +133,7 @@ function IssuancesManagement() {
         }}
       />
 
-      <Dialog open={printSetupOpen} onOpenChange={setPrintSetupOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{t("issuances.printSetup.title")}</DialogTitle>
-            <DialogDescription>{t("issuances.printSetup.description")}</DialogDescription>
-          </DialogHeader>
-          <CalibrationPanel />
-        </DialogContent>
-      </Dialog>
+      <IssuanceSettingsDialog open={printSetupOpen} onOpenChange={setPrintSetupOpen} />
       {printOverlay}
     </div>
   )

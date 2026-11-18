@@ -8,7 +8,13 @@ from fastapi.testclient import TestClient
 from sqlmodel import Session, col, delete, select
 
 from app.core.config import settings
-from app.models_foundation import AuditLog, Official, Street, TricycleAssociation
+from app.models_foundation import (
+    AuditLog,
+    IdType,
+    Official,
+    Street,
+    TricycleAssociation,
+)
 from app.models_residents import Resident
 from tests.utils.utils import random_lower_string
 
@@ -25,6 +31,7 @@ def _tidy_up(db: Session) -> Generator[None]:
     db.execute(delete(Street))
     db.execute(delete(TricycleAssociation))
     db.execute(delete(Official))
+    db.execute(delete(IdType).where(col(IdType.name).like("ZZ test %")))
     db.commit()
 
 
@@ -83,7 +90,7 @@ def test_staff_and_admin_read_seeded_lookups(
 def test_seeded_lookups_are_read_only(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
-    for path in ("sectors", "id-types", "issuance-purposes", "document-types"):
+    for path in ("sectors", "issuance-purposes", "document-types"):
         r = client.post(
             f"{LK}/{path}", json={"name": "Nope"}, headers=superuser_token_headers
         )
@@ -263,6 +270,78 @@ def test_admin_tricycle_association_lifecycle(
     )
     assert r.status_code == 204
     assert db.get(TricycleAssociation, aid) is None
+
+
+def test_admin_id_type_lifecycle(
+    client: TestClient, db: Session, superuser_token_headers: dict[str, str]
+) -> None:
+    name = f"ZZ test {random_lower_string()[:8]}"
+    r = client.post(
+        f"{LK}/id-types", json={"name": f"  {name}  "}, headers=superuser_token_headers
+    )
+    assert r.status_code == 201
+    assert r.json()["name"] == name  # trimmed
+    tid = r.json()["id"]
+    # The same name in other letters is a duplicate.
+    r = client.post(
+        f"{LK}/id-types", json={"name": name.upper()}, headers=superuser_token_headers
+    )
+    assert r.status_code == 409
+    assert r.json()["detail"] == "This ID type already exists"
+    listed = client.get(f"{LK}/id-types", headers=superuser_token_headers).json()
+    assert {"id": tid, "name": name} in listed
+    new_name = f"ZZ test {random_lower_string()[:8]}"
+    r = client.patch(
+        f"{LK}/id-types/{tid}", json={"name": new_name}, headers=superuser_token_headers
+    )
+    assert r.status_code == 200 and r.json()["name"] == new_name
+    r = client.delete(f"{LK}/id-types/{tid}", headers=superuser_token_headers)
+    assert r.status_code == 204
+    assert db.get(IdType, tid) is None
+    assert (
+        client.delete(
+            f"{LK}/id-types/{tid}", headers=superuser_token_headers
+        ).status_code
+        == 404
+    )
+    db.expire_all()
+    assert {"id_type.create", "id_type.rename", "id_type.delete"} <= set(
+        _audit_actions(db, str(tid))
+    )
+
+
+def test_id_type_name_is_limited_to_fifty_characters(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    r = client.post(
+        f"{LK}/id-types", json={"name": "Z" * 51}, headers=superuser_token_headers
+    )
+    assert r.status_code == 422
+    r = client.post(
+        f"{LK}/id-types", json={"name": "   "}, headers=superuser_token_headers
+    )
+    assert r.status_code == 422
+
+
+def test_staff_cannot_change_id_types(
+    client: TestClient, staff_token_headers: dict[str, str]
+) -> None:
+    assert (
+        client.post(
+            f"{LK}/id-types", json={"name": "X"}, headers=staff_token_headers
+        ).status_code
+        == 403
+    )
+    assert (
+        client.patch(
+            f"{LK}/id-types/1", json={"name": "X"}, headers=staff_token_headers
+        ).status_code
+        == 403
+    )
+    assert (
+        client.delete(f"{LK}/id-types/1", headers=staff_token_headers).status_code
+        == 403
+    )
 
 
 # --- Officials --------------------------------------------------------------
