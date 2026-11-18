@@ -166,8 +166,20 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   // The sectors come from the server too; the form keeps each chosen sector's real id.
   const sectorChoices = lookupsQuery.data?.sectorChoices ?? []
   const sectorIdOf = (name: string) => sectorChoices.find((item) => item.name === name)?.id ?? 0
-  const config = (seriesOn || idTypeChoices.length > 0 || sectorChoices.length > 0
-    ? { ...baseConfig, fields: baseConfig.fields.map((candidate) => (seriesOn && candidate.name === "idNumber" ? { ...candidate, required: false } : candidate.name === "idType" && idTypeChoices.length > 0 ? { ...candidate, options: idTypeChoices.map((item) => item.name) } : candidate.name === "sector" && sectorChoices.length > 0 ? { ...candidate, options: sectorChoices.map((item) => item.name) } : candidate)) }
+  const purposeChoices = lookupsQuery.data?.purposeChoices ?? []
+  const purposeNames = purposeChoices.map((item) => item.name)
+  const config = (seriesOn || idTypeChoices.length > 0 || sectorChoices.length > 0 || purposeNames.length > 0
+    ? { ...baseConfig, fields: baseConfig.fields.map((candidate) => (
+        seriesOn && candidate.name === "idNumber"
+          ? { ...candidate, required: false }
+          : candidate.name === "idType" && idTypeChoices.length > 0
+            ? { ...candidate, options: idTypeChoices.map((item) => item.name) }
+            : candidate.name === "sector" && sectorChoices.length > 0
+              ? { ...candidate, options: sectorChoices.map((item) => item.name) }
+              : candidate.name === "purpose" && purposeNames.length > 0
+                ? { ...candidate, options: documentType === "RESIDENCY" ? purposeNames.filter((name) => !residencyExcludedPurposes.includes(name)) : purposeNames }
+                : candidate
+      )) }
     : baseConfig) as typeof baseConfig
   // Read during render so react-hook-form keeps isDirty up to date for the discard prompt.
   const formDirty = form.formState.isDirty

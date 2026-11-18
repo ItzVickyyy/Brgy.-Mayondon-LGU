@@ -16,7 +16,7 @@ Last updated: November 5, 2026
 | `Residency.docx` | Residency certification wording. May contain sensitive narratives; do not reuse as defaults |
 | `First-Time Jobseekers.docx` | Applicant information sheet, oath of undertaking and barangay certification. Use the structure only |
 
-The supplied workbook has **different purpose lists on different sheets**. The prototype uses the `BRGY CLEARANCE` list for Barangay Clearance. The `CLEARANCE POSTAL` list is not mapped to any form yet. Only those two sheets were confirmed to have active Excel dropdown validation. Check option lists against the original workbook and confirm with the barangay **(D-14)**.
+The supplied workbook has **different purpose lists on different sheets**. Those lists remain the source material to review with the barangay **(D-14)**. In the current application, the administrator-maintained `IssuancePurpose` list is shared by Clearance and Indigency; Residency hides the three assistance-purpose names in `residencyExcludedPurposes`. This shared-list behavior is an implementation choice, not confirmation that the barangay approved merging the workbook's separate lists. The `CLEARANCE POSTAL` list still needs an explicit mapping decision.
 
 ## 2. Document list
 

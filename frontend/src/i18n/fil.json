@@ -161,7 +161,10 @@
       "sector_create": "{{actor}} ang nagdagdag ng sektor sa listahan.",
       "sector_rename": "{{actor}} ang nagpalit ng pangalan ng sektor sa listahan.",
       "sector_delete": "{{actor}} ang nag-alis ng sektor sa listahan.",
-      "tricycle_association_delete": "{{actor}} ang nag-alis ng samahan ng tricycle sa listahan."
+      "tricycle_association_delete": "{{actor}} ang nag-alis ng samahan ng tricycle sa listahan.",
+      "issuance_purpose_create": "{{actor}} ang nagdagdag ng layunin ng dokumento sa listahan.",
+      "issuance_purpose_rename": "{{actor}} ang nagpalit ng pangalan ng layunin ng dokumento sa listahan.",
+      "issuance_purpose_delete": "{{actor}} ang nag-alis ng layunin ng dokumento sa listahan."
     }
   },
   "logoutDialog": {
@@ -454,6 +457,11 @@
         "create": "Nadagdag ang sektor",
         "rename": "Napalitan ang pangalan ng sektor",
         "delete": "Naalis ang sektor"
+      },
+      "issuance_purpose": {
+        "create": "Nadagdag ang layunin ng dokumento",
+        "rename": "Napalitan ang pangalan ng layunin ng dokumento",
+        "delete": "Naalis ang layunin ng dokumento"
       },
       "tricycle_association": {
         "create": "Nadagdag ang samahan ng tricycle",
@@ -1109,6 +1117,16 @@
         "empty": "Wala pang sektor",
         "deleteTitle": "Burahin ang sektor?"
       },
+      "purpose": {
+        "title": "Mga layunin ng dokumento",
+        "description": "Mga pinagsasaluhang pagpipilian sa mga porma ng clearance at sertipikasyon. Kapag pinalitan ang pangalan, magbabago rin ang label sa mga dating isyu at ulat.",
+        "newName": "Bagong pangalan ng layunin",
+        "placeholder": "Ilagay ang layunin",
+        "loading": "Nilo-load ang mga layunin...",
+        "loadError": "Hindi ma-load ang mga layunin",
+        "empty": "Wala pang mga layunin",
+        "deleteTitle": "Burahin ang layunin?"
+      },
       "association": {
         "title": "Mga Asosasyon ng Traysikel",
         "description": "Ginagamit sa pagtatala ng mga franchise clearance.",
@@ -1165,7 +1183,8 @@
         "idType": "Mga balidong ID",
         "sector": "Mga sektor",
         "street": "Mga kalye",
-        "association": "Mga asosasyon ng traysikel"
+        "association": "Mga asosasyon ng traysikel",
+        "purpose": "Mga layunin"
       }
     },
     "printSetup": {

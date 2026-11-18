@@ -138,6 +138,12 @@ Inspect the generated migration — autogenerate is a starting point, not a guar
 bash scripts/generate-client.sh
 ```
 
+### Editable issuance lookup lists
+
+`/api/v1/lookups/issuance-purposes` is readable by any signed-in user. Only users with `LOOKUPS_MANAGE` (System Administrator) may create, rename or delete a purpose. The list uses `IssuancePurpose` rows and the existing `LookupNameIn` validation (trimmed, 1–150 characters). A purpose referenced by an issuance cannot be deleted (409); rename it instead. Issuances store the purpose ID, so a rename changes the displayed label on existing records and purpose reports. Each change writes an `issuance_purpose.create`, `.rename` or `.delete` audit event.
+
+The Issuance settings dialog exposes the list to administrators. New Issuance loads purpose names and IDs from the server. Clearance and Indigency use the shared list; Residency hides the three assistance-only names in `residencyExcludedPurposes`. That exclusion is name-based, so renaming one of those entries removes it from the Residency exclusion. The mock issuance API supplies deterministic IDs for frontend-only tests.
+
 ## 8. Security and privacy rules for contributors
 
 - Never commit `.env`, credentials, API keys, tokens or production secrets; `.env.example` holds names and safe placeholders only.

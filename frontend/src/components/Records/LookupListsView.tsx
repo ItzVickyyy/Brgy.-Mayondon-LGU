@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button"
 import { notify } from "@/lib/notifications"
 import { readApiError } from "@/lib/residents"
 
-type LookupKind = "street" | "association" | "idType" | "sector"
+type LookupKind = "street" | "association" | "idType" | "sector" | "purpose"
 type LookupAction = "create" | "rename" | "delete"
 
 /** The most characters a name may have: it matches the column in the database. */
@@ -26,6 +26,7 @@ const NAME_LIMIT: Record<LookupKind, number> = {
   association: 150,
   idType: 50,
   sector: 100,
+  purpose: 150,
 }
 
 async function changeLookup(
@@ -40,6 +41,8 @@ async function changeLookup(
       return (await LookupsService.createIdType({ body: { name } })).data
     if (kind === "sector")
       return (await LookupsService.createSector({ body: { name } })).data
+    if (kind === "purpose")
+      return (await LookupsService.createIssuancePurpose({ body: { name } })).data
     return kind === "street"
       ? (await LookupsService.createStreet({ body: { name } })).data
       : (await LookupsService.createTricycleAssociation({ body: { name } }))
@@ -63,6 +66,13 @@ async function changeLookup(
           body: { name },
         })
       ).data
+    if (kind === "purpose")
+      return (
+        await LookupsService.renameIssuancePurpose({
+          path: { item_id: id },
+          body: { name },
+        })
+      ).data
     return kind === "street"
       ? (
           await LookupsService.renameStreet({
@@ -82,6 +92,8 @@ async function changeLookup(
     await LookupsService.deleteIdType({ path: { item_id: id } })
   } else if (kind === "sector") {
     await LookupsService.deleteSector({ path: { item_id: id } })
+  } else if (kind === "purpose") {
+    await LookupsService.deleteIssuancePurpose({ path: { item_id: id } })
   } else if (kind === "street") {
     await LookupsService.deleteStreet({ path: { street_id: id } })
   } else {
@@ -423,6 +435,10 @@ const LIST_QUERIES = {
   },
   idType: { key: "id-types", load: () => LookupsService.listIdTypes() },
   sector: { key: "sectors", load: () => LookupsService.listSectors() },
+  purpose: {
+    key: "issuance-purposes",
+    load: () => LookupsService.listIssuancePurposes(),
+  },
 } as const
 
 /** One editable list with its own loading: used inside Issuance settings. */

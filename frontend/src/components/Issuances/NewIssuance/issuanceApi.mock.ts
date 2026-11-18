@@ -1,4 +1,7 @@
-import { clearancePurposeOptions } from "@/components/Issuances/config"
+import {
+  clearancePurposeOptions,
+  indigencyPurposeOptions,
+} from "@/components/Issuances/config"
 import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import { type DocumentCode, documentConfig } from "./documentConfig"
 import {
@@ -26,7 +29,8 @@ let residents: ResidentRecord[] = []
 let issuances: MockIssuance[] = []
 let issuanceCounter = 0
 let streets = ["Rizal Street", "Mabini Street", "Bonifacio Street"]
-let purposes = [...clearancePurposeOptions]
+let purposes = [...new Set([...clearancePurposeOptions, ...indigencyPurposeOptions])]
+const purposeChoices = purposes.map((name, index) => ({ id: index + 1, name }))
 let associations = ["Mayondon Tricycle Operators and Drivers Association"]
 let mockTricycles: {
   id: string
@@ -50,12 +54,10 @@ function toStoredPayload(
   } = input
   const purposeId =
     input.purposeId ??
-    (purposeText?.trim()
-      ? purposes.findIndex(
-          (purpose) =>
-            purpose.toLowerCase() === purposeText.trim().toLowerCase(),
-        ) + 1
-      : undefined)
+    purposeChoices.find(
+      (purpose) =>
+        purpose.name.toLowerCase() === purposeText?.trim().toLowerCase(),
+    )?.id
   let storedDetails: StoredDocumentDetails
   if (details.type === "FRANCHISE_CLEARANCE") {
     storedDetails = { type: "FRANCHISE_CLEARANCE", tricycleId }
@@ -98,7 +100,7 @@ export const issuanceApi = {
   },
 
   getPurposeLabel(id?: number) {
-    return id ? purposes[id - 1] : undefined
+    return purposeChoices.find((purpose) => purpose.id === id)?.name
   },
 
   async searchResidents(query = ""): Promise<ResidentRecord[]> {
@@ -199,6 +201,7 @@ export const issuanceApi = {
     return {
       documentTypes: Object.values(documentConfig),
       purposes: [...purposes],
+      purposeChoices: [...purposeChoices],
       sectors: [...indigencySectorOptions],
       idTypes: [...new Set(["CTC", ...idTypeOptions])],
       idTypeChoices: [...new Set(["CTC", ...idTypeOptions])].map(
@@ -225,7 +228,7 @@ export const issuanceApi = {
     }
   },
 
-  /** The lists the print code reads, as {id, name}: stored ids are 1-based positions here. */
+  /** The mock API gives static lists deterministic IDs for form and print tests. */
   async getPrintLookups() {
     const lookups = await this.getLookups()
     const named = (names: string[]) =>
@@ -233,7 +236,7 @@ export const issuanceApi = {
     return {
       sectors: named(lookups.sectors),
       idTypes: named(lookups.idTypes),
-      purposes: named(lookups.purposes),
+      purposes: lookups.purposeChoices,
     }
   },
 

@@ -633,6 +633,36 @@ def test_new_purpose_is_remembered_only_when_issued(
     db.commit()
 
 
+def test_used_issuance_purpose_cannot_be_deleted(
+    client: TestClient,
+    staff_token_headers: Headers,
+    superuser_token_headers: Headers,
+    street_id: int,
+    db: Session,
+) -> None:
+    resident = _resident(client, staff_token_headers, street_id)
+    name = f"ZZ test purpose {random_lower_string()[:8]}"
+    draft = _clearance(client, staff_token_headers, resident["id"])
+    issued = _issue(client, staff_token_headers, draft["id"], purpose_name=name)
+    purpose_id = issued["purpose_id"]
+    renamed = client.patch(
+        f"{API}/lookups/issuance-purposes/{purpose_id}",
+        headers=superuser_token_headers,
+        json={"name": f"{name} renamed"},
+    )
+    assert renamed.status_code == 200, renamed.text
+    response = client.delete(
+        f"{API}/lookups/issuance-purposes/{purpose_id}",
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 409, response.text
+    db.rollback()
+    assert db.get(IssuancePurpose, purpose_id) is not None
+    db.execute(delete(Issuance).where(col(Issuance.purpose_id) == purpose_id))
+    db.execute(delete(IssuancePurpose).where(col(IssuancePurpose.id) == purpose_id))
+    db.commit()
+
+
 # --- Corrections and voiding --------------------------------------------------
 
 

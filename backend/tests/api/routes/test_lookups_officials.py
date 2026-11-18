@@ -11,6 +11,7 @@ from app.core.config import settings
 from app.models_foundation import (
     AuditLog,
     IdType,
+    IssuancePurpose,
     Official,
     Sector,
     Street,
@@ -34,6 +35,9 @@ def _tidy_up(db: Session) -> Generator[None]:
     db.execute(delete(Official))
     db.execute(delete(IdType).where(col(IdType.name).like("ZZ test %")))
     db.execute(delete(Sector).where(col(Sector.name).like("ZZ test %")))
+    db.execute(
+        delete(IssuancePurpose).where(col(IssuancePurpose.name).like("ZZ test %"))
+    )
     db.commit()
 
 
@@ -89,10 +93,10 @@ def test_staff_and_admin_read_seeded_lookups(
             assert client.get(f"{LK}/{path}", headers=headers).status_code == 200
 
 
-def test_seeded_lookups_are_read_only(
+def test_document_types_are_read_only(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
-    for path in ("issuance-purposes", "document-types"):
+    for path in ("document-types",):
         r = client.post(
             f"{LK}/{path}", json={"name": "Nope"}, headers=superuser_token_headers
         )
@@ -600,4 +604,94 @@ def test_staff_cannot_change_sectors(
     )
     assert (
         client.delete(f"{LK}/sectors/1", headers=staff_token_headers).status_code == 403
+    )
+
+
+def test_staff_cannot_change_issuance_purposes(
+    client: TestClient,
+    db: Session,
+    staff_token_headers: dict[str, str],
+    superuser_token_headers: dict[str, str],
+) -> None:
+    created = client.post(
+        f"{LK}/issuance-purposes",
+        json={"name": _name("ZZ test purpose")},
+        headers=superuser_token_headers,
+    )
+    assert created.status_code == 201
+    item_id = created.json()["id"]
+    assert client.post(
+        f"{LK}/issuance-purposes", json={"name": "Nope"}, headers=staff_token_headers
+    ).status_code == 403
+    assert client.patch(
+        f"{LK}/issuance-purposes/{item_id}",
+        json={"name": "Nope"},
+        headers=staff_token_headers,
+    ).status_code == 403
+    assert client.delete(
+        f"{LK}/issuance-purposes/{item_id}", headers=staff_token_headers
+    ).status_code == 403
+    assert db.get(IssuancePurpose, item_id) is not None
+    client.delete(f"{LK}/issuance-purposes/{item_id}", headers=superuser_token_headers)
+
+
+def test_admin_issuance_purpose_lifecycle_is_audited(
+    client: TestClient, db: Session, superuser_token_headers: dict[str, str]
+) -> None:
+    name = _name("ZZ test purpose")
+    created = client.post(
+        f"{LK}/issuance-purposes",
+        json={"name": f"  {name}  "},
+        headers=superuser_token_headers,
+    )
+    assert created.status_code == 201, created.text
+    item = created.json()
+    assert item["name"] == name
+    item_id = item["id"]
+
+    renamed = _name("ZZ test renamed purpose")
+    response = client.patch(
+        f"{LK}/issuance-purposes/{item_id}",
+        json={"name": renamed},
+        headers=superuser_token_headers,
+    )
+    assert response.status_code == 200, response.text
+    assert response.json() == {"id": item_id, "name": renamed}
+    listed = client.get(
+        f"{LK}/issuance-purposes", headers=superuser_token_headers
+    ).json()
+    assert {"id": item_id, "name": renamed} in listed
+    assert client.delete(
+        f"{LK}/issuance-purposes/{item_id}", headers=superuser_token_headers
+    ).status_code == 204
+    assert set(_audit_actions(db, str(item_id))) == {
+        "issuance_purpose.create",
+        "issuance_purpose.rename",
+        "issuance_purpose.delete",
+    }
+
+
+def test_issuance_purpose_validation_and_duplicate_names(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    for body in ({"name": "   "}, {"name": "x" * 151}):
+        assert client.post(
+            f"{LK}/issuance-purposes", json=body, headers=superuser_token_headers
+        ).status_code == 422
+    name = _name("ZZ test purpose")
+    first = client.post(
+        f"{LK}/issuance-purposes",
+        json={"name": name},
+        headers=superuser_token_headers,
+    )
+    assert first.status_code == 201
+    duplicate = client.post(
+        f"{LK}/issuance-purposes",
+        json={"name": name.upper()},
+        headers=superuser_token_headers,
+    )
+    assert duplicate.status_code == 409
+    client.delete(
+        f"{LK}/issuance-purposes/{first.json()['id']}",
+        headers=superuser_token_headers,
     )

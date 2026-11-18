@@ -161,7 +161,10 @@
       "sector_create": "{{actor}} added a sector to the list.",
       "sector_rename": "{{actor}} renamed a sector in the list.",
       "sector_delete": "{{actor}} removed a sector from the list.",
-      "tricycle_association_delete": "{{actor}} removed a tricycle association from the list."
+      "tricycle_association_delete": "{{actor}} removed a tricycle association from the list.",
+      "issuance_purpose_create": "{{actor}} added an issuance purpose to the list.",
+      "issuance_purpose_rename": "{{actor}} renamed an issuance purpose in the list.",
+      "issuance_purpose_delete": "{{actor}} removed an issuance purpose from the list."
     }
   },
   "logoutDialog": {
@@ -454,6 +457,11 @@
         "create": "Sector added",
         "rename": "Sector renamed",
         "delete": "Sector removed"
+      },
+      "issuance_purpose": {
+        "create": "Issuance purpose added",
+        "rename": "Issuance purpose renamed",
+        "delete": "Issuance purpose removed"
       },
       "tricycle_association": {
         "create": "Tricycle association added",
@@ -1109,6 +1117,16 @@
         "empty": "No sectors yet",
         "deleteTitle": "Delete sector?"
       },
+      "purpose": {
+        "title": "Issuance Purposes",
+        "description": "Shared choices used on clearance and certification forms. Renaming a purpose also changes how existing issuances and reports are labelled.",
+        "newName": "New purpose name",
+        "placeholder": "Enter purpose name",
+        "loading": "Loading issuance purposes...",
+        "loadError": "Could not load issuance purposes",
+        "empty": "No issuance purposes yet",
+        "deleteTitle": "Delete purpose?"
+      },
       "association": {
         "title": "Tricycle Associations",
         "description": "Used when recording franchise clearances.",
@@ -1165,7 +1183,8 @@
         "idType": "Valid IDs",
         "sector": "Sectors",
         "street": "Streets",
-        "association": "Tricycle associations"
+        "association": "Tricycle associations",
+        "purpose": "Purposes"
       }
     },
     "printSetup": {

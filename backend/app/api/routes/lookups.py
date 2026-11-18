@@ -86,7 +86,7 @@ def list_tricycle_associations(
     return _names(session, TricycleAssociation)
 
 
-# --- Admin upkeep for streets, tricycle associations, ID types and sectors ----------
+# --- Admin upkeep for editable lookup lists --------------------------------------
 
 
 def _name_taken(
@@ -212,6 +212,49 @@ def _remove(
             detail=f"This {label} is in use and cannot be removed; rename it instead",
         )
     return Response(status_code=204)
+
+
+@router.post("/issuance-purposes", response_model=LookupItem, status_code=201)
+def create_issuance_purpose(
+    body: LookupNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _create(
+        session,
+        user,
+        IssuancePurpose,
+        body,
+        label="purpose",
+        record_type="issuance_purpose",
+    )
+
+
+@router.patch("/issuance-purposes/{item_id}", response_model=LookupItem)
+def rename_issuance_purpose(
+    item_id: int, body: LookupNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _rename(
+        session,
+        user,
+        IssuancePurpose,
+        item_id,
+        body,
+        label="purpose",
+        record_type="issuance_purpose",
+    )
+
+
+@router.delete("/issuance-purposes/{item_id}", status_code=204)
+def delete_issuance_purpose(
+    item_id: int, session: SessionDep, user: ManageUser
+) -> Response:
+    return _remove(
+        session,
+        user,
+        IssuancePurpose,
+        item_id,
+        label="purpose",
+        record_type="issuance_purpose",
+    )
 
 
 @router.post("/streets", response_model=LookupItem, status_code=201)

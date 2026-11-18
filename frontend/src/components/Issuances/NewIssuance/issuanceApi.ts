@@ -926,6 +926,9 @@ export const issuanceApi = {
       documentTypes: Object.values(documentConfig),
       // Ordered by id: the print code reads these lists by id.
       purposes: byId(data.purposes),
+      purposeChoices: [...data.purposes]
+        .sort((a, b) => a.id - b.id)
+        .map(({ id, name }) => ({ id, name })),
       sectors: byId(data.sectors),
       idTypes: byId(data.idTypes),
       idTypeChoices: [...data.idTypes]
