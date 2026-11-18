@@ -158,6 +158,9 @@
       "id_type_create": "{{actor}} added a valid ID type to the list.",
       "id_type_rename": "{{actor}} renamed a valid ID type in the list.",
       "id_type_delete": "{{actor}} removed a valid ID type from the list.",
+      "sector_create": "{{actor}} added a sector to the list.",
+      "sector_rename": "{{actor}} renamed a sector in the list.",
+      "sector_delete": "{{actor}} removed a sector from the list.",
       "tricycle_association_delete": "{{actor}} removed a tricycle association from the list."
     }
   },
@@ -446,6 +449,11 @@
         "create": "Valid ID type added",
         "rename": "Valid ID type renamed",
         "delete": "Valid ID type removed"
+      },
+      "sector": {
+        "create": "Sector added",
+        "rename": "Sector renamed",
+        "delete": "Sector removed"
       },
       "tricycle_association": {
         "create": "Tricycle association added",
@@ -1091,6 +1099,16 @@
         "empty": "No valid IDs yet",
         "deleteTitle": "Delete valid ID?"
       },
+      "sector": {
+        "title": "Sectors",
+        "description": "Choices for the sector on issuance forms and on resident records.",
+        "newName": "New sector name",
+        "placeholder": "Enter sector name",
+        "loading": "Loading sectors...",
+        "loadError": "Could not load sectors",
+        "empty": "No sectors yet",
+        "deleteTitle": "Delete sector?"
+      },
       "association": {
         "title": "Tricycle Associations",
         "description": "Used when recording franchise clearances.",
@@ -1145,6 +1163,7 @@
       "tabs": {
         "printing": "Printing setup",
         "idType": "Valid IDs",
+        "sector": "Sectors",
         "street": "Streets",
         "association": "Tricycle associations"
       }
@@ -1458,7 +1477,9 @@
         "chooseValidIdType": "Choose a valid ID type before saving this issuance.",
         "idTypeNotAvailable": "The ID type \"{{name}}\" is no longer available. Ask an administrator to restore it, then try again.",
         "chooseValidSector": "Choose a valid sector before saving this issuance.",
-        "sectorNotAvailable": "The sector \"{{name}}\" is no longer available. Ask an administrator to restore it, then try again."
+        "sectorNotAvailable": "The sector \"{{name}}\" is no longer available. Ask an administrator to restore it, then try again.",
+        "idTypeGone": "The chosen ID type is no longer available. Choose another ID type, then try again.",
+        "sectorGone": "The chosen sector is no longer available. Choose another sector, then try again."
       },
       "fieldLabels": {
         "validId": "Valid ID presented",

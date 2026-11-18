@@ -16,6 +16,7 @@ from app.models_foundation import (
     IdType,
     IssuancePurpose,
     Official,
+    Sector,
     Street,
     TricycleAssociation,
 )
@@ -46,6 +47,7 @@ def _tidy_up(db: Session) -> Generator[None]:
         delete(IssuancePurpose).where(col(IssuancePurpose.name).like("ZZ test %"))
     )
     db.execute(delete(IdType).where(col(IdType.name).like("ZZ test %")))
+    db.execute(delete(Sector).where(col(Sector.name).like("ZZ test %")))
     db.commit()
 
 
@@ -1219,6 +1221,35 @@ def test_id_type_in_use_cannot_be_deleted_but_can_be_renamed(
     assert db.get(IdType, id_type["id"]) is not None
     r = client.patch(
         f"{API}/lookups/id-types/{id_type['id']}",
+        headers=admin,
+        json={"name": f"ZZ test {random_lower_string()[:8]}"},
+    )
+    assert r.status_code == 200
+
+
+def test_sector_in_use_cannot_be_deleted_but_can_be_renamed(
+    client: TestClient,
+    db: Session,
+    staff_token_headers: Headers,
+    superuser_token_headers: Headers,
+    street_id: int,
+) -> None:
+    """A sector held by a resident stays; renaming it is the way to change it."""
+    admin = superuser_token_headers
+    r = client.post(
+        f"{API}/lookups/sectors",
+        headers=admin,
+        json={"name": f"ZZ test {random_lower_string()[:8]}"},
+    )
+    assert r.status_code == 201, r.text
+    sector = r.json()
+    _resident(client, staff_token_headers, street_id, sector_ids=[sector["id"]])
+    r = client.delete(f"{API}/lookups/sectors/{sector['id']}", headers=admin)
+    assert r.status_code == 409
+    assert "in use" in r.json()["detail"]
+    assert db.get(Sector, sector["id"]) is not None
+    r = client.patch(
+        f"{API}/lookups/sectors/{sector['id']}",
         headers=admin,
         json={"name": f"ZZ test {random_lower_string()[:8]}"},
     )

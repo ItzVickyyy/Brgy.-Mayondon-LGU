@@ -2634,6 +2634,18 @@ export type SectorIn = {
 };
 
 /**
+ * SectorNameIn
+ *
+ * Body for adding or renaming a sector (the column holds 100 characters).
+ */
+export type SectorNameIn = {
+    /**
+     * Name
+     */
+    name: string;
+};
+
+/**
  * SectorPublic
  */
 export type SectorPublic = {
@@ -4432,6 +4444,31 @@ export type lookupsListSectorsResponses = {
 
 export type lookupsListSectorsResponse = lookupsListSectorsResponses[keyof lookupsListSectorsResponses];
 
+export type lookupsCreateSectorData = {
+    body: SectorNameIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/sectors';
+};
+
+export type lookupsCreateSectorErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsCreateSectorError = lookupsCreateSectorErrors[keyof lookupsCreateSectorErrors];
+
+export type lookupsCreateSectorResponses = {
+    /**
+     * Successful Response
+     */
+    201: LookupItem;
+};
+
+export type lookupsCreateSectorResponse = lookupsCreateSectorResponses[keyof lookupsCreateSectorResponses];
+
 export type lookupsListIdTypesData = {
     body?: never;
     path?: never;
@@ -4758,6 +4795,66 @@ export type lookupsRenameIdTypeResponses = {
 };
 
 export type lookupsRenameIdTypeResponse = lookupsRenameIdTypeResponses[keyof lookupsRenameIdTypeResponses];
+
+export type lookupsDeleteSectorData = {
+    body?: never;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/sectors/{item_id}';
+};
+
+export type lookupsDeleteSectorErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsDeleteSectorError = lookupsDeleteSectorErrors[keyof lookupsDeleteSectorErrors];
+
+export type lookupsDeleteSectorResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type lookupsDeleteSectorResponse = lookupsDeleteSectorResponses[keyof lookupsDeleteSectorResponses];
+
+export type lookupsRenameSectorData = {
+    body: SectorNameIn;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/sectors/{item_id}';
+};
+
+export type lookupsRenameSectorErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsRenameSectorError = lookupsRenameSectorErrors[keyof lookupsRenameSectorErrors];
+
+export type lookupsRenameSectorResponses = {
+    /**
+     * Successful Response
+     */
+    200: LookupItem;
+};
+
+export type lookupsRenameSectorResponse = lookupsRenameSectorResponses[keyof lookupsRenameSectorResponses];
 
 export type officialsListOfficialsData = {
     body?: never;

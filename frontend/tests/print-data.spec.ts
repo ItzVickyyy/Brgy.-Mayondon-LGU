@@ -8,9 +8,19 @@ import {
 import { printTemplates } from "../src/lib/print/templates"
 
 const lookups: PrintLookups = {
-  sectors: ["Senior Citizen", "PWD", "Solo Parent"],
-  idTypes: ["CTC", "Driver's License"],
-  purposes: ["Employment", "Scholarship"],
+  sectors: [
+    { id: 1, name: "Senior Citizen" },
+    { id: 2, name: "PWD" },
+    { id: 3, name: "Solo Parent" },
+  ],
+  idTypes: [
+    { id: 1, name: "CTC" },
+    { id: 2, name: "Driver's License" },
+  ],
+  purposes: [
+    { id: 1, name: "Employment" },
+    { id: 2, name: "Scholarship" },
+  ],
   tricycle: {
     association: "Mayondon TODA",
     make: "Honda",
@@ -97,6 +107,59 @@ test.describe("buildPrintData", () => {
     expect(data.values.name).toBe("JUAN S. DELA CRUZ")
     expect(data.values.addressedTo).toBe("PhilHealth")
     expect(data.photoUrl).toBeUndefined()
+  })
+
+  test("names are found by id, so a removed list item leaves no gap that shifts the others", () => {
+    // ids 1 and 2 were removed from each list; the saved ids are 4, 7 and 9
+    const gaps: PrintLookups = {
+      sectors: [
+        { id: 4, name: "Senior Citizen" },
+        { id: 9, name: "Solo Parent" },
+      ],
+      idTypes: [{ id: 7, name: "Driver's License" }],
+      purposes: [{ id: 4, name: "Employment" }],
+    }
+    const data = buildPrintData(
+      make("BARANGAY_CLEARANCE", {
+        purposeId: 4,
+        details: { type: "BARANGAY_CLEARANCE" },
+        identification: {
+          idTypeId: 7,
+          idNumber: "N01",
+          placeOfIssue: "Manila",
+          dateOfIssue: "2024-01-05",
+        },
+      }),
+      gaps,
+      name,
+    )!
+    expect(data.values).toMatchObject({
+      purpose: "Employment",
+      idType: "Driver's License",
+    })
+    const indigency = buildPrintData(
+      make("INDIGENCY", {
+        purposeId: 4,
+        sectors: [{ sectorId: 9 }, { sectorId: 4 }],
+        details: { type: "INDIGENCY", addressedToOffice: "PhilHealth" },
+      }),
+      gaps,
+      name,
+    )!
+    expect(indigency.values.sectorLine).toBe(
+      "SECTOR : Solo Parent / Senior Citizen",
+    )
+    // an id that is no longer in the list prints nothing rather than another item's name
+    const missing = buildPrintData(
+      make("INDIGENCY", {
+        sectors: [{ sectorId: 2 }],
+        details: { type: "INDIGENCY", addressedToOffice: "PhilHealth" },
+      }),
+      gaps,
+      name,
+    )!
+    expect(missing.values.sectorLine).not.toContain("Solo Parent")
+    expect(missing.values.sectorLine).not.toContain("Senior Citizen")
   })
 
   test("utility sets marks values and franchise reads the tricycle lookup", () => {

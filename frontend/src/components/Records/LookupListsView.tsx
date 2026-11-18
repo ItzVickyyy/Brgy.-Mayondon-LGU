@@ -17,8 +17,16 @@ import { Button } from "@/components/ui/button"
 import { notify } from "@/lib/notifications"
 import { readApiError } from "@/lib/residents"
 
-type LookupKind = "street" | "association" | "idType"
+type LookupKind = "street" | "association" | "idType" | "sector"
 type LookupAction = "create" | "rename" | "delete"
+
+/** The most characters a name may have: it matches the column in the database. */
+const NAME_LIMIT: Record<LookupKind, number> = {
+  street: 150,
+  association: 150,
+  idType: 50,
+  sector: 100,
+}
 
 async function changeLookup(
   kind: LookupKind,
@@ -30,6 +38,8 @@ async function changeLookup(
     if (!name) throw new Error(i18n.t("records.lookups.enterName"))
     if (kind === "idType")
       return (await LookupsService.createIdType({ body: { name } })).data
+    if (kind === "sector")
+      return (await LookupsService.createSector({ body: { name } })).data
     return kind === "street"
       ? (await LookupsService.createStreet({ body: { name } })).data
       : (await LookupsService.createTricycleAssociation({ body: { name } }))
@@ -42,6 +52,13 @@ async function changeLookup(
     if (kind === "idType")
       return (
         await LookupsService.renameIdType({
+          path: { item_id: id },
+          body: { name },
+        })
+      ).data
+    if (kind === "sector")
+      return (
+        await LookupsService.renameSector({
           path: { item_id: id },
           body: { name },
         })
@@ -63,6 +80,8 @@ async function changeLookup(
 
   if (kind === "idType") {
     await LookupsService.deleteIdType({ path: { item_id: id } })
+  } else if (kind === "sector") {
+    await LookupsService.deleteSector({ path: { item_id: id } })
   } else if (kind === "street") {
     await LookupsService.deleteStreet({ path: { street_id: id } })
   } else {
@@ -195,7 +214,7 @@ export function LookupListPanel({
           onChange={(event) => setNewName(event.target.value)}
           className={formControlClass}
           placeholder={t(`records.lookups.${kind}.placeholder`)}
-          maxLength={kind === "idType" ? 50 : 150}
+          maxLength={NAME_LIMIT[kind]}
         />
         <Button type="submit" disabled={!newName.trim() || mutation.isPending}>
           <Plus aria-hidden="true" />
@@ -272,7 +291,7 @@ export function LookupListPanel({
                         value={editingName}
                         onChange={(event) => setEditingName(event.target.value)}
                         className={formControlClass}
-                        maxLength={kind === "idType" ? 50 : 150}
+                        maxLength={NAME_LIMIT[kind]}
                       />
                     </label>
                     <div className="flex justify-end gap-2">
@@ -403,6 +422,7 @@ const LIST_QUERIES = {
     load: () => LookupsService.listTricycleAssociations(),
   },
   idType: { key: "id-types", load: () => LookupsService.listIdTypes() },
+  sector: { key: "sectors", load: () => LookupsService.listSectors() },
 } as const
 
 /** One editable list with its own loading: used inside Issuance settings. */

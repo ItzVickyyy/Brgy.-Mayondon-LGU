@@ -43,7 +43,7 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 | Notification bell (top bar) | Only notices about their own account: something an administrator did to it (details changed, role changed, password or two-factor or recovery questions reset, unlocked, asked or no longer asked to use two-factor) and their own security events (password changed, two-factor on or off, new codes, recovery questions set, recovery completed, locked after failed sign-ins). Never backups, imports, configuration or other people's accounts | Every notice in the catalog, whoever did it, their own too: accounts, security, backups, imports, configuration. Never residents or issuances |
 | My Account, User Settings | Allowed | Allowed |
 | Officials, User Accounts | No | Allowed |
-| Streets, Tricycle Associations and Valid ID type lists (add, rename, remove if unused; `LOOKUPS_MANAGE`; Valid IDs from patch 142, reached from Issuance settings) | No | Allowed |
+| Streets, Tricycle Associations, Valid ID type and Sector lists (add, rename, remove if unused; `LOOKUPS_MANAGE`; Valid IDs from patch 142 and Sectors from patch 143, reached from Issuance settings) | No | Allowed |
 | Lookup lists and officials list (read, for the forms) | Allowed | Allowed |
 | Management Reports | No | Allowed |
 | Backup and Restore | No; manual-backup permission to confirm | Allowed |

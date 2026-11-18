@@ -163,8 +163,11 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const idTypeChoices = lookupsQuery.data?.idTypeChoices ?? []
   const idTypeNameOf = (id: unknown) => idTypeChoices.find((item) => item.id === Number(id))?.name ?? ""
   const idTypeIdOf = (name: string) => idTypeChoices.find((item) => item.name === name)?.id ?? 0
-  const config = (seriesOn || idTypeChoices.length > 0
-    ? { ...baseConfig, fields: baseConfig.fields.map((candidate) => (seriesOn && candidate.name === "idNumber" ? { ...candidate, required: false } : candidate.name === "idType" && idTypeChoices.length > 0 ? { ...candidate, options: idTypeChoices.map((item) => item.name) } : candidate)) }
+  // The sectors come from the server too; the form keeps each chosen sector's real id.
+  const sectorChoices = lookupsQuery.data?.sectorChoices ?? []
+  const sectorIdOf = (name: string) => sectorChoices.find((item) => item.name === name)?.id ?? 0
+  const config = (seriesOn || idTypeChoices.length > 0 || sectorChoices.length > 0
+    ? { ...baseConfig, fields: baseConfig.fields.map((candidate) => (seriesOn && candidate.name === "idNumber" ? { ...candidate, required: false } : candidate.name === "idType" && idTypeChoices.length > 0 ? { ...candidate, options: idTypeChoices.map((item) => item.name) } : candidate.name === "sector" && sectorChoices.length > 0 ? { ...candidate, options: sectorChoices.map((item) => item.name) } : candidate)) }
     : baseConfig) as typeof baseConfig
   // Read during render so react-hook-form keeps isDirty up to date for the discard prompt.
   const formDirty = form.formState.isDirty
@@ -210,10 +213,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       form.setValue("sectors", [], { shouldDirty: false })
       return
     }
-    const options = sectorField.options ?? []
+    const options = sectorChoices.map((item) => item.name)
     const matching = resident.sectors.filter((sector) => options.includes(sector)).slice(0, sectorField.maxSelected ?? 1)
     setSelectedSector(sectorField.type === "multiselect" ? matching : matching[0] ?? "")
-    form.setValue("sectors", matching.map((sector) => ({ sectorId: options.indexOf(sector) + 1 })), { shouldDirty: false })
+    form.setValue("sectors", matching.map((sector) => ({ sectorId: sectorIdOf(sector) })), { shouldDirty: false })
   }
 
   function changeDocumentType(nextCode: DocumentCode) {
@@ -391,8 +394,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         setPayment(paymentKeyOf(field.name), nextValue)
       } else if (field.name === "purpose") setRootField("purposeText", String(nextValue))
       else if (field.name === "remarks") setRootField("remarks", String(nextValue))
-      else if (field.name === "sector" && field.type === "multiselect") { const values = Array.isArray(nextValue) ? nextValue as string[] : []; setSectorManuallySelected(true); setSelectedSector(values); form.setValue("sectors", values.map((sector) => ({ sectorId: Math.max(1, (field.options ?? []).indexOf(sector) + 1) })), { shouldDirty: true }) }
-      else if (field.name === "sector") { setSectorManuallySelected(true); setSelectedSector(String(nextValue)); form.setValue("sectors", [{ sectorId: Math.max(1, (field.options ?? []).indexOf(String(nextValue)) + 1) }], { shouldDirty: true }) }
+      else if (field.name === "sector" && field.type === "multiselect") { const values = Array.isArray(nextValue) ? nextValue as string[] : []; setSectorManuallySelected(true); setSelectedSector(values); form.setValue("sectors", values.map((sector) => ({ sectorId: sectorIdOf(sector) })), { shouldDirty: true }) }
+      else if (field.name === "sector") { setSectorManuallySelected(true); setSelectedSector(String(nextValue)); form.setValue("sectors", [{ sectorId: sectorIdOf(String(nextValue)) }], { shouldDirty: true }) }
       else if (field.name === "for") setDetail("forSelf", nextValue === "Myself")
       else if (field.name === "relationship") setDetail("beneficiaryRelationship", String(nextValue))
       else if (field.name === "isJobstartBeneficiary") setDetail(field.name, nextValue === "true")
@@ -402,7 +405,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
           setDetail("validUntil", defaultIdValidUntil(form.getValues("issueDate"), String(nextValue).toLowerCase(), selectedResident).date)
         }
       } else if (field.name === "sectorIdNumber") {
-        form.setValue("sectors", [{ sectorId: form.getValues("sectors")?.[0]?.sectorId ?? 1, idNumber: String(nextValue) }], { shouldDirty: true })
+        form.setValue("sectors", [{ sectorId: form.getValues("sectors")?.[0]?.sectorId ?? sectorChoices[0]?.id ?? 0, idNumber: String(nextValue) }], { shouldDirty: true })
       } else if (field.name === "validUntil") { setValidUntilEdited(true); setDetail(field.name, nextValue) }
       else setDetail(field.name, nextValue)
     }
@@ -909,7 +912,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     }
     if (need === "civilStatus" || need === "sector") {
       const key = need
-      const choices = need === "civilStatus" ? civilStatusOptions : ["STUDENT", "Senior Citizens", "Person with Disabilities (PWD)", "Solo Parents"]
+      const choices = need === "civilStatus" ? civilStatusOptions : sectorChoices.map((item) => item.name)
       const current = need === "sector" ? (residentUpdates.sectors?.[0] ?? "") : String(updates[key] ?? "")
       return <div key={need} className={fieldLabelClass}><label htmlFor={`resident-missing-${need}`}>{need === "civilStatus" ? t("issuances.new.resident.fields.civilStatus") : t("issuances.new.resident.fields.sector")}</label><SelectField id={`resident-missing-${need}`} value={current} options={choices} onChange={(next) => patch({ [key]: need === "sector" ? [next] : next })} /></div>
     }

@@ -158,7 +158,7 @@ Required fields and validation rules remain **unconfirmed**. Do not treat the pr
 4. Is residency duration entered manually or calculated from an approved start date?
 5. Which fields are mandatory for each document? **(D-14)**
 6. Dimensions, orientation, printer models and photo dimensions for each template. Does every workstation use the same printer settings? **(D-17)**
-7. Approved purposes, sector options, ID types (editable by an administrator in Issuance settings since patch 142; the New Issuance form holds the real id of the chosen ID type, not its place in a list), receipt values, default notes and "addressed to" wording.
+7. Approved purposes, sector options, ID types (the Valid ID and Sector lists are editable by an administrator in Issuance settings since patches 142 and 143; the New Issuance form holds the real id of the chosen ID type and sector, not their place in a list, and the print code finds names by id, so a removed list item cannot shift another item's name onto a printed document), receipt values, default notes and "addressed to" wording.
 8. Exact name and fields of the assistance certification — is it the Damayan form? **(D-13)**
 9. Where does the birthdate come from, and is the photo captured, uploaded or taken from an existing resident record? **(D-18)**
 10. Physical samples of both ID sides and the assistance certification for calibration.

@@ -204,6 +204,10 @@ export const issuanceApi = {
       idTypeChoices: [...new Set(["CTC", ...idTypeOptions])].map(
         (name, index) => ({ id: index + 1, name }),
       ),
+      sectorChoices: indigencySectorOptions.map((name, index) => ({
+        id: index + 1,
+        name,
+      })),
       puroks: [
         "Purok 1",
         "Purok 2",
@@ -218,6 +222,18 @@ export const issuanceApi = {
         .filter((official) => official.status === "Current")
         .map(({ id, name, position }) => ({ id, name, position })),
       civilStatuses: [...civilStatusOptions],
+    }
+  },
+
+  /** The lists the print code reads, as {id, name}: stored ids are 1-based positions here. */
+  async getPrintLookups() {
+    const lookups = await this.getLookups()
+    const named = (names: string[]) =>
+      names.map((name, index) => ({ id: index + 1, name }))
+    return {
+      sectors: named(lookups.sectors),
+      idTypes: named(lookups.idTypes),
+      purposes: named(lookups.purposes),
     }
   },
 

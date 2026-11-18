@@ -12,6 +12,7 @@ from app.models_foundation import (
     AuditLog,
     IdType,
     Official,
+    Sector,
     Street,
     TricycleAssociation,
 )
@@ -32,6 +33,7 @@ def _tidy_up(db: Session) -> Generator[None]:
     db.execute(delete(TricycleAssociation))
     db.execute(delete(Official))
     db.execute(delete(IdType).where(col(IdType.name).like("ZZ test %")))
+    db.execute(delete(Sector).where(col(Sector.name).like("ZZ test %")))
     db.commit()
 
 
@@ -90,7 +92,7 @@ def test_staff_and_admin_read_seeded_lookups(
 def test_seeded_lookups_are_read_only(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
-    for path in ("sectors", "issuance-purposes", "document-types"):
+    for path in ("issuance-purposes", "document-types"):
         r = client.post(
             f"{LK}/{path}", json={"name": "Nope"}, headers=superuser_token_headers
         )
@@ -529,3 +531,73 @@ def test_audit_details_hold_field_names_only(
     ).one()
     assert name not in str(row.details)
     assert "full_name" in row.details["fields"]  # type: ignore[index]
+
+
+def test_admin_sector_lifecycle(
+    client: TestClient, db: Session, superuser_token_headers: dict[str, str]
+) -> None:
+    name = f"ZZ test {random_lower_string()[:8]}"
+    r = client.post(
+        f"{LK}/sectors", json={"name": f"  {name}  "}, headers=superuser_token_headers
+    )
+    assert r.status_code == 201
+    assert r.json()["name"] == name  # trimmed
+    sid = r.json()["id"]
+    r = client.post(
+        f"{LK}/sectors", json={"name": name.upper()}, headers=superuser_token_headers
+    )
+    assert r.status_code == 409
+    assert r.json()["detail"] == "This sector already exists"
+    listed = client.get(f"{LK}/sectors", headers=superuser_token_headers).json()
+    assert {"id": sid, "name": name} in listed
+    new_name = f"ZZ test {random_lower_string()[:8]}"
+    r = client.patch(
+        f"{LK}/sectors/{sid}", json={"name": new_name}, headers=superuser_token_headers
+    )
+    assert r.status_code == 200 and r.json()["name"] == new_name
+    r = client.delete(f"{LK}/sectors/{sid}", headers=superuser_token_headers)
+    assert r.status_code == 204
+    assert db.get(Sector, sid) is None
+    assert (
+        client.delete(
+            f"{LK}/sectors/{sid}", headers=superuser_token_headers
+        ).status_code
+        == 404
+    )
+    db.expire_all()
+    assert {"sector.create", "sector.rename", "sector.delete"} <= set(
+        _audit_actions(db, str(sid))
+    )
+
+
+def test_sector_name_is_limited_to_one_hundred_characters(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    r = client.post(
+        f"{LK}/sectors", json={"name": "Z" * 101}, headers=superuser_token_headers
+    )
+    assert r.status_code == 422
+    r = client.post(
+        f"{LK}/sectors", json={"name": "   "}, headers=superuser_token_headers
+    )
+    assert r.status_code == 422
+
+
+def test_staff_cannot_change_sectors(
+    client: TestClient, staff_token_headers: dict[str, str]
+) -> None:
+    assert (
+        client.post(
+            f"{LK}/sectors", json={"name": "X"}, headers=staff_token_headers
+        ).status_code
+        == 403
+    )
+    assert (
+        client.patch(
+            f"{LK}/sectors/1", json={"name": "X"}, headers=staff_token_headers
+        ).status_code
+        == 403
+    )
+    assert (
+        client.delete(f"{LK}/sectors/1", headers=staff_token_headers).status_code == 403
+    )

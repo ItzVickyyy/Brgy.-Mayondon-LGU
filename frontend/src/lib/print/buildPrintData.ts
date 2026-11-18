@@ -27,11 +27,14 @@ export type PrintResidentName = {
   suffix?: string
 }
 
-/** Lookup lists used by the mock API: stored ids are 1-based positions in these lists. */
+/** One saved list entry: the id an issuance stores, and the name that is printed. */
+export type LookupName = { id: number; name: string }
+
+/** Lookup lists with their real ids. A name is found by id, never by its place in the list, so a removed item leaves no gap that shifts the others. */
 export type PrintLookups = {
-  sectors: string[]
-  idTypes: string[]
-  purposes: string[]
+  sectors: LookupName[]
+  idTypes: LookupName[]
+  purposes: LookupName[]
   tricycle?: {
     association: string
     make: string
@@ -52,8 +55,8 @@ export const templateIdByDocumentCode: Partial<
   ASSISTANCE: "assistance",
 }
 
-const byId = (list: string[], id?: number) =>
-  id && id > 0 ? (list[id - 1] ?? "") : ""
+const byId = (list: LookupName[], id?: number) =>
+  id && id > 0 ? (list.find((item) => item.id === id)?.name ?? "") : ""
 const cap = (value: string) =>
   value ? value.charAt(0).toUpperCase() + value.slice(1) : ""
 

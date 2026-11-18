@@ -52,6 +52,12 @@ class IdTypeNameIn(LookupNameIn):
     name: str = Field(min_length=1, max_length=50)
 
 
+class SectorNameIn(LookupNameIn):
+    """Body for adding or renaming a sector (the column holds 100 characters)."""
+
+    name: str = Field(min_length=1, max_length=100)
+
+
 class OfficialPublic(SQLModel):
     id: uuid.UUID
     full_name: str

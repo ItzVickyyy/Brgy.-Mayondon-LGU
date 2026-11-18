@@ -1,10 +1,11 @@
 """Lookup lists for the forms (read) and admin upkeep of two of them (write).
 
-Any signed-in user may read every list. Document types, sectors and issuance
-purposes are seeded by migration and read-only here. ID types are seeded by
-migration and may be added, renamed and removed by an administrator. Streets and
-tricycle associations start empty; adding, renaming and removing them, and the
-same for ID types, needs LOOKUPS_MANAGE (System Administrator only). An item
+Any signed-in user may read every list. Document types and issuance
+purposes are seeded by migration and read-only here. Sectors and ID types are
+seeded by migration and may be added, renamed and removed by an administrator.
+Streets and tricycle associations start empty; adding, renaming and removing
+them, and the same for sectors and ID types, needs LOOKUPS_MANAGE (System
+Administrator only). An item
 that is already in use cannot be removed (409): rename it instead.
 """
 
@@ -34,6 +35,7 @@ from app.models_lookups import (
     IdTypeNameIn,
     LookupItem,
     LookupNameIn,
+    SectorNameIn,
 )
 
 router = APIRouter(prefix="/lookups", tags=["lookups"])
@@ -84,7 +86,7 @@ def list_tricycle_associations(
     return _names(session, TricycleAssociation)
 
 
-# --- Admin upkeep for streets, tricycle associations and ID types ----------
+# --- Admin upkeep for streets, tricycle associations, ID types and sectors ----------
 
 
 def _name_taken(
@@ -299,3 +301,24 @@ def delete_id_type(item_id: int, session: SessionDep, user: ManageUser) -> Respo
     return _remove(
         session, user, IdType, item_id, label="ID type", record_type="id_type"
     )
+
+
+@router.post("/sectors", response_model=LookupItem, status_code=201)
+def create_sector(
+    body: SectorNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _create(session, user, Sector, body, label="sector", record_type="sector")
+
+
+@router.patch("/sectors/{item_id}", response_model=LookupItem)
+def rename_sector(
+    item_id: int, body: SectorNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _rename(
+        session, user, Sector, item_id, body, label="sector", record_type="sector"
+    )
+
+
+@router.delete("/sectors/{item_id}", status_code=204)
+def delete_sector(item_id: int, session: SessionDep, user: ManageUser) -> Response:
+    return _remove(session, user, Sector, item_id, label="sector", record_type="sector")

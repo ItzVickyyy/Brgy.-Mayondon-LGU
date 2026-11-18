@@ -7,6 +7,7 @@ import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import type { MockIssuance } from "@/components/Issuances/NewIssuance/issuanceTypes"
 import {
   buildPrintData,
+  type LookupName,
   type PrintData,
   type PrintLookups,
 } from "./buildPrintData"
@@ -18,10 +19,10 @@ export type LoadPrintResult =
 
 export type PrintApi = {
   getIssuance(id: string): Promise<MockIssuance | undefined>
-  getLookups(): Promise<{
-    sectors: string[]
-    idTypes: string[]
-    purposes: string[]
+  getPrintLookups(): Promise<{
+    sectors: LookupName[]
+    idTypes: LookupName[]
+    purposes: LookupName[]
   }>
   getResidentName(id: string): Promise<
     | {
@@ -62,7 +63,7 @@ export async function loadPrintData(
       message: `${issuance.referenceNo} was voided and cannot be printed.`,
     }
 
-  const lookups = await api.getLookups()
+  const lookups = await api.getPrintLookups()
   const name = await api.getResidentName(issuance.residentId)
   const details = issuance.payload.details
   const tricycle =

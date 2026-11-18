@@ -20,7 +20,6 @@ import {
   type ResidentUpdate,
 } from "@/client"
 import { client } from "@/client/client.gen"
-import { indigencySectorOptions } from "@/components/Issuances/config"
 import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import { issuanceErrorMessage } from "@/lib/issuanceErrors"
 import { readApiError } from "@/lib/residents"
@@ -475,17 +474,20 @@ async function buildSections(input: IssuanceInput, data: LookupData) {
   }
   if (allowed.includes("sectors")) {
     const chosen = (input.sectors ?? []).map((sector) => {
-      const name = indigencySectorOptions[sector.sectorId - 1]
-      if (!name) {
+      if (!(sector.sectorId > 0)) {
         throw new Error("Choose a valid sector before saving this issuance.")
       }
-      const id = findByName(data.sectors, name)?.id
-      if (!id) {
+      // The form holds the real sector id; check that it still exists (an administrator may have removed it).
+      const known = data.sectors.find((item) => item.id === sector.sectorId)
+      if (!known) {
         throw new Error(
-          `The sector "${name}" is no longer available. Ask an administrator to restore it, then try again.`,
+          "The chosen sector is no longer available. Choose another sector, then try again.",
         )
       }
-      return { sector_id: id, sector_id_number: orNull(sector.idNumber) }
+      return {
+        sector_id: known.id,
+        sector_id_number: orNull(sector.idNumber),
+      }
     })
     sections.sectors = chosen.length ? chosen : null
   }
@@ -929,6 +931,9 @@ export const issuanceApi = {
       idTypeChoices: [...data.idTypes]
         .sort((a, b) => a.id - b.id)
         .map(({ id, name }) => ({ id, name })),
+      sectorChoices: [...data.sectors]
+        .sort((a, b) => a.id - b.id)
+        .map(({ id, name }) => ({ id, name })),
       puroks: [
         "Purok 1",
         "Purok 2",
@@ -944,11 +949,23 @@ export const issuanceApi = {
     }
   },
 
+  /** The lists the print code reads, with their real ids (a name is found by id, not by position). */
+  async getPrintLookups() {
+    const data = await loadLookups()
+    const named = (items: LookupItem[]) =>
+      items.map(({ id, name }) => ({ id, name }))
+    return {
+      sectors: named(data.sectors),
+      idTypes: named(data.idTypes),
+      purposes: named(data.purposes),
+    }
+  },
+
   /**
-   * The form keeps the real id of the chosen ID type, so nothing is looked up by its
-   * place in a list and an administrator may add, rename or remove ID types. Each
-   * sector is still kept as a position in its own option list (the list in
-   * documentConfig); this turns the saved sector ids back into positions by NAME.
+   * The form keeps the real id of the chosen ID type and of each chosen sector, so
+   * nothing is looked up by its place in a list and an administrator may add, rename
+   * or remove them. This checks that a saved draft's ids still exist and returns the
+   * sector names the form shows.
    */
   async toFormPositions(
     payload: {
@@ -967,13 +984,12 @@ export const issuanceApi = {
     const sectorNames: string[] = []
     for (const sector of payload.sectors ?? []) {
       const name = data.sectors.find((item) => item.id === sector.sectorId)?.name
-      const position = name ? indigencySectorOptions.indexOf(name) + 1 : 0
-      if (!name || position < 1) {
+      if (!name) {
         throw new Error(
           "A sector in this draft is no longer available. Ask an administrator to restore it before continuing this draft.",
         )
       }
-      sectors.push({ sectorId: position, idNumber: sector.idNumber })
+      sectors.push({ sectorId: sector.sectorId, idNumber: sector.idNumber })
       sectorNames.push(name)
     }
     return { idTypeId, sectors, sectorNames }

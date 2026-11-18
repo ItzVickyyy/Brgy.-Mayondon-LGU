@@ -180,6 +180,10 @@ const validationKeys = {
     "issuances.new.validation.chooseValidIdType",
   "Choose a valid sector before saving this issuance.":
     "issuances.new.validation.chooseValidSector",
+  "The chosen ID type is no longer available. Choose another ID type, then try again.":
+    "issuances.new.validation.idTypeGone",
+  "The chosen sector is no longer available. Choose another sector, then try again.":
+    "issuances.new.validation.sectorGone",
 } as const satisfies Record<string, ParseKeys>
 
 export function validationMessage(message: string, t: TFunction) {
