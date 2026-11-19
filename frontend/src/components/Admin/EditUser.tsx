@@ -229,7 +229,7 @@ const EditUser = ({
           {t("admin.users.form.editTitle")}
         </DropdownMenuItem>
       )}
-      <DialogContent className={`${modalShell} sm:max-w-2xl`}>
+      <DialogContent className={`${modalShell} sm:max-w-3xl`}>
         <Form {...form}>
           <form
             className="flex min-h-0 flex-1 flex-col"
@@ -250,7 +250,7 @@ const EditUser = ({
                 control={form.control}
                 name="email"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="sm:col-span-2">
                     <FormLabel>
                       {t("admin.users.form.email")}{" "}
                       <span className="text-destructive">*</span>
@@ -268,81 +268,86 @@ const EditUser = ({
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="first_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("account.fields.firstName")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("account.placeholders.firstName")}
-                        type="text"
-                        maxLength={100}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* The four name parts share one row, as in Add User. Each field
+                  spans three shared rows (label, input, message) so a label that
+                  wraps in Filipino cannot push its input down. Stacks on a phone. */}
+              <div className="grid gap-4 sm:col-span-2 sm:grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,9rem)] sm:grid-rows-[auto_auto_auto]">
+                <FormField
+                  control={form.control}
+                  name="first_name"
+                  render={({ field }) => (
+                    <FormItem className="sm:row-span-3 sm:grid-rows-subgrid sm:gap-y-2 sm:[&>label]:self-end">
+                      <FormLabel>{t("account.fields.firstName")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t("account.placeholders.firstName")}
+                          type="text"
+                          maxLength={100}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="middle_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("account.fields.middleName")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("account.placeholders.middleName")}
-                        type="text"
-                        maxLength={100}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="middle_name"
+                  render={({ field }) => (
+                    <FormItem className="sm:row-span-3 sm:grid-rows-subgrid sm:gap-y-2 sm:[&>label]:self-end">
+                      <FormLabel>{t("account.fields.middleName")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t("account.placeholders.middleName")}
+                          type="text"
+                          maxLength={100}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="last_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("account.fields.lastName")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("account.placeholders.lastName")}
-                        type="text"
-                        maxLength={100}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="last_name"
+                  render={({ field }) => (
+                    <FormItem className="sm:row-span-3 sm:grid-rows-subgrid sm:gap-y-2 sm:[&>label]:self-end">
+                      <FormLabel>{t("account.fields.lastName")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t("account.placeholders.lastName")}
+                          type="text"
+                          maxLength={100}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="extension_name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("account.fields.extensionName")}</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder={t("account.placeholders.extensionName")}
-                        type="text"
-                        maxLength={20}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="extension_name"
+                  render={({ field }) => (
+                    <FormItem className="sm:row-span-3 sm:grid-rows-subgrid sm:gap-y-2 sm:[&>label]:self-end">
+                      <FormLabel>{t("account.fields.extensionName")}</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder={t("account.placeholders.extensionName")}
+                          type="text"
+                          maxLength={20}
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               {isEditingSelf ? (
                 <>
