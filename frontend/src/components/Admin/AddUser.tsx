@@ -235,7 +235,7 @@ const AddUser = () => {
                   />
                   {/* Full name on one row: first, middle, last and a narrow
                       extension (Jr., III). Stacks on a phone. */}
-                  <div className="grid gap-4 sm:col-span-2 sm:grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,6.5rem)]">
+                  <div className="grid gap-4 sm:col-span-2 sm:items-start sm:grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,9rem)]">
                     <FormField
                       control={form.control}
                       name="first_name"
