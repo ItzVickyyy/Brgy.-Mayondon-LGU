@@ -20,6 +20,10 @@ import {
   TablePagination,
   usePagination,
 } from "@/components/Common/TablePagination"
+import {
+  ReportLetterhead,
+  ReportSignatories,
+} from "@/components/Reports/ReportLetterhead"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
@@ -33,6 +37,7 @@ import {
   formatLocaleNumber,
 } from "@/lib/locale"
 import { notify } from "@/lib/notifications"
+import { userFullName } from "@/lib/userNames"
 
 export const Route = createFileRoute("/_layout/reports")({
   component: Reports,
@@ -265,6 +270,20 @@ function Reports() {
   if (!isAdmin) return <NoPermission />
 
   const appliedPeriodText = t(periodKeys[applied?.period ?? period])
+  const printedDate = formatLocaleDate(new Date(), {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "Asia/Manila",
+  })
+  const printedAt = formatLocaleDate(new Date(), {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZone: "Asia/Manila",
+  })
 
   // The preview is always on screen; the button only reloads the figures.
   function previewReport() {
@@ -952,7 +971,7 @@ function Reports() {
         />
       ) : null}
 
-      <section className="overflow-hidden rounded-xl border bg-card shadow-sm print:overflow-visible print:rounded-none print:border-0 print:shadow-none">
+      <section className="report-sheet overflow-hidden rounded-xl border bg-card shadow-sm print:overflow-visible print:rounded-none print:border-0 print:shadow-none">
         <div className="flex flex-col gap-4 border-b p-4 sm:p-5 print:hidden">
           <div>
             <h2 className="font-semibold tracking-tight">
@@ -1028,26 +1047,30 @@ function Reports() {
 
         <div className="p-4 sm:p-5 print:p-0">
           {applied ? (
-            <div className="mb-4 hidden border-b pb-3 print:block">
-              <h1 className="text-xl font-bold">{t("admin.reports.title")}</h1>
-              <p className="text-sm">
-                {t(`admin.reports.reportTypes.${applied.report}`)}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {t("admin.reports.printedOn", {
-                  date: formatLocaleDate(new Date(), {
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                    hour: "numeric",
-                    minute: "2-digit",
-                    timeZone: "Asia/Manila",
-                  }),
-                })}
-              </p>
-            </div>
+            <ReportLetterhead
+              title={t(
+                `admin.reports.reportTypes.${applied.report}`,
+              ).toUpperCase()}
+              subtitle={t("admin.reports.title")}
+              coverage={
+                applied.report === "expiry" || applied.report === "imports"
+                  ? t("admin.reports.print.asOf", { date: printedDate })
+                  : t("admin.reports.print.period", {
+                      period: appliedPeriodText,
+                    })
+              }
+              printedOn={t("admin.reports.printedOn", { date: printedAt })}
+            />
           ) : null}
           {renderResults()}
+          {applied ? (
+            <ReportSignatories
+              preparedByLabel={t("admin.reports.print.preparedBy")}
+              preparedByName={userFullName(user)}
+              notedByLabel={t("admin.reports.print.notedBy")}
+              notedByTitle={t("admin.reports.print.punongBarangay")}
+            />
+          ) : null}
         </div>
       </section>
     </div>

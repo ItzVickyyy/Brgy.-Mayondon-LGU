@@ -4684,6 +4684,49 @@ export type lookupsCreateStreetResponses = {
 
 export type lookupsCreateStreetResponse = lookupsCreateStreetResponses[keyof lookupsCreateStreetResponses];
 
+export type lookupsListSubdivisionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/subdivisions';
+};
+
+export type lookupsListSubdivisionsResponses = {
+    /**
+     * Response Lookups-List Subdivisions
+     *
+     * Successful Response
+     */
+    200: Array<LookupItem>;
+};
+
+export type lookupsListSubdivisionsResponse = lookupsListSubdivisionsResponses[keyof lookupsListSubdivisionsResponses];
+
+export type lookupsCreateSubdivisionData = {
+    body: LookupNameIn;
+    path?: never;
+    query?: never;
+    url: '/api/v1/lookups/subdivisions';
+};
+
+export type lookupsCreateSubdivisionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsCreateSubdivisionError = lookupsCreateSubdivisionErrors[keyof lookupsCreateSubdivisionErrors];
+
+export type lookupsCreateSubdivisionResponses = {
+    /**
+     * Successful Response
+     */
+    201: LookupItem;
+};
+
+export type lookupsCreateSubdivisionResponse = lookupsCreateSubdivisionResponses[keyof lookupsCreateSubdivisionResponses];
+
 export type lookupsListTricycleAssociationsData = {
     body?: never;
     path?: never;
@@ -4966,6 +5009,66 @@ export type lookupsRenameStreetResponses = {
 };
 
 export type lookupsRenameStreetResponse = lookupsRenameStreetResponses[keyof lookupsRenameStreetResponses];
+
+export type lookupsDeleteSubdivisionData = {
+    body?: never;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/subdivisions/{item_id}';
+};
+
+export type lookupsDeleteSubdivisionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsDeleteSubdivisionError = lookupsDeleteSubdivisionErrors[keyof lookupsDeleteSubdivisionErrors];
+
+export type lookupsDeleteSubdivisionResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type lookupsDeleteSubdivisionResponse = lookupsDeleteSubdivisionResponses[keyof lookupsDeleteSubdivisionResponses];
+
+export type lookupsRenameSubdivisionData = {
+    body: LookupNameIn;
+    path: {
+        /**
+         * Item Id
+         */
+        item_id: number;
+    };
+    query?: never;
+    url: '/api/v1/lookups/subdivisions/{item_id}';
+};
+
+export type lookupsRenameSubdivisionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type lookupsRenameSubdivisionError = lookupsRenameSubdivisionErrors[keyof lookupsRenameSubdivisionErrors];
+
+export type lookupsRenameSubdivisionResponses = {
+    /**
+     * Successful Response
+     */
+    200: LookupItem;
+};
+
+export type lookupsRenameSubdivisionResponse = lookupsRenameSubdivisionResponses[keyof lookupsRenameSubdivisionResponses];
 
 export type lookupsDeleteTricycleAssociationData = {
     body?: never;

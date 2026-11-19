@@ -5,6 +5,7 @@ import {
   modalBody,
   modalHeader,
   modalShell,
+  modalTall,
 } from "@/components/Common/ModalLayout"
 import { CalibrationPanel } from "@/components/Issuances/CalibrationPanel"
 import { LookupListSection } from "@/components/Records/LookupListsView"
@@ -24,6 +25,7 @@ type SettingsTab =
   | "idType"
   | "sector"
   | "street"
+  | "subdivision"
   | "association"
   | "purpose"
   | "addressedOffice"
@@ -33,6 +35,7 @@ const LIST_TABS: SettingsTab[] = [
   "idType",
   "sector",
   "street",
+  "subdivision",
   "association",
   "purpose",
   "addressedOffice",
@@ -63,7 +66,7 @@ export function IssuanceSettingsDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={cn(modalShell, "sm:max-w-3xl")}
+        className={cn(modalShell, modalTall, "sm:max-w-3xl")}
         data-testid="issuance-settings"
       >
         <DialogHeader className={modalHeader}>

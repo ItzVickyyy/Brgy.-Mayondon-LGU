@@ -151,7 +151,7 @@ const AddUser = () => {
           {t("admin.users.form.addButton")}
         </Button>
       </DialogTrigger>
-      <DialogContent className={`${modalShell} sm:max-w-2xl`}>
+      <DialogContent className={`${modalShell} sm:max-w-3xl`}>
         {handOver ? (
           <>
             <DialogHeader className={modalHeader}>
@@ -233,88 +233,94 @@ const AddUser = () => {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="first_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {t("account.fields.firstName")}{" "}
-                          <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("account.placeholders.firstName")}
-                            type="text"
-                            maxLength={100}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="middle_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("account.fields.middleName")}</FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("account.placeholders.middleName")}
-                            type="text"
-                            maxLength={100}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="last_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {t("account.fields.lastName")}{" "}
-                          <span className="text-destructive">*</span>
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t("account.placeholders.lastName")}
-                            type="text"
-                            maxLength={100}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="extension_name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>
-                          {t("account.fields.extensionName")}
-                        </FormLabel>
-                        <FormControl>
-                          <Input
-                            placeholder={t(
-                              "account.placeholders.extensionName",
-                            )}
-                            type="text"
-                            maxLength={20}
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {/* Full name on one row: first, middle, last and a narrow
+                      extension (Jr., III). Stacks on a phone. */}
+                  <div className="grid gap-4 sm:col-span-2 sm:grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,6.5rem)]">
+                    <FormField
+                      control={form.control}
+                      name="first_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t("account.fields.firstName")}{" "}
+                            <span className="text-destructive">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={t("account.placeholders.firstName")}
+                              type="text"
+                              maxLength={100}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="middle_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t("account.fields.middleName")}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={t("account.placeholders.middleName")}
+                              type="text"
+                              maxLength={100}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="last_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t("account.fields.lastName")}{" "}
+                            <span className="text-destructive">*</span>
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={t("account.placeholders.lastName")}
+                              type="text"
+                              maxLength={100}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="extension_name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>
+                            {t("account.fields.extensionName")}
+                          </FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder={t(
+                                "account.placeholders.extensionName",
+                              )}
+                              type="text"
+                              maxLength={20}
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <FormField
                     control={form.control}
                     name="is_superuser"
@@ -346,14 +352,15 @@ const AddUser = () => {
                     control={form.control}
                     name="is_active"
                     render={({ field }) => (
-                      <FormItem className="flex min-h-11 items-center gap-3 space-y-0 self-end rounded-md border bg-background px-3 sm:mb-0">
+                      <FormItem className="flex min-h-11 min-w-0 flex-row items-center gap-3 space-y-0 self-end rounded-md border bg-background px-3 py-2">
                         <FormControl>
                           <Checkbox
+                            className="shrink-0"
                             checked={field.value}
                             onCheckedChange={field.onChange}
                           />
                         </FormControl>
-                        <FormLabel className="font-normal">
+                        <FormLabel className="min-w-0 flex-1 cursor-pointer font-normal leading-snug">
                           {t("admin.users.form.isActive")}
                         </FormLabel>
                       </FormItem>

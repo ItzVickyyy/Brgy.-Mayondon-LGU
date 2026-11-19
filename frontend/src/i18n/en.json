@@ -170,7 +170,10 @@
       "addressed_office_delete": "{{actor}} removed an addressed-office suggestion from the list.",
       "issuance_purpose_create": "{{actor}} added an issuance purpose to the list.",
       "issuance_purpose_rename": "{{actor}} renamed an issuance purpose in the list.",
-      "issuance_purpose_delete": "{{actor}} removed an issuance purpose from the list."
+      "issuance_purpose_delete": "{{actor}} removed an issuance purpose from the list.",
+      "subdivision_create": "{{actor}} added a subdivision to the list.",
+      "subdivision_rename": "{{actor}} renamed a subdivision in the list.",
+      "subdivision_delete": "{{actor}} removed a subdivision from the list."
     }
   },
   "logoutDialog": {
@@ -483,6 +486,11 @@
         "create": "Tricycle association added",
         "rename": "Tricycle association renamed",
         "delete": "Tricycle association removed"
+      },
+      "subdivision": {
+        "create": "Subdivision added",
+        "rename": "Subdivision renamed",
+        "delete": "Subdivision removed"
       },
       "id_series": {
         "update": "Barangay ID number series changed"
@@ -1175,6 +1183,16 @@
         "empty": "No tricycle associations yet",
         "deleteTitle": "Delete association?"
       },
+      "subdivision": {
+        "title": "Subdivisions",
+        "description": "Subdivisions within the barangay. Administrators can add, rename or remove them here.",
+        "newName": "New subdivision name",
+        "placeholder": "Enter subdivision name",
+        "loading": "Loading subdivisions...",
+        "loadError": "Could not load subdivisions",
+        "empty": "No subdivisions yet",
+        "deleteTitle": "Delete subdivision?"
+      },
       "add": "Add",
       "save": "Save",
       "cancel": "Cancel",
@@ -1221,6 +1239,7 @@
         "idType": "Valid IDs",
         "sector": "Sectors",
         "street": "Streets",
+        "subdivision": "Subdivisions",
         "association": "Tricycle associations",
         "purpose": "Purposes",
         "addressedOffice": "Addressed offices",
@@ -2043,6 +2062,13 @@
         "print": "Print"
       },
       "printedOn": "Printed on {{date}}",
+      "print": {
+        "period": "Period covered: {{period}}",
+        "asOf": "As of {{date}}",
+        "preparedBy": "Prepared by:",
+        "notedBy": "Noted by:",
+        "punongBarangay": "Punong Barangay"
+      },
       "reportTypes": {
         "issuances": "Issuances by document type",
         "purpose": "Issuances by purpose",

@@ -28,9 +28,7 @@ import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { ArchivedResidentsView } from "@/components/Records/ArchivedResidentsView"
 import { BarangayIdsView } from "@/components/Records/BarangayIdsView"
-import { FamilySectorView } from "@/components/Records/FamilySectorView"
 import { ImportMasterlistView } from "@/components/Records/ImportMasterlistView"
-import { LookupListsView } from "@/components/Records/LookupListsView"
 import { ResidentFormDialog } from "@/components/Records/ResidentFormDialog"
 import { ResidentProfileDialog } from "@/components/Records/ResidentProfileDialog"
 import { Badge } from "@/components/ui/badge"
@@ -58,13 +56,7 @@ export const Route = createFileRoute("/_layout/records")({
   head: () => ({ meta: [{ title: pageTitle("Records Management") }] }),
 })
 
-type View =
-  | "residents"
-  | "archived"
-  | "barangay-ids"
-  | "family-sector"
-  | "lists"
-  | "import"
+type View = "residents" | "archived" | "barangay-ids" | "import"
 
 const inputClass = formControlClass
 
@@ -253,12 +245,8 @@ function RecordsManagement() {
     { id: "residents", label: t("records.tabs.residents") },
     { id: "archived", label: t("records.tabs.archived") },
     { id: "barangay-ids", label: t("records.tabs.barangayIds") },
-    { id: "family-sector", label: t("records.tabs.familySector") },
     ...(isAdmin
-      ? [
-          { id: "lists" as const, label: t("records.tabs.lookupLists") },
-          { id: "import" as const, label: t("records.tabs.import") },
-        ]
+      ? [{ id: "import" as const, label: t("records.tabs.import") }]
       : []),
   ]
 
@@ -570,18 +558,6 @@ function RecordsManagement() {
       )}
 
       {view === "barangay-ids" && <BarangayIdsView />}
-
-      {view === "lists" && isAdmin && <LookupListsView />}
-
-      {view === "family-sector" && (
-        <FamilySectorView
-          streets={streetNames}
-          onViewProfile={(resident) => {
-            setSelectedResident(resident)
-            setProfileTab("Family & Sector")
-          }}
-        />
-      )}
 
       {view === "import" && isAdmin && <ImportMasterlistView />}
 

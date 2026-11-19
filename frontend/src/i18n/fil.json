@@ -170,7 +170,10 @@
       "addressed_office_delete": "{{actor}} ang nag-alis ng mungkahing opisina sa listahan.",
       "issuance_purpose_create": "{{actor}} ang nagdagdag ng layunin ng dokumento sa listahan.",
       "issuance_purpose_rename": "{{actor}} ang nagpalit ng pangalan ng layunin ng dokumento sa listahan.",
-      "issuance_purpose_delete": "{{actor}} ang nag-alis ng layunin ng dokumento sa listahan."
+      "issuance_purpose_delete": "{{actor}} ang nag-alis ng layunin ng dokumento sa listahan.",
+      "subdivision_create": "Nagdagdag si {{actor}} ng subdibisyon sa listahan.",
+      "subdivision_rename": "Pinalitan ni {{actor}} ang pangalan ng isang subdibisyon sa listahan.",
+      "subdivision_delete": "Nag-alis si {{actor}} ng subdibisyon sa listahan."
     }
   },
   "logoutDialog": {
@@ -483,6 +486,11 @@
         "create": "Nadagdag ang samahan ng tricycle",
         "rename": "Napalitan ang pangalan ng samahan ng tricycle",
         "delete": "Naalis ang samahan ng tricycle"
+      },
+      "subdivision": {
+        "create": "Naidagdag ang subdibisyon",
+        "rename": "Napalitan ang pangalan ng subdibisyon",
+        "delete": "Naalis ang subdibisyon"
       },
       "id_series": {
         "update": "Binago ang serye ng numero ng Barangay ID"
@@ -1175,6 +1183,16 @@
         "empty": "Wala pang asosasyon ng traysikel",
         "deleteTitle": "Burahin ang asosasyon?"
       },
+      "subdivision": {
+        "title": "Mga Subdibisyon",
+        "description": "Mga subdibisyon sa loob ng barangay. Maaaring magdagdag, magpalit ng pangalan o magtanggal dito ang mga administrator.",
+        "newName": "Pangalan ng bagong subdibisyon",
+        "placeholder": "Ilagay ang pangalan ng subdibisyon",
+        "loading": "Nilo-load ang mga subdibisyon...",
+        "loadError": "Hindi ma-load ang mga subdibisyon",
+        "empty": "Wala pang subdibisyon",
+        "deleteTitle": "Tanggalin ang subdibisyon?"
+      },
       "add": "Idagdag",
       "save": "I-save",
       "cancel": "Kanselahin",
@@ -1221,6 +1239,7 @@
         "idType": "Mga balidong ID",
         "sector": "Mga sektor",
         "street": "Mga kalye",
+        "subdivision": "Mga subdibisyon",
         "association": "Mga asosasyon ng traysikel",
         "purpose": "Mga layunin",
         "addressedOffice": "Mga opisina",
@@ -2043,6 +2062,13 @@
         "print": "I-print"
       },
       "printedOn": "Na-print noong {{date}}",
+      "print": {
+        "period": "Saklaw na panahon: {{period}}",
+        "asOf": "Hanggang {{date}}",
+        "preparedBy": "Inihanda ni:",
+        "notedBy": "Binigyang-pansin ni:",
+        "punongBarangay": "Punong Barangay"
+      },
       "reportTypes": {
         "issuances": "Mga isyu ayon sa uri ng dokumento",
         "purpose": "Mga isyu ayon sa layunin",

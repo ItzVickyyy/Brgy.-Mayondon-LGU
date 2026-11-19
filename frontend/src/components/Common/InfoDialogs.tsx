@@ -255,22 +255,12 @@ export function HelpDialog(props: DialogProps) {
               <strong>Barangay IDs:</strong> every ID card issued, with its
               status (Valid, Expiring soon, Expired).
             </li>
-            <li>
-              <strong>Family &amp; Sector Details:</strong> family and
-              marginalized-sector information linked to residents.
-            </li>
             {isAdmin ? (
-              <>
-                <li>
-                  <strong>Lookup Lists:</strong> the streets, associations and
-                  similar choices that appear in forms.
-                </li>
-                <li>
-                  <strong>Import Masterlist:</strong> bring in many residents at
-                  once from a CSV, XLSX or XLS file. Follow the steps shown on
-                  the page and review the results before finishing.
-                </li>
-              </>
+              <li>
+                <strong>Import Masterlist:</strong> bring in many residents at
+                once from a CSV, XLSX or XLS file. Follow the steps shown on the
+                page and review the results before finishing.
+              </li>
             ) : null}
           </ul>
         </Section>

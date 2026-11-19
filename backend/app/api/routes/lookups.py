@@ -2,7 +2,7 @@
 
 Any signed-in user may read every list. Document types are seeded and read-only.
 Issuance purposes, sectors, ID types, addressed-office suggestions and
-educational-attainment suggestions are admin-managed. Streets and tricycle
+educational-attainment suggestions are admin-managed. Streets, subdivisions and tricycle
 associations have the same admin-only upkeep. Referenced lookup items cannot be removed (409). Addressed-office
 suggestions are not foreign keys: issued Indigency records retain the office
 text entered at issue time, so suggestions can be removed without changing
@@ -30,6 +30,7 @@ from app.models_foundation import (
     IssuancePurpose,
     Sector,
     Street,
+    Subdivision,
     TricycleAssociation,
 )
 from app.models_lookups import (
@@ -91,6 +92,11 @@ def list_educational_attainments(
 @router.get("/streets", response_model=list[LookupItem])
 def list_streets(session: SessionDep, _user: CurrentUser) -> list[LookupItem]:
     return _names(session, Street)
+
+
+@router.get("/subdivisions", response_model=list[LookupItem])
+def list_subdivisions(session: SessionDep, _user: CurrentUser) -> list[LookupItem]:
+    return _names(session, Subdivision)
 
 
 @router.get("/tricycle-associations", response_model=list[LookupItem])
@@ -377,6 +383,47 @@ def rename_street(
 def delete_street(street_id: int, session: SessionDep, user: ManageUser) -> Response:
     return _remove(
         session, user, Street, street_id, label="street", record_type="street"
+    )
+
+
+@router.post("/subdivisions", response_model=LookupItem, status_code=201)
+def create_subdivision(
+    body: LookupNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _create(
+        session,
+        user,
+        Subdivision,
+        body,
+        label="subdivision",
+        record_type="subdivision",
+    )
+
+
+@router.patch("/subdivisions/{item_id}", response_model=LookupItem)
+def rename_subdivision(
+    item_id: int, body: LookupNameIn, session: SessionDep, user: ManageUser
+) -> LookupItem:
+    return _rename(
+        session,
+        user,
+        Subdivision,
+        item_id,
+        body,
+        label="subdivision",
+        record_type="subdivision",
+    )
+
+
+@router.delete("/subdivisions/{item_id}", status_code=204)
+def delete_subdivision(item_id: int, session: SessionDep, user: ManageUser) -> Response:
+    return _remove(
+        session,
+        user,
+        Subdivision,
+        item_id,
+        label="subdivision",
+        record_type="subdivision",
     )
 
 

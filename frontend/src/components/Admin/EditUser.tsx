@@ -551,7 +551,7 @@ const EditUser = ({
                 control={form.control}
                 name="is_active"
                 render={({ field }) => (
-                  <FormItem className="flex min-h-11 items-center gap-3 space-y-0 self-end rounded-md border bg-background px-3">
+                  <FormItem className="flex min-h-11 min-w-0 flex-row items-center gap-3 space-y-0 self-end rounded-md border bg-background px-3 py-2">
                     <FormControl>
                       <Checkbox
                         disabled={protectRoleAndStatus}
@@ -559,7 +559,7 @@ const EditUser = ({
                         onCheckedChange={field.onChange}
                       />
                     </FormControl>
-                    <FormLabel className="font-normal">
+                    <FormLabel className="min-w-0 flex-1 cursor-pointer font-normal leading-snug">
                       {t("admin.users.form.isActive")}
                     </FormLabel>
                   </FormItem>

@@ -31,7 +31,7 @@ test.describe("Issuance settings", () => {
     await page.getByRole("button", { name: "Issuance settings" }).click()
     const dialog = page.getByTestId("issuance-settings")
     await expect(dialog).toBeVisible()
-    await expect(dialog.getByRole("tab")).toHaveCount(8)
+    await expect(dialog.getByRole("tab")).toHaveCount(9)
     await expect(dialog.getByTestId("settings-tab-printing")).toHaveAttribute(
       "aria-selected",
       "true",
@@ -330,4 +330,55 @@ test("an administrator can maintain First-Time Jobseeker educational-attainment 
     .getByRole("button", { name: "Delete", exact: true })
     .click()
   await expect(reopened.getByText(renamed, { exact: true })).toHaveCount(0)
+})
+
+test("an administrator can add, rename and delete a subdivision", async ({
+  page,
+}) => {
+  const name = `ZZ Subdivision ${randomLetters(6)}`
+  const renamed = `${name} X`
+  await page.goto("/issuances")
+  await page.getByRole("button", { name: "Issuance settings" }).click()
+  const settings = page.getByTestId("issuance-settings")
+  await settings.getByTestId("settings-tab-subdivision").click()
+  await settings.getByLabel("New subdivision name").fill(name)
+  await settings.getByRole("button", { name: "Add" }).click()
+  await expect(settings.getByText(name, { exact: true })).toBeVisible()
+  await settings.getByRole("button", { name: `Rename ${name}` }).click()
+  await settings.getByRole("textbox").last().fill(renamed)
+  await settings.getByRole("button", { name: "Save" }).click()
+  await expect(settings.getByText(renamed, { exact: true })).toBeVisible()
+  await settings.getByRole("button", { name: `Delete ${renamed}` }).click()
+  await page
+    .getByRole("dialog")
+    .filter({ hasText: "Delete subdivision?" })
+    .getByRole("button", { name: "Delete", exact: true })
+    .click()
+  await expect(settings.getByText(renamed, { exact: true })).toHaveCount(0)
+})
+
+test("the Issuance settings pop-up keeps the same size on every tab", async ({
+  page,
+}) => {
+  await page.goto("/issuances")
+  await page.getByRole("button", { name: "Issuance settings" }).click()
+  const settings = page.getByTestId("issuance-settings")
+  const sizes: { width: number; height: number }[] = []
+  for (const tab of [
+    "printing",
+    "idType",
+    "street",
+    "subdivision",
+    "association",
+  ]) {
+    await settings.getByTestId(`settings-tab-${tab}`).click()
+    await expect(settings.getByTestId(`settings-tab-${tab}`)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    )
+    const box = await settings.boundingBox()
+    expect(box).not.toBeNull()
+    sizes.push({ width: box!.width, height: box!.height })
+  }
+  for (const size of sizes) expect(size).toEqual(sizes[0])
 })

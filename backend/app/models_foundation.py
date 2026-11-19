@@ -112,6 +112,15 @@ class Street(SQLModel, table=True):
     name: str = Field(max_length=150, unique=True)
 
 
+class Subdivision(SQLModel, table=True):
+    """Administrator-managed subdivisions of the barangay (editable list)."""
+
+    __tablename__ = "subdivisions"
+
+    id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(max_length=150, unique=True)
+
+
 class Official(SQLModel, table=True):
     """Barangay officials who sign or witness documents.
 

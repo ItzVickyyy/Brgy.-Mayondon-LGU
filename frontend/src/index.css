@@ -506,3 +506,116 @@ tr:focus-within > .row-hover-cell {
     display: table-header-group;
   }
 }
+
+/* Official look of a printed Management Report (letterhead as on the Barangay
+   softcopies). Only applies while the page script sets "report-printing". */
+@media print {
+  body.report-printing .report-sheet {
+    font-family: "Times New Roman", Times, serif;
+    color: #000;
+  }
+  body.report-printing .report-letterhead__top {
+    display: flex;
+    align-items: center;
+    gap: 12pt;
+    text-align: center;
+    border-bottom: 2.25pt double #000;
+    padding-bottom: 8pt;
+  }
+  body.report-printing .report-letterhead__top img {
+    width: 64pt;
+    height: 64pt;
+    object-fit: contain;
+  }
+  body.report-printing .report-letterhead__balance {
+    width: 64pt;
+    flex: none;
+  }
+  body.report-printing .report-letterhead__lines {
+    flex: 1;
+  }
+  body.report-printing .report-letterhead__lines p {
+    margin: 0;
+    font-size: 10.5pt;
+    line-height: 1.25;
+  }
+  body.report-printing .report-letterhead__lines .report-letterhead__barangay {
+    font-size: 16pt;
+    font-weight: 700;
+    letter-spacing: 0.5pt;
+  }
+  body.report-printing .report-letterhead__office {
+    font-weight: 700;
+  }
+  body.report-printing .report-letterhead__title {
+    margin: 14pt 0 2pt;
+    text-align: center;
+    font-size: 15pt;
+    font-weight: 700;
+    letter-spacing: 1pt;
+  }
+  body.report-printing .report-letterhead__subtitle {
+    margin: 0 0 6pt;
+    text-align: center;
+    font-size: 11pt;
+  }
+  body.report-printing .report-letterhead__meta {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 10pt;
+    font-size: 9.5pt;
+  }
+  body.report-printing .report-letterhead__meta dt,
+  body.report-printing .report-letterhead__meta dd {
+    margin: 0;
+    font-weight: 400;
+  }
+  body.report-printing .report-sheet h3 {
+    margin: 0 0 6pt;
+    font-size: 11pt;
+    font-weight: 700;
+  }
+  body.report-printing .report-sheet table {
+    border-collapse: collapse;
+    font-size: 10pt;
+  }
+  body.report-printing .report-sheet th,
+  body.report-printing .report-sheet td {
+    border: 0.5pt solid #000;
+    padding: 3pt 5pt;
+    color: #000;
+  }
+  body.report-printing .report-sheet thead th {
+    background: #e6e6e6;
+    font-weight: 700;
+    text-transform: none;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  body.report-printing .report-sheet tfoot td {
+    font-weight: 700;
+  }
+  body.report-printing .report-signatories {
+    margin-top: 36pt;
+    grid-template-columns: 1fr 1fr;
+    gap: 48pt;
+    break-inside: avoid;
+    font-size: 10pt;
+  }
+  body.report-printing .report-signatories p {
+    margin: 0;
+  }
+  body.report-printing .report-signatories .report-signatories__label {
+    margin-bottom: 26pt;
+  }
+  body.report-printing .report-signatories__name {
+    border-top: 0.75pt solid #000;
+    padding-top: 2pt;
+    text-align: center;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  body.report-printing .report-signatories__title {
+    text-align: center;
+  }
+}

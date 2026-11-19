@@ -19,6 +19,7 @@ import { readApiError } from "@/lib/residents"
 
 type LookupKind =
   | "street"
+  | "subdivision"
   | "association"
   | "idType"
   | "sector"
@@ -30,6 +31,7 @@ type LookupAction = "create" | "rename" | "delete"
 /** The most characters a name may have: it matches the column in the database. */
 const NAME_LIMIT: Record<LookupKind, number> = {
   street: 150,
+  subdivision: 150,
   association: 150,
   idType: 50,
   sector: 100,
@@ -60,6 +62,8 @@ async function changeLookup(
       return (
         await LookupsService.createEducationalAttainment({ body: { name } })
       ).data
+    if (kind === "subdivision")
+      return (await LookupsService.createSubdivision({ body: { name } })).data
     return kind === "street"
       ? (await LookupsService.createStreet({ body: { name } })).data
       : (await LookupsService.createTricycleAssociation({ body: { name } }))
@@ -104,6 +108,13 @@ async function changeLookup(
           body: { name },
         })
       ).data
+    if (kind === "subdivision")
+      return (
+        await LookupsService.renameSubdivision({
+          path: { item_id: id },
+          body: { name },
+        })
+      ).data
     return kind === "street"
       ? (
           await LookupsService.renameStreet({
@@ -129,6 +140,8 @@ async function changeLookup(
     await LookupsService.deleteAddressedOffice({ path: { item_id: id } })
   } else if (kind === "educationalAttainment") {
     await LookupsService.deleteEducationalAttainment({ path: { item_id: id } })
+  } else if (kind === "subdivision") {
+    await LookupsService.deleteSubdivision({ path: { item_id: id } })
   } else if (kind === "street") {
     await LookupsService.deleteStreet({ path: { street_id: id } })
   } else {
@@ -442,38 +455,12 @@ export function LookupListPanel({
   )
 }
 
-export function LookupListsView() {
-  const streetsQuery = useQuery({
-    queryKey: ["lookups", "streets"],
-    queryFn: async () => (await LookupsService.listStreets()).data,
-  })
-  const associationsQuery = useQuery({
-    queryKey: ["lookups", "tricycle-associations"],
-    queryFn: async () => (await LookupsService.listTricycleAssociations()).data,
-  })
-
-  return (
-    <div className="grid items-start gap-4 xl:grid-cols-2">
-      <LookupListPanel
-        kind="street"
-        items={streetsQuery.data ?? []}
-        loading={streetsQuery.isLoading}
-        failed={streetsQuery.isError}
-        retry={() => void streetsQuery.refetch()}
-      />
-      <LookupListPanel
-        kind="association"
-        items={associationsQuery.data ?? []}
-        loading={associationsQuery.isLoading}
-        failed={associationsQuery.isError}
-        retry={() => void associationsQuery.refetch()}
-      />
-    </div>
-  )
-}
-
 const LIST_QUERIES = {
   street: { key: "streets", load: () => LookupsService.listStreets() },
+  subdivision: {
+    key: "subdivisions",
+    load: () => LookupsService.listSubdivisions(),
+  },
   association: {
     key: "tricycle-associations",
     load: () => LookupsService.listTricycleAssociations(),

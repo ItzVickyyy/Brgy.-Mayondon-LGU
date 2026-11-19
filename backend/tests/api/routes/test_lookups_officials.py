@@ -17,6 +17,7 @@ from app.models_foundation import (
     Official,
     Sector,
     Street,
+    Subdivision,
     TricycleAssociation,
 )
 from app.models_residents import Resident
@@ -34,6 +35,7 @@ def _tidy_up(db: Session) -> Generator[None]:
     db.execute(delete(Resident).where(col(Resident.street_id).is_not(None)))
     db.execute(delete(Street))
     db.execute(delete(TricycleAssociation))
+    db.execute(delete(Subdivision))
     db.execute(delete(Official))
     db.execute(delete(IdType).where(col(IdType.name).like("ZZ test %")))
     db.execute(delete(Sector).where(col(Sector.name).like("ZZ test %")))
@@ -77,6 +79,7 @@ def test_lookups_require_login(client: TestClient) -> None:
         "addressed-offices",
         "educational-attainments",
         "streets",
+        "subdivisions",
         "tricycle-associations",
     ):
         assert client.get(f"{LK}/{path}").status_code == 401
@@ -110,7 +113,7 @@ def test_staff_and_admin_read_seeded_lookups(
         assert len(kinds) == 8
         assert kinds["BARANGAY_CLEARANCE"]["validity_months"] == 2
         assert kinds["FIRST_TIME_JOBSEEKER"]["one_per_resident"] is True
-        for path in ("streets", "tricycle-associations"):
+        for path in ("streets", "subdivisions", "tricycle-associations"):
             assert client.get(f"{LK}/{path}", headers=headers).status_code == 200
 
 
@@ -137,7 +140,7 @@ def test_staff_cannot_change_streets_or_associations(
         f"{LK}/streets", json={"name": _name("Staff")}, headers=superuser_token_headers
     ).json()
     sid = created["id"]
-    for path in ("streets", "tricycle-associations"):
+    for path in ("streets", "subdivisions", "tricycle-associations"):
         r = client.post(f"{LK}/{path}", json={"name": "X"}, headers=staff_token_headers)
         assert r.status_code == 403
         r = client.patch(
@@ -297,6 +300,55 @@ def test_admin_tricycle_association_lifecycle(
     )
     assert r.status_code == 204
     assert db.get(TricycleAssociation, aid) is None
+
+
+def test_admin_subdivision_lifecycle_is_audited(
+    client: TestClient, db: Session, superuser_token_headers: dict[str, str]
+) -> None:
+    name = _name("Villa Heights")
+    r = client.post(
+        f"{LK}/subdivisions",
+        json={"name": f"  {name}  "},
+        headers=superuser_token_headers,
+    )
+    assert r.status_code == 201
+    item = r.json()
+    assert item["name"] == name  # trimmed
+    sid = item["id"]
+    # Same name in other case is a duplicate.
+    assert (
+        client.post(
+            f"{LK}/subdivisions",
+            json={"name": name.upper()},
+            headers=superuser_token_headers,
+        ).status_code
+        == 409
+    )
+    listed = client.get(f"{LK}/subdivisions", headers=superuser_token_headers).json()
+    assert {"id": sid, "name": name} in listed
+    new_name = _name("Greenfields")
+    r = client.patch(
+        f"{LK}/subdivisions/{sid}",
+        json={"name": new_name},
+        headers=superuser_token_headers,
+    )
+    assert r.status_code == 200 and r.json()["name"] == new_name
+    r = client.delete(f"{LK}/subdivisions/{sid}", headers=superuser_token_headers)
+    assert r.status_code == 204
+    assert db.get(Subdivision, sid) is None
+    assert (
+        client.delete(
+            f"{LK}/subdivisions/{sid}", headers=superuser_token_headers
+        ).status_code
+        == 404
+    )
+    db.expire_all()
+    actions = _audit_actions(db, str(sid), "subdivision")
+    assert {
+        "subdivision.create",
+        "subdivision.rename",
+        "subdivision.delete",
+    } <= set(actions)
 
 
 def test_admin_id_type_lifecycle(

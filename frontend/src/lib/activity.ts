@@ -45,6 +45,9 @@ const activityKeys = {
     "activity.actions.educational_attainment.rename",
   "educational_attainment.delete":
     "activity.actions.educational_attainment.delete",
+  "subdivision.create": "activity.actions.subdivision.create",
+  "subdivision.rename": "activity.actions.subdivision.rename",
+  "subdivision.delete": "activity.actions.subdivision.delete",
   "tricycle_association.create": "activity.actions.tricycle_association.create",
   "tricycle_association.rename": "activity.actions.tricycle_association.rename",
   "tricycle_association.delete": "activity.actions.tricycle_association.delete",
