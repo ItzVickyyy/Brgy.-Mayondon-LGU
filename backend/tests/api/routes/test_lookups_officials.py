@@ -55,9 +55,14 @@ def _name(prefix: str) -> str:
     return f"{prefix} {random_lower_string()[:10]}"
 
 
-def _audit_actions(db: Session, record_id: str) -> list[str]:
+def _audit_actions(
+    db: Session, record_id: str, record_type: str
+) -> list[str]:
     rows = db.exec(
-        select(AuditLog.action).where(col(AuditLog.record_id) == record_id)
+        select(AuditLog.action).where(
+            col(AuditLog.record_id) == record_id,
+            col(AuditLog.record_type) == record_type,
+        )
     ).all()
     return list(rows)
 
@@ -180,7 +185,7 @@ def test_admin_street_lifecycle_is_audited(
     assert r.status_code == 404
 
     db.expire_all()
-    actions = _audit_actions(db, str(sid))
+    actions = _audit_actions(db, str(sid), "street")
     assert {"street.create", "street.rename", "street.delete"} <= set(actions)
 
 
@@ -330,7 +335,7 @@ def test_admin_id_type_lifecycle(
     )
     db.expire_all()
     assert {"id_type.create", "id_type.rename", "id_type.delete"} <= set(
-        _audit_actions(db, str(tid))
+        _audit_actions(db, str(tid), "id_type")
     )
 
 
@@ -456,7 +461,7 @@ def test_admin_creates_updates_and_retires_official(
     assert r.json()["term_end"] is None
 
     db.expire_all()
-    actions = _audit_actions(db, oid)
+    actions = _audit_actions(db, oid, "official")
     assert "official.create" in actions
     assert actions.count("official.update") == 2
 
@@ -588,7 +593,7 @@ def test_admin_sector_lifecycle(
     )
     db.expire_all()
     assert {"sector.create", "sector.rename", "sector.delete"} <= set(
-        _audit_actions(db, str(sid))
+        _audit_actions(db, str(sid), "sector")
     )
 
 
@@ -682,7 +687,7 @@ def test_admin_issuance_purpose_lifecycle_is_audited(
     assert client.delete(
         f"{LK}/issuance-purposes/{item_id}", headers=superuser_token_headers
     ).status_code == 204
-    assert set(_audit_actions(db, str(item_id))) == {
+    assert set(_audit_actions(db, str(item_id), "issuance_purpose")) == {
         "issuance_purpose.create",
         "issuance_purpose.rename",
         "issuance_purpose.delete",
@@ -785,7 +790,7 @@ def test_admin_addressed_office_suggestion_lifecycle(
     assert client.delete(
         f"{LK}/addressed-offices/{item_id}", headers=superuser_token_headers
     ).status_code == 204
-    assert set(_audit_actions(db, str(item_id))) == {
+    assert set(_audit_actions(db, str(item_id), "addressed_office")) == {
         "addressed_office.create",
         "addressed_office.rename",
         "addressed_office.delete",
@@ -862,7 +867,7 @@ def test_admin_educational_attainment_suggestion_lifecycle(
         f"{LK}/educational-attainments/{item_id}",
         headers=superuser_token_headers,
     ).status_code == 204
-    assert set(_audit_actions(db, str(item_id))) == {
+    assert set(_audit_actions(db, str(item_id), "educational_attainment")) == {
         "educational_attainment.create",
         "educational_attainment.rename",
         "educational_attainment.delete",
