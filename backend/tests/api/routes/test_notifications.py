@@ -169,7 +169,13 @@ def test_staff_never_see_backup_import_or_configuration(
     )
     imp = _audit(db, admin, "import.commit", module="imports", details={"file": "z"})
     ids = {
-        ok.id, bad.id, cfg.id, purpose_cfg.id, office_cfg.id, attainment_cfg.id, imp.id
+        ok.id,
+        bad.id,
+        cfg.id,
+        purpose_cfg.id,
+        office_cfg.id,
+        attainment_cfg.id,
+        imp.id,
     }
     staff_body = _bell(client, head)
     assert not ids & {i["id"] for i in staff_body["data"]}

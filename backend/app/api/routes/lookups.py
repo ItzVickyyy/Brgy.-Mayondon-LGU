@@ -77,9 +77,7 @@ def list_issuance_purposes(session: SessionDep, _user: CurrentUser) -> list[Look
 
 
 @router.get("/addressed-offices", response_model=list[LookupItem])
-def list_addressed_offices(
-    session: SessionDep, _user: CurrentUser
-) -> list[LookupItem]:
+def list_addressed_offices(session: SessionDep, _user: CurrentUser) -> list[LookupItem]:
     return _names(session, AddressedOffice)
 
 
