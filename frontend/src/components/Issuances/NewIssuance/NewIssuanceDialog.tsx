@@ -22,7 +22,7 @@ import { userFullName, userInitials } from "@/lib/userNames"
 import { cn } from "@/lib/utils"
 import { DateField } from "./DateField"
 import { DocumentTypePicker } from "./DocumentTypePicker"
-import { type DetailFieldConfig, type DocumentCode, documentConfig, residencyExcludedPurposes } from "./documentConfig"
+import { type DetailFieldConfig, type DocumentCode, documentConfig, residencyPurposeChoices } from "./documentConfig"
 import { CheckField, ChoiceRow, ComboField, SelectField } from "./FormControls"
 import { IssuanceSection } from "./IssuanceSection"
 import { getMissingResidentFields, getResidentAddress, issuanceApi, type MockIssuance, PHOTO_ON_FILE, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
@@ -179,7 +179,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
             : candidate.name === "sector" && sectorChoices.length > 0
               ? { ...candidate, options: sectorChoices.map((item) => item.name) }
               : candidate.name === "purpose" && purposeNames.length > 0
-                ? { ...candidate, options: documentType === "RESIDENCY" ? purposeNames.filter((name) => !residencyExcludedPurposes.includes(name)) : purposeNames }
+                ? { ...candidate, options: documentType === "RESIDENCY" ? residencyPurposeChoices(purposeNames) : purposeNames }
                 : candidate.name === "addressedToOffice" && addressedOfficeChoices.length > 0
                   ? { ...candidate, options: addressedOfficeChoices.map((item) => item.name) }
                   : candidate.name === "educationalAttainment" && educationalAttainmentChoices.length > 0

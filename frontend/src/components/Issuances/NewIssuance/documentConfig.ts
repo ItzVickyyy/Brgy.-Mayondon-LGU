@@ -66,10 +66,13 @@ const indigencyPurposes = Array.from(
 // These purposes belong to assistance documents. They are hidden from Residency
 // only; the lookup rows stay (Indigency and old issuances use them).
 export const residencyExcludedPurposes: readonly string[] = [
-  "Medical",
+  "Medical Assistance",
   "Financial/Medical Assistance",
   "Financial/Burial Assistance",
 ]
+/** Purpose names Residency may offer: the given list without the assistance purposes. */
+export const residencyPurposeChoices = (names: readonly string[]): string[] =>
+  names.filter((name) => !residencyExcludedPurposes.includes(name))
 const residencyPurposes = purposeOptions.filter(
   (purpose) => !residencyExcludedPurposes.includes(purpose),
 )

@@ -1,16 +1,19 @@
 // Unit tests for pure issuance formatting helpers.
 import { expect, test } from "@playwright/test"
 import {
+  clearancePurposeOptions,
   documentFields,
   documentMeta,
   documentSections,
   documentTypes,
+  indigencyPurposeOptions,
   normalizeDocumentType,
 } from "../src/components/Issuances/config"
 import {
   documentConfig,
   documentConfigList,
   residencyExcludedPurposes,
+  residencyPurposeChoices,
 } from "../src/components/Issuances/NewIssuance/documentConfig"
 import { getMissingFields } from "../src/components/Issuances/print-summary"
 import {
@@ -240,4 +243,26 @@ test("Residency never offers the assistance purposes", () => {
   for (const purpose of residencyExcludedPurposes) {
     expect(options).not.toContain(purpose)
   }
+})
+
+test("every Residency exclusion names a purpose the system actually seeds", () => {
+  const seeded = new Set([
+    ...clearancePurposeOptions,
+    ...indigencyPurposeOptions,
+  ])
+  for (const purpose of residencyExcludedPurposes) {
+    expect(seeded.has(purpose), `${purpose} is not a seeded purpose`).toBe(true)
+  }
+})
+
+test("Residency hides the assistance purposes from the server list", () => {
+  const serverList = [
+    "Employment Requirement",
+    ...residencyExcludedPurposes,
+    "Scholarship Requirement",
+  ]
+  expect(residencyPurposeChoices(serverList)).toEqual([
+    "Employment Requirement",
+    "Scholarship Requirement",
+  ])
 })
