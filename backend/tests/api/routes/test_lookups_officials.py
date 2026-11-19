@@ -55,9 +55,12 @@ def _name(prefix: str) -> str:
     return f"{prefix} {random_lower_string()[:10]}"
 
 
-def _audit_actions(db: Session, record_id: str) -> list[str]:
+def _audit_actions(db: Session, record_id: str, record_type: str) -> list[str]:
     rows = db.exec(
-        select(AuditLog.action).where(col(AuditLog.record_id) == record_id)
+        select(AuditLog.action).where(
+            col(AuditLog.record_id) == record_id,
+            col(AuditLog.record_type) == record_type,
+        )
     ).all()
     return list(rows)
 
@@ -180,7 +183,7 @@ def test_admin_street_lifecycle_is_audited(
     assert r.status_code == 404
 
     db.expire_all()
-    actions = _audit_actions(db, str(sid))
+    actions = _audit_actions(db, str(sid), "street")
     assert {"street.create", "street.rename", "street.delete"} <= set(actions)
 
 
@@ -330,7 +333,7 @@ def test_admin_id_type_lifecycle(
     )
     db.expire_all()
     assert {"id_type.create", "id_type.rename", "id_type.delete"} <= set(
-        _audit_actions(db, str(tid))
+        _audit_actions(db, str(tid), "id_type")
     )
 
 
@@ -456,7 +459,7 @@ def test_admin_creates_updates_and_retires_official(
     assert r.json()["term_end"] is None
 
     db.expire_all()
-    actions = _audit_actions(db, oid)
+    actions = _audit_actions(db, oid, "official")
     assert "official.create" in actions
     assert actions.count("official.update") == 2
 
@@ -535,7 +538,7 @@ def test_noop_official_update_writes_no_audit_row(
     )
     assert r.status_code == 200
     db.expire_all()
-    assert _audit_actions(db, oid) == ["official.create"]
+    assert _audit_actions(db, oid, "official") == ["official.create"]
 
 
 def test_audit_details_hold_field_names_only(
@@ -588,7 +591,7 @@ def test_admin_sector_lifecycle(
     )
     db.expire_all()
     assert {"sector.create", "sector.rename", "sector.delete"} <= set(
-        _audit_actions(db, str(sid))
+        _audit_actions(db, str(sid), "sector")
     )
 
 
@@ -638,17 +641,28 @@ def test_staff_cannot_change_issuance_purposes(
     )
     assert created.status_code == 201
     item_id = created.json()["id"]
-    assert client.post(
-        f"{LK}/issuance-purposes", json={"name": "Nope"}, headers=staff_token_headers
-    ).status_code == 403
-    assert client.patch(
-        f"{LK}/issuance-purposes/{item_id}",
-        json={"name": "Nope"},
-        headers=staff_token_headers,
-    ).status_code == 403
-    assert client.delete(
-        f"{LK}/issuance-purposes/{item_id}", headers=staff_token_headers
-    ).status_code == 403
+    assert (
+        client.post(
+            f"{LK}/issuance-purposes",
+            json={"name": "Nope"},
+            headers=staff_token_headers,
+        ).status_code
+        == 403
+    )
+    assert (
+        client.patch(
+            f"{LK}/issuance-purposes/{item_id}",
+            json={"name": "Nope"},
+            headers=staff_token_headers,
+        ).status_code
+        == 403
+    )
+    assert (
+        client.delete(
+            f"{LK}/issuance-purposes/{item_id}", headers=staff_token_headers
+        ).status_code
+        == 403
+    )
     assert db.get(IssuancePurpose, item_id) is not None
     client.delete(f"{LK}/issuance-purposes/{item_id}", headers=superuser_token_headers)
 
@@ -679,10 +693,13 @@ def test_admin_issuance_purpose_lifecycle_is_audited(
         f"{LK}/issuance-purposes", headers=superuser_token_headers
     ).json()
     assert {"id": item_id, "name": renamed} in listed
-    assert client.delete(
-        f"{LK}/issuance-purposes/{item_id}", headers=superuser_token_headers
-    ).status_code == 204
-    assert set(_audit_actions(db, str(item_id))) == {
+    assert (
+        client.delete(
+            f"{LK}/issuance-purposes/{item_id}", headers=superuser_token_headers
+        ).status_code
+        == 204
+    )
+    assert set(_audit_actions(db, str(item_id), "issuance_purpose")) == {
         "issuance_purpose.create",
         "issuance_purpose.rename",
         "issuance_purpose.delete",
@@ -693,9 +710,12 @@ def test_issuance_purpose_validation_and_duplicate_names(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     for body in ({"name": "   "}, {"name": "x" * 151}):
-        assert client.post(
-            f"{LK}/issuance-purposes", json=body, headers=superuser_token_headers
-        ).status_code == 422
+        assert (
+            client.post(
+                f"{LK}/issuance-purposes", json=body, headers=superuser_token_headers
+            ).status_code
+            == 422
+        )
     name = _name("ZZ test purpose")
     first = client.post(
         f"{LK}/issuance-purposes",
@@ -717,7 +737,6 @@ def test_issuance_purpose_validation_and_duplicate_names(
 
 def test_staff_cannot_change_addressed_office_suggestions(
     client: TestClient,
-    db: Session,
     staff_token_headers: dict[str, str],
     superuser_token_headers: dict[str, str],
 ) -> None:
@@ -728,33 +747,43 @@ def test_staff_cannot_change_addressed_office_suggestions(
     )
     assert created.status_code == 201
     item_id = created.json()["id"]
-    assert client.post(
-        f"{LK}/addressed-offices",
-        json={"name": "Nope"},
-        headers=staff_token_headers,
-    ).status_code == 403
-    assert client.patch(
-        f"{LK}/addressed-offices/{item_id}",
-        json={"name": "Nope"},
-        headers=staff_token_headers,
-    ).status_code == 403
-    assert client.delete(
-        f"{LK}/addressed-offices/{item_id}", headers=staff_token_headers
-    ).status_code == 403
-    client.delete(
-        f"{LK}/addressed-offices/{item_id}", headers=superuser_token_headers
+    assert (
+        client.post(
+            f"{LK}/addressed-offices",
+            json={"name": "Nope"},
+            headers=staff_token_headers,
+        ).status_code
+        == 403
     )
+    assert (
+        client.patch(
+            f"{LK}/addressed-offices/{item_id}",
+            json={"name": "Nope"},
+            headers=staff_token_headers,
+        ).status_code
+        == 403
+    )
+    assert (
+        client.delete(
+            f"{LK}/addressed-offices/{item_id}", headers=staff_token_headers
+        ).status_code
+        == 403
+    )
+    client.delete(f"{LK}/addressed-offices/{item_id}", headers=superuser_token_headers)
 
 
 def test_admin_addressed_office_suggestion_lifecycle(
     client: TestClient, db: Session, superuser_token_headers: dict[str, str]
 ) -> None:
     for body in ({"name": "   "}, {"name": "x" * 151}):
-        assert client.post(
-            f"{LK}/addressed-offices",
-            json=body,
-            headers=superuser_token_headers,
-        ).status_code == 422
+        assert (
+            client.post(
+                f"{LK}/addressed-offices",
+                json=body,
+                headers=superuser_token_headers,
+            ).status_code
+            == 422
+        )
     name = _name("ZZ test office")
     created = client.post(
         f"{LK}/addressed-offices",
@@ -782,10 +811,13 @@ def test_admin_addressed_office_suggestion_lifecycle(
         f"{LK}/addressed-offices", headers=superuser_token_headers
     ).json()
     assert {"id": item_id, "name": renamed} in listed
-    assert client.delete(
-        f"{LK}/addressed-offices/{item_id}", headers=superuser_token_headers
-    ).status_code == 204
-    assert set(_audit_actions(db, str(item_id))) == {
+    assert (
+        client.delete(
+            f"{LK}/addressed-offices/{item_id}", headers=superuser_token_headers
+        ).status_code
+        == 204
+    )
+    assert set(_audit_actions(db, str(item_id), "addressed_office")) == {
         "addressed_office.create",
         "addressed_office.rename",
         "addressed_office.delete",
@@ -794,7 +826,6 @@ def test_admin_addressed_office_suggestion_lifecycle(
 
 def test_staff_cannot_change_educational_attainment_suggestions(
     client: TestClient,
-    db: Session,
     staff_token_headers: dict[str, str],
     superuser_token_headers: dict[str, str],
 ) -> None:
@@ -805,19 +836,28 @@ def test_staff_cannot_change_educational_attainment_suggestions(
     )
     assert created.status_code == 201
     item_id = created.json()["id"]
-    assert client.post(
-        f"{LK}/educational-attainments",
-        json={"name": "Nope"},
-        headers=staff_token_headers,
-    ).status_code == 403
-    assert client.patch(
-        f"{LK}/educational-attainments/{item_id}",
-        json={"name": "Nope"},
-        headers=staff_token_headers,
-    ).status_code == 403
-    assert client.delete(
-        f"{LK}/educational-attainments/{item_id}", headers=staff_token_headers
-    ).status_code == 403
+    assert (
+        client.post(
+            f"{LK}/educational-attainments",
+            json={"name": "Nope"},
+            headers=staff_token_headers,
+        ).status_code
+        == 403
+    )
+    assert (
+        client.patch(
+            f"{LK}/educational-attainments/{item_id}",
+            json={"name": "Nope"},
+            headers=staff_token_headers,
+        ).status_code
+        == 403
+    )
+    assert (
+        client.delete(
+            f"{LK}/educational-attainments/{item_id}", headers=staff_token_headers
+        ).status_code
+        == 403
+    )
     client.delete(
         f"{LK}/educational-attainments/{item_id}",
         headers=superuser_token_headers,
@@ -828,11 +868,14 @@ def test_admin_educational_attainment_suggestion_lifecycle(
     client: TestClient, db: Session, superuser_token_headers: dict[str, str]
 ) -> None:
     for body in ({"name": "   "}, {"name": "x" * 151}):
-        assert client.post(
-            f"{LK}/educational-attainments",
-            json=body,
-            headers=superuser_token_headers,
-        ).status_code == 422
+        assert (
+            client.post(
+                f"{LK}/educational-attainments",
+                json=body,
+                headers=superuser_token_headers,
+            ).status_code
+            == 422
+        )
     name = _name("ZZ test attainment")
     created = client.post(
         f"{LK}/educational-attainments",
@@ -858,11 +901,14 @@ def test_admin_educational_attainment_suggestion_lifecycle(
         f"{LK}/educational-attainments", headers=superuser_token_headers
     ).json()
     assert {"id": item_id, "name": renamed} in listed
-    assert client.delete(
-        f"{LK}/educational-attainments/{item_id}",
-        headers=superuser_token_headers,
-    ).status_code == 204
-    assert set(_audit_actions(db, str(item_id))) == {
+    assert (
+        client.delete(
+            f"{LK}/educational-attainments/{item_id}",
+            headers=superuser_token_headers,
+        ).status_code
+        == 204
+    )
+    assert set(_audit_actions(db, str(item_id), "educational_attainment")) == {
         "educational_attainment.create",
         "educational_attainment.rename",
         "educational_attainment.delete",
