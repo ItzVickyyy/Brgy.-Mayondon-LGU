@@ -234,13 +234,15 @@ const AddUser = () => {
                     )}
                   />
                   {/* Full name on one row: first, middle, last and a narrow
-                      extension (Jr., III). Stacks on a phone. */}
-                  <div className="grid gap-4 sm:col-span-2 sm:items-start sm:grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,9rem)]">
+                      extension (Jr., III). Stacks on a phone. On wider screens each
+                      field spans three shared rows (label, input, message) so a
+                      label that wraps in Filipino cannot push its input down. */}
+                  <div className="grid gap-4 sm:col-span-2 sm:grid-cols-[repeat(3,minmax(0,1fr))_minmax(0,9rem)] sm:grid-rows-[auto_auto_auto]">
                     <FormField
                       control={form.control}
                       name="first_name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="sm:row-span-3 sm:grid-rows-subgrid sm:gap-y-2 sm:[&>label]:self-end">
                           <FormLabel>
                             {t("account.fields.firstName")}{" "}
                             <span className="text-destructive">*</span>
@@ -261,7 +263,7 @@ const AddUser = () => {
                       control={form.control}
                       name="middle_name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="sm:row-span-3 sm:grid-rows-subgrid sm:gap-y-2 sm:[&>label]:self-end">
                           <FormLabel>
                             {t("account.fields.middleName")}
                           </FormLabel>
@@ -281,7 +283,7 @@ const AddUser = () => {
                       control={form.control}
                       name="last_name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="sm:row-span-3 sm:grid-rows-subgrid sm:gap-y-2 sm:[&>label]:self-end">
                           <FormLabel>
                             {t("account.fields.lastName")}{" "}
                             <span className="text-destructive">*</span>
@@ -302,7 +304,7 @@ const AddUser = () => {
                       control={form.control}
                       name="extension_name"
                       render={({ field }) => (
-                        <FormItem>
+                        <FormItem className="sm:row-span-3 sm:grid-rows-subgrid sm:gap-y-2 sm:[&>label]:self-end">
                           <FormLabel>
                             {t("account.fields.extensionName")}
                           </FormLabel>
