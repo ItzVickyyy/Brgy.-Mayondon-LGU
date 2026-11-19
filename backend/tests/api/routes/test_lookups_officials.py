@@ -540,7 +540,7 @@ def test_noop_official_update_writes_no_audit_row(
     )
     assert r.status_code == 200
     db.expire_all()
-    assert _audit_actions(db, oid) == ["official.create"]
+    assert _audit_actions(db, oid, "official") == ["official.create"]
 
 
 def test_audit_details_hold_field_names_only(

@@ -313,7 +313,7 @@ test("an administrator can maintain First-Time Jobseeker educational-attainment 
     .filter({ hasText: /First-Time Jobseeker/ })
     .first()
     .click()
-  const attainment = form.getByRole("button", {
+  const attainment = form.getByRole("combobox", {
     name: /Educational attainment/i,
   })
   await attainment.click()
