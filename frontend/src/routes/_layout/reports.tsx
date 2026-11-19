@@ -37,6 +37,7 @@ import {
   formatLocaleNumber,
 } from "@/lib/locale"
 import { notify } from "@/lib/notifications"
+import { reportPageRule } from "@/lib/print/paperSizes"
 import { userFullName } from "@/lib/userNames"
 
 export const Route = createFileRoute("/_layout/reports")({
@@ -255,6 +256,11 @@ function Reports() {
       if (wasDark) root.classList.add("dark")
       setPrintAll(false)
     }
+    // Page size and margins for this print only; removed again in the cleanup.
+    const pageStyle = document.createElement("style")
+    pageStyle.setAttribute("data-report-page", "")
+    pageStyle.textContent = reportPageRule()
+    document.head.appendChild(pageStyle)
     document.body.classList.add("report-printing")
     root.classList.remove("dark")
     window.addEventListener("afterprint", finish, { once: true })
@@ -262,6 +268,7 @@ function Reports() {
     return () => {
       window.clearTimeout(timer)
       window.removeEventListener("afterprint", finish)
+      pageStyle.remove()
       document.body.classList.remove("report-printing")
       if (wasDark) root.classList.add("dark")
     }

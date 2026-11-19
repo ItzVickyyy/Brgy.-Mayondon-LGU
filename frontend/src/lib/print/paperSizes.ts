@@ -27,3 +27,7 @@ export const paperDimensions = {
 /** The `@page` rule for a paper size. No margins: the templates position everything themselves. */
 export const pageRule = (size: PaperSize): string =>
   `@page { size: ${paperDimensions[size].css}; margin: 0 }`
+
+/** The `@page` rule for a printed Management Report: short paper with real margins, because a report is a flowing table, not a form with fixed positions. */
+export const reportPageRule = (): string =>
+  `@page { size: ${paperDimensions.short.css}; margin: 0.6in }`

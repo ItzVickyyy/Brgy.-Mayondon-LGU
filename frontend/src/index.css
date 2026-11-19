@@ -485,6 +485,14 @@ tr:focus-within > .row-hover-cell {
     /* biome-ignore lint/complexity/noImportantStyles: the printed report must beat the screen layout classes */
     margin: 0 !important;
   }
+  /* The page colour of the app must not paint grey below the report when the
+     print dialog has "Background graphics" turned on. */
+  body.report-printing,
+  body.report-printing [data-slot="sidebar-wrapper"],
+  body.report-printing [data-slot="sidebar-inset"],
+  body.report-printing main {
+    background: #fff;
+  }
   body.report-printing main {
     /* biome-ignore lint/complexity/noImportantStyles: the printed report must beat the screen layout classes */
     padding: 0 !important;
@@ -504,6 +512,11 @@ tr:focus-within > .row-hover-cell {
   }
   body.report-printing thead {
     display: table-header-group;
+  }
+  /* A table footer repeats on every printed page by default; the totals row
+     must print once, after the last row. */
+  body.report-printing tfoot {
+    display: table-row-group;
   }
 }
 
@@ -594,6 +607,10 @@ tr:focus-within > .row-hover-cell {
   }
   body.report-printing .report-sheet tfoot td {
     font-weight: 700;
+  }
+  /* Reference numbers must stay on one line. */
+  body.report-printing .report-sheet td.font-mono {
+    white-space: nowrap;
   }
   body.report-printing .report-signatories {
     margin-top: 36pt;
