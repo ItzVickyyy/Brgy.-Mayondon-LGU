@@ -392,11 +392,15 @@ export function IssuanceHistory({
   const latestQuery = useQuery({
     queryKey: ["issuances-summary", "latest"],
     queryFn: async () =>
+      // null, not undefined, when nothing is issued yet: React Query treats an
+      // undefined result as an error.
       (
-        await IssuancesService.listIssuances({
-          query: { status: "issued", limit: 1 },
-        })
-      ).data.data[0],
+        (
+          await IssuancesService.listIssuances({
+            query: { status: "issued", limit: 1 },
+          })
+        ).data.data[0] ?? null
+      ),
   })
   const topType = [...(overallQuery.data?.by_document_type ?? [])].sort(
     (a, b) => b.count - a.count,
