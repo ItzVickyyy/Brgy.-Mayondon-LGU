@@ -347,7 +347,7 @@ function BackupRestore() {
           ) : null}
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[960px] text-left text-sm">
+          <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
                 {columnIds.map((id) => (

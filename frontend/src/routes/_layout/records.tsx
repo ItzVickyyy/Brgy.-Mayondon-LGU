@@ -374,13 +374,13 @@ function RecordsManagement() {
             ) : (
               <>
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[960px] text-left text-sm">
+                  <table className="w-full min-w-[900px] text-left text-sm">
                     <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                       <tr>
                         {residentColumns.map((column) => (
                           <th
                             key={column}
-                            className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-right" : ""}`}
+                            className={`px-3 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-right" : ""}`}
                           >
                             {t(`records.list.columns.${column}`)}
                           </th>
@@ -400,7 +400,7 @@ function RecordsManagement() {
                               archived && "opacity-70",
                             )}
                           >
-                            <td className="px-4 py-3 align-middle sm:px-5">
+                            <td className="px-3 py-3 align-middle">
                               <p className="font-semibold">
                                 {resident.full_name}
                               </p>
@@ -411,23 +411,39 @@ function RecordsManagement() {
                                 {resident.id.slice(0, 8)}…
                               </p>
                             </td>
-                            <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
-                              {resident.birthdate
-                                ? `${formatBusinessDate(resident.birthdate)}${resident.age !== null ? ` · ${t("records.ageYears", { age: resident.age })}` : ""}`
-                                : "—"}
+                            <td className="px-3 py-3 align-middle">
+                              {resident.birthdate ? (
+                                <>
+                                  <span className="whitespace-nowrap">
+                                    {formatBusinessDate(resident.birthdate)}
+                                  </span>
+                                  {resident.age !== null ? (
+                                    <>
+                                      {" · "}
+                                      <span className="whitespace-nowrap">
+                                        {t("records.ageYears", {
+                                          age: resident.age,
+                                        })}
+                                      </span>
+                                    </>
+                                  ) : null}
+                                </>
+                              ) : (
+                                "—"
+                              )}
                             </td>
                             <td
-                              className="max-w-[180px] truncate px-4 py-3 align-middle sm:px-5"
+                              className="max-w-[180px] truncate px-3 py-3 align-middle"
                               title={address}
                             >
                               {address || "—"}
                             </td>
-                            <td className="px-4 py-3 align-middle sm:px-5">
+                            <td className="px-3 py-3 align-middle">
                               {resident.resident_type
                                 ? residentTypeLabel(resident.resident_type, t)
                                 : "—"}
                             </td>
-                            <td className="px-4 py-3 align-middle sm:px-5">
+                            <td className="px-3 py-3 align-middle">
                               <Badge
                                 variant="outline"
                                 className={
@@ -439,7 +455,7 @@ function RecordsManagement() {
                                 {t(`records.idStatus.${resident.id_status}`)}
                               </Badge>
                             </td>
-                            <td className="px-4 py-3 align-middle sm:px-5">
+                            <td className="px-3 py-3 align-middle">
                               <Badge
                                 variant="outline"
                                 className={
@@ -449,7 +465,7 @@ function RecordsManagement() {
                                 {t(`records.status.${statusKey}`)}
                               </Badge>
                             </td>
-                            <td className="sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle sm:px-5 sticky-edge">
+                            <td className="sticky right-0 bg-card row-hover-cell px-3 py-3 align-middle sticky-edge">
                               <RowActions
                                 name={resident.full_name}
                                 isAdmin={isAdmin}

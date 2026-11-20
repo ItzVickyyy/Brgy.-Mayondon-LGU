@@ -701,7 +701,7 @@ export function IssuanceHistory({
                     {historyColumns.map((column) => (
                       <th
                         key={column}
-                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-right" : ""}`}
+                        className={`px-3 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-right" : ""}`}
                       >
                         {t(`issuances.history.columns.${column}`)}
                       </th>
@@ -733,25 +733,25 @@ export function IssuanceHistory({
                         key={item.id}
                         className="transition-colors hover:bg-muted/30"
                       >
-                        <td className="px-4 py-3 align-middle sm:px-5">
+                        <td className="px-3 py-3 align-middle">
                           <p className="font-semibold">{item.resident_name}</p>
                           <p className="mt-1 font-mono text-xs text-muted-foreground">
                             {item.reference_no ??
                               t("issuances.history.notNumbered")}
                           </p>
                         </td>
-                        <td className="max-w-xs px-4 py-3 align-middle sm:px-5">
+                        <td className="max-w-xs px-3 py-3 align-middle">
                           {documentName}
                         </td>
-                        <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">
+                        <td className="px-3 py-3 align-middle text-muted-foreground">
                           {(item.purpose_id &&
                             purposeNames.get(item.purpose_id)) ||
                             "—"}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                        <td className="whitespace-nowrap px-3 py-3 align-middle">
                           {isDraft ? "—" : formatBusinessDate(item.issue_date)}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                        <td className="whitespace-nowrap px-3 py-3 align-middle">
                           {item.expires_on ? (
                             <div className="flex flex-col items-start gap-1">
                               <span>{formatBusinessDate(item.expires_on)}</span>
@@ -768,7 +768,7 @@ export function IssuanceHistory({
                             "—"
                           )}
                         </td>
-                        <td className="px-4 py-3 align-middle sm:px-5">
+                        <td className="px-3 py-3 align-middle">
                           <Badge
                             variant="outline"
                             className={statusStyles[styleKey]}
@@ -800,7 +800,7 @@ export function IssuanceHistory({
                             </p>
                           ) : null}
                         </td>
-                        <td className="px-4 py-3 align-middle sm:px-5 sticky right-0 bg-card row-hover-cell sticky-edge">
+                        <td className="px-3 py-3 align-middle sticky right-0 bg-card row-hover-cell sticky-edge">
                           <RowActions
                             name={item.resident_name}
                             isAdmin={isAdmin}

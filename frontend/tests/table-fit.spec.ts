@@ -1,0 +1,197 @@
+// The Records and Issuance History tables fit a 1280 px laptop screen without
+// a sideways scroll bar, in English and in Filipino (whose labels are longer).
+// Before, the Filipino tables were 42 to 152 px too wide, so the sticky Actions
+// column slid over the status badge and the "Katayuan ng ID" header. The API is
+// mocked with real responses (synthetic residents), so this spec needs only the
+// running frontend.
+import { expect, test } from "@playwright/test"
+
+const admin = {
+  id: "22222222-0000-0000-0000-000000000001",
+  email: "admin@example.com",
+  is_active: true,
+  is_superuser: true,
+  role: "admin",
+  full_name: "Test Admin",
+}
+const residents = {
+  data: [
+    {
+      first_name: "Grace",
+      middle_name: "Flores",
+      last_name: "Alcantara",
+      suffix: null,
+      birthdate: "1937-08-02",
+      birth_place: "Nagcarlan, Laguna",
+      sex: "Female",
+      civil_status: "Married",
+      house_number: "197",
+      street_id: 3,
+      purok: 7,
+      resident_since_year: 1966,
+      resident_since_birth: false,
+      resident_type: null,
+      id_number: null,
+      voter_registration: "unregistered",
+      residency_type: "new",
+      emergency_contact_name: null,
+      emergency_contact_address: null,
+      emergency_contact_phone: null,
+      id: "e7d083c5-29b4-402c-bc22-72c418d43c0f",
+      full_name: "Grace Flores Alcantara",
+      age: 89,
+      sector_ids: [],
+      has_photo: false,
+      id_status: "none",
+      id_valid_until: null,
+      id_validity_months: 6,
+      voter_proof_verified_at: null,
+      voter_proof_verified_by_name: null,
+      status: "active",
+      archive_reason: null,
+      archived_at: null,
+      archived_by_name: null,
+      created_at: "2026-11-20T01:38:19.905795Z",
+      updated_at: "2026-11-20T01:38:19.905806Z",
+    },
+    {
+      first_name: "Lorna",
+      middle_name: "Santos",
+      last_name: "Alcantara",
+      suffix: null,
+      birthdate: "1970-06-25",
+      birth_place: "San Pablo City, Laguna",
+      sex: "Female",
+      civil_status: "Widow/Widower",
+      house_number: "247",
+      street_id: 7,
+      purok: 6,
+      resident_since_year: null,
+      resident_since_birth: true,
+      resident_type: null,
+      id_number: null,
+      voter_registration: "registered",
+      residency_type: "renting",
+      emergency_contact_name: null,
+      emergency_contact_address: null,
+      emergency_contact_phone: null,
+      id: "805d2ece-77a6-4eae-8100-4865df06b28c",
+      full_name: "Lorna Santos Alcantara",
+      age: 56,
+      sector_ids: [],
+      has_photo: false,
+      id_status: "none",
+      id_valid_until: null,
+      id_validity_months: 6,
+      voter_proof_verified_at: null,
+      voter_proof_verified_by_name: null,
+      status: "active",
+      archive_reason: null,
+      archived_at: null,
+      archived_by_name: null,
+      created_at: "2026-11-20T01:38:19.940292Z",
+      updated_at: "2026-11-20T01:38:19.940300Z",
+    },
+  ],
+  count: 54,
+}
+const documentTypes = [
+  {
+    id: 1,
+    code: "BARANGAY_CLEARANCE",
+    name: "Barangay Clearance",
+    category: "clearance",
+    print_mode: "overlay",
+    validity_months: 2,
+    one_per_resident: false,
+    signatory_default_position: null,
+  },
+]
+const issuances = {
+  data: [
+    {
+      id: "324269c8-5718-4b80-9c1b-758c8de9a61c",
+      reference_no: "ISS-2026-000032",
+      status: "issued",
+      document_type_id: 1,
+      document_type_code: "BARANGAY_CLEARANCE",
+      resident_id: "7d6b7b8d-33b2-4766-8998-1cc14b85b5cf",
+      resident_name: "Rowena Flores Mendoza Sr.",
+      issue_date: "2026-11-20",
+      purpose_id: null,
+      expires_on: "2027-01-20",
+      issued_at: "2026-11-20T01:38:44.987923Z",
+      corrects_issuance_id: null,
+      created_at: "2026-11-20T01:38:44.962818Z",
+      archived_at: null,
+      archived_by_name: null,
+      archive_reason: null,
+      original_status: null,
+    },
+    {
+      id: "aadf8464-bf33-4c93-b377-7d6b41dae6df",
+      reference_no: "ISS-2026-000031",
+      status: "issued",
+      document_type_id: 1,
+      document_type_code: "BARANGAY_CLEARANCE",
+      resident_id: "0935ea6b-8736-41a0-b9ac-0e8050a14ac5",
+      resident_name: "Dennis Rivera Mendoza",
+      issue_date: "2026-11-20",
+      purpose_id: null,
+      expires_on: "2027-01-20",
+      issued_at: "2026-11-20T01:38:44.946032Z",
+      corrects_issuance_id: null,
+      created_at: "2026-11-20T01:38:44.920415Z",
+      archived_at: null,
+      archived_by_name: null,
+      archive_reason: null,
+      original_status: null,
+    },
+  ],
+  count: 32,
+}
+
+const pages = [
+  { path: "/records", name: "Records" },
+  { path: "/issuances", name: "Issuance History" },
+]
+
+for (const language of ["en", "fil"])
+  for (const { path, name } of pages) {
+    test(`${name} table fits 1280 px without scrolling (${language})`, async ({
+      page,
+    }) => {
+      await page.route("**/api/v1/**", async (route) => {
+        const json = (body: unknown) =>
+          route.fulfill({
+            contentType: "application/json",
+            body: JSON.stringify(body),
+          })
+        const url = route.request().url()
+        if (url.includes("/users/me")) return json(admin)
+        if (url.includes("/lookups/document-types")) return json(documentTypes)
+        if (url.includes("/lookups/")) return json([])
+        if (url.includes("/dashboard"))
+          return json({ total_issued: 2, by_document_type: [] })
+        if (url.includes("/residents/") && !url.includes("/residents/stats"))
+          return json(residents)
+        if (url.includes("/issuances/")) return json(issuances)
+        return json({ data: [], count: 0 })
+      })
+      await page.addInitScript((lang) => {
+        localStorage.setItem("access_token", "test-token")
+        localStorage.setItem("app-language", lang)
+        localStorage.setItem("vite-ui-theme", "light")
+      }, language)
+      await page.setViewportSize({ width: 1280, height: 900 })
+      await page.goto(path)
+
+      const table = page.locator("table").first()
+      await expect(table.locator("tbody tr").first()).toBeVisible()
+      const over = await table.evaluate((el) => {
+        const box = el.closest(".overflow-x-auto") as HTMLElement
+        return box.scrollWidth - box.clientWidth
+      })
+      expect(over).toBeLessThanOrEqual(1)
+    })
+  }
