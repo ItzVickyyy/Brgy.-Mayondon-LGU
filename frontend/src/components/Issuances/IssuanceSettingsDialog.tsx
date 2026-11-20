@@ -45,7 +45,8 @@ const LIST_TABS: SettingsTab[] = [
 /**
  * Issuance settings: Printing setup for everyone, plus the editable option lists
  * for administrators only. There is no Radix Tabs package in the project, so the
- * tab list is built by hand (buttons with role="tab").
+ * tab list is built by hand (buttons with role="tab"): a left sidebar from
+ * `sm` up, a sideways strip on a phone.
  */
 export function IssuanceSettingsDialog({
   open,
@@ -66,7 +67,7 @@ export function IssuanceSettingsDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className={cn(modalShell, modalTall, "sm:max-w-3xl")}
+        className={cn(modalShell, modalTall, "sm:max-w-6xl")}
         data-testid="issuance-settings"
       >
         <DialogHeader className={modalHeader}>
@@ -79,50 +80,53 @@ export function IssuanceSettingsDialog({
             )}
           </DialogDescription>
         </DialogHeader>
-        {tabs.length > 1 && (
-          <div
-            role="tablist"
-            aria-label={t("issuances.settings.title")}
-            className="flex gap-1 overflow-x-auto border-b px-3 sm:px-4"
-          >
-            {tabs.map((name) => (
-              <button
-                key={name}
-                type="button"
-                role="tab"
-                id={`settings-tab-${name}`}
-                aria-selected={active === name}
-                aria-controls="settings-panel"
-                data-testid={`settings-tab-${name}`}
-                onClick={() => setTab(name)}
-                className={cn(
-                  "min-h-11 shrink-0 border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                  active === name
-                    ? "border-primary text-brand"
-                    : "border-transparent text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {t(`issuances.settings.tabs.${name}`)}
-              </button>
-            ))}
-          </div>
-        )}
-        <div
-          role="tabpanel"
-          id="settings-panel"
-          aria-labelledby={`settings-tab-${active}`}
-          className={modalBody}
-        >
-          {active === "printing" ? (
-            <div className="flex flex-col gap-4">
-              <p className="text-sm text-muted-foreground">
-                {t("issuances.printSetup.description")}
-              </p>
-              <CalibrationPanel />
+        <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
+          {tabs.length > 1 && (
+            <div
+              role="tablist"
+              aria-orientation="vertical"
+              aria-label={t("issuances.settings.title")}
+              className="flex shrink-0 gap-1 overflow-x-auto border-b px-3 sm:w-64 sm:flex-col sm:overflow-y-auto sm:overflow-x-hidden sm:border-r sm:border-b-0 sm:bg-muted/30 sm:p-3"
+            >
+              {tabs.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  role="tab"
+                  id={`settings-tab-${name}`}
+                  aria-selected={active === name}
+                  aria-controls="settings-panel"
+                  data-testid={`settings-tab-${name}`}
+                  onClick={() => setTab(name)}
+                  className={cn(
+                    "min-h-11 shrink-0 border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-full sm:rounded-md sm:border-b-0 sm:border-l-2 sm:py-2 sm:text-left",
+                    active === name
+                      ? "border-primary text-brand sm:bg-background sm:shadow-xs"
+                      : "border-transparent text-muted-foreground hover:text-foreground sm:hover:bg-muted",
+                  )}
+                >
+                  {t(`issuances.settings.tabs.${name}`)}
+                </button>
+              ))}
             </div>
-          ) : (
-            <LookupListSection kind={active} />
           )}
+          <div
+            role="tabpanel"
+            id="settings-panel"
+            aria-labelledby={`settings-tab-${active}`}
+            className={cn(modalBody, "min-w-0")}
+          >
+            {active === "printing" ? (
+              <div className="flex flex-col gap-4">
+                <p className="text-sm text-muted-foreground">
+                  {t("issuances.printSetup.description")}
+                </p>
+                <CalibrationPanel />
+              </div>
+            ) : (
+              <LookupListSection kind={active} />
+            )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
