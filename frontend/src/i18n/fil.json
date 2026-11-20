@@ -1204,6 +1204,7 @@
         "renamed": "Napalitan ang pangalan ng item sa listahan.",
         "deleted": "Nabura ang item sa listahan."
       },
+      "nameRequired": "Maglagay ng pangalan bago idagdag sa listahan.",
       "inUse": "Ginagamit na ng isang talaan ang item na ito at hindi ito maaaring burahin. Palitan lamang ang pangalan kung tama ang bagong pangalan para sa mga umiiral na talaan.",
       "loadErrorDescription": "Suriin ang iyong koneksyon at subukan muli.",
       "emptyDescription": "Idagdag ang mga pangalang ibinigay at kinumpirma ng tanggapan ng barangay.",

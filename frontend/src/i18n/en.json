@@ -1204,6 +1204,7 @@
         "renamed": "List item renamed.",
         "deleted": "List item deleted."
       },
+      "nameRequired": "Enter a name before adding it to the list.",
       "inUse": "This item is already used by a record. It cannot be deleted. Rename it only if the new name is correct for existing records.",
       "loadErrorDescription": "Check your connection and try again.",
       "emptyDescription": "Add the names supplied and confirmed by the barangay office.",

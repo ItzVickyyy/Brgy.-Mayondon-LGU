@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import i18n from "i18next"
 import { Pencil, Plus, Save, Search, Trash2, X } from "lucide-react"
-import { type FormEvent, useMemo, useState } from "react"
+import { type FormEvent, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { type LookupItem, LookupsService } from "@/client"
@@ -171,6 +171,7 @@ export function LookupListPanel({
   const [deleteTarget, setDeleteTarget] = useState<LookupItem | null>(null)
   const [error, setError] = useState("")
   const [filter, setFilter] = useState("")
+  const newNameInput = useRef<HTMLInputElement>(null)
 
   // Alphabetical, numbers in natural order, so a new name lands where it belongs.
   const sorted = useMemo(
@@ -236,7 +237,12 @@ export function LookupListPanel({
   function submitCreate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const name = newName.trim()
-    if (!name) return
+    if (!name) {
+      // The Add button stays clickable; an empty name is explained, not silently blocked.
+      setError(t("records.lookups.nameRequired"))
+      newNameInput.current?.focus()
+      return
+    }
     mutation.mutate({ action: "create", name })
   }
 
@@ -270,13 +276,17 @@ export function LookupListPanel({
         </label>
         <input
           id={`${kind}-new-name`}
+          ref={newNameInput}
           value={newName}
-          onChange={(event) => setNewName(event.target.value)}
+          onChange={(event) => {
+            setNewName(event.target.value)
+            if (error) setError("")
+          }}
           className={formControlClass}
           placeholder={t(`records.lookups.${kind}.placeholder`)}
           maxLength={NAME_LIMIT[kind]}
         />
-        <Button type="submit" disabled={!newName.trim() || mutation.isPending}>
+        <Button type="submit" disabled={mutation.isPending}>
           <Plus aria-hidden="true" />
           {t("records.lookups.add")}
         </Button>
