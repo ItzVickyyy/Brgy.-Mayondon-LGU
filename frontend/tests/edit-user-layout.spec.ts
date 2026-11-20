@@ -1,6 +1,7 @@
 // Edit User, desktop width: the four name inputs sit on one line in both
 // languages, even when a label wraps to two lines (Filipino "Karugtong ng
-// pangalan"), and the dialog is no longer than it needs to be. The API is
+// pangalan"), the Is active box is level with the Role select, and the dialog
+// is no longer than it needs to be. The API is
 // mocked, so this spec needs only the running frontend.
 import { expect, test } from "@playwright/test"
 
@@ -67,5 +68,15 @@ for (const language of ["en", "fil"]) {
     expect(Math.max(...tops) - Math.min(...tops)).toBeLessThanOrEqual(1)
     // Wide enough for a long surname (Add User shows the same widths).
     for (const b of boxes.slice(0, 3)) expect(b.w).toBeGreaterThanOrEqual(150)
+
+    // The Is active box sits level with the Role select, not below it.
+    const role = await dialog.getByLabel(/^(Role|Tungkulin)/).boundingBox()
+    const box = await dialog
+      .getByRole("checkbox", { name: /^(Is active|Aktibo)/ })
+      .locator("xpath=ancestor::div[@data-slot='form-item'][1]")
+      .boundingBox()
+    expect(role).not.toBeNull()
+    expect(box).not.toBeNull()
+    expect(Math.abs((role?.y ?? 0) - (box?.y ?? 0))).toBeLessThanOrEqual(1)
   })
 }

@@ -524,52 +524,56 @@ const EditUser = ({
                 </>
               )}
 
-              <FormField
-                control={form.control}
-                name="is_superuser"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>{t("admin.users.form.role")}</FormLabel>
-                    <FormControl>
-                      <Select
-                        className={formControlClass}
-                        disabled={protectRoleAndStatus}
-                        value={field.value ? "admin" : "staff"}
-                        onChange={(event) =>
-                          field.onChange(event.target.value === "admin")
-                        }
-                      >
-                        <option value="staff">
-                          {t("admin.users.roleStaff")}
-                        </option>
-                        <option value="admin">
-                          {t("admin.users.roleAdmin")}
-                        </option>
-                      </Select>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              {/* Role and Is active: the box sits in the same row as the select,
+                  not at the bottom of the select's message space. */}
+              <div className="grid gap-4 sm:col-span-2 sm:grid-cols-2 sm:grid-rows-[auto_auto_auto] sm:gap-y-2">
+                <FormField
+                  control={form.control}
+                  name="is_superuser"
+                  render={({ field }) => (
+                    <FormItem className="sm:row-span-3 sm:grid-rows-subgrid sm:gap-y-2">
+                      <FormLabel>{t("admin.users.form.role")}</FormLabel>
+                      <FormControl>
+                        <Select
+                          className={formControlClass}
+                          disabled={protectRoleAndStatus}
+                          value={field.value ? "admin" : "staff"}
+                          onChange={(event) =>
+                            field.onChange(event.target.value === "admin")
+                          }
+                        >
+                          <option value="staff">
+                            {t("admin.users.roleStaff")}
+                          </option>
+                          <option value="admin">
+                            {t("admin.users.roleAdmin")}
+                          </option>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="is_active"
-                render={({ field }) => (
-                  <FormItem className="flex min-h-11 min-w-0 flex-row items-center gap-3 space-y-0 self-end rounded-md border bg-background px-3 py-2">
-                    <FormControl>
-                      <Checkbox
-                        disabled={protectRoleAndStatus}
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <FormLabel className="min-w-0 flex-1 cursor-pointer font-normal leading-snug">
-                      {t("admin.users.form.isActive")}
-                    </FormLabel>
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="is_active"
+                  render={({ field }) => (
+                    <FormItem className="flex min-h-11 min-w-0 flex-row items-center gap-3 space-y-0 rounded-md border bg-background px-3 py-2 sm:col-start-2 sm:row-start-2">
+                      <FormControl>
+                        <Checkbox
+                          disabled={protectRoleAndStatus}
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="min-w-0 flex-1 cursor-pointer font-normal leading-snug">
+                        {t("admin.users.form.isActive")}
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+              </div>
             </div>
 
             <DialogFooter className={modalFooter}>
