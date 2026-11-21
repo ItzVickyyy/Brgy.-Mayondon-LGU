@@ -2,3 +2,64 @@
 *.sh text eol=lf
 frontend/** text eol=lf
 *.png -text
+
+# ---------------------------------------------------------------------------
+# Release archive (decision 70). GitHub's "archive/<commit>.zip" (used by
+# scripts/auto-update.ps1) and "git archive" skip every path marked
+# export-ignore, so the office computer only receives what the running system
+# needs. This is an allowlist: everything is left out unless a line below puts
+# it back with "-export-ignore". A new file inside an allowed folder ships
+# automatically; a new top-level file or folder does NOT until it is listed
+# here. Check with: sh scripts/verify-release-archive.sh
+# This has no effect on a normal clone or on CI.
+# ---------------------------------------------------------------------------
+* export-ignore
+
+# Folders have to be put back too, or git never looks inside them.
+/deploy -export-ignore
+/scripts -export-ignore
+/backend -export-ignore
+/backend/scripts -export-ignore
+/backend/app -export-ignore
+/frontend -export-ignore
+/frontend/public -export-ignore
+/frontend/src -export-ignore
+/docs -export-ignore
+
+# Build inputs (backend/Dockerfile copies exactly these)
+/package.json -export-ignore
+/bun.lock -export-ignore
+/pyproject.toml -export-ignore
+/uv.lock -export-ignore
+/compose.yml -export-ignore
+/.dockerignore -export-ignore
+/.env.example -export-ignore
+/LICENSE -export-ignore
+/README.md -export-ignore
+/deploy/** -export-ignore
+
+# Office launchers and scripts (developer-only helpers are put back out below)
+/*.cmd -export-ignore
+/scripts/*.ps1 -export-ignore
+/scripts/dev-db.ps1 export-ignore
+
+# Backend: the app, migrations and the container entry point
+/backend/Dockerfile -export-ignore
+/backend/pyproject.toml -export-ignore
+/backend/alembic.ini -export-ignore
+/backend/app/** -export-ignore
+/backend/scripts/entrypoint.sh -export-ignore
+
+# Frontend: what "bun run build" reads (no tests, lint or client-generation config)
+/frontend/index.html -export-ignore
+/frontend/package.json -export-ignore
+/frontend/tsconfig.json -export-ignore
+/frontend/tsconfig.build.json -export-ignore
+/frontend/tsconfig.node.json -export-ignore
+/frontend/vite.config.ts -export-ignore
+/frontend/public/** -export-ignore
+/frontend/src/** -export-ignore
+
+# The two documents the office scripts point the operator to
+/docs/06-Architecture-and-Deployment.md -export-ignore
+/docs/11-Host-Checks.md -export-ignore

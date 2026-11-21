@@ -211,6 +211,8 @@ The GitHub repo is the team's **development workspace**. The barangay computer d
 5. Keep the real `.env` only on the host, restricted, with secrets different from development.
 6. Never put GitHub passwords, tokens, SSH keys, development credentials or real resident data in the package or docs.
 
+**What the office computer gets (decision 70).** The automatic update downloads GitHub's archive of the `Production` commit, and the `.gitattributes` allowlist limits that archive to the build inputs, the office scripts and two documents (`docs/06`, `docs/11`). Tests, CI files, Word templates, `compose.override.yml`, `compose.dev.yml`, `packages/` and developer scripts are left out. For a USB update, make the folder with `git archive --format=zip -o mayondon-release.zip <commit>` (not by copying the clone) and run `Update-Mayondon.cmd -From <extracted folder>`. Run `sh scripts/verify-release-archive.sh --build` after changing the allowlist.
+
 Illustrative layout (must match the repo's Docker config and be tested): `Mayondon-Deployment/` with `compose.production.yml`, `mayondon-backend.tar`, `mayondon-frontend.tar`, `deployment-instructions.pdf`, `scripts/`. Docker images reduce distributing the repo but do **not** make software impossible to copy; frontend code is inspectable in the browser.
 
 Host rules: do not publish the PostgreSQL port to the LAN; keep the firewall on; do not save credentials in shortcuts, scripts or browser launch commands; use separate production secrets and staff accounts; limit Windows admin access and access to deployment files and database storage.
