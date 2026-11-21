@@ -58,7 +58,6 @@ import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate } from "@/lib/locale"
 import { templateIdByDocumentCode } from "@/lib/print/buildPrintData"
 import type { PrintMode } from "@/lib/print/printMode"
-import { type PrintTemplateId, printTemplates } from "@/lib/print/templates"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { cn } from "@/lib/utils"
 
@@ -831,13 +830,6 @@ export function IssuanceHistory({
                               isIssued && canReprint ? (
                                 <PrintSplitButton
                                   name={item.resident_name}
-                                  formOnly={Boolean(
-                                    printTemplates[
-                                      templateIdByDocumentCode[
-                                        item.document_type_code as DocumentCode
-                                      ] as PrintTemplateId
-                                    ]?.blankStock,
-                                  )}
                                   onPrint={async (mode) => {
                                     try {
                                       const message = await onPrint(item, mode)

@@ -1,39 +1,35 @@
-import { Printer } from "lucide-react"
+import { Check, ChevronDown, Printer } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
-import { type PrintMode, setPrintMode } from "@/lib/print/printMode"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  getPrintMode,
+  type PrintMode,
+  setPrintMode,
+} from "@/lib/print/printMode"
 
 type Props = {
   name: string // resident name, for the accessible labels
-  /** A form that is only ever printed on its own blank form image (Residency, Jobseeker): one button, no choice. */
-  formOnly?: boolean
   onPrint: (mode: PrintMode) => void
 }
 
-/** Print buttons for an issued row: one click prints either "Data only" (pre-printed paper) or "Form + data" (blank paper). */
-export function PrintSplitButton({ name, formOnly, onPrint }: Props) {
+/** Print button for an issued row: the main part prints with the remembered mode, the arrow lets staff pick the other one. */
+export function PrintSplitButton({ name, onPrint }: Props) {
   const { t } = useTranslation()
+  const [mode, setMode] = useState<PrintMode>(getPrintMode)
 
-  const choose = (mode: PrintMode) => {
-    setPrintMode(mode) // the success screen's "Print again" follows the last choice
-    onPrint(mode)
+  const choose = (next: PrintMode) => {
+    setPrintMode(next)
+    setMode(next)
+    onPrint(next)
   }
-
-  if (formOnly)
-    return (
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        aria-label={t("issuances.history.actions.printFor", { name })}
-        title={t("issuances.history.actions.printForm")}
-        onClick={() => choose("form")}
-      >
-        <Printer aria-hidden="true" />
-        {t("issuances.history.actions.print")}
-      </Button>
-    )
 
   return (
     <div className="flex items-center">
@@ -41,24 +37,46 @@ export function PrintSplitButton({ name, formOnly, onPrint }: Props) {
         type="button"
         size="sm"
         variant="outline"
-        className="rounded-r-none px-2.5"
-        aria-label={t("issuances.history.actions.printDataFor", { name })}
-        title={t("issuances.history.actions.printData")}
-        onClick={() => choose("data")}
+        className="rounded-r-none"
+        aria-label={t("issuances.history.actions.printFor", { name })}
+        title={t(
+          mode === "form"
+            ? "issuances.history.actions.printForm"
+            : "issuances.history.actions.printData",
+        )}
+        onClick={() => onPrint(mode)}
       >
-        {t("issuances.history.actions.printDataShort")}
+        <Printer aria-hidden="true" />
+        {t("issuances.history.actions.print")}
       </Button>
-      <Button
-        type="button"
-        size="sm"
-        variant="outline"
-        className="-ml-px rounded-l-none px-2.5"
-        aria-label={t("issuances.history.actions.printFormFor", { name })}
-        title={t("issuances.history.actions.printForm")}
-        onClick={() => choose("form")}
-      >
-        {t("issuances.history.actions.printFormShort")}
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            className="-ml-px min-w-11 rounded-l-none px-2"
+            aria-label={t("issuances.history.actions.printChoose", { name })}
+          >
+            <ChevronDown aria-hidden="true" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {(["data", "form"] as const).map((option) => (
+            <DropdownMenuItem key={option} onSelect={() => choose(option)}>
+              <Check
+                aria-hidden="true"
+                className={`size-4 ${mode === option ? "" : "invisible"}`}
+              />
+              {t(
+                option === "form"
+                  ? "issuances.history.actions.printForm"
+                  : "issuances.history.actions.printData",
+              )}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }

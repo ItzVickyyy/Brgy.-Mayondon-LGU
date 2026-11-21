@@ -86,26 +86,13 @@ test("every issued row has Print; Barangay ID shows it disabled", async ({
 
   const rows = page.locator("table tbody tr")
   await expect(rows).toHaveCount(codes.length)
-  // Residency and Jobseeker print only on their own blank form: one Print button. The others show both choices.
-  const formOnly = ["RESIDENCY", "FIRST_TIME_JOBSEEKER"]
   for (let index = 0; index < codes.length; index++) {
-    const row = rows.nth(index)
-    if (codes[index] === "BARANGAY_ID") {
-      await expect(
-        row.getByRole("button", { name: /^Print for Resident/ }),
-      ).toBeDisabled()
-    } else if (formOnly.includes(codes[index])) {
-      await expect(
-        row.getByRole("button", { name: /^Print for Resident/ }),
-      ).toBeEnabled()
-    } else {
-      await expect(
-        row.getByRole("button", { name: /^Print data only for/ }),
-      ).toBeEnabled()
-      await expect(
-        row.getByRole("button", { name: /^Print form and data for/ }),
-      ).toBeEnabled()
-    }
+    const print = rows
+      .nth(index)
+      .getByRole("button", { name: /^Print for Resident/ })
+    await expect(print).toBeVisible()
+    if (codes[index] === "BARANGAY_ID") await expect(print).toBeDisabled()
+    else await expect(print).toBeEnabled()
   }
 })
 
