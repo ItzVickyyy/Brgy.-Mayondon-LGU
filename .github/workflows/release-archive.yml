@@ -58,3 +58,12 @@ jobs:
           print("services:", sorted(services), "without a log limit:", bad)
           raise SystemExit(bool(bad) or not services)
           PY
+      - name: Check the program starts in the image and pg_dump matches the database
+        run: |
+          cd "$RUNNER_TEMP/release"
+          # The program refuses the placeholder secrets of .env.example outside development,
+          # so this step uses throw-away values (the shell overrides .env for Compose).
+          export SECRET_KEY="$(openssl rand -hex 32)" POSTGRES_PASSWORD="$(openssl rand -hex 16)" FIRST_SUPERUSER_PASSWORD="$(openssl rand -hex 16)"
+          docker compose -f compose.yml run --rm --no-deps --entrypoint python backend -c \
+            "import app.main, app.backup_cli, app.migrate_on_start; print('program modules import')"
+          docker compose -f compose.yml run --rm --no-deps --entrypoint pg_dump backend --version | grep -q "(PostgreSQL) 18"

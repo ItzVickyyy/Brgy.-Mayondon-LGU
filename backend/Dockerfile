@@ -18,7 +18,9 @@ ARG VITE_API_URL=
 RUN bun run build
 
 
-FROM python:3.14
+# The slim variant (decision 77): no compilers or build headers, because every library in
+# uv.lock comes as a ready-made Linux wheel except dkimpy, which is plain Python.
+FROM python:3.14-slim
 
 ENV PYTHONUNBUFFERED=1
 
