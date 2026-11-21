@@ -76,8 +76,15 @@ if ($oldCommit -and $oldCommit -eq $newCommit -and -not $From) {
 
 # ---------------------------------------------- 3. keep the old image
 Step "3/5  Building the new version (the program keeps running until the build is done)"
-Invoke-Quiet { docker image inspect backend:latest *> $null }
-if ($LASTEXITCODE -eq 0) { & docker tag backend:latest backend:previous }
+# The program that runs now is kept as backend:previous, but only when it is healthy:
+# if a failed update is run again, "latest" is the bad one and must not replace the
+# last good copy (decision 75). The way back below uses it and needs no internet.
+$runningId = (Invoke-Quiet { docker compose -f compose.yml ps -q backend 2>$null } | Out-String).Trim()
+$runningHealth = if ($runningId) { (Invoke-Quiet { docker inspect --format "{{.State.Health.Status}}" $runningId 2>$null } | Out-String).Trim() } else { "" }
+if ($runningHealth -eq "healthy") {
+    Invoke-Quiet { docker image inspect backend:latest *> $null }
+    if ($LASTEXITCODE -eq 0) { & docker tag backend:latest backend:previous }
+}
 & docker compose -f compose.yml build backend
 if ($LASTEXITCODE -ne 0) { Stop-Here "The build failed. The running program was not changed." }
 
@@ -123,8 +130,13 @@ Write-Host "Read the reason:  docker compose -f compose.yml logs backend --tail 
 Write-Host "Nothing was undone automatically. Your data is safe: a backup was made at the start (backups\)."
 Write-Host "The way back, only if the developers cannot fix it quickly:"
 if ($oldCommit) { Write-Host "  1. git checkout $oldCommit" }
-Write-Host "  2. docker compose -f compose.yml build backend"
+Invoke-Quiet { docker image inspect backend:previous *> $null }
+if ($LASTEXITCODE -eq 0) {
+    Write-Host "  2. docker tag backend:previous backend:latest     (the program that ran before; no internet needed)"
+} else {
+    Write-Host "  2. docker compose -f compose.yml build backend    (needs internet unless the libraries are cached)"
+}
 Write-Host "  3. If the log says the database is NEWER than the program, restore the backup first:"
 Write-Host "       .\scripts\restore-db.ps1 -BackupFile .\backups\<newest mayondon-db-... or mayondon-premigrate-... file> [-KeyFile <USB>\backup-private.pem]"
-Write-Host "  4. docker compose -f compose.yml up -d"
+Write-Host "  4. docker compose -f compose.yml up -d --no-build --force-recreate backend"
 exit 1
