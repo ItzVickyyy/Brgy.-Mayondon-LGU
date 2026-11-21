@@ -89,6 +89,11 @@ jobs:
             docker inspect --format '{{.HostConfig.LogConfig.Config}}' "$id" | grep -q "max-size:10m" \
               || { echo "$service has no log limit"; exit 1; }
           done
+          for service in db backend; do
+            id=$(docker compose -f compose.yml ps -q "$service")
+            docker inspect --format '{{.HostConfig.SecurityOpt}}' "$id" | grep -q "no-new-privileges" \
+              || { echo "$service lacks no-new-privileges"; exit 1; }
+          done
           docker compose -f compose.yml port db 5432 | grep -q "^127.0.0.1:" \
             || { echo "The database port is not bound to 127.0.0.1"; exit 1; }
           # First administrator, then a backup made the way the scheduled task makes it.

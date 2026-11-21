@@ -13,6 +13,9 @@ services:
     image: postgres:18
     restart: unless-stopped
     logging: *default-logging
+    # A process in the container can never gain more rights than it started with (decision 81).
+    security_opt:
+      - no-new-privileges:true
     # Time for PostgreSQL to finish writing and shut down cleanly when the
     # computer stops or the program is updated (Docker's default is 10 seconds).
     stop_grace_period: 60s
@@ -36,6 +39,8 @@ services:
     image: backend:latest
     restart: unless-stopped
     logging: *default-logging
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       db:
         condition: service_healthy
