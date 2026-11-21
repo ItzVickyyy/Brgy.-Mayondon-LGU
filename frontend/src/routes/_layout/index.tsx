@@ -60,14 +60,6 @@ function monthLabel(value: string, withYear = false) {
   return withYear ? `${name} ${year}` : name
 }
 
-// "2026", or "2025 – 2026" when the range crosses a year.
-function yearRange(values: string[]) {
-  if (values.length === 0) return ""
-  const first = values[0].slice(0, 4)
-  const last = values[values.length - 1].slice(0, 4)
-  return first === last ? first : `${first} – ${last}`
-}
-
 // "2026-12-06" is a business date, not a moment: format it without time zones.
 function dateLabel(value: string) {
   const [year, month, day] = value.split("-").map(Number)
@@ -250,7 +242,6 @@ function Dashboard() {
     (best, item) => (best === null || item.count > best.count ? item : best),
     null,
   )
-  const chartYears = yearRange(months.map((item) => item.month))
   // A long range scrolls sideways inside the card; start at the newest bar.
   const plotScroller = useRef<HTMLDivElement>(null)
   // biome-ignore lint/correctness/useExhaustiveDependencies: run again when the range changes
@@ -312,31 +303,6 @@ function Dashboard() {
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-          <label
-            htmlFor="dashboard-period"
-            className="flex items-center gap-2 self-start text-sm sm:self-auto"
-          >
-            <CalendarDays
-              className="size-4 text-muted-foreground"
-              aria-hidden="true"
-            />
-            <span className="text-muted-foreground">
-              {t("dashboard.period.label")}
-            </span>
-            <Select
-              id="dashboard-period"
-              aria-label={t("dashboard.period.ariaLabel")}
-              value={period}
-              onChange={(event) => setPeriod(event.target.value as Period)}
-              className="min-h-11 min-w-40 rounded-md border bg-background px-3 text-base transition-colors hover:border-ring/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              {periods.map((value) => (
-                <option key={value} value={value}>
-                  {t(`dashboard.period.${value}`)}
-                </option>
-              ))}
-            </Select>
-          </label>
           {/* Call to action: opens Issuances with the New Issuance dialog ready. */}
           <Button
             type="button"
@@ -435,7 +401,7 @@ function Dashboard() {
             card instead of stretching the grid column and the page. */}
       <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
         <article className="flex min-w-0 flex-col rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <div className="flex items-start gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
             <div className="hidden rounded-lg bg-brand/10 p-2.5 text-brand sm:block">
               <BarChart3 className="size-5" aria-hidden="true" />
             </div>
@@ -449,11 +415,34 @@ function Dashboard() {
                 )}
               />
             </div>
-            {chartYears ? (
-              <span className="shrink-0 rounded-full border border-brand/25 bg-brand/10 px-3 py-1 text-sm font-semibold tabular-nums text-brand">
-                {chartYears}
+            <label
+              htmlFor="dashboard-period"
+              className="flex shrink-0 items-center gap-2 self-start text-sm"
+            >
+              <CalendarDays
+                className="size-4 text-muted-foreground"
+                aria-hidden="true"
+              />
+              {/* The word is shown only on very wide screens; the chart card
+                  is narrow, and the icon and the select's own label say the
+                  rest. Kept for screen readers at every width. */}
+              <span className="sr-only text-muted-foreground 2xl:not-sr-only">
+                {t("dashboard.period.label")}
               </span>
-            ) : null}
+              <Select
+                id="dashboard-period"
+                aria-label={t("dashboard.period.ariaLabel")}
+                value={period}
+                onChange={(event) => setPeriod(event.target.value as Period)}
+                className="min-h-11 min-w-32 rounded-md border bg-background px-3 text-base transition-colors hover:border-ring/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {periods.map((value) => (
+                  <option key={value} value={value}>
+                    {t(`dashboard.period.${value}`)}
+                  </option>
+                ))}
+              </Select>
+            </label>
           </div>
 
           {hasOverTimeData && peakMonth ? (
