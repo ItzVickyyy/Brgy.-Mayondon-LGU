@@ -39,6 +39,8 @@ export type PrintTemplate = {
   documentCode: string
   paperSize: PaperSize
   paper: { widthPt: number; heightPt: number }
+  /** True for a form that is not pre-printed stock (Residency, First-Time Jobseeker): it always prints with the blank form image, never as values only. */
+  blankStock?: boolean
   fields: PrintFieldBox[]
   marks?: PrintMarkBox[]
   photo?: PrintPhotoBox
@@ -49,12 +51,33 @@ export type PrintTemplateId =
   | "utility"
   | "indigency"
   | "assistance"
+  | "residency"
+  | "jobseeker"
 
-// Every template with a print layout today is a Short (Letter) document. A Long template adds `paperSize: "long"`.
+// A template is Short (Letter) unless it says `paperSize: "long"` (First-Time Jobseeker, 8.5 x 13 in).
 const paper = {
   widthPt: paperDimensions.short.widthPt,
   heightPt: paperDimensions.short.heightPt,
 }
+const longPaper = {
+  widthPt: paperDimensions.long.widthPt,
+  heightPt: paperDimensions.long.heightPt,
+}
+// The additional statement of a Residency certificate has no ruled lines: six typed lines in the blank space under the first paragraph.
+const statementLines = (): PrintFieldBox[] =>
+  [0, 1, 2, 3, 4, 5].map((line) => ({
+    key: `statement${line + 1}`,
+    x: 72,
+    y: 275 + line * 16.1,
+    w: 468,
+    size: 10.5,
+  }))
+// Three lines for a complete address on the Jobseeker applicant sheet: the first starts after the label, the others use the ruled lines below it.
+const addressLines = (): PrintFieldBox[] => [
+  { key: "addressLine1", x: 210, y: 263.2, w: 255, size: 10 },
+  { key: "addressLine2", x: 74, y: 290.4, w: 358, size: 10 },
+  { key: "addressLine3", x: 74, y: 317.6, w: 358, size: 10 },
+]
 const date = (y: number): PrintFieldBox => ({
   key: "date",
   x: 491,
@@ -179,6 +202,144 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "assistanceType", when: "Burial", x: 502, y: 357.7, page: 1 },
       { key: "for", when: "Myself", x: 395.5, y: 383.2, page: 1 },
       { key: "for", when: "Someone else", x: 469, y: 383.2, page: 1 },
+    ],
+  },
+  // Certification of Residency, from the blank copy of the barangay's Word file (scripts/make-blank-print-sources.py). The signatory has no line on the form: the typed name and position go in the space above the CTC rows.
+  residency: {
+    id: "residency",
+    documentCode: "RESIDENCY",
+    paperSize: "short",
+    paper,
+    blankStock: true,
+    fields: [
+      { key: "name", x: 285, y: 198.1, w: 164 },
+      { key: "address", x: 90, y: 230.3, w: 228 },
+      { key: "since", x: 259.4, y: 246.4, w: 68, align: "center" },
+      ...statementLines(),
+      { key: "purpose", x: 184, y: 391.8, w: 176 },
+      { key: "dayOrdinal", x: 194, y: 423.0, w: 34, align: "center" },
+      { key: "month", x: 325, y: 423.0, w: 130, align: "center" },
+      { key: "yearShort", x: 423, y: 423.0, w: 24, align: "center" },
+      { key: "signatoryName", x: 430, y: 476.0, w: 230, align: "center" },
+      {
+        key: "signatoryPosition",
+        x: 430,
+        y: 490,
+        w: 230,
+        align: "center",
+        size: 10,
+      },
+      { key: "idPresented", x: 226, y: 516.8, w: 156, size: 10 },
+      { key: "orNumber", x: 226, y: 528.9, w: 156, size: 10 },
+      { key: "date", x: 226, y: 540.9, w: 156, size: 10 },
+    ],
+  },
+  // First-Time Jobseeker packet on 8.5 x 13 in: page 0 Applicant sheet, page 1 Oath of Undertaking, page 2 Certification. The witness is never printed (decision of patch 133); the signature, photo and thumbmark stay blank.
+  jobseeker: {
+    id: "jobseeker",
+    documentCode: "FIRST_TIME_JOBSEEKER",
+    paperSize: "long",
+    paper: longPaper,
+    blankStock: true,
+    fields: [
+      { key: "name", x: 118, y: 210.3, w: 326, size: 10 },
+      { key: "birthdate", x: 152, y: 237.5, w: 186, size: 10 },
+      { key: "ageNumber", x: 395, y: 237.5, w: 78, size: 10 },
+      ...addressLines(),
+      { key: "yearsResident", x: 378, y: 346.3, w: 126, size: 10 },
+      { key: "sex", x: 153, y: 373.5, w: 94, size: 10 },
+      { key: "civilStatus", x: 326, y: 373.5, w: 140, size: 10 },
+      { key: "educationalAttainment", x: 222, y: 400.7, w: 243, size: 10 },
+      { key: "course", x: 252, y: 427.9, w: 220, size: 10 },
+      { key: "name", x: 88, y: 122.2, w: 250, size: 10, page: 1 },
+      {
+        key: "ageNumber",
+        x: 351,
+        y: 122.2,
+        w: 34,
+        align: "left",
+        size: 10,
+        page: 1,
+      },
+      { key: "yearsResident", x: 343, y: 136.9, w: 120, size: 10, page: 1 },
+      {
+        key: "dayOrdinal",
+        x: 155.5,
+        y: 586.3,
+        w: 30,
+        align: "center",
+        size: 10,
+        page: 1,
+      },
+      {
+        key: "month",
+        x: 279,
+        y: 586.3,
+        w: 120,
+        align: "center",
+        size: 10,
+        page: 1,
+      },
+      {
+        key: "yearShort",
+        x: 370,
+        y: 586.3,
+        w: 16,
+        align: "center",
+        size: 10,
+        page: 1,
+      },
+      { key: "name", x: 241, y: 231.2, w: 163, size: 10, page: 2 },
+      { key: "yearsResident", x: 269, y: 250.4, w: 110, size: 10, page: 2 },
+      {
+        key: "dayOrdinal",
+        x: 173.5,
+        y: 418.6,
+        w: 44,
+        align: "center",
+        size: 10,
+        page: 2,
+      },
+      {
+        key: "month",
+        x: 322,
+        y: 418.6,
+        w: 124,
+        align: "center",
+        size: 10,
+        page: 2,
+      },
+      {
+        key: "yearShort",
+        x: 421,
+        y: 418.6,
+        w: 16,
+        align: "center",
+        size: 10,
+        page: 2,
+      },
+      {
+        key: "signatoryName",
+        x: 430,
+        y: 588,
+        w: 230,
+        align: "center",
+        page: 2,
+      },
+      {
+        key: "signatoryPosition",
+        x: 430,
+        y: 602,
+        w: 230,
+        align: "center",
+        size: 10,
+        page: 2,
+      },
+    ],
+    // Centres of the two check boxes on the applicant sheet; an X goes only in the chosen one.
+    marks: [
+      { key: "jobstart", when: "yes", x: 295.7, y: 558.5 },
+      { key: "jobstart", when: "no", x: 403.5, y: 558.5 },
     ],
   },
 }

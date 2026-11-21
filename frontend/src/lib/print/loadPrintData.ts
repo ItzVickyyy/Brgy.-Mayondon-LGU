@@ -33,6 +33,8 @@ export type PrintApi = {
       }
     | undefined
   >
+  /** Current officials, for the signatory printed on Residency and First-Time Jobseeker. Optional: without it the signatory is left blank. */
+  getOfficials?(): Promise<{ id: string; name: string; position: string }[]>
   loadResidentPhoto?(id: string): Promise<string | undefined>
   getTricycle(id?: string): Promise<
     | {
@@ -70,7 +72,14 @@ export async function loadPrintData(
     details.type === "FRANCHISE_CLEARANCE"
       ? await api.getTricycle(details.tricycleId)
       : undefined
+  const needsSignatory =
+    details.type === "RESIDENCY" || details.type === "FIRST_TIME_JOBSEEKER"
+  const officials =
+    needsSignatory && api.getOfficials
+      ? await api.getOfficials().catch(() => undefined) // a failed lookup leaves the signatory blank rather than blocking the print
+      : undefined
   const printLookups: PrintLookups = {
+    officials,
     sectors: lookups.sectors,
     idTypes: lookups.idTypes,
     purposes: lookups.purposes,

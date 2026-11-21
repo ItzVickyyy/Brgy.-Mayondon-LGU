@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs"
 import { expect, test } from "@playwright/test"
 import { documentMeta } from "../src/components/Issuances/config"
 import { overlayCss, printOverlayCss } from "../src/lib/print/overlayStyles"
@@ -37,10 +38,29 @@ test.describe("paper sizes (Short = 8.5 x 11 in, Long = 8.5 x 13 in)", () => {
     expect(Object.keys(documentMeta)).toHaveLength(shortDocuments.length + 1)
   })
 
-  test("every print template with a layout today is Short, 612 x 792 pt", () => {
+  test("every print template is Short (612 x 792 pt) except First-Time Jobseeker, which is Long (612 x 936 pt)", () => {
     for (const template of Object.values(printTemplates)) {
-      expect(template.paperSize, template.id).toBe("short")
-      expect(template.paper).toEqual({ widthPt: 612, heightPt: 792 })
+      const long = template.id === "jobseeker"
+      expect(template.paperSize, template.id).toBe(long ? "long" : "short")
+      expect(template.paper).toEqual(
+        long
+          ? { widthPt: 612, heightPt: 936 }
+          : { widthPt: 612, heightPt: 792 },
+      )
+    }
+  })
+
+  test("Residency and Jobseeker print on their blank form image, 612 x 792 and 612 x 936 pt", () => {
+    expect(printTemplates.residency.blankStock).toBe(true)
+    expect(printTemplates.jobseeker.blankStock).toBe(true)
+    for (const [id, size] of [
+      ["residency", [612, 792]],
+      ["jobseeker", [612, 936]],
+    ] as const) {
+      const file = `public/assets/print-forms/${id}-0.png`
+      const png = readFileSync(file)
+      const ratio = png.readUInt32BE(16) / png.readUInt32BE(20) // PNG width / height
+      expect(ratio, id).toBeCloseTo(size[0] / size[1], 2)
     }
   })
 

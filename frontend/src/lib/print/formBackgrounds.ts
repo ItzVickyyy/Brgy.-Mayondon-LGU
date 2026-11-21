@@ -12,4 +12,10 @@ export const formBackgrounds: Partial<Record<PrintTemplateId, string[]>> = {
   utility: ["/assets/print-forms/utility-0.png"],
   indigency: ["/assets/print-forms/indigency-0.png"],
   assistance: ["", "/assets/print-forms/assistance-1.png"],
+  residency: ["/assets/print-forms/residency-0.png"],
+  jobseeker: [
+    "/assets/print-forms/jobseeker-0.png",
+    "/assets/print-forms/jobseeker-1.png",
+    "/assets/print-forms/jobseeker-2.png",
+  ],
 }

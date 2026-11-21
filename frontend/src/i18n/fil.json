@@ -1882,7 +1882,9 @@
           "franchise": "Franchise Clearance",
           "utility": "Kuryente at Tubig",
           "indigency": "Indigency",
-          "assistance": "Sertipikasyon ng Tulong"
+          "assistance": "Sertipikasyon ng Tulong",
+          "residency": "Sertipikasyon ng Paninirahan",
+          "jobseeker": "First-Time Jobseeker (mahabang papel)"
         }
       }
     },

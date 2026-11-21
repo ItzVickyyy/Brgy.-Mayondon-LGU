@@ -1,7 +1,7 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { IssuancesService } from "@/client"
-import { PrintForm } from "@/components/Issuances/PrintForm"
+import { hasTypesetForm, PrintForm } from "@/components/Issuances/PrintForm"
 import { PrintOverlay } from "@/components/Issuances/PrintOverlay"
 import { printMessage } from "@/lib/issuanceLabels"
 import type { PrintData } from "@/lib/print/buildPrintData"
@@ -9,6 +9,7 @@ import { getOffset } from "@/lib/print/calibration"
 import { formBackgrounds } from "@/lib/print/formBackgrounds"
 import { loadPrintData } from "@/lib/print/loadPrintData"
 import { getPrintMode, type PrintMode } from "@/lib/print/printMode"
+import { printTemplates } from "@/lib/print/templates"
 
 const IMAGE_WAIT_MS = 3000
 
@@ -72,7 +73,11 @@ export function usePrintIssuance(): {
       try {
         const result = await loadPrintData(issuanceId)
         if (!result.ok) return printMessage(result.message, t)
-        const printMode = chosen ?? getPrintMode()
+        // A form that is not pre-printed stock always prints on its own blank form image: values alone on white paper would be an unfinished page.
+        const printMode: PrintMode = printTemplates[result.data.templateId]
+          .blankStock
+          ? "form"
+          : (chosen ?? getPrintMode())
         // The Activity Log must know about every print, so a print that cannot be recorded does not start.
         try {
           await IssuancesService.recordPrint({
@@ -109,8 +114,10 @@ export function usePrintIssuance(): {
             data={data}
             backgrounds={formBackgrounds[data.templateId]}
           />
-        ) : (
+        ) : hasTypesetForm(data.templateId) ? (
           <PrintForm data={data} />
+        ) : (
+          <PrintOverlay data={data} />
         )
       ) : (
         <PrintOverlay data={data} offset={getOffset(data.templateId)} />

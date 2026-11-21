@@ -413,9 +413,9 @@ function Assistance({ data }: { data: PrintData }) {
   )
 }
 
-const forms: Record<
-  PrintData["templateId"],
-  (props: { data: PrintData }) => ReactNode
+// Typeset copies exist only for the pre-printed forms. Residency and First-Time Jobseeker are printed from the barangay's blank form image (formBackgrounds.ts).
+const forms: Partial<
+  Record<PrintData["templateId"], (props: { data: PrintData }) => ReactNode>
 > = {
   clearance: Clearance,
   franchise: Franchise,
@@ -429,9 +429,13 @@ type Props = {
   preview?: boolean // show on screen for checking; never used for real printing
 }
 
+export const hasTypesetForm = (templateId: PrintData["templateId"]): boolean =>
+  templateId in forms
+
 /** Renders the typeset form for `data` into document.body. Call `window.print()` while it is mounted. */
 export function PrintForm({ data, preview = false }: Props) {
   const Form = forms[data.templateId]
+  if (!Form) return null // callers check hasTypesetForm first
   return createPortal(
     <div className="print-form-root" data-preview={preview}>
       <style>{formCss(printTemplates[data.templateId].paperSize)}</style>

@@ -35,6 +35,8 @@ export type PrintLookups = {
   sectors: LookupName[]
   idTypes: LookupName[]
   purposes: LookupName[]
+  /** Current officials, for the signatory of Residency and First-Time Jobseeker (an official that is no longer current is left blank for handwriting). */
+  officials?: { id: string; name: string; position: string }[]
   tricycle?: {
     association: string
     make: string
@@ -53,6 +55,8 @@ export const templateIdByDocumentCode: Partial<
   UTILITY_CLEARANCE: "utility",
   INDIGENCY: "indigency",
   ASSISTANCE: "assistance",
+  RESIDENCY: "residency",
+  FIRST_TIME_JOBSEEKER: "jobseeker",
 }
 
 const byId = (list: LookupName[], id?: number) =>
@@ -60,13 +64,50 @@ const byId = (list: LookupName[], id?: number) =>
 const cap = (value: string) =>
   value ? value.charAt(0).toUpperCase() + value.slice(1) : ""
 
+/** 1 -> "1st", 22 -> "22nd", 13 -> "13th": the form reads "this ___ day of". */
+export function ordinal(day: string): string {
+  const n = Number(day)
+  if (!Number.isInteger(n) || n < 1) return ""
+  const teen = n % 100 >= 11 && n % 100 <= 13
+  return `${n}${teen ? "th" : (["th", "st", "nd", "rd"][n % 10] ?? "th")}`
+}
+
+/**
+ * Splits text into at most `maxLines` lines of about `limits[i]` characters (the last limit repeats).
+ * Words are not broken; whatever does not fit stays on the last line, where the printer shrinks it to the box.
+ */
+export function wrapLines(
+  text: string,
+  limits: number[],
+  maxLines: number,
+): string[] {
+  const lines: string[] = []
+  let line = ""
+  for (const word of text.split(/\s+/).filter(Boolean)) {
+    const limit = limits[Math.min(lines.length, limits.length - 1)] ?? 80
+    const next = line ? `${line} ${word}` : word
+    if (line && next.length > limit && lines.length < maxLines - 1) {
+      lines.push(line)
+      line = word
+    } else line = next
+  }
+  if (line) lines.push(line)
+  return lines
+}
+
+/** "19 years": the printed value carries its own unit, because the forms leave it out. */
+function yearsText(years: number): string {
+  if (years < 1) return "Less than 1 year"
+  return years === 1 ? "1 year" : `${years} years`
+}
+
 export function buildPrintData(
   issuance: MockIssuance,
   lookups: PrintLookups,
   name?: PrintResidentName,
 ): PrintData | null {
   const templateId = templateIdByDocumentCode[issuance.documentType]
-  if (!templateId) return null // Residency, First-Time Jobseeker, Barangay ID: no overlay template yet
+  if (!templateId) return null // Barangay ID: no overlay template yet
   const { payload, residentSnapshot: resident, issueDate } = issuance
   const details = payload.details
   const sectors = (payload.sectors ?? [])
@@ -88,10 +129,13 @@ export function buildPrintData(
   const values: Record<string, string> = {
     date: formatPaperDate(issueDate),
     day: dateParts.day,
+    dayOrdinal: ordinal(dateParts.day),
     month: dateParts.month,
+    yearShort: issueDate.slice(2, 4),
     name: printedName,
     address: resident?.addressLine ?? "",
     age: age ? `${age} years old` : "",
+    ageNumber: age,
     birthdate: resident?.birthDate ? formatPaperDate(resident.birthDate) : "",
     birthplace: resident?.birthPlace ?? "",
     civilStatus: resident?.civilStatus ?? "",
@@ -143,6 +187,57 @@ export function buildPrintData(
       : since
         ? String(Math.max(0, Number(issueDate.slice(0, 4)) - since))
         : ""
+  }
+
+  if (details.type === "RESIDENCY") {
+    values.since = resident?.residentSinceBirth
+      ? "birth"
+      : resident?.residentSinceYear
+        ? String(resident.residentSinceYear)
+        : ""
+    // The barangay's own sample prints FOC where the receipt number goes when the certificate is free.
+    values.orNumber = payload.payment?.isFree
+      ? "FOC"
+      : (payload.payment?.officialReceiptNo ?? "")
+    values.idPresented = [values.idType, values.idNumber]
+      .filter(Boolean)
+      .join(": ")
+    // Up to 500 characters, typed in six lines because the form has no ruled lines there.
+    wrapLines(details.additionalStatement ?? "", [96], 6).forEach(
+      (line, index) => {
+        values[`statement${index + 1}`] = line
+      },
+    )
+  }
+  if (details.type === "FIRST_TIME_JOBSEEKER") {
+    const years = resident?.residentSinceBirth
+      ? Number(age)
+      : resident?.residentSinceYear
+        ? Number(issueDate.slice(0, 4)) - resident.residentSinceYear
+        : undefined
+    values.yearsResident =
+      years === undefined || Number.isNaN(years)
+        ? ""
+        : yearsText(Math.max(0, years))
+    values.sex = resident?.sex ?? ""
+    values.educationalAttainment = details.educationalAttainment
+    values.course = details.course
+    values.jobstart = details.isJobstartBeneficiary ? "yes" : "no"
+    wrapLines(resident?.addressLine ?? "", [48, 66, 66], 3).forEach(
+      (line, index) => {
+        values[`addressLine${index + 1}`] = line
+      },
+    )
+  }
+  if (details.type === "RESIDENCY" || details.type === "FIRST_TIME_JOBSEEKER") {
+    const official = lookups.officials?.find(
+      (item) => item.id === payload.signatoryOfficialId,
+    )
+    if (official) {
+      const upper = official.name.trim().toUpperCase()
+      values.signatoryName = /^HON\.?\s/.test(upper) ? upper : `HON. ${upper}`
+      values.signatoryPosition = official.position
+    }
   }
 
   // Only keep keys the template actually prints, so stray data never reaches the paper.

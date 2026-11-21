@@ -1882,7 +1882,9 @@
           "franchise": "Franchise Clearance",
           "utility": "Electrical and Water",
           "indigency": "Indigency",
-          "assistance": "Assistance Certification"
+          "assistance": "Assistance Certification",
+          "residency": "Certification of Residency",
+          "jobseeker": "First-Time Jobseeker (long paper)"
         }
       }
     },

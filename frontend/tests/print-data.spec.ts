@@ -3,7 +3,9 @@ import { expect, test } from "@playwright/test"
 import type { MockIssuance } from "../src/components/Issuances/NewIssuance/issuanceApi"
 import {
   buildPrintData,
+  ordinal,
   type PrintLookups,
+  wrapLines,
 } from "../src/lib/print/buildPrintData"
 import { printTemplates } from "../src/lib/print/templates"
 
@@ -20,6 +22,10 @@ const lookups: PrintLookups = {
   purposes: [
     { id: 1, name: "Employment" },
     { id: 2, name: "Scholarship" },
+  ],
+  officials: [
+    { id: "o1", name: "Juan Official", position: "Punong Barangay" },
+    { id: "o2", name: "Hon. Ana Reyes", position: "Barangay Kagawad" },
   ],
   tricycle: {
     association: "Mayondon TODA",
@@ -227,7 +233,9 @@ test.describe("buildPrintData", () => {
   test("only template keys are returned, unsupported documents give null, falls back to snapshot name", () => {
     expect(
       buildPrintData(
-        make("RESIDENCY", { details: { type: "RESIDENCY" } }),
+        make("BARANGAY_ID", {
+          details: { type: "BARANGAY_ID", transactionType: "new" },
+        }),
         lookups,
       ),
     ).toBeNull()
@@ -254,5 +262,130 @@ test.describe("buildPrintData", () => {
     })
     // The health condition is confidential: stored, never printed.
     expect(JSON.stringify(data.values)).not.toContain("Asthma")
+  })
+
+  test("Residency: since, statement lines, FOC, ID presented, signatory", () => {
+    const statement = "He has lived in this barangay without a break. "
+      .repeat(8)
+      .trim()
+    const data = buildPrintData(
+      make("RESIDENCY", {
+        purposeId: 1,
+        signatoryOfficialId: "o1",
+        identification: {
+          idTypeId: 1,
+          idNumber: "123",
+          placeOfIssue: "Los Baños",
+          dateOfIssue: "2026-01-02",
+        },
+        payment: { officialReceiptNo: "OR-9", isFree: true },
+        details: { type: "RESIDENCY", additionalStatement: statement },
+      }),
+      lookups,
+    )!
+    expect(data.templateId).toBe("residency")
+    expect(data.values).toMatchObject({
+      since: "2010",
+      purpose: "Employment",
+      dayOrdinal: "4th",
+      yearShort: "26",
+      orNumber: "FOC",
+      idPresented: "CTC: 123",
+      signatoryName: "HON. JUAN OFFICIAL",
+      signatoryPosition: "Punong Barangay",
+    })
+    const lines = Object.entries(data.values).filter(([key]) =>
+      key.startsWith("statement"),
+    )
+    expect(lines.length).toBeGreaterThan(1)
+    expect(lines.length).toBeLessThanOrEqual(6)
+    expect(lines.map(([, line]) => line).join(" ")).toBe(statement)
+    const since = buildPrintData(
+      {
+        ...make("RESIDENCY", { details: { type: "RESIDENCY" } }),
+        residentSnapshot: { ...resident, residentSinceBirth: true },
+      },
+      lookups,
+    )!
+    expect(since.values.since).toBe("birth")
+    expect(since.values.signatoryName).toBeUndefined() // no official chosen: left for handwriting
+    const paid = buildPrintData(
+      make("RESIDENCY", {
+        payment: { officialReceiptNo: "OR-9", isFree: false },
+        details: { type: "RESIDENCY" },
+      }),
+      lookups,
+    )!
+    expect(paid.values.orNumber).toBe("OR-9")
+  })
+
+  test("Jobseeker: values for all three sheets, the witness is never printed", () => {
+    const data = buildPrintData(
+      make("FIRST_TIME_JOBSEEKER", {
+        signatoryOfficialId: "o2",
+        details: {
+          type: "FIRST_TIME_JOBSEEKER",
+          educationalAttainment: "College Graduate",
+          course: "BS Biology",
+          isJobstartBeneficiary: false,
+          witnessName: "Staff Member",
+        },
+      }),
+      lookups,
+      { firstName: "Juan", middleName: "Santos", lastName: "Dela Cruz" },
+    )!
+    expect(data.templateId).toBe("jobseeker")
+    expect(data.values).toMatchObject({
+      name: "JUAN S. DELA CRUZ",
+      ageNumber: "26",
+      yearsResident: "16 years",
+      educationalAttainment: "College Graduate",
+      course: "BS Biology",
+      jobstart: "no",
+      addressLine1: "12 Rizal Street, Purok 2",
+      signatoryName: "HON. ANA REYES", // not doubled
+    })
+    expect(JSON.stringify(data.values)).not.toContain("Staff Member")
+    expect(
+      buildPrintData(
+        make("FIRST_TIME_JOBSEEKER", {
+          details: {
+            type: "FIRST_TIME_JOBSEEKER",
+            educationalAttainment: "x",
+            course: "N/A",
+            isJobstartBeneficiary: true,
+          },
+        }),
+        lookups,
+      )!.values.jobstart,
+    ).toBe("yes")
+    const pages = new Set(
+      printTemplates.jobseeker.fields.map((f) => f.page ?? 0),
+    )
+    expect([...pages].sort()).toEqual([0, 1, 2])
+  })
+
+  test("ordinal days and line wrapping", () => {
+    expect(
+      ["1", "2", "3", "4", "11", "12", "13", "21", "22", "23", "31"].map(
+        ordinal,
+      ),
+    ).toEqual([
+      "1st",
+      "2nd",
+      "3rd",
+      "4th",
+      "11th",
+      "12th",
+      "13th",
+      "21st",
+      "22nd",
+      "23rd",
+      "31st",
+    ])
+    expect(ordinal("")).toBe("")
+    expect(wrapLines("aaa bbb ccc ddd", [7], 5)).toEqual(["aaa bbb", "ccc ddd"])
+    expect(wrapLines("aaa bbb ccc ddd", [7], 1)).toEqual(["aaa bbb ccc ddd"])
+    expect(wrapLines("", [7], 3)).toEqual([])
   })
 })

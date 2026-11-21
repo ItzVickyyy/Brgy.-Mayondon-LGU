@@ -100,6 +100,7 @@ test("unknown, voided and template-less documents return a message instead of th
   const resident = await seedResident()
   expect(await loadPrintData("nope", issuanceApi)).toMatchObject({ ok: false })
 
+  // Residency and First-Time Jobseeker have templates now; only the Barangay ID has none.
   const residency = await issuanceApi.createIssuance({
     documentType: "RESIDENCY",
     issueDate: "2026-11-03",
@@ -109,7 +110,32 @@ test("unknown, voided and template-less documents return a message instead of th
     details: { type: "RESIDENCY" },
     status: "issued",
   })
-  expect(await loadPrintData(residency.id, issuanceApi)).toMatchObject({
+  const loaded = await loadPrintData(residency.id, issuanceApi)
+  expect(loaded).toMatchObject({ ok: true })
+  expect(loaded.ok && loaded.data.templateId).toBe("residency")
+
+  // The Barangay ID needs a photo and more resident fields to be issued, so serve a stored one from a stand-in API.
+  const barangayId = {
+    ...residency,
+    id: "ID-1",
+    documentType: "BARANGAY_ID" as const,
+    payload: {
+      ...residency.payload,
+      details: {
+        type: "BARANGAY_ID" as const,
+        transactionType: "new" as const,
+        validUntil: "2027-11-03",
+      },
+    },
+  }
+  const withBarangayId = {
+    ...issuanceApi,
+    getIssuance: async () => barangayId,
+    getPrintLookups: () => issuanceApi.getPrintLookups(),
+    getResidentName: (id: string) => issuanceApi.getResidentName(id),
+    getTricycle: (id?: string) => issuanceApi.getTricycle(id),
+  }
+  expect(await loadPrintData("ID-1", withBarangayId)).toMatchObject({
     ok: false,
     message: expect.stringContaining("no print template"),
   })
