@@ -26,6 +26,7 @@ import useAuth from "@/hooks/useAuth"
 import { activityTitle } from "@/lib/activity"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
+import { type StatTone, statCycle, statTones } from "@/lib/statTones"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -85,10 +86,18 @@ function niceScale(max: number) {
   return { top, ticks }
 }
 
-function OverTimeStat({ label, value }: { label: string; value: string }) {
+function OverTimeStat({
+  label,
+  value,
+  tone,
+}: {
+  label: string
+  value: string
+  tone: StatTone
+}) {
   return (
     <div className="min-w-0 rounded-lg border bg-muted/40 px-3 py-2.5">
-      <p className="truncate text-xs font-medium text-muted-foreground">
+      <p className={`truncate text-xs font-medium ${statTones[tone].text}`}>
         {label}
       </p>
       <p className="mt-1 truncate text-lg font-semibold tabular-nums leading-6">
@@ -451,6 +460,7 @@ function Dashboard() {
               <OverTimeStat
                 label={t("dashboard.overTime.stats.total")}
                 value={formatLocaleNumber(monthsTotal)}
+                tone="blue"
               />
               <OverTimeStat
                 label={t(
@@ -461,6 +471,7 @@ function Dashboard() {
                 value={formatLocaleNumber(monthsAverage, {
                   maximumFractionDigits: 1,
                 })}
+                tone="teal"
               />
               <OverTimeStat
                 label={t(
@@ -469,6 +480,7 @@ function Dashboard() {
                     : "dashboard.overTime.stats.peak",
                 )}
                 value={`${peakMonth.fullLabel} · ${formatLocaleNumber(peakMonth.count)}`}
+                tone="amber"
               />
             </dl>
           ) : null}
@@ -527,7 +539,7 @@ function Dashboard() {
                               {/* Solid by default; softer on hover. The bar rises
                                   from the bottom, one after another. */}
                               <div
-                                className="bar-rise relative w-full max-w-10 rounded-t-md bg-brand transition-colors group-hover:bg-brand/60"
+                                className="bar-rise relative w-full max-w-10 rounded-t-md bg-stat-blue transition-colors group-hover:bg-stat-blue/60"
                                 style={
                                   {
                                     height: `${(item.count / chartTop) * 100}%`,
@@ -636,7 +648,7 @@ function Dashboard() {
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="bar-grow h-full rounded-full bg-brand"
+                    className={`bar-grow h-full rounded-full ${statTones[statCycle[index % statCycle.length]].bg}`}
                     style={
                       {
                         width: `${totalByType > 0 ? (item.count / totalByType) * 100 : 0}%`,

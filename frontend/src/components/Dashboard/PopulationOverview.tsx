@@ -16,13 +16,14 @@ import type { DashboardPopulation } from "@/client"
 import { AnimatedNumber } from "@/components/Common/AnimatedNumber"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatLocaleNumber } from "@/lib/locale"
+import { type StatTone, statCycle, statTones } from "@/lib/statTones"
 
 // Population cards for the Dashboard. Every figure comes from the API (active
 // residents only); the page's Period filter does not change them. Colors are
-// the system's own: the brand color and tints of it, so the cards follow the
+// the system's own: soft stat colors (see lib/statTones.ts), so the cards follow the
 // theme and the accent the user picked.
 
-type Segment = { key: string; label: string; value: number; tone: string }
+type Segment = { key: string; label: string; value: number; tone: StatTone }
 
 const percent = (part: number, whole: number) =>
   whole > 0 ? (part / whole) * 100 : 0
@@ -50,25 +51,31 @@ function StatCard({
   growth,
   loading,
   icon: Icon,
+  tone,
 }: {
   title: string
   value: number | undefined
   growth: number | null | undefined
   loading: boolean
   icon: typeof UsersRound
+  tone: StatTone
 }) {
   const { t } = useTranslation()
   return (
-    <article className="relative flex min-w-0 flex-col justify-between gap-3 overflow-hidden rounded-xl border bg-card p-4 shadow-sm xl:p-3 2xl:p-4">
+    <article
+      className={`flex min-w-0 flex-col justify-center gap-2 rounded-xl border bg-card p-4 shadow-sm xl:p-3 2xl:p-4`}
+    >
       <div className="flex items-center gap-2">
-        <span className="shrink-0 rounded-md bg-brand/10 p-1.5 text-brand 2xl:p-2">
+        <span
+          className={`shrink-0 rounded-md bg-muted p-1.5 2xl:p-2 ${statTones[tone].text}`}
+        >
           <Icon className="size-4 2xl:size-5" aria-hidden="true" />
         </span>
         <p className="min-w-0 break-words text-xs font-medium leading-4 text-muted-foreground 2xl:text-sm 2xl:leading-5">
           {title}
         </p>
       </div>
-      <p className="text-3xl font-extrabold tracking-tight tabular-nums">
+      <p className="mt-1 text-3xl font-extrabold tracking-tight tabular-nums">
         {value !== undefined ? (
           <AnimatedNumber value={value} />
         ) : loading ? (
@@ -77,7 +84,7 @@ function StatCard({
           "–"
         )}
       </p>
-      <p className="min-h-4 text-xs font-medium text-brand">
+      <p className={`min-h-4 text-xs font-semibold ${statTones[tone].text}`}>
         {growth ? (
           <span
             title={t("dashboard.population.growth", {
@@ -93,10 +100,6 @@ function StatCard({
           </span>
         ) : null}
       </p>
-      <Icon
-        className="pointer-events-none absolute -right-2 -bottom-2 size-16 text-brand/10"
-        aria-hidden="true"
-      />
     </article>
   )
 }
@@ -140,7 +143,7 @@ function Donut({ segments, total }: { segments: Segment[]; total: number }) {
               fill="none"
               strokeWidth="14"
               stroke="currentColor"
-              className={item.tone}
+              className={statTones[item.tone].text}
               strokeDasharray={`${length} ${circumference - length}`}
               strokeDashoffset={-offset}
             />
@@ -161,24 +164,44 @@ function Donut({ segments, total }: { segments: Segment[]; total: number }) {
   )
 }
 
-function Legend({ segments }: { segments: Segment[] }) {
+function Legend({
+  segments,
+  inline = false,
+}: {
+  segments: Segment[]
+  inline?: boolean
+}) {
   const sum = segments.reduce((acc, item) => acc + item.value, 0)
   return (
-    <ul className="min-w-0 flex-1 space-y-2.5">
+    <ul className={`min-w-0 flex-1 ${inline ? "space-y-2" : "space-y-2.5"}`}>
       {segments.map((item) => (
-        <li key={item.key} className="flex items-start gap-2">
+        <li
+          key={item.key}
+          className={`flex gap-2 ${inline ? "items-center" : "items-start"}`}
+        >
           <span
-            className={`mt-1 size-2.5 shrink-0 rounded-full bg-current ${item.tone}`}
+            className={`size-2.5 shrink-0 rounded-full bg-current ${inline ? "" : "mt-1"} ${statTones[item.tone].text}`}
             aria-hidden="true"
           />
-          <span className="min-w-0 leading-4">
-            <span className="block text-xs text-muted-foreground">
-              {item.label}
+          {inline ? (
+            <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+              <span className="min-w-0 text-xs leading-4 text-muted-foreground">
+                {item.label}
+              </span>
+              <span className="shrink-0 text-sm font-semibold tabular-nums">
+                {fmtPercent(percent(item.value, sum))}%
+              </span>
             </span>
-            <span className="block text-sm font-semibold tabular-nums">
-              {fmtPercent(percent(item.value, sum))}%
+          ) : (
+            <span className="min-w-0 leading-4">
+              <span className="block text-xs text-muted-foreground">
+                {item.label}
+              </span>
+              <span className="block text-sm font-semibold tabular-nums">
+                {fmtPercent(percent(item.value, sum))}%
+              </span>
             </span>
-          </span>
+          )}
         </li>
       ))}
     </ul>
@@ -190,17 +213,21 @@ function SectorTile({
   value,
   total,
   icon: Icon,
+  tone,
 }: {
   label: string
   value: number
   total: number
   icon: typeof UsersRound
+  tone: StatTone
 }) {
   const { t } = useTranslation()
   return (
-    <div className="flex min-w-0 flex-col items-center gap-1 rounded-lg border bg-brand/5 px-2 py-4 text-center">
-      <Icon className="size-6 text-brand" aria-hidden="true" />
-      <p className="text-xs font-semibold text-brand">{label}</p>
+    <div
+      className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg border bg-muted/40 px-2 py-4 text-center`}
+    >
+      <Icon className={`size-6 ${statTones[tone].text}`} aria-hidden="true" />
+      <p className={`text-xs font-semibold ${statTones[tone].text}`}>{label}</p>
       <p className="text-2xl font-extrabold tabular-nums">
         <AnimatedNumber value={value} />
       </p>
@@ -229,21 +256,16 @@ export function PopulationOverview({
       key: "male",
       label: t("dashboard.population.male"),
       value: data?.male ?? 0,
-      tone: "text-brand",
+      tone: "blue",
     },
     {
       key: "female",
       label: t("dashboard.population.female"),
       value: data?.female ?? 0,
-      tone: "text-brand/35",
+      tone: "rose",
     },
   ]
-  const civilTones = [
-    "text-brand",
-    "text-brand/70",
-    "text-brand/45",
-    "text-brand/25",
-  ]
+  const civilTones: StatTone[] = ["blue", "green", "amber", "rose"]
   const civil: Segment[] = (data?.civil_status ?? []).map((item, index) => ({
     key: item.status,
     label: t(`dashboard.population.civil.${item.status}`, {
@@ -258,7 +280,8 @@ export function PopulationOverview({
   const maxPurok = Math.max(1, ...puroks.map((item) => item.count))
   const sectoral = data?.sectoral
 
-  const card = "min-w-0 rounded-xl border bg-card p-4 shadow-sm sm:p-5"
+  const card =
+    "flex min-w-0 flex-col rounded-xl border bg-card p-4 shadow-sm sm:p-5"
 
   return (
     <section
@@ -274,6 +297,7 @@ export function PopulationOverview({
             growth={data?.population_growth_percent}
             loading={loading}
             icon={UsersRound}
+            tone="blue"
           />
           <StatCard
             title={t("dashboard.population.totalHouseholds")}
@@ -281,6 +305,7 @@ export function PopulationOverview({
             growth={data?.household_growth_percent}
             loading={loading}
             icon={House}
+            tone="green"
           />
           <StatCard
             title={t("dashboard.population.totalVoters")}
@@ -288,6 +313,7 @@ export function PopulationOverview({
             growth={data?.voter_growth_percent}
             loading={loading}
             icon={Vote}
+            tone="violet"
           />
         </div>
 
@@ -295,7 +321,7 @@ export function PopulationOverview({
           <CardTitle icon={VenusAndMars}>
             {t("dashboard.population.genderBreakdown")}
           </CardTitle>
-          <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row">
+          <div className="mt-3 flex flex-1 flex-col items-center justify-center gap-4 sm:flex-row">
             {ready ? (
               <>
                 <Donut segments={gender} total={total} />
@@ -312,7 +338,7 @@ export function PopulationOverview({
             {t("dashboard.population.ageBrackets")}
           </CardTitle>
           {ready ? (
-            <ul className="mt-4 flex h-36 items-end gap-1.5 border-b">
+            <ul className="mt-3 flex h-28 flex-1 items-end gap-1.5 border-b">
               {ages.map((item, index) => (
                 <li
                   key={item.bracket}
@@ -322,7 +348,7 @@ export function PopulationOverview({
                     {formatLocaleNumber(item.count)}
                   </span>
                   <div
-                    className="bar-rise mx-auto w-full max-w-10 rounded-t-md bg-brand"
+                    className={`bar-rise mx-auto w-full max-w-10 rounded-t-md ${statTones[statCycle[index % statCycle.length]].bg}`}
                     style={
                       {
                         height: `${(item.count / maxAge) * 80}%`,
@@ -335,7 +361,7 @@ export function PopulationOverview({
               ))}
             </ul>
           ) : (
-            <Skeleton className="mt-4 h-36 w-full" aria-hidden="true" />
+            <Skeleton className="mt-3 h-28 w-full" aria-hidden="true" />
           )}
           {ready ? (
             <ul className="mt-2 flex gap-1.5">
@@ -358,7 +384,7 @@ export function PopulationOverview({
           <CardTitle icon={MapPin}>
             {t("dashboard.population.perPurok")}
           </CardTitle>
-          <div className="mt-4 space-y-3">
+          <div className="mt-3 flex flex-1 flex-col justify-center gap-3">
             {loading
               ? Array.from({ length: 5 }, (_, index) => (
                   <Skeleton
@@ -375,7 +401,7 @@ export function PopulationOverview({
                 </span>
                 <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="bar-grow h-full rounded-full bg-brand"
+                    className={`bar-grow h-full rounded-full ${statTones[statCycle[index % statCycle.length]].bg}`}
                     style={
                       {
                         width: `${(item.count / maxPurok) * 100}%`,
@@ -401,11 +427,11 @@ export function PopulationOverview({
           <CardTitle icon={ChartPie}>
             {t("dashboard.population.civilStatus")}
           </CardTitle>
-          <div className="mt-4 flex flex-col items-center gap-4 sm:flex-row">
+          <div className="mt-3 flex flex-1 flex-col items-center justify-center gap-4 sm:flex-row">
             {ready ? (
               <>
                 <Donut segments={civil} total={total} />
-                <Legend segments={civil} />
+                <Legend segments={civil} inline />
               </>
             ) : (
               <Skeleton className="size-28 rounded-full" aria-hidden="true" />
@@ -417,7 +443,7 @@ export function PopulationOverview({
           <CardTitle icon={UsersRound}>
             {t("dashboard.population.sectoral")}
           </CardTitle>
-          <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+          <div className="mt-3 grid flex-1 grid-cols-2 gap-3 lg:grid-cols-4">
             {sectoral ? (
               <>
                 <SectorTile
@@ -425,24 +451,28 @@ export function PopulationOverview({
                   value={sectoral.pwd}
                   total={total}
                   icon={Accessibility}
+                  tone="blue"
                 />
                 <SectorTile
                   label={t("dashboard.population.seniorCitizens")}
                   value={sectoral.senior_citizens}
                   total={total}
                   icon={PersonStanding}
+                  tone="green"
                 />
                 <SectorTile
                   label={t("dashboard.population.children")}
                   value={sectoral.children}
                   total={total}
                   icon={Baby}
+                  tone="amber"
                 />
                 <SectorTile
                   label={t("dashboard.population.soloParents")}
                   value={sectoral.solo_parents}
                   total={total}
                   icon={UsersRound}
+                  tone="violet"
                 />
               </>
             ) : (

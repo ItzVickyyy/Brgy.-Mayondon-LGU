@@ -32,6 +32,12 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+  --color-stat-blue: var(--stat-blue);
+  --color-stat-green: var(--stat-green);
+  --color-stat-amber: var(--stat-amber);
+  --color-stat-violet: var(--stat-violet);
+  --color-stat-rose: var(--stat-rose);
+  --color-stat-teal: var(--stat-teal);
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -73,6 +79,13 @@
   --chart-3: oklch(0.6 0.08 250);
   --chart-4: oklch(0.8 0.04 250);
   --chart-5: oklch(0.52 0.03 256);
+  /* Stat colors for the Dashboard: clear but not bright. */
+  --stat-blue: oklch(0.55 0.15 255);
+  --stat-green: oklch(0.58 0.13 155);
+  --stat-amber: oklch(0.7 0.14 75);
+  --stat-violet: oklch(0.55 0.15 295);
+  --stat-rose: oklch(0.6 0.15 10);
+  --stat-teal: oklch(0.6 0.1 195);
   /* Sidebar: one solid navy, white text, a gold marker for the current page. */
   --sidebar: oklch(0.27 0.06 258);
   --sidebar-foreground: oklch(0.95 0.008 250);
@@ -109,6 +122,13 @@
   --chart-3: oklch(0.72 0.07 250);
   --chart-4: oklch(0.85 0.04 250);
   --chart-5: oklch(0.62 0.03 256);
+  /* Stat colors for the Dashboard: clear but not bright. */
+  --stat-blue: oklch(0.72 0.13 255);
+  --stat-green: oklch(0.74 0.13 155);
+  --stat-amber: oklch(0.8 0.13 80);
+  --stat-violet: oklch(0.74 0.13 295);
+  --stat-rose: oklch(0.75 0.13 10);
+  --stat-teal: oklch(0.76 0.1 195);
   --sidebar: oklch(0.21 0.05 258);
   --sidebar-foreground: oklch(0.95 0.008 250);
   --sidebar-primary: oklch(0.8 0.12 85);
