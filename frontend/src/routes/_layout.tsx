@@ -205,10 +205,13 @@ function Layout() {
         <main
           id="main-content"
           tabIndex={-1}
-          className="relative flex-1 p-4 outline-none sm:p-6 md:p-8"
+          className="relative flex-1 p-3 outline-none sm:p-4 md:p-5"
         >
           <AppBackdrop />
-          <div key={pathname} className="page-enter relative mx-auto max-w-7xl">
+          <div
+            key={pathname}
+            className="page-enter relative mx-auto max-w-[96rem]"
+          >
             <Outlet />
           </div>
         </main>

@@ -231,6 +231,11 @@ html[data-font-size="large"] {
     outline: 2px solid var(--brand);
     outline-offset: 2px;
   }
+  /* Always reserve the page scrollbar's width, so centred content does not
+     shift sideways when a page becomes long enough (or short enough) to scroll. */
+  html {
+    scrollbar-gutter: stable;
+  }
   /* Slim scrollbars for wide tables and long lists. */
   * {
     scrollbar-width: thin;

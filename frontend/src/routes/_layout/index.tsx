@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query"
+import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
   Activity,
@@ -207,6 +207,9 @@ function Dashboard() {
     queryKey: ["dashboard", period],
     queryFn: async () =>
       (await DashboardService.dashboard({ query: { period } })).data,
+    // Keep the old figures on screen while the new period loads, so the page
+    // does not collapse to skeletons and jump (and lose its scrollbar).
+    placeholderData: keepPreviousData,
   })
   // Staff always get only their own rows from this endpoint; Admin gets everyone's.
   const activityQuery = useQuery({

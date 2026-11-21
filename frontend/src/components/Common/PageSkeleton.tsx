@@ -7,7 +7,10 @@ import { Skeleton } from "@/components/ui/skeleton"
 
 function ContentSkeleton() {
   return (
-    <div className="mx-auto flex max-w-7xl flex-col gap-6" aria-hidden="true">
+    <div
+      className="mx-auto flex max-w-[96rem] flex-col gap-6"
+      aria-hidden="true"
+    >
       <div className="space-y-3">
         <Skeleton className="h-8 w-56" />
         <Skeleton className="h-4 w-80 max-w-full" />
@@ -91,7 +94,7 @@ export function AppShellSkeleton() {
             <Skeleton className="h-9 w-9 rounded-full" />
           </div>
         </div>
-        <div className="flex-1 p-4 sm:p-6 md:p-8">
+        <div className="flex-1 p-3 sm:p-4 md:p-5">
           <ContentSkeleton />
         </div>
       </div>
