@@ -281,6 +281,22 @@ html[data-font-size="large"] {
 }
 
 @layer components {
+  /* Dashboard stat numbers: bold (not extra-bold, which looks clumsy in the
+     system font), slightly tightened, lining and equal-width digits so figures
+     line up and do not jitter while they count up. Size is set where used. */
+  .stat-figure {
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1;
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  /* Label above a stat number: small, medium weight, muted. */
+  .stat-label {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+    color: var(--muted-foreground);
+  }
   /* Soft entrance for the page content. `backwards` (not `both`) so no
      transform is left behind to trap fixed-position children afterwards. */
   .page-enter {

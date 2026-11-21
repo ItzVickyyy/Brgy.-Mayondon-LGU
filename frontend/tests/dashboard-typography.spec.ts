@@ -1,5 +1,6 @@
-// Dashboard: every card title uses one text style, chart labels share one
-// size, and the Gender ring sits in the middle of its card when there is room.
+// Dashboard: number-card labels are small and muted, section titles share one
+// semibold style, every stat number is bold with tight spacing, and the
+// Gender ring sits in the middle of its card when there is room.
 // The API is mocked, so this spec needs only the running frontend
 // (run with --no-deps).
 import { expect, test } from "@playwright/test"
@@ -60,14 +61,22 @@ const dashboard = {
   },
 }
 
-const titles = [
+// Number cards: small, medium-weight, muted label (the "stat label" style).
+const numberCardLabels = [
   "Documents Issued This Month",
-  "Quick Actions",
-  "Document Issuances Over Time",
-  "Issuances by Document Type",
+  "Clearances Expiring in 30 Days",
+  "Barangay IDs Expiring in 30 Days",
+  "Pending Document Requests",
   "Total Population",
   "Total Registered Households",
   "Total Registered Voters",
+]
+
+// Section and chart cards: semibold, normal text color.
+const titles = [
+  "Quick Actions",
+  "Document Issuances Over Time",
+  "Issuances by Document Type",
   "Gender Breakdown",
   "Age Brackets",
   "Population per Purok / Sitio",
@@ -102,19 +111,33 @@ for (const width of [1280, 1920]) {
     await page.goto("/")
     await expect(page.getByText("Gender Breakdown")).toBeVisible()
 
-    const styles = []
-    for (const title of titles) {
-      const element = page.getByText(title, { exact: true }).first()
-      styles.push(
-        await element.evaluate((node) => {
+    const styleOf = async (text: string) =>
+      page
+        .getByText(text, { exact: true })
+        .first()
+        .evaluate((node) => {
           const css = getComputedStyle(node)
           return [css.fontFamily, css.fontSize, css.fontWeight, css.color].join(
             "|",
           )
-        }),
-      )
-    }
-    expect(new Set(styles).size).toBe(1)
+        })
+    const heading = await Promise.all(titles.map(styleOf))
+    expect(new Set(heading).size).toBe(1)
+    const labels = await Promise.all(numberCardLabels.map(styleOf))
+    expect(new Set(labels).size).toBe(1)
+    // The two groups differ on purpose: labels are lighter and fainter.
+    expect(labels[0]).not.toBe(heading[0])
+    expect(labels[0]).toContain("|500|")
+
+    // Every stat number shares one weight and one letter-spacing.
+    const figures = await page.locator(".stat-figure").evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const css = getComputedStyle(node)
+        return [css.fontWeight, css.letterSpacing !== "normal"].join("|")
+      }),
+    )
+    expect(figures.length).toBeGreaterThanOrEqual(8)
+    expect(new Set(figures)).toEqual(new Set(["700|true"]))
 
     // The ring sits in the middle of the Gender card whenever the card is wide
     // enough to also hold the legend beside it (the card is ~370 px at 1920).

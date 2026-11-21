@@ -71,16 +71,14 @@ function StatCard({
         >
           <Icon className="size-4 2xl:size-5" aria-hidden="true" />
         </span>
-        <p className="min-w-0 font-semibold leading-tight tracking-tight">
-          {title}
-        </p>
+        <p className="stat-label min-w-0 leading-tight">{title}</p>
       </div>
       <div className="flex flex-1 flex-col items-center justify-center gap-1">
-        <p className="text-center text-2xl font-extrabold tracking-tight tabular-nums sm:text-3xl">
+        <p className="stat-figure text-center text-3xl 2xl:text-4xl">
           {value !== undefined ? (
             <AnimatedNumber value={value} />
           ) : loading ? (
-            <Skeleton className="h-9 w-20" />
+            <Skeleton className="h-8 w-20 2xl:h-9" />
           ) : (
             "–"
           )}
@@ -157,7 +155,7 @@ function Donut({ segments, total }: { segments: Segment[]; total: number }) {
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-        <span className="text-base font-extrabold leading-5 tabular-nums">
+        <span className="stat-figure text-base">
           {formatLocaleNumber(total)}
         </span>
         <span className="text-xs leading-4 text-muted-foreground">
@@ -232,7 +230,7 @@ function SectorTile({
     >
       <Icon className={`size-6 ${statTones[tone].text}`} aria-hidden="true" />
       <p className={`text-xs font-semibold ${statTones[tone].text}`}>{label}</p>
-      <p className="text-2xl font-extrabold tabular-nums">
+      <p className="stat-figure mt-0.5 text-2xl">
         <AnimatedNumber value={value} />
       </p>
       <p className="text-xs text-muted-foreground">

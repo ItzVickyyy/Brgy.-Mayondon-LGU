@@ -101,9 +101,7 @@ function OverTimeStat({
       <p className={`truncate text-xs font-semibold ${statTones[tone].text}`}>
         {label}
       </p>
-      <p className="mt-1 truncate text-xl font-extrabold tabular-nums leading-6">
-        {value}
-      </p>
+      <p className="stat-figure mt-1.5 truncate text-2xl">{value}</p>
     </div>
   )
 }
@@ -125,12 +123,12 @@ function SummaryCard({
     <article className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="font-semibold leading-tight tracking-tight">{title}</p>
-          <p className="mt-2 text-2xl font-extrabold tracking-tight tabular-nums sm:text-3xl">
+          <p className="stat-label">{title}</p>
+          <p className="stat-figure mt-3 text-3xl 2xl:text-4xl">
             {value !== undefined ? (
               <AnimatedNumber value={value} />
             ) : loading ? (
-              <Skeleton className="h-9 w-16" />
+              <Skeleton className="h-8 w-16 2xl:h-9" />
             ) : (
               "–"
             )}
