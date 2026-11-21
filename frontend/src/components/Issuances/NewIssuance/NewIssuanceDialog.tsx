@@ -1301,7 +1301,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
           <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-nowrap sm:justify-end">
             <Button type="button" variant="ghost" className={footerButton} onClick={() => requestClose(false)}>{t("issuances.new.footer.cancel")}</Button>
             <Button type="button" variant="outline" className={footerButton} disabled={saving} onClick={() => void saveDraft()}>{t("issuances.new.footer.saveDraftClose")}</Button>
-            <Button type="submit" className={footerButton} disabled={saving || Boolean(duplicate) || residentArchived} data-testid="issue-submit">
+            <Button type="submit" className={cn(footerButton, "col-span-2 sm:col-auto")} disabled={saving || Boolean(duplicate) || residentArchived} data-testid="issue-submit">
               {saving ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : printable ? <Printer className="size-4" aria-hidden="true" /> : null}
               {saving ? t("issuances.new.footer.savingButton") : printable ? t("issuances.new.footer.issueAndPrint") : t("issuances.new.footer.issue")}
             </Button>
