@@ -12,6 +12,7 @@ import {
 import { useTranslation } from "react-i18next"
 
 import { Logo } from "@/components/Common/Logo"
+import { SidebarBackdrop } from "@/components/Common/SidebarBackdrop"
 import { Sidebar, SidebarContent, SidebarHeader } from "@/components/ui/sidebar"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
@@ -93,10 +94,11 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="h-16 min-h-16 justify-center overflow-hidden border-b border-sidebar-border px-4 py-2 transition-[padding] duration-300 ease-sidebar group-data-[collapsible=icon]:px-2">
+      <SidebarBackdrop />
+      <SidebarHeader className="relative h-16 min-h-16 justify-center overflow-hidden border-b border-sidebar-border px-4 py-2 transition-[padding] duration-300 ease-sidebar group-data-[collapsible=icon]:px-2">
         <Logo variant="responsive" tone="sidebar" />
       </SidebarHeader>
-      <SidebarContent className="pt-3">
+      <SidebarContent className="relative pt-3">
         <Main items={visibleItems} />
       </SidebarContent>
     </Sidebar>
