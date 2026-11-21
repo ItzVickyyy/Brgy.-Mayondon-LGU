@@ -64,8 +64,8 @@ function StatCard({
 }) {
   const { t } = useTranslation()
   return (
-    <article className="flex min-w-0 flex-col items-stretch gap-2 rounded-xl border bg-card p-3 text-center shadow-sm 2xl:p-4">
-      <div className="flex items-center justify-center gap-2">
+    <article className="flex min-w-0 flex-col items-stretch gap-2 rounded-xl border bg-card p-3 text-left shadow-sm 2xl:p-4">
+      <div className="flex items-center justify-start gap-2">
         <span
           className={`shrink-0 rounded-md bg-muted p-1.5 2xl:p-2 ${statTones[tone].text}`}
         >

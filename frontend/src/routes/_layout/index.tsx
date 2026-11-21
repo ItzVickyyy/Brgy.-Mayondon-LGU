@@ -3,6 +3,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router"
 import {
   Activity,
   BarChart3,
+  CalendarClock,
   CalendarDays,
   ChevronRight,
   Clock3,
@@ -681,13 +682,18 @@ function Dashboard() {
         loading={dashboardQuery.isLoading}
       />
 
-      <section className="grid gap-4">
-        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-          <div className="flex flex-col items-start gap-2">
-            <SectionHeading
-              title={t("dashboard.expiring.title")}
-              description={t("dashboard.expiring.description")}
-            />
+      <section className="grid min-w-0 gap-4 xl:grid-cols-2">
+        <article className="min-w-0 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-brand/10 p-2.5 text-brand">
+              <CalendarClock className="size-5" aria-hidden="true" />
+            </div>
+            <div className="flex flex-col items-start gap-2">
+              <SectionHeading
+                title={t("dashboard.expiring.title")}
+                description={t("dashboard.expiring.description")}
+              />
+            </div>
           </div>
           {dashboardQuery.isLoading ? (
             <div className="mt-4">
@@ -713,7 +719,7 @@ function Dashboard() {
                     })}
                   </p>
                 </div>
-                <span className="inline-flex min-h-8 items-center self-start rounded-full border px-3 text-xs font-semibold sm:self-center">
+                <span className="inline-flex min-h-8 shrink-0 items-center self-start whitespace-nowrap rounded-full border px-3 text-xs font-semibold sm:self-center">
                   {expiryText(item.days_left)}
                 </span>
               </div>
@@ -739,82 +745,85 @@ function Dashboard() {
             {t("dashboard.expiring.openHistory")}
           </Link>
         </article>
-      </section>
 
-      <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
-        <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-brand/10 p-2.5 text-brand">
-            <Activity className="size-5" aria-hidden="true" />
-          </div>
-          <div>
-            <div className="flex flex-col items-start gap-2">
-              <SectionHeading
-                title={t("dashboard.recent.title")}
-                description={
-                  isAdmin
-                    ? t("dashboard.recent.descriptionAdmin")
-                    : t("dashboard.recent.descriptionStaff")
-                }
-              />
+        <article className="min-w-0 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-brand/10 p-2.5 text-brand">
+              <Activity className="size-5" aria-hidden="true" />
+            </div>
+            <div>
+              <div className="flex flex-col items-start gap-2">
+                <SectionHeading
+                  title={t("dashboard.recent.title")}
+                  description={
+                    isAdmin
+                      ? t("dashboard.recent.descriptionAdmin")
+                      : t("dashboard.recent.descriptionStaff")
+                  }
+                />
+              </div>
             </div>
           </div>
-        </div>
-        {activityQuery.isLoading ? (
-          <div className="mt-4">
-            <RowsSkeleton rows={4} />
-          </div>
-        ) : null}
-        <div className="mt-4 divide-y">
-          {activities.map((activity) => {
-            const reference =
-              typeof activity.details?.reference_no === "string"
-                ? activity.details.reference_no
+          {activityQuery.isLoading ? (
+            <div className="mt-4">
+              <RowsSkeleton rows={4} />
+            </div>
+          ) : null}
+          <div className="mt-4 divide-y">
+            {activities.map((activity) => {
+              const reference =
+                typeof activity.details?.reference_no === "string"
+                  ? activity.details.reference_no
+                  : null
+              const who = isAdmin
+                ? activity.is_own
+                  ? t("dashboard.recent.you")
+                  : (activity.actor_email ??
+                    t("dashboard.recent.deletedAccount"))
                 : null
-            const who = isAdmin
-              ? activity.is_own
-                ? t("dashboard.recent.you")
-                : (activity.actor_email ?? t("dashboard.recent.deletedAccount"))
-              : null
-            const detail =
-              [who, reference].filter(Boolean).join(" · ") ||
-              (activity.module ?? "")
-            return (
-              <div
-                key={activity.id}
-                className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-              >
-                <div>
-                  <p className="text-sm font-medium">
-                    {activityTitle(activity.action, t)}
-                  </p>
-                  <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
+              const detail =
+                [who, reference].filter(Boolean).join(" · ") ||
+                (activity.module ?? "")
+              return (
+                <div
+                  key={activity.id}
+                  className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
+                >
+                  <div>
+                    <p className="text-sm font-medium">
+                      {activityTitle(activity.action, t)}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {detail}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-xs text-muted-foreground">
+                    {formatLocaleDate(new Date(activity.occurred_at), {
+                      timeZone: "Asia/Manila",
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </span>
                 </div>
-                <span className="shrink-0 text-xs text-muted-foreground">
-                  {formatLocaleDate(new Date(activity.occurred_at), {
-                    timeZone: "Asia/Manila",
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                  })}
-                </span>
-              </div>
-            )
-          })}
-          {activityQuery.isError ? (
-            <p className="py-3 text-sm text-muted-foreground">
-              {t("dashboard.recent.loadError")}
-            </p>
-          ) : null}
-          {activities.length === 0 &&
-          !activityQuery.isLoading &&
-          !activityQuery.isError ? (
-            <p className="py-3 text-sm text-muted-foreground">
-              {t("dashboard.recent.empty")}
-            </p>
-          ) : null}
-        </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          {t("dashboard.recent.note")}
-        </p>
+              )
+            })}
+            {activityQuery.isError ? (
+              <p className="py-3 text-sm text-muted-foreground">
+                {t("dashboard.recent.loadError")}
+              </p>
+            ) : null}
+            {activities.length === 0 &&
+            !activityQuery.isLoading &&
+            !activityQuery.isError ? (
+              <p className="py-3 text-sm text-muted-foreground">
+                {t("dashboard.recent.empty")}
+              </p>
+            ) : null}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {t("dashboard.recent.note")}
+          </p>
+        </article>
       </section>
     </div>
   )
