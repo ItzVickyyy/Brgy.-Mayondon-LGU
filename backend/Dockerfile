@@ -7,7 +7,9 @@ COPY frontend/package.json /app/frontend/
 
 WORKDIR /app/frontend
 
-RUN bun install
+# --frozen-lockfile: build exactly the library versions in bun.lock (the ones that
+# were tested), and stop if bun.lock and package.json disagree (decision 72).
+RUN bun install --frozen-lockfile
 
 COPY ./frontend /app/frontend
 

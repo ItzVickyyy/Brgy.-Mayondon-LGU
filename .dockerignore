@@ -8,3 +8,10 @@ frontend/node_modules
 frontend/playwright-report
 frontend/test-results
 node_modules
+# Never copied into an image; keeps them out of the build context (decision 72).
+# frontend/tests stays: frontend/Dockerfile.playwright copies it.
+docs
+.github
+.vscode
+packages
+backend/tests

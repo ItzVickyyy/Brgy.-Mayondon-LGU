@@ -38,7 +38,8 @@ done
 
 echo "Release files: $(find "$tmp" -type f | wc -l) of $(git ls-files | wc -l) tracked."
 if [ "${1:-}" = "--build" ] && [ $fail = 0 ]; then
-  (cd "$tmp/frontend" && bun install && bun run build)
+  # Same steps as backend/Dockerfile: install exactly bun.lock, then build.
+  (cd "$tmp/frontend" && bun install --frozen-lockfile && bun run build)
 fi
 [ $fail = 0 ] && echo "Release archive OK." || echo "Release archive has problems."
 exit $fail
