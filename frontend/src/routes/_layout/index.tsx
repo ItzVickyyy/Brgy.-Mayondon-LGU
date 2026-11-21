@@ -18,6 +18,7 @@ import { ActivityService, DashboardService } from "@/client"
 import { AnimatedNumber } from "@/components/Common/AnimatedNumber"
 import { ErrorState, LoadingState } from "@/components/Common/FeedbackState"
 import { Select } from "@/components/Common/Select"
+import { PopulationOverview } from "@/components/Dashboard/PopulationOverview"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { pageTitle } from "@/config/site"
@@ -662,6 +663,11 @@ function Dashboard() {
           </div>
         </article>
       </section>
+
+      <PopulationOverview
+        data={dashboard?.population}
+        loading={dashboardQuery.isLoading}
+      />
 
       <section className="grid gap-4">
         <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">

@@ -16,6 +16,7 @@ from app.api.deps import SessionDep, require_permission
 from app.core.dates import today_manila
 from app.core.periods import Period, months_in, resolve_period
 from app.core.permissions import Permission
+from app.core.population_queries import population_summary
 from app.core.report_queries import (
     count_by_type,
     count_expiring,
@@ -121,4 +122,5 @@ def dashboard(
         by_document_type=by_type,
         total_issued=sum(item.count for item in by_type),
         expiring=expiring,
+        population=population_summary(session, today),
     )

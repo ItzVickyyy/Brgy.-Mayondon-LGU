@@ -166,6 +166,96 @@ def test_months_in_spans_year_ends() -> None:
 # --- Dashboard --------------------------------------------------------------------
 
 
+def test_population_age_and_household_helpers() -> None:
+    from app.core.population_queries import age_on, household_key
+
+    today = date(2026, 11, 21)
+    assert age_on(date(2026, 11, 21), today) == 0
+    assert age_on(date(2008, 11, 22), today) == 17  # turns 18 tomorrow
+    assert age_on(date(2008, 11, 21), today) == 18
+    assert household_key(None, None) is None
+    assert household_key(None, "  ") is None
+    assert household_key(4, " 12A ") == household_key(4, "12a")
+    assert household_key(4, "12") != household_key(5, "12")
+
+
+def test_dashboard_population_follows_residents(
+    client: TestClient, staff_token_headers: Headers, street_id: int
+) -> None:
+    before = _get(client, staff_token_headers, f"{DASH}/")["population"]
+    house = f"ZP{random_lower_string()[:6]}"
+    _resident(
+        client,
+        staff_token_headers,
+        street_id,
+        house_number=house,
+        sex="Male",
+        civil_status="Married",
+        birthdate=str(date.today().replace(year=date.today().year - 70)),
+        voter_registration="registered",
+        purok=9,
+    )
+    _resident(
+        client,
+        staff_token_headers,
+        street_id,
+        house_number=house,  # same house: one more resident, not one more household
+        sex="Female",
+        civil_status="Single",
+        birthdate=str(date.today().replace(year=date.today().year - 5)),
+        voter_registration="unregistered",
+        purok=9,
+    )
+    after = _get(client, staff_token_headers, f"{DASH}/")["population"]
+
+    assert after["total_population"] == before["total_population"] + 2
+    assert after["total_households"] == before["total_households"] + 1
+    assert after["total_voters"] == before["total_voters"] + 1
+    assert after["male"] == before["male"] + 1
+    assert after["female"] == before["female"] + 1
+    assert after["sectoral"]["senior_citizens"] == (
+        before["sectoral"]["senior_citizens"] + 1
+    )
+    assert after["sectoral"]["children"] == before["sectoral"]["children"] + 1
+
+    brackets = {r["bracket"]: r["count"] for r in after["age_brackets"]}
+    earlier = {r["bracket"]: r["count"] for r in before["age_brackets"]}
+    assert [r["bracket"] for r in after["age_brackets"]] == [
+        "0-17",
+        "18-29",
+        "30-49",
+        "50-64",
+        "65+",
+    ]
+    assert brackets["65+"] == earlier["65+"] + 1
+    assert brackets["0-17"] == earlier["0-17"] + 1
+    puroks = {r["purok"]: r["count"] for r in after["by_purok"]}
+    puroks_before = {r["purok"]: r["count"] for r in before["by_purok"]}
+    assert puroks[9] == puroks_before.get(9, 0) + 2
+    civil = {r["status"]: r["count"] for r in after["civil_status"]}
+    civil_before = {r["status"]: r["count"] for r in before["civil_status"]}
+    assert civil["Married"] == civil_before["Married"] + 1
+    assert civil["Single"] == civil_before["Single"] + 1
+
+
+def test_dashboard_population_ignores_archived_residents(
+    client: TestClient, staff_token_headers: Headers, superuser_token_headers: Headers
+) -> None:
+    before = _get(client, staff_token_headers, f"{DASH}/")["population"]
+    resident = _resident(client, staff_token_headers, None, sex="Male")
+    mid = _get(client, staff_token_headers, f"{DASH}/")["population"]
+    assert mid["total_population"] == before["total_population"] + 1
+    r = client.post(
+        f"{API}/residents/{resident['id']}/archive",
+        headers=superuser_token_headers,
+        json={"reason": "Moved away"},
+    )
+    assert r.status_code == 200, r.text
+    after = _get(client, staff_token_headers, f"{DASH}/")["population"]
+    assert after["total_population"] == before["total_population"]
+    assert after["male"] == before["male"]
+
+
 def test_dashboard_counts_follow_issuing(
     client: TestClient, staff_token_headers: Headers, street_id: int
 ) -> None:

@@ -162,6 +162,20 @@ export type ActivityPublic = {
 };
 
 /**
+ * AgeBracketCount
+ */
+export type AgeBracketCount = {
+    /**
+     * Bracket
+     */
+    bracket: string;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
  * ArchiveRequest
  */
 export type ArchiveRequest = {
@@ -438,6 +452,73 @@ export type Body_login_login_access_token = {
 };
 
 /**
+ * CivilStatusCount
+ */
+export type CivilStatusCount = {
+    /**
+     * Status
+     */
+    status: string;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
+ * DashboardPopulation
+ *
+ * Active residents only; not affected by the dashboard period.
+ */
+export type DashboardPopulation = {
+    /**
+     * Total Population
+     */
+    total_population: number;
+    /**
+     * Total Households
+     */
+    total_households: number;
+    /**
+     * Total Voters
+     */
+    total_voters: number;
+    /**
+     * Population Growth Percent
+     */
+    population_growth_percent: number | null;
+    /**
+     * Household Growth Percent
+     */
+    household_growth_percent: number | null;
+    /**
+     * Voter Growth Percent
+     */
+    voter_growth_percent: number | null;
+    /**
+     * Male
+     */
+    male: number;
+    /**
+     * Female
+     */
+    female: number;
+    /**
+     * Age Brackets
+     */
+    age_brackets: Array<AgeBracketCount>;
+    /**
+     * By Purok
+     */
+    by_purok: Array<PurokCount>;
+    /**
+     * Civil Status
+     */
+    civil_status: Array<CivilStatusCount>;
+    sectoral: SectoralIndicators;
+};
+
+/**
  * DashboardPublic
  */
 export type DashboardPublic = {
@@ -459,6 +540,7 @@ export type DashboardPublic = {
      * Expiring
      */
     expiring: Array<ExpiringItem>;
+    population: DashboardPopulation;
 };
 
 /**
@@ -2088,6 +2170,20 @@ export type PrivateUserCreate = {
 };
 
 /**
+ * PurokCount
+ */
+export type PurokCount = {
+    /**
+     * Purok
+     */
+    purok: number;
+    /**
+     * Count
+     */
+    count: number;
+};
+
+/**
  * PurposeRow
  */
 export type PurposeRow = {
@@ -2671,6 +2767,28 @@ export type SectorSummary = {
      * Residents With Sector
      */
     residents_with_sector: number;
+};
+
+/**
+ * SectoralIndicators
+ */
+export type SectoralIndicators = {
+    /**
+     * Pwd
+     */
+    pwd: number;
+    /**
+     * Senior Citizens
+     */
+    senior_citizens: number;
+    /**
+     * Children
+     */
+    children: number;
+    /**
+     * Solo Parents
+     */
+    solo_parents: number;
 };
 
 /**

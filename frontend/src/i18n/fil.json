@@ -284,6 +284,36 @@
       "descriptionYear": "Taunang dami ng naisyu",
       "noteYear": "Isang taon ang bawat bar; binibilang ang kasalukuyang taon hanggang ngayon."
     },
+    "population": {
+      "ariaLabel": "Pangkalahatang-ideya ng populasyon",
+      "note": "Binibilang ang mga aktibong talaan ng residente. Ang mga residenteng walang petsa ng kapanganakan, kasarian, purok o katayuang sibil ay hindi kasama sa kaukulang card.",
+      "totalPopulation": "Kabuuang Populasyon",
+      "totalHouseholds": "Kabuuang Rehistradong Sambahayan",
+      "totalVoters": "Kabuuang Rehistradong Botante",
+      "growth": "{{percent}}% na mas marami kaysa 30 araw ang nakalipas",
+      "genderBreakdown": "Hati ayon sa Kasarian",
+      "male": "Lalaki",
+      "female": "Babae",
+      "ageBrackets": "Mga Pangkat ng Edad",
+      "perPurok": "Populasyon bawat Purok / Sitio",
+      "purok": "Purok {{number}}",
+      "purokEmpty": "Wala pang residenteng may purok.",
+      "civilStatus": "Distribusyon ng Katayuang Sibil",
+      "civil": {
+        "Single": "Walang asawa",
+        "Married": "May asawa",
+        "Widow/Widower": "Balo",
+        "Legally Separated": "Hiwalay"
+      },
+      "sectoral": "Mga Tagapagpahiwatig ng Sektor",
+      "pwd": "PWD",
+      "seniorCitizens": "Senior Citizen",
+      "children": "Mga Bata",
+      "soloParents": "Solo Parent",
+      "ofPopulation": "{{percent}}% ng Pop.",
+      "chartTotal": "Kabuuan",
+      "empty": "Wala pang talaan ng residente."
+    },
     "byType": {
       "title": "Mga Naisyu ayon sa Uri ng Dokumento",
       "description": "Hatian para sa napiling panahon ng ulat",

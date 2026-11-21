@@ -59,6 +59,47 @@ class DashboardSummary(SQLModel):
     open_drafts: int  # drafts not yet issued ("pending document requests")
 
 
+class AgeBracketCount(SQLModel):
+    bracket: str  # "0-17", "18-29", "30-49", "50-64", "65+"
+    count: int
+
+
+class PurokCount(SQLModel):
+    purok: int
+    count: int
+
+
+class CivilStatusCount(SQLModel):
+    status: str  # as stored: Single, Married, Widow/Widower, Legally Separated
+    count: int
+
+
+class SectoralIndicators(SQLModel):
+    pwd: int
+    senior_citizens: int  # 60 or older, or in the Senior Citizens sector
+    children: int  # under 18
+    solo_parents: int
+
+
+class DashboardPopulation(SQLModel):
+    """Active residents only; not affected by the dashboard period."""
+
+    total_population: int
+    total_households: int  # distinct street + house number (no household record)
+    total_voters: int
+    # Percent more than 30 days ago (new records / earlier records); None when
+    # nothing was added or there is no earlier base.
+    population_growth_percent: float | None
+    household_growth_percent: float | None
+    voter_growth_percent: float | None
+    male: int
+    female: int
+    age_brackets: list[AgeBracketCount]
+    by_purok: list[PurokCount]
+    civil_status: list[CivilStatusCount]
+    sectoral: SectoralIndicators
+
+
 class DashboardPublic(SQLModel):
     period: PeriodInfo
     summary: DashboardSummary
@@ -66,6 +107,7 @@ class DashboardPublic(SQLModel):
     by_document_type: list[DocumentTypeCount]
     total_issued: int  # in the period; equals the sum of by_document_type
     expiring: list[ExpiringItem]  # soonest first, at most 10
+    population: DashboardPopulation
 
 
 class ReportSummary(SQLModel):

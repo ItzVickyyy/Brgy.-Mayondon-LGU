@@ -284,6 +284,36 @@
       "descriptionYear": "Yearly issuance volume",
       "noteYear": "Each bar is one year; the current year counts up to today."
     },
+    "population": {
+      "ariaLabel": "Population overview",
+      "note": "Counts active resident records. Residents with no birthdate, sex, purok or civil status are left out of that card.",
+      "totalPopulation": "Total Population",
+      "totalHouseholds": "Total Registered Households",
+      "totalVoters": "Total Registered Voters",
+      "growth": "{{percent}}% more than 30 days ago",
+      "genderBreakdown": "Gender Breakdown",
+      "male": "Male",
+      "female": "Female",
+      "ageBrackets": "Age Brackets",
+      "perPurok": "Population per Purok / Sitio",
+      "purok": "Purok {{number}}",
+      "purokEmpty": "No resident has a purok yet.",
+      "civilStatus": "Civil Status Distribution",
+      "civil": {
+        "Single": "Single",
+        "Married": "Married",
+        "Widow/Widower": "Widowed",
+        "Legally Separated": "Separated"
+      },
+      "sectoral": "Sectoral Indicators",
+      "pwd": "PWDs",
+      "seniorCitizens": "Senior Citizens",
+      "children": "Children",
+      "soloParents": "Solo Parents",
+      "ofPopulation": "{{percent}}% of Pop.",
+      "chartTotal": "Total",
+      "empty": "No resident records yet."
+    },
     "byType": {
       "title": "Issuances by Document Type",
       "description": "Distribution for the selected reporting period",
