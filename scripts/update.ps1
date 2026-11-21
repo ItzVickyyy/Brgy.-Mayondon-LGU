@@ -94,7 +94,10 @@ Step "4/5  Restarting"
 if ($LASTEXITCODE -ne 0) { Stop-Here "Restart failed. See the way back below." }
 
 $healthy = $false
-$deadline = (Get-Date).AddMinutes(6)
+# MAYONDON_WAIT_FACTOR shortens the waits; only the tests set it (test-auto-update.sh).
+$waitFactor = 1.0
+if ($env:MAYONDON_WAIT_FACTOR -match "^[0-9.]+$") { $waitFactor = [double]$env:MAYONDON_WAIT_FACTOR }
+$deadline = (Get-Date).AddMinutes(6 * $waitFactor)
 while ((Get-Date) -lt $deadline) {
     $id = (& docker compose -f compose.yml ps -q backend | Out-String).Trim()
     if ($id) {

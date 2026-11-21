@@ -36,6 +36,8 @@ jobs:
         run: sh scripts/test-prune-release.sh
       - name: Test the PowerShell scripts (syntax and the update script)
         run: bash scripts/test-office-scripts.sh
+      - name: Test the automatic update (fake GitHub and fake Docker)
+        run: bash scripts/test-auto-update.sh
       - name: Build the image from the archive alone
         run: |
           rm -rf "$RUNNER_TEMP/release" && mkdir -p "$RUNNER_TEMP/release"

@@ -88,8 +88,11 @@ function Test-BackendHealthy {
     $state = (Invoke-Quiet { docker inspect --format "{{.State.Health.Status}}" $id 2>$null } | Out-String).Trim()
     return ($state -eq "healthy")
 }
+# MAYONDON_WAIT_FACTOR shortens the waits; only the tests set it (test-auto-update.sh).
+$waitFactor = 1.0
+if ($env:MAYONDON_WAIT_FACTOR -match "^[0-9.]+$") { $waitFactor = [double]$env:MAYONDON_WAIT_FACTOR }
 function Wait-BackendHealthy([int]$minutes) {
-    $deadline = (Get-Date).AddMinutes($minutes)
+    $deadline = (Get-Date).AddMinutes($minutes * $waitFactor)
     while ((Get-Date) -lt $deadline) {
         if (Test-BackendHealthy) { return $true }
         Start-Sleep -Seconds 5
