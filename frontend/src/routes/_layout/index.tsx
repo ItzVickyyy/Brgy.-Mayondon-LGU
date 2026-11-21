@@ -98,10 +98,10 @@ function OverTimeStat({
 }) {
   return (
     <div className="min-w-0 rounded-lg border bg-muted/40 px-3 py-2.5">
-      <p className={`truncate text-xs font-medium ${statTones[tone].text}`}>
+      <p className={`truncate text-xs font-semibold ${statTones[tone].text}`}>
         {label}
       </p>
-      <p className="mt-1 truncate text-lg font-semibold tabular-nums leading-6">
+      <p className="mt-1 truncate text-xl font-extrabold tabular-nums leading-6">
         {value}
       </p>
     </div>
@@ -125,7 +125,7 @@ function SummaryCard({
     <article className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <p className="font-semibold leading-tight tracking-tight">{title}</p>
           <p className="mt-2 text-2xl font-extrabold tracking-tight tabular-nums sm:text-3xl">
             {value !== undefined ? (
               <AnimatedNumber value={value} />
@@ -202,7 +202,7 @@ function Dashboard() {
   const { user } = useAuth()
   const isAdmin = Boolean(user?.is_superuser)
   const navigate = useNavigate()
-  const [period, setPeriod] = useState<Period>("overall")
+  const [period, setPeriod] = useState<Period>("year")
   const dashboardQuery = useQuery({
     queryKey: ["dashboard", period],
     queryFn: async () =>
@@ -448,7 +448,7 @@ function Dashboard() {
                 aria-label={t("dashboard.period.ariaLabel")}
                 value={period}
                 onChange={(event) => setPeriod(event.target.value as Period)}
-                className="min-h-11 min-w-32 rounded-md border bg-background px-3 text-base transition-colors hover:border-ring/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="min-h-11 min-w-32 rounded-md border bg-background px-3 text-sm transition-colors hover:border-ring/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {periods.map((value) => (
                   <option key={value} value={value}>
@@ -505,7 +505,7 @@ function Dashboard() {
                     {chartTicks.map((tick) => (
                       <span
                         key={tick}
-                        className="absolute right-0 translate-y-1/2 text-[11px] tabular-nums leading-none text-muted-foreground"
+                        className="absolute right-0 translate-y-1/2 text-xs tabular-nums leading-none text-muted-foreground"
                         style={{ bottom: `${(tick / chartTop) * 100}%` }}
                       >
                         {formatLocaleNumber(tick)}
@@ -710,8 +710,8 @@ function Dashboard() {
                 className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between"
               >
                 <div>
-                  <p className="font-medium">{item.resident_name}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">
+                  <p className="text-sm font-medium">{item.resident_name}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
                     {t("dashboard.expiring.line", {
                       kind:
                         item.kind === "clearance"
@@ -743,7 +743,7 @@ function Dashboard() {
           ) : null}
           <Link
             to="/issuances"
-            className="mt-3 inline-flex min-h-11 items-center font-semibold text-brand hover:underline"
+            className="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-brand hover:underline"
           >
             {t("dashboard.expiring.openHistory")}
           </Link>

@@ -71,12 +71,12 @@ function StatCard({
         >
           <Icon className="size-4 2xl:size-5" aria-hidden="true" />
         </span>
-        <p className="min-w-0 break-words text-xs font-medium leading-4 text-muted-foreground 2xl:text-sm 2xl:leading-5">
+        <p className="min-w-0 font-semibold leading-tight tracking-tight">
           {title}
         </p>
       </div>
       <div className="flex flex-1 flex-col items-center justify-center gap-1">
-        <p className="text-center text-3xl font-extrabold tracking-tight tabular-nums">
+        <p className="text-center text-2xl font-extrabold tracking-tight tabular-nums sm:text-3xl">
           {value !== undefined ? (
             <AnimatedNumber value={value} />
           ) : loading ? (
@@ -160,7 +160,7 @@ function Donut({ segments, total }: { segments: Segment[]; total: number }) {
         <span className="text-base font-extrabold leading-5 tabular-nums">
           {formatLocaleNumber(total)}
         </span>
-        <span className="text-[10px] leading-3 text-muted-foreground">
+        <span className="text-xs leading-4 text-muted-foreground">
           {t("dashboard.population.chartTotal")}
         </span>
       </div>
@@ -177,7 +177,7 @@ function Legend({
 }) {
   const sum = segments.reduce((acc, item) => acc + item.value, 0)
   return (
-    <ul className={`min-w-0 flex-1 ${inline ? "space-y-2" : "space-y-2.5"}`}>
+    <ul className={`min-w-0 ${inline ? "space-y-2" : "space-y-2.5"}`}>
       {segments.map((item) => (
         <li
           key={item.key}
@@ -188,7 +188,7 @@ function Legend({
             aria-hidden="true"
           />
           {inline ? (
-            <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
+            <span className="flex min-w-0 items-center justify-between gap-4">
               <span className="min-w-0 text-xs leading-4 text-muted-foreground">
                 {item.label}
               </span>
@@ -325,15 +325,18 @@ export function PopulationOverview({
           <CardTitle icon={VenusAndMars}>
             {t("dashboard.population.genderBreakdown")}
           </CardTitle>
-          <div className="mt-3 flex flex-1 flex-col items-center justify-center gap-4 sm:flex-row">
-            {ready ? (
-              <>
-                <Donut segments={gender} total={total} />
-                <Legend segments={gender} />
-              </>
-            ) : (
-              <Skeleton className="size-28 rounded-full" aria-hidden="true" />
-            )}
+          <div className="@container mt-3 flex flex-1 flex-col justify-center">
+            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row @[20rem]:grid @[20rem]:grid-cols-[1fr_auto_1fr]">
+              {ready ? (
+                <>
+                  <span className="hidden @[20rem]:block" aria-hidden="true" />
+                  <Donut segments={gender} total={total} />
+                  <Legend segments={gender} />
+                </>
+              ) : (
+                <Skeleton className="size-28 rounded-full" aria-hidden="true" />
+              )}
+            </div>
           </div>
         </article>
 
@@ -348,7 +351,7 @@ export function PopulationOverview({
                   key={item.bracket}
                   className="flex h-full min-w-0 flex-1 flex-col justify-end"
                 >
-                  <span className="mb-1 text-center text-xs font-semibold tabular-nums">
+                  <span className="mb-1 text-center text-xs tabular-nums text-muted-foreground">
                     {formatLocaleNumber(item.count)}
                   </span>
                   <div
@@ -372,7 +375,7 @@ export function PopulationOverview({
               {ages.map((item) => (
                 <li
                   key={item.bracket}
-                  className="min-w-0 flex-1 whitespace-nowrap text-center text-[11px] text-muted-foreground"
+                  className="min-w-0 flex-1 whitespace-nowrap text-center text-xs text-muted-foreground"
                 >
                   {item.bracket.replace("-", "–")}
                 </li>
