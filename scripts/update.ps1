@@ -6,6 +6,7 @@
 #                     (no internet needed for the copy; the first build after a
 #                     change of libraries still needs it)
 # Your .env, the backups folder and the database are never touched by the copy.
+# After the copy, prune-release.ps1 removes files the new version no longer has (installed copies only).
 #
 # Order: safety backup (the update stops if it fails) -> new code -> build ->
 # restart -> wait until healthy -> check the database update line in the log.
@@ -56,6 +57,12 @@ if ($From) {
     # robocopy: 0 to 7 means success.
     if ($LASTEXITCODE -ge 8) { Stop-Here "Copying the new files failed (robocopy code $LASTEXITCODE). Nothing was built." }
     Write-Host "New files copied from $source."
+    # Take away what older versions left behind (tests, CI files, development Compose files...).
+    # Not on a Git clone; a failure here is only a warning (decision 70).
+    if (-not $oldCommit) {
+        try { & (Join-Path $PSScriptRoot "prune-release.ps1") -Source $source -Root $repoRoot }
+        catch { Write-Warning "Clean-up of old files skipped: $($_.Exception.Message)" }
+    }
 } else {
     if (-not $oldCommit) { Stop-Here "This folder is not a Git clone. Use:  Update-Mayondon.cmd -From <folder with the new version>" }
     & git pull --ff-only

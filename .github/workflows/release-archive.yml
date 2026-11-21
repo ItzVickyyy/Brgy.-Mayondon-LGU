@@ -1,0 +1,43 @@
+name: Release archive
+
+# Decision 70: the office computer only receives the files in the .gitattributes
+# allowlist. This job proves that archive still contains everything the system
+# needs by building the Docker image from the archive alone, and tests the
+# clean-up of old files on installed copies.
+
+on:
+  push:
+    branches:
+      - Foundation
+      - master
+      - draft/admin-portal
+  pull_request:
+    branches:
+      - Foundation
+      - master
+      - draft/admin-portal
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  release-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Check the archive contents
+        run: sh scripts/verify-release-archive.sh
+      - name: Test the clean-up of old files
+        run: sh scripts/test-prune-release.sh
+      - name: Build the image from the archive alone
+        run: |
+          rm -rf "$RUNNER_TEMP/release" && mkdir -p "$RUNNER_TEMP/release"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/release"
+          cd "$RUNNER_TEMP/release"
+          cp .env.example .env
+          docker compose -f compose.yml build backend
