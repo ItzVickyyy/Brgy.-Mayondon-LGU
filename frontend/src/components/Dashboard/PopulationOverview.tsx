@@ -39,7 +39,9 @@ function CardTitle({
 }) {
   return (
     <h3 className="flex items-center gap-2 font-semibold tracking-tight">
-      <Icon className="size-4 shrink-0 text-brand" aria-hidden="true" />
+      <span className="shrink-0 rounded-md bg-muted p-1.5 text-brand 2xl:p-2">
+        <Icon className="size-4 2xl:size-5" aria-hidden="true" />
+      </span>
       <span className="min-w-0">{children}</span>
     </h3>
   )
@@ -62,10 +64,8 @@ function StatCard({
 }) {
   const { t } = useTranslation()
   return (
-    <article
-      className={`flex min-w-0 flex-col justify-center gap-2 rounded-xl border bg-card p-4 shadow-sm xl:p-3 2xl:p-4`}
-    >
-      <div className="flex items-center gap-2">
+    <article className="flex min-w-0 flex-col items-stretch gap-2 rounded-xl border bg-card p-3 text-center shadow-sm 2xl:p-4">
+      <div className="flex items-center justify-center gap-2">
         <span
           className={`shrink-0 rounded-md bg-muted p-1.5 2xl:p-2 ${statTones[tone].text}`}
         >
@@ -75,31 +75,35 @@ function StatCard({
           {title}
         </p>
       </div>
-      <p className="mt-1 text-3xl font-extrabold tracking-tight tabular-nums">
-        {value !== undefined ? (
-          <AnimatedNumber value={value} />
-        ) : loading ? (
-          <Skeleton className="h-9 w-20" />
-        ) : (
-          "–"
-        )}
-      </p>
-      <p className={`min-h-4 text-xs font-semibold ${statTones[tone].text}`}>
+      <div className="flex flex-1 flex-col items-center justify-center gap-1">
+        <p className="text-center text-3xl font-extrabold tracking-tight tabular-nums">
+          {value !== undefined ? (
+            <AnimatedNumber value={value} />
+          ) : loading ? (
+            <Skeleton className="h-9 w-20" />
+          ) : (
+            "–"
+          )}
+        </p>
         {growth ? (
-          <span
-            title={t("dashboard.population.growth", {
-              percent: fmtPercent(growth),
-            })}
+          <p
+            className={`text-center text-xs font-semibold ${statTones[tone].text}`}
           >
-            <span aria-hidden="true">↑ {fmtPercent(growth)}%</span>
-            <span className="sr-only">
-              {t("dashboard.population.growth", {
+            <span
+              title={t("dashboard.population.growth", {
                 percent: fmtPercent(growth),
               })}
+            >
+              <span aria-hidden="true">↑ {fmtPercent(growth)}%</span>
+              <span className="sr-only">
+                {t("dashboard.population.growth", {
+                  percent: fmtPercent(growth),
+                })}
+              </span>
             </span>
-          </span>
+          </p>
         ) : null}
-      </p>
+      </div>
     </article>
   )
 }
