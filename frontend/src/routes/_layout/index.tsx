@@ -539,7 +539,7 @@ function Dashboard() {
                               {/* Solid by default; softer on hover. The bar rises
                                   from the bottom, one after another. */}
                               <div
-                                className="bar-rise relative w-full max-w-10 rounded-t-md bg-stat-blue transition-colors group-hover:bg-stat-blue/60"
+                                className="bar-rise relative w-full max-w-10 rounded-t-md bg-brand transition-colors group-hover:bg-brand/60"
                                 style={
                                   {
                                     height: `${(item.count / chartTop) * 100}%`,
