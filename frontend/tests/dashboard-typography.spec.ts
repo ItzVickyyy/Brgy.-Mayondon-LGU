@@ -61,7 +61,8 @@ const dashboard = {
   },
 }
 
-// Number cards: small, medium-weight, muted label (the "stat label" style).
+// Number-card and population-card labels: small, medium-weight, muted (the
+// "stat label" style).
 const numberCardLabels = [
   "Documents Issued This Month",
   "Clearances Expiring in 30 Days",
@@ -70,18 +71,18 @@ const numberCardLabels = [
   "Total Population",
   "Total Registered Households",
   "Total Registered Voters",
-]
-
-// Section and chart cards: semibold, normal text color.
-const titles = [
-  "Quick Actions",
-  "Document Issuances Over Time",
-  "Issuances by Document Type",
   "Gender Breakdown",
   "Age Brackets",
   "Population per Purok / Sitio",
   "Civil Status Distribution",
   "Sectoral Indicators",
+]
+
+// Section cards (not the population cards): semibold, normal text color.
+const titles = [
+  "Quick Actions",
+  "Document Issuances Over Time",
+  "Issuances by Document Type",
   "Expiring IDs and Clearances",
   "Recent Activities",
 ]

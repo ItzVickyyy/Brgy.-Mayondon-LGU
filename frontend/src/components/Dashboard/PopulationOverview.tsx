@@ -38,7 +38,7 @@ function CardTitle({
   children: ReactNode
 }) {
   return (
-    <h3 className="flex items-center gap-2 font-semibold tracking-tight">
+    <h3 className="stat-label flex items-center gap-2">
       <span className="shrink-0 rounded-md bg-muted p-1.5 text-brand 2xl:p-2">
         <Icon className="size-4 2xl:size-5" aria-hidden="true" />
       </span>
