@@ -12,6 +12,7 @@ import {
   FilePenLine,
   FileText,
   FileType,
+  Printer,
   Search,
   X,
 } from "lucide-react"
@@ -37,6 +38,7 @@ import { Select } from "@/components/Common/Select"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { SummaryCard } from "@/components/Issuances/IssuanceLayout"
+import type { DocumentCode } from "@/components/Issuances/NewIssuance/documentConfig"
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { PrintSplitButton } from "@/components/Issuances/PrintSplitButton"
 import { useExportIssuance } from "@/components/Issuances/useExportIssuance"
@@ -54,6 +56,7 @@ import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate } from "@/lib/locale"
+import { templateIdByDocumentCode } from "@/lib/print/buildPrintData"
 import type { PrintMode } from "@/lib/print/printMode"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { cn } from "@/lib/utils"
@@ -733,13 +736,12 @@ export function IssuanceHistory({
                     const isDraft = item.status === "draft"
                     const isArchived = Boolean(item.archived_at)
                     const isIssued = item.status === "issued" && !isArchived
-                    const canReprint = [
-                      "BARANGAY_CLEARANCE",
-                      "FRANCHISE_CLEARANCE",
-                      "UTILITY_CLEARANCE",
-                      "INDIGENCY",
-                      "ASSISTANCE",
-                    ].includes(item.document_type_code)
+                    // Every document type that has a print template can be printed and saved; Barangay ID has none yet.
+                    const canReprint = Boolean(
+                      templateIdByDocumentCode[
+                        item.document_type_code as DocumentCode
+                      ],
+                    )
                     const styleKey = statusStyleKey[item.status] ?? item.status
                     const label = statusLabel(item.status, t)
                     const expired = Boolean(
@@ -837,6 +839,23 @@ export function IssuanceHistory({
                                     }
                                   }}
                                 />
+                              ) : isIssued ? (
+                                <Button
+                                  type="button"
+                                  size="sm"
+                                  variant="outline"
+                                  disabled
+                                  aria-label={t(
+                                    "issuances.history.actions.printFor",
+                                    { name: item.resident_name },
+                                  )}
+                                  title={t(
+                                    "issuances.history.actions.printUnavailable",
+                                  )}
+                                >
+                                  <Printer aria-hidden="true" />
+                                  {t("issuances.history.actions.print")}
+                                </Button>
                               ) : undefined
                             }
                             primary={{
@@ -847,7 +866,13 @@ export function IssuanceHistory({
                             items={[
                               {
                                 label: t("issuances.history.actions.savePdf"),
-                                hidden: !isIssued || !canReprint,
+                                hidden: !isIssued,
+                                disabled: !canReprint,
+                                title: canReprint
+                                  ? undefined
+                                  : t(
+                                      "issuances.history.actions.printUnavailable",
+                                    ),
                                 icon: (
                                   <FileDown
                                     aria-hidden="true"
@@ -859,7 +884,13 @@ export function IssuanceHistory({
                               },
                               {
                                 label: t("issuances.history.actions.saveWord"),
-                                hidden: !isIssued || !canReprint,
+                                hidden: !isIssued,
+                                disabled: !canReprint,
+                                title: canReprint
+                                  ? undefined
+                                  : t(
+                                      "issuances.history.actions.printUnavailable",
+                                    ),
                                 icon: (
                                   <FileType
                                     aria-hidden="true"

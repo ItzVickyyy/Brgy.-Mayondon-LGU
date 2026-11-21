@@ -1360,6 +1360,7 @@
         "print": "I-print",
         "printFor": "I-print para kay {{name}}",
         "printChoose": "Piliin kung paano i-print para kay {{name}}",
+        "printUnavailable": "Wala pang print template ang uri ng dokumentong ito, kaya hindi ito maipi-print o mase-save bilang file mula rito.",
         "printData": "Data lamang (naka-print nang papel)",
         "printForm": "Form at data (blangkong papel)",
         "discard": "Itapon ang draft",
