@@ -8,8 +8,10 @@ import type { ParseKeys, TFunction } from "i18next"
 import {
   CalendarDays,
   FileCheck2,
+  FileDown,
   FilePenLine,
   FileText,
+  FileType,
   Search,
   X,
 } from "lucide-react"
@@ -37,6 +39,7 @@ import { TablePagination } from "@/components/Common/TablePagination"
 import { SummaryCard } from "@/components/Issuances/IssuanceLayout"
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
 import { PrintSplitButton } from "@/components/Issuances/PrintSplitButton"
+import { useExportIssuance } from "@/components/Issuances/useExportIssuance"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -294,6 +297,7 @@ export function IssuanceHistory({
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
   const queryClient = useQueryClient()
+  const { exportIssuance } = useExportIssuance()
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [typeFilter, setTypeFilter] = useState("")
@@ -495,6 +499,22 @@ export function IssuanceHistory({
     setDateTo("")
   }
   const today = manilaToday()
+
+  /** Saves an issued document as a PDF or Word file; the answer goes to the page notice (good news) or the error banner. */
+  async function saveCopy(
+    item: IssuanceListItem,
+    format: "pdf" | "docx",
+    documentName: string,
+  ) {
+    setErrorNotice("")
+    const result = await exportIssuance(
+      item.id,
+      format,
+      `${item.reference_no ?? ""} ${documentName} ${item.resident_name}`,
+    )
+    if (result.ok) onNotice(result.message)
+    else setErrorNotice(result.message)
+  }
   const latest = latestQuery.data
 
   return (
@@ -825,6 +845,30 @@ export function IssuanceHistory({
                               onSelect: () => setViewItem(item),
                             }}
                             items={[
+                              {
+                                label: t("issuances.history.actions.savePdf"),
+                                hidden: !isIssued || !canReprint,
+                                icon: (
+                                  <FileDown
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
+                                onSelect: () =>
+                                  void saveCopy(item, "pdf", documentName),
+                              },
+                              {
+                                label: t("issuances.history.actions.saveWord"),
+                                hidden: !isIssued || !canReprint,
+                                icon: (
+                                  <FileType
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
+                                onSelect: () =>
+                                  void saveCopy(item, "docx", documentName),
+                              },
                               {
                                 label: t("issuances.history.actions.void"),
                                 adminOnly: true,

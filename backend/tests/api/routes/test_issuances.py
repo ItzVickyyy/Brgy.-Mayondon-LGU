@@ -427,7 +427,7 @@ def test_printing_is_audited_with_a_copy_count(
         client.post(url, headers=staff_token_headers, json={"mode": "x"}).status_code
         == 422
     )
-    for mode in ("data", "form"):
+    for mode in ("data", "form", "pdf", "docx"):
         r = client.post(url, headers=staff_token_headers, json={"mode": mode})
         assert r.status_code == 204, r.text
     db.rollback()
@@ -439,8 +439,13 @@ def test_printing_is_audited_with_a_copy_count(
         )
         .order_by(col(AuditLog.occurred_at))
     ).all()
-    assert [r.details["copy"] for r in rows] == [1, 2]
-    assert [r.details["mode"] for r in rows] == ["data only", "form and data"]
+    assert [r.details["copy"] for r in rows] == [1, 2, 3, 4]
+    assert [r.details["mode"] for r in rows] == [
+        "data only",
+        "form and data",
+        "saved as PDF file",
+        "saved as Word file",
+    ]
     assert rows[0].details["reference_no"] == issued["reference_no"]
     assert all(r.actor_email for r in rows)
 

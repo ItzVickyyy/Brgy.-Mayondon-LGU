@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { CheckCircle2, ChevronDown, CircleAlert, Clock, Keyboard, Printer, Search } from "lucide-react"
+import { CheckCircle2, ChevronDown, CircleAlert, Clock, FileDown, FileType, Keyboard, LoaderCircle, Printer, Search } from "lucide-react"
 import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { BarangayIdsService } from "@/client"
@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { FieldError } from "@/components/Common/FieldError"
 import { formControlClass } from "@/components/Common/formStyles"
 import { PrintSummaryPanel } from "@/components/Issuances/PrintSummaryPanel"
+import { useExportIssuance } from "@/components/Issuances/useExportIssuance"
 import type { ResidentRecord } from "@/components/Records/records-sample-data"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -16,7 +17,9 @@ import { isSystemAdministrator } from "@/lib/access"
 import { defaultIdValidUntil, idValidityNoteKey } from "@/lib/idValidity"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { documentName, fieldHelp, fieldLabel, fieldOptionLabel, validationMessage } from "@/lib/issuanceLabels"
-import { getLocaleOr } from "@/lib/locale"
+import { formatLocaleDate, getLocaleOr } from "@/lib/locale"
+import { templateIdByDocumentCode } from "@/lib/print/buildPrintData"
+import type { ExportFormat } from "@/lib/print/exportDocument"
 import { civilStatusLabel, sexLabel } from "@/lib/residentLabels"
 import { userFullName, userInitials } from "@/lib/userNames"
 import { cn } from "@/lib/utils"
@@ -140,6 +143,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const [quickDuplicateSignature, setQuickDuplicateSignature] = useState<string | null>(null)
   const [editingResident, setEditingResident] = useState(false)
   const [printNotice, setPrintNotice] = useState("")
+  const [printing, setPrinting] = useState(false)
+  const [exporting, setExporting] = useState<ExportFormat | null>(null)
+  const [exportNotice, setExportNotice] = useState<{ ok: boolean; message: string } | null>(null)
+  const { exportIssuance } = useExportIssuance()
   const [autoSave, setAutoSave] = useState<{ state: "idle" | "saving" | "saved" | "error"; at?: Date }>({ state: "idle" })
   const draftIdRef = useRef<string | null>(null)
   const restoredDraftRef = useRef("")
@@ -436,7 +443,14 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     const message = fieldError || (missingNow ? t("issuances.new.detailsStep.fillIn") : "")
     const messageNode = <FieldError id={`${fieldId}-error`}>{message}</FieldError>
     if (field.type === "checkbox") {
-      return <div key={field.name} className={cn("flex min-h-11 items-center", field.group === "payment" && "sm:self-end")}>
+      // In the payment row the tile sits on the same line as the receipt box: an invisible label line stands in for the receipt label above it, and the tile is exactly as tall as the box.
+      if (field.group === "payment") {
+        return <div key={field.name} className={fieldLabelClass}>
+          <span aria-hidden="true" className="hidden select-none sm:block">&nbsp;</span>
+          <CheckField variant="box" className="w-full" id={fieldId} checked={Boolean(value)} onChange={(checked) => onValueChange(checked)} label={fieldLabel(field.label, t)} invalid={invalid} describedBy={describedBy} />
+        </div>
+      }
+      return <div key={field.name} className="flex min-h-11 items-center">
         <CheckField id={fieldId} checked={Boolean(value)} onChange={(checked) => onValueChange(checked)} label={fieldLabel(field.label, t)} invalid={invalid} describedBy={describedBy} />
       </div>
     }
@@ -713,8 +727,24 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
   async function handlePrint(record: MockIssuance) {
     setPrintNotice("")
-    const message = await onPrint?.(record)
-    setPrintNotice(message || "")
+    setPrinting(true)
+    try {
+      const message = await onPrint?.(record)
+      setPrintNotice(message || "")
+    } finally {
+      setPrinting(false)
+    }
+  }
+
+  async function saveCopy(record: MockIssuance, format: ExportFormat) {
+    setExportNotice(null)
+    setExporting(format)
+    try {
+      const resident = selectedResident?.name ?? record.residentSnapshot?.fullName ?? ""
+      setExportNotice(await exportIssuance(record.id, format, `${record.referenceNo} ${documentName(documentType, t)} ${resident}`))
+    } finally {
+      setExporting(null)
+    }
   }
 
   function hasTypedValues() {
@@ -783,6 +813,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setQuickDuplicateSignature(null)
     setEditingResident(false)
     setPrintNotice("")
+    setPrinting(false)
+    setExportNotice(null)
     setDiscardOpen(false)
     setChangeResidentOpen(false)
     setQuickAdd(emptyQuickAdd)
@@ -795,6 +827,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setAutoSave({ state: "idle" })
     autoSavePausedRef.current = false
   }
+
+  // A document type without a print template (Residency, Barangay ID, Jobseeker) can only be issued; the others are issued and printed in one step.
+  const printable = Boolean(templateIdByDocumentCode[documentType])
 
   const birthplaceRequired = config.residentNeeds.includes("birthPlace")
   const sexRequired = config.residentNeeds.includes("sex")
@@ -1100,19 +1135,44 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         <DialogTitle>{t("issuances.new.title")}</DialogTitle>
         <DialogDescription>{t("issuances.new.description")}</DialogDescription>
       </DialogHeader>
-      {successRecord ? <div className="flex flex-1 flex-col items-center justify-center gap-4 overflow-y-auto p-8 text-center" role="status">
-        <CheckCircle2 className="size-12 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
-        <div>
-          <p className="text-lg font-semibold">{t("issuances.new.success.issued", { reference: successRecord.referenceNo })}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{selectedResident ? t("issuances.new.success.saved", { document: documentName(documentType, t), resident: selectedResident.name }) : t("issuances.new.success.savedNoResident", { document: documentName(documentType, t) })}</p>
-          {printNotice ? <p role="status" className="mx-auto mt-3 max-w-md rounded-lg border bg-muted/50 px-3 py-2 text-sm">{printNotice}</p> : null}
+      {successRecord ? (() => {
+        const residentName = selectedResident?.name ?? successRecord.residentSnapshot?.fullName ?? ""
+        const issuedOn = formatLocaleDate(new Date(`${successRecord.issueDate}T00:00:00`), { dateStyle: "long" })
+        const printOpened = printNotice === t("issuances.printing.notices.opened")
+        const afterSteps = config.name === "Barangay Clearance" ? t("issuances.printing.summary.stepsClearance") : config.name === "Certification (assistance request)" ? t("issuances.printing.summary.stepsAssistance") : t("issuances.printing.summary.stepsOther")
+        const rows: [string, string][] = [
+          [t("issuances.new.success.rows.document"), documentName(documentType, t)],
+          [t("issuances.new.success.rows.resident"), residentName],
+          [t("issuances.new.success.rows.issueDate"), issuedOn],
+        ]
+        return <div className="flex flex-1 flex-col items-center justify-center gap-5 overflow-y-auto p-6 text-center sm:p-8" data-testid="issue-success">
+          <div role="status" className="flex flex-col items-center gap-2">
+            <CheckCircle2 className="size-12 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+            <p className="text-lg font-semibold">{t("issuances.new.success.issuedTitle")}</p>
+            <p className="rounded-md bg-emerald-50 px-3 py-1 font-mono text-base font-semibold tracking-wide text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300" data-testid="issue-success-reference">{successRecord.referenceNo}</p>
+          </div>
+          <dl className="grid w-full max-w-md grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-1.5 rounded-lg border bg-muted/30 px-4 py-3 text-left text-sm">
+            {rows.filter(([, value]) => value).map(([label, value]) => <div key={label} className="contents"><dt className="text-muted-foreground">{label}</dt><dd className="min-w-0 break-words font-medium">{value}</dd></div>)}
+          </dl>
+          {printable ? <div className="w-full max-w-md space-y-2 text-sm" aria-live="polite">
+            {printing ? <p className="flex items-center justify-center gap-2 text-muted-foreground" data-testid="issue-printing"><LoaderCircle className="size-4 animate-spin" aria-hidden="true" />{t("issuances.new.success.printing")}</p>
+              : printNotice ? <p className={cn("rounded-lg border px-3 py-2 text-left", printOpened ? "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200" : "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200")}>{printNotice}</p> : null}
+            <p className="rounded-lg bg-muted/50 px-3 py-2 text-left text-xs text-muted-foreground">{t("issuances.printing.summary.afterPrinting", { steps: afterSteps })}</p>
+          </div> : <p className="max-w-md rounded-lg bg-muted/50 px-3 py-2 text-sm text-muted-foreground">{t("issuances.new.success.noTemplate")}</p>}
+          {exportNotice ? <p role="status" className={cn("w-full max-w-md rounded-lg border px-3 py-2 text-left text-sm", exportNotice.ok ? "border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200" : "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200")}>{exportNotice.message}</p> : null}
+          <div className="flex w-full max-w-md flex-col gap-2">
+            {printable ? <div className="grid gap-2 sm:grid-cols-3">
+              <Button type="button" variant="outline" className={footerButton} disabled={printing} onClick={() => void handlePrint(successRecord)}><Printer className="size-4" aria-hidden="true" />{t("issuances.new.success.printAgain")}</Button>
+              <Button type="button" variant="outline" className={footerButton} disabled={exporting !== null} onClick={() => void saveCopy(successRecord, "pdf")}>{exporting === "pdf" ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <FileDown className="size-4" aria-hidden="true" />}{t("issuances.new.success.savePdf")}</Button>
+              <Button type="button" variant="outline" className={footerButton} disabled={exporting !== null} onClick={() => void saveCopy(successRecord, "docx")}>{exporting === "docx" ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : <FileType className="size-4" aria-hidden="true" />}{t("issuances.new.success.saveWord")}</Button>
+            </div> : null}
+            <div className="grid gap-2 sm:grid-cols-2">
+              <Button type="button" variant="outline" className={footerButton} onClick={issueAnother}>{t("issuances.new.success.issueAnother")}</Button>
+              <Button type="button" className={footerButton} autoFocus onClick={() => { resetDialog(); onOpenChange(false) }}>{t("issuances.new.success.done")}</Button>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-wrap justify-center gap-2">
-          <Button type="button" variant="outline" onClick={() => successRecord && handlePrint(successRecord)}><Printer className="size-4" />{t("issuances.new.success.print")}</Button>
-          <Button type="button" variant="outline" onClick={issueAnother}>{t("issuances.new.success.issueAnother")}</Button>
-          <Button type="button" onClick={() => { resetDialog(); onOpenChange(false) }}>{t("issuances.new.success.done")}</Button>
-        </div>
-      </div> : <form noValidate className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => { event.preventDefault(); void issue() }} onKeyDown={(event) => { if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); void issue() } }}>
+      })() : <form noValidate className="flex min-h-0 flex-1 flex-col" onSubmit={(event) => { event.preventDefault(); void issue(printable) }} onKeyDown={(event) => { if ((event.ctrlKey || event.metaKey) && event.key === "Enter") { event.preventDefault(); void issue(printable) } }}>
         <div className="grid min-h-0 flex-1 lg:grid-cols-[minmax(0,1fr)_368px]">
           <div className="min-h-0 space-y-4 overflow-y-auto bg-muted/30 px-4 py-4 sm:px-5">
             <IssuanceSection id="issuance-step-document" step={1} title={t("issuances.new.documentStep.title")} done>
@@ -1241,8 +1301,10 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
           <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-nowrap sm:justify-end">
             <Button type="button" variant="ghost" className={footerButton} onClick={() => requestClose(false)}>{t("issuances.new.footer.cancel")}</Button>
             <Button type="button" variant="outline" className={footerButton} disabled={saving} onClick={() => void saveDraft()}>{t("issuances.new.footer.saveDraftClose")}</Button>
-            <Button type="button" variant="outline" className={footerButton} disabled={saving} onClick={() => void issue(true)}><Printer className="size-4" aria-hidden="true" />{t("issuances.new.footer.issueAndPrint")}</Button>
-            <Button type="submit" className={footerButton} disabled={saving || Boolean(duplicate) || residentArchived}>{saving ? t("issuances.new.footer.savingButton") : t("issuances.new.footer.issue")}</Button>
+            <Button type="submit" className={footerButton} disabled={saving || Boolean(duplicate) || residentArchived} data-testid="issue-submit">
+              {saving ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : printable ? <Printer className="size-4" aria-hidden="true" /> : null}
+              {saving ? t("issuances.new.footer.savingButton") : printable ? t("issuances.new.footer.issueAndPrint") : t("issuances.new.footer.issue")}
+            </Button>
           </div>
         </DialogFooter>
       </form>}

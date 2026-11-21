@@ -790,9 +790,9 @@ class ReasonRequest(SQLModel):
 
 
 class PrintedRequest(SQLModel):
-    """What the browser reports just before it opens the print dialog."""
+    """What the browser reports just before it opens the print dialog or saves a copy as a file."""
 
-    mode: Literal["data", "form"]
+    mode: Literal["data", "form", "pdf", "docx"]
 
 
 class IdentificationPublic(SQLModel):

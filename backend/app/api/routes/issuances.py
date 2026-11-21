@@ -1397,13 +1397,23 @@ def correct(
     return _public(session, draft)
 
 
+# What the Activity Log shows for each way of printing or saving a copy.
+_PRINT_MODE_LABELS = {
+    "data": "data only",
+    "form": "form and data",
+    "pdf": "saved as PDF file",
+    "docx": "saved as Word file",
+}
+
+
 @router.post("/{issuance_id}/printed", status_code=204)
 def record_print(
     issuance_id: uuid.UUID, body: PrintedRequest, session: SessionDep, user: WriteUser
 ) -> Response:
-    """Write an ``issuance.print`` audit row. The browser calls it before printing.
+    """Write an ``issuance.print`` audit row. The browser calls it before printing
+    or before it saves a PDF or Word copy (``mode`` ``pdf`` / ``docx``).
 
-    Only an issued document can be printed. ``copy`` counts every print of this
+    Only an issued document can be printed or saved. ``copy`` counts every print of this
     document so far (1 is the first print, 2 or more are reprints).
     """
     issuance = _get_or_404(session, issuance_id)
@@ -1429,7 +1439,7 @@ def record_print(
         record_id=issuance.id,
         details={
             "reference_no": issuance.reference_no,
-            "mode": "data only" if body.mode == "data" else "form and data",
+            "mode": _PRINT_MODE_LABELS[body.mode],
             "copy": earlier + 1,
         },
         commit=True,

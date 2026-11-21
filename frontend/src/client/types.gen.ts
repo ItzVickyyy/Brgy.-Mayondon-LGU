@@ -2156,13 +2156,13 @@ export type PeriodInfo = {
 /**
  * PrintedRequest
  *
- * What the browser reports just before it opens the print dialog.
+ * What the browser reports just before it opens the print dialog or saves a copy as a file.
  */
 export type PrintedRequest = {
     /**
      * Mode
      */
-    mode: 'data' | 'form';
+    mode: 'data' | 'form' | 'pdf' | 'docx';
 };
 
 /**

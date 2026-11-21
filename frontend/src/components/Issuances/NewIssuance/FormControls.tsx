@@ -609,6 +609,7 @@ type CheckFieldProps = {
   describedBy?: string
   /** "box" draws a bordered tile that fills in when ticked. */
   variant?: "plain" | "box"
+  className?: string
 }
 
 /** Large, easy-to-hit checkbox. The whole label is clickable. */
@@ -621,6 +622,7 @@ export function CheckField({
   invalid,
   describedBy,
   variant = "plain",
+  className,
 }: CheckFieldProps) {
   const autoId = useId()
   const checkboxId = id ?? autoId
@@ -633,6 +635,7 @@ export function CheckField({
           "rounded-lg border bg-background px-3.5 transition-colors hover:bg-muted",
         variant === "box" && checked && "border-brand bg-brand/5",
         disabled && "cursor-not-allowed opacity-50",
+        className,
       )}
     >
       <Checkbox

@@ -1364,7 +1364,9 @@
         "printForm": "Form and data (blank paper)",
         "discard": "Discard draft",
         "archive": "Archive",
-        "restore": "Restore"
+        "restore": "Restore",
+        "savePdf": "Save as PDF",
+        "saveWord": "Save as Word"
       },
       "confirm": {
         "voidTitle": "Void issuance?",
@@ -1523,7 +1525,18 @@
         "savedNoResident": "{{document}} for the resident was saved.",
         "print": "Print",
         "issueAnother": "Issue another for this resident",
-        "done": "Done"
+        "done": "Done",
+        "issuedTitle": "Document issued",
+        "printing": "Opening the print dialog…",
+        "printAgain": "Print again",
+        "savePdf": "Save as PDF",
+        "saveWord": "Save as Word",
+        "noTemplate": "This document type has no print template yet, so it was issued but cannot be printed or saved as a file from here.",
+        "rows": {
+          "document": "Document",
+          "resident": "Resident",
+          "issueDate": "Issue date"
+        }
       },
       "discard": {
         "title": "Discard the changes to this issuance?",
@@ -1871,6 +1884,16 @@
           "indigency": "Indigency",
           "assistance": "Assistance Certification"
         }
+      }
+    },
+    "exporting": {
+      "notices": {
+        "busy": "A file is already being made. Please wait a moment.",
+        "notRecorded": "The save could not be recorded in the Activity Log, so no file was made. Please try again.",
+        "unavailable": "This document cannot be saved as a file: it was not found, was voided, or has no form template yet.",
+        "unable": "Unable to make the file for this document.",
+        "savedPdf": "Saved {{file}}. Check your Downloads folder.",
+        "savedWord": "Saved {{file}}. Check your Downloads folder. The filled form is the background of each page."
       }
     }
   },

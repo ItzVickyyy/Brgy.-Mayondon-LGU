@@ -1364,7 +1364,9 @@
         "printForm": "Form at data (blangkong papel)",
         "discard": "Itapon ang draft",
         "archive": "I-archive",
-        "restore": "Ibalik"
+        "restore": "Ibalik",
+        "savePdf": "I-save bilang PDF",
+        "saveWord": "I-save bilang Word"
       },
       "confirm": {
         "voidTitle": "I-void ang isyu?",
@@ -1523,7 +1525,18 @@
         "savedNoResident": "Na-save ang {{document}} para sa residente.",
         "print": "I-print",
         "issueAnother": "Mag-isyu pa ng isa para sa residenteng ito",
-        "done": "Tapos na"
+        "done": "Tapos na",
+        "issuedTitle": "Naibigay na ang dokumento",
+        "printing": "Binubuksan ang print dialog…",
+        "printAgain": "I-print muli",
+        "savePdf": "I-save bilang PDF",
+        "saveWord": "I-save bilang Word",
+        "noTemplate": "Wala pang print template ang uri ng dokumentong ito, kaya naibigay ito pero hindi mai-print o mai-save bilang file mula rito.",
+        "rows": {
+          "document": "Dokumento",
+          "resident": "Residente",
+          "issueDate": "Petsa ng pagbibigay"
+        }
       },
       "discard": {
         "title": "Itapon ang mga pagbabago sa isyung ito?",
@@ -1871,6 +1884,16 @@
           "indigency": "Indigency",
           "assistance": "Sertipikasyon ng Tulong"
         }
+      }
+    },
+    "exporting": {
+      "notices": {
+        "busy": "May ginagawa nang file. Maghintay sandali.",
+        "notRecorded": "Hindi naitala sa Activity Log ang pag-save, kaya walang ginawang file. Pakisubukan muli.",
+        "unavailable": "Hindi mai-save bilang file ang dokumentong ito: hindi ito nahanap, na-void na ito, o wala pa itong form template.",
+        "unable": "Hindi magawa ang file para sa dokumentong ito.",
+        "savedPdf": "Na-save ang {{file}}. Tingnan ang Downloads folder.",
+        "savedWord": "Na-save ang {{file}}. Tingnan ang Downloads folder. Ang napunang form ang background ng bawat pahina."
       }
     }
   },
