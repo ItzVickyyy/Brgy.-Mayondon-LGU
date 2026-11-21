@@ -58,6 +58,7 @@ import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate } from "@/lib/locale"
 import { templateIdByDocumentCode } from "@/lib/print/buildPrintData"
 import type { PrintMode } from "@/lib/print/printMode"
+import { type PrintTemplateId, printTemplates } from "@/lib/print/templates"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { cn } from "@/lib/utils"
 
@@ -830,6 +831,13 @@ export function IssuanceHistory({
                               isIssued && canReprint ? (
                                 <PrintSplitButton
                                   name={item.resident_name}
+                                  formOnly={Boolean(
+                                    printTemplates[
+                                      templateIdByDocumentCode[
+                                        item.document_type_code as DocumentCode
+                                      ] as PrintTemplateId
+                                    ]?.blankStock,
+                                  )}
                                   onPrint={async (mode) => {
                                     try {
                                       const message = await onPrint(item, mode)
@@ -865,50 +873,6 @@ export function IssuanceHistory({
                             }}
                             items={[
                               {
-                                label: t("issuances.history.actions.savePdf"),
-                                hidden: !isIssued,
-                                disabled: !canReprint,
-                                title: canReprint
-                                  ? undefined
-                                  : t(
-                                      "issuances.history.actions.printUnavailable",
-                                    ),
-                                icon: (
-                                  <FileDown
-                                    aria-hidden="true"
-                                    className="size-4"
-                                  />
-                                ),
-                                onSelect: () =>
-                                  void saveCopy(item, "pdf", documentName),
-                              },
-                              {
-                                label: t("issuances.history.actions.saveWord"),
-                                hidden: !isIssued,
-                                disabled: !canReprint,
-                                title: canReprint
-                                  ? undefined
-                                  : t(
-                                      "issuances.history.actions.printUnavailable",
-                                    ),
-                                icon: (
-                                  <FileType
-                                    aria-hidden="true"
-                                    className="size-4"
-                                  />
-                                ),
-                                onSelect: () =>
-                                  void saveCopy(item, "docx", documentName),
-                              },
-                              {
-                                label: t("issuances.history.actions.void"),
-                                adminOnly: true,
-                                hidden: !isIssued,
-                                destructive: true,
-                                onSelect: () =>
-                                  setPending({ item, action: "void" }),
-                              },
-                              {
                                 label: t(
                                   "issuances.history.actions.continueDraft",
                                 ),
@@ -934,11 +898,40 @@ export function IssuanceHistory({
                                   setPending({ item, action: "correct" }),
                               },
                               {
-                                label: t("issuances.history.actions.discard"),
-                                hidden: !isDraft,
-                                destructive: true,
+                                label: t("issuances.history.actions.saveWord"),
+                                hidden: !isIssued,
+                                disabled: !canReprint,
+                                title: canReprint
+                                  ? undefined
+                                  : t(
+                                      "issuances.history.actions.printUnavailable",
+                                    ),
+                                icon: (
+                                  <FileType
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
                                 onSelect: () =>
-                                  setPending({ item, action: "discard" }),
+                                  void saveCopy(item, "docx", documentName),
+                              },
+                              {
+                                label: t("issuances.history.actions.savePdf"),
+                                hidden: !isIssued,
+                                disabled: !canReprint,
+                                title: canReprint
+                                  ? undefined
+                                  : t(
+                                      "issuances.history.actions.printUnavailable",
+                                    ),
+                                icon: (
+                                  <FileDown
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
+                                onSelect: () =>
+                                  void saveCopy(item, "pdf", documentName),
                               },
                               {
                                 label: t("issuances.history.actions.archive"),
@@ -953,6 +946,21 @@ export function IssuanceHistory({
                                 hidden: !isArchived,
                                 onSelect: () =>
                                   setPending({ item, action: "restore" }),
+                              },
+                              {
+                                label: t("issuances.history.actions.void"),
+                                adminOnly: true,
+                                hidden: !isIssued,
+                                destructive: true,
+                                onSelect: () =>
+                                  setPending({ item, action: "void" }),
+                              },
+                              {
+                                label: t("issuances.history.actions.discard"),
+                                hidden: !isDraft,
+                                destructive: true,
+                                onSelect: () =>
+                                  setPending({ item, action: "discard" }),
                               },
                             ]}
                           />

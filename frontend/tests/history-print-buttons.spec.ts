@@ -1,7 +1,7 @@
 // Issuance History: every issued row has a Print button in the Actions column when its document type has a
 // print template (all of them except Barangay ID); a type without one shows the button disabled with a reason.
 // The API is mocked (synthetic data), so this spec needs only the running frontend.
-import { expect, test } from "@playwright/test"
+import { expect, type Page, test } from "@playwright/test"
 
 const admin = {
   id: "22222222-0000-0000-0000-000000000001",
@@ -54,9 +54,7 @@ const issuances = {
   count: codes.length,
 }
 
-test("every issued row has Print; Barangay ID shows it disabled", async ({
-  page,
-}) => {
+async function mockApi(page: Page) {
   await page.route("**/api/v1/**", async (route) => {
     const json = (body: unknown) =>
       route.fulfill({
@@ -77,17 +75,53 @@ test("every issued row has Print; Barangay ID shows it disabled", async ({
     localStorage.setItem("app-language", "en")
     localStorage.setItem("vite-ui-theme", "light")
   })
+}
+
+test("every issued row has Print; Barangay ID shows it disabled", async ({
+  page,
+}) => {
+  await mockApi(page)
   await page.setViewportSize({ width: 1440, height: 1100 })
   await page.goto("/issuances")
 
   const rows = page.locator("table tbody tr")
   await expect(rows).toHaveCount(codes.length)
+  // Residency and Jobseeker print only on their own blank form: one Print button. The others show both choices.
+  const formOnly = ["RESIDENCY", "FIRST_TIME_JOBSEEKER"]
   for (let index = 0; index < codes.length; index++) {
-    const print = rows
-      .nth(index)
-      .getByRole("button", { name: /^Print for Resident/ })
-    await expect(print).toBeVisible()
-    if (codes[index] === "BARANGAY_ID") await expect(print).toBeDisabled()
-    else await expect(print).toBeEnabled()
+    const row = rows.nth(index)
+    if (codes[index] === "BARANGAY_ID") {
+      await expect(
+        row.getByRole("button", { name: /^Print for Resident/ }),
+      ).toBeDisabled()
+    } else if (formOnly.includes(codes[index])) {
+      await expect(
+        row.getByRole("button", { name: /^Print for Resident/ }),
+      ).toBeEnabled()
+    } else {
+      await expect(
+        row.getByRole("button", { name: /^Print data only for/ }),
+      ).toBeEnabled()
+      await expect(
+        row.getByRole("button", { name: /^Print form and data for/ }),
+      ).toBeEnabled()
+    }
   }
+})
+
+test("the three-dot menu keeps the agreed order", async ({ page }) => {
+  await mockApi(page)
+  await page.setViewportSize({ width: 1440, height: 1100 })
+  await page.goto("/issuances")
+  const row = page.locator("table tbody tr").first()
+  await expect(row).toBeVisible()
+  await row.getByRole("button", { name: /more|actions|iba pa/i }).click()
+  const labels = await page.getByRole("menuitem").allInnerTexts()
+  expect(labels.map((l) => l.trim())).toEqual([
+    "Correct & edit",
+    "Save as Word",
+    "Save as PDF",
+    "Archive",
+    "Void issuance",
+  ])
 })
