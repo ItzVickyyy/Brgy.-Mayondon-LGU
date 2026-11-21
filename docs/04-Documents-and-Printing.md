@@ -31,8 +31,8 @@ The brief lists documents "discussed or shown" and says to **confirm the final l
 | 5 | Certification for assistance request (likely Damayan; exact name unconfirmed) | Client form | Overlay on its own layout | Provisional |
 | 6 | Barangay ID — front | Publisher layout | Overlay on ID card stock | In brief |
 | 7 | Barangay ID — back | Publisher layout | Overlay | In brief |
-| 8 | Residency certification | Word file | **Unknown**: full document or overlay? | Provisional (D-15) |
-| 9 | First-Time Jobseekers packet | Word file | **Unknown** | Provisional (D-16) |
+| 8 | Residency certification | Word file | Overlay on the barangay's blank form (patch 194); wording still to confirm | Provisional (D-15) |
+| 9 | First-Time Jobseekers packet | Word file | Overlay on the three blank sheets, Long paper (patch 194) | Provisional (D-16) |
 
 Business and building clearances (municipal), and BIR/PhilHealth documents, remain **excluded** unless the client corrects that understanding.
 
@@ -64,7 +64,7 @@ The Print button on an issued History row prints in one of two modes; the arrow 
 
 Both modes cover the six types that have a print template. Reprint is no longer in the three-dot menu. The typeset forms have not been compared with paper by the client; confirm the letterhead e-mail addresses, the motto spelling and the signatory names on them before relying on blank-paper printing.
 
-**Paper sizes (owner decision, Nov 18, 2026).** Short paper is Letter, 8.5 x 11 in: Barangay Clearance, Franchise Clearance, Electrical and Water, Residency, Indigency, Assistance Certification (which now also covers the former Marginalized Sector certificate). Long paper is 8.5 x 13 in: First-Time Jobseeker. Long here is the Philippine long bond, not US Legal (8.5 x 14 in); if the office stock is 8.5 x 14 in, change `paperDimensions.long` in `frontend/src/lib/print/paperSizes.ts` (the only place that decides it). The page size is set per document (`paper.size` in `documentMeta`) and per print template (`paperSize` in `templates.ts`); the print CSS `@page` rule, the on-screen page box, the form image and the calibration sheet all read it. Every print template that exists today is Short. Residency and First-Time Jobseeker still have no print template, so no Long page can print yet; when the Jobseeker layout is added, give it `paperSize: "long"`, and its form image must be 612 x 936 pt. The Long size has not been tried on the EPSON L3250: the printer must be set to the matching 8.5 x 13 in paper size (a user-defined size in the driver if the list lacks it), at 100% scale, with the paper tray set accordingly.
+**Paper sizes (owner decision, Nov 18, 2026).** Short paper is Letter, 8.5 x 11 in: Barangay Clearance, Franchise Clearance, Electrical and Water, Residency, Indigency, Assistance Certification (which now also covers the former Marginalized Sector certificate). Long paper is 8.5 x 13 in: First-Time Jobseeker. Long here is the Philippine long bond, not US Legal (8.5 x 14 in); if the office stock is 8.5 x 14 in, change `paperDimensions.long` in `frontend/src/lib/print/paperSizes.ts` (the only place that decides it). The page size is set per document (`paper.size` in `documentMeta`) and per print template (`paperSize` in `templates.ts`); the print CSS `@page` rule, the on-screen page box, the form image and the calibration sheet all read it. The First-Time Jobseeker template (patch 194) is the only Long one (`paperSize: "long"`, form images 612 x 936 pt); every other print template is Short. The Long size has not been tried on the EPSON L3250: the printer must be set to the matching 8.5 x 13 in paper size (a user-defined size in the driver if the list lacks it), at 100% scale, with the paper tray set accordingly.
 
 ## 4. Form-by-form typed content
 
@@ -107,9 +107,13 @@ Both modes cover the six types that have a print template. Reprint is no longer 
 - Not printed: labels, red emergency-contact heading, signatures, countersignature, blue footer band, warning text
 
 ### 4.8 Residency certification (provisional)
+Prints since patch 194 as values placed on a blank form image (`residency`, Letter, one page) made from `Barangay-Certification-of-Residency-BLANK.docx`; the typed name and position sit above the CTC rows because the form has no signatory line (confirm with the barangay). The additional statement is six unruled lines. The template is `blankStock`: it always prints in "form" mode, because values alone on white paper would be unfinished.
+
 The Word file shows wording varies by purpose. Do not hard-code example narratives or incident details. Confirm approved default wording, editable text, purpose options and required issuance metadata. Blotter management stays out of scope unless separately approved **(D-15)**.
 
 ### 4.9 First-Time Jobseekers (provisional)
+Prints since patch 194 as values on three blank sheets (`jobseeker`, `paperSize: "long"`, form images 612 x 936 pt) made from `Barangay-Certification-of-First-Time-Jobseekers-BLANK.docx`. All three sheets always print (stored details do not keep "Parts to print"). The witness is never printed. The blank copies are built by `scripts/make-blank-print-sources.py` and the page images by `scripts/build-print-forms.py`; the Long size is untried on the EPSON L3250.
+
 The file holds an applicant information sheet, oath of undertaking and barangay certification. Applicant sheet fields: name, birthdate, age, complete address, years/months of residency, sex/gender, civil status, educational attainment, course (if applicable), JobStart beneficiary yes/no. Confirm which parts the system generates, which data comes from the resident record, how residency duration is supplied, and who witnesses the oath. **Do not infer legal eligibility or auto-approve a request** **(D-16)**.
 
 ## 5. Issuance metadata
@@ -132,7 +136,7 @@ Six print templates are currently defined in `frontend/src/lib/print/templates.t
 
 The Issuances page has an **Issuance settings** button (patch 142) that opens a pop-up; its **Printing setup** tab is a screen for selecting a template, saving per-template X/Y calibration offsets, printing a calibration sheet and resetting offsets. Offsets are stored in browser local storage. The default positions are estimates and still require visual comparison and real-paper calibration.
 
-The following documents have **no print template** yet: Residency, First-Time Jobseekers, Barangay ID front and Barangay ID back. (PhilHealth Certification was removed from the app entirely; it is no longer a document type.) Confirm the intended output and approved source format before adding templates.
+The following documents have **no print template** yet: Barangay ID front and Barangay ID back (Residency and First-Time Jobseekers have one since patch 194). (PhilHealth Certification was removed from the app entirely; it is no longer a document type.) Confirm the intended output and approved source format before adding templates.
 
 Required fields and validation rules remain **unconfirmed**. Do not treat the presence of a source form as client approval.
 
@@ -152,8 +156,8 @@ Required fields and validation rules remain **unconfirmed**. Do not treat the pr
 
 ## 8. Questions for the client
 
-1. Should Residency and First-Time Jobseekers print as complete documents on blank paper, or as overlays on pre-printed stock? **(D-15, D-16)**
-2. Which parts of the First-Time Jobseekers packet should be generated: applicant sheet, oath, certification, or all three?
+1. Residency and First-Time Jobseekers now print as values on the barangay's blank forms (patch 194). Is that the output the barangay wants, and is the Residency wording approved? **(D-15, D-16)**
+2. Which parts of the First-Time Jobseekers packet should be generated: applicant sheet, oath, certification, or all three? (Today all three always print.)
 3. Which residency wording is approved, and may staff edit the narrative?
 4. Is residency duration entered manually or calculated from an approved start date?
 5. Which fields are mandatory for each document? **(D-14)**
