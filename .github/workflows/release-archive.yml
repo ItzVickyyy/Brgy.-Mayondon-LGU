@@ -24,7 +24,7 @@ permissions:
 jobs:
   release-archive:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -67,3 +67,37 @@ jobs:
           docker compose -f compose.yml run --rm --no-deps --entrypoint python backend -c \
             "import app.main, app.backup_cli, app.migrate_on_start; print('program modules import')"
           docker compose -f compose.yml run --rm --no-deps --entrypoint pg_dump backend --version | grep -q "(PostgreSQL) 18"
+      - name: Start the office stack from the archive and use it
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP/release"
+          # The same Compose file the office computer runs (-f compose.yml), with throw-away secrets.
+          cp .env.example .env
+          sed -i -E "s|^SECRET_KEY=.*|SECRET_KEY=$(openssl rand -hex 32)|; s|^POSTGRES_PASSWORD=.*|POSTGRES_PASSWORD=$(openssl rand -hex 16)|; s|^FIRST_SUPERUSER_PASSWORD=.*|FIRST_SUPERUSER_PASSWORD=$(openssl rand -hex 16)|" .env
+          echo "POSTGRES_PORT=5433" >> .env   # 5432 can be taken on a GitHub runner
+          mkdir -p backups
+          docker compose -f compose.yml up -d --wait --wait-timeout 300
+          curl -fsS http://localhost:8000/api/v1/utils/health-check/
+          docker compose -f compose.yml logs backend | grep "\[migrate\]"
+          # Logs are capped, and the database port is open on this computer only (decision 74).
+          for service in db backend; do
+            id=$(docker compose -f compose.yml ps -q "$service")
+            docker inspect --format '{{.HostConfig.LogConfig.Config}}' "$id" | grep -q "max-size:10m" \
+              || { echo "$service has no log limit"; exit 1; }
+          done
+          docker compose -f compose.yml port db 5432 | grep -q "^127.0.0.1:" \
+            || { echo "The database port is not bound to 127.0.0.1"; exit 1; }
+          # First administrator, then a backup made the way the scheduled task makes it.
+          docker compose -f compose.yml exec -T backend python app/initial_data.py
+          docker compose -f compose.yml exec -T backend python -m app.backup_cli
+          ls backups/mayondon-db-*.dump
+          # Recreate the program container (what an update does): data and sign-in must survive.
+          docker compose -f compose.yml up -d --force-recreate --wait --wait-timeout 300 backend
+          password=$(grep '^FIRST_SUPERUSER_PASSWORD=' .env | cut -d= -f2-)
+          curl -fsS -d "username=admin@example.com&password=$password" http://localhost:8000/api/v1/login/access-token | grep -q access_token
+      - name: Stop the office stack
+        if: always()
+        run: |
+          cd "$RUNNER_TEMP/release"
+          docker compose -f compose.yml logs --tail 80 || true
+          docker compose -f compose.yml down -v --remove-orphans || true
