@@ -274,18 +274,18 @@ function Dashboard() {
       : t("dashboard.expiring.inDays", { count: daysLeft })
   const quickActions = [
     {
-      key: "findResident",
-      title: t("dashboard.quickActions.findResident.title"),
-      description: t("dashboard.quickActions.findResident.description"),
-      to: "/records",
-      icon: Users,
-    },
-    {
       key: "createIssuance",
       title: t("dashboard.quickActions.createIssuance.title"),
       description: t("dashboard.quickActions.createIssuance.description"),
       to: "/issuances",
       icon: FileCheck2,
+    },
+    {
+      key: "findResident",
+      title: t("dashboard.quickActions.findResident.title"),
+      description: t("dashboard.quickActions.findResident.description"),
+      to: "/records",
+      icon: Users,
     },
     {
       key: "reviewHistory",

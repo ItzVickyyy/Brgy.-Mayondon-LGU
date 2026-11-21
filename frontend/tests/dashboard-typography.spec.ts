@@ -112,6 +112,13 @@ for (const width of [1280, 1920]) {
     await page.goto("/")
     await expect(page.getByText("Gender Breakdown")).toBeVisible()
 
+    // Quick Actions order: Create an issuance comes before Find a resident.
+    const actionTitles = await page
+      .locator(".action-card")
+      .evaluateAll((nodes) => nodes.map((node) => node.textContent ?? ""))
+    expect(actionTitles[0]).toContain("Create an issuance")
+    expect(actionTitles[1]).toContain("Find a resident")
+
     const styleOf = async (text: string) =>
       page
         .getByText(text, { exact: true })
