@@ -34,6 +34,8 @@ jobs:
         run: sh scripts/verify-release-archive.sh
       - name: Test the clean-up of old files
         run: sh scripts/test-prune-release.sh
+      - name: Test the PowerShell scripts (syntax and the update script)
+        run: bash scripts/test-office-scripts.sh
       - name: Build the image from the archive alone
         run: |
           rm -rf "$RUNNER_TEMP/release" && mkdir -p "$RUNNER_TEMP/release"
