@@ -117,6 +117,10 @@ elseif ($healthy) {
 }
 
 if ($healthy -and $log -notmatch "\[migrate\] STOP") {
+    # Every update leaves the older program image without a name (only backend:latest and
+    # backend:previous keep one). Remove those unnamed images so the disk does not fill
+    # up over the years (decision 76). Only after a healthy update; a failure is ignored.
+    Invoke-Quiet { docker image prune -f *> $null }
     Write-Host ""
     Write-Host "UPDATE DONE. The program is healthy." -ForegroundColor Green
     if ($oldCommit -and $newCommit) { Write-Host "Version: $($oldCommit.Substring(0,7)) -> $($newCommit.Substring(0,7))" }
