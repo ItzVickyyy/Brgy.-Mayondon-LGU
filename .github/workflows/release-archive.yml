@@ -41,3 +41,8 @@ jobs:
           cd "$RUNNER_TEMP/release"
           cp .env.example .env
           docker compose -f compose.yml build backend
+      - name: Check the image carries no test or lint tools
+        run: |
+          cd "$RUNNER_TEMP/release"
+          docker compose -f compose.yml run --rm --no-deps --entrypoint python backend -c \
+            "import importlib.util as u; bad=[m for m in ('pytest','mypy','ruff','coverage') if u.find_spec(m)]; print('dev tools in image:', bad); raise SystemExit(bool(bad))"

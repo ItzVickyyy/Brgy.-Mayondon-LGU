@@ -17,6 +17,9 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
+      args:
+        # Tests (scripts/test.sh) run inside this image, so it keeps the dev tools.
+        INSTALL_DEV_TOOLS: "true"
     command:
       - fastapi
       - dev

@@ -46,6 +46,11 @@ COPY --from=ghcr.io/astral-sh/uv:0.9.26 /uv /uvx /bin/
 ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 
+# The real system carries no test or lint tools (pytest, mypy, ruff, coverage...):
+# a smaller image with less in it (decision 73). Development builds turn them on
+# through compose.override.yml (INSTALL_DEV_TOOLS=true), which scripts/test.sh needs.
+ARG INSTALL_DEV_TOOLS=false
+
 WORKDIR /app/
 
 ENV PATH="/app/.venv/bin:$PATH"
@@ -53,7 +58,11 @@ ENV PATH="/app/.venv/bin:$PATH"
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --no-install-workspace --package app
+    if [ "$INSTALL_DEV_TOOLS" = "true" ]; then \
+        uv sync --frozen --no-install-workspace --package app; \
+    else \
+        uv sync --frozen --no-install-workspace --no-dev --package app; \
+    fi
 
 COPY ./backend/scripts /app/backend/scripts
 COPY ./backend/pyproject.toml ./backend/alembic.ini /app/backend/
@@ -63,7 +72,11 @@ COPY --from=frontend-build /app/backend/app/frontend /app/backend/app/frontend
 RUN --mount=type=cache,target=/root/.cache/uv \
     --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    uv sync --frozen --package app
+    if [ "$INSTALL_DEV_TOOLS" = "true" ]; then \
+        uv sync --frozen --package app; \
+    else \
+        uv sync --frozen --no-dev --package app; \
+    fi
 
 WORKDIR /app/backend/
 
