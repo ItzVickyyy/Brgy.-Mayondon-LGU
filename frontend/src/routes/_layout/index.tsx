@@ -27,7 +27,7 @@ import useAuth from "@/hooks/useAuth"
 import { activityTitle } from "@/lib/activity"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
-import { type StatTone, statCycle, statTones } from "@/lib/statTones"
+import { statCycle, statTones } from "@/lib/statTones"
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
@@ -87,18 +87,10 @@ function niceScale(max: number) {
   return { top, ticks }
 }
 
-function OverTimeStat({
-  label,
-  value,
-  tone,
-}: {
-  label: string
-  value: string
-  tone: StatTone
-}) {
+function OverTimeStat({ label, value }: { label: string; value: string }) {
   return (
     <div className="min-w-0 rounded-lg border bg-muted/40 px-3 py-2.5">
-      <p className={`truncate text-xs font-semibold ${statTones[tone].text}`}>
+      <p className="truncate text-xs font-semibold text-muted-foreground">
         {label}
       </p>
       <p className="stat-figure mt-1.5 truncate text-2xl">{value}</p>
@@ -462,7 +454,6 @@ function Dashboard() {
               <OverTimeStat
                 label={t("dashboard.overTime.stats.total")}
                 value={formatLocaleNumber(monthsTotal)}
-                tone="blue"
               />
               <OverTimeStat
                 label={t(
@@ -473,7 +464,6 @@ function Dashboard() {
                 value={formatLocaleNumber(monthsAverage, {
                   maximumFractionDigits: 1,
                 })}
-                tone="teal"
               />
               <OverTimeStat
                 label={t(
@@ -482,7 +472,6 @@ function Dashboard() {
                     : "dashboard.overTime.stats.peak",
                 )}
                 value={`${peakMonth.fullLabel} · ${formatLocaleNumber(peakMonth.count)}`}
-                tone="amber"
               />
             </dl>
           ) : null}
@@ -538,10 +527,11 @@ function Dashboard() {
                               title={`${item.fullLabel}: ${formatLocaleNumber(item.count)}`}
                               className="group relative flex h-full flex-1 items-end justify-center"
                             >
-                              {/* Solid by default; softer on hover. The bar rises
-                                  from the bottom, one after another. */}
+                              {/* One soft stat color per bar (same cycle as the
+                                  age bars); softer on hover. The bar rises from
+                                  the bottom, one after another. */}
                               <div
-                                className="bar-rise relative w-full max-w-10 rounded-t-md bg-brand transition-colors group-hover:bg-brand/60"
+                                className={`bar-rise relative w-full max-w-10 rounded-t-md transition-opacity group-hover:opacity-70 ${statTones[statCycle[index % statCycle.length]].bg}`}
                                 style={
                                   {
                                     height: `${(item.count / chartTop) * 100}%`,

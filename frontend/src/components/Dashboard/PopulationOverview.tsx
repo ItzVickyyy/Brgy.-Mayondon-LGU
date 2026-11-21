@@ -9,7 +9,7 @@ import {
   VenusAndMars,
   Vote,
 } from "lucide-react"
-import type { CSSProperties, ReactNode } from "react"
+import { type CSSProperties, type ReactNode, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { DashboardPopulation } from "@/client"
@@ -29,6 +29,15 @@ const percent = (part: number, whole: number) =>
   whole > 0 ? (part / whole) * 100 : 0
 const fmtPercent = (value: number) =>
   formatLocaleNumber(value, { maximumFractionDigits: 1 })
+
+// Hover linking: the key under the pointer is "active"; everything else in the
+// same card fades a little. The motion-reduce rule keeps the fade but drops
+// the movement. Pointer only: all figures stay readable without it.
+type ActiveKey = string | null
+const fade = (active: ActiveKey, key: string) =>
+  active !== null && active !== key ? "opacity-40" : ""
+const hoverMove =
+  "transition duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0"
 
 function CardTitle({
   icon: Icon,
@@ -64,7 +73,9 @@ function StatCard({
 }) {
   const { t } = useTranslation()
   return (
-    <article className="flex min-w-0 flex-col items-stretch gap-2 rounded-xl border bg-card p-3 text-left shadow-sm 2xl:p-4">
+    <article
+      className={`flex min-w-0 flex-col items-stretch gap-2 rounded-xl border bg-card p-3 text-left shadow-sm 2xl:p-4 ${hoverMove}`}
+    >
       <div className="flex items-center justify-start gap-2">
         <span
           className={`shrink-0 rounded-md bg-muted p-1.5 2xl:p-2 ${statTones[tone].text}`}
@@ -107,12 +118,23 @@ function StatCard({
 }
 
 // A ring drawn from circles. The centre shows `total` (the population).
-function Donut({ segments, total }: { segments: Segment[]; total: number }) {
+function Donut({
+  segments,
+  total,
+  active,
+  onActive,
+}: {
+  segments: Segment[]
+  total: number
+  active: ActiveKey
+  onActive: (key: ActiveKey) => void
+}) {
   const { t } = useTranslation()
   const radius = 44
   const circumference = 2 * Math.PI * radius
   const sum = segments.reduce((acc, item) => acc + item.value, 0)
   let offset = 0
+  const current = segments.find((item) => item.key === active)
   return (
     <div
       className="relative mx-auto size-28 shrink-0"
@@ -137,29 +159,33 @@ function Donut({ segments, total }: { segments: Segment[]; total: number }) {
         {segments.map((item) => {
           const length = sum > 0 ? (item.value / sum) * circumference : 0
           const circle = (
+            // biome-ignore lint/a11y/noStaticElementInteractions: pointer-only highlight; every figure stays visible without it
             <circle
               key={item.key}
               cx="60"
               cy="60"
               r={radius}
               fill="none"
-              strokeWidth="14"
+              strokeWidth={active === item.key ? 18 : 14}
               stroke="currentColor"
-              className={statTones[item.tone].text}
+              className={`cursor-pointer transition-all duration-200 motion-reduce:transition-none ${statTones[item.tone].text} ${fade(active, item.key)}`}
               strokeDasharray={`${length} ${circumference - length}`}
               strokeDashoffset={-offset}
+              onMouseEnter={() => onActive(item.key)}
+              onMouseLeave={() => onActive(null)}
             />
           )
           offset += length
           return length > 0 ? circle : null
         })}
       </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+      {/* The centre shows the total, or the hovered segment's own count. */}
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-5 text-center">
         <span className="stat-figure text-base">
-          {formatLocaleNumber(total)}
+          {formatLocaleNumber(current ? current.value : total)}
         </span>
-        <span className="text-xs leading-4 text-muted-foreground">
-          {t("dashboard.population.chartTotal")}
+        <span className="max-w-full truncate text-xs leading-4 text-muted-foreground">
+          {current ? current.label : t("dashboard.population.chartTotal")}
         </span>
       </div>
     </div>
@@ -168,9 +194,13 @@ function Donut({ segments, total }: { segments: Segment[]; total: number }) {
 
 function Legend({
   segments,
+  active,
+  onActive,
   inline = false,
 }: {
   segments: Segment[]
+  active: ActiveKey
+  onActive: (key: ActiveKey) => void
   inline?: boolean
 }) {
   const sum = segments.reduce((acc, item) => acc + item.value, 0)
@@ -179,7 +209,9 @@ function Legend({
       {segments.map((item) => (
         <li
           key={item.key}
-          className={`flex gap-2 ${inline ? "items-center" : "items-start"}`}
+          className={`-mx-1.5 flex cursor-default gap-2 rounded-md px-1.5 py-0.5 transition duration-200 motion-reduce:transition-none ${active === item.key ? "bg-muted" : ""} ${fade(active, item.key)} ${inline ? "items-center" : "items-start"}`}
+          onMouseEnter={() => onActive(item.key)}
+          onMouseLeave={() => onActive(null)}
         >
           <span
             className={`size-2.5 shrink-0 rounded-full bg-current ${inline ? "" : "mt-1"} ${statTones[item.tone].text}`}
@@ -216,17 +248,24 @@ function SectorTile({
   total,
   icon: Icon,
   tone,
+  faded,
+  onActive,
 }: {
   label: string
   value: number
   total: number
   icon: typeof UsersRound
   tone: StatTone
+  faded: boolean
+  onActive: (active: boolean) => void
 }) {
   const { t } = useTranslation()
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: pointer-only highlight; every figure stays visible without it
     <div
-      className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg border bg-muted/40 px-2 py-4 text-center`}
+      className={`flex min-w-0 flex-col items-center justify-center gap-1 rounded-lg border bg-muted/40 px-2 py-4 text-center ${hoverMove} ${faded ? "opacity-40" : ""}`}
+      onMouseEnter={() => onActive(true)}
+      onMouseLeave={() => onActive(false)}
     >
       <Icon className={`size-6 ${statTones[tone].text}`} aria-hidden="true" />
       <p className={`text-xs font-semibold ${statTones[tone].text}`}>{label}</p>
@@ -252,6 +291,11 @@ export function PopulationOverview({
   const { t } = useTranslation()
   const total = data?.total_population ?? 0
   const ready = data !== undefined
+  const [genderActive, setGenderActive] = useState<ActiveKey>(null)
+  const [civilActive, setCivilActive] = useState<ActiveKey>(null)
+  const [ageActive, setAgeActive] = useState<ActiveKey>(null)
+  const [purokActive, setPurokActive] = useState<ActiveKey>(null)
+  const [sectorActive, setSectorActive] = useState<ActiveKey>(null)
 
   const gender: Segment[] = [
     {
@@ -328,8 +372,17 @@ export function PopulationOverview({
               {ready ? (
                 <>
                   <span className="hidden @[20rem]:block" aria-hidden="true" />
-                  <Donut segments={gender} total={total} />
-                  <Legend segments={gender} />
+                  <Donut
+                    segments={gender}
+                    total={total}
+                    active={genderActive}
+                    onActive={setGenderActive}
+                  />
+                  <Legend
+                    segments={gender}
+                    active={genderActive}
+                    onActive={setGenderActive}
+                  />
                 </>
               ) : (
                 <Skeleton className="size-28 rounded-full" aria-hidden="true" />
@@ -347,9 +400,14 @@ export function PopulationOverview({
               {ages.map((item, index) => (
                 <li
                   key={item.bracket}
-                  className="flex h-full min-w-0 flex-1 flex-col justify-end"
+                  title={`${item.bracket.replace("-", "–")}: ${formatLocaleNumber(item.count)}`}
+                  className={`flex h-full min-w-0 flex-1 cursor-default flex-col justify-end transition-opacity duration-200 motion-reduce:transition-none ${fade(ageActive, item.bracket)}`}
+                  onMouseEnter={() => setAgeActive(item.bracket)}
+                  onMouseLeave={() => setAgeActive(null)}
                 >
-                  <span className="mb-1 text-center text-xs tabular-nums text-muted-foreground">
+                  <span
+                    className={`mb-1 text-center text-xs tabular-nums ${ageActive === item.bracket ? "font-semibold text-foreground" : "text-muted-foreground"}`}
+                  >
                     {formatLocaleNumber(item.count)}
                   </span>
                   <div
@@ -373,7 +431,7 @@ export function PopulationOverview({
               {ages.map((item) => (
                 <li
                   key={item.bracket}
-                  className="min-w-0 flex-1 whitespace-nowrap text-center text-xs text-muted-foreground"
+                  className={`min-w-0 flex-1 whitespace-nowrap text-center text-xs transition-opacity duration-200 motion-reduce:transition-none ${ageActive === item.bracket ? "font-semibold text-foreground" : "text-muted-foreground"} ${fade(ageActive, item.bracket)}`}
                 >
                   {item.bracket.replace("-", "–")}
                 </li>
@@ -400,7 +458,13 @@ export function PopulationOverview({
                 ))
               : null}
             {puroks.map((item, index) => (
-              <div key={item.purok} className="flex items-center gap-3 text-sm">
+              // biome-ignore lint/a11y/noStaticElementInteractions: pointer-only highlight; every figure stays visible without it
+              <div
+                key={item.purok}
+                className={`-mx-2 flex cursor-default items-center gap-3 rounded-md px-2 py-0.5 text-sm transition duration-200 motion-reduce:transition-none ${purokActive === String(item.purok) ? "bg-muted" : ""} ${fade(purokActive, String(item.purok))}`}
+                onMouseEnter={() => setPurokActive(String(item.purok))}
+                onMouseLeave={() => setPurokActive(null)}
+              >
                 <span className="w-16 shrink-0 truncate">
                   {t("dashboard.population.purok", { number: item.purok })}
                 </span>
@@ -435,8 +499,18 @@ export function PopulationOverview({
           <div className="mt-3 flex flex-1 flex-col items-center justify-center gap-4 sm:flex-row">
             {ready ? (
               <>
-                <Donut segments={civil} total={total} />
-                <Legend segments={civil} inline />
+                <Donut
+                  segments={civil}
+                  total={total}
+                  active={civilActive}
+                  onActive={setCivilActive}
+                />
+                <Legend
+                  segments={civil}
+                  active={civilActive}
+                  onActive={setCivilActive}
+                  inline
+                />
               </>
             ) : (
               <Skeleton className="size-28 rounded-full" aria-hidden="true" />
@@ -457,6 +531,8 @@ export function PopulationOverview({
                   total={total}
                   icon={Accessibility}
                   tone="blue"
+                  faded={sectorActive !== null && sectorActive !== "pwd"}
+                  onActive={(on) => setSectorActive(on ? "pwd" : null)}
                 />
                 <SectorTile
                   label={t("dashboard.population.seniorCitizens")}
@@ -464,6 +540,12 @@ export function PopulationOverview({
                   total={total}
                   icon={PersonStanding}
                   tone="green"
+                  faded={
+                    sectorActive !== null && sectorActive !== "senior_citizens"
+                  }
+                  onActive={(on) =>
+                    setSectorActive(on ? "senior_citizens" : null)
+                  }
                 />
                 <SectorTile
                   label={t("dashboard.population.children")}
@@ -471,6 +553,8 @@ export function PopulationOverview({
                   total={total}
                   icon={Baby}
                   tone="amber"
+                  faded={sectorActive !== null && sectorActive !== "children"}
+                  onActive={(on) => setSectorActive(on ? "children" : null)}
                 />
                 <SectorTile
                   label={t("dashboard.population.soloParents")}
@@ -478,6 +562,10 @@ export function PopulationOverview({
                   total={total}
                   icon={UsersRound}
                   tone="violet"
+                  faded={
+                    sectorActive !== null && sectorActive !== "solo_parents"
+                  }
+                  onActive={(on) => setSectorActive(on ? "solo_parents" : null)}
                 />
               </>
             ) : (
