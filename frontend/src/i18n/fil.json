@@ -614,9 +614,9 @@
         "resident": "Residente",
         "birthdate": "Petsa ng Kapanganakan / Edad",
         "address": "Tirahan",
-        "type": "Uri ng residente",
-        "idStatus": "Katayuan ng ID",
-        "status": "Katayuan",
+        "sex": "Kasarian",
+        "civilStatus": "Katayuang sibil",
+        "occupation": "Hanapbuhay",
         "actions": "Mga Aksyon"
       },
       "empty": {
@@ -827,6 +827,7 @@
         "birth_place": "Lugar ng kapanganakan",
         "sex": "Kasarian",
         "civil_status": "Katayuang sibil",
+        "occupation": "Hanapbuhay",
         "house_number": "Numero ng bahay",
         "street": "Kalye",
         "purok": "Purok",
@@ -925,6 +926,7 @@
       "sex": "Kasarian",
       "notSet": "Hindi nakatakda",
       "civilStatus": "Katayuang sibil",
+      "occupation": "Hanapbuhay",
       "houseNumber": "Numero ng bahay",
       "street": "Kalye",
       "noStreets": "Wala pang nadagdag na kalye",
@@ -998,6 +1000,7 @@
         "birthPlace": "Lugar ng kapanganakan",
         "sex": "Kasarian",
         "civilStatus": "Katayuang sibil",
+        "occupation": "Hanapbuhay",
         "address": "Kumpletong tirahan",
         "residentSince": "Residente mula",
         "sinceBirth": "Mula pagkapanganak",
@@ -1027,6 +1030,7 @@
       "id": {
         "number": "Numero ng Barangay ID",
         "none": "Walang nakatala",
+        "status": "Katayuan ng ID",
         "note": "Itinatakda ang mga numero ng ID kapag may ID na iniisyu mula sa Pamamahala ng Pag-isyu."
       },
       "history": {

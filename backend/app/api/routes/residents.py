@@ -490,6 +490,7 @@ def update_resident(
     for key in (
         "middle_name",
         "birth_place",
+        "occupation",
         "house_number",
         "resident_type",
         "emergency_contact_name",

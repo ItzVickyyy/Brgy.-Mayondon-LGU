@@ -46,6 +46,7 @@ type FormState = {
   birth_place: string
   sex: string
   civil_status: string
+  occupation: string
   house_number: string
   street_id: string
   purok: string
@@ -72,6 +73,7 @@ function emptyForm(): FormState {
     birth_place: "",
     sex: "",
     civil_status: "",
+    occupation: "",
     house_number: "",
     street_id: "",
     purok: "",
@@ -99,6 +101,7 @@ function formFromResident(resident: ResidentPublic): FormState {
     birth_place: resident.birth_place ?? "",
     sex: resident.sex ?? "",
     civil_status: resident.civil_status ?? "",
+    occupation: resident.occupation ?? "",
     house_number: resident.house_number ?? "",
     street_id: resident.street_id ? String(resident.street_id) : "",
     purok: resident.purok ? String(resident.purok) : "",
@@ -132,6 +135,7 @@ function buildBody(form: FormState): ResidentCreate {
     birth_place: text(form.birth_place),
     sex: (form.sex || null) as ResidentCreate["sex"],
     civil_status: (form.civil_status || null) as ResidentCreate["civil_status"],
+    occupation: text(form.occupation),
     house_number: text(form.house_number),
     street_id: whole(form.street_id),
     purok: whole(form.purok),
@@ -500,6 +504,15 @@ export function ResidentFormDialog({
                       </option>
                     ))}
                   </Select>
+                </label>
+                <label className={labelClass}>
+                  {t("records.form.occupation")}
+                  <input
+                    value={form.occupation}
+                    maxLength={100}
+                    onChange={(event) => set("occupation", event.target.value)}
+                    className={formControlClass}
+                  />
                 </label>
               </div>
             </ModalSection>

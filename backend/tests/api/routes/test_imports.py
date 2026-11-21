@@ -233,6 +233,7 @@ def test_masterlist_layout_with_separate_name_columns_maps_cleanly() -> None:
         "Birthdate": "birthdate",
         "Sex": "sex",
         "Civil Status": "civil_status",
+        "Occupation": "occupation",
         "Place of Birth": "birth_place",
     }
     mi.check_mapping(headers, mapping)

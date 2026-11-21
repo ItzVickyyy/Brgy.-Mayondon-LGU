@@ -1,7 +1,8 @@
 // The Records and Issuance History tables fit a 1280 px laptop screen without
 // a sideways scroll bar, in English and in Filipino (whose labels are longer).
 // Before, the Filipino tables were 42 to 152 px too wide, so the sticky Actions
-// column slid over the status badge and the "Katayuan ng ID" header. The API is
+// column slid over the last data column. The first residents row has a long
+// Occupation to prove that column is cut short instead of widening. The API is
 // mocked with real responses (synthetic residents), so this spec needs only the
 // running frontend.
 import { expect, test } from "@playwright/test"
@@ -25,6 +26,7 @@ const residents = {
       birth_place: "Nagcarlan, Laguna",
       sex: "Female",
       civil_status: "Married",
+      occupation: "Self-employed (sari-sari store owner)",
       house_number: "197",
       street_id: 3,
       purok: 7,
@@ -63,6 +65,7 @@ const residents = {
       birth_place: "San Pablo City, Laguna",
       sex: "Female",
       civil_status: "Widow/Widower",
+      occupation: null,
       house_number: "247",
       street_id: 7,
       purok: 6,

@@ -48,6 +48,7 @@ const FIELD_KEYS = [
   "birth_place",
   "sex",
   "civil_status",
+  "occupation",
   "house_number",
   "street",
   "purok",

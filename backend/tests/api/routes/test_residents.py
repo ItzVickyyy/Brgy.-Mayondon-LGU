@@ -254,6 +254,7 @@ def _form_body(resident: dict) -> dict[str, object]:
         "birth_place": text(resident.get("birth_place")),
         "sex": resident.get("sex") or None,
         "civil_status": resident.get("civil_status") or None,
+        "occupation": text(resident.get("occupation")),
         "house_number": text(resident.get("house_number")),
         "street_id": resident.get("street_id") or None,
         "purok": resident.get("purok") or None,
@@ -329,6 +330,34 @@ def test_extra_spaces_are_not_a_change_but_clearing_a_value_is(
     assert r.json()["birth_place"] is None
     audit = _audit(db, "resident.update", created["id"])
     assert len(audit) == 1 and audit[0].details == {"fields": ["birth_place"]}
+
+
+def test_occupation_is_optional_trimmed_limited_and_audited(
+    client: TestClient, staff_token_headers: Headers, db: Session
+) -> None:
+    blank = _create(client, staff_token_headers)
+    assert blank["occupation"] is None
+    created = _create(client, staff_token_headers, occupation="  Farmer  ")
+    assert created["occupation"] == "Farmer"
+    too_long = client.post(
+        f"{API}/residents/",
+        headers=staff_token_headers,
+        json=_payload(occupation="x" * 101),
+    )
+    assert too_long.status_code == 422
+    body = _form_body(created)
+    body["occupation"] = "Tricycle driver"
+    r = client.patch(
+        f"{API}/residents/{created['id']}", headers=staff_token_headers, json=body
+    )
+    assert r.status_code == 200 and r.json()["occupation"] == "Tricycle driver"
+    audit = _audit(db, "resident.update", created["id"])
+    assert len(audit) == 1 and audit[0].details == {"fields": ["occupation"]}
+    body["occupation"] = "   "
+    r = client.patch(
+        f"{API}/residents/{created['id']}", headers=staff_token_headers, json=body
+    )
+    assert r.json()["occupation"] is None
 
 
 def test_update_cannot_blank_required_names(

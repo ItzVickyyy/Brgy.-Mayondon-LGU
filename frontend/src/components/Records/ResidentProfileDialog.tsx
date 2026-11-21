@@ -31,7 +31,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
-import { civilStatusLabel, sexLabel } from "@/lib/residentLabels"
+import {
+  civilStatusLabel,
+  residentTypeLabel,
+  sexLabel,
+} from "@/lib/residentLabels"
 import { formatBusinessDate, residentAddress } from "@/lib/residents"
 
 type ResidentProfileDialogProps = {
@@ -44,6 +48,14 @@ type ResidentProfileDialogProps = {
   documentTypes: LookupItem[]
   /** Shown only for an active resident; opens the edit form. */
   onEdit?: () => void
+}
+
+// statusStyles is keyed by the English status word, not by the shown label.
+const idStatusStyleKey: Record<ResidentPublic["id_status"], string> = {
+  none: "None",
+  valid: "Valid",
+  expiring_soon: "Expiring soon",
+  expired: "Expired",
 }
 
 // statusStyles is keyed by the capitalised English status word.
@@ -167,6 +179,10 @@ export function ResidentProfileDialog({
                   ? civilStatusLabel(resident.civil_status, t)
                   : dash,
               ],
+              [
+                t("records.profile.fields.occupation"),
+                resident.occupation || dash,
+              ],
             ],
           },
           {
@@ -183,6 +199,12 @@ export function ResidentProfileDialog({
                   : resident.resident_since_year
                     ? String(resident.resident_since_year)
                     : dash,
+              ],
+              [
+                t("records.profile.fields.residentType"),
+                resident.resident_type
+                  ? residentTypeLabel(resident.resident_type, t)
+                  : dash,
               ],
               [
                 t("records.profile.fields.residencyType"),
@@ -410,6 +432,15 @@ export function ResidentProfileDialog({
                   <p className="mt-1 font-semibold">
                     {resident.id_number || t("records.profile.id.none")}
                   </p>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    {t("records.profile.id.status")}
+                  </p>
+                  <Badge
+                    variant="outline"
+                    className={`mt-1 ${statusStyles[idStatusStyleKey[resident.id_status]]}`}
+                  >
+                    {t(`records.idStatus.${resident.id_status}`)}
+                  </Badge>
                   <p className="mt-2 text-xs text-muted-foreground">
                     {t("records.profile.id.note")}
                   </p>

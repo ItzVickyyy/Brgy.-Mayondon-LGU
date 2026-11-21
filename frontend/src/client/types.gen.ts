@@ -2352,6 +2352,10 @@ export type ResidentCreate = {
      */
     civil_status?: 'Single' | 'Married' | 'Legally Separated' | 'Widow/Widower' | null;
     /**
+     * Occupation
+     */
+    occupation?: string | null;
+    /**
      * House Number
      */
     house_number?: string | null;
@@ -2441,6 +2445,10 @@ export type ResidentPublic = {
      * Civil Status
      */
     civil_status?: 'Single' | 'Married' | 'Legally Separated' | 'Widow/Widower' | null;
+    /**
+     * Occupation
+     */
+    occupation?: string | null;
     /**
      * House Number
      */
@@ -2613,6 +2621,10 @@ export type ResidentUpdate = {
      * Civil Status
      */
     civil_status?: 'Single' | 'Married' | 'Legally Separated' | 'Widow/Widower' | null;
+    /**
+     * Occupation
+     */
+    occupation?: string | null;
     /**
      * House Number
      */

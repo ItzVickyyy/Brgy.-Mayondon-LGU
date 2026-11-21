@@ -62,6 +62,16 @@ LAST = [
 ]  # fmt: skip
 MIDDLE = ["Cruz", "Santos", "Reyes", "Garcia", "Lim", "Torres", "Flores", "Rivera"]
 PLACES = ["Nagcarlan, Laguna", "San Pablo City, Laguna", "Liliw, Laguna", "Manila"]
+OCCUPATIONS = [
+    "Farmer",
+    "Vendor",
+    "Teacher",
+    "Tricycle driver",
+    "Housewife",
+    "Carpenter",
+    "Retired",
+    None,
+]
 CIVIL = ["Single", "Married", "Widow/Widower", "Legally Separated"]
 OFFICIALS = [
     ("Punong Barangay", True),
@@ -140,6 +150,7 @@ def seed(session: Session, residents: int, rng: random.Random) -> dict[str, int]
             birth_place=rng.choice(PLACES),
             sex=sex,
             civil_status="Single" if age < 18 else rng.choice(CIVIL),
+            occupation=None if age < 18 else rng.choice(OCCUPATIONS),
             house_number=str(rng.randint(1, 250)),
             street_id=rng.choice(street_ids),
             purok=rng.randint(1, 7),

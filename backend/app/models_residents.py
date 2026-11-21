@@ -117,6 +117,7 @@ class Resident(SQLModel, table=True):
     birth_place: str | None = Field(default=None, max_length=255)
     sex: str | None = Field(default=None, max_length=10)
     civil_status: str | None = Field(default=None, max_length=30)
+    occupation: str | None = Field(default=None, max_length=100)
     house_number: str | None = Field(default=None, max_length=50)
     street_id: int | None = Field(
         default=None, foreign_key="streets.id", ondelete="RESTRICT"
@@ -240,6 +241,7 @@ class ResidentFields(SQLModel):
     civil_status: (
         Literal["Single", "Married", "Legally Separated", "Widow/Widower"] | None
     ) = None
+    occupation: str | None = Field(default=None, max_length=100)
     house_number: str | None = Field(default=None, max_length=50)
     street_id: int | None = None
     purok: int | None = Field(default=None, gt=0, le=32767)
@@ -263,6 +265,7 @@ class ResidentFields(SQLModel):
     @field_validator(
         "middle_name",
         "birth_place",
+        "occupation",
         "house_number",
         "resident_type",
         "id_number",
@@ -303,6 +306,7 @@ class ResidentUpdate(SQLModel):
     civil_status: (
         Literal["Single", "Married", "Legally Separated", "Widow/Widower"] | None
     ) = None
+    occupation: str | None = Field(default=None, max_length=100)
     house_number: str | None = Field(default=None, max_length=50)
     street_id: int | None = None
     purok: int | None = Field(default=None, gt=0, le=32767)

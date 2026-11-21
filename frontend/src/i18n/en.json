@@ -614,9 +614,9 @@
         "resident": "Resident",
         "birthdate": "Birthdate / Age",
         "address": "Address",
-        "type": "Resident type",
-        "idStatus": "ID status",
-        "status": "Status",
+        "sex": "Sex",
+        "civilStatus": "Civil status",
+        "occupation": "Occupation",
         "actions": "Actions"
       },
       "empty": {
@@ -827,6 +827,7 @@
         "birth_place": "Place of birth",
         "sex": "Sex",
         "civil_status": "Civil status",
+        "occupation": "Occupation",
         "house_number": "House number",
         "street": "Street",
         "purok": "Purok",
@@ -925,6 +926,7 @@
       "sex": "Sex",
       "notSet": "Not set",
       "civilStatus": "Civil status",
+      "occupation": "Occupation",
       "houseNumber": "House number",
       "street": "Street",
       "noStreets": "No streets added yet",
@@ -998,6 +1000,7 @@
         "birthPlace": "Birth place",
         "sex": "Sex",
         "civilStatus": "Civil status",
+        "occupation": "Occupation",
         "address": "Complete address",
         "residentSince": "Resident since",
         "sinceBirth": "Since birth",
@@ -1027,6 +1030,7 @@
       "id": {
         "number": "Barangay ID number",
         "none": "None on record",
+        "status": "ID status",
         "note": "ID numbers are set when an ID is issued from Issuance Management."
       },
       "history": {

@@ -22,30 +22,26 @@ import {
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
 import { RowActions } from "@/components/Common/RowActions"
-import { Select } from "@/components/Common/Select"
 import { StatCard } from "@/components/Common/StatCard"
-import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { ArchivedResidentsView } from "@/components/Records/ArchivedResidentsView"
 import { BarangayIdsView } from "@/components/Records/BarangayIdsView"
 import { ImportMasterlistView } from "@/components/Records/ImportMasterlistView"
 import { ResidentFormDialog } from "@/components/Records/ResidentFormDialog"
 import { ResidentProfileDialog } from "@/components/Records/ResidentProfileDialog"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { isSystemAdministrator } from "@/lib/access"
 import { notify } from "@/lib/notifications"
-import { residentTypeLabel } from "@/lib/residentLabels"
+import { civilStatusLabel, sexLabel } from "@/lib/residentLabels"
 import {
   formatBusinessDate,
   readApiError,
   residentAddress,
   streetNameMap,
 } from "@/lib/residents"
-import { cn } from "@/lib/utils"
 
 export const Route = createFileRoute("/_layout/records")({
   component: RecordsManagement,
@@ -60,30 +56,22 @@ type View = "residents" | "archived" | "barangay-ids" | "import"
 
 const inputClass = formControlClass
 
-// statusStyles is keyed by the English status word, not by the shown label.
-const idStatusStyleKey: Record<ResidentPublic["id_status"], string> = {
-  none: "None",
-  valid: "Valid",
-  expiring_soon: "Expiring soon",
-  expired: "Expired",
-}
-
 type ResidentColumn =
   | "resident"
-  | "birthdate"
   | "address"
-  | "type"
-  | "idStatus"
-  | "status"
+  | "birthdate"
+  | "sex"
+  | "civilStatus"
+  | "occupation"
   | "actions"
 
 const residentColumns: ResidentColumn[] = [
   "resident",
-  "birthdate",
   "address",
-  "type",
-  "idStatus",
-  "status",
+  "birthdate",
+  "sex",
+  "civilStatus",
+  "occupation",
   "actions",
 ]
 
@@ -94,9 +82,6 @@ function RecordsManagement() {
   const [view, setView] = useState<View>(initialView ?? "residents")
   const [search, setSearch] = useState("")
   const [debouncedSearch, setDebouncedSearch] = useState("")
-  const [statusFilter, setStatusFilter] = useState<
-    "active" | "archived" | "all"
-  >("active")
   const [pageIndex, setPageIndex] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [archiveTarget, setArchiveTarget] = useState<ResidentPublic | null>(
@@ -125,7 +110,7 @@ function RecordsManagement() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: the filters are the trigger.
   useEffect(() => {
     setPageIndex(0)
-  }, [debouncedSearch, statusFilter])
+  }, [debouncedSearch])
 
   const streetsQuery = useQuery({
     queryKey: ["lookups", "streets"],
@@ -144,13 +129,13 @@ function RecordsManagement() {
   const streetNames = streetNameMap(streets)
 
   const residentsQuery = useQuery({
-    queryKey: ["residents", debouncedSearch, statusFilter, pageIndex, pageSize],
+    queryKey: ["residents", debouncedSearch, pageIndex, pageSize],
     queryFn: async () =>
       (
         await ResidentsService.listResidents({
           query: {
             q: debouncedSearch || undefined,
-            status: statusFilter,
+            status: "active",
             skip: pageIndex * pageSize,
             limit: pageSize,
           },
@@ -338,29 +323,6 @@ function RecordsManagement() {
                     className={`${inputClass} pl-9`}
                   />
                 </label>
-                <label htmlFor="records-status-filter" className="sm:w-44">
-                  <span className="sr-only">
-                    {t("records.list.statusFilterLabel")}
-                  </span>
-                  <Select
-                    id="records-status-filter"
-                    value={statusFilter}
-                    onChange={(event) =>
-                      setStatusFilter(
-                        event.target.value as "active" | "archived" | "all",
-                      )
-                    }
-                    className={inputClass}
-                  >
-                    <option value="active">
-                      {t("records.list.statusActive")}
-                    </option>
-                    <option value="archived">
-                      {t("records.list.statusArchived")}
-                    </option>
-                    <option value="all">{t("records.list.statusAll")}</option>
-                  </Select>
-                </label>
               </div>
             </div>
             {residentsQuery.isLoading ? (
@@ -389,27 +351,25 @@ function RecordsManagement() {
                     </thead>
                     <tbody className="divide-y">
                       {residents.map((resident) => {
-                        const archived = resident.status === "archived"
-                        const statusKey = archived ? "archived" : "active"
                         const address = residentAddress(resident, streetNames)
                         return (
                           <tr
                             key={resident.id}
-                            className={cn(
-                              "transition-colors hover:bg-muted/30",
-                              archived && "opacity-70",
-                            )}
+                            className="transition-colors hover:bg-muted/30"
                           >
                             <td className="px-3 py-3 align-middle">
                               <p className="font-semibold">
                                 {resident.full_name}
                               </p>
-                              <p
-                                className="mt-1 font-mono text-xs text-muted-foreground"
-                                title={resident.id}
-                              >
-                                {resident.id.slice(0, 8)}…
+                              <p className="mt-1 font-mono text-xs text-muted-foreground">
+                                {resident.id_number || "—"}
                               </p>
+                            </td>
+                            <td
+                              className="max-w-[180px] truncate px-3 py-3 align-middle"
+                              title={address}
+                            >
+                              {address || "—"}
                             </td>
                             <td className="px-3 py-3 align-middle">
                               {resident.birthdate ? (
@@ -432,38 +392,19 @@ function RecordsManagement() {
                                 "—"
                               )}
                             </td>
-                            <td
-                              className="max-w-[180px] truncate px-3 py-3 align-middle"
-                              title={address}
-                            >
-                              {address || "—"}
+                            <td className="px-3 py-3 align-middle">
+                              {resident.sex ? sexLabel(resident.sex, t) : "—"}
                             </td>
                             <td className="px-3 py-3 align-middle">
-                              {resident.resident_type
-                                ? residentTypeLabel(resident.resident_type, t)
+                              {resident.civil_status
+                                ? civilStatusLabel(resident.civil_status, t)
                                 : "—"}
                             </td>
-                            <td className="px-3 py-3 align-middle">
-                              <Badge
-                                variant="outline"
-                                className={
-                                  statusStyles[
-                                    idStatusStyleKey[resident.id_status]
-                                  ]
-                                }
-                              >
-                                {t(`records.idStatus.${resident.id_status}`)}
-                              </Badge>
-                            </td>
-                            <td className="px-3 py-3 align-middle">
-                              <Badge
-                                variant="outline"
-                                className={
-                                  statusStyles[archived ? "Archived" : "Active"]
-                                }
-                              >
-                                {t(`records.status.${statusKey}`)}
-                              </Badge>
+                            <td
+                              className="max-w-[140px] truncate px-3 py-3 align-middle"
+                              title={resident.occupation ?? undefined}
+                            >
+                              {resident.occupation || "—"}
                             </td>
                             <td className="sticky right-0 bg-card row-hover-cell px-3 py-3 align-middle sticky-edge">
                               <RowActions
@@ -480,12 +421,10 @@ function RecordsManagement() {
                                 items={[
                                   {
                                     label: t("records.actions.editDetails"),
-                                    hidden: archived,
                                     onSelect: () => openForm(resident),
                                   },
                                   {
                                     label: t("records.actions.newIssuance"),
-                                    hidden: archived,
                                     onSelect: () =>
                                       window.location.assign(
                                         `/issuances?resident=${encodeURIComponent(resident.id)}`,
@@ -494,15 +433,8 @@ function RecordsManagement() {
                                   {
                                     label: t("records.actions.archive"),
                                     adminOnly: true,
-                                    hidden: archived,
                                     destructive: true,
                                     onSelect: () => setArchiveTarget(resident),
-                                  },
-                                  {
-                                    label: t("records.actions.restore"),
-                                    adminOnly: true,
-                                    hidden: !archived,
-                                    onSelect: () => setRestoreTarget(resident),
                                   },
                                 ]}
                               />
@@ -517,14 +449,13 @@ function RecordsManagement() {
                       title={t("records.list.empty.title")}
                       description={t("records.list.empty.description")}
                       action={
-                        search.trim() !== "" || statusFilter !== "active" ? (
+                        search.trim() !== "" ? (
                           <Button
                             type="button"
                             variant="outline"
                             className="min-h-11"
                             onClick={() => {
                               setSearch("")
-                              setStatusFilter("active")
                             }}
                           >
                             {t("issuances.history.resetFilters")}
