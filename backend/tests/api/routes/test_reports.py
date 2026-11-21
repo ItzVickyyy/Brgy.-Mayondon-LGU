@@ -315,6 +315,33 @@ def test_dashboard_period_limits_the_charts_not_the_month_card(
     )
 
 
+def test_dashboard_week_is_sunday_to_saturday_with_one_bar_per_day(
+    client: TestClient, staff_token_headers: Headers, street_id: int
+) -> None:
+    today = today_manila()
+    before = _get(client, staff_token_headers, f"{DASH}/", period="week")
+    _issue_clearance(client, staff_token_headers, street_id)
+    week = _get(client, staff_token_headers, f"{DASH}/", period="week")
+    days = week["issuances_by_day"]
+    assert len(days) == 7
+    first = date.fromisoformat(days[0]["day"])
+    assert first.isoweekday() == 7  # Sunday
+    assert first <= today <= first + timedelta(days=6)
+    assert [date.fromisoformat(d["day"]) for d in days] == [
+        first + timedelta(days=n) for n in range(7)
+    ]
+    today_row = next(d for d in days if d["day"] == today.isoformat())
+    before_row = next(
+        d for d in before["issuances_by_day"] if d["day"] == today.isoformat()
+    )
+    assert today_row["count"] == before_row["count"] + 1
+    # The by-type total covers the same Sunday-to-Saturday span as the bars.
+    assert week["total_issued"] == sum(d["count"] for d in days)
+    # Only the week period fills the daily list.
+    month = _get(client, staff_token_headers, f"{DASH}/", period="month")
+    assert month["issuances_by_day"] == []
+
+
 def test_dashboard_expiring_cards_and_list(
     client: TestClient, staff_token_headers: Headers, street_id: int
 ) -> None:

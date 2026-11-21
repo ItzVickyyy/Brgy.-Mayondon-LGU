@@ -274,13 +274,17 @@
         "average": "Karaniwan kada buwan",
         "peak": "Pinakamaraming buwan",
         "averageYear": "Karaniwan kada taon",
-        "peakYear": "Pinakamaraming taon"
+        "peakYear": "Pinakamaraming taon",
+        "averageWeek": "Karaniwan kada araw",
+        "peakWeek": "Pinakamaraming araw"
       },
       "table": {
         "month": "Buwan",
         "count": "Mga naisyung dokumento",
-        "year": "Taon"
+        "year": "Taon",
+        "day": "Araw"
       },
+      "descriptionWeek": "Araw-araw na dami ng naisyu, Linggo hanggang Sabado",
       "descriptionYear": "Taunang dami ng naisyu",
       "noteYear": "Isang taon ang bawat bar; binibilang ang kasalukuyang taon hanggang ngayon."
     },

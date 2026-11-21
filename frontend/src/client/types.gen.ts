@@ -529,6 +529,10 @@ export type DashboardPublic = {
      */
     issuances_over_time: Array<MonthCount>;
     /**
+     * Issuances By Day
+     */
+    issuances_by_day?: Array<DayCount>;
+    /**
      * By Document Type
      */
     by_document_type: Array<DocumentTypeCount>;
@@ -571,6 +575,20 @@ export type DashboardSummary = {
      * Open Drafts
      */
     open_drafts: number;
+};
+
+/**
+ * DayCount
+ */
+export type DayCount = {
+    /**
+     * Day
+     */
+    day: string;
+    /**
+     * Count
+     */
+    count: number;
 };
 
 /**

@@ -39,6 +39,11 @@ class MonthCount(SQLModel):
     count: int
 
 
+class DayCount(SQLModel):
+    day: str  # "YYYY-MM-DD"
+    count: int
+
+
 class ExpiringItem(SQLModel):
     kind: Literal["clearance", "barangay_id"]
     issuance_id: uuid.UUID
@@ -104,6 +109,9 @@ class DashboardPublic(SQLModel):
     period: PeriodInfo
     summary: DashboardSummary
     issuances_over_time: list[MonthCount]
+    # Only filled for the "week" period: Sunday to Saturday, one entry per day
+    # (days after today are zero). Empty for every other period.
+    issuances_by_day: list[DayCount] = []
     by_document_type: list[DocumentTypeCount]
     total_issued: int  # in the period; equals the sum of by_document_type
     expiring: list[ExpiringItem]  # soonest first, at most 10

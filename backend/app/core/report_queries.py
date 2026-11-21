@@ -75,6 +75,21 @@ def monthly_issued(session: Session, range_: DateRange) -> dict[str, int]:
     return dict(rows)
 
 
+def daily_issued(session: Session, range_: DateRange) -> dict[str, int]:
+    """Issued documents per day, keyed ``YYYY-MM-DD``."""
+    day = sa_func.to_char(col(Issuance.issue_date), "YYYY-MM-DD")
+    rows = session.exec(
+        select(day, sa_func.count())
+        .where(
+            Issuance.status == "issued",
+            col(Issuance.archived_at).is_(None),
+            *in_range(range_),
+        )
+        .group_by(day)
+    ).all()
+    return dict(rows)
+
+
 def first_issue_date(session: Session) -> date | None:
     return session.exec(
         select(sa_func.min(col(Issuance.issue_date))).where(

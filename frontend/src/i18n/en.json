@@ -274,13 +274,17 @@
         "average": "Monthly average",
         "peak": "Busiest month",
         "averageYear": "Yearly average",
-        "peakYear": "Busiest year"
+        "peakYear": "Busiest year",
+        "averageWeek": "Daily average",
+        "peakWeek": "Busiest day"
       },
       "table": {
         "month": "Month",
         "count": "Documents issued",
-        "year": "Year"
+        "year": "Year",
+        "day": "Day"
       },
+      "descriptionWeek": "Daily issuance volume, Sunday to Saturday",
       "descriptionYear": "Yearly issuance volume",
       "noteYear": "Each bar is one year; the current year counts up to today."
     },

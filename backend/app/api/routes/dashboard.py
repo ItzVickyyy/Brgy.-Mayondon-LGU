@@ -6,6 +6,7 @@ the page calls ``GET /activity?limit=5``, which already limits Staff to their
 own rows. Nothing is stored; every figure is computed on read.
 """
 
+from datetime import timedelta
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, Query
@@ -14,12 +15,13 @@ from sqlmodel import select
 
 from app.api.deps import SessionDep, require_permission
 from app.core.dates import today_manila
-from app.core.periods import Period, months_in, resolve_period
+from app.core.periods import DateRange, Period, months_in, resolve_period
 from app.core.permissions import Permission
 from app.core.population_queries import population_summary
 from app.core.report_queries import (
     count_by_type,
     count_expiring,
+    daily_issued,
     document_types,
     expiring_item,
     expiring_records,
@@ -36,6 +38,7 @@ from app.models_issuance import (
 from app.models_reports import (
     DashboardPublic,
     DashboardSummary,
+    DayCount,
     DocumentTypeCount,
     MonthCount,
 )
@@ -58,6 +61,11 @@ def dashboard(
 ) -> Any:
     today = today_manila()
     current = resolve_period(period, today)
+    if period == "week":
+        # The dashboard's week is Sunday to Saturday (the shared "week" period
+        # used by reports still starts on Monday).
+        sunday = today - timedelta(days=(today.weekday() + 1) % 7)
+        current = DateRange(sunday, sunday + timedelta(days=6))
     month_start = resolve_period("month", today)
 
     # Cards
@@ -108,6 +116,14 @@ def dashboard(
         for m in months
     ]
 
+    # Weekly bars: Sunday to Saturday, one per day (future days count zero)
+    by_day: list[DayCount] = []
+    if period == "week" and current.start is not None:
+        per_day = daily_issued(session, current)
+        for offset in range(7):
+            day = f"{current.start + timedelta(days=offset):%Y-%m-%d}"
+            by_day.append(DayCount(day=day, count=per_day.get(day, 0)))
+
     # Soonest-expiring work list (clearances and cards, not yet expired)
     stmt, kind_of_type = expiring_records(session, today, status="expiring_soon")
     rows = session.exec(stmt.limit(MAX_EXPIRING)).all()
@@ -119,6 +135,7 @@ def dashboard(
         period=period_info(period, today),
         summary=summary,
         issuances_over_time=over_time,
+        issuances_by_day=by_day,
         by_document_type=by_type,
         total_issued=sum(item.count for item in by_type),
         expiring=expiring,

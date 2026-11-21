@@ -63,6 +63,20 @@ function monthLabel(value: string, withYear = false) {
   return withYear ? `${name} ${year}` : name
 }
 
+// "2026-11-22" -> "Sun" (short) or "Sun, Nov 22" (full; the week is always the
+// current one, so the year is left out to keep the "Busiest day" tile short).
+function dayLabel(value: string, full = false) {
+  const [year, month, day] = value.split("-").map(Number)
+  const date = new Date(year, month - 1, day)
+  return full
+    ? formatLocaleDate(date, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      })
+    : formatLocaleDate(date, { weekday: "short" })
+}
+
 // "2026-12-06" is a business date, not a moment: format it without time zones.
 function dateLabel(value: string) {
   const [year, month, day] = value.split("-").map(Number)
@@ -218,26 +232,36 @@ function Dashboard() {
   // be a long scroll, so each bar becomes one year (the current year is counted
   // up to today). Shorter ranges and every other period stay monthly.
   const byYear = period === "overall" && months.length > 24
-  const bars = byYear
-    ? Object.values(
-        months.reduce<Record<string, { key: string; count: number }>>(
-          (acc, item) => {
-            const year = item.month.slice(0, 4)
-            acc[year] = {
-              key: year,
-              count: (acc[year]?.count ?? 0) + item.count,
-            }
-            return acc
-          },
-          {},
-        ),
-      ).map((item) => ({ ...item, label: item.key, fullLabel: item.key }))
-    : months.map((item) => ({
-        key: item.month,
+  // This Week: one bar per day, Sunday to Saturday (sent by the API).
+  const byDay = period === "week"
+  const days = dashboard?.issuances_by_day ?? []
+  const bars = byDay
+    ? days.map((item) => ({
+        key: item.day,
         count: item.count,
-        label: monthLabel(item.month),
-        fullLabel: monthLabel(item.month, true),
+        label: dayLabel(item.day),
+        fullLabel: dayLabel(item.day, true),
       }))
+    : byYear
+      ? Object.values(
+          months.reduce<Record<string, { key: string; count: number }>>(
+            (acc, item) => {
+              const year = item.month.slice(0, 4)
+              acc[year] = {
+                key: year,
+                count: (acc[year]?.count ?? 0) + item.count,
+              }
+              return acc
+            },
+            {},
+          ),
+        ).map((item) => ({ ...item, label: item.key, fullLabel: item.key }))
+      : months.map((item) => ({
+          key: item.month,
+          count: item.count,
+          label: monthLabel(item.month),
+          fullLabel: monthLabel(item.month, true),
+        }))
   const maxMonthly = Math.max(0, ...bars.map((item) => item.count))
   const { top: chartTop, ticks: chartTicks } = niceScale(maxMonthly)
   const monthsTotal = bars.reduce((sum, item) => sum + item.count, 0)
@@ -413,9 +437,11 @@ function Dashboard() {
               <SectionHeading
                 title={t("dashboard.overTime.title")}
                 description={t(
-                  byYear
-                    ? "dashboard.overTime.descriptionYear"
-                    : "dashboard.overTime.description",
+                  byDay
+                    ? "dashboard.overTime.descriptionWeek"
+                    : byYear
+                      ? "dashboard.overTime.descriptionYear"
+                      : "dashboard.overTime.description",
                 )}
               />
             </div>
@@ -457,9 +483,11 @@ function Dashboard() {
               />
               <OverTimeStat
                 label={t(
-                  byYear
-                    ? "dashboard.overTime.stats.averageYear"
-                    : "dashboard.overTime.stats.average",
+                  byDay
+                    ? "dashboard.overTime.stats.averageWeek"
+                    : byYear
+                      ? "dashboard.overTime.stats.averageYear"
+                      : "dashboard.overTime.stats.average",
                 )}
                 value={formatLocaleNumber(monthsAverage, {
                   maximumFractionDigits: 1,
@@ -467,9 +495,11 @@ function Dashboard() {
               />
               <OverTimeStat
                 label={t(
-                  byYear
-                    ? "dashboard.overTime.stats.peakYear"
-                    : "dashboard.overTime.stats.peak",
+                  byDay
+                    ? "dashboard.overTime.stats.peakWeek"
+                    : byYear
+                      ? "dashboard.overTime.stats.peakYear"
+                      : "dashboard.overTime.stats.peak",
                 )}
                 value={`${peakMonth.fullLabel} · ${formatLocaleNumber(peakMonth.count)}`}
               />
@@ -573,9 +603,11 @@ function Dashboard() {
                     <tr>
                       <th scope="col">
                         {t(
-                          byYear
-                            ? "dashboard.overTime.table.year"
-                            : "dashboard.overTime.table.month",
+                          byDay
+                            ? "dashboard.overTime.table.day"
+                            : byYear
+                              ? "dashboard.overTime.table.year"
+                              : "dashboard.overTime.table.month",
                         )}
                       </th>
                       <th scope="col">{t("dashboard.overTime.table.count")}</th>
