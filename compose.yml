@@ -1,7 +1,21 @@
+# Container logs are capped (decision 74). Docker keeps them without limit by
+# default, so after months of use they could fill the office computer's disk.
+# 3 files of 10 MB per container (30 MB at most) is far more than "docker compose
+# logs --tail 500", which status.ps1 and update.ps1 read, ever needs.
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   db:
     image: postgres:18
     restart: unless-stopped
+    logging: *default-logging
+    # Time for PostgreSQL to finish writing and shut down cleanly when the
+    # computer stops or the program is updated (Docker's default is 10 seconds).
+    stop_grace_period: 60s
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
       interval: 10s
@@ -21,6 +35,7 @@ services:
   backend:
     image: backend:latest
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       db:
         condition: service_healthy
@@ -82,6 +97,7 @@ services:
     image: caddy:2
     profiles: ["https"]
     restart: unless-stopped
+    logging: *default-logging
     depends_on:
       backend:
         condition: service_healthy

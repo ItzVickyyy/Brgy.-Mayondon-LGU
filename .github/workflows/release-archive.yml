@@ -46,3 +46,15 @@ jobs:
           cd "$RUNNER_TEMP/release"
           docker compose -f compose.yml run --rm --no-deps --entrypoint python backend -c \
             "import importlib.util as u; bad=[m for m in ('pytest','mypy','ruff','coverage') if u.find_spec(m)]; print('dev tools in image:', bad); raise SystemExit(bool(bad))"
+      - name: Check every service has capped logs
+        run: |
+          cd "$RUNNER_TEMP/release"
+          docker compose -f compose.yml --profile https config --format json > compose.json
+          python3 - <<'PY'
+          import json
+          services = json.load(open("compose.json"))["services"]
+          bad = [n for n, s in services.items()
+                 if not s.get("logging", {}).get("options", {}).get("max-size")]
+          print("services:", sorted(services), "without a log limit:", bad)
+          raise SystemExit(bool(bad) or not services)
+          PY
