@@ -246,7 +246,7 @@ function RecordsManagement() {
             {t("records.subtitle")}
           </p>
         </div>
-        <Button className="min-h-11" onClick={() => openForm(null)}>
+        <Button variant="cta" size="cta" onClick={() => openForm(null)}>
           <UserRound aria-hidden="true" />
           {t("records.addResident")}
         </Button>
@@ -463,7 +463,8 @@ function RecordsManagement() {
                         ) : (
                           <Button
                             type="button"
-                            className="min-h-11"
+                            variant="cta"
+                            size="cta"
                             onClick={() => openForm(null)}
                           >
                             <UserRound aria-hidden="true" />

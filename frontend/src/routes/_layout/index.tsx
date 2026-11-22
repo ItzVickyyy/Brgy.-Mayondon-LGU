@@ -334,7 +334,9 @@ function Dashboard() {
           {/* Call to action: opens Issuances with the New Issuance dialog ready. */}
           <Button
             type="button"
-            className="icon-react icon-spin h-12 w-full gap-2 px-6 text-base font-semibold shadow-md ring-2 ring-primary/25 ring-offset-2 ring-offset-background hover:shadow-lg sm:w-auto"
+            variant="cta"
+            size="cta"
+            className="icon-react icon-spin w-full sm:w-auto"
             onClick={() =>
               void navigate({ to: "/issuances", search: { new: 1 } })
             }

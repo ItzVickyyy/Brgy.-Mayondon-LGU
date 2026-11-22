@@ -317,7 +317,7 @@ function OfficialsManagement() {
             {t("admin.officials.subtitle")}
           </p>
         </div>
-        <Button onClick={openAddForm}>
+        <Button variant="cta" size="cta" onClick={openAddForm}>
           <UserRoundPlus aria-hidden="true" />
           {t("admin.officials.addButton")}
         </Button>

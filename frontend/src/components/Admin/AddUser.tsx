@@ -146,8 +146,8 @@ const AddUser = () => {
   return (
     <Dialog open={isOpen} onOpenChange={closeDialog}>
       <DialogTrigger asChild>
-        <Button className="min-h-11">
-          <Plus className="mr-2" />
+        <Button variant="cta" size="cta">
+          <Plus aria-hidden="true" />
           {t("admin.users.form.addButton")}
         </Button>
       </DialogTrigger>

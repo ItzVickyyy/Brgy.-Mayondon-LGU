@@ -401,7 +401,7 @@ export function LookupListPanel({
                         type="button"
                         size="icon"
                         variant="ghost"
-                        className="size-8 text-muted-foreground"
+                        className="size-9 text-brand"
                         aria-label={t("records.lookups.renameItem", {
                           name: item.name,
                         })}
@@ -414,7 +414,7 @@ export function LookupListPanel({
                         type="button"
                         size="icon"
                         variant="ghost"
-                        className="size-8 text-destructive hover:text-destructive"
+                        className="size-9 text-destructive hover:text-destructive"
                         aria-label={t("records.lookups.deleteItem", {
                           name: item.name,
                         })}

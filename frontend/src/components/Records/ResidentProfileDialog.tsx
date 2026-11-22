@@ -37,6 +37,7 @@ import {
   sexLabel,
 } from "@/lib/residentLabels"
 import { formatBusinessDate, residentAddress } from "@/lib/residents"
+import { cn } from "@/lib/utils"
 
 type ResidentProfileDialogProps = {
   resident: ResidentPublic | null
@@ -345,7 +346,11 @@ export function ResidentProfileDialog({
                       inline: "nearest",
                     })
                   }}
-                  className="min-h-11 shrink-0 rounded-md px-4 sm:min-h-10"
+                  className={cn(
+                    "min-h-11 shrink-0 rounded-md px-4 sm:min-h-10",
+                    profileTab !== tab.id &&
+                      "in-data-[slot=dialog-content]:border-transparent in-data-[slot=dialog-content]:bg-transparent in-data-[slot=dialog-content]:shadow-none",
+                  )}
                 >
                   {t(tab.labelKey)}
                 </Button>

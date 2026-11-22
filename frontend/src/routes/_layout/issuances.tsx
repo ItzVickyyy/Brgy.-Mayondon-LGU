@@ -69,8 +69,9 @@ function IssuancesManagement() {
             {t("issuances.settingsButton")}
           </Button>
           <Button
-            size="default"
-            className="min-h-11 w-full sm:w-auto"
+            variant="cta"
+            size="cta"
+            className="w-full sm:w-auto"
             data-shortcut="new-issuance"
             onClick={() => setIsSimplifiedDialogOpen(true)}
           >
