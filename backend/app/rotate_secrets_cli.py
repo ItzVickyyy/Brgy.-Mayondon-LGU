@@ -36,6 +36,16 @@ Parts (``--parts``, default all three):
                      When ``.env`` has no such key yet, this part makes one (use
                      it once to set two-factor up). Rollback puts the secrets back.
 
+* ``data-key``       (not in the default) a new ``DATA_ENCRYPTION_KEY``: the key
+                     that locks the health condition of medical assistance
+                     records. Every stored value is re-encrypted with the new
+                     key in ONE database transaction that is saved only after
+                     ``.env`` is replaced; values still saved as plain text are
+                     encrypted as well. When ``.env`` has no such key yet, this
+                     part makes one. **Copy the new ``.env`` to the USB drive
+                     straight away:** the old copy can no longer open the
+                     health conditions. Rollback puts the values back.
+
 Nothing here prints a secret. Afterwards restart the backend (``apply`` prints
 the exact command). Exit codes: 0 = done (or plan fine), 1 = failed or refused,
 2 = bad option.
@@ -59,14 +69,14 @@ from psycopg import sql
 from sqlalchemy.engine import URL, Engine, make_url
 from sqlmodel import Session, create_engine, select
 
-from app.core import mfa
+from app.core import field_crypto, mfa
 from app.core.audit import record_audit_event
 from app.core.security import DEFAULT_PASSWORD, get_password_hash
 from app.models import User, UserRole
 
 PARTS = ("secret-key", "db-password", "admin-password")
 # Chosen only by name (--parts mfa-key): it is not part of "everything".
-OPTIONAL_PARTS = ("mfa-key",)
+OPTIONAL_PARTS = ("mfa-key", "data-key")
 MIN_ADMIN_PASSWORD_LENGTH = 12
 DEFAULT_MAX_BACKUP_AGE_MINUTES = 120
 BACKUP_FILE = re.compile(r"^mayondon-db-\d{8}-\d{6}-\d{3}\.dump(\.enc)?$")
@@ -165,6 +175,7 @@ def check_env(
         "db-password": ["POSTGRES_PASSWORD"],
         "admin-password": ["FIRST_SUPERUSER", "FIRST_SUPERUSER_PASSWORD"],
         "mfa-key": [],
+        "data-key": [],
     }
     for part in parts:
         for key in required[part]:
@@ -270,6 +281,15 @@ def build_plan(
             "Every stored authenticator secret is re-encrypted with it in one "
             "transaction, saved only after .env is replaced. Nobody has to set "
             "two-factor up again."
+        )
+    if "data-key" in parts:
+        plan.lines.append(
+            "DATA_ENCRYPTION_KEY: a new random value (made when .env has none). "
+            "Every stored health condition is re-encrypted with it in one "
+            "transaction, saved only after .env is replaced; values saved as plain "
+            "text are encrypted too. Afterwards copy the new .env to the USB drive: "
+            "the old copy can no longer open them. A backup made BEFORE this holds the "
+            "values under the old key, so keep the old .env together with it."
         )
     plan.lines.append(
         "The old .env is saved first as .env.before-rotation-<time> next to it."
@@ -387,6 +407,89 @@ def check_mfa_secrets_readable(url: URL, password: str, key: str) -> int:
             raise RotationError(
                 "A stored authenticator secret cannot be read with the "
                 "MFA_ENCRYPTION_KEY in .env. Nothing was changed."
+            )
+    return len(rows)
+
+
+def _health_plain(stored: str, key: str) -> str | None:
+    """The readable text of a stored health condition, or None when it cannot be read."""
+    if not stored.startswith(field_crypto.PREFIX):
+        return stored  # saved before any key existed
+    return field_crypto.decrypt_text(stored, key=key)
+
+
+def read_health_conditions(url: URL, password: str) -> list[tuple[uuid.UUID, str]]:
+    """Every stored health condition (encrypted or plain), as saved."""
+    with connect(url, password) as connection:
+        rows = connection.execute(
+            "SELECT issuance_id, health_condition FROM issuance_assistance "
+            "WHERE health_condition IS NOT NULL ORDER BY issuance_id"
+        ).fetchall()
+    return [(row[0], row[1]) for row in rows]
+
+
+def begin_health_reencrypt(
+    url: URL, password: str, from_key: str, to_key: str
+) -> psycopg.Connection:
+    """Re-encrypt every health condition under ``to_key``, but do NOT save yet.
+
+    ``to_key`` empty means "store as plain text" (a rollback to a ``.env`` that had no
+    key). Returns the open transaction; the caller commits it once ``.env`` has been
+    replaced (or rolls it back). Raises RotationError (and rolls back) if any value
+    cannot be read with ``from_key`` or does not survive a test decryption.
+    """
+    connection = psycopg.connect(
+        host=url.host,
+        port=url.port or 5432,
+        dbname=url.database,
+        user=url.username,
+        password=password,
+        connect_timeout=10,
+        autocommit=False,
+    )
+    try:
+        rows = connection.execute(
+            "SELECT issuance_id, health_condition FROM issuance_assistance "
+            "WHERE health_condition IS NOT NULL FOR UPDATE"
+        ).fetchall()
+        for issuance_id, stored in rows:
+            plain = _health_plain(stored, from_key)
+            if plain is None:
+                raise RotationError(
+                    "A stored health condition cannot be read with the "
+                    "DATA_ENCRYPTION_KEY in .env. Nothing was changed."
+                )
+            if to_key:
+                new_value = field_crypto.encrypt_text(plain, key=to_key)
+                if field_crypto.decrypt_text(new_value, key=to_key) != plain:
+                    raise RotationError(
+                        "A health condition did not survive a test decryption. "
+                        "Nothing was changed."
+                    )
+            else:
+                new_value = plain
+            connection.execute(
+                "UPDATE issuance_assistance SET health_condition = %s "
+                "WHERE issuance_id = %s",
+                (new_value, issuance_id),
+            )
+    except BaseException:
+        connection.rollback()
+        connection.close()
+        raise
+    return connection
+
+
+def check_health_conditions_readable(url: URL, password: str, key: str) -> int:
+    """How many health conditions exist; raises when any cannot be read with ``key``."""
+    rows = read_health_conditions(url, password)
+    for _issuance_id, stored in rows:
+        if _health_plain(stored, key) is None:
+            raise RotationError(
+                "A stored health condition cannot be read with the "
+                "DATA_ENCRYPTION_KEY in .env"
+                + ("" if key else " (there is none)")
+                + ". Nothing was changed."
             )
     return len(rows)
 
@@ -510,6 +613,10 @@ def apply_rotation(
         # Prove every stored secret can be read BEFORE anything changes.
         check_mfa_secrets_readable(url, current_db_password, old_mfa_key)
 
+    old_data_key = env_get(text, "DATA_ENCRYPTION_KEY") or ""
+    if "data-key" in parts:
+        check_health_conditions_readable(url, current_db_password, old_data_key)
+
     # Ask for the administrator's new password BEFORE changing anything.
     admin_password: str | None = None
     admin_email = env_get(text, "FIRST_SUPERUSER") or ""
@@ -548,13 +655,18 @@ def apply_rotation(
         new_mfa_key = new_secret_key()
         new_text = env_set(new_text, "MFA_ENCRYPTION_KEY", new_mfa_key)
         changed.append("MFA_ENCRYPTION_KEY")
+    new_data_key = ""
+    if "data-key" in parts:
+        new_data_key = new_secret_key()
+        new_text = env_set(new_text, "DATA_ENCRYPTION_KEY", new_data_key)
+        changed.append("DATA_ENCRYPTION_KEY")
 
     old_copy = env_file.with_name(f"{env_file.name}.before-rotation-{_stamp(now)}")
     shutil.copy2(env_file, old_copy)
     old_copy.chmod(0o600)
 
     database_changed = False
-    mfa_transaction: psycopg.Connection | None = None
+    transactions: list[psycopg.Connection] = []
     env_replaced = False
     try:
         if "db-password" in parts:
@@ -565,17 +677,21 @@ def apply_rotation(
             if can_connect(url, current_db_password):
                 raise RotationError("the database still accepts the old password")
         if "mfa-key" in parts:
-            mfa_transaction = begin_mfa_reencrypt(
-                url, new_db_password, old_mfa_key, new_mfa_key
+            transactions.append(
+                begin_mfa_reencrypt(url, new_db_password, old_mfa_key, new_mfa_key)
+            )
+        if "data-key" in parts:
+            transactions.append(
+                begin_health_reencrypt(url, new_db_password, old_data_key, new_data_key)
             )
         _replace_env(env_file, new_text)
         env_replaced = True
-        if mfa_transaction is not None:
-            mfa_transaction.commit()
+        for transaction in transactions:
+            transaction.commit()
     except Exception as exc:
-        if mfa_transaction is not None:
+        for transaction in transactions:
             try:
-                mfa_transaction.rollback()
+                transaction.rollback()
             except psycopg.Error:
                 pass
         if env_replaced:
@@ -621,7 +737,9 @@ def rollback_rotation(
     steps: list[str] = []
     current_mfa_key = env_get(read_text_exact(env_file), "MFA_ENCRYPTION_KEY") or ""
     old_mfa_key = env_get(old_text, "MFA_ENCRYPTION_KEY") or ""
-    mfa_transaction: psycopg.Connection | None = None
+    current_data_key = env_get(read_text_exact(env_file), "DATA_ENCRYPTION_KEY") or ""
+    old_data_key = env_get(old_text, "DATA_ENCRYPTION_KEY") or ""
+    transactions: list[psycopg.Connection] = []
     if old_password != current_db_password:
         if not can_connect(url, current_db_password):
             raise RotationError(
@@ -634,6 +752,8 @@ def rollback_rotation(
         raise RotationError(
             "The database does not accept the old password after the change."
         )
+    mfa_back = False
+    health_back = False
     if current_mfa_key != old_mfa_key:
         stored = read_mfa_secrets(url, old_password)
         if stored and not old_mfa_key:
@@ -643,17 +763,27 @@ def rollback_rotation(
                 "(account_recovery_cli reset-mfa), then roll back."
             )
         if stored:
-            mfa_transaction = begin_mfa_reencrypt(
-                url, old_password, current_mfa_key, old_mfa_key
+            transactions.append(
+                begin_mfa_reencrypt(url, old_password, current_mfa_key, old_mfa_key)
             )
+            mfa_back = True
+    if current_data_key != old_data_key and read_health_conditions(url, old_password):
+        # An old .env without a key gets its values back as plain text, as before.
+        transactions.append(
+            begin_health_reencrypt(url, old_password, current_data_key, old_data_key)
+        )
+        health_back = True
     try:
         _replace_env(env_file, old_text)
-        if mfa_transaction is not None:
-            mfa_transaction.commit()
+        for transaction in transactions:
+            transaction.commit()
+        if mfa_back:
             steps.append("authenticator secrets put back under the old key")
+        if health_back:
+            steps.append("health conditions put back under the old key")
     except Exception:
-        if mfa_transaction is not None:
-            mfa_transaction.rollback()
+        for transaction in transactions:
+            transaction.rollback()
         raise
     steps.append(".env restored")
     return steps
@@ -759,6 +889,13 @@ def main(argv: list[str] | None = None) -> int:
             say("once you have checked the system works.")
             say("NEXT: docker compose -f compose.yml up -d --force-recreate")
             say("Then sign in again and make a new encrypted backup.")
+            if "DATA_ENCRYPTION_KEY" in result.changed:
+                say(
+                    "IMPORTANT: copy the NEW .env to the USB drive now. The old copy can"
+                )
+                say(
+                    "no longer open the health conditions; without this key they are lost."
+                )
             return 0
         if args.confirm != "ROLLBACK" or not args.old_env:
             say("Not done: give --old-env FILE and --confirm ROLLBACK.", error=True)
