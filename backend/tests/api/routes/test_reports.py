@@ -217,6 +217,16 @@ def test_dashboard_population_follows_residents(
         before["sectoral"]["senior_citizens"] + 1
     )
     assert after["sectoral"]["children"] == before["sectoral"]["children"] + 1
+    assert set(after["sectoral"]) == {
+        "children",
+        "teens",
+        "adults",
+        "senior_citizens",
+        "pwd",
+        "solo_parents",
+        "urban_poor",
+        "indigenous_people",
+    }
 
     brackets = {r["bracket"]: r["count"] for r in after["age_brackets"]}
     earlier = {r["bracket"]: r["count"] for r in before["age_brackets"]}

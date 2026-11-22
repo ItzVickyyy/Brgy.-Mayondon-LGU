@@ -57,6 +57,10 @@ const dashboard = {
       senior_citizens: 2100,
       children: 5000,
       solo_parents: 400,
+      teens: 800,
+      adults: 4000,
+      urban_poor: 150,
+      indigenous_people: 60,
     },
   },
 }

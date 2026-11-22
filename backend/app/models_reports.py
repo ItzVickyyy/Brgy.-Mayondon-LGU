@@ -80,10 +80,14 @@ class CivilStatusCount(SQLModel):
 
 
 class SectoralIndicators(SQLModel):
-    pwd: int
+    children: int  # age 0 to 12
+    teens: int  # age 13 to 17
+    adults: int  # age 18 to 59
     senior_citizens: int  # 60 or older, or in the Senior Citizens sector
-    children: int  # under 18
+    pwd: int
     solo_parents: int
+    urban_poor: int
+    indigenous_people: int
 
 
 class DashboardPopulation(SQLModel):

@@ -2804,21 +2804,37 @@ export type SectorSummary = {
  */
 export type SectoralIndicators = {
     /**
-     * Pwd
+     * Children
      */
-    pwd: number;
+    children: number;
+    /**
+     * Teens
+     */
+    teens: number;
+    /**
+     * Adults
+     */
+    adults: number;
     /**
      * Senior Citizens
      */
     senior_citizens: number;
     /**
-     * Children
+     * Pwd
      */
-    children: number;
+    pwd: number;
     /**
      * Solo Parents
      */
     solo_parents: number;
+    /**
+     * Urban Poor
+     */
+    urban_poor: number;
+    /**
+     * Indigenous People
+     */
+    indigenous_people: number;
 };
 
 /**

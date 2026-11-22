@@ -48,7 +48,16 @@ const dashboard = {
     age_brackets: [],
     by_purok: [],
     civil_status: [],
-    sectoral: { pwd: 0, senior_citizens: 0, children: 0, solo_parents: 0 },
+    sectoral: {
+      children: 0,
+      teens: 0,
+      adults: 0,
+      senior_citizens: 0,
+      pwd: 0,
+      solo_parents: 0,
+      urban_poor: 0,
+      indigenous_people: 0,
+    },
   },
 }
 

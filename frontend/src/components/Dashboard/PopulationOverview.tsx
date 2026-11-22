@@ -1,10 +1,15 @@
+import type { ParseKeys } from "i18next"
 import {
   Accessibility,
   Baby,
+  Building2,
   ChartPie,
+  Feather,
+  GraduationCap,
   House,
   MapPin,
   PersonStanding,
+  User,
   UsersRound,
   VenusAndMars,
   Vote,
@@ -241,6 +246,63 @@ function Legend({
     </ul>
   )
 }
+
+// Two rows of four: age groups first, then the sectors.
+const sectorTiles = [
+  {
+    key: "children",
+    label: "dashboard.population.children",
+    icon: Baby,
+    tone: "amber",
+  },
+  {
+    key: "teens",
+    label: "dashboard.population.teens",
+    icon: GraduationCap,
+    tone: "teal",
+  },
+  {
+    key: "adults",
+    label: "dashboard.population.adults",
+    icon: User,
+    tone: "blue",
+  },
+  {
+    key: "senior_citizens",
+    label: "dashboard.population.seniorCitizens",
+    icon: PersonStanding,
+    tone: "green",
+  },
+  {
+    key: "pwd",
+    label: "dashboard.population.pwd",
+    icon: Accessibility,
+    tone: "blue",
+  },
+  {
+    key: "solo_parents",
+    label: "dashboard.population.soloParents",
+    icon: UsersRound,
+    tone: "violet",
+  },
+  {
+    key: "urban_poor",
+    label: "dashboard.population.urbanPoor",
+    icon: Building2,
+    tone: "rose",
+  },
+  {
+    key: "indigenous_people",
+    label: "dashboard.population.indigenousPeople",
+    icon: Feather,
+    tone: "amber",
+  },
+] as const satisfies readonly {
+  key: keyof NonNullable<DashboardPopulation["sectoral"]>
+  label: ParseKeys
+  icon: typeof UsersRound
+  tone: StatTone
+}[]
 
 function SectorTile({
   label,
@@ -522,61 +584,27 @@ export function PopulationOverview({
           <CardTitle icon={UsersRound}>
             {t("dashboard.population.sectoral")}
           </CardTitle>
-          <div className="mt-3 grid flex-1 grid-cols-2 gap-3 lg:grid-cols-4">
-            {sectoral ? (
-              <>
-                <SectorTile
-                  label={t("dashboard.population.pwd")}
-                  value={sectoral.pwd}
-                  total={total}
-                  icon={Accessibility}
-                  tone="blue"
-                  faded={sectorActive !== null && sectorActive !== "pwd"}
-                  onActive={(on) => setSectorActive(on ? "pwd" : null)}
-                />
-                <SectorTile
-                  label={t("dashboard.population.seniorCitizens")}
-                  value={sectoral.senior_citizens}
-                  total={total}
-                  icon={PersonStanding}
-                  tone="green"
-                  faded={
-                    sectorActive !== null && sectorActive !== "senior_citizens"
-                  }
-                  onActive={(on) =>
-                    setSectorActive(on ? "senior_citizens" : null)
-                  }
-                />
-                <SectorTile
-                  label={t("dashboard.population.children")}
-                  value={sectoral.children}
-                  total={total}
-                  icon={Baby}
-                  tone="amber"
-                  faded={sectorActive !== null && sectorActive !== "children"}
-                  onActive={(on) => setSectorActive(on ? "children" : null)}
-                />
-                <SectorTile
-                  label={t("dashboard.population.soloParents")}
-                  value={sectoral.solo_parents}
-                  total={total}
-                  icon={UsersRound}
-                  tone="violet"
-                  faded={
-                    sectorActive !== null && sectorActive !== "solo_parents"
-                  }
-                  onActive={(on) => setSectorActive(on ? "solo_parents" : null)}
-                />
-              </>
-            ) : (
-              Array.from({ length: 4 }, (_, index) => (
-                <Skeleton
-                  key={index}
-                  className="h-32 w-full"
-                  aria-hidden="true"
-                />
-              ))
-            )}
+          <div className="mt-3 grid flex-1 grid-cols-2 gap-3 sm:grid-cols-4">
+            {sectoral
+              ? sectorTiles.map(({ key, label, icon, tone }) => (
+                  <SectorTile
+                    key={key}
+                    label={t(label)}
+                    value={sectoral[key]}
+                    total={total}
+                    icon={icon}
+                    tone={tone}
+                    faded={sectorActive !== null && sectorActive !== key}
+                    onActive={(on) => setSectorActive(on ? key : null)}
+                  />
+                ))
+              : Array.from({ length: 8 }, (_, index) => (
+                  <Skeleton
+                    key={index}
+                    className="h-28 w-full"
+                    aria-hidden="true"
+                  />
+                ))}
           </div>
         </article>
       </div>

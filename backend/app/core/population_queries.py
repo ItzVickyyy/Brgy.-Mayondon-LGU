@@ -40,6 +40,12 @@ CIVIL_STATUS_ORDER = ["Single", "Married", "Widow/Widower", "Legally Separated"]
 PWD_WORDS = ("disabilit", "pwd")
 SOLO_PARENT_WORDS = ("solo parent",)
 SENIOR_WORDS = ("senior",)
+URBAN_POOR_WORDS = ("urban poor",)
+INDIGENOUS_WORDS = ("indigenous",)
+
+# Age groups of the dashboard's sectoral card (seniors use SENIOR_AGE).
+CHILD_MAX_AGE = 12
+TEEN_MAX_AGE = 17
 
 
 def age_on(birthdate: date, today: date) -> int:
@@ -85,6 +91,8 @@ def population_summary(session: Session, today: date) -> DashboardPopulation:
     pwd_ids = {i for i, n in sectors.items() if _matches(n, PWD_WORDS)}
     solo_ids = {i for i, n in sectors.items() if _matches(n, SOLO_PARENT_WORDS)}
     senior_ids = {i for i, n in sectors.items() if _matches(n, SENIOR_WORDS)}
+    urban_ids = {i for i, n in sectors.items() if _matches(n, URBAN_POOR_WORDS)}
+    indigenous_ids = {i for i, n in sectors.items() if _matches(n, INDIGENOUS_WORDS)}
     links = session.exec(
         select(col(ResidentSector.resident_id), col(ResidentSector.sector_id))
     ).all()
@@ -98,7 +106,7 @@ def population_summary(session: Session, today: date) -> DashboardPopulation:
     brackets = [0] * len(AGE_BRACKETS)
     voters = voters_added = added = 0
     household_first: dict[HouseholdKey, date] = {}
-    pwd = seniors = children = solo = 0
+    pwd = seniors = children = teens = adults = solo = urban = indigenous = 0
 
     for resident in residents:
         rid = resident.id
@@ -128,10 +136,14 @@ def population_summary(session: Session, today: date) -> DashboardPopulation:
                 if age >= low and (high is None or age <= high):
                     brackets[index] += 1
                     break
-            children += age < 18
+            children += age <= CHILD_MAX_AGE
+            teens += CHILD_MAX_AGE < age <= TEEN_MAX_AGE
+            adults += TEEN_MAX_AGE < age < SENIOR_AGE
         mine = sector_of.get(rid, set())
         pwd += bool(mine & pwd_ids)
         solo += bool(mine & solo_ids)
+        urban += bool(mine & urban_ids)
+        indigenous += bool(mine & indigenous_ids)
         seniors += bool((age is not None and age >= SENIOR_AGE) or mine & senior_ids)
 
     total = len(residents)
@@ -161,6 +173,13 @@ def population_summary(session: Session, today: date) -> DashboardPopulation:
         by_purok=[PurokCount(purok=p, count=n) for p, n in sorted(puroks.items())],
         civil_status=civil_rows,
         sectoral=SectoralIndicators(
-            pwd=pwd, senior_citizens=seniors, children=children, solo_parents=solo
+            children=children,
+            teens=teens,
+            adults=adults,
+            senior_citizens=seniors,
+            pwd=pwd,
+            solo_parents=solo,
+            urban_poor=urban,
+            indigenous_people=indigenous,
         ),
     )
