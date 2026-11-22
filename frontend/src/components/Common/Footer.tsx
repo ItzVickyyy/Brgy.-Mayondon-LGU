@@ -2,13 +2,14 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import {
+  DevNoteDialog,
   PrivacyDialog,
   TermsDialog,
   VersionDialog,
 } from "@/components/Common/InfoDialogs"
 import { SITE } from "@/config/site"
 
-type Popup = "version" | "terms" | "privacy" | null
+type Popup = "version" | "devNote" | "terms" | "privacy" | null
 
 const linkClass =
   "rounded-sm text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -29,6 +30,7 @@ export function Footer({ variant = "default" }: FooterProps) {
   const dialogs = (
     <>
       <VersionDialog open={popup === "version"} onOpenChange={close} />
+      <DevNoteDialog open={popup === "devNote"} onOpenChange={close} />
       <TermsDialog open={popup === "terms"} onOpenChange={close} />
       <PrivacyDialog open={popup === "privacy"} onOpenChange={close} />
     </>
@@ -48,6 +50,16 @@ export function Footer({ variant = "default" }: FooterProps) {
             onClick={() => setPopup("version")}
           >
             {t("footer.version")}
+          </button>
+          <span aria-hidden="true" className="text-xs text-muted-foreground/50">
+            •
+          </span>
+          <button
+            type="button"
+            className={authLink}
+            onClick={() => setPopup("devNote")}
+          >
+            {t("footer.devNote")}
           </button>
           <span aria-hidden="true" className="text-xs text-muted-foreground/50">
             •
@@ -94,6 +106,13 @@ export function Footer({ variant = "default" }: FooterProps) {
             onClick={() => setPopup("version")}
           >
             {t("footer.version")}
+          </button>
+          <button
+            type="button"
+            className={linkClass}
+            onClick={() => setPopup("devNote")}
+          >
+            {t("footer.devNote")}
           </button>
           <button
             type="button"

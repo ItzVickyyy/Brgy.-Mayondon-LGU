@@ -58,5 +58,7 @@ frontend/** text eol=lf
 /frontend/tsconfig.build.json -export-ignore
 /frontend/tsconfig.node.json -export-ignore
 /frontend/vite.config.ts -export-ignore
+# Git writes the commit and its date into this file when the archive is made (see vite.config.ts).
+/frontend/build-info.json -export-ignore export-subst
 /frontend/public/** -export-ignore
 /frontend/src/** -export-ignore

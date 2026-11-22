@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react"
 
+import { AboutButton } from "@/components/Common/AboutButton"
 import { Appearance } from "@/components/Common/Appearance"
 import { FullscreenButton } from "@/components/Common/FullscreenButton"
 import { Logo } from "@/components/Common/Logo"
@@ -180,6 +181,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
           >
             {SITE.systemName}
           </p>
+
+          <div className="auth-rise" style={delay(340)}>
+            <AboutButton className="border border-foreground/15 bg-white/50 text-foreground/80 backdrop-blur hover:bg-white/80 dark:border-white/20 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10" />
+          </div>
         </div>
       </aside>
 
@@ -207,6 +212,10 @@ export function AuthLayout({ children }: AuthLayoutProps) {
                 <p className="text-lg font-semibold">{BRAND_NAME}</p>
                 <p className="text-sm text-muted-foreground">{SITE.location}</p>
               </div>
+            </div>
+
+            <div className="auth-rise -mt-3 mb-4 lg:hidden" style={delay(40)}>
+              <AboutButton className="-ml-4 text-brand hover:bg-brand/10" />
             </div>
 
             <div className="rounded-2xl border bg-card p-7 shadow-xl shadow-primary/5 transition-shadow duration-300 hover:shadow-2xl hover:shadow-primary/15 sm:p-9">

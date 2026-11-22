@@ -191,6 +191,7 @@
     "emailPlaceholder": "Ilagay ang iyong email address",
     "passwordLabel": "Password",
     "passwordPlaceholder": "Ilagay ang iyong password",
+    "about": "Tungkol sa sistemang ito",
     "forgotPassword": "Nakalimutan ang password?",
     "submit": "Mag-sign in",
     "invalidEmail": "Hindi wastong email address",
@@ -202,6 +203,7 @@
   "footer": {
     "ariaLabel": "Footer",
     "version": "Bersyon",
+    "devNote": "Tala ng mga Developer",
     "terms": "Mga Tuntunin ng Paggamit",
     "privacy": "Patakaran sa Privacy"
   },

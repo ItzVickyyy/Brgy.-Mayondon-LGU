@@ -191,6 +191,7 @@
     "emailPlaceholder": "Enter your email address",
     "passwordLabel": "Password",
     "passwordPlaceholder": "Enter your password",
+    "about": "About this system",
     "forgotPassword": "Forgot password?",
     "submit": "Sign in",
     "invalidEmail": "Invalid email address",
@@ -202,6 +203,7 @@
   "footer": {
     "ariaLabel": "Footer",
     "version": "Version",
+    "devNote": "Dev Note",
     "terms": "Terms of Use",
     "privacy": "Privacy Policy"
   },

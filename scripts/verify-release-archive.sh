@@ -28,6 +28,11 @@ for d in backend/app/alembic/versions frontend/public/assets/print-forms; do
   a=$(git ls-files "$d" | wc -l); b=$(find "$tmp/$d" -type f 2>/dev/null | wc -l)
   [ "$a" = "$b" ] || { echo "$d: $b of $a files in the release"; fail=1; }
 done
+# Git must have written the commit into the version file (export-subst), because the office
+# computer has no .git folder to ask. A literal "$Format" means the .gitattributes line is lost.
+if grep -q 'Format:' "$tmp/frontend/build-info.json" 2>/dev/null; then
+  echo "frontend/build-info.json was not filled in by git archive (check .gitattributes export-subst)"; fail=1
+fi
 # None of these may ship.
 for f in compose.override.yml compose.dev.yml .env.dev.example .github docs/Barangay-softcopies \
   backend/tests frontend/tests packages scripts/dev-db.ps1 scripts/test.sh scripts/generate-client.sh \

@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { DEV_GUIDES, DEV_TEAM, type DevNotePerson } from "@/config/dev-note"
 import { SITE } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
@@ -565,11 +566,28 @@ export function LearnMoreDialog(props: DialogProps) {
 }
 
 export function VersionDialog(props: DialogProps) {
+  const known = __APP_COMMIT__ !== "unknown"
   return (
     <InfoDialog {...props} title="Version" description={SITE.systemName}>
       <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
         <dt className="text-muted-foreground">Version</dt>
         <dd className="font-medium">{__APP_VERSION__}</dd>
+        <dt className="text-muted-foreground">Release</dt>
+        <dd className="font-medium">
+          {known ? (
+            <span className="font-mono" data-testid="version-commit">
+              {__APP_COMMIT__}
+            </span>
+          ) : (
+            "Development copy (not an installed release)"
+          )}
+          {known && __APP_RELEASED__ ? (
+            <span className="font-normal text-muted-foreground">
+              {" "}
+              · saved {__APP_RELEASED__}
+            </span>
+          ) : null}
+        </dd>
         <dt className="text-muted-foreground">Built on</dt>
         <dd className="font-medium">{__BUILD_DATE__}</dd>
         <dt className="text-muted-foreground">Status</dt>
@@ -577,6 +595,145 @@ export function VersionDialog(props: DialogProps) {
           Prototype. Not yet approved for real data.
         </dd>
       </dl>
+      <p className="text-xs text-muted-foreground">
+        The release code changes every time the system is updated on this
+        computer. Quote it when you report a problem.
+      </p>
+    </InfoDialog>
+  )
+}
+
+export function AboutDialog(props: DialogProps) {
+  return (
+    <InfoDialog
+      {...props}
+      title="About this system"
+      description={SITE.systemName}
+    >
+      <Section title="What it is">
+        <p>
+          A records and document issuance system for {SITE.fullName},{" "}
+          {SITE.location}. It replaces retyping the same resident details on
+          every form with one record that is filled in once and reused.
+        </p>
+      </Section>
+      <Section title="What it does">
+        <ul className="list-disc space-y-1 pl-5">
+          <li>
+            Keeps resident records, with search and import of the barangay's
+            existing masterlist.
+          </li>
+          <li>
+            Prepares and prints barangay documents such as clearances,
+            certificates and Barangay IDs on the office's own forms, and keeps a
+            history with issue and expiry dates.
+          </li>
+          <li>
+            Shows what was issued, what is about to expire, and what needs
+            attention, with reports for the barangay officials.
+          </li>
+          <li>Records who did what, and takes backups of the data.</li>
+        </ul>
+      </Section>
+      <Section title="Who it is for">
+        <p>
+          Barangay office personnel only. Accounts are created by the System
+          Administrator; there is no public sign-up and residents do not sign
+          in.
+        </p>
+      </Section>
+      <Section title="Where the data lives">
+        <p>
+          The system runs on a computer in the barangay office and is opened
+          from other office computers over the local network. It does not need
+          the internet, and resident information stays in the office.
+        </p>
+      </Section>
+      <Section title="What it does not do">
+        <p>
+          It does not sign or stamp documents; the Punong Barangay's signature
+          and the dry seal stay manual. It is a separate system and is not
+          connected to LGUSS-BIMS.
+        </p>
+      </Section>
+      <Section title="Who made it">
+        <p>
+          Built for {SITE.fullName} by students of {SITE.developedBy}. See the
+          Dev Note in the footer for the story.
+        </p>
+      </Section>
+    </InfoDialog>
+  )
+}
+
+function PersonList({ people }: { people: readonly DevNotePerson[] }) {
+  return (
+    <ul className="space-y-2">
+      {people.map((person) => (
+        <li key={person.name} className="rounded-lg border bg-card px-3 py-2">
+          <p className="font-semibold">{person.name}</p>
+          <p className="text-xs text-muted-foreground">{person.role}</p>
+          <p className="mt-1">{person.contribution}</p>
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+export function DevNoteDialog(props: DialogProps) {
+  return (
+    <InfoDialog
+      {...props}
+      title="Dev Note"
+      description="The story behind the system"
+    >
+      <Section title="How it started">
+        <p>
+          This system began as a class project and became something more. Our
+          instructors assigned us a real client, {SITE.fullName}, and on October
+          19 and 20, 2026 we went to the barangay to interview the people who do
+          this work every day. We asked how a document is prepared today, what
+          slows them down, and what a system would have to do before they could
+          trust it.
+        </p>
+      </Section>
+      <Section title="What we promised">
+        <p>
+          We wrote the Creative Brief from those interviews, and our professor
+          signed it. We chose to build a few things that fully work instead of
+          many things that half work: resident records, document issuance and
+          printing, the issuance history, and backup and restore. We also
+          promised never to invent what the barangay had not told us, so
+          anything we were unsure about stayed a question for the client.
+        </p>
+      </Section>
+      <Section title="How we built it">
+        <p>
+          We built it to run in the barangay office with no internet, because
+          that is what the office asked for. Documents are printed onto the
+          barangay's own forms, every change to a record is written down so it
+          can be reviewed later, and resident information is treated as
+          sensitive: we used made-up data for every test and demo.
+        </p>
+      </Section>
+      <Section title="The team">
+        <PersonList people={DEV_TEAM} />
+      </Section>
+      <Section title="Those who guided us">
+        <PersonList people={DEV_GUIDES} />
+        <p>
+          Thank you also to the officials and staff of {SITE.fullName}, who gave
+          their time, showed us their real forms and told us what the work is
+          really like.
+        </p>
+      </Section>
+      <Section title="A last word">
+        <p>
+          This is a prototype from {SITE.developedBy}. It is not yet approved
+          for real resident data. If something is wrong or missing, tell the
+          System Administrator, so the next version can be better.
+        </p>
+      </Section>
     </InfoDialog>
   )
 }
