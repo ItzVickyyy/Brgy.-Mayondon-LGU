@@ -1,4 +1,5 @@
 {
   "commit": "$Format:%h$",
+  "full": "$Format:%H$",
   "released": "$Format:%cs$"
 }

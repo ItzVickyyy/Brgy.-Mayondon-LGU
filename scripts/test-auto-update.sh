@@ -97,6 +97,14 @@ run() {
   rm -rf "$tmp/app" "$tmp/state"; mkdir -p "$tmp/app" "$tmp/state"
   cp -a "$tmp/base/." "$tmp/app/"; echo 'x=1' > "$tmp/app/.env"
   [ "$inst" = none ] || echo "$inst" > "$tmp/app/.installed-commit"
+  # FAILED_SHA: a version an earlier run recorded as failed here
+  if [ -n "${FAILED_SHA:-}" ]; then
+    mkdir -p "$tmp/app/backups"; printf '{"result":"rolled_back","failed_sha":"%s"}' "$FAILED_SHA" > "$tmp/app/backups/last-autoupdate.json"
+  fi
+  # INFO_SHA: the commit written into frontend/build-info.json by the release archive
+  if [ -n "${INFO_SHA:-}" ]; then
+    mkdir -p "$tmp/app/frontend"; printf '{"commit":"x","full":"%s"}' "$INFO_SHA" > "$tmp/app/frontend/build-info.json"
+  fi
   echo old > "$tmp/state/latest"; echo rev1 > "$tmp/state/rev"
   envs=()
   while [ "$1" != "--" ]; do envs+=("$1"); shift; done; shift
@@ -131,6 +139,20 @@ run $OLD FAKE_NEWBAD=1 FAKE_DBCHANGE=1 --
 echo "-- already installed"
 run $NEW A=1 --
 [ "$(result)" = up_to_date ] && a=ok || a=bad; check "result is up_to_date" $a
+grep -q "compose -f compose.yml build" "$tmp/state/calls.log" && a=bad || a=ok; check "nothing was built" $a
+
+echo "-- no .installed-commit, but the release archive's own commit is the approved one"
+INFO_SHA=$NEW run none A=1 --
+[ "$(result)" = up_to_date ] && a=ok || a=bad; check "result is up_to_date" $a
+grep -q "compose -f compose.yml build" "$tmp/state/calls.log" && a=bad || a=ok; check "nothing was built" $a
+
+echo "-- no .installed-commit and an older commit in build-info.json"
+INFO_SHA=$OLD run none A=1 --
+[ "$(result)" = updated ] && a=ok || a=bad; check "result is updated" $a
+
+echo "-- no .installed-commit, the failed version's files are in place"
+FAILED_SHA=$NEW INFO_SHA=$NEW run none A=1 --
+[ "$(result)" = skipped ] && a=ok || a=bad; check "it is skipped, not reported as installed" $a
 grep -q "compose -f compose.yml build" "$tmp/state/calls.log" && a=bad || a=ok; check "nothing was built" $a
 
 echo "-- -CheckOnly"

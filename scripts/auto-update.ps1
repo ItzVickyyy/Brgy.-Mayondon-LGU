@@ -16,7 +16,9 @@
 #      back, but ONLY when the database was not changed. If the database was changed it
 #      leaves everything as it is and says so: the developers must look at it.
 #   5. It writes backups\last-autoupdate.json (no secrets), the log
-#      backups\auto-update.log, and the installed commit in .installed-commit.
+#      backups\auto-update.log, and the installed commit in .installed-commit. Without that
+#      file (a first install, or a manual update) the commit in frontend\build-info.json is
+#      taken as the installed version.
 #
 # It does nothing on a Git clone (the development computer), when .env is missing,
 # when Docker or the program is not running, or when GitHub cannot be reached.
@@ -143,6 +145,20 @@ try {
     if (Test-Path -LiteralPath $markerFile) {
         $text = (Get-Content -LiteralPath $markerFile -Raw).Trim()
         if ($text -match "^[0-9a-f]{40}$") { $installed = $text }
+    }
+    # A computer that was installed or updated by hand has no .installed-commit. The release
+    # archive carries its own commit in frontend\build-info.json (Git fills it in when the archive
+    # is made, see .gitattributes), so use that instead of treating the version as unknown. A
+    # version that already failed here is not taken from it: its files may be in place while the
+    # old program is the one running.
+    if (-not $installed) {
+        $infoFile = Join-Path $repoRoot "frontend\build-info.json"
+        if (Test-Path -LiteralPath $infoFile) {
+            try {
+                $full = [string]((Get-Content -LiteralPath $infoFile -Raw | ConvertFrom-Json).full)
+                if ($full -match "^[0-9a-f]{40}$" -and $full -ne $script:knownFailed) { $installed = $full }
+            } catch { }
+        }
     }
     if ($installed -eq $target) { Finish "up_to_date" $true "Version $short is installed. Nothing to do." $target }
     if ($script:knownFailed -eq $target) {
