@@ -26,6 +26,8 @@ EXEMPT = {
     ("PATCH", f"{API}/users/me/password"),
     ("GET", f"{API}/users/me/preferences"),
     ("PUT", f"{API}/users/me/preferences"),
+    # Patch 211: a person who has not changed the temporary password can still sign out.
+    ("POST", f"{API}/login/logout"),
 }
 
 

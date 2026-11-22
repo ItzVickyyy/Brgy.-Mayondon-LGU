@@ -32,6 +32,7 @@ from sqlalchemy import (
 from sqlmodel import Field, SQLModel
 
 from app.core.dates import today_manila
+from app.core.field_crypto import EncryptedText
 from app.models import get_datetime_utc
 
 STATUSES = ("draft", "issued", "voided")
@@ -402,7 +403,9 @@ class IssuanceAssistance(SQLModel, table=True):
         foreign_key="issuances.id", primary_key=True, ondelete="CASCADE"
     )
     assistance_type: str | None = Field(default=None, max_length=20)
-    health_condition: str | None = Field(default=None, max_length=500)
+    # Encrypted in the database once DATA_ENCRYPTION_KEY is set (core/field_crypto.py); the API
+    # limit of 500 characters is enforced by ``AssistanceIn``.
+    health_condition: str | None = Field(default=None, sa_type=EncryptedText)
     for_self: bool = Field(
         default=True,
         sa_column=Column(Boolean, nullable=False, server_default=text("true")),

@@ -156,6 +156,28 @@ def safety_copy(from_revision: str) -> Path:
     return final
 
 
+def protect_health_conditions() -> None:
+    """Encrypt health conditions saved before DATA_ENCRYPTION_KEY existed (patch 213).
+
+    Runs at every start, does nothing without a key or when everything is already encrypted, and
+    never stops the program: a failure leaves the values as they were (plain text) and is logged.
+    """
+    try:
+        from sqlmodel import Session
+
+        from app.core.field_crypto import encrypt_existing
+
+        with Session(engine) as session:
+            changed = encrypt_existing(session)
+        if changed:
+            say(f"Health conditions encrypted: {changed}.")
+    except Exception as exc:  # noqa: BLE001
+        say(
+            "WARNING: could not encrypt the stored health conditions "
+            f"({type(exc).__name__}: {exc}). They stay as they were."
+        )
+
+
 def main() -> int:
     if not env_flag("MIGRATE_ON_START"):
         say("MIGRATE_ON_START is off: not touching the database.")
@@ -183,6 +205,7 @@ def main() -> int:
 
     if action == CURRENT:
         say(f"Database is up to date ({shown}).")
+        protect_health_conditions()
         return 0
     if action == NEWER:
         say(
@@ -229,6 +252,7 @@ def main() -> int:
         return 1
 
     say(f"Database is now up to date ({', '.join(heads)}).")
+    protect_health_conditions()
     return 0
 
 

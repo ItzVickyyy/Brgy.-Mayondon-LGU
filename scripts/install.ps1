@@ -148,6 +148,7 @@ if (Test-Path -LiteralPath $envPath) {
     $text = Set-EnvLine $text "COMPOSE_FILE" "compose.yml"
     $text = Set-EnvLine $text "SECRET_KEY" (New-Secret 48)
     $text = Set-EnvLine $text "MFA_ENCRYPTION_KEY" (New-Secret 48)
+    $text = Set-EnvLine $text "DATA_ENCRYPTION_KEY" (New-Secret 48)
     $text = Set-EnvLine $text "FIRST_SUPERUSER" $AdminEmail
     $text = Set-EnvLine $text "FIRST_SUPERUSER_PASSWORD" $adminPassword
     $text = Set-EnvLine $text "POSTGRES_PASSWORD" $dbPassword

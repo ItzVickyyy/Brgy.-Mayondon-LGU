@@ -44,6 +44,8 @@ class Settings(BaseSettings):
     # never locks anyone out of two-factor. Empty = two-factor is not available
     # yet (nothing can be enrolled). Make one with docs/11 or the rotation tool.
     MFA_ENCRYPTION_KEY: str = ""
+    # Locks the health condition of an assistance certificate in the database (patch 213).
+    DATA_ENCRYPTION_KEY: str = ""
     # How long the "now type your code" step stays open after the password.
     MFA_TOKEN_EXPIRE_MINUTES: int = Field(default=5, gt=0)
     FRONTEND_HOST: str = "http://localhost:5173"
@@ -163,6 +165,13 @@ class Settings(BaseSettings):
             if len(self.MFA_ENCRYPTION_KEY.encode("utf-8")) < 32:
                 raise ValueError(
                     "MFA_ENCRYPTION_KEY must be at least 32 bytes long "
+                    "(.env.example shows how to make one)."
+                )
+        if self.DATA_ENCRYPTION_KEY:
+            self._check_default_secret("DATA_ENCRYPTION_KEY", self.DATA_ENCRYPTION_KEY)
+            if len(self.DATA_ENCRYPTION_KEY.encode("utf-8")) < 32:
+                raise ValueError(
+                    "DATA_ENCRYPTION_KEY must be at least 32 bytes long "
                     "(.env.example shows how to make one)."
                 )
         if len(self.SECRET_KEY.encode("utf-8")) < 32:

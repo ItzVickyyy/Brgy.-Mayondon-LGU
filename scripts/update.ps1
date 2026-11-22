@@ -74,6 +74,11 @@ if ($oldCommit -and $oldCommit -eq $newCommit -and -not $From) {
     exit 0
 }
 
+# The key that locks health conditions in the database (patch 213). Added once, never changed.
+if (Test-Path -LiteralPath (Join-Path $PSScriptRoot "ensure-data-key.ps1")) {
+    try { & (Join-Path $PSScriptRoot "ensure-data-key.ps1") }
+    catch { Write-Warning "Could not add DATA_ENCRYPTION_KEY to .env: $($_.Exception.Message)" }
+}
 # ---------------------------------------------- 3. keep the old image
 Step "3/5  Building the new version (the program keeps running until the build is done)"
 # The program that runs now is kept as backend:previous, but only when it is healthy:

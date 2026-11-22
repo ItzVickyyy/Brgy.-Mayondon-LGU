@@ -148,3 +148,40 @@ def test_switched_off_leaves_the_database_alone(
     database(monkeypatch, (OLD,), True)
     assert m.main() == 0
     assert rec.calls == []
+
+
+@pytest.mark.usefixtures("rec")
+def test_health_conditions_are_protected_on_every_start(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import app.core.field_crypto as fc
+
+    seen: list[int] = []
+
+    def fake_encrypt_existing(_session: object) -> int:
+        seen.append(1)
+        return 3
+
+    monkeypatch.setattr(fc, "encrypt_existing", fake_encrypt_existing)
+    database(monkeypatch, heads(), True)  # already up to date
+    assert m.main() == 0
+    database(monkeypatch, (OLD,), True)  # after an upgrade
+    assert m.main() == 0
+    assert seen == [1, 1]
+    assert "Health conditions encrypted: 3." in capsys.readouterr().out
+
+
+@pytest.mark.usefixtures("rec")
+def test_a_failure_while_encrypting_never_stops_the_program(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import app.core.field_crypto as fc
+
+    def broken(_session: object) -> int:
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(fc, "encrypt_existing", broken)
+    database(monkeypatch, heads(), True)
+    assert m.main() == 0
+    out = capsys.readouterr().out
+    assert "WARNING: could not encrypt" in out and "boom" in out

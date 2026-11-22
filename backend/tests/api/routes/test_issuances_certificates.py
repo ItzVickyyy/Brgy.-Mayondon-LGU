@@ -5,11 +5,13 @@ import json
 import uuid
 from datetime import date
 
+import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, col, select
+from sqlmodel import Session, col, select, text
 
 from app.core.config import settings
 from app.core.dates import add_months
+from app.core.field_crypto import encrypt_existing
 from app.models_foundation import AuditLog, Street
 from app.models_issuance import IssuanceAssistance
 from tests.api.routes.test_issuances import (  # noqa: F401  (fixtures are reused)
@@ -633,3 +635,94 @@ def test_correcting_a_jobseeker_certificate_is_not_blocked_by_the_original(
     assert r.status_code == 201
     assert r.json()["jobseeker"]["educational_attainment"] == "College"
     assert _issue_status(client, staff_token_headers, r.json()["id"])[0] == 200
+
+
+# --- The health condition is encrypted in the database (patch 213) -------------
+
+DATA_KEY = "d" * 48
+
+
+def _stored_health_condition(db: Session, issuance_id: str) -> str | None:
+    """What the database really holds, read around the ORM."""
+    db.rollback()  # see rows committed by the API's own session
+    return (
+        db.connection()
+        .execute(
+            text(
+                "SELECT health_condition FROM issuance_assistance WHERE issuance_id = :i"
+            ),
+            {"i": issuance_id},
+        )
+        .scalar()
+    )
+
+
+def test_health_condition_is_encrypted_at_rest_and_still_masked_in_the_api(
+    client: TestClient,
+    staff_token_headers: Headers,
+    street_id: int,
+    db: Session,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", DATA_KEY)
+    res = _resident(client, staff_token_headers, street_id)
+    created = _marginalized(client, staff_token_headers, res["id"])
+    stored = _stored_health_condition(db, created["id"])
+    assert stored is not None and stored.startswith("enc1:")
+    assert SECRET not in stored
+    assert created["assistance"]["health_condition"] == "[restricted]"
+    single = client.get(f"{ISS}/{created['id']}", headers=staff_token_headers)
+    assert single.json()["assistance"]["health_condition"] == SECRET
+
+    # The wrong key, or no key, must never show the value or crash the page.
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", "z" * 48)
+    lost = client.get(f"{ISS}/{created['id']}", headers=staff_token_headers)
+    assert lost.status_code == 200
+    assert lost.json()["assistance"]["health_condition"] == "[cannot be read]"
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", "")
+    nokey = client.get(f"{ISS}/{created['id']}", headers=staff_token_headers)
+    assert nokey.json()["assistance"]["health_condition"] == "[cannot be read]"
+    assert SECRET not in lost.text + nokey.text
+
+
+def test_without_a_key_the_health_condition_is_stored_as_before(
+    client: TestClient,
+    staff_token_headers: Headers,
+    street_id: int,
+    db: Session,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", "")
+    res = _resident(client, staff_token_headers, street_id)
+    created = _marginalized(client, staff_token_headers, res["id"])
+    assert _stored_health_condition(db, created["id"]) == SECRET
+    single = client.get(f"{ISS}/{created['id']}", headers=staff_token_headers)
+    assert single.json()["assistance"]["health_condition"] == SECRET
+
+
+def test_start_up_encrypts_rows_saved_before_the_key_and_is_repeatable(
+    client: TestClient,
+    staff_token_headers: Headers,
+    street_id: int,
+    db: Session,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", "")
+    res = _resident(client, staff_token_headers, street_id)
+    created = _marginalized(client, staff_token_headers, res["id"])
+    assert _stored_health_condition(db, created["id"]) == SECRET
+
+    # Still no key: nothing changes (a warning is logged).
+    assert encrypt_existing(db) == 0
+    assert _stored_health_condition(db, created["id"]) == SECRET
+
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", DATA_KEY)
+    # Old plain text is still readable while the key is set but the row is not converted.
+    single = client.get(f"{ISS}/{created['id']}", headers=staff_token_headers)
+    assert single.json()["assistance"]["health_condition"] == SECRET
+    assert encrypt_existing(db) >= 1
+    stored = _stored_health_condition(db, created["id"])
+    assert stored is not None and stored.startswith("enc1:")
+    assert encrypt_existing(db) == 0
+    single = client.get(f"{ISS}/{created['id']}", headers=staff_token_headers)
+    assert single.json()["assistance"]["health_condition"] == SECRET
