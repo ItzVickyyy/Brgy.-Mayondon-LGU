@@ -1,5 +1,24 @@
+import {
+  ChevronRight,
+  CircleHelp,
+  Info,
+  Keyboard,
+  type LucideIcon,
+  MessageSquareText,
+  ScrollText,
+  ShieldCheck,
+  Tag,
+} from "lucide-react"
 import type { ReactNode } from "react"
+import { useTranslation } from "react-i18next"
 
+import {
+  modalBody,
+  modalFooter,
+  modalHeader,
+  modalShell,
+} from "@/components/Common/ModalLayout"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -7,34 +26,98 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { DEV_GUIDES, DEV_TEAM, type DevNotePerson } from "@/config/dev-note"
+import {
+  DEV_CONTACT,
+  DEV_GUIDES,
+  DEV_TEAM,
+  type DevNotePerson,
+} from "@/config/dev-note"
 import { SITE } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { SHORTCUTS } from "@/lib/shortcuts"
+import { cn } from "@/lib/utils"
 
 type DialogProps = { open: boolean; onOpenChange: (open: boolean) => void }
 
-/** One shared shell so every information popup closes, scrolls and traps focus the same way. */
+const widths = {
+  /** Short pages such as Version. */
+  md: "sm:max-w-md",
+  /** Reading pages: Get help, Terms, Privacy, About. */
+  lg: "sm:max-w-2xl",
+} as const
+
+/**
+ * One shared shell so every information popup looks, closes, scrolls and traps focus the same way.
+ * The header and the Close button stay in place while only the text scrolls (see ModalLayout).
+ * `flushTop` removes the top padding of the body for pages that start with a sticky contents bar.
+ */
 export function InfoDialog({
   open,
   onOpenChange,
   title,
   description,
+  icon: Icon,
+  size = "lg",
+  flushTop = false,
   children,
-}: DialogProps & { title: string; description?: string; children: ReactNode }) {
+}: DialogProps & {
+  title: string
+  description?: string
+  icon?: LucideIcon
+  size?: keyof typeof widths
+  flushTop?: boolean
+  children: ReactNode
+}) {
+  const { t } = useTranslation()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85svh] gap-4 overflow-y-auto sm:max-w-xl">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          {description ? (
-            <DialogDescription>{description}</DialogDescription>
-          ) : (
-            <DialogDescription className="sr-only">{title}</DialogDescription>
-          )}
+      <DialogContent className={cn(modalShell, widths[size])}>
+        <DialogHeader className={modalHeader}>
+          <div className="flex items-center gap-3 text-left">
+            {Icon ? (
+              <span
+                aria-hidden="true"
+                className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-brand/10 text-brand"
+              >
+                <Icon className="size-5" />
+              </span>
+            ) : null}
+            <div className="min-w-0 space-y-0.5">
+              <DialogTitle className="text-lg leading-tight">
+                {title}
+              </DialogTitle>
+              {description ? (
+                <DialogDescription className="text-xs sm:text-sm">
+                  {description}
+                </DialogDescription>
+              ) : (
+                <DialogDescription className="sr-only">
+                  {title}
+                </DialogDescription>
+              )}
+            </div>
+          </div>
         </DialogHeader>
-        <div className="space-y-4 text-sm leading-6">{children}</div>
+        <div
+          className={cn(
+            modalBody,
+            "space-y-5 text-sm leading-6",
+            flushTop && "pt-0",
+          )}
+        >
+          {children}
+        </div>
+        <div className={cn(modalFooter, "flex justify-end")}>
+          <Button
+            type="button"
+            variant="outline"
+            data-testid="info-close"
+            onClick={() => onOpenChange(false)}
+          >
+            {t("common.ui.close")}
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   )
@@ -43,44 +126,19 @@ export function InfoDialog({
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="space-y-1.5">
-      <h3 className="font-semibold">{title}</h3>
+      <h3 className="font-semibold text-brand">{title}</h3>
       {children}
     </section>
   )
 }
 
-function DraftNotice() {
+function Bullets({ items }: { items: ReactNode[] }) {
   return (
-    <p
-      role="note"
-      className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs font-medium text-amber-900 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-200"
-    >
-      Draft, pending barangay review. This text is not yet approved by the
-      barangay.
-    </p>
-  )
-}
-
-/** A collapsible group so the long help text stays easy to scan. */
-function HelpGroup({
-  title,
-  children,
-  defaultOpen = false,
-}: {
-  title: string
-  children: ReactNode
-  defaultOpen?: boolean
-}) {
-  return (
-    <details
-      open={defaultOpen}
-      className="group rounded-lg border bg-card px-3 py-2 open:pb-3"
-    >
-      <summary className="cursor-pointer select-none py-1 font-semibold marker:text-muted-foreground">
-        {title}
-      </summary>
-      <div className="mt-2 space-y-3">{children}</div>
-    </details>
+    <ul className="list-disc space-y-1 pl-5">
+      {items.map((item, index) => (
+        <li key={index}>{item}</li>
+      ))}
+    </ul>
   )
 }
 
@@ -91,6 +149,50 @@ function Steps({ items }: { items: ReactNode[] }) {
         <li key={index}>{item}</li>
       ))}
     </ol>
+  )
+}
+
+/** A quiet highlighted note, with a thin marker on the left. */
+function Callout({ children }: { children: ReactNode }) {
+  return (
+    <p
+      role="note"
+      className="rounded-md border-l-2 border-brand bg-muted/60 px-3 py-2 text-sm"
+    >
+      {children}
+    </p>
+  )
+}
+
+/** A collapsible group so the long help text stays easy to scan. */
+function HelpGroup({
+  title,
+  icon: Icon,
+  children,
+  defaultOpen = false,
+}: {
+  title: string
+  icon?: LucideIcon
+  children: ReactNode
+  defaultOpen?: boolean
+}) {
+  return (
+    <details
+      open={defaultOpen}
+      className="group rounded-lg border bg-card open:shadow-xs"
+    >
+      <summary className="flex min-h-11 cursor-pointer select-none list-none items-center gap-2.5 rounded-lg px-3 py-2 font-semibold hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
+        <ChevronRight
+          aria-hidden="true"
+          className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90"
+        />
+        {Icon ? (
+          <Icon aria-hidden="true" className="size-4 shrink-0 text-brand" />
+        ) : null}
+        <span className="min-w-0 flex-1">{title}</span>
+      </summary>
+      <div className="space-y-4 border-t px-3 pb-4 pt-3">{children}</div>
+    </details>
   )
 }
 
@@ -140,11 +242,641 @@ export function ShortcutsDialog(props: DialogProps) {
   return (
     <InfoDialog
       {...props}
+      icon={Keyboard}
       title="Keyboard shortcuts"
       description="Shortcuts do not work while you are typing in a box."
     >
       <ShortcutsList />
     </InfoDialog>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Long reading pages (Terms of Use, Privacy Policy)                  */
+/* ------------------------------------------------------------------ */
+
+type LegalSection = {
+  id: string
+  title: string
+  /** Short label for the contents bar. */
+  short: string
+  body: ReactNode
+}
+
+/** Numbered sections with a contents bar that stays at the top while the text scrolls. */
+function LegalDocument({
+  prefix,
+  sections,
+}: {
+  prefix: string
+  sections: LegalSection[]
+}) {
+  const jump = (id: string) => {
+    const element = document.getElementById(`${prefix}-${id}`)
+    if (!element) return
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    element.scrollIntoView({
+      behavior: reduce ? "auto" : "smooth",
+      block: "start",
+    })
+  }
+
+  return (
+    <>
+      <nav
+        aria-label="Sections"
+        className="sticky top-0 z-10 -mx-5 border-b bg-background px-5 sm:-mx-6 sm:px-6"
+      >
+        <ul className="flex gap-1.5 overflow-x-auto py-1.5">
+          {sections.map((section, index) => (
+            <li key={section.id} className="shrink-0">
+              <button
+                type="button"
+                aria-label={`${index + 1}. ${section.title}`}
+                onClick={() => jump(section.id)}
+                className="min-h-11 whitespace-nowrap rounded-full border px-3 text-xs text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {index + 1}. {section.short}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <div className="space-y-6">
+        {sections.map((section, index) => (
+          <section
+            key={section.id}
+            id={`${prefix}-${section.id}`}
+            className="scroll-mt-16 space-y-2"
+          >
+            <h3 className="flex items-baseline gap-2 font-semibold">
+              <span className="text-brand tabular-nums">{index + 1}.</span>
+              {section.title}
+            </h3>
+            {section.body}
+          </section>
+        ))}
+      </div>
+    </>
+  )
+}
+
+export function TermsDialog(props: DialogProps) {
+  const sections: LegalSection[] = [
+    {
+      id: "about",
+      title: "About these terms",
+      short: "About",
+      body: (
+        <p>
+          These terms explain the rules for using the {SITE.systemName}. By
+          signing in, you agree to follow them. If you do not agree, do not use
+          the system.
+        </p>
+      ),
+    },
+    {
+      id: "who",
+      title: "Who may use the system",
+      short: "Who may use it",
+      body: (
+        <p>
+          Only barangay office personnel with an account created by the System
+          Administrator may use this system. There is no public sign-up.
+          Residents do not have accounts.
+        </p>
+      ),
+    },
+    {
+      id: "account",
+      title: "Your account",
+      short: "Your account",
+      body: (
+        <Bullets
+          items={[
+            "Your account is for you only. Do not share your email or password.",
+            "Keep your password private. If you think someone else knows it, tell the System Administrator right away.",
+            "If you receive a temporary password, change it when you first sign in.",
+            "Sign out when you leave the computer.",
+            "You are responsible for actions made under your account.",
+          ]}
+        />
+      ),
+    },
+    {
+      id: "use",
+      title: "How you may use the system",
+      short: "How to use it",
+      body: (
+        <>
+          <p>You may use the system only for barangay office work, such as:</p>
+          <Bullets
+            items={[
+              "keeping resident records,",
+              "preparing and printing barangay documents and IDs,",
+              "reviewing issuance history and reports.",
+            ]}
+          />
+        </>
+      ),
+    },
+    {
+      id: "not",
+      title: "What you must not do",
+      short: "Not allowed",
+      body: (
+        <Bullets
+          items={[
+            "Do not use resident information for personal reasons or share it with people who are not authorized.",
+            "Do not look up residents without an office reason.",
+            "Do not issue a document that you know has wrong or false details.",
+            "Do not try to get into pages, records or accounts that you are not allowed to use.",
+            "Do not try to damage, change or bypass how the system works.",
+            "Do not copy, remove or give out resident data, photos or backups without permission from the barangay.",
+          ]}
+        />
+      ),
+    },
+    {
+      id: "accuracy",
+      title: "Accuracy and responsibility for documents",
+      short: "Documents",
+      body: (
+        <Bullets
+          items={[
+            "Check every detail before you issue or print a document.",
+            "Documents are issued under the authority of the barangay. Only issue what the barangay allows you to issue.",
+            "Issued records are not edited directly. If a document has a mistake, use Correct or Void and give a reason. Do not delete records.",
+          ]}
+        />
+      ),
+    },
+    {
+      id: "activity",
+      title: "Activity is recorded",
+      short: "Activity",
+      body: (
+        <p>
+          The system records actions such as signing in, issuing, correcting,
+          voiding and account changes. Each record includes your name and the
+          time. The barangay may review these records.
+        </p>
+      ),
+    },
+    {
+      id: "roles",
+      title: "Roles and access",
+      short: "Roles",
+      body: (
+        <>
+          <Bullets
+            items={[
+              "Staff can work with resident records, issuances and their own activity.",
+              "System Administrators can also manage user accounts, officials, reports and backups.",
+            ]}
+          />
+          <p>
+            The System Administrator may change or turn off an account at any
+            time, for example when a person leaves the office or when these
+            terms are broken.
+          </p>
+        </>
+      ),
+    },
+    {
+      id: "privacy",
+      title: "Data and privacy",
+      short: "Data",
+      body: (
+        <p>
+          Resident details, photos and issuance history are kept on the barangay
+          office computer. Handling of this information follows the Privacy
+          Policy and the procedures the barangay approves under the Data Privacy
+          Act.
+        </p>
+      ),
+    },
+    {
+      id: "availability",
+      title: "Availability",
+      short: "Availability",
+      body: (
+        <p>
+          The system runs on a computer in the barangay office and is used over
+          the office network. It may be unavailable when the computer is off,
+          being repaired or being updated. The barangay does not promise that it
+          will always be available or free of errors. Keep a way to continue
+          office work if the system is down.
+        </p>
+      ),
+    },
+    {
+      id: "backups",
+      title: "Backups",
+      short: "Backups",
+      body: (
+        <p>
+          The System Administrator is responsible for backing up the database
+          and keeping copies in a safe place, such as an external drive.
+        </p>
+      ),
+    },
+    {
+      id: "broken",
+      title: "If these terms are broken",
+      short: "Breaking terms",
+      body: (
+        <p>
+          The barangay may turn off the account of anyone who breaks these
+          terms. Other action may follow under barangay rules and applicable
+          law.
+        </p>
+      ),
+    },
+    {
+      id: "changes",
+      title: "Changes to these terms",
+      short: "Changes",
+      body: (
+        <p>
+          The barangay may update these terms. The newest version is shown in
+          the system. Continuing to use the system means you accept the update.
+        </p>
+      ),
+    },
+    {
+      id: "questions",
+      title: "Questions",
+      short: "Questions",
+      body: <p>Ask the System Administrator at the barangay office.</p>,
+    },
+  ]
+
+  return (
+    <InfoDialog
+      {...props}
+      icon={ScrollText}
+      flushTop
+      title="Terms of Use"
+      description={`${SITE.systemName}, ${SITE.location}`}
+    >
+      <LegalDocument prefix="terms" sections={sections} />
+    </InfoDialog>
+  )
+}
+
+export function PrivacyDialog(props: DialogProps) {
+  const sections: LegalSection[] = [
+    {
+      id: "about",
+      title: "About this policy",
+      short: "About",
+      body: (
+        <p>
+          This policy explains what personal information the {SITE.systemName}{" "}
+          keeps, why it is kept, who can see it, and how it is protected. It
+          follows the Data Privacy Act of 2012 (Republic Act No. 10173).
+        </p>
+      ),
+    },
+    {
+      id: "covers",
+      title: "Who this policy covers",
+      short: "Who it covers",
+      body: (
+        <Bullets
+          items={[
+            "Residents whose details are recorded in the system.",
+            "Barangay office personnel who have an account.",
+          ]}
+        />
+      ),
+    },
+    {
+      id: "kept",
+      title: "What information is kept",
+      short: "What is kept",
+      body: (
+        <>
+          <div className="space-y-1">
+            <h4 className="font-medium">About residents</h4>
+            <Bullets
+              items={[
+                "Name, birthdate, birthplace, sex and civil status",
+                "Home address and the year they started living in the barangay",
+                "Photo",
+                "Barangay ID number and ID card history",
+                "Emergency contact name, address and number (for Barangay IDs)",
+                "Family details and sector (for example senior citizen, PWD, solo parent)",
+                "Details given for a document, such as purpose, the ID presented, official receipt number, and for some certifications, a health condition",
+              ]}
+            />
+          </div>
+          <div className="space-y-1">
+            <h4 className="font-medium">About documents issued</h4>
+            <Bullets
+              items={[
+                "The type of document, reference number, date, validity, purpose and who issued it",
+                "Corrections and voids, with the reason given",
+              ]}
+            />
+          </div>
+          <div className="space-y-1">
+            <h4 className="font-medium">About staff</h4>
+            <Bullets
+              items={[
+                "Name, email address, profile photo and role",
+                "Activity records: what the person did in the system, and when",
+              ]}
+            />
+          </div>
+          <div className="space-y-1">
+            <h4 className="font-medium">About barangay officials</h4>
+            <Bullets
+              items={[
+                "Name, position and term dates, which are printed on documents as signatories and witnesses",
+              ]}
+            />
+          </div>
+          <Callout>
+            Some of this is sensitive personal information, such as health
+            conditions, sector details and government ID numbers. It gets extra
+            care.
+          </Callout>
+        </>
+      ),
+    },
+    {
+      id: "why",
+      title: "Why it is kept",
+      short: "Why",
+      body: (
+        <>
+          <Bullets
+            items={[
+              "To prepare and print clearances, certifications and Barangay IDs.",
+              "To keep an accurate record of what the barangay issued.",
+              "To tell the office when clearances and IDs are about to expire.",
+              "To produce summaries and reports for office use.",
+              "To keep a record of staff actions so the office can review them.",
+              "To manage staff accounts and sign-ins.",
+            ]}
+          />
+          <p>The information is not used for advertising or sold to anyone.</p>
+        </>
+      ),
+    },
+    {
+      id: "see",
+      title: "Who can see it",
+      short: "Who can see it",
+      body: (
+        <Bullets
+          items={[
+            "Signed-in barangay office personnel can see resident records and issuance history as their work requires.",
+            "System Administrators have extra access to manage accounts, officials, reports and backups.",
+            "Staff can see their own activity records. System Administrators can see everyone's.",
+            "Residents do not have accounts and cannot see the system.",
+          ]}
+        />
+      ),
+    },
+    {
+      id: "where",
+      title: "Where it is kept",
+      short: "Where",
+      body: (
+        <p>
+          Resident data, photos and records are stored on the barangay office
+          computer and used over the office network. They are not uploaded to
+          the internet. If the office sets up email for password recovery, a
+          staff member's email address is used to send that message.
+        </p>
+      ),
+    },
+    {
+      id: "sharing",
+      title: "Sharing information",
+      short: "Sharing",
+      body: (
+        <>
+          <p>Information is not shared outside the barangay office except:</p>
+          <Bullets
+            items={[
+              "on the printed document given to the resident who asked for it,",
+              "when the law requires it, for example a valid request from a court or a government agency.",
+            ]}
+          />
+        </>
+      ),
+    },
+    {
+      id: "protected",
+      title: "How it is protected",
+      short: "Protection",
+      body: (
+        <>
+          <Bullets
+            items={[
+              "Every user signs in with a personal email and password. Two-factor sign-in adds a second step.",
+              "Users only see the pages their role allows.",
+              "A signed-in computer that is left alone is signed out after 30 minutes.",
+              "Issuing, correcting and account changes are recorded with the user's name and the time. Opening a record that holds a health condition is recorded too.",
+              "Issued records are not edited directly. Corrections are made with a reason and kept in the history.",
+              "The System Administrator backs up the database and keeps copies in a safe place.",
+              "Staff must keep passwords private and sign out when they leave the computer.",
+            ]}
+          />
+          <p>
+            No system is completely risk-free. If a data breach happens, the
+            barangay will respond and give notice as the law requires.
+          </p>
+        </>
+      ),
+    },
+    {
+      id: "retention",
+      title: "How long it is kept",
+      short: "How long",
+      body: (
+        <p>
+          Records are kept for as long as the barangay needs them. Residents who
+          moved away or passed away are archived, not deleted. Archived records
+          stay in the system until the barangay decides otherwise.
+        </p>
+      ),
+    },
+    {
+      id: "rights",
+      title: "Your rights",
+      short: "Your rights",
+      body: (
+        <>
+          <p>Under the Data Privacy Act, residents may:</p>
+          <Bullets
+            items={[
+              "ask what information the barangay keeps about them,",
+              "ask for wrong information to be corrected,",
+              "object to how their information is used, or ask for it to be blocked or removed where the law allows,",
+              "file a complaint with the National Privacy Commission.",
+            ]}
+          />
+          <p>
+            To ask for any of these, go to the barangay office and ask the
+            System Administrator. The barangay will tell you what it can and
+            cannot do under the law.
+          </p>
+        </>
+      ),
+    },
+    {
+      id: "photos",
+      title: "Residents' photos",
+      short: "Photos",
+      body: (
+        <p>
+          Photos are taken for Barangay IDs and for documents with a photo box.
+          Ask the resident before taking the photo. The photo is used only for
+          barangay documents and records.
+        </p>
+      ),
+    },
+    {
+      id: "changes",
+      title: "Changes to this policy",
+      short: "Changes",
+      body: (
+        <p>
+          The barangay may update this policy. The newest version is shown in
+          the system.
+        </p>
+      ),
+    },
+    {
+      id: "questions",
+      title: "Questions",
+      short: "Questions",
+      body: <p>Ask the System Administrator at the barangay office.</p>,
+    },
+  ]
+
+  return (
+    <InfoDialog
+      {...props}
+      icon={ShieldCheck}
+      flushTop
+      title="Privacy Policy"
+      description={`${SITE.systemName}, ${SITE.location}`}
+    >
+      <LegalDocument prefix="privacy" sections={sections} />
+    </InfoDialog>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Get help                                                            */
+/* ------------------------------------------------------------------ */
+
+function DeveloperContact() {
+  const lines: [string, string][] = []
+  if (DEV_CONTACT.email) lines.push(["Email", DEV_CONTACT.email])
+  if (DEV_CONTACT.phone) lines.push(["Phone or messaging", DEV_CONTACT.phone])
+  if (DEV_CONTACT.hours) lines.push(["Hours", DEV_CONTACT.hours])
+  return (
+    <>
+      <Section title="Who to contact">
+        <p>
+          First ask your System Administrator at the barangay office. They can
+          fix most account and password problems right away. If they cannot
+          solve it, contact the developers: {SITE.developedBy}.
+        </p>
+        {lines.length ? (
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+            {lines.map(([label, value]) => (
+              <div key={label} className="contents">
+                <dt className="text-muted-foreground">{label}</dt>
+                <dd className="font-medium">{value}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : null}
+        <ul className="space-y-2">
+          {DEV_TEAM.map((person) => (
+            <li
+              key={person.name}
+              className="rounded-lg border bg-background px-3 py-2"
+            >
+              <p className="font-semibold">{person.name}</p>
+              <p className="text-xs text-muted-foreground">{person.role}</p>
+              {person.github ? (
+                <p className="mt-0.5 font-mono text-xs">{person.github}</p>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      </Section>
+      <Section title="Before you contact us">
+        <p>These solve most problems:</p>
+        <Bullets
+          items={[
+            "Refresh the page.",
+            "Check that the office computer hosting the system is on and that you are on the office network.",
+            "Sign out and sign in again.",
+            "For a forgotten password, ask the System Administrator to set a temporary password.",
+            "Read the Common problems section above.",
+          ]}
+        />
+      </Section>
+      <Section title="What to include in your message">
+        <Steps
+          items={[
+            "Your name and role (Staff or System Administrator).",
+            "The page you were on, for example Issuance Management or Records Management.",
+            "What you were trying to do, for example issue a Barangay Clearance.",
+            "What happened instead, and the exact message on the screen if there was one.",
+            "When it happened (date and time).",
+            "A screenshot, if possible.",
+            "Whether it happens every time or only sometimes.",
+            "The release code shown in Version (the link in the footer).",
+          ]}
+        />
+        <Callout>
+          Do not send passwords, or resident details such as full names with
+          birthdates, addresses or ID numbers. If we need to see a record, we
+          will ask how to do that safely.
+        </Callout>
+      </Section>
+      <Section title="Types of requests">
+        <Bullets
+          items={[
+            "Something is not working: the page will not load, a button does nothing, or printing is off.",
+            "A mistake in the system: wrong text on a document, a wrong total, or a missing option in a list.",
+            "A question about how to use it: how to issue a document, add an official or run a report.",
+            "A suggestion: something that would make office work easier.",
+            "A change to the lists: a new street, association or sector. System Administrators can do this in Issuance settings.",
+          ]}
+        />
+      </Section>
+      <Section title="Urgent problems">
+        <p>
+          If the system is down and the office cannot issue documents, tell the
+          System Administrator first, then the developers. Mark your message
+          URGENT and say what is stopped.
+        </p>
+        <p>
+          Never delete or edit issued records to work around a problem. Wait for
+          help, or use Correct or Void with a reason.
+        </p>
+      </Section>
+      <Section title="What to expect">
+        <p>
+          We will reply as soon as we can. How fast depends on the problem and
+          on who is available. Simple questions are answered first. Fixes to the
+          system may take longer and are tested before they are put on the
+          office computer.
+        </p>
+      </Section>
+    </>
   )
 }
 
@@ -155,6 +887,7 @@ export function HelpDialog(props: DialogProps) {
   return (
     <InfoDialog
       {...props}
+      icon={CircleHelp}
       title="Get help"
       description="Short guides for everyday office work. Everything here works without an internet connection."
     >
@@ -179,13 +912,15 @@ export function HelpDialog(props: DialogProps) {
         <Section title="Signing out">
           <p>
             Open the profile menu (your name) and choose Logout. Always sign out
-            when you leave the computer.
+            when you leave the computer. A computer left alone is signed out
+            after 30 minutes.
           </p>
         </Section>
         <Section title="Your account and the profile menu">
           <p>
             The profile menu has My Account (your details, photo and password),
-            Language, Get help, Learn more and Logout.
+            Preferences (theme, colour and text size), Language, Get help, Learn
+            more and Logout.
           </p>
         </Section>
         <Section title="What each person can see">
@@ -203,24 +938,26 @@ export function HelpDialog(props: DialogProps) {
           (Today, This Week, This Month, Past 3 Months, Past 6 Months, This
           Year, Overall) to change the numbers.
         </p>
-        <ul className="list-disc space-y-1 pl-5">
-          <li>
-            <strong>Documents Issued This Month:</strong> how many documents the
-            office issued.
-          </li>
-          <li>
-            <strong>Clearances and Barangay IDs expiring in 30 days:</strong>{" "}
-            records that will need renewing soon.
-          </li>
-          <li>
-            <strong>Pending Document Requests:</strong> drafts that were started
-            but not yet issued.
-          </li>
-          <li>
-            <strong>Quick Actions:</strong> shortcuts to find a resident, create
-            an issuance or review history.
-          </li>
-        </ul>
+        <Bullets
+          items={[
+            <>
+              <strong>Documents Issued This Month:</strong> how many documents
+              the office issued.
+            </>,
+            <>
+              <strong>Clearances and Barangay IDs expiring in 30 days:</strong>{" "}
+              records that will need renewing soon.
+            </>,
+            <>
+              <strong>Pending Document Requests:</strong> drafts that were
+              started but not yet issued.
+            </>,
+            <>
+              <strong>Quick Actions:</strong> shortcuts to find a resident,
+              create an issuance or review history.
+            </>,
+          ]}
+        />
       </HelpGroup>
 
       <HelpGroup title="Finding and managing residents">
@@ -251,19 +988,24 @@ export function HelpDialog(props: DialogProps) {
           </p>
         </Section>
         <Section title="Other tabs in Records Management">
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              <strong>Barangay IDs:</strong> every ID card issued, with its
-              status (Valid, Expiring soon, Expired).
-            </li>
-            {isAdmin ? (
-              <li>
-                <strong>Import Masterlist:</strong> bring in many residents at
-                once from a CSV, XLSX or XLS file. Follow the steps shown on the
-                page and review the results before finishing.
-              </li>
-            ) : null}
-          </ul>
+          <Bullets
+            items={[
+              <>
+                <strong>Barangay IDs:</strong> every ID card issued, with its
+                status (Valid, Expiring soon, Expired).
+              </>,
+              ...(isAdmin
+                ? [
+                    <>
+                      <strong>Import Masterlist:</strong> bring in many
+                      residents at once from a CSV, XLSX or XLS file. Follow the
+                      steps shown on the page and review the results before
+                      finishing.
+                    </>,
+                  ]
+                : []),
+            ]}
+          />
         </Section>
       </HelpGroup>
 
@@ -282,54 +1024,53 @@ export function HelpDialog(props: DialogProps) {
           />
         </Section>
         <Section title="Buttons at the bottom of the form">
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              <strong>Save draft &amp; close:</strong> keeps your work to finish
-              later. Drafts appear in the history with the status Draft.
-            </li>
-            <li>
-              <strong>Issue:</strong> finalizes the document and gives it a
-              reference number.
-            </li>
-            <li>
-              <strong>Issue &amp; print:</strong> issues it and opens printing
-              right away.
-            </li>
-            <li>
-              <strong>Cancel:</strong> closes the form. You can keep the draft
-              or discard the changes.
-            </li>
-          </ul>
+          <Bullets
+            items={[
+              <>
+                <strong>Save draft &amp; close:</strong> keeps your work to
+                finish later. Drafts appear in the history with the status
+                Draft.
+              </>,
+              <>
+                <strong>Issue:</strong> finalizes the document and gives it a
+                reference number.
+              </>,
+              <>
+                <strong>Issue &amp; print:</strong> issues it and opens printing
+                right away.
+              </>,
+              <>
+                <strong>Cancel:</strong> closes the form. You can keep the draft
+                or discard the changes.
+              </>,
+            ]}
+          />
         </Section>
         <Section title="Documents the system can prepare">
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              <strong>Barangay Clearance</strong> (valid for 2 months)
-            </li>
-            <li>
-              <strong>Franchise Clearance</strong> for tricycles
-            </li>
-            <li>
-              <strong>Electrical and Water Clearance</strong>
-            </li>
-            <li>
-              <strong>Certification of Residency</strong>
-            </li>
-            <li>
-              <strong>Certificate of Indigency</strong>
-            </li>
-            <li>
-              <strong>Assistance Certification</strong> (financial, medical or
-              burial; medical also records the health condition)
-            </li>
-            <li>
-              <strong>First-Time Jobseeker</strong> (one per resident, valid for
-              12 months)
-            </li>
-            <li>
-              <strong>Barangay ID</strong> (new, renewal or replacement)
-            </li>
-          </ul>
+          <Bullets
+            items={[
+              <>
+                <strong>Barangay Clearance</strong> (valid for 2 months)
+              </>,
+              <>
+                <strong>Franchise Clearance</strong> for tricycles
+              </>,
+              <strong key="electrical">Electrical and Water Clearance</strong>,
+              <strong key="residency">Certification of Residency</strong>,
+              <strong key="indigency">Certificate of Indigency</strong>,
+              <>
+                <strong>Assistance Certification</strong> (financial, medical or
+                burial; medical also records the health condition)
+              </>,
+              <>
+                <strong>First-Time Jobseeker</strong> (one per resident, valid
+                for 12 months)
+              </>,
+              <>
+                <strong>Barangay ID</strong> (new, renewal or replacement)
+              </>,
+            ]}
+          />
         </Section>
         <Section title="Barangay ID requirements">
           <p>
@@ -355,6 +1096,14 @@ export function HelpDialog(props: DialogProps) {
           <p>
             Open Issuance Management, find the document in the history and
             choose Print again. A reprint keeps the same reference number.
+          </p>
+        </Section>
+        <Section title="Save as PDF or Word">
+          <p>
+            On the screen after issuing, or in the three-dot menu of a row in
+            the history, choose Save as PDF or Save as Word. The file is the
+            filled form as a picture of the page, so the values cannot be edited
+            in Word. Saving a copy counts as a copy in the history.
           </p>
         </Section>
         <Section title="Text does not line up with the blanks">
@@ -386,16 +1135,18 @@ export function HelpDialog(props: DialogProps) {
           </p>
         </Section>
         <Section title="Void or discard">
-          <ul className="list-disc space-y-1 pl-5">
-            <li>
-              <strong>Void:</strong> cancels an issued document that should not
-              be used. A reason is required and the record stays in the history
-              marked Voided.
-            </li>
-            <li>
-              <strong>Discard:</strong> removes a draft that was never issued.
-            </li>
-          </ul>
+          <Bullets
+            items={[
+              <>
+                <strong>Void:</strong> cancels an issued document that should
+                not be used. A reason is required and the record stays in the
+                history marked Voided.
+              </>,
+              <>
+                <strong>Discard:</strong> removes a draft that was never issued.
+              </>,
+            ]}
+          />
         </Section>
       </HelpGroup>
 
@@ -415,8 +1166,8 @@ export function HelpDialog(props: DialogProps) {
             <Steps
               items={[
                 "Open User Accounts and choose Add User.",
-                "Enter the full name, email, role (System Administrator or Staff) and a temporary password.",
-                "Give the temporary password to the person in person. They must change it at first sign-in.",
+                "Enter the full name, email and role (System Administrator or Staff).",
+                "Give the starting password to the person in person. They must change it at first sign-in.",
                 "To stop someone from using the system, set the account to inactive instead of deleting it.",
               ]}
             />
@@ -439,20 +1190,39 @@ export function HelpDialog(props: DialogProps) {
               signatories and witnesses on documents.
             </p>
           </Section>
+          <Section title="Issuance settings">
+            <p>
+              On Issuance Management, choose Issuance settings to change the
+              lists used in forms (ID types, sectors, streets, subdivisions,
+              tricycle associations, purposes, offices and educational
+              attainment) and to set up Printing. Renaming an item relabels old
+              documents. An item that is already used cannot be deleted.
+            </p>
+          </Section>
           <Section title="Management Reports">
             <p>
               Choose a report (issuances by document type, by purpose, expiring
-              records, or account activity) and a period, then choose Preview.
-              Reports can be downloaded as a CSV file.
+              records, or account activity) and a period. The report shows on
+              the page. Reports can be printed or downloaded as a CSV file.
             </p>
           </Section>
           <Section title="Backup and Restore">
             <p>
-              The buttons on this page do not back up data yet. To back up the
-              database, open PowerShell in the project folder and run{" "}
-              <code className="font-mono">.\scripts\backup-db.ps1</code>. The
-              file is saved in the <code className="font-mono">backups</code>{" "}
-              folder. Copy it to an external drive regularly.
+              Choose Back up now on the Backup and Restore page. The backup is
+              saved in the <code className="font-mono">backups</code> folder and
+              checked. Copy backups to an external drive regularly and keep the
+              encryption key and its passphrase apart from the computer. A
+              restore replaces the whole database, so it is not run from the
+              screen: the page checks the backup you choose and shows the
+              command to run on the office computer.
+            </p>
+          </Section>
+          <Section title="Updates">
+            <p>
+              The system looks for a new version and installs it at night. When
+              a version is waiting, an Update reminder appears in the
+              notification bell, and you can choose Update now to install it
+              right away.
             </p>
           </Section>
         </HelpGroup>
@@ -505,28 +1275,37 @@ export function HelpDialog(props: DialogProps) {
       </HelpGroup>
 
       <HelpGroup title="Good habits">
-        <ul className="list-disc space-y-1 pl-5">
-          <li>Check every detail before you issue or print.</li>
-          <li>Use resident information only for barangay office work.</li>
-          <li>Never share your password. Sign out when you step away.</li>
-          <li>
-            Actions such as issuing, correcting and account changes are recorded
-            with your name and the time.
-          </li>
-        </ul>
+        <Bullets
+          items={[
+            "Check every detail before you issue or print.",
+            "Use resident information only for barangay office work.",
+            "Never share your password. Sign out when you step away.",
+            "Actions such as issuing, correcting and account changes are recorded with your name and the time.",
+          ]}
+        />
       </HelpGroup>
 
       <HelpGroup title="Keyboard shortcuts">
         <ShortcutsList />
       </HelpGroup>
 
-      <Section title="Who to contact">
-        <p>
-          Ask your System Administrator at the barangay office. Tell them the
-          page you were on, what you clicked, and any message you saw.
-        </p>
-      </Section>
+      <HelpGroup title="Contact the developers">
+        <DeveloperContact />
+      </HelpGroup>
     </InfoDialog>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Learn more, About, Version, Dev Note                                */
+/* ------------------------------------------------------------------ */
+
+function RoleCard({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="rounded-lg border bg-card px-3 py-2.5">
+      <p className="font-semibold">{title}</p>
+      <p className="mt-0.5 text-muted-foreground">{children}</p>
+    </div>
   )
 }
 
@@ -534,6 +1313,7 @@ export function LearnMoreDialog(props: DialogProps) {
   return (
     <InfoDialog
       {...props}
+      icon={Info}
       title="About this system"
       description={`${SITE.systemName}, ${SITE.location}`}
     >
@@ -541,9 +1321,20 @@ export function LearnMoreDialog(props: DialogProps) {
         <p>
           A staff-only system for the barangay office. It keeps resident
           records, prepares and prints documents on the barangay&apos;s
-          pre-printed forms, keeps issuance history including Barangay ID cards,
-          and shows summaries and reports for office use.
+          pre-printed forms, keeps a history of everything issued, including
+          Barangay ID cards, and shows summaries and reports for office use.
         </p>
+      </Section>
+      <Section title="What it helps you do">
+        <Bullets
+          items={[
+            "Keep resident records in one place.",
+            "Prepare and print clearances, certifications and Barangay IDs.",
+            "Check which documents were issued, corrected or voided.",
+            "See which clearances and IDs are about to expire.",
+            "Review who did what in the system.",
+          ]}
+        />
       </Section>
       <Section title="What it is not">
         <p>
@@ -552,10 +1343,38 @@ export function LearnMoreDialog(props: DialogProps) {
           agencies.
         </p>
       </Section>
+      <Section title="Who can use it">
+        <p>
+          Only barangay office personnel with an account made by the System
+          Administrator. There are two roles:
+        </p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <RoleCard title="Staff">
+            Work with resident records, issuances and their own activity.
+          </RoleCard>
+          <RoleCard title="System Administrator">
+            Also manages user accounts, officials, reports and backups.
+          </RoleCard>
+        </div>
+      </Section>
       <Section title="How it runs">
         <p>
           It runs on a computer in the barangay office and is used over the
-          office network. Resident data and photos stay on that computer.
+          office network. It does not need the internet. Resident data and
+          photos stay on that computer and are not uploaded online.
+        </p>
+      </Section>
+      <Section title="Your records are protected">
+        <Bullets
+          items={[
+            "Every sign-in needs an email and password. Do not share yours.",
+            "Issuing, correcting and account changes are recorded with your name and the time.",
+            "Issued documents are not edited directly. Corrections are made with a reason and kept in the history.",
+          ]}
+        />
+        <p>
+          Read the Terms of Use and the Privacy Policy at the bottom of the page
+          for the full rules.
         </p>
       </Section>
       <Section title="Built by">
@@ -568,32 +1387,44 @@ export function LearnMoreDialog(props: DialogProps) {
 export function VersionDialog(props: DialogProps) {
   const known = __APP_COMMIT__ !== "unknown"
   return (
-    <InfoDialog {...props} title="Version" description={SITE.systemName}>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-6 gap-y-2">
-        <dt className="text-muted-foreground">Version</dt>
-        <dd className="font-medium">{__APP_VERSION__}</dd>
-        <dt className="text-muted-foreground">Release</dt>
-        <dd className="font-medium">
-          {known ? (
-            <span className="font-mono" data-testid="version-commit">
-              {__APP_COMMIT__}
-            </span>
-          ) : (
-            "Development copy (not an installed release)"
-          )}
-          {known && __APP_RELEASED__ ? (
-            <span className="font-normal text-muted-foreground">
-              {" "}
-              · saved {__APP_RELEASED__}
-            </span>
-          ) : null}
-        </dd>
-        <dt className="text-muted-foreground">Built on</dt>
-        <dd className="font-medium">{__BUILD_DATE__}</dd>
-        <dt className="text-muted-foreground">Status</dt>
-        <dd className="font-medium">
-          Prototype. Not yet approved for real data.
-        </dd>
+    <InfoDialog
+      {...props}
+      icon={Tag}
+      size="md"
+      title="Version"
+      description={SITE.systemName}
+    >
+      <dl className="divide-y rounded-lg border">
+        <div className="grid grid-cols-[6rem_1fr] gap-x-4 px-3 py-2.5">
+          <dt className="text-muted-foreground">Version</dt>
+          <dd className="font-medium">{__APP_VERSION__}</dd>
+        </div>
+        <div className="grid grid-cols-[6rem_1fr] gap-x-4 px-3 py-2.5">
+          <dt className="text-muted-foreground">Release</dt>
+          <dd className="min-w-0 font-medium">
+            {known ? (
+              <span className="font-mono" data-testid="version-commit">
+                {__APP_COMMIT__}
+              </span>
+            ) : (
+              "Development copy (not an installed release)"
+            )}
+            {known && __APP_RELEASED__ ? (
+              <span className="font-normal text-muted-foreground">
+                {" "}
+                · saved {__APP_RELEASED__}
+              </span>
+            ) : null}
+          </dd>
+        </div>
+        <div className="grid grid-cols-[6rem_1fr] gap-x-4 px-3 py-2.5">
+          <dt className="text-muted-foreground">Built on</dt>
+          <dd className="font-medium">{__BUILD_DATE__}</dd>
+        </div>
+        <div className="grid grid-cols-[6rem_1fr] gap-x-4 px-3 py-2.5">
+          <dt className="text-muted-foreground">Developed by</dt>
+          <dd className="font-medium">{SITE.developedBy}</dd>
+        </div>
       </dl>
       <p className="text-xs text-muted-foreground">
         The release code changes every time the system is updated on this
@@ -607,6 +1438,7 @@ export function AboutDialog(props: DialogProps) {
   return (
     <InfoDialog
       {...props}
+      icon={Info}
       title="About this system"
       description={SITE.systemName}
     >
@@ -618,22 +1450,14 @@ export function AboutDialog(props: DialogProps) {
         </p>
       </Section>
       <Section title="What it does">
-        <ul className="list-disc space-y-1 pl-5">
-          <li>
-            Keeps resident records, with search and import of the barangay's
-            existing masterlist.
-          </li>
-          <li>
-            Prepares and prints barangay documents such as clearances,
-            certificates and Barangay IDs on the office's own forms, and keeps a
-            history with issue and expiry dates.
-          </li>
-          <li>
-            Shows what was issued, what is about to expire, and what needs
-            attention, with reports for the barangay officials.
-          </li>
-          <li>Records who did what, and takes backups of the data.</li>
-        </ul>
+        <Bullets
+          items={[
+            "Keeps resident records, with search and import of the barangay's existing masterlist.",
+            "Prepares and prints barangay documents such as clearances, certificates and Barangay IDs on the office's own forms, and keeps a history with issue and expiry dates.",
+            "Shows what was issued, what is about to expire, and what needs attention, with reports for the barangay officials.",
+            "Records who did what, and takes backups of the data.",
+          ]}
+        />
       </Section>
       <Section title="Who it is for">
         <p>
@@ -670,10 +1494,15 @@ function PersonList({ people }: { people: readonly DevNotePerson[] }) {
   return (
     <ul className="space-y-2">
       {people.map((person) => (
-        <li key={person.name} className="rounded-lg border bg-card px-3 py-2">
+        <li key={person.name} className="rounded-lg border bg-card px-3 py-2.5">
           <p className="font-semibold">{person.name}</p>
           <p className="text-xs text-muted-foreground">{person.role}</p>
           <p className="mt-1">{person.contribution}</p>
+          {person.github ? (
+            <p className="mt-1 font-mono text-xs text-muted-foreground">
+              {person.github}
+            </p>
+          ) : null}
         </li>
       ))}
     </ul>
@@ -684,6 +1513,7 @@ export function DevNoteDialog(props: DialogProps) {
   return (
     <InfoDialog
       {...props}
+      icon={MessageSquareText}
       title="Dev Note"
       description="The story behind the system"
     >
@@ -729,79 +1559,9 @@ export function DevNoteDialog(props: DialogProps) {
       </Section>
       <Section title="A last word">
         <p>
-          This is a prototype from {SITE.developedBy}. It is not yet approved
-          for real resident data. If something is wrong or missing, tell the
-          System Administrator, so the next version can be better.
-        </p>
-      </Section>
-    </InfoDialog>
-  )
-}
-
-export function TermsDialog(props: DialogProps) {
-  return (
-    <InfoDialog {...props} title="Terms of Use">
-      <DraftNotice />
-      <Section title="Who may use this system">
-        <p>
-          Only barangay office personnel with an account created by the System
-          Administrator. Do not share your account or password.
-        </p>
-      </Section>
-      <Section title="How to use it">
-        <ul className="list-disc space-y-1 pl-5">
-          <li>Use resident information only for barangay office work.</li>
-          <li>Check every detail before issuing or printing a document.</li>
-          <li>
-            Do not alter issued records. Corrections are made with a reason and
-            are kept in the history.
-          </li>
-          <li>Sign out when you leave the computer.</li>
-        </ul>
-      </Section>
-      <Section title="Activity is recorded">
-        <p>
-          Issuing, correcting and account changes are recorded with your name
-          and the time, so the office can review them.
-        </p>
-      </Section>
-    </InfoDialog>
-  )
-}
-
-export function PrivacyDialog(props: DialogProps) {
-  return (
-    <InfoDialog {...props} title="Privacy Policy">
-      <DraftNotice />
-      <Section title="What is kept">
-        <p>
-          Resident details needed for barangay documents, resident photos,
-          issuance history and staff activity records.
-        </p>
-      </Section>
-      <Section title="Why it is kept">
-        <p>
-          To prepare and print the documents the barangay issues and to keep an
-          accurate record of them.
-        </p>
-      </Section>
-      <Section title="Who can see it">
-        <p>
-          Signed-in barangay office personnel. The System Administrator has
-          extra access to manage accounts and records.
-        </p>
-      </Section>
-      <Section title="Where it is kept">
-        <p>
-          On the barangay office computer. Resident data and photos are not
-          uploaded to the internet.
-        </p>
-      </Section>
-      <Section title="Retention, corrections and questions">
-        <p>
-          How long records are kept and how residents may ask for corrections
-          will follow the procedures the barangay approves under the Data
-          Privacy Act. Ask the System Administrator for details.
+          Thank you for using the system. If something is wrong or missing, tell
+          the System Administrator, so the next version can be better. Open Get
+          help in the profile menu to see how to reach the developers.
         </p>
       </Section>
     </InfoDialog>

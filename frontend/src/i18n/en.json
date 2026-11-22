@@ -2698,10 +2698,8 @@
       "helpDescription": "Everything here works without an internet connection.",
       "learnTitle": "About this system",
       "versionTitle": "Version",
-      "versionStatus": "Prototype. Not yet approved for real data.",
       "termsTitle": "Terms of Use",
       "privacyTitle": "Privacy Policy",
-      "draftNotice": "Draft, pending barangay review. This text is not yet approved by the barangay.",
       "shortcutItems": [
         "Show this list of keyboard shortcuts",
         "Jump to the search box on the page",
