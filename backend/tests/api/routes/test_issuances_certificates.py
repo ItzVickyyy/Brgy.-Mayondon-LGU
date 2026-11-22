@@ -726,3 +726,53 @@ def test_start_up_encrypts_rows_saved_before_the_key_and_is_repeatable(
     assert encrypt_existing(db) == 0
     single = client.get(f"{ISS}/{created['id']}", headers=staff_token_headers)
     assert single.json()["assistance"]["health_condition"] == SECRET
+
+
+# --- The bell warns about a missing or wrong data key (patch 214) --------------
+
+PROTECTION = f"{API}/system/data-protection"
+
+
+def test_data_protection_status_counts_plain_and_unreadable_rows(
+    client: TestClient,
+    superuser_token_headers: Headers,
+    staff_token_headers: Headers,
+    street_id: int,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def status() -> dict:
+        r = client.get(PROTECTION, headers=superuser_token_headers)
+        assert r.status_code == 200, r.text
+        return r.json()
+
+    # Other tests leave rows behind, so compare with the counts before.
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", DATA_KEY)
+    start = status()
+    assert start["key_configured"] is True
+
+    res = _resident(client, staff_token_headers, street_id)
+    _marginalized(client, staff_token_headers, res["id"])
+    assert status() == start  # an encrypted, readable row changes nothing
+
+    # The same row, read with another key, cannot be opened.
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", "z" * 48)
+    wrong = status()
+    assert wrong["key_configured"] is True
+    assert wrong["unreadable_count"] >= start["unreadable_count"] + 1
+
+    # No key at all: reported as missing; a row saved now is plain text.
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", "")
+    before = status()
+    assert before["key_configured"] is False
+    _marginalized(client, staff_token_headers, res["id"])
+    after = status()
+    assert after["plain_count"] == before["plain_count"] + 1
+    # Counts only: the value itself is never in the answer.
+    assert SECRET not in client.get(PROTECTION, headers=superuser_token_headers).text
+
+
+def test_data_protection_status_is_for_administrators_only(
+    client: TestClient, staff_token_headers: Headers
+) -> None:
+    assert client.get(PROTECTION, headers=staff_token_headers).status_code == 403
+    assert client.get(PROTECTION).status_code in (401, 403)

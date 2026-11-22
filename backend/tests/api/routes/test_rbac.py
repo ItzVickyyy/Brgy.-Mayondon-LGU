@@ -328,6 +328,7 @@ ADMIN_ONLY = {
     Permission.REPORTS_VIEW,
     Permission.BACKUP_RESTORE,
     Permission.SYSTEM_UPDATE,
+    Permission.SYSTEM_STATUS,
 }
 
 

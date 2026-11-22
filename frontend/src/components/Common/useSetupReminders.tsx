@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
 import { BackupsService } from "@/client"
+import { useDataProtection } from "@/components/Security/useDataProtection"
 import { useSecurityQuestionsStatus } from "@/components/SecurityQuestions/useSecurityQuestionsStatus"
 import { useMfaStatus } from "@/components/TwoFactor/useMfaStatus"
 import { useUpdateStatus } from "@/components/Updates/useUpdateStatus"
@@ -19,7 +20,13 @@ export type ReminderSeverity = "urgent" | "soon" | "optional"
 export const SEVERITY_ORDER: ReminderSeverity[] = ["urgent", "soon", "optional"]
 
 export type SetupReminder = {
-  id: "securityQuestions" | "twoFactor" | "backupTool" | "update" | "plainHttp"
+  id:
+    | "securityQuestions"
+    | "twoFactor"
+    | "backupTool"
+    | "update"
+    | "plainHttp"
+    | "dataKey"
   testId: string
   severity: ReminderSeverity
   /** A short heading (only when the text below is a longer instruction). */
@@ -101,6 +108,9 @@ function wasDismissed(userId: string): boolean {
  *   (an `UpdateDialog`) installs it now.
  * - Plain HTTP (patch 212): System Administrator only, while the page was opened over
  *   `http://` from another computer (not `localhost`). "Remind me later" hides it for 14 days.
+ * - Health-condition key (patch 214): System Administrator only. Red when saved values cannot be
+ *   opened with the key on this computer, orange when no key is set (they are stored as plain
+ *   text). No "remind me later": it is fixed once, on the server computer.
  * Severity: two-factor and the missing backup tool are urgent (red); recovery
  * questions an administrator cannot dismiss are soon (orange); recovery
  * questions staff may postpone are optional (green).
@@ -121,6 +131,7 @@ export function useSetupReminders(): SetupReminder[] {
   })
 
   const update = useUpdateStatus(isAdmin)
+  const protection = useDataProtection(isAdmin)
   // Re-read the "remind me later" time when the dialog sets it.
   const [, setSnoozeTick] = useState(0)
   useEffect(() => {
@@ -232,6 +243,25 @@ export function useSetupReminders(): SetupReminder[] {
       teaser: t("notifications.teaser.plainHttp"),
       action: t("security.plainHttp.action"),
     })
+  }
+
+  const protectionData = protection.data
+  if (isAdmin && protectionData) {
+    const unreadable = protectionData.unreadable_count > 0
+    if (unreadable || !protectionData.key_configured) {
+      const kind = unreadable ? "unreadable" : "missing"
+      reminders.push({
+        id: "dataKey",
+        testId: "data-key-reminder",
+        severity: unreadable ? "urgent" : "soon",
+        title: t(`security.dataKey.${kind}.title`),
+        text: t(`security.dataKey.${kind}.text`, {
+          count: protectionData.unreadable_count,
+        }),
+        teaser: t(`security.dataKey.${kind}.teaser`),
+        action: t("security.dataKey.action"),
+      })
+    }
   }
 
   return reminders.sort(

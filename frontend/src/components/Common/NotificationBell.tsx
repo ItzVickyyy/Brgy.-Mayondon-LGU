@@ -21,7 +21,9 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { type NotificationItem, NotificationsService } from "@/client"
+import { DataKeyDialog } from "@/components/Security/DataKeyDialog"
 import { PlainHttpDialog } from "@/components/Security/PlainHttpDialog"
+import { useDataProtection } from "@/components/Security/useDataProtection"
 import { SecurityQuestionsDialog } from "@/components/SecurityQuestions/SecurityQuestionsDialog"
 import { TwoFactorSetupDialog } from "@/components/TwoFactor/TwoFactorSetupDialog"
 import { UpdateDialog } from "@/components/Updates/UpdateDialog"
@@ -34,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import useAuth from "@/hooks/useAuth"
+import { isSystemAdministrator } from "@/lib/access"
 import { getLocale } from "@/lib/locale"
 import { noticeSentence } from "@/lib/notifications"
 import {
@@ -332,7 +335,12 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
   const [twoFactorOpen, setTwoFactorOpen] = useState(false)
   const [updateOpen, setUpdateOpen] = useState(false)
   const [httpOpen, setHttpOpen] = useState(false)
+  const [dataKeyOpen, setDataKeyOpen] = useState(false)
   const { user: signedIn } = useAuth()
+  // Same query as the reminder (fetched once); only the dialog's wording is read here.
+  const protectionData = useDataProtection(
+    Boolean(signedIn) && isSystemAdministrator(signedIn),
+  ).data
   const [filter, setFilter] = useState<"all" | "unread">("all")
   const now = useNow()
   const shown =
@@ -366,6 +374,7 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
       if (id === "securityQuestions") setQuestionsOpen(true)
       else if (id === "update") setUpdateOpen(true)
       else if (id === "plainHttp") setHttpOpen(true)
+      else if (id === "dataKey") setDataKeyOpen(true)
       else setTwoFactorOpen(true)
     }, 80)
   }
@@ -563,6 +572,17 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
       {/* Always mounted, like the two above: the reminder disappears the moment the update
         starts, but the dialog must stay open to follow it. */}
       <UpdateDialog open={updateOpen} onOpenChange={setUpdateOpen} />
+      {/* Always mounted, so it can finish closing after the key is added and the reminder goes. */}
+      <DataKeyDialog
+        open={dataKeyOpen}
+        onOpenChange={setDataKeyOpen}
+        kind={
+          protectionData && protectionData.unreadable_count > 0
+            ? "unreadable"
+            : "missing"
+        }
+        count={protectionData?.unreadable_count ?? 0}
+      />
       {/* Always mounted: "Remind me later" hides the reminder while the dialog is still closing. */}
       <PlainHttpDialog
         open={httpOpen}

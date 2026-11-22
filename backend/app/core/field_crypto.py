@@ -18,6 +18,7 @@ text because the program searches and sorts on them (decision 94).
 import base64
 import logging
 import secrets
+from typing import NamedTuple
 
 from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives import hashes
@@ -135,3 +136,33 @@ def encrypt_existing(session: Session) -> int:
     session.commit()
     logger.info("Encrypted %d health condition(s).", len(pending))
     return len(pending)
+
+
+class DataProtection(NamedTuple):
+    """What the administrator needs to know about the health-condition key (patch 214)."""
+
+    key_configured: bool
+    # Stored as plain text (no key was set when they were saved).
+    plain_count: int
+    # Stored encrypted but not readable with the key in .env (key lost, changed or damaged).
+    unreadable_count: int
+
+
+def protection_status(session: Session) -> DataProtection:
+    """Count health conditions that are plain or unreadable. Reads, never changes, never logs a value."""
+    rows = (
+        session.connection()
+        .execute(
+            text(
+                "SELECT health_condition FROM issuance_assistance "
+                "WHERE health_condition IS NOT NULL"
+            )
+        )
+        .scalars()
+        .all()
+    )
+    plain = sum(1 for value in rows if not value.startswith(PREFIX))
+    unreadable = sum(
+        1 for value in rows if value.startswith(PREFIX) and decrypt_text(value) is None
+    )
+    return DataProtection(is_available(), plain, unreadable)

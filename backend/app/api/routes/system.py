@@ -1,4 +1,4 @@
-"""Program updates from the notification bell (patch 206; System Administrator only).
+"""Program updates and installation status for the notification bell (System Administrator only).
 
 ``GET /system/update`` says whether a new approved version is waiting and whether
 the computer's update service can install it; ``POST /system/update/request``
@@ -15,7 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.api.deps import SessionDep, require_permission
-from app.core import update_state
+from app.core import field_crypto, update_state
 from app.core.audit import record_audit_event
 from app.core.permissions import Permission
 from app.models import User
@@ -23,6 +23,7 @@ from app.models import User
 router = APIRouter(prefix="/system", tags=["system"])
 
 UpdateUser = Annotated[User, Depends(require_permission(Permission.SYSTEM_UPDATE))]
+StatusUser = Annotated[User, Depends(require_permission(Permission.SYSTEM_STATUS))]
 
 
 class UpdateStatusPublic(BaseModel):
@@ -71,3 +72,28 @@ def request_update(session: SessionDep, user: UpdateUser) -> UpdateStatusPublic:
         commit=True,
     )
     return _public(status)
+
+
+class DataProtectionPublic(BaseModel):
+    # Is DATA_ENCRYPTION_KEY set in .env?
+    key_configured: bool
+    # Health conditions saved as plain text (nothing was there to encrypt them).
+    plain_count: int
+    # Encrypted health conditions the key in .env cannot open (key lost or changed).
+    unreadable_count: int
+
+
+@router.get("/data-protection", response_model=DataProtectionPublic)
+def read_data_protection(
+    session: SessionDep, _user: StatusUser
+) -> DataProtectionPublic:
+    """Patch 214: lets the bell warn an administrator when the data key is missing or wrong.
+
+    Only counts are returned, never a value. Not audited (a status read, like ``/system/update``).
+    """
+    status = field_crypto.protection_status(session)
+    return DataProtectionPublic(
+        key_configured=status.key_configured,
+        plain_count=status.plain_count,
+        unreadable_count=status.unreadable_count,
+    )

@@ -578,6 +578,24 @@ export type DashboardSummary = {
 };
 
 /**
+ * DataProtectionPublic
+ */
+export type DataProtectionPublic = {
+    /**
+     * Key Configured
+     */
+    key_configured: boolean;
+    /**
+     * Plain Count
+     */
+    plain_count: number;
+    /**
+     * Unreadable Count
+     */
+    unreadable_count: number;
+};
+
+/**
  * DayCount
  */
 export type DayCount = {
@@ -3551,6 +3569,22 @@ export type loginLoginAccessTokenResponses = {
 };
 
 export type loginLoginAccessTokenResponse = loginLoginAccessTokenResponses[keyof loginLoginAccessTokenResponses];
+
+export type loginLogoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/login/logout';
+};
+
+export type loginLogoutResponses = {
+    /**
+     * Successful Response
+     */
+    200: Message;
+};
+
+export type loginLogoutResponse = loginLogoutResponses[keyof loginLogoutResponses];
 
 export type loginLoginMfaData = {
     body: MfaLogin;
@@ -6672,6 +6706,22 @@ export type systemRequestUpdateResponses = {
 };
 
 export type systemRequestUpdateResponse = systemRequestUpdateResponses[keyof systemRequestUpdateResponses];
+
+export type systemReadDataProtectionData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/system/data-protection';
+};
+
+export type systemReadDataProtectionResponses = {
+    /**
+     * Successful Response
+     */
+    200: DataProtectionPublic;
+};
+
+export type systemReadDataProtectionResponse = systemReadDataProtectionResponses[keyof systemReadDataProtectionResponses];
 
 export type importsListImportsData = {
     body?: never;

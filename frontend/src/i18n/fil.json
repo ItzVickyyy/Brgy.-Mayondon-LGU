@@ -101,7 +101,8 @@
       "twoFactor": "I-set up ang two-factor na pag-sign in",
       "backupTool": "Wala ang backup tool",
       "update": "May bagong bersyon na",
-      "plainHttp": "Hindi protektado ang network"
+      "plainHttp": "Hindi protektado ang network",
+      "dataKey": "Hindi protektado ang mga kondisyong pangkalusugan"
     },
     "events": {
       "user_create": "{{actor}} ang gumawa ng user account para kay {{target}}.",
@@ -2883,6 +2884,40 @@
         },
         "later": "Paalalahanan ako sa 2 linggo",
         "close": "Isara"
+      }
+    },
+    "dataKey": {
+      "action": "Ano ang gagawin",
+      "close": "Isara",
+      "missing": {
+        "title": "Walang proteksyon ang mga kondisyong pangkalusugan",
+        "text": "Wala sa computer na ito ang susi ng proteksyon para sa mga kondisyong pangkalusugan, kaya nakasave ang mga ito bilang plain text sa database. Ang pagdagdag ng susi ang solusyon.",
+        "teaser": "Hindi protektado ang mga kondisyong pangkalusugan",
+        "dialog": {
+          "title": "Protektahan ang mga kondisyong pangkalusugan",
+          "description": "Kung walang susi, nakasave bilang plain text sa database ang kondisyong pangkalusugan ng medical assistance request.",
+          "steps": {
+            "one": "Sa server computer, bubuksan ng taong nag-aalaga ng programa ang program folder at patatakbuhin ang ensure-data-key.ps1 sa scripts folder. Idinadagdag nito ang susi at hindi ito ipinapakita.",
+            "two": "Pagkatapos, sisimulan niya muli ang programa gamit ang: docker compose -f compose.yml up -d. Mapoprotektahan sa pagsisimulang iyon ang mga kondisyong nakasave na.",
+            "three": "Kokopyahin niya ang .env file sa USB drive. Kung wala ang eksaktong susing iyon, hindi na muling mababasa ang mga protektadong kondisyon, kaya itago ito nang maayos."
+          }
+        }
+      },
+      "unreadable": {
+        "title": "May mga kondisyong pangkalusugan na hindi mabasa",
+        "text_one": "{{count}} nakasave na kondisyong pangkalusugan ang hindi mabuksan ng susi sa computer na ito. Maaaring nawala o napalitan ang susi.",
+        "text_other": "{{count}} nakasave na kondisyong pangkalusugan ang hindi mabuksan ng susi sa computer na ito. Maaaring nawala o napalitan ang susi.",
+        "teaser": "Hindi mabasa ang mga kondisyong pangkalusugan",
+        "dialog": {
+          "title": "Hindi mabasa ang mga kondisyong pangkalusugan",
+          "description_one": "{{count}} nakasave na kondisyong pangkalusugan ang hindi mabuksan ng susi sa computer na ito.",
+          "description_other": "{{count}} nakasave na kondisyong pangkalusugan ang hindi mabuksan ng susi sa computer na ito.",
+          "steps": {
+            "one": "Huwag patakbuhin ang ensure-data-key.ps1 at huwag gumawa ng bagong susi: hindi mabubuksan ng bagong susi ang mga lumang value.",
+            "two": "Hanapin ang .env file na nasa USB drive (o mas lumang kopya) at ilagay ang DATA_ENCRYPTION_KEY na linya nito sa .env ng server computer.",
+            "three": "Simulan muli ang programa gamit ang: docker compose -f compose.yml up -d. Kung walang kopya, magtanong sa mga developer; huwag i-save muli ang mga talaang iyon, dahil mapapalitan nito ang nakaimbak."
+          }
+        }
       }
     }
   }

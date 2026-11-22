@@ -38,6 +38,7 @@ class Permission(StrEnum):
     REPORTS_VIEW = "reports.view"
     BACKUP_RESTORE = "backup.restore"
     SYSTEM_UPDATE = "system.update"  # install a new program version from the bell
+    SYSTEM_STATUS = "system.status"  # read-only installation status
 
 
 _STAFF_PERMISSIONS = frozenset(
