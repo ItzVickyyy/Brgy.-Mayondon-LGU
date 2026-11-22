@@ -1,16 +1,18 @@
-"""Encryption of the one sensitive free-text field kept in the database (patch 213).
+"""Encryption of the sensitive values kept in the database (patches 213 and 216).
 
-Only the assistance ``health_condition`` is encrypted. Names, addresses and birthdates stay plain
-text because the program searches and sorts on them (decision 94).
+The assistance ``health_condition`` (patch 213) and the resident photos (patch 216) are encrypted.
+Names, addresses and birthdates stay plain text because the program searches and sorts on them
+(decision 94).
 
 * Key: ``DATA_ENCRYPTION_KEY`` in ``.env``. It is its own key (not ``MFA_ENCRYPTION_KEY`` and not
   touched by the secret-rotation tool), so changing one can never make the other data unreadable.
   Without the key a value is stored as plain text, exactly as before, and a warning is logged at
   start-up. **Losing or changing the key makes the stored health conditions unreadable** (they show
-  as ``[cannot be read]``); keep a copy of ``.env`` on the USB drive.
+  as ``[cannot be read]``, a photo cannot be shown); keep a copy of ``.env`` on the USB drive.
 * Format: ``enc1:`` + base64url(nonce + AES-GCM ciphertext), key derived with HKDF-SHA256.
   A stored value without the prefix is plain text (rows written before the key existed) and is
-  returned as it is.
+  returned as it is. A photo uses the same key and layout as raw bytes: ``enc1:`` + nonce +
+  AES-GCM ciphertext (a PNG or WebP file never starts with those bytes).
 * ``EncryptedText`` does this transparently in the ORM, so routes and tests keep reading and
   writing plain strings; the database only ever holds the encrypted form once a key is set.
 """
@@ -24,7 +26,7 @@ from cryptography.exceptions import InvalidTag
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.hkdf import HKDF
-from sqlalchemy import Text, TypeDecorator, text
+from sqlalchemy import LargeBinary, Text, TypeDecorator, text
 from sqlmodel import Session
 
 from app.core.config import settings
@@ -32,6 +34,8 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 PREFIX = "enc1:"
+BYTES_PREFIX = PREFIX.encode("ascii")
+_PHOTO_CONTEXT = b"resident-photo-v1"
 # Shown instead of a value that cannot be decrypted (wrong or missing key, damaged value).
 UNREADABLE = "[cannot be read]"
 
@@ -78,6 +82,27 @@ def decrypt_text(stored: str, *, key: str | None = None) -> str | None:
         return None
 
 
+def encrypt_bytes(plain: bytes, *, key: str | None = None) -> bytes:
+    nonce = secrets.token_bytes(12)
+    blob = _aead(settings.DATA_ENCRYPTION_KEY if key is None else key).encrypt(
+        nonce, plain, _PHOTO_CONTEXT
+    )
+    return BYTES_PREFIX + nonce + blob
+
+
+def decrypt_bytes(stored: bytes, *, key: str | None = None) -> bytes | None:
+    """The plain bytes, or None when they cannot be read (no key, wrong key, damaged)."""
+    if not stored.startswith(BYTES_PREFIX):
+        return None
+    raw = stored[len(BYTES_PREFIX) :]
+    try:
+        return _aead(settings.DATA_ENCRYPTION_KEY if key is None else key).decrypt(
+            raw[:12], raw[12:], _PHOTO_CONTEXT
+        )
+    except InvalidTag, ValueError, DataKeyMissing:
+        return None
+
+
 class EncryptedText(TypeDecorator[str]):
     """A text column that is encrypted on the way in and decrypted on the way out."""
 
@@ -96,11 +121,52 @@ class EncryptedText(TypeDecorator[str]):
         return UNREADABLE if plain is None else plain
 
 
+class EncryptedBytes(TypeDecorator[bytes]):
+    """A binary column (the resident photo) encrypted on the way in and decrypted on the way out.
+
+    A value that cannot be decrypted reads as empty bytes; the photo route answers that the photo
+    cannot be read, and uploading a new photo replaces it.
+    """
+
+    impl = LargeBinary
+    cache_ok = True
+
+    def process_bind_param(self, value: bytes | None, dialect: object) -> bytes | None:
+        if value is None or not is_available():
+            return value
+        return encrypt_bytes(bytes(value))
+
+    def process_result_value(
+        self, value: bytes | None, dialect: object
+    ) -> bytes | None:
+        if value is None:
+            return value
+        raw = bytes(value)
+        if not raw.startswith(BYTES_PREFIX):
+            return raw
+        return decrypt_bytes(raw) or b""
+
+
+def _photos_not_encrypted(session: Session) -> list[object]:
+    return list(
+        session.connection()
+        .execute(
+            text(
+                "SELECT resident_id FROM resident_photos "
+                "WHERE substring(content from 1 for 5) <> :p ORDER BY resident_id"
+            ),
+            {"p": BYTES_PREFIX},
+        )
+        .scalars()
+        .all()
+    )
+
+
 def encrypt_existing(session: Session) -> int:
-    """Encrypt health conditions saved as plain text before a key was set.
+    """Encrypt health conditions and photos saved as plain text before a key was set.
 
     Safe to run at every start: it touches only rows that are not encrypted yet, does nothing
-    without a key, and returns how many rows it changed.
+    without a key, saves everything in one transaction, and returns how many values it changed.
     """
     connection = session.connection()
     pending = connection.execute(
@@ -110,13 +176,15 @@ def encrypt_existing(session: Session) -> int:
         ),
         {"p": PREFIX + "%"},
     ).all()
-    if not pending:
+    pending_photos = _photos_not_encrypted(session)
+    if not pending and not pending_photos:
         return 0
     if not is_available():
         logger.warning(
-            "DATA_ENCRYPTION_KEY is not set: %d health condition(s) are stored as plain "
-            "text. Add the key to .env to protect them.",
+            "DATA_ENCRYPTION_KEY is not set: %d health condition(s) and %d photo(s) are "
+            "stored unprotected. Add the key to .env to protect them.",
             len(pending),
+            len(pending_photos),
         )
         return 0
     for issuance_id, plain in pending:
@@ -133,9 +201,29 @@ def encrypt_existing(session: Session) -> int:
             ),
             {"v": encrypted, "i": issuance_id},
         )
+    for resident_id in pending_photos:
+        row = connection.execute(
+            text("SELECT content FROM resident_photos WHERE resident_id = :i"),
+            {"i": resident_id},
+        ).first()
+        if row is None:
+            continue
+        plain_photo = bytes(row[0])
+        encrypted_photo = encrypt_bytes(plain_photo)
+        if decrypt_bytes(encrypted_photo) != plain_photo:
+            session.rollback()
+            raise RuntimeError("A photo did not survive a test decryption.")
+        connection.execute(
+            text("UPDATE resident_photos SET content = :v WHERE resident_id = :i"),
+            {"v": encrypted_photo, "i": resident_id},
+        )
     session.commit()
-    logger.info("Encrypted %d health condition(s).", len(pending))
-    return len(pending)
+    logger.info(
+        "Encrypted %d health condition(s) and %d photo(s).",
+        len(pending),
+        len(pending_photos),
+    )
+    return len(pending) + len(pending_photos)
 
 
 class DataProtection(NamedTuple):

@@ -15,13 +15,13 @@ from sqlalchemy import (
     Column,
     DateTime,
     Index,
-    LargeBinary,
     SmallInteger,
     text,
 )
 from sqlmodel import Field, SQLModel
 
 from app.core.dates import today_manila
+from app.core.field_crypto import EncryptedBytes
 from app.models import get_datetime_utc
 
 SUFFIXES = ("Jr.", "Sr.", "II", "III", "IV", "V")
@@ -179,7 +179,11 @@ class ResidentSector(SQLModel, table=True):
 
 
 class ResidentPhoto(SQLModel, table=True):
-    """Processed PNG/WebP, at most 300 KB. Kept apart so lists never load bytes."""
+    """Processed PNG/WebP, at most 300 KB. Kept apart so lists never load bytes.
+
+    ``content`` is encrypted in the database when ``DATA_ENCRYPTION_KEY`` is set (patch 216);
+    ``byte_size`` is the size of the photo itself.
+    """
 
     __tablename__ = "resident_photos"
     __table_args__ = (
@@ -195,7 +199,7 @@ class ResidentPhoto(SQLModel, table=True):
     resident_id: uuid.UUID = Field(
         foreign_key="residents.id", primary_key=True, ondelete="CASCADE"
     )
-    content: bytes = Field(sa_column=Column(LargeBinary, nullable=False))
+    content: bytes = Field(sa_column=Column(EncryptedBytes, nullable=False))
     content_type: str = Field(max_length=20)
     byte_size: int
     updated_at: datetime = Field(

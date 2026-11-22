@@ -1,8 +1,9 @@
 # ruff: noqa: F811  (fixtures imported from other test modules are used as parameters)
-"""Changing DATA_ENCRYPTION_KEY with the rotation tool (patch 215).
+"""Changing DATA_ENCRYPTION_KEY with the rotation tool (patches 215 and 216).
 
-Every stored health condition is re-encrypted in one transaction that is saved only after
-``.env`` is replaced; a wrong or missing key stops the tool before anything changes.
+Every stored health condition and resident photo is re-encrypted in one transaction that is
+saved only after ``.env`` is replaced; a wrong or missing key stops the tool before anything
+changes.
 """
 
 from pathlib import Path
@@ -21,6 +22,7 @@ from tests.api.routes.test_issuances import (  # noqa: F401  (fixtures are reuse
     street_id,
 )
 from tests.api.routes.test_issuances_certificates import SECRET, _marginalized
+from tests.api.routes.test_residents import API, PNG, WEBP, _create
 from tests.test_rotate_secrets import (  # noqa: F401  (fixtures are reused)
     OLD_SECRET_KEY,
     SCRATCH_PASSWORD,
@@ -43,12 +45,49 @@ def _env_with_data_key(folder: Path, key: str | None) -> None:
 
 
 def _forget_other_conditions(db: Session) -> None:
-    """Earlier tests leave health conditions saved under other keys; the tool (rightly)
-    looks at every stored one, so start from none."""
+    """Earlier tests leave health conditions and photos saved under other keys; the tool
+    (rightly) looks at every stored one, so start from none."""
     db.connection().execute(
         text("UPDATE issuance_assistance SET health_condition = NULL")
     )
+    db.connection().execute(text("DELETE FROM resident_photos"))
     db.commit()
+
+
+def _stored_photo(db: Session, resident_id: str) -> bytes:
+    db.rollback()
+    value = (
+        db.connection()
+        .execute(
+            text("SELECT content FROM resident_photos WHERE resident_id = :i"),
+            {"i": resident_id},
+        )
+        .scalar()
+    )
+    assert value is not None
+    return bytes(value)
+
+
+@pytest.fixture
+def photo(
+    client: TestClient,
+    staff_token_headers: dict[str, str],
+    db: Session,
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """Saves one photo; the test chooses the key it was saved under."""
+    _forget_other_conditions(db)
+
+    def make(key: str, content: bytes = PNG) -> str:
+        monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", key)
+        rid = _create(client, staff_token_headers)["id"]
+        res = client.put(
+            f"{API}/residents/{rid}/photo", headers=staff_token_headers, content=content
+        )
+        assert res.status_code == 200
+        return rid
+
+    return make
 
 
 def _stored(db: Session, issuance_id: str) -> str:
@@ -239,3 +278,102 @@ def test_the_command_line_reminds_to_copy_the_new_env(
     out = capsys.readouterr()
     assert code == 0, out.err
     assert "copy the NEW .env to the USB drive" in out.out
+
+
+@pytest.mark.usefixtures("scratch")
+def test_rotation_re_encrypts_photos_and_rollback_puts_them_back(
+    folder: Path, db: Session, photo
+) -> None:
+    rid = photo(OLD_KEY, PNG)
+    assert fc.decrypt_bytes(_stored_photo(db, rid), key=OLD_KEY) == PNG
+    _env_with_data_key(folder, OLD_KEY)
+
+    result = run_apply(folder, ("data-key",))
+
+    new_key = r.env_get(r.read_text_exact(folder / ".env"), "DATA_ENCRYPTION_KEY")
+    assert new_key and new_key != OLD_KEY
+    stored = _stored_photo(db, rid)
+    assert fc.decrypt_bytes(stored, key=new_key) == PNG
+    assert fc.decrypt_bytes(stored, key=OLD_KEY) is None
+    assert PNG not in stored
+
+    steps = r.rollback_rotation(
+        folder / ".env",
+        result.old_env_copy,
+        url=scratch_url(),
+        current_db_password=SCRATCH_PASSWORD,
+    )
+    assert "photos put back under the old key" in steps
+    assert "health conditions put back under the old key" not in steps  # none stored
+    assert fc.decrypt_bytes(_stored_photo(db, rid), key=OLD_KEY) == PNG
+
+
+@pytest.mark.usefixtures("scratch")
+def test_plain_photos_are_encrypted_and_rollback_makes_them_plain_again(
+    folder: Path, db: Session, photo
+) -> None:
+    rid = photo("", WEBP)  # saved while no key existed: plain bytes
+    assert _stored_photo(db, rid) == WEBP
+    _env_with_data_key(folder, None)
+
+    result = run_apply(folder, ("data-key",))
+
+    new_key = r.env_get(r.read_text_exact(folder / ".env"), "DATA_ENCRYPTION_KEY")
+    assert new_key
+    assert fc.decrypt_bytes(_stored_photo(db, rid), key=new_key) == WEBP
+
+    r.rollback_rotation(
+        folder / ".env",
+        result.old_env_copy,
+        url=scratch_url(),
+        current_db_password=SCRATCH_PASSWORD,
+    )
+    assert _stored_photo(db, rid) == WEBP  # as before: no key, plain bytes
+
+
+@pytest.mark.usefixtures("scratch")
+def test_refuses_when_a_photo_cannot_be_read_and_changes_nothing(
+    folder: Path, db: Session, photo
+) -> None:
+    rid = photo(OLD_KEY)
+    before = _stored_photo(db, rid)
+    _env_with_data_key(folder, WRONG_KEY)
+    with pytest.raises(r.RotationError, match="photo cannot be read"):
+        run_apply(folder, ("data-key",))
+    assert _stored_photo(db, rid) == before
+    assert not list(folder.glob(".env.before-rotation-*"))
+
+    _env_with_data_key(folder, None)  # encrypted photo but no key in .env
+    with pytest.raises(r.RotationError, match="there is none"):
+        run_apply(folder, ("data-key",))
+    assert _stored_photo(db, rid) == before
+
+
+@pytest.mark.usefixtures("scratch")
+def test_one_unreadable_photo_stops_the_whole_rotation(
+    folder: Path,
+    db: Session,
+    client: TestClient,
+    staff_token_headers: dict[str, str],
+    condition,
+    photo,
+) -> None:
+    issuance_id = condition(OLD_KEY)
+    rid = photo(OLD_KEY)
+    stranger = _create(client, staff_token_headers)["id"]
+    db.connection().execute(
+        text(
+            "INSERT INTO resident_photos (resident_id, content, content_type, byte_size) "
+            "VALUES (:i, :c, 'image/png', 10)"
+        ),
+        {"i": stranger, "c": fc.encrypt_bytes(PNG, key=WRONG_KEY)},
+    )
+    db.commit()
+    before_condition = _stored(db, issuance_id)
+    before_photo = _stored_photo(db, rid)
+    _env_with_data_key(folder, OLD_KEY)
+    with pytest.raises(r.RotationError, match="photo cannot be read"):
+        run_apply(folder, ("data-key",))
+    assert _stored(db, issuance_id) == before_condition
+    assert _stored_photo(db, rid) == before_photo
+    assert fc.decrypt_bytes(_stored_photo(db, stranger), key=WRONG_KEY) == PNG

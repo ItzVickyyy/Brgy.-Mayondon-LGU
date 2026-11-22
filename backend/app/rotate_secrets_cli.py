@@ -38,13 +38,14 @@ Parts (``--parts``, default all three):
 
 * ``data-key``       (not in the default) a new ``DATA_ENCRYPTION_KEY``: the key
                      that locks the health condition of medical assistance
-                     records. Every stored value is re-encrypted with the new
-                     key in ONE database transaction that is saved only after
-                     ``.env`` is replaced; values still saved as plain text are
-                     encrypted as well. When ``.env`` has no such key yet, this
-                     part makes one. **Copy the new ``.env`` to the USB drive
-                     straight away:** the old copy can no longer open the
-                     health conditions. Rollback puts the values back.
+                     records and the resident photos. Every stored value is
+                     re-encrypted with the new key in ONE database transaction
+                     that is saved only after ``.env`` is replaced; values still
+                     saved as plain text are encrypted as well. When ``.env``
+                     has no such key yet, this part makes one. **Copy the new
+                     ``.env`` to the USB drive straight away:** the old copy can
+                     no longer open the health conditions or the photos.
+                     Rollback puts the values back.
 
 Nothing here prints a secret. Afterwards restart the backend (``apply`` prints
 the exact command). Exit codes: 0 = done (or plan fine), 1 = failed or refused,
@@ -285,11 +286,11 @@ def build_plan(
     if "data-key" in parts:
         plan.lines.append(
             "DATA_ENCRYPTION_KEY: a new random value (made when .env has none). "
-            "Every stored health condition is re-encrypted with it in one "
-            "transaction, saved only after .env is replaced; values saved as plain "
-            "text are encrypted too. Afterwards copy the new .env to the USB drive: "
-            "the old copy can no longer open them. A backup made BEFORE this holds the "
-            "values under the old key, so keep the old .env together with it."
+            "Every stored health condition and resident photo is re-encrypted with it "
+            "in one transaction, saved only after .env is replaced; values saved as "
+            "plain text are encrypted too. Afterwards copy the new .env to the USB "
+            "drive: the old copy can no longer open them. A backup made BEFORE this "
+            "holds the values under the old key, so keep the old .env together with it."
         )
     plan.lines.append(
         "The old .env is saved first as .env.before-rotation-<time> next to it."
@@ -428,10 +429,23 @@ def read_health_conditions(url: URL, password: str) -> list[tuple[uuid.UUID, str
     return [(row[0], row[1]) for row in rows]
 
 
+def _photo_plain(stored: bytes, key: str) -> bytes | None:
+    """The photo's own bytes, or None when they cannot be read."""
+    if not stored.startswith(field_crypto.BYTES_PREFIX):
+        return stored  # saved before any key existed
+    return field_crypto.decrypt_bytes(stored, key=key)
+
+
+def count_photos(url: URL, password: str) -> int:
+    with connect(url, password) as connection:
+        row = connection.execute("SELECT count(*) FROM resident_photos").fetchone()
+    return int(row[0]) if row else 0
+
+
 def begin_health_reencrypt(
     url: URL, password: str, from_key: str, to_key: str
 ) -> psycopg.Connection:
-    """Re-encrypt every health condition under ``to_key``, but do NOT save yet.
+    """Re-encrypt every health condition and photo under ``to_key``, but do NOT save yet.
 
     ``to_key`` empty means "store as plain text" (a rollback to a ``.env`` that had no
     key). Returns the open transaction; the caller commits it once ``.env`` has been
@@ -473,6 +487,39 @@ def begin_health_reencrypt(
                 "WHERE issuance_id = %s",
                 (new_value, issuance_id),
             )
+        resident_ids = [
+            row[0]
+            for row in connection.execute(
+                "SELECT resident_id FROM resident_photos "
+                "ORDER BY resident_id FOR UPDATE"
+            ).fetchall()
+        ]
+        for resident_id in resident_ids:  # one photo at a time: they are large
+            row = connection.execute(
+                "SELECT content FROM resident_photos WHERE resident_id = %s",
+                (resident_id,),
+            ).fetchone()
+            if row is None:
+                continue
+            plain_photo = _photo_plain(bytes(row[0]), from_key)
+            if plain_photo is None:
+                raise RotationError(
+                    "A stored photo cannot be read with the "
+                    "DATA_ENCRYPTION_KEY in .env. Nothing was changed."
+                )
+            if to_key:
+                new_photo = field_crypto.encrypt_bytes(plain_photo, key=to_key)
+                if field_crypto.decrypt_bytes(new_photo, key=to_key) != plain_photo:
+                    raise RotationError(
+                        "A photo did not survive a test decryption. "
+                        "Nothing was changed."
+                    )
+            else:
+                new_photo = plain_photo
+            connection.execute(
+                "UPDATE resident_photos SET content = %s WHERE resident_id = %s",
+                (new_photo, resident_id),
+            )
     except BaseException:
         connection.rollback()
         connection.close()
@@ -481,7 +528,7 @@ def begin_health_reencrypt(
 
 
 def check_health_conditions_readable(url: URL, password: str, key: str) -> int:
-    """How many health conditions exist; raises when any cannot be read with ``key``."""
+    """How many health conditions and photos exist; raises when any cannot be read with ``key``."""
     rows = read_health_conditions(url, password)
     for _issuance_id, stored in rows:
         if _health_plain(stored, key) is None:
@@ -491,7 +538,26 @@ def check_health_conditions_readable(url: URL, password: str, key: str) -> int:
                 + ("" if key else " (there is none)")
                 + ". Nothing was changed."
             )
-    return len(rows)
+    with connect(url, password) as connection:
+        resident_ids = [
+            row[0]
+            for row in connection.execute(
+                "SELECT resident_id FROM resident_photos ORDER BY resident_id"
+            ).fetchall()
+        ]
+        for resident_id in resident_ids:  # one photo at a time: they are large
+            row = connection.execute(
+                "SELECT content FROM resident_photos WHERE resident_id = %s",
+                (resident_id,),
+            ).fetchone()
+            if row is not None and _photo_plain(bytes(row[0]), key) is None:
+                raise RotationError(
+                    "A stored photo cannot be read with the "
+                    "DATA_ENCRYPTION_KEY in .env"
+                    + ("" if key else " (there is none)")
+                    + ". Nothing was changed."
+                )
+    return len(rows) + len(resident_ids)
 
 
 def write_admin_password(
@@ -754,6 +820,7 @@ def rollback_rotation(
         )
     mfa_back = False
     health_back = False
+    photos_back = False
     if current_mfa_key != old_mfa_key:
         stored = read_mfa_secrets(url, old_password)
         if stored and not old_mfa_key:
@@ -767,12 +834,16 @@ def rollback_rotation(
                 begin_mfa_reencrypt(url, old_password, current_mfa_key, old_mfa_key)
             )
             mfa_back = True
-    if current_data_key != old_data_key and read_health_conditions(url, old_password):
-        # An old .env without a key gets its values back as plain text, as before.
-        transactions.append(
-            begin_health_reencrypt(url, old_password, current_data_key, old_data_key)
-        )
-        health_back = True
+    if current_data_key != old_data_key:
+        health_back = bool(read_health_conditions(url, old_password))
+        photos_back = count_photos(url, old_password) > 0
+        if health_back or photos_back:
+            # An old .env without a key gets its values back as plain text, as before.
+            transactions.append(
+                begin_health_reencrypt(
+                    url, old_password, current_data_key, old_data_key
+                )
+            )
     try:
         _replace_env(env_file, old_text)
         for transaction in transactions:
@@ -781,6 +852,8 @@ def rollback_rotation(
             steps.append("authenticator secrets put back under the old key")
         if health_back:
             steps.append("health conditions put back under the old key")
+        if photos_back:
+            steps.append("photos put back under the old key")
     except Exception:
         for transaction in transactions:
             transaction.rollback()
@@ -894,8 +967,9 @@ def main(argv: list[str] | None = None) -> int:
                     "IMPORTANT: copy the NEW .env to the USB drive now. The old copy can"
                 )
                 say(
-                    "no longer open the health conditions; without this key they are lost."
+                    "no longer open the health conditions or the photos; without this key"
                 )
+                say("they are lost.")
             return 0
         if args.confirm != "ROLLBACK" or not args.old_env:
             say("Not done: give --old-env FILE and --confirm ROLLBACK.", error=True)

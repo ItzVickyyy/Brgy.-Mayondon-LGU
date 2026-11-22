@@ -796,6 +796,11 @@ def get_photo(resident_id: uuid.UUID, session: SessionDep, _user: EditUser) -> R
     photo = session.get(ResidentPhoto, resident_id)
     if photo is None:
         raise HTTPException(status_code=404, detail="No photo for this resident")
+    if not photo.content:
+        raise HTTPException(
+            status_code=409,
+            detail="The photo cannot be read with the key on this computer",
+        )
     return Response(
         content=photo.content,
         media_type=photo.content_type,
