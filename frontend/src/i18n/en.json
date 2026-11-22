@@ -99,7 +99,8 @@
     "teaser": {
       "securityQuestions": "Set your recovery questions",
       "twoFactor": "Set up two-factor sign-in",
-      "backupTool": "Backup tool is missing"
+      "backupTool": "Backup tool is missing",
+      "update": "A new version is ready"
     },
     "events": {
       "user_create": "{{actor}} created a user account for {{target}}.",
@@ -174,6 +175,49 @@
       "subdivision_create": "{{actor}} added a subdivision to the list.",
       "subdivision_rename": "{{actor}} renamed a subdivision in the list.",
       "subdivision_delete": "{{actor}} removed a subdivision from the list."
+    }
+  },
+  "update": {
+    "reminder": {
+      "title": "A new version is ready",
+      "text": "It will be installed tonight by itself. To install it now, press Update. The program is unavailable for about a minute.",
+      "action": "Update",
+      "runningTitle": "The program is updating",
+      "runningText": "Press View progress to follow it.",
+      "viewProgress": "View progress"
+    },
+    "dialog": {
+      "title": {
+        "confirm": "Update the program now?",
+        "running": "Updating the program",
+        "done": "Update finished",
+        "failed": "The update did not finish"
+      },
+      "description": {
+        "confirm": "A new approved version is ready. It is installed automatically every night; you can install it now instead.",
+        "running": "Please wait and do not turn off the computer.",
+        "done": "The new version is installed.",
+        "failed": "Nothing was done to your records that a backup cannot restore."
+      },
+      "points": {
+        "backup": "A backup of the database is made first.",
+        "unavailable": "The program is unavailable for about a minute while it restarts, for everyone using it. The whole update takes a few minutes.",
+        "safe": "Your records are kept. If the new version does not start, the computer tries to put the previous one back."
+      },
+      "starting": "Starting the update…",
+      "updating": "Installing the new version…",
+      "reconnecting": "The program is restarting…",
+      "keepOpen": "Keep this window open. It takes a few minutes.",
+      "reload": "Reload the page to start using the new version.",
+      "reloadButton": "Reload the page",
+      "didNotStart": "The computer did not start the update. It will try again tonight.",
+      "didNotFinish": "The update stopped before it was finished.",
+      "tooLong": "The update is taking much longer than expected. Please check the computer.",
+      "failedGeneric": "The update did not finish.",
+      "failedSafe": "Your records are safe. Tell the developers if this happens again.",
+      "cancel": "Not now",
+      "confirm": "Update now",
+      "close": "Close"
     }
   },
   "logoutDialog": {
@@ -568,6 +612,9 @@
         "update_self": "Own account updated",
         "delete": "Account deleted",
         "delete_self": "Own account deleted"
+      },
+      "system": {
+        "update_requested": "Program update requested"
       }
     }
   },

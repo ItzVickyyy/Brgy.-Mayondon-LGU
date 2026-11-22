@@ -20,6 +20,7 @@ const activityKeys = {
   "backup.verify": "activity.actions.backup.verify",
   "backup.restore_requested": "activity.actions.backup.restore_requested",
   "backup.download": "activity.actions.backup.download",
+  "system.update_requested": "activity.actions.system.update_requested",
   "import.upload": "activity.actions.import.upload",
   "import.preview": "activity.actions.import.preview",
   "import.commit": "activity.actions.import.commit",

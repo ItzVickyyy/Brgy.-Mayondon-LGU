@@ -2948,6 +2948,40 @@ export type UpdatePassword = {
 };
 
 /**
+ * UpdateStatusPublic
+ */
+export type UpdateStatusPublic = {
+    /**
+     * Watcher Running
+     */
+    watcher_running: boolean;
+    /**
+     * State
+     */
+    state: string;
+    /**
+     * Installed
+     */
+    installed: string;
+    /**
+     * Target
+     */
+    target: string;
+    /**
+     * Checked At
+     */
+    checked_at: string | null;
+    /**
+     * Requested
+     */
+    requested: boolean;
+    /**
+     * Message
+     */
+    message: string;
+};
+
+/**
  * UserCreateByAdmin
  *
  * Body of POST /users/. There is no password: the account starts with the
@@ -6590,6 +6624,38 @@ export type backupsRequestRestoreResponses = {
 };
 
 export type backupsRequestRestoreResponse = backupsRequestRestoreResponses[keyof backupsRequestRestoreResponses];
+
+export type systemReadUpdateStatusData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/system/update';
+};
+
+export type systemReadUpdateStatusResponses = {
+    /**
+     * Successful Response
+     */
+    200: UpdateStatusPublic;
+};
+
+export type systemReadUpdateStatusResponse = systemReadUpdateStatusResponses[keyof systemReadUpdateStatusResponses];
+
+export type systemRequestUpdateData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/system/update/request';
+};
+
+export type systemRequestUpdateResponses = {
+    /**
+     * Successful Response
+     */
+    200: UpdateStatusPublic;
+};
+
+export type systemRequestUpdateResponse = systemRequestUpdateResponses[keyof systemRequestUpdateResponses];
 
 export type importsListImportsData = {
     body?: never;

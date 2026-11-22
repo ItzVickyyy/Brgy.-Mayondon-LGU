@@ -19,7 +19,8 @@ for f in compose.yml package.json bun.lock pyproject.toml uv.lock .dockerignore 
   backend/scripts/entrypoint.sh backend/app/main.py backend/app/migrate_on_start.py \
   frontend/index.html frontend/package.json frontend/tsconfig.json frontend/tsconfig.build.json \
   frontend/tsconfig.node.json frontend/vite.config.ts frontend/src/main.tsx \
-  scripts/install.ps1 scripts/update.ps1 scripts/auto-update.ps1 scripts/scheduled-backup.ps1 \
+  scripts/install.ps1 scripts/update.ps1 scripts/auto-update.ps1 scripts/update-watcher.ps1 \
+  scripts/register-update-task.ps1 scripts/scheduled-backup.ps1 \
   scripts/restore-db.ps1 scripts/status.ps1 scripts/start-mayondon.ps1; do
   [ -e "$tmp/$f" ] || { echo "MISSING from the release: $f"; fail=1; }
 done

@@ -16,6 +16,7 @@ from app.api.routes import (
     reports,
     residents,
     security_questions,
+    system,
     users,
     utils,
 )
@@ -46,6 +47,7 @@ def create_api_router(
     router.include_router(dashboard.router)
     router.include_router(reports.router)
     router.include_router(backups.router)
+    router.include_router(system.router)
     router.include_router(imports.router)
     router.include_router(utils.router)
 

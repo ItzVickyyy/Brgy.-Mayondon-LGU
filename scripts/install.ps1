@@ -10,7 +10,7 @@
 #   4. creates the administrator account
 #   5. makes the backup key pair (you type the passphrase) and turns encryption on
 #   6. registers the daily backup task, the start-at-sign-in task (it also opens the
-#      program in the browser) and the daily automatic update task
+#      program in the browser) and the automatic update task (night only)
 #   7. opens the firewall for the office network (asks Windows for permission)
 #   8. puts a "Barangay Mayondon" shortcut on the desktop
 #
@@ -19,10 +19,10 @@
 #           -BackupTime 17:00               time of the daily backup
 #           -BackupCopyTo "E:\MayondonBackups"   second location for backups
 #           -NoBrowser                      do not open the program at sign-in
-#           -NoAutoUpdate                   do not register the daily automatic update
+#           -NoAutoUpdate                   do not register the automatic update
 #           -AllNetworks                    firewall rule for every network profile (local subnet only),
 #                                           for an office Wi-Fi that Windows calls 'Public'
-#           -UpdateTime 12:30               time of the automatic update
+#           -UpdateTime 02:00               start of the night window of the automatic update
 # This script never prints or stores a secret except the one-time message that
 # shows a generated administrator password on screen.
 
@@ -34,7 +34,7 @@ param(
     [switch]$NoBrowser,
     [switch]$NoAutoUpdate,
     [switch]$AllNetworks,
-    [string]$UpdateTime = "12:30"
+    [string]$UpdateTime = "02:00"
 )
 
 $ErrorActionPreference = "Stop"
@@ -331,4 +331,4 @@ if ($adminPasswordShown) {
 }
 Write-Host "Next, signed in as the administrator: add the streets and puroks, create staff accounts with each person present, and ask everyone to set their security questions."
 Write-Host "The program starts by itself when this Windows user signs in (task 'Mayondon Start at Sign-in')$(if (-not $NoBrowser) { ' and opens in the browser' }). Tick Docker Desktop > Settings > General > 'Start Docker Desktop when you sign in' as well. Check anytime with Check-Mayondon.cmd."
-if (-not $NoAutoUpdate) { Write-Host "Updates: every day at $UpdateTime the program installs the newest approved version by itself (task 'Mayondon Auto Update'); it makes a backup first." }
+if (-not $NoAutoUpdate) { Write-Host "Updates: at night (from $UpdateTime) the program installs the newest approved version by itself (task 'Mayondon Auto Update'); it makes a backup first. An administrator can also press Update in the notification bell." }

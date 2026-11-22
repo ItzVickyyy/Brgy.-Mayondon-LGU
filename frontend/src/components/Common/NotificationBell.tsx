@@ -23,6 +23,7 @@ import { useTranslation } from "react-i18next"
 import { type NotificationItem, NotificationsService } from "@/client"
 import { SecurityQuestionsDialog } from "@/components/SecurityQuestions/SecurityQuestionsDialog"
 import { TwoFactorSetupDialog } from "@/components/TwoFactor/TwoFactorSetupDialog"
+import { UpdateDialog } from "@/components/Updates/UpdateDialog"
 import { Button } from "@/components/ui/button"
 import {
   DropdownMenu,
@@ -326,6 +327,7 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [questionsOpen, setQuestionsOpen] = useState(false)
   const [twoFactorOpen, setTwoFactorOpen] = useState(false)
+  const [updateOpen, setUpdateOpen] = useState(false)
   const [filter, setFilter] = useState<"all" | "unread">("all")
   const now = useNow()
   const shown =
@@ -357,6 +359,7 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
     // Let the menu finish closing before a dialog opens (focus handling).
     window.setTimeout(() => {
       if (id === "securityQuestions") setQuestionsOpen(true)
+      else if (id === "update") setUpdateOpen(true)
       else setTwoFactorOpen(true)
     }, 80)
   }
@@ -551,6 +554,9 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
         open={twoFactorOpen}
         onOpenChange={setTwoFactorOpen}
       />
+      {/* Always mounted, like the two above: the reminder disappears the moment the update
+        starts, but the dialog must stay open to follow it. */}
+      <UpdateDialog open={updateOpen} onOpenChange={setUpdateOpen} />
     </div>
   )
 }

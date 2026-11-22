@@ -6,6 +6,7 @@ import { Trans, useTranslation } from "react-i18next"
 import { BackupsService } from "@/client"
 import { useSecurityQuestionsStatus } from "@/components/SecurityQuestions/useSecurityQuestionsStatus"
 import { useMfaStatus } from "@/components/TwoFactor/useMfaStatus"
+import { useUpdateStatus } from "@/components/Updates/useUpdateStatus"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 
@@ -18,7 +19,7 @@ export type ReminderSeverity = "urgent" | "soon" | "optional"
 export const SEVERITY_ORDER: ReminderSeverity[] = ["urgent", "soon", "optional"]
 
 export type SetupReminder = {
-  id: "securityQuestions" | "twoFactor" | "backupTool"
+  id: "securityQuestions" | "twoFactor" | "backupTool" | "update"
   testId: string
   severity: ReminderSeverity
   /** A short heading (only when the text below is a longer instruction). */
@@ -55,6 +56,9 @@ function wasDismissed(userId: string): boolean {
  *   and for a staff member an administrator asked. No "Not now".
  * - Backup tool missing: System Administrator only (moved here from the top of
  *   the Backup and Restore page).
+ * - New version ready (patch 206): System Administrator only, and only on a computer whose
+ *   update service is running. The computer installs it by itself at night; the button
+ *   (an `UpdateDialog`) installs it now.
  * Severity: two-factor and the missing backup tool are urgent (red); recovery
  * questions an administrator cannot dismiss are soon (orange); recovery
  * questions staff may postpone are optional (green).
@@ -73,6 +77,8 @@ export function useSetupReminders(): SetupReminder[] {
     enabled: isAdmin,
     staleTime: 60_000,
   })
+
+  const update = useUpdateStatus(isAdmin)
 
   if (!user) return []
   const reminders: SetupReminder[] = []
@@ -138,6 +144,32 @@ export function useSetupReminders(): SetupReminder[] {
       teaser: t("notifications.teaser.backupTool"),
       action: t("notifications.openBackup"),
       to: "/backup-restore",
+    })
+  }
+
+  const updateData = update.data
+  if (
+    isAdmin &&
+    updateData?.watcher_running &&
+    (updateData.state === "available" ||
+      updateData.state === "updating" ||
+      updateData.requested)
+  ) {
+    const running = updateData.state === "updating" || updateData.requested
+    reminders.push({
+      id: "update",
+      testId: "update-reminder",
+      severity: "soon",
+      title: running
+        ? t("update.reminder.runningTitle")
+        : t("update.reminder.title"),
+      text: running
+        ? t("update.reminder.runningText")
+        : t("update.reminder.text"),
+      teaser: t("notifications.teaser.update"),
+      action: running
+        ? t("update.reminder.viewProgress")
+        : t("update.reminder.action"),
     })
   }
 

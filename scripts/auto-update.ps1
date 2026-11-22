@@ -1,7 +1,15 @@
-# Automatic update, started once a day by the Task Scheduler task made by
-# register-update-task.ps1. It can also be run by hand:
+# Automatic update. update-watcher.ps1 (the Task Scheduler task made by
+# register-update-task.ps1) runs it; it can also be run by hand:
 #   .\scripts\auto-update.ps1 -CheckOnly      shows what it would do and changes nothing
-#   .\scripts\auto-update.ps1                 does it now
+#   .\scripts\auto-update.ps1 -CheckOnly -Record   the same, and writes backups\update-state.json
+#                                              (what the program's notification reads)
+#   .\scripts\auto-update.ps1                 installs, but ONLY at night (see below)
+#   .\scripts\auto-update.ps1 -Now            installs now, at any hour (what the Update
+#                                              button in the program asks for)
+#
+# Night rule: without -Now it installs only from -NightFrom (default 02:00) for -NightHours
+# (default 3). At any other time it only records that a version is waiting, so nobody is
+# interrupted at work; an administrator can still press Update in the program.
 #
 # What it does:
 #   1. Asks GitHub which commit the APPROVED branch points to (default: "Production",
@@ -15,7 +23,8 @@
 #   4. If the new version does not come up healthy it puts the previous program image
 #      back, but ONLY when the database was not changed. If the database was changed it
 #      leaves everything as it is and says so: the developers must look at it.
-#   5. It writes backups\last-autoupdate.json (no secrets), the log
+#   5. It writes backups\last-autoupdate.json (no secrets), backups\update-state.json (what
+#      the program's notification shows: up_to_date, available, updating or failed), the log
 #      backups\auto-update.log, and the installed commit in .installed-commit. Without that
 #      file (a first install, or a manual update) the commit in frontend\build-info.json is
 #      taken as the installed version.
@@ -28,6 +37,15 @@ param(
     [string]$Repo = "ItzVickyyy/Brgy.-Mayondon-LGU",
     [string]$Ref = "Production",
     [switch]$CheckOnly,
+    # With -CheckOnly: also write backups\update-state.json (nothing else is changed).
+    [switch]$Record,
+    # Install even outside the night window (manual run, or the Update button).
+    [switch]$Now,
+    # The night window: it starts at this time (24-hour HH:mm) and lasts this many hours.
+    [ValidatePattern("^([01][0-9]|2[0-3]):[0-5][0-9]$")]
+    [string]$NightFrom = "02:00",
+    [ValidateRange(1, 8)]
+    [int]$NightHours = 3,
     # Only for tests: where the GitHub API and the archive downloads come from.
     [string]$ApiBase = "https://api.github.com",
     [string]$ArchiveBase = "https://github.com"
@@ -44,10 +62,21 @@ New-Item -ItemType Directory -Path $backups -Force | Out-Null
 $statusFile = Join-Path $backups "last-autoupdate.json"
 $logFile = Join-Path $backups "auto-update.log"
 $markerFile = Join-Path $repoRoot ".installed-commit"
+$stateFile = Join-Path $backups "update-state.json"
+$requestFile = Join-Path $backups "update-request.json"
 $script:work = $null
 $script:knownFailed = ""
+$script:stateInstalled = ""
+$script:stateTarget = ""
 
-if (-not $CheckOnly) { try { Start-Transcript -Path $logFile -Force | Out-Null } catch { } }
+# The log is appended to (a run that only waits for the night must not wipe the last install's
+# log); it starts again when it grows past 1 MB.
+if (-not $CheckOnly) {
+    try {
+        if ((Test-Path -LiteralPath $logFile) -and (Get-Item -LiteralPath $logFile).Length -gt 1MB) { Remove-Item -LiteralPath $logFile -Force }
+        Start-Transcript -Path $logFile -Append | Out-Null
+    } catch { }
+}
 
 # A version that already failed here is remembered until a newer one appears.
 if (Test-Path -LiteralPath $statusFile) {
@@ -63,9 +92,57 @@ function Invoke-Quiet([scriptblock]$block) {
     try { & $block } finally { $ErrorActionPreference = $keep }
 }
 
+# The clock; MAYONDON_CLOCK lets the tests pretend it is another time (nothing else sets it).
+function Get-Clock {
+    if ($env:MAYONDON_CLOCK) {
+        try { return [datetime]::Parse($env:MAYONDON_CLOCK, [Globalization.CultureInfo]::InvariantCulture) } catch { }
+    }
+    return Get-Date
+}
+function Test-NightWindow {
+    $from = [datetime]::ParseExact($NightFrom, "HH:mm", [Globalization.CultureInfo]::InvariantCulture).TimeOfDay
+    $now = (Get-Clock).TimeOfDay
+    $to = $from + [TimeSpan]::FromHours($NightHours)
+    if ($to.TotalHours -le 24) { return ($now -ge $from -and $now -lt $to) }
+    return ($now -ge $from -or $now -lt ($to - [TimeSpan]::FromHours(24)))
+}
+
+# What the program shows in its notification (no secrets): up_to_date, available, updating, failed.
+function Write-State([string]$state, [string]$message) {
+    try {
+        $tmp = "$stateFile.tmp"
+        ([ordered]@{
+            checked_at = (Get-Date).ToString("o"); state = $state
+            installed = $script:stateInstalled; target = $script:stateTarget; message = $message
+        } | ConvertTo-Json) | Set-Content -LiteralPath $tmp -Encoding UTF8
+        Move-Item -LiteralPath $tmp -Destination $stateFile -Force
+    } catch { }
+}
+
 function Finish([string]$result, [bool]$ok, [string]$message, [string]$target = "", [int]$code = 0) {
     Write-Host ""
     Write-Host "AUTO UPDATE: $result. $message"
+    if (-not $CheckOnly -or $Record) {
+        $state = switch ($result) {
+            "up_to_date" { "up_to_date" }
+            "updated" { "up_to_date" }
+            "would_update" { "available" }
+            "waiting_for_night" { "available" }
+            "failed" { "failed" }
+            "rolled_back" { "failed" }
+            # A version that failed here before is "skipped" with ok = false; other skips change nothing.
+            "skipped" { if (-not $ok) { "failed" } else { "" } }
+            default { "" }
+        }
+        if ($state) {
+            if ($target) { $script:stateTarget = $target.Substring(0, 7) }
+            Write-State $state $message
+        }
+    }
+    # An administrator's request from the program is used up once this run has looked at it.
+    if ($Now -and -not $CheckOnly -and (Test-Path -LiteralPath $requestFile)) {
+        try { Remove-Item -LiteralPath $requestFile -Force } catch { }
+    }
     if (-not $CheckOnly) {
         $failed = $script:knownFailed
         if ($result -eq "updated") { $failed = "" }
@@ -160,6 +237,7 @@ try {
             } catch { }
         }
     }
+    $script:stateInstalled = if ($installed) { $installed.Substring(0, 7) } else { "" }
     if ($installed -eq $target) { Finish "up_to_date" $true "Version $short is installed. Nothing to do." $target }
     if ($script:knownFailed -eq $target) {
         Finish "skipped" $false "Version $short failed on this computer before and was not tried again. Waiting for a newer approved version, or ask the developers." $target
@@ -187,8 +265,12 @@ try {
     if ($CheckOnly) {
         Finish "would_update" $true "Would update from $from to $short (nothing was changed)." $target
     }
+    if (-not $Now -and -not (Test-NightWindow)) {
+        Finish "waiting_for_night" $true "Version $short is ready (installed: $from). It is installed at night, from $NightFrom, or when an administrator presses Update in the program." $target
+    }
 
     # --------------------------------------------------------------- download
+    Write-State "updating" "Updating from $from to $short."
     Write-Host "Downloading version $short ..."
     $script:work = Join-Path ([IO.Path]::GetTempPath()) "mu-$short"
     if (Test-Path -LiteralPath $script:work) { Remove-Item -LiteralPath $script:work -Recurse -Force }

@@ -4,7 +4,9 @@
 # image and the database revision in files, and a fake "robocopy". Covers: a good update,
 # a new version that does not start (put back when the database is unchanged, left alone
 # when the database changed), already installed, a version that failed before, and
-# -CheckOnly. Run from anywhere inside the clone:  bash scripts/test-auto-update.sh
+# -CheckOnly, the night-only rule (a run in the daytime only records that a version is waiting;
+# -Now installs at any hour and uses up the Update button's request file) and
+# update-watcher.ps1 (one pass: request, night, check). Run from anywhere inside the clone:  bash scripts/test-auto-update.sh
 # Exit code 0 = good, 1 = problem. Takes about a minute.
 set -eu
 root=$(git rev-parse --show-toplevel)
@@ -108,10 +110,24 @@ run() {
   echo old > "$tmp/state/latest"; echo rev1 > "$tmp/state/rev"
   envs=()
   while [ "$1" != "--" ]; do envs+=("$1"); shift; done; shift
-  (cd "$tmp/app" && env FAKE_STATE="$tmp/state" "${envs[@]}" timeout 120 \
+  # The clock stands at 02:30 (inside the night window) unless a test sets CLOCK.
+  (cd "$tmp/app" && env FAKE_STATE="$tmp/state" MAYONDON_CLOCK="${CLOCK:-2026-11-22T02:30:00}" "${envs[@]}" timeout 120 \
     pwsh -NoProfile -File scripts/auto-update.ps1 -Repo "$REPO" -ApiBase "$base" -ArchiveBase "$base" "$@" \
     > "$tmp/out.txt" 2>&1) && code=0 || code=$?
 }
+# usage: watch [extra environment ...] -- : one pass of update-watcher.ps1 on a fresh installed copy,
+# started by the caller's run() setup (REQUEST=1 leaves an update-request.json first).
+watch() {
+  inst=$1; shift
+  rm -rf "$tmp/app" "$tmp/state"; mkdir -p "$tmp/app/backups" "$tmp/state"
+  cp -a "$tmp/base/." "$tmp/app/"; echo 'x=1' > "$tmp/app/.env"; echo "$inst" > "$tmp/app/.installed-commit"
+  [ -z "${REQUEST:-}" ] || printf '{"requested_at":"now"}' > "$tmp/app/backups/update-request.json"
+  echo old > "$tmp/state/latest"; echo rev1 > "$tmp/state/rev"
+  (cd "$tmp/app" && env FAKE_STATE="$tmp/state" MAYONDON_CLOCK="${CLOCK:-2026-11-22T14:00:00}" timeout 180 \
+    pwsh -NoProfile -File scripts/update-watcher.ps1 -Repo "$REPO" -ApiBase "$base" -ArchiveBase "$base" -Once \
+    > "$tmp/out.txt" 2>&1) && code=0 || code=$?
+}
+statefield() { python3 -c "import json; print(json.load(open('$tmp/app/backups/update-state.json'))['$1'])" 2>/dev/null || echo none; }
 result() { python3 -c "import json,sys; print(json.load(open('$tmp/app/backups/last-autoupdate.json'))['result'])" 2>/dev/null || echo none; }
 state() { cat "$tmp/state/$1" 2>/dev/null || echo none; }
 
@@ -159,6 +175,52 @@ echo "-- -CheckOnly"
 run $OLD A=1 -- -CheckOnly
 grep -q "would_update\|Would update" "$tmp/out.txt" && a=ok || a=bad; check "it says what it would do" $a
 [ ! -e "$tmp/app/NEW-VERSION.txt" ] && [ "$(cat "$tmp/app/.installed-commit")" = "$OLD" ] && a=ok || a=bad; check "it changed nothing" $a
+
+echo "-- -CheckOnly changes nothing, not even the state file; with -Record it writes only that"
+run $OLD A=1 -- -CheckOnly
+[ ! -e "$tmp/app/backups/update-state.json" ] && a=ok || a=bad; check "no state file without -Record" $a
+run $OLD A=1 -- -CheckOnly -Record
+[ "$(statefield state)" = available ] && a=ok || a=bad; check "state is available" $a
+[ "$(statefield target)" = "${NEW%"${NEW#???????}"}" ] && a=ok || a=bad; check "the new version is named" $a
+[ ! -e "$tmp/app/NEW-VERSION.txt" ] && a=ok || a=bad; check "nothing was installed" $a
+
+echo "-- in the daytime nothing is installed, the version is recorded as waiting"
+CLOCK=2026-11-22T14:00:00 run $OLD A=1 --
+[ "$(result)" = waiting_for_night ] && a=ok || a=bad; check "result is waiting_for_night" $a
+[ ! -e "$tmp/app/NEW-VERSION.txt" ] && a=ok || a=bad; check "nothing was installed" $a
+grep -q "compose -f compose.yml build" "$tmp/state/calls.log" && a=bad || a=ok; check "nothing was built" $a
+[ "$(statefield state)" = available ] && a=ok || a=bad; check "state is available" $a
+[ "$code" = 0 ] && a=ok || a=bad; check "exit code 0" $a
+
+echo "-- at night the same run installs, and a window that crosses midnight works"
+CLOCK=2026-11-22T04:59:00 run $OLD A=1 --
+[ "$(result)" = updated ] && a=ok || a=bad; check "04:59 is still inside 02:00 + 3 h" $a
+[ "$(statefield state)" = up_to_date ] && a=ok || a=bad; check "state is up_to_date afterwards" $a
+CLOCK=2026-11-22T05:00:00 run $OLD A=1 --
+[ "$(result)" = waiting_for_night ] && a=ok || a=bad; check "05:00 is outside it" $a
+CLOCK=2026-11-22T00:30:00 run $OLD A=1 -- -NightFrom 23:00 -NightHours 3
+[ "$(result)" = updated ] && a=ok || a=bad; check "00:30 is inside 23:00 + 3 h" $a
+
+echo "-- -Now installs in the daytime and uses up the request file"
+CLOCK=2026-11-22T14:00:00 run $OLD A=1 -- -Now
+[ "$(result)" = updated ] && a=ok || a=bad; check "result is updated" $a
+[ -f "$tmp/app/NEW-VERSION.txt" ] && a=ok || a=bad; check "the new files were copied" $a
+
+echo "-- the watcher: a request installs at once, even in the daytime"
+REQUEST=1 watch $OLD --
+[ -f "$tmp/app/NEW-VERSION.txt" ] && a=ok || a=bad; check "the update was installed" $a
+[ ! -e "$tmp/app/backups/update-request.json" ] && a=ok || a=bad; check "the request file was used up" $a
+[ -f "$tmp/app/backups/update-watcher.json" ] && a=ok || a=bad; check "the watcher wrote its heartbeat" $a
+
+echo "-- the watcher: with no request in the daytime it only checks"
+watch $OLD --
+[ ! -e "$tmp/app/NEW-VERSION.txt" ] && a=ok || a=bad; check "nothing was installed" $a
+[ "$(statefield state)" = available ] && a=ok || a=bad; check "state is available" $a
+
+echo "-- the watcher: at night it installs without a request"
+CLOCK=2026-11-22T02:10:00 watch $OLD --
+[ -f "$tmp/app/NEW-VERSION.txt" ] && a=ok || a=bad; check "the update was installed" $a
+[ "$(statefield state)" = up_to_date ] && a=ok || a=bad; check "state is up_to_date" $a
 
 [ $fail = 0 ] && echo "Auto-update OK." || { echo "Auto-update has problems."; sed -n 1,60p "$tmp/out.txt"; }
 exit $fail

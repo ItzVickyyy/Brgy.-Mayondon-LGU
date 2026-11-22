@@ -99,7 +99,8 @@
     "teaser": {
       "securityQuestions": "Itakda ang mga tanong sa pagbawi",
       "twoFactor": "I-set up ang two-factor na pag-sign in",
-      "backupTool": "Wala ang backup tool"
+      "backupTool": "Wala ang backup tool",
+      "update": "May bagong bersyon na"
     },
     "events": {
       "user_create": "{{actor}} ang gumawa ng user account para kay {{target}}.",
@@ -174,6 +175,49 @@
       "subdivision_create": "Nagdagdag si {{actor}} ng subdibisyon sa listahan.",
       "subdivision_rename": "Pinalitan ni {{actor}} ang pangalan ng isang subdibisyon sa listahan.",
       "subdivision_delete": "Nag-alis si {{actor}} ng subdibisyon sa listahan."
+    }
+  },
+  "update": {
+    "reminder": {
+      "title": "May bagong bersyon na",
+      "text": "Awtomatiko itong ii-install mamayang gabi. Para i-install ito ngayon, pindutin ang Update. Hindi magagamit ang programa nang halos isang minuto.",
+      "action": "Update",
+      "runningTitle": "Ina-update ang programa",
+      "runningText": "Pindutin ang Tingnan ang progreso para masubaybayan ito.",
+      "viewProgress": "Tingnan ang progreso"
+    },
+    "dialog": {
+      "title": {
+        "confirm": "I-update na ang programa?",
+        "running": "Ina-update ang programa",
+        "done": "Tapos na ang update",
+        "failed": "Hindi natapos ang update"
+      },
+      "description": {
+        "confirm": "May bagong aprubadong bersyon na. Awtomatiko itong ini-install tuwing gabi; maaari mo itong i-install ngayon.",
+        "running": "Maghintay lang at huwag patayin ang computer.",
+        "done": "Naka-install na ang bagong bersyon.",
+        "failed": "Walang ginawa sa iyong mga talaan na hindi maibabalik ng backup."
+      },
+      "points": {
+        "backup": "Gagawa muna ng backup ng database.",
+        "unavailable": "Hindi magagamit ang programa nang halos isang minuto habang nagre-restart, para sa lahat ng gumagamit nito. Ilang minuto ang buong update.",
+        "safe": "Mananatili ang iyong mga talaan. Kung hindi mag-start ang bagong bersyon, susubukan ng computer na ibalik ang dati."
+      },
+      "starting": "Sinisimulan ang update…",
+      "updating": "Ini-install ang bagong bersyon…",
+      "reconnecting": "Nagre-restart ang programa…",
+      "keepOpen": "Panatilihing bukas ang window na ito. Aabutin ito ng ilang minuto.",
+      "reload": "I-reload ang pahina para magamit ang bagong bersyon.",
+      "reloadButton": "I-reload ang pahina",
+      "didNotStart": "Hindi sinimulan ng computer ang update. Susubukan ulit ito mamayang gabi.",
+      "didNotFinish": "Huminto ang update bago ito natapos.",
+      "tooLong": "Mas matagal kaysa inaasahan ang update. Pakisuri ang computer.",
+      "failedGeneric": "Hindi natapos ang update.",
+      "failedSafe": "Ligtas ang iyong mga talaan. Sabihan ang mga developer kung mauulit ito.",
+      "cancel": "Hindi muna",
+      "confirm": "I-update na",
+      "close": "Isara"
     }
   },
   "logoutDialog": {
@@ -568,6 +612,9 @@
         "update_self": "Na-update ang sariling account",
         "delete": "Binura ang account",
         "delete_self": "Binura ang sariling account"
+      },
+      "system": {
+        "update_requested": "Humiling ng update ng programa"
       }
     }
   },

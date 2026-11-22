@@ -18,8 +18,15 @@ from tests.utils.utils import random_email, random_lower_string
 API = settings.API_V1_STR
 Headers = dict[str, str]
 
-# The only endpoints a user with a temporary password may call.
-EXEMPT = {("GET", f"{API}/users/me"), ("PATCH", f"{API}/users/me/password")}
+# The only endpoints a user with a temporary password may call. The two preferences
+# endpoints are allowed on purpose (patch 200: the theme must apply on the change-password
+# screen); they hold no records.
+EXEMPT = {
+    ("GET", f"{API}/users/me"),
+    ("PATCH", f"{API}/users/me/password"),
+    ("GET", f"{API}/users/me/preferences"),
+    ("PUT", f"{API}/users/me/preferences"),
+}
 
 
 def _create_temp_user(client: TestClient, admin: Headers) -> tuple[str, str, str]:
