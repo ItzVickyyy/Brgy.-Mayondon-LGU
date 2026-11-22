@@ -100,5 +100,20 @@ pwsh -NoProfile -File "$root/scripts/ensure-data-key.ps1" -EnvFile "$ek/.env" >/
 [ "$(grep '^DATA_ENCRYPTION_KEY=' "$ek/.env" | tr -d '\r' | cut -d= -f2)" = "$key" ] && a=ok || a=bad; check "ensure-data-key leaves an existing key alone" $a
 pwsh -NoProfile -File "$root/scripts/ensure-data-key.ps1" -EnvFile "$ek/missing" >/dev/null 2>&1 && a=bad || a=ok; check "ensure-data-key stops without a .env" $a
 
+# --- 4. enable-https.ps1 (patch 220)
+eh="$tmp/eh"; mkdir "$eh"
+printf 'A=1\r\nCOMPOSE_FILE=compose.yml\r\n# APP_BIND=0.0.0.0\r\nSECRET_KEY=keepme\r\n' > "$eh/.env"
+pwsh -NoProfile -File "$root/scripts/enable-https.ps1" -EnvFile "$eh/.env" -EnvOnly -HttpsHost 192.168.1.10 >/dev/null 2>&1 || true
+grep -q $'^COMPOSE_PROFILES=https\r$' "$eh/.env" && grep -q $'^HTTPS_HOST=192.168.1.10\r$' "$eh/.env" && a=ok || a=bad; check "enable-https sets the profile and the address, keeping Windows line ends" $a
+grep -q $'^APP_BIND=127.0.0.1\r$' "$eh/.env" && grep -q $'^FORWARDED_ALLOW_IPS=\*\r$' "$eh/.env" && a=ok || a=bad; check "enable-https binds plain HTTP to this computer and trusts the proxy" $a
+[ "$(grep -c '^APP_BIND' "$eh/.env")" = 1 ] && grep -q 'SECRET_KEY=keepme' "$eh/.env" && grep -q '^A=1' "$eh/.env" && a=ok || a=bad; check "enable-https replaces the commented line and leaves everything else" $a
+[ "$(ls "$eh"/.env.before-https-* 2>/dev/null | wc -l)" = 1 ] && a=ok || a=bad; check "enable-https saves the old .env first" $a
+pwsh -NoProfile -File "$root/scripts/enable-https.ps1" -EnvFile "$eh/.env" -EnvOnly -HttpsHost 192.168.1.10 >/dev/null 2>&1 || true
+[ "$(ls "$eh"/.env.before-https-* | wc -l)" = 1 ] && a=ok || a=bad; check "enable-https run again changes nothing and saves no second copy" $a
+pwsh -NoProfile -File "$root/scripts/enable-https.ps1" -EnvFile "$eh/.env" -EnvOnly -HttpsHost 'bad host;x' >/dev/null 2>&1 && a=bad || a=ok; check "enable-https refuses an address with odd characters" $a
+pwsh -NoProfile -File "$root/scripts/enable-https.ps1" -EnvFile "$eh/.env" -EnvOnly -Off >/dev/null 2>&1 || true
+grep -q $'^APP_BIND=0.0.0.0\r$' "$eh/.env" && grep -q $'^COMPOSE_PROFILES=\r$' "$eh/.env" && grep -q 'SECRET_KEY=keepme' "$eh/.env" && a=ok || a=bad; check "enable-https -Off goes back to plain HTTP" $a
+pwsh -NoProfile -File "$root/scripts/enable-https.ps1" -EnvFile "$eh/missing" -EnvOnly >/dev/null 2>&1 && a=bad || a=ok; check "enable-https stops without a .env" $a
+
 [ $fail = 0 ] && echo "Office scripts OK." || echo "Office scripts have problems."
 exit $fail

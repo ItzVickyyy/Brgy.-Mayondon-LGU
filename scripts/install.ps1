@@ -14,7 +14,9 @@
 #   7. opens the firewall for the office network (asks Windows for permission)
 #   8. puts a "Barangay Mayondon" shortcut on the desktop
 #
-# Optional: -HttpsHost brgy-mayondon.test   switches on HTTPS by name (docs/11 G.7)
+# HTTPS is ON by default (patch 220): the program is reached at https://<this computer's LAN address>.
+# Optional: -HttpsHost 192.168.1.10          use this address or name instead of the detected one
+#           -NoHttps                        plain HTTP on port 8000 (not recommended: passwords cross the network in clear text)
 #           -AdminEmail you@example.com     skips the question
 #           -BackupTime 17:00               time of the daily backup
 #           -BackupCopyTo "E:\MayondonBackups"   second location for backups
@@ -29,6 +31,7 @@
 param(
     [string]$AdminEmail,
     [string]$HttpsHost,
+    [switch]$NoHttps,
     [string]$BackupTime = "17:00",
     [string]$BackupCopyTo,
     [switch]$NoBrowser,
@@ -43,6 +46,43 @@ Set-Location $repoRoot
 
 function Step([string]$text) { Write-Host ""; Write-Host "== $text" -ForegroundColor Cyan }
 function Stop-Here([string]$text) { Write-Host ""; Write-Host "STOPPED: $text" -ForegroundColor Red; exit 1 }
+
+# The office address is the one of the adapter that has a default gateway (the Wi-Fi or cable to the router).
+# Taking "the first address" picked Docker's or WSL's own virtual adapter (172.x.x.x) on the first real run.
+function Get-OfficeIp {
+    $found = $null
+    try {
+        $found = (Get-NetIPConfiguration -ErrorAction Stop |
+            Where-Object { $_.IPv4DefaultGateway -and $_.IPv4Address -and $_.NetAdapter.Status -eq "Up" -and $_.InterfaceAlias -notmatch "vEthernet|WSL|Docker|VirtualBox|VMware|Hyper-V" } |
+            Select-Object -First 1).IPv4Address.IPAddress
+    } catch { }
+    if (-not $found) {
+        try {
+            $found = (Get-NetIPAddress -AddressFamily IPv4 -ErrorAction Stop |
+                Where-Object { $_.IPAddress -notmatch "^(127|169\.254)\." -and $_.PrefixOrigin -ne "WellKnown" -and $_.InterfaceAlias -notmatch "vEthernet|WSL|Docker|VirtualBox|VMware|Hyper-V" } |
+                Select-Object -First 1).IPAddress
+        } catch { }
+    }
+    return $found
+}
+
+# An existing .env decides: running the installer again never switches an installed computer between
+# HTTP and HTTPS (scripts\enable-https.ps1 does that on purpose).
+$existingEnv = Join-Path $repoRoot ".env"
+$envExists = Test-Path -LiteralPath $existingEnv
+if ($envExists) {
+    $existingText = [System.IO.File]::ReadAllText($existingEnv)
+    $HttpsHost = ""
+    if (($existingText -match "(?m)^COMPOSE_PROFILES=.*\bhttps\b") -and ($existingText -match "(?m)^HTTPS_HOST=(\S+)\s*$")) { $HttpsHost = $Matches[1] }
+}
+# HTTPS by default: use the detected office address unless a host was given or -NoHttps.
+if (-not $envExists -and -not $NoHttps -and [string]::IsNullOrWhiteSpace($HttpsHost)) {
+    $HttpsHost = Get-OfficeIp
+    if ([string]::IsNullOrWhiteSpace($HttpsHost)) {
+        Write-Warning "This computer's office address could not be found, so the program is set up with plain HTTP. Run scripts\enable-https.ps1 once the computer is on the office network."
+    }
+}
+if ($NoHttps -and -not $envExists) { $HttpsHost = "" }
 
 # A random value that is safe inside .env and inside a database URL (letters and digits only).
 function New-Secret([int]$length) {
@@ -299,30 +339,17 @@ try {
 
 if (-not [string]::IsNullOrWhiteSpace($HttpsHost)) {
     Write-Host ""
-    Write-Host "HTTPS: run scripts\export-https-root.ps1 now and trust the file on every office computer." -ForegroundColor Yellow
+    Write-Host "HTTPS: run scripts\export-https-root.ps1 now, then trust the file on every office computer (scripts\trust-office-https.ps1). Until then their browsers show a warning." -ForegroundColor Yellow
 }
 
 # --------------------------------------------------------------- summary
-$ip = $null
-# The office address is the one of the adapter that has a default gateway (the Wi-Fi or cable to the router).
-# Taking "the first address" picked Docker's or WSL's own virtual adapter (172.x.x.x) on the first real run.
-try {
-    $ip = (Get-NetIPConfiguration -ErrorAction Stop |
-        Where-Object { $_.IPv4DefaultGateway -and $_.IPv4Address -and $_.NetAdapter.Status -eq "Up" -and $_.InterfaceAlias -notmatch "vEthernet|WSL|Docker|VirtualBox|VMware|Hyper-V" } |
-        Select-Object -First 1).IPv4Address.IPAddress
-} catch { }
-if (-not $ip) {
-    try {
-        $ip = (Get-NetIPAddress -AddressFamily IPv4 -ErrorAction Stop |
-            Where-Object { $_.IPAddress -notmatch "^(127|169\.254)\." -and $_.PrefixOrigin -ne "WellKnown" -and $_.InterfaceAlias -notmatch "vEthernet|WSL|Docker|VirtualBox|VMware|Hyper-V" } |
-            Select-Object -First 1).IPAddress
-    } catch { }
-}
+$ip = Get-OfficeIp
 
 Write-Host ""
 Write-Host "==================== DONE ====================" -ForegroundColor Green
 Write-Host "On this computer open:  $url"
 if ($ip -and [string]::IsNullOrWhiteSpace($HttpsHost)) { Write-Host "Other office computers: http://$($ip):8000   (ask the network administrator to reserve this address)" }
+if (-not [string]::IsNullOrWhiteSpace($HttpsHost)) { Write-Host "Other office computers: https://$HttpsHost   (ask the network administrator to reserve this address; the certificate is made for it)" }
 if ($adminPasswordShown) {
     Write-Host ""
     Write-Host "Administrator password (shown ONCE, write it down now):  $adminPasswordShown" -ForegroundColor Yellow
