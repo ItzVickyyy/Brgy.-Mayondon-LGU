@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60 * 8, gt=0)
     LOGIN_MAX_FAILED_ATTEMPTS: int = Field(default=5, gt=0)
     LOGIN_LOCKOUT_MINUTES: int = Field(default=15, gt=0)
+    # Wrong sign-ins from one computer (any e-mail, known or not) before it must wait out
+    # LOGIN_LOCKOUT_MINUTES. Stops one password being tried on every account.
+    LOGIN_MAX_FAILED_ATTEMPTS_PER_IP: int = Field(default=20, gt=0)
     PASSWORD_RECOVERY_WINDOW_MINUTES: int = Field(default=15, gt=0)
     PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_EMAIL: int = Field(default=5, gt=0)
     PASSWORD_RECOVERY_MAX_ATTEMPTS_PER_IP: int = Field(default=30, gt=0)

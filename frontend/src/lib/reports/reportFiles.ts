@@ -35,10 +35,18 @@ const xml = (value: string) =>
 
 const XML_HEAD = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n'
 
+/** Text that starts with = + - @ (or a tab or return) would run as a formula in Excel, so it gets a leading apostrophe. */
+export function csvSafe(value: ReportCell): string {
+  const text = String(value)
+  return typeof value === "string" && /^[=+\-@\t\r]/.test(text)
+    ? `'${text}`
+    : text
+}
+
 export function reportCsv(rows: ReportCell[][]): string {
   return rows
     .map((row) =>
-      row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","),
+      row.map((value) => `"${csvSafe(value).replace(/"/g, '""')}"`).join(","),
     )
     .join("\r\n")
 }

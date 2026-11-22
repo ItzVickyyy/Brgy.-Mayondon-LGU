@@ -21,6 +21,7 @@ from sqlmodel import Session, col, select
 from app.api.deps import SessionDep, require_permission
 from app.core import masterlist_import as mi
 from app.core.audit import record_audit_event
+from app.core.csv_safe import csv_safe
 from app.core.permissions import Permission
 from app.models import User
 from app.models_import import ImportBatch, ImportRow
@@ -458,7 +459,9 @@ def download_error_report(
     writer.writerow(["Row", "Field", "Problem"])
     for row in rows:
         for error in row.errors or []:
-            writer.writerow([row.row_number, error["field"], error["message"]])
+            writer.writerow(
+                [row.row_number, csv_safe(error["field"]), csv_safe(error["message"])]
+            )
     return Response(
         content="﻿" + buffer.getvalue(),
         media_type="text/csv; charset=utf-8",

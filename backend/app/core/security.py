@@ -1,5 +1,6 @@
 import hashlib
 import hmac
+import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -54,6 +55,7 @@ def create_access_token(
         "exp": expire,
         "sub": str(subject),
         "pwdv": password_fingerprint(hashed_password),
+        "jti": uuid.uuid4().hex,
     }
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

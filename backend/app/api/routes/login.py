@@ -8,18 +8,23 @@ from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
+from sqlalchemy import delete
+from sqlalchemy.dialects.postgresql import insert
+from sqlmodel import col
 
 from app import crud
-from app.api.deps import CurrentUser, SessionDep, require_admin
+from app.api.deps import CurrentUser, SessionDep, TokenDep, require_admin
 from app.core import mfa_check, security
 from app.core.audit import record_audit_event
 from app.core.config import settings
+from app.core.login_throttle import login_ip_locked, record_login_failure
 from app.core.password_recovery import is_password_recovery_rate_limited
 from app.models import (
     LoginResult,
     Message,
     NewPassword,
     PasswordRecoveryRequest,
+    RevokedToken,
     TokenPayload,
     User,
     UserPublic,
@@ -40,7 +45,9 @@ dev_router = APIRouter(tags=["login"])
 
 @router.post("/login/access-token")
 def login_access_token(
-    session: SessionDep, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+    request: Request,
+    session: SessionDep,
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
 ) -> LoginResult:
     """
     OAuth2 compatible token login, get an access token for future requests.
@@ -50,6 +57,12 @@ def login_access_token(
     comes after the code.
     """
     email = form_data.username.strip().lower()
+    client_ip = request.client.host if request.client else None
+    if login_ip_locked(session, client_ip=client_ip):
+        raise HTTPException(
+            status_code=429,
+            detail="Too many wrong sign-in attempts from this computer. Wait a few minutes and try again.",
+        )
     existing = crud.get_user_by_email(session=session, email=email)
     was_locked = bool(
         existing
@@ -63,6 +76,7 @@ def login_access_token(
     )
     user = crud.authenticate(session=session, email=email, password=form_data.password)
     if not user:
+        record_login_failure(session, client_ip=client_ip)
         # Only known accounts are recorded, so anonymous guessing cannot fill the
         # log. The typed email and password are never stored.
         if existing:
@@ -127,6 +141,42 @@ def _finish_login(session: SessionDep, user: Any) -> LoginResult:
             hashed_password=user.hashed_password,
         )
     )
+
+
+@router.post("/login/logout")
+def logout(session: SessionDep, token: TokenDep) -> Message:
+    """End this sign-in token now, so a copy of it stops working at once.
+
+    Always answers the same way, whether or not the token was valid: signing out must never
+    fail on the screen. Works while a temporary password is still waiting to be changed.
+    """
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+        )
+        data = TokenPayload(**payload)
+    except InvalidTokenError, ValidationError:
+        return Message(message="Signed out")
+    if (
+        data.jti
+        and data.purpose is None
+        and isinstance(payload.get("exp"), int | float)
+    ):
+        now = datetime.now(UTC)
+        session.exec(
+            delete(RevokedToken).where(col(RevokedToken.expires_at) < now)
+        )  # tokens that would have expired anyway
+        statement = (
+            insert(RevokedToken)
+            .values(
+                jti=data.jti,
+                expires_at=datetime.fromtimestamp(payload["exp"], UTC),
+            )
+            .on_conflict_do_nothing()
+        )
+        session.exec(statement)
+        session.commit()
+    return Message(message="Signed out")
 
 
 MFA_REFUSED = "The code was not accepted. Check it and try again."

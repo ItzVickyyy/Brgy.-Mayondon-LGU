@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { useIdleSignOut } from "@/hooks/useIdleSignOut"
+import { endSession } from "@/lib/endSession"
 
 /** Where the person lands after an automatic sign-out (the login page shows a notice). */
 export const IDLE_SIGN_OUT_URL = "/login?idle=1"
@@ -17,11 +18,7 @@ export const IDLE_SIGN_OUT_URL = "/login?idle=1"
 // A full page load, not a router move, so nothing a person was looking at
 // stays in memory.
 function signOutAndLeave(url: string) {
-  try {
-    localStorage.removeItem("access_token")
-  } catch {
-    // Nothing more can be done if storage is blocked.
-  }
+  endSession()
   window.location.assign(url)
 }
 

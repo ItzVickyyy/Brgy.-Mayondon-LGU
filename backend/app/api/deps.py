@@ -12,7 +12,7 @@ from app.core import security
 from app.core.config import settings
 from app.core.db import engine
 from app.core.permissions import Permission, has_permission, is_admin
-from app.models import TokenPayload, User
+from app.models import RevokedToken, TokenPayload, User
 
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
@@ -44,6 +44,13 @@ def get_current_user_allow_temporary(session: SessionDep, token: TokenDep) -> Us
         )
     if token_data.purpose is not None:
         # A password-only (two-factor pending) token is not a sign-in.
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+    revoked = session.get(RevokedToken, token_data.jti) if token_data.jti else None
+    if revoked is not None:
+        # The person signed out with this token.
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",

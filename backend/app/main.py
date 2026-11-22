@@ -1,4 +1,8 @@
+import base64
+import hashlib
+import re
 from collections.abc import Awaitable, Callable
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -33,12 +37,52 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 if settings.SENTRY_DSN and settings.FASTAPI_ENV != "development":
     sentry_sdk.init(dsn=str(settings.SENTRY_DSN), enable_tracing=True)
 
+# The interactive API page and the endpoint list are for developers only. On a real installation
+# (no FASTAPI_ENV=development) anyone on the network could otherwise read a map of every
+# endpoint without signing in. The client generator reads app.openapi() directly, not this URL.
+DOCS_ENABLED = settings.FASTAPI_ENV == "development"
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     docs_url=None,
-    openapi_url=f"{settings.API_V1_STR}/openapi.json",
+    openapi_url=f"{settings.API_V1_STR}/openapi.json" if DOCS_ENABLED else None,
     generate_unique_id_function=custom_generate_unique_id,
 )
+
+
+_INLINE_SCRIPT = re.compile(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", re.S)
+
+
+@lru_cache(maxsize=1)
+def _content_security_policy() -> str:
+    """What the browser may load for the app pages.
+
+    Only the app's own files, plus the single inline script in index.html (it sets the saved theme
+    before the first paint), allowed by its hash and read from the built page, so a change to that
+    script needs no edit here. Nothing from another site, no plug-ins, and the page cannot be put in
+    a frame. Styles allow inline because the interface sets some at run time.
+    """
+    hashes = []
+    index = FRONTEND_DIR / "index.html"
+    if index.is_file():
+        for body in _INLINE_SCRIPT.findall(index.read_text(encoding="utf-8")):
+            digest = hashlib.sha256(body.encode("utf-8")).digest()
+            hashes.append(f"'sha256-{base64.b64encode(digest).decode()}'")
+    scripts = " ".join(["'self'", *hashes])
+    return "; ".join(
+        [
+            "default-src 'self'",
+            f"script-src {scripts}",
+            "style-src 'self' 'unsafe-inline'",
+            "img-src 'self' data: blob:",
+            "font-src 'self' data:",
+            "connect-src 'self'",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self'",
+            "frame-ancestors 'none'",
+        ]
+    )
 
 
 @app.middleware("http")
@@ -53,6 +97,12 @@ async def add_security_headers(
         # Only sent over HTTPS (browsers ignore it on HTTP). 30 days, no
         # subdomains: short enough to undo if the office goes back to HTTP.
         response.headers.setdefault("Strict-Transport-Security", "max-age=2592000")
+    path = request.url.path
+    if not path.startswith("/api/") and path != "/docs":
+        # The developer API page loads its viewer from another site, so it is left out.
+        response.headers.setdefault(
+            "Content-Security-Policy", _content_security_policy()
+        )
     if request.url.path.startswith("/api/"):
         # Resident data must never be kept in a browser or proxy cache on a
         # shared office computer.
@@ -62,6 +112,8 @@ async def add_security_headers(
 
 @app.get("/docs", include_in_schema=False)
 def custom_swagger_ui_html() -> HTMLResponse:
+    if not DOCS_ENABLED:
+        raise HTTPException(status_code=404, detail="Not Found")
     return get_swagger_ui_html(
         openapi_url=app.openapi_url or f"{settings.API_V1_STR}/openapi.json",
         title=f"{settings.PROJECT_NAME} - API documentation",

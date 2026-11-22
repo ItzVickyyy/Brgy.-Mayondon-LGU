@@ -215,6 +215,13 @@ class PasswordRecoveryRateLimit(SQLModel, table=True):
     attempts: int = Field(default=1, nullable=False)
 
 
+class RevokedToken(SQLModel, table=True):
+    """A sign-in token ended by signing out; kept until the token would have expired anyway."""
+
+    jti: str = Field(primary_key=True, max_length=64)
+    expires_at: datetime = Field(sa_type=DateTime(timezone=True), index=True)
+
+
 # Properties to return via API, id is always required
 class UserPublic(UserBase):
     id: uuid.UUID
@@ -274,6 +281,8 @@ class TokenPayload(SQLModel):
     pwdv: str | None = None
     # Set only on the short two-factor token. A full sign-in token has none.
     purpose: str | None = None
+    # Id of this sign-in token, so signing out can end it. Tokens made before it was added have none.
+    jti: str | None = None
 
 
 class PasswordRecoveryRequest(SQLModel):

@@ -7,6 +7,7 @@ from sqlmodel import Session, col, delete
 
 from app.core.config import settings
 from app.core.db import engine, init_db
+from app.core.login_throttle import login_ip_key
 from app.main import app
 from app.models import PasswordRecoveryRateLimit, User
 from app.models_issuance import Issuance, Tricycle
@@ -82,6 +83,24 @@ def normal_user_token_headers(client: TestClient, db: Session) -> dict[str, str]
     return authentication_token_from_email(
         client=client, email=settings.EMAIL_TEST_USER, db=db
     )
+
+
+@pytest.fixture(autouse=True)
+def _clean_login_ip_bucket(db: Session) -> Generator[None]:
+    """The test client always comes from one address, and the per-computer sign-in limit would
+    otherwise carry wrong attempts from one test into the next."""
+
+    def clear() -> None:
+        db.execute(
+            delete(PasswordRecoveryRateLimit).where(
+                col(PasswordRecoveryRateLimit.bucket_key) == login_ip_key("testclient")
+            )
+        )
+        db.commit()
+
+    clear()
+    yield
+    clear()
 
 
 @pytest.fixture(autouse=True)

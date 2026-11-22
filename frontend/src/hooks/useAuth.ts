@@ -11,6 +11,7 @@ import {
   type UserRegister,
   UsersService,
 } from "@/client"
+import { endSession } from "@/lib/endSession"
 import { handleError } from "@/utils"
 import useCustomToast from "./useCustomToast"
 
@@ -100,7 +101,7 @@ const useAuth = () => {
   })
 
   const logout = () => {
-    localStorage.removeItem("access_token")
+    endSession()
     queryClient.removeQueries({ queryKey: ["notifications"] })
     navigate({ to: "/login" })
     showSuccessToast(t("common.toast.signedOut"))
