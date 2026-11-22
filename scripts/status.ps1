@@ -79,7 +79,7 @@ $backups = Join-Path $repoRoot "backups"
 if (Test-Path (Join-Path $backups "backup-private.pem")) { Warn "backup-private.pem is on this computer. Copy ONLY that file to the USB drive and delete it here. Leave backup-public.pem in the backups folder: the program needs it to make backups." }
 if (-not (Test-Path (Join-Path $backups "backup-public.pem"))) {
     $encRequired = (Test-Path .env) -and ((Get-Content .env -Raw) -match "(?m)^BACKUP_REQUIRE_ENCRYPTION=true\s*$")
-    if ($encRequired) { Bad "backup-public.pem is missing from the backups folder, so every backup is being REFUSED. Put it back (copy it from the USB drive) or make a new key (docs/11 section G)." }
+    if ($encRequired) { Bad "backup-public.pem is missing from the backups folder, so every backup is being REFUSED. Put it back (copy it from the USB drive) or make a new key." }
     else { Warn "No backup key yet (backups would be unencrypted)." }
 }
 $newest = Get-ChildItem -LiteralPath $backups -Filter "mayondon-db-*" -File -ErrorAction SilentlyContinue |

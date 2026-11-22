@@ -72,7 +72,7 @@ def make_key() -> int:
     say("  2. Copy backup-private.pem to a USB drive kept away from this computer,")
     say("     then delete it from the backups folder.")
     say("  3. Set BACKUP_REQUIRE_ENCRYPTION=true in .env and restart the backend.")
-    say("  4. Make a backup, then prove it opens: decrypt --check (docs/11 section G).")
+    say("  4. Make a backup, then prove it opens: decrypt --check.")
     return 0
 
 

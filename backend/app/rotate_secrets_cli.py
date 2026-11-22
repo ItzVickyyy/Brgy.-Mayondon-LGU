@@ -587,7 +587,7 @@ def apply_rotation(
                 raise RotationError(
                     f"FAILED ({exc}) and the old database password could NOT be put back "
                     f"({type(undo_error).__name__}). .env is unchanged. Use rollback with "
-                    f"{old_copy.name} (docs/06, secret rotation)."
+                    f"{old_copy.name}."
                 ) from exc
         raise RotationError(
             f"Not done ({exc}). Nothing was changed; the old password is back in place."

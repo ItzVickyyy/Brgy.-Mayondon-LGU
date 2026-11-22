@@ -48,7 +48,7 @@ services:
     ports:
       # The application and API share this port. Office computers open
       # http://<server-computer-LAN-IP>:8000 from their browsers. With HTTPS
-      # switched on (docs/11 section G item 7) set APP_BIND=127.0.0.1 so only
+      # switched on set APP_BIND=127.0.0.1 so only
       # this computer can use plain HTTP and the office uses the HTTPS proxy.
       - "${APP_BIND:-0.0.0.0}:${APP_PORT:-8000}:8000"
     environment:

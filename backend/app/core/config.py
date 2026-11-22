@@ -160,7 +160,7 @@ class Settings(BaseSettings):
             if len(self.MFA_ENCRYPTION_KEY.encode("utf-8")) < 32:
                 raise ValueError(
                     "MFA_ENCRYPTION_KEY must be at least 32 bytes long "
-                    "(see docs/11, two-factor sign-in)."
+                    "(.env.example shows how to make one)."
                 )
         if len(self.SECRET_KEY.encode("utf-8")) < 32:
             message = (

@@ -38,8 +38,7 @@ require_user_admin = require_permission(Permission.USERS_MANAGE)
 
 REFUSED = "The code was not accepted. Check it and try again."
 NOT_AVAILABLE = (
-    "Two-factor sign-in is not set up on this server yet. "
-    "Ask the system administrator (docs/11, two-factor sign-in)."
+    "Two-factor sign-in is not set up on this server yet. Ask the system administrator."
 )
 
 
@@ -258,7 +257,7 @@ def reset_user_mfa(
             status_code=400,
             detail=(
                 "An administrator's two-factor sign-in can only be reset from "
-                "the server computer (docs/11)."
+                "the server computer."
             ),
         )
     _clear_mfa(session, target)

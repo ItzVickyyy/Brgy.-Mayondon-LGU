@@ -97,7 +97,7 @@ function Invoke-Quiet([scriptblock]$block) {
 # ---------------------------------------------------------------- 1. Docker
 Step "1/8  Checking Docker Desktop"
 if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
-    Stop-Here "Docker Desktop is not installed. Install it first (docs/06 section 4), start it once, then run this installer again."
+    Stop-Here "Docker Desktop is not installed. Install it first, start it once, then run this installer again."
 }
 function Test-Docker { Invoke-Quiet { docker info *> $null }; return ($LASTEXITCODE -eq 0) }
 if (-not (Test-Docker)) {
@@ -227,10 +227,10 @@ if (Test-Path -LiteralPath $publicKey) {
                 Remove-Item -LiteralPath $privateKey -Force
                 Write-Host "The private key is on $usb and was removed from this computer."
             } catch {
-                Write-Warning "Could not copy the private key: $($_.Exception.Message). It stays in the backups folder; copy it to a USB drive and delete it from there by hand (docs/11 G.5)."
+                Write-Warning "Could not copy the private key: $($_.Exception.Message). It stays in the backups folder; copy it to a USB drive and delete it from there by hand."
             }
         } else {
-            Write-Warning "The private key is still in the backups folder. Copy it to a USB drive kept elsewhere and delete it from here (docs/11 G.5)."
+            Write-Warning "The private key is still in the backups folder. Copy it to a USB drive kept elsewhere and delete it from here."
         }
     }
 }
@@ -298,7 +298,7 @@ try {
 
 if (-not [string]::IsNullOrWhiteSpace($HttpsHost)) {
     Write-Host ""
-    Write-Host "HTTPS: run scripts\export-https-root.ps1 now and trust the file on every office computer (docs/11 G.7)." -ForegroundColor Yellow
+    Write-Host "HTTPS: run scripts\export-https-root.ps1 now and trust the file on every office computer." -ForegroundColor Yellow
 }
 
 # --------------------------------------------------------------- summary
@@ -329,6 +329,6 @@ if ($adminPasswordShown) {
     Read-Host "Press Enter after you wrote it down (the screen will be cleared)" | Out-Null
     Clear-Host
 }
-Write-Host "Next, signed in as the administrator (docs/11 section F): add the streets and puroks, create staff accounts with each person present, and ask everyone to set their security questions."
+Write-Host "Next, signed in as the administrator: add the streets and puroks, create staff accounts with each person present, and ask everyone to set their security questions."
 Write-Host "The program starts by itself when this Windows user signs in (task 'Mayondon Start at Sign-in')$(if (-not $NoBrowser) { ' and opens in the browser' }). Tick Docker Desktop > Settings > General > 'Start Docker Desktop when you sign in' as well. Check anytime with Check-Mayondon.cmd."
-if (-not $NoAutoUpdate) { Write-Host "Updates: every day at $UpdateTime the program installs the newest approved version by itself (task 'Mayondon Auto Update'); it makes a backup first. See docs/11 section H." }
+if (-not $NoAutoUpdate) { Write-Host "Updates: every day at $UpdateTime the program installs the newest approved version by itself (task 'Mayondon Auto Update'); it makes a backup first." }

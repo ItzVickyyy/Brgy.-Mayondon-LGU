@@ -1,4 +1,4 @@
-# HTTPS for the office network (docs/11 section G item 7). Used only when the
+# HTTPS for the office network. Used only when the
 # "https" profile is on (COMPOSE_PROFILES=https in .env).
 #
 # HTTPS_HOST is the address the office computers type: the server computer's

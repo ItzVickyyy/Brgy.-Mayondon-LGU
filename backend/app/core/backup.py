@@ -157,7 +157,7 @@ def public_key_or_none() -> X25519PublicKey | None:
             raise BackupUnavailable(
                 "Backup encryption is required but no key is set up. Run "
                 "'docker compose -f compose.yml exec backend python -m "
-                "app.backup_cli make-key' once (docs/11 section G)."
+                "app.backup_cli make-key' once."
             )
         return None
     try:
