@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import type { ReactNode } from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
 import { BackupsService } from "@/client"
@@ -19,7 +19,7 @@ export type ReminderSeverity = "urgent" | "soon" | "optional"
 export const SEVERITY_ORDER: ReminderSeverity[] = ["urgent", "soon", "optional"]
 
 export type SetupReminder = {
-  id: "securityQuestions" | "twoFactor" | "backupTool" | "update"
+  id: "securityQuestions" | "twoFactor" | "backupTool" | "update" | "plainHttp"
   testId: string
   severity: ReminderSeverity
   /** A short heading (only when the text below is a longer instruction). */
@@ -36,6 +36,46 @@ export type SetupReminder = {
 }
 
 const dismissKey = (userId: string) => `sq-banner-dismissed:${userId}`
+
+const httpSnoozeKey = (userId: string) => `https-reminder-snoozed:${userId}`
+/** "Remind me later" on the plain-HTTP reminder hides it this long. */
+export const HTTP_SNOOZE_DAYS = 14
+export const HTTP_SNOOZE_EVENT = "https-reminder-snoozed"
+
+/**
+ * True when the program was opened over plain http:// from another computer. On the server
+ * computer itself (localhost) nothing crosses the network, so it is not a risk there.
+ */
+export function isPlainHttpOnNetwork(
+  loc: { protocol: string; hostname: string } = window.location,
+): boolean {
+  if (loc.protocol !== "http:") return false
+  return !["localhost", "127.0.0.1", "[::1]", "::1"].includes(loc.hostname)
+}
+
+export function isHttpReminderSnoozed(
+  userId: string,
+  now = Date.now(),
+): boolean {
+  try {
+    const until = Number(localStorage.getItem(httpSnoozeKey(userId)))
+    return Number.isFinite(until) && until > now
+  } catch {
+    return false
+  }
+}
+
+export function snoozeHttpReminder(userId: string, now = Date.now()): void {
+  try {
+    localStorage.setItem(
+      httpSnoozeKey(userId),
+      String(now + HTTP_SNOOZE_DAYS * 24 * 60 * 60 * 1000),
+    )
+  } catch {
+    // Private browsing: it simply comes back on the next page view.
+  }
+  window.dispatchEvent(new Event(HTTP_SNOOZE_EVENT))
+}
 
 function wasDismissed(userId: string): boolean {
   try {
@@ -59,6 +99,8 @@ function wasDismissed(userId: string): boolean {
  * - New version ready (patch 206): System Administrator only, and only on a computer whose
  *   update service is running. The computer installs it by itself at night; the button
  *   (an `UpdateDialog`) installs it now.
+ * - Plain HTTP (patch 212): System Administrator only, while the page was opened over
+ *   `http://` from another computer (not `localhost`). "Remind me later" hides it for 14 days.
  * Severity: two-factor and the missing backup tool are urgent (red); recovery
  * questions an administrator cannot dismiss are soon (orange); recovery
  * questions staff may postpone are optional (green).
@@ -79,6 +121,13 @@ export function useSetupReminders(): SetupReminder[] {
   })
 
   const update = useUpdateStatus(isAdmin)
+  // Re-read the "remind me later" time when the dialog sets it.
+  const [, setSnoozeTick] = useState(0)
+  useEffect(() => {
+    const bump = () => setSnoozeTick((n) => n + 1)
+    window.addEventListener(HTTP_SNOOZE_EVENT, bump)
+    return () => window.removeEventListener(HTTP_SNOOZE_EVENT, bump)
+  }, [])
 
   if (!user) return []
   const reminders: SetupReminder[] = []
@@ -170,6 +219,18 @@ export function useSetupReminders(): SetupReminder[] {
       action: running
         ? t("update.reminder.viewProgress")
         : t("update.reminder.action"),
+    })
+  }
+
+  if (isAdmin && isPlainHttpOnNetwork() && !isHttpReminderSnoozed(user.id)) {
+    reminders.push({
+      id: "plainHttp",
+      testId: "plain-http-reminder",
+      severity: "soon",
+      title: t("security.plainHttp.title"),
+      text: t("security.plainHttp.text"),
+      teaser: t("notifications.teaser.plainHttp"),
+      action: t("security.plainHttp.action"),
     })
   }
 

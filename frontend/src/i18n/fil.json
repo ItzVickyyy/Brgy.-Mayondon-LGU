@@ -100,7 +100,8 @@
       "securityQuestions": "Itakda ang mga tanong sa pagbawi",
       "twoFactor": "I-set up ang two-factor na pag-sign in",
       "backupTool": "Wala ang backup tool",
-      "update": "May bagong bersyon na"
+      "update": "May bagong bersyon na",
+      "plainHttp": "Hindi protektado ang network"
     },
     "events": {
       "user_create": "{{actor}} ang gumawa ng user account para kay {{target}}.",
@@ -2865,6 +2866,24 @@
       "issueDateTooOld": "Hindi maaaring mas maaga kaysa {{earliest}} ang petsa ng pag-isyu.",
       "validUntilTooLong": "Hindi maaaring mas huli kaysa {{latest}} ang petsang “Valid until”.",
       "tricycleHasValidFranchise": "May balidong prangkisa na ang traysikel na ito na naisyu sa ibang residente."
+    }
+  },
+  "security": {
+    "plainHttp": {
+      "title": "Hindi protektado ang network na ito",
+      "text": "Binuksan ang programa gamit ang http://, kaya ang mga password at talaan ng residente ay dumadaan sa network ng opisina nang walang proteksyon. Ang pag-on ng HTTPS ang solusyon.",
+      "action": "Ano ang gagawin",
+      "dialog": {
+        "title": "Protektahan ang network ng opisina",
+        "description": "Binuksan ng computer na ito ang programa gamit ang address na nagsisimula sa http://.",
+        "points": {
+          "listen": "Sa http://, sinumang nakakonekta sa network ng opisina (kable o Wi-Fi) ay nababasa ang mga password at talaan ng residente habang ipinapadala. Sa https:// ay nakakubli ang mga ito.",
+          "camera": "Pinapayagan din ng HTTPS ang ibang computer na gamitin ang camera para sa larawan ng Barangay ID; kung wala ito, sa server computer lang pinapayagan ng mga browser.",
+          "how": "Isang beses lang binubuksan ang HTTPS, sa server computer, ng taong nag-install ng programa. Pagkatapos, pagkakatiwalaan ng bawat computer sa opisina ang sertipiko ng opisina nang isang beses. Hilingin ito sa taong iyon; walang magbabago hangga't hindi niya ito ginagawa."
+        },
+        "later": "Paalalahanan ako sa 2 linggo",
+        "close": "Isara"
+      }
     }
   }
 }

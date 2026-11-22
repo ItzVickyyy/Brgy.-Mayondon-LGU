@@ -100,7 +100,8 @@
       "securityQuestions": "Set your recovery questions",
       "twoFactor": "Set up two-factor sign-in",
       "backupTool": "Backup tool is missing",
-      "update": "A new version is ready"
+      "update": "A new version is ready",
+      "plainHttp": "The network is not protected"
     },
     "events": {
       "user_create": "{{actor}} created a user account for {{target}}.",
@@ -2865,6 +2866,24 @@
       "issueDateTooOld": "The issue date cannot be earlier than {{earliest}}.",
       "validUntilTooLong": "The “Valid until” date cannot be later than {{latest}}.",
       "tricycleHasValidFranchise": "This tricycle already has a valid franchise issued to another resident."
+    }
+  },
+  "security": {
+    "plainHttp": {
+      "title": "This network is not protected",
+      "text": "The program is opened with http://, so passwords and resident records cross the office network without protection. Switching on HTTPS fixes this.",
+      "action": "What to do",
+      "dialog": {
+        "title": "Protect the office network",
+        "description": "This computer opened the program with an address that starts with http://.",
+        "points": {
+          "listen": "With http://, anyone who is connected to the office network (cable or Wi-Fi) can read passwords and resident records as they are sent. With https:// they are scrambled.",
+          "camera": "HTTPS also lets other computers use the camera for Barangay ID photos, which browsers allow only on the server computer without it.",
+          "how": "HTTPS is switched on once, on the server computer, by the person who installed the program. Then each office computer trusts the office certificate once. Ask that person to do it; nothing changes until they do."
+        },
+        "later": "Remind me in 2 weeks",
+        "close": "Close"
+      }
     }
   }
 }

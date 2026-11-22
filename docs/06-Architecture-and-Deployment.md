@@ -23,7 +23,7 @@ flowchart TD
 
 - One designated office computer runs the React frontend (served by FastAPI), the FastAPI backend and PostgreSQL. Other authorized computers use a browser over the LAN. They need **no** Git, Docker or PostgreSQL.
 - The frontend calls only the REST API (`/api/v1/...`). The API client in `frontend/src/client` is **generated from the backend's OpenAPI schema**, keeping types in sync.
-- Login uses JWT bearer tokens; passwords are hashed with Argon2 (bcrypt supported).
+- Login uses JWT bearer tokens; passwords are hashed with Argon2 (bcrypt supported). Signing out revokes the token's id in the `revokedtoken` table (migration `d6b2f4a8c915`); rows are kept only until the token would have expired. Non-API pages carry a Content-Security-Policy built in `main.py` (`_content_security_policy()`); if `frontend/index.html` ever gains another inline script or an outside resource, check the browser console for CSP errors. `/docs` and `openapi.json` are served only in development.
 - The Docker image builds the frontend and the backend serves it from the same origin — no separate frontend server and no separate API origin.
 - No Vercel, Supabase or internet is needed for normal use. Internet is needed **once** beforehand to download the repo, packages and Docker images. Vercel configuration and Supabase pooler handling were removed from active code on Oct 25.
 - This is **LAN operation without internet**, not a copy of the database on every computer. If the host or the LAN is down, other staff cannot use the system until it is restored.

@@ -21,6 +21,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { type NotificationItem, NotificationsService } from "@/client"
+import { PlainHttpDialog } from "@/components/Security/PlainHttpDialog"
 import { SecurityQuestionsDialog } from "@/components/SecurityQuestions/SecurityQuestionsDialog"
 import { TwoFactorSetupDialog } from "@/components/TwoFactor/TwoFactorSetupDialog"
 import { UpdateDialog } from "@/components/Updates/UpdateDialog"
@@ -32,11 +33,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import useAuth from "@/hooks/useAuth"
 import { getLocale } from "@/lib/locale"
 import { noticeSentence } from "@/lib/notifications"
 import {
   type ReminderSeverity,
   type SetupReminder,
+  snoozeHttpReminder,
   useSetupReminders,
 } from "./useSetupReminders"
 
@@ -328,6 +331,8 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
   const [questionsOpen, setQuestionsOpen] = useState(false)
   const [twoFactorOpen, setTwoFactorOpen] = useState(false)
   const [updateOpen, setUpdateOpen] = useState(false)
+  const [httpOpen, setHttpOpen] = useState(false)
+  const { user: signedIn } = useAuth()
   const [filter, setFilter] = useState<"all" | "unread">("all")
   const now = useNow()
   const shown =
@@ -360,6 +365,7 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
     window.setTimeout(() => {
       if (id === "securityQuestions") setQuestionsOpen(true)
       else if (id === "update") setUpdateOpen(true)
+      else if (id === "plainHttp") setHttpOpen(true)
       else setTwoFactorOpen(true)
     }, 80)
   }
@@ -557,6 +563,14 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
       {/* Always mounted, like the two above: the reminder disappears the moment the update
         starts, but the dialog must stay open to follow it. */}
       <UpdateDialog open={updateOpen} onOpenChange={setUpdateOpen} />
+      {/* Always mounted: "Remind me later" hides the reminder while the dialog is still closing. */}
+      <PlainHttpDialog
+        open={httpOpen}
+        onOpenChange={setHttpOpen}
+        onSnooze={() => {
+          if (signedIn) snoozeHttpReminder(signedIn.id)
+        }}
+      />
     </div>
   )
 }
