@@ -24,7 +24,6 @@ frontend/** text eol=lf
 /frontend -export-ignore
 /frontend/public -export-ignore
 /frontend/src -export-ignore
-/docs -export-ignore
 
 # Build inputs (backend/Dockerfile copies exactly these)
 /package.json -export-ignore
@@ -34,20 +33,22 @@ frontend/** text eol=lf
 /compose.yml -export-ignore
 /.dockerignore -export-ignore
 /.env.example -export-ignore
-/LICENSE -export-ignore
-/README.md -export-ignore
 /deploy/** -export-ignore
 
 # Office launchers and scripts (developer-only helpers are put back out below)
 /*.cmd -export-ignore
 /scripts/*.ps1 -export-ignore
 /scripts/dev-db.ps1 export-ignore
+/scripts/test-backup-restore.ps1 export-ignore
 
 # Backend: the app, migrations and the container entry point
 /backend/Dockerfile -export-ignore
 /backend/pyproject.toml -export-ignore
 /backend/alembic.ini -export-ignore
 /backend/app/** -export-ignore
+/backend/app/sample_data_cli.py export-ignore
+/backend/app/alembic/README export-ignore
+/backend/app/alembic/script.py.mako export-ignore
 /backend/scripts/entrypoint.sh -export-ignore
 
 # Frontend: what "bun run build" reads (no tests, lint or client-generation config)
@@ -59,7 +60,3 @@ frontend/** text eol=lf
 /frontend/vite.config.ts -export-ignore
 /frontend/public/** -export-ignore
 /frontend/src/** -export-ignore
-
-# The two documents the office scripts point the operator to
-/docs/06-Architecture-and-Deployment.md -export-ignore
-/docs/11-Host-Checks.md -export-ignore

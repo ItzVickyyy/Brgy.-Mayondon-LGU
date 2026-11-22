@@ -20,8 +20,7 @@ for f in compose.yml package.json bun.lock pyproject.toml uv.lock .dockerignore 
   frontend/index.html frontend/package.json frontend/tsconfig.json frontend/tsconfig.build.json \
   frontend/tsconfig.node.json frontend/vite.config.ts frontend/src/main.tsx \
   scripts/install.ps1 scripts/update.ps1 scripts/auto-update.ps1 scripts/scheduled-backup.ps1 \
-  scripts/restore-db.ps1 scripts/status.ps1 scripts/start-mayondon.ps1 \
-  docs/11-Host-Checks.md docs/06-Architecture-and-Deployment.md; do
+  scripts/restore-db.ps1 scripts/status.ps1 scripts/start-mayondon.ps1; do
   [ -e "$tmp/$f" ] || { echo "MISSING from the release: $f"; fail=1; }
 done
 # Every migration and print-form image must be in.
@@ -32,7 +31,8 @@ done
 # None of these may ship.
 for f in compose.override.yml compose.dev.yml .env.dev.example .github docs/Barangay-softcopies \
   backend/tests frontend/tests packages scripts/dev-db.ps1 scripts/test.sh scripts/generate-client.sh \
-  frontend/biome.json; do
+  frontend/biome.json docs README.md LICENSE scripts/test-backup-restore.ps1 \
+  backend/app/sample_data_cli.py backend/app/alembic/README backend/app/alembic/script.py.mako; do
   [ ! -e "$tmp/$f" ] || { echo "SHOULD NOT ship: $f"; fail=1; }
 done
 

@@ -1,5 +1,5 @@
 # Removes files an earlier version left on this computer that the new release no
-# longer contains (tests, CI files, Word templates, development Compose files, old
+# longer contains (tests, CI files, documents, Word templates, development Compose files, old
 # source files). Called by update.ps1 after it has copied a new version in; it can
 # also be run by hand:
 #   .\scripts\prune-release.ps1 -Source <folder with the new version> -DryRun   (lists only)
@@ -38,13 +38,13 @@ if (Test-Path -LiteralPath (Join-Path $Root ".git")) {
 }
 
 # Folders that are fully mirrored: files not in the new version are removed.
-$mirrored = @("backend\app", "backend\scripts", "frontend\src", "frontend\public", "deploy", "docs", "scripts")
+$mirrored = @("backend\app", "backend\scripts", "frontend\src", "frontend\public", "deploy", "scripts")
 # Folders where only the files directly inside are mirrored (sub-folders are left alone).
 $flat = @("backend", "frontend")
 # Folders that exist only for development; removed when the new version has no such folder.
-$devOnly = @("backend\tests", "frontend\tests", "packages", ".github", ".vscode")
+$devOnly = @("backend\tests", "frontend\tests", "packages", ".github", ".vscode", "docs")
 # Single files that exist only for development; removed when the new version has no such file.
-$devFiles = @("compose.override.yml", "compose.dev.yml", ".env.dev.example", ".pre-commit-config.yaml", ".python-version", ".gitattributes")
+$devFiles = @("compose.override.yml", "compose.dev.yml", ".env.dev.example", ".pre-commit-config.yaml", ".python-version", ".gitattributes", "README.md", "LICENSE")
 # Never removed, whatever the rules above say.
 $protected = '(^|\\)(\.env(\.dev|\.before-rotation-.*)?|\.installed-commit|backups(\\.*)?|.*\.pem|.*\.crt|.*\.dump(\.enc)?|__pycache__(\\.*)?|node_modules(\\.*)?|\.venv(\\.*)?)$'
 

@@ -33,7 +33,8 @@ for f in .env .env.before-rotation-1 .installed-commit mayondon-office-root.crt 
   [ -e "$f" ] || { echo "FAIL: removed a file that must stay: $f"; fail=1; }
 done
 for f in backend/app/old_removed.py frontend/src/stale.tsx compose.override.yml compose.dev.yml .env.dev.example \
-  backend/tests frontend/tests packages .github docs/Barangay-softcopies scripts/dev-db.ps1 backend/scripts/test.sh; do
+  backend/tests frontend/tests packages .github docs docs/Barangay-softcopies README.md LICENSE \
+  scripts/dev-db.ps1 scripts/test-backup-restore.ps1 backend/app/sample_data_cli.py backend/scripts/test.sh; do
   [ ! -e "$f" ] || { echo "FAIL: not removed: $f"; fail=1; }
 done
 # Every file of the new release is still there.
