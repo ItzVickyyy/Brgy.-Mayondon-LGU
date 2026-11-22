@@ -14,11 +14,13 @@ const buttonVariants = cva(
       variant: {
         default: `bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 hover:shadow-sm ${press}`,
         destructive: `bg-destructive text-white shadow-xs hover:bg-destructive/90 hover:shadow-sm focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 ${press}`,
-        outline: `border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 ${press}`,
+        // Inside a pop-up an outline button (Close, Cancel, Edit, Back) gets a thicker brand-coloured
+        // border and bold brand text, so it reads as a button and not as plain text.
+        outline: `border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 in-data-[slot=dialog-content]:border-2 in-data-[slot=dialog-content]:border-brand/60 in-data-[slot=dialog-content]:font-semibold in-data-[slot=dialog-content]:text-brand in-data-[slot=dialog-content]:shadow-sm dark:in-data-[slot=dialog-content]:border-brand/60 ${press}`,
         secondary: `bg-secondary text-secondary-foreground hover:bg-secondary/80 ${press}`,
         // Inside a pop-up a ghost button gets an outline so Cancel, Edit and
         // similar actions are easy to see (the pop-up is the in-data parent).
-        ghost: `hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 in-data-[slot=dialog-content]:border in-data-[slot=dialog-content]:border-input in-data-[slot=dialog-content]:bg-background in-data-[slot=dialog-content]:shadow-xs ${press}`,
+        ghost: `hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 in-data-[slot=dialog-content]:border in-data-[slot=dialog-content]:border-input in-data-[slot=dialog-content]:bg-background in-data-[slot=dialog-content]:font-semibold in-data-[slot=dialog-content]:shadow-xs ${press}`,
         // Main call to action: navy fill with the soft navy ring of the original Issue Document button.
         cta: `bg-primary text-primary-foreground shadow-md ring-2 ring-primary/25 ring-offset-2 ring-offset-background hover:bg-primary/90 hover:shadow-lg ${press}`,
         link: "text-brand underline-offset-4 hover:underline",

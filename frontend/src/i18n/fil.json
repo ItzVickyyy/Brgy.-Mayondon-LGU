@@ -2170,9 +2170,31 @@
         "description": "Pumili ng uri ng ulat at panahon ng pag-uulat para makita ang kabuuang resulta.",
         "reportType": "Uri ng ulat",
         "period": "Panahon ng pag-uulat",
-        "preview": "I-preview ang Ulat",
         "export": "I-export",
         "print": "I-print"
+      },
+      "exportDialog": {
+        "title": "I-export ang ulat",
+        "description": "Piliin ang uri ng file na pagse-save-an ng ipinapakitang ulat.",
+        "cancel": "Kanselahin",
+        "formats": {
+          "xlsx": {
+            "name": "Excel",
+            "hint": "Spreadsheet (.xlsx) na maaaring i-sort at kalkulahin."
+          },
+          "docx": {
+            "name": "Word",
+            "hint": "Dokumento (.docx) na may ulat bilang talahanayan."
+          },
+          "pdf": {
+            "name": "PDF",
+            "hint": "Nakapirming layout (.pdf), handa nang ipadala o i-print."
+          },
+          "csv": {
+            "name": "CSV",
+            "hint": "Payak na datos (.csv) para sa ibang programa."
+          }
+        }
       },
       "printedOn": "Na-print noong {{date}}",
       "print": {
@@ -2272,11 +2294,9 @@
         }
       },
       "notices": {
-        "previewBeforeExport": "I-preview muna ang ulat bago mag-export.",
         "notLoaded": "Hindi pa tapos mag-load ang ulat, kaya hindi pa ito maie-export.",
-        "csvStarted": "Nagsimula na ang pag-export ng CSV para sa ipinapakitang ulat.",
-        "previewBeforePrint": "I-preview muna ang ulat bago mag-print.",
-        "notRecorded": "Hindi nai-record sa Activity Log ang pag-export, kaya hindi ito sinimulan. Subukang muli."
+        "notRecorded": "Hindi nai-record sa Activity Log ang pag-export, kaya hindi ito sinimulan. Subukang muli.",
+        "exportStarted": "Nagsimula na ang pag-export ng {{format}} para sa ipinapakitang ulat."
       },
       "noPurpose": "(Walang nakasaad na layunin)"
     },

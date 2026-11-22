@@ -51,6 +51,15 @@ from app.models_residents import Resident, ResidentSector
 
 router = APIRouter(prefix="/reports", tags=["reports"])
 
+# How the Activity Log words each way a report leaves the screen.
+EXPORT_MODE_LABELS = {
+    "csv": "CSV file",
+    "xlsx": "Excel file",
+    "docx": "Word file",
+    "pdf": "PDF file",
+    "print": "printed",
+}
+
 ReportsUser = Annotated[User, Depends(require_permission(Permission.REPORTS_VIEW))]
 PeriodQuery = Annotated[Period, Query(description="Reporting period, to date")]
 
@@ -330,7 +339,7 @@ def record_export(
         details={
             "report": body.report,
             "period": body.period,
-            "mode": "CSV file" if body.mode == "csv" else "printed",
+            "mode": EXPORT_MODE_LABELS[body.mode],
         },
         commit=True,
     )

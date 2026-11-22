@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { CreditCard, FileCheck2, UserRound, Users } from "lucide-react"
+import { CreditCard, FileCheck2, Pencil, UserRound, Users } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -538,10 +538,12 @@ export function ResidentProfileDialog({
               <div className="flex shrink-0 justify-end border-t bg-muted/30 px-5 py-3 sm:px-6">
                 <Button
                   type="button"
-                  variant="outline"
-                  className="min-h-11 sm:min-h-9"
+                  variant="default"
+                  data-testid="profile-edit"
+                  className="min-h-11 px-6 font-semibold shadow-md"
                   onClick={onEdit}
                 >
+                  <Pencil aria-hidden="true" />
                   {t("records.profile.edit")}
                 </Button>
               </div>

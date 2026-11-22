@@ -84,15 +84,13 @@ test("upload, map, check and import a small fictional masterlist", async ({
     page.getByLabel(/^Report type/),
     "Masterlist import summary",
   )
-  await page
-    .getByRole("button", { name: "Preview Report", exact: true })
-    .click()
   const reportRow = page.getByRole("row", {
     name: new RegExp(`masterlist-${tag}.csv`),
   })
   await expect(reportRow).toContainText("Completed")
   const downloadPromise = page.waitForEvent("download")
   await page.getByRole("button", { name: "Export", exact: true }).click()
+  await page.getByTestId("export-format-csv").click()
   const exported = readFileSync(await (await downloadPromise).path(), "utf8")
   expect(exported.split("\r\n")[0]).toBe(
     '"Date","File","By","Status","Created","Updated","Skipped","Failed"',

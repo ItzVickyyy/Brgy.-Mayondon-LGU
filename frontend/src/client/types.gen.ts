@@ -2311,7 +2311,7 @@ export type ReportExportedRequest = {
     /**
      * Mode
      */
-    mode: 'csv' | 'print';
+    mode: 'csv' | 'xlsx' | 'docx' | 'pdf' | 'print';
 };
 
 /**

@@ -158,8 +158,21 @@ def test_report_export_is_logged_and_validated(
         json={**body, "mode": "print"},
     )
     assert printed.status_code == 204
-    rows = sorted(_rows(db, "report.export"), key=lambda x: x.id or 0)[-2:]
-    assert [x.details["mode"] for x in rows if x.details] == ["CSV file", "printed"]
+    for mode in ("xlsx", "docx", "pdf"):
+        saved = client.post(
+            f"{API}/reports/exported",
+            headers=superuser_token_headers,
+            json={**body, "mode": mode},
+        )
+        assert saved.status_code == 204
+    rows = sorted(_rows(db, "report.export"), key=lambda x: x.id or 0)[-5:]
+    assert [x.details["mode"] for x in rows if x.details] == [
+        "CSV file",
+        "printed",
+        "Excel file",
+        "Word file",
+        "PDF file",
+    ]
     assert rows[0].module == "reports"
     assert rows[0].details == {
         "report": "expiry",

@@ -1,5 +1,5 @@
 // The report preview is always on screen: it loads with the page and follows the
-// two selects, with no need to press "Preview Report". Needs the running app.
+// two selects, and there is no "Preview Report" button. Needs the running app.
 import { readFileSync } from "node:fs"
 import { expect, test } from "@playwright/test"
 import { chooseOption } from "./utils/select"
@@ -22,23 +22,30 @@ async function csvHeader(page: import("@playwright/test").Page) {
     .waitForEvent("download", { timeout: 2000 })
     .catch(() => null)
   await page.getByRole("button", { name: "Export", exact: true }).click()
+  // Until the report has loaded no dialog opens; once it has, pick CSV.
+  const csv = page.getByTestId("export-format-csv")
+  if (await csv.isVisible({ timeout: 1000 }).catch(() => false))
+    await csv.click()
   const download = await downloadPromise
   if (!download) return ""
   return readFileSync(await download.path(), "utf8").split("\r\n")[0]
 }
 
-test("the report is shown on load without pressing Preview Report", async ({
+test("the report is shown on load and there is no Preview Report button", async ({
   page,
 }) => {
   await page.goto("/reports")
   await expect(page.getByText("Report preview area")).toHaveCount(0)
+  await expect(
+    page.getByRole("button", { name: "Preview Report" }),
+  ).toHaveCount(0)
   // The exported header only exists once the report has loaded by itself.
   await expect(page.getByText(/·/).first()).toBeVisible()
   await expect.poll(() => csvHeader(page)).toBe(expectedHeader.issuances)
 })
 
 for (const report of reportOrder) {
-  test(`choosing "${report}" shows it without pressing Preview Report`, async ({
+  test(`choosing "${report}" shows it with no button to press`, async ({
     page,
   }) => {
     await page.goto("/reports")

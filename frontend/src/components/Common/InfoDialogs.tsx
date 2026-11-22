@@ -1203,7 +1203,8 @@ export function HelpDialog(props: DialogProps) {
             <p>
               Choose a report (issuances by document type, by purpose, expiring
               records, or account activity) and a period. The report shows on
-              the page. Reports can be printed or downloaded as a CSV file.
+              the page. Reports can be printed or saved as an Excel, Word, PDF
+              or CSV file.
             </p>
           </Section>
           <Section title="Backup and Restore">

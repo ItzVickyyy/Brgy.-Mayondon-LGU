@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { ParseKeys, TFunction } from "i18next"
 import { BarChart3, Clock3, Download, FileCheck2, FileUp } from "lucide-react"
@@ -20,6 +20,7 @@ import {
   TablePagination,
   usePagination,
 } from "@/components/Common/TablePagination"
+import { ExportFormatDialog } from "@/components/Reports/ExportFormatDialog"
 import {
   ReportLetterhead,
   ReportSignatories,
@@ -38,6 +39,11 @@ import {
 } from "@/lib/locale"
 import { notify } from "@/lib/notifications"
 import { reportPageRule } from "@/lib/print/paperSizes"
+import {
+  buildReportFile,
+  type ReportFormat,
+  reportMime,
+} from "@/lib/reports/reportFiles"
 import { userFullName } from "@/lib/userNames"
 
 export const Route = createFileRoute("/_layout/reports")({
@@ -48,18 +54,10 @@ export const Route = createFileRoute("/_layout/reports")({
 type Period = "week" | "month" | "quarter" | "year"
 type ReportType = "issuances" | "purpose" | "expiry" | "imports" | "accounts"
 
-type NoticeKey =
-  | "previewBeforeExport"
-  | "notLoaded"
-  | "csvStarted"
-  | "previewBeforePrint"
-  | "notRecorded"
+type NoticeKey = "notLoaded" | "notRecorded"
 
 function notice(key: NoticeKey) {
-  notify(
-    { key: `admin.reports.notices.${key}` },
-    key === "csvStarted" ? "success" : "warning",
-  )
+  notify({ key: `admin.reports.notices.${key}` }, "warning")
 }
 
 const periodKeys = {
@@ -165,12 +163,12 @@ function Reports() {
   const isAdmin = isSystemAdministrator(user)
   const [period, setPeriod] = useState<Period>("month")
   const [report, setReport] = useState<ReportType>("issuances")
-  const queryClient = useQueryClient()
   // The preview always follows the two selects: it loads with the page and
   // again whenever either select changes, with no button to press.
   const applied = { report, period }
   // While true, every row of the report is on the page so a print is complete.
   const [printAll, setPrintAll] = useState(false)
+  const [exportOpen, setExportOpen] = useState(false)
 
   const summaryQuery = useQuery({
     queryKey: ["reports-summary", period],
@@ -292,14 +290,7 @@ function Reports() {
     timeZone: "Asia/Manila",
   })
 
-  // The preview is always on screen; the button only reloads the figures.
-  function previewReport() {
-    void queryClient.invalidateQueries({
-      predicate: (query) => String(query.queryKey[0]).startsWith("reports-"),
-    })
-  }
-
-  // The CSV export is always English (owner decision, Nov 8), whatever the
+  // Every saved file (CSV, Excel, Word, PDF) is always English (owner decision, Nov 8), whatever the
   // interface language is: headers, labels, dates and numbers all use these.
   function buildCsvRows(): (string | number)[][] | null {
     if (!applied) return null
@@ -430,7 +421,7 @@ function Reports() {
 
   // The Activity Log must know about every report that leaves the screen, so
   // an export or print that cannot be recorded does not start.
-  async function recordExport(mode: "csv" | "print"): Promise<boolean> {
+  async function recordExport(mode: ReportFormat | "print"): Promise<boolean> {
     if (!applied) return false
     try {
       await ReportsService.recordExport({
@@ -443,37 +434,63 @@ function Reports() {
     }
   }
 
-  async function exportReport() {
-    if (!applied) {
-      notice("previewBeforeExport")
-      return
-    }
-    const csvRows = buildCsvRows()
-    if (!csvRows) {
+  // The Export button asks for the file type first; this saves it.
+  function openExport() {
+    if (!buildCsvRows()) {
       notice("notLoaded")
       return
     }
-    if (!(await recordExport("csv"))) return
-    const csv = csvRows
-      .map((row) =>
-        row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","),
-      )
-      .join("\r\n")
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
+    setExportOpen(true)
+  }
+
+  async function exportReport(format: ReportFormat) {
+    setExportOpen(false)
+    const rows = buildCsvRows()
+    if (!rows) {
+      notice("notLoaded")
+      return
+    }
+    if (!(await recordExport(format))) return
+    const tEn = i18n.getFixedT("en")
+    const blob = new Blob(
+      [
+        buildReportFile(format, {
+          title: tEn(`admin.reports.reportTypes.${applied.report}`),
+          subtitle: `${tEn(periodKeys[applied.period])} · ${formatLocaleDate(
+            new Date(),
+            {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+              timeZone: "Asia/Manila",
+            },
+            FIXED_LOCALE,
+          )}`,
+          rows,
+        }) as BlobPart,
+      ],
+      { type: reportMime[format] },
+    )
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
     link.href = url
-    link.download = `management-report-${applied.report}-${applied.period}.csv`
+    link.download = `management-report-${applied.report}-${applied.period}.${format}`
     link.click()
     URL.revokeObjectURL(url)
-    notice("csvStarted")
+    notify(
+      {
+        key: "admin.reports.notices.exportStarted",
+        values: {
+          format: i18n.getFixedT("en")(
+            `admin.reports.exportDialog.formats.${format}.name`,
+          ),
+        },
+      },
+      "success",
+    )
   }
 
   async function printReport() {
-    if (!applied) {
-      notice("previewBeforePrint")
-      return
-    }
     if (!buildCsvRows()) {
       notice("notLoaded")
       return
@@ -1038,11 +1055,7 @@ function Reports() {
                 <option value="year">{t(periodKeys.year)}</option>
               </Select>
             </label>
-            <Button onClick={previewReport}>
-              <BarChart3 aria-hidden="true" />
-              {t("admin.reports.generate.preview")}
-            </Button>
-            <Button variant="outline" onClick={exportReport}>
+            <Button variant="outline" onClick={openExport}>
               <Download aria-hidden="true" />
               {t("admin.reports.generate.export")}
             </Button>
@@ -1080,6 +1093,11 @@ function Reports() {
           ) : null}
         </div>
       </section>
+      <ExportFormatDialog
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+        onChoose={(format) => void exportReport(format)}
+      />
     </div>
   )
 }

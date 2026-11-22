@@ -16,7 +16,7 @@ class ReportExportedRequest(SQLModel):
     period: Literal[
         "today", "week", "month", "quarter", "3months", "6months", "year", "overall"
     ]
-    mode: Literal["csv", "print"]
+    mode: Literal["csv", "xlsx", "docx", "pdf", "print"]
 
 
 class PeriodInfo(SQLModel):

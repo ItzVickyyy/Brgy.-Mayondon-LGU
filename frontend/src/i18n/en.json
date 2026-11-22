@@ -2170,9 +2170,31 @@
         "description": "Choose a report type and reporting period to preview aggregate results.",
         "reportType": "Report type",
         "period": "Reporting period",
-        "preview": "Preview Report",
         "export": "Export",
         "print": "Print"
+      },
+      "exportDialog": {
+        "title": "Export report",
+        "description": "Choose the file type to save the displayed report as.",
+        "cancel": "Cancel",
+        "formats": {
+          "xlsx": {
+            "name": "Excel",
+            "hint": "A spreadsheet (.xlsx) you can sort and calculate in."
+          },
+          "docx": {
+            "name": "Word",
+            "hint": "A document (.docx) with the report as a table."
+          },
+          "pdf": {
+            "name": "PDF",
+            "hint": "A fixed layout (.pdf) that is ready to send or print."
+          },
+          "csv": {
+            "name": "CSV",
+            "hint": "Plain data (.csv) for other programs."
+          }
+        }
       },
       "printedOn": "Printed on {{date}}",
       "print": {
@@ -2272,11 +2294,9 @@
         }
       },
       "notices": {
-        "previewBeforeExport": "Preview a report before exporting.",
         "notLoaded": "The report has not finished loading, so it cannot be exported yet.",
-        "csvStarted": "CSV export started for the displayed report.",
-        "previewBeforePrint": "Preview a report before printing.",
-        "notRecorded": "The export could not be recorded in the Activity Log, so it was not started. Try again."
+        "notRecorded": "The export could not be recorded in the Activity Log, so it was not started. Try again.",
+        "exportStarted": "{{format}} export started for the displayed report."
       },
       "noPurpose": "(No purpose given)"
     },

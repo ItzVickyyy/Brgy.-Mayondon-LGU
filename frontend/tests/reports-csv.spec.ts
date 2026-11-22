@@ -15,7 +15,6 @@ const expectedHeader: Record<string, string> = {
 // Position of each report in the "Report type" list.
 const reportOrder = ["issuances", "purpose", "expiry", "imports", "accounts"]
 
-const previewLabel = { en: "Preview Report", fil: "I-preview ang Ulat" }
 const exportLabel = { en: "Export", fil: "I-export" }
 
 for (const language of ["en", "fil"] as const) {
@@ -31,16 +30,14 @@ for (const language of ["en", "fil"] as const) {
         page.locator('[aria-haspopup="listbox"]').first(),
         reportOrder.indexOf(report),
       )
-      await page
-        .getByRole("button", { name: previewLabel[language], exact: true })
-        .click()
-      // Wait for the preview to load before exporting.
+      // The preview loads by itself; wait for it before exporting.
       await expect(page.getByText(/·/).first()).toBeVisible()
 
       const downloadPromise = page.waitForEvent("download")
       await page
         .getByRole("button", { name: exportLabel[language], exact: true })
         .click()
+      await page.getByTestId("export-format-csv").click()
       const download = await downloadPromise
       const path = await download.path()
       const csv = readFileSync(path, "utf8")
