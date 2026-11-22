@@ -102,7 +102,8 @@
       "backupTool": "Wala ang backup tool",
       "update": "May bagong bersyon na",
       "plainHttp": "Hindi protektado ang network",
-      "dataKey": "Hindi protektado ang mga kondisyong pangkalusugan"
+      "dataKey": "Hindi protektado ang mga kondisyong pangkalusugan",
+      "secondAdmin": "Magdagdag ng pangalawang administrator"
     },
     "events": {
       "user_create": "{{actor}} ang gumawa ng user account para kay {{target}}.",
@@ -2919,6 +2920,11 @@
           }
         }
       }
+    },
+    "secondAdmin": {
+      "title": "Isa lang ang administrator account",
+      "text": "Kapag na-lock ang account na ito o nawala ang password, walang makakapamahala ng programa. Magdagdag ng pangalawang System Administrator na may sariling password, recovery questions at two-factor na pag-sign in.",
+      "action": "Magdagdag ng pangalawang administrator"
     }
   }
 }

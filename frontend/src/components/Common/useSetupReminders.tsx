@@ -27,6 +27,7 @@ export type SetupReminder = {
     | "update"
     | "plainHttp"
     | "dataKey"
+    | "secondAdmin"
   testId: string
   severity: ReminderSeverity
   /** A short heading (only when the text below is a longer instruction). */
@@ -262,6 +263,19 @@ export function useSetupReminders(): SetupReminder[] {
         action: t("security.dataKey.action"),
       })
     }
+  }
+
+  if (isAdmin && protectionData?.active_admin_count === 1) {
+    reminders.push({
+      id: "secondAdmin",
+      testId: "second-admin-reminder",
+      severity: "soon",
+      title: t("security.secondAdmin.title"),
+      text: t("security.secondAdmin.text"),
+      teaser: t("notifications.teaser.secondAdmin"),
+      action: t("security.secondAdmin.action"),
+      to: "/admin",
+    })
   }
 
   return reminders.sort(

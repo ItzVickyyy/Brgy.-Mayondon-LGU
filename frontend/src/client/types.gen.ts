@@ -593,6 +593,10 @@ export type DataProtectionPublic = {
      * Unreadable Count
      */
     unreadable_count: number;
+    /**
+     * Active Admin Count
+     */
+    active_admin_count: number;
 };
 
 /**

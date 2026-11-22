@@ -13,12 +13,13 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlmodel import func, select
 
 from app.api.deps import SessionDep, require_permission
 from app.core import field_crypto, update_state
 from app.core.audit import record_audit_event
 from app.core.permissions import Permission
-from app.models import User
+from app.models import User, UserRole
 
 router = APIRouter(prefix="/system", tags=["system"])
 
@@ -81,6 +82,19 @@ class DataProtectionPublic(BaseModel):
     plain_count: int
     # Encrypted health conditions the key in .env cannot open (key lost or changed).
     unreadable_count: int
+    # Active System Administrator accounts (patch 218). One means a lost password or a locked
+    # account leaves nobody who can manage the program.
+    active_admin_count: int
+
+
+def _active_admin_count(session: SessionDep) -> int:
+    return int(
+        session.exec(
+            select(func.count())
+            .select_from(User)
+            .where(User.role == UserRole.admin, User.is_active == True)  # noqa: E712
+        ).one()
+    )
 
 
 @router.get("/data-protection", response_model=DataProtectionPublic)
@@ -96,4 +110,5 @@ def read_data_protection(
         key_configured=status.key_configured,
         plain_count=status.plain_count,
         unreadable_count=status.unreadable_count,
+        active_admin_count=_active_admin_count(session),
     )

@@ -7,11 +7,12 @@ from datetime import date
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session, col, select, text
+from sqlmodel import Session, col, func, select, text
 
 from app.core.config import settings
 from app.core.dates import add_months
 from app.core.field_crypto import encrypt_existing
+from app.models import User, UserRole
 from app.models_foundation import AuditLog, Street
 from app.models_issuance import IssuanceAssistance
 from tests.api.routes.test_issuances import (  # noqa: F401  (fixtures are reused)
@@ -776,3 +777,17 @@ def test_data_protection_status_is_for_administrators_only(
 ) -> None:
     assert client.get(PROTECTION, headers=staff_token_headers).status_code == 403
     assert client.get(PROTECTION).status_code in (401, 403)
+
+
+def test_data_protection_status_counts_active_administrators(
+    client: TestClient, superuser_token_headers: Headers, db: Session
+) -> None:
+    """Patch 218: the bell asks for a second administrator when only one is active."""
+    expected = db.exec(
+        select(func.count())
+        .select_from(User)
+        .where(User.role == UserRole.admin, User.is_active == True)  # noqa: E712
+    ).one()
+    res = client.get(PROTECTION, headers=superuser_token_headers)
+    assert res.status_code == 200
+    assert res.json()["active_admin_count"] == expected >= 1
