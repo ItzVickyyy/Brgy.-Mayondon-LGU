@@ -2753,6 +2753,7 @@
     },
     "ui": {
       "skipToMain": "Lumaktaw sa pangunahing nilalaman",
+      "backToTop": "Bumalik sa itaas",
       "showPassword": "Ipakita ang password",
       "hidePassword": "Itago ang password",
       "collapseSidebar": "Isara ang sidebar",

@@ -16,6 +16,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { UsersService } from "@/client"
 import { AppBackdrop } from "@/components/Common/AppBackdrop"
+import { BackToTop } from "@/components/Common/BackToTop"
 import { Footer } from "@/components/Common/Footer"
 import { IdleSignOut } from "@/components/Common/IdleSignOut"
 import { KeyboardShortcuts } from "@/components/Common/KeyboardShortcuts"
@@ -155,7 +156,7 @@ function Layout() {
               type="button"
               variant="outline"
               size="icon"
-              className="size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
+              className="icon-react icon-turn size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
               aria-label={
                 isDark ? t("common.ui.lightMode") : t("common.ui.darkMode")
               }
@@ -174,7 +175,7 @@ function Layout() {
               type="button"
               variant="outline"
               size="icon"
-              className="size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
+              className="icon-react icon-grow size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
               aria-label={
                 isFullscreen
                   ? t("common.ui.exitFullscreen")
@@ -216,6 +217,7 @@ function Layout() {
           </div>
         </main>
         <Footer />
+        <BackToTop />
       </SidebarInset>
     </SidebarProvider>
   )

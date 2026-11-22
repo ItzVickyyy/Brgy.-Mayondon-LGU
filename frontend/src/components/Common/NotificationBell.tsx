@@ -404,7 +404,7 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
             variant="outline"
             size="icon"
             data-testid="notification-bell"
-            className="relative size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
+            className="icon-react icon-bell relative size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
             aria-label={label}
             title={t("notifications.bell")}
           >

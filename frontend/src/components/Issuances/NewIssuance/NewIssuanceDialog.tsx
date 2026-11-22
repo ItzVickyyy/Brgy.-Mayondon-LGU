@@ -1147,7 +1147,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         ]
         return <div className="flex flex-1 flex-col items-center justify-center gap-5 overflow-y-auto p-6 text-center sm:p-8" data-testid="issue-success">
           <div role="status" className="flex flex-col items-center gap-2">
-            <CheckCircle2 className="size-12 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+            <CheckCircle2 className="check-pop size-12 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
             <p className="text-lg font-semibold">{t("issuances.new.success.issuedTitle")}</p>
             <p className="rounded-md bg-emerald-50 px-3 py-1 font-mono text-base font-semibold tracking-wide text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300" data-testid="issue-success-reference">{successRecord.referenceNo}</p>
           </div>

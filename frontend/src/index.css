@@ -274,6 +274,48 @@ html[data-font-size="large"] {
   }
 }
 
+/* Small feedback animations used by the interaction layer below. */
+@keyframes bell-ring {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(16deg);
+  }
+  40% {
+    transform: rotate(-13deg);
+  }
+  60% {
+    transform: rotate(8deg);
+  }
+  80% {
+    transform: rotate(-4deg);
+  }
+}
+@keyframes float-soft {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+@keyframes check-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 @keyframes shimmer {
   to {
     transform: translateX(100%);
@@ -301,6 +343,109 @@ html[data-font-size="large"] {
      transform is left behind to trap fixed-position children afterwards. */
   .page-enter {
     animation: page-enter 200ms ease-out backwards;
+  }
+
+  /* Children appear one after another (each a little later than the one
+     before), so a page builds up instead of arriving as one block. Only the
+     first twelve are delayed; `backwards` leaves no transform behind. */
+  .stagger-in > * {
+    animation: page-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+  .stagger-in > :nth-child(2) {
+    animation-delay: 50ms;
+  }
+  .stagger-in > :nth-child(3) {
+    animation-delay: 100ms;
+  }
+  .stagger-in > :nth-child(4) {
+    animation-delay: 150ms;
+  }
+  .stagger-in > :nth-child(5) {
+    animation-delay: 200ms;
+  }
+  .stagger-in > :nth-child(6) {
+    animation-delay: 250ms;
+  }
+  .stagger-in > :nth-child(7) {
+    animation-delay: 300ms;
+  }
+  .stagger-in > :nth-child(8) {
+    animation-delay: 350ms;
+  }
+  .stagger-in > :nth-child(9) {
+    animation-delay: 400ms;
+  }
+  .stagger-in > :nth-child(10) {
+    animation-delay: 450ms;
+  }
+  .stagger-in > :nth-child(11) {
+    animation-delay: 500ms;
+  }
+  .stagger-in > :nth-child(n + 12) {
+    animation-delay: 550ms;
+  }
+
+  /* Plain (not clickable) cards answer the pointer too: the border picks up the
+     accent and the shadow deepens. No movement, so charts and text stay still. */
+  .card-hover {
+    transition:
+      border-color 200ms ease-out,
+      box-shadow 200ms ease-out;
+  }
+  @media (hover: hover) {
+    .card-hover:hover {
+      border-color: color-mix(in oklab, var(--brand) 35%, var(--border));
+      box-shadow: 0 8px 20px -12px oklch(0 0 0 / 0.3);
+    }
+  }
+
+  /* Header icon buttons: the icon itself reacts (bell rings, theme icon turns,
+     full-screen icon grows). Pointer and keyboard focus both trigger it. */
+  .icon-react svg {
+    transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .icon-react.icon-bell:hover svg,
+    .icon-react.icon-bell:focus-visible svg {
+      transform-origin: 50% 10%;
+      animation: bell-ring 700ms ease-in-out;
+    }
+    .icon-react.icon-turn:hover svg,
+    .icon-react.icon-turn:focus-visible svg {
+      transform: rotate(24deg) scale(1.1);
+    }
+    .icon-react.icon-grow:hover svg,
+    .icon-react.icon-grow:focus-visible svg {
+      transform: scale(1.2);
+    }
+    .icon-react.icon-spin:hover svg,
+    .icon-react.icon-spin:focus-visible svg {
+      transform: rotate(90deg);
+    }
+  }
+
+  /* Sidebar links: the icon grows a little and the label nudges right. */
+  @media (hover: hover) and (prefers-reduced-motion: no-preference) {
+    .nav-react > svg {
+      transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .nav-react:hover > svg {
+      transform: scale(1.15);
+    }
+    .nav-react > span:not(.sr-only) {
+      transition: transform 200ms ease-out;
+    }
+    .nav-react:hover > span:not(.sr-only) {
+      transform: translateX(2px);
+    }
+  }
+
+  /* A small popping tick for confirmations (issued, saved). */
+  .check-pop {
+    animation: check-pop 520ms cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+  }
+  .float-soft {
+    animation: float-soft 3.2s ease-in-out infinite;
   }
 
   /* A small grid of dots for the page backdrop (AppBackdrop). One solid

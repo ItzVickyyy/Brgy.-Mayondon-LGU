@@ -126,7 +126,7 @@ function SummaryCard({
   icon: typeof Users
 }) {
   return (
-    <article className="rounded-lg border bg-card p-4 shadow-sm sm:p-5">
+    <article className="card-hover rounded-lg border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="stat-label">{title}</p>
@@ -320,7 +320,7 @@ function Dashboard() {
   ] as const
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="stagger-in flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
@@ -334,7 +334,7 @@ function Dashboard() {
           {/* Call to action: opens Issuances with the New Issuance dialog ready. */}
           <Button
             type="button"
-            className="h-12 w-full gap-2 px-6 text-base font-semibold shadow-md ring-2 ring-primary/25 ring-offset-2 ring-offset-background hover:shadow-lg sm:w-auto"
+            className="icon-react icon-spin h-12 w-full gap-2 px-6 text-base font-semibold shadow-md ring-2 ring-primary/25 ring-offset-2 ring-offset-background hover:shadow-lg sm:w-auto"
             onClick={() =>
               void navigate({ to: "/issuances", search: { new: 1 } })
             }
@@ -395,7 +395,7 @@ function Dashboard() {
       </section>
 
       <section aria-label={t("dashboard.quickActions.ariaLabel")}>
-        <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+        <article className="card-hover rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <SectionHeading title={t("dashboard.quickActions.title")} />
           <div className="mt-3 grid gap-3 sm:grid-cols-2 2xl:grid-cols-4">
             {quickActions.map((item) => (
@@ -428,7 +428,7 @@ function Dashboard() {
       {/* minmax(0, ...) and min-w-0: a 24-month chart must scroll inside its
             card instead of stretching the grid column and the page. */}
       <section className="grid min-w-0 gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-        <article className="flex min-w-0 flex-col rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+        <article className="flex min-w-0 flex-col card-hover rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
             <div className="hidden rounded-lg bg-brand/10 p-2.5 text-brand sm:block">
               <BarChart3 className="size-5" aria-hidden="true" />
@@ -644,7 +644,7 @@ function Dashboard() {
           </p>
         </article>
 
-        <article className="min-w-0 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+        <article className="min-w-0 card-hover rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex flex-col items-start gap-2">
             <SectionHeading
               title={t("dashboard.byType.title")}
@@ -706,7 +706,7 @@ function Dashboard() {
       />
 
       <section className="grid min-w-0 gap-4 xl:grid-cols-2">
-        <article className="min-w-0 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+        <article className="min-w-0 card-hover rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
             <div className="rounded-lg bg-brand/10 p-2.5 text-brand">
               <CalendarClock className="size-5" aria-hidden="true" />
@@ -769,7 +769,7 @@ function Dashboard() {
           </Link>
         </article>
 
-        <article className="min-w-0 rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+        <article className="min-w-0 card-hover rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-start gap-3">
             <div className="rounded-lg bg-brand/10 p-2.5 text-brand">
               <Activity className="size-5" aria-hidden="true" />

@@ -32,6 +32,7 @@ interface MainProps {
 // sidebar as it opens and closes, so the highlight never snaps ahead of it.
 // Motion is switched off globally when the system asks for reduced motion.
 const NAV_BUTTON_CLASS = [
+  "nav-react",
   "relative rounded-md transition-[background-color,color]",
   "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
   "before:absolute before:left-0 before:top-1/2 before:h-5 before:w-[3px]",

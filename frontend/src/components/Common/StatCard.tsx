@@ -16,7 +16,7 @@ export function StatCard({
   description,
 }: StatCardProps) {
   return (
-    <article className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+    <article className="card-hover rounded-xl border bg-card p-4 shadow-sm sm:p-5">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-sm font-medium text-muted-foreground">{label}</p>

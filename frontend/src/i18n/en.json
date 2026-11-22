@@ -2753,6 +2753,7 @@
     },
     "ui": {
       "skipToMain": "Skip to main content",
+      "backToTop": "Back to top",
       "showPassword": "Show password",
       "hidePassword": "Hide password",
       "collapseSidebar": "Collapse Sidebar",

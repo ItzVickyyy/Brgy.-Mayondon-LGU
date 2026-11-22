@@ -29,7 +29,7 @@ const skeletonWidths = ["w-2/3", "w-1/2", "w-3/5", "w-2/5"]
 export function EmptyState({ title, description, action }: EmptyStateProps) {
   return (
     <div className="animate-in fade-in-0 flex flex-col items-center justify-center gap-2 p-8 text-center duration-300">
-      <div className="rounded-full bg-muted p-3">
+      <div className="float-soft rounded-full bg-muted p-3">
         <Inbox className="size-6 text-muted-foreground" aria-hidden="true" />
       </div>
       <p className="mt-1 text-base font-medium">{title}</p>
