@@ -103,7 +103,8 @@
       "update": "May bagong bersyon na",
       "plainHttp": "Hindi protektado ang network",
       "dataKey": "Hindi protektado ang mga kondisyong pangkalusugan",
-      "secondAdmin": "Magdagdag ng pangalawang administrator"
+      "secondAdmin": "Magdagdag ng pangalawang administrator",
+      "backupStale": "Gumawa ng bagong backup"
     },
     "events": {
       "user_create": "{{actor}} ang gumawa ng user account para kay {{target}}.",
@@ -2925,6 +2926,17 @@
       "title": "Isa lang ang administrator account",
       "text": "Kapag na-lock ang account na ito o nawala ang password, walang makakapamahala ng programa. Magdagdag ng pangalawang System Administrator na may sariling password, recovery questions at two-factor na pag-sign in.",
       "action": "Magdagdag ng pangalawang administrator"
+    },
+    "backupStale": {
+      "none": {
+        "title": "Wala pang nagagawang backup",
+        "text": "Walang matagumpay na backup ng database. Kapag nasira ang computer, mawawala ang lahat ng talaan. Pindutin ang Back up now sa Backup page."
+      },
+      "old": {
+        "title": "Luma na ang huling backup",
+        "text_one": "{{count}} araw na ang pinakabagong matagumpay na backup. Pindutin ang Back up now at tiyaking tumatakbo pa ang araw-araw na backup.",
+        "text_other": "{{count}} araw na ang pinakabagong matagumpay na backup. Pindutin ang Back up now at tiyaking tumatakbo pa ang araw-araw na backup."
+      }
     }
   }
 }

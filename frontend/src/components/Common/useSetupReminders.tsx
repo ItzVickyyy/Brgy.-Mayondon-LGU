@@ -28,6 +28,7 @@ export type SetupReminder = {
     | "plainHttp"
     | "dataKey"
     | "secondAdmin"
+    | "backupStale"
   testId: string
   severity: ReminderSeverity
   /** A short heading (only when the text below is a longer instruction). */
@@ -41,6 +42,29 @@ export type SetupReminder = {
   to?: string
   dismissLabel?: string
   onDismiss?: () => void
+}
+
+/** A backup older than this many days is reported in the bell. */
+export const BACKUP_STALE_DAYS = 3
+/** Older than this (or none at all) is urgent. */
+export const BACKUP_URGENT_DAYS = 7
+
+/**
+ * Whole days since the newest successful backup, or null when there is none. `runs` is the
+ * Backup page's list; failed and still-running attempts do not count.
+ */
+export function daysSinceGoodBackup(
+  runs: { status: string; started_at: string }[],
+  now = Date.now(),
+): number | null {
+  let newest = Number.NEGATIVE_INFINITY
+  for (const run of runs) {
+    if (run.status !== "ok") continue
+    const time = Date.parse(run.started_at)
+    if (Number.isFinite(time) && time > newest) newest = time
+  }
+  if (!Number.isFinite(newest)) return null
+  return Math.max(0, Math.floor((now - newest) / 86_400_000))
 }
 
 const dismissKey = (userId: string) => `sq-banner-dismissed:${userId}`
@@ -206,6 +230,24 @@ export function useSetupReminders(): SetupReminder[] {
       action: t("notifications.openBackup"),
       to: "/backup-restore",
     })
+  }
+
+  if (isAdmin && backups.data?.tool_available === true) {
+    const days = daysSinceGoodBackup(backups.data.data)
+    if (days === null || days >= BACKUP_STALE_DAYS) {
+      const kind = days === null ? "none" : "old"
+      reminders.push({
+        id: "backupStale",
+        testId: "backup-stale-reminder",
+        severity:
+          days === null || days >= BACKUP_URGENT_DAYS ? "urgent" : "soon",
+        title: t(`security.backupStale.${kind}.title`),
+        text: t(`security.backupStale.${kind}.text`, { count: days ?? 0 }),
+        teaser: t("notifications.teaser.backupStale"),
+        action: t("notifications.openBackup"),
+        to: "/backup-restore",
+      })
+    }
   }
 
   const updateData = update.data

@@ -103,7 +103,8 @@
       "update": "A new version is ready",
       "plainHttp": "The network is not protected",
       "dataKey": "Health conditions are not protected",
-      "secondAdmin": "Add a second administrator"
+      "secondAdmin": "Add a second administrator",
+      "backupStale": "Make a new backup"
     },
     "events": {
       "user_create": "{{actor}} created a user account for {{target}}.",
@@ -2925,6 +2926,17 @@
       "title": "Only one administrator account",
       "text": "If this account is locked or its password is lost, nobody can manage the program. Add a second System Administrator with their own password, recovery questions and two-factor sign-in.",
       "action": "Add a second administrator"
+    },
+    "backupStale": {
+      "none": {
+        "title": "No backup has been made yet",
+        "text": "There is no successful backup of the database. If the computer fails, every record would be lost. Press Back up now on the Backup page."
+      },
+      "old": {
+        "title": "The last backup is old",
+        "text_one": "The newest successful backup is {{count}} day old. Press Back up now, and check that the daily backup is still running.",
+        "text_other": "The newest successful backup is {{count}} days old. Press Back up now, and check that the daily backup is still running."
+      }
     }
   }
 }
