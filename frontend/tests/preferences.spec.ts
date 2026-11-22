@@ -122,7 +122,79 @@ test.describe("Preferences", () => {
     await choose(page, "pref-accent-navy")
   })
 
-  test("choices are saved per user, in this browser only", async ({ page }) => {
+  test("choices are saved on the account and follow the person to another computer", async ({
+    page,
+  }) => {
+    await openPreferences(page)
+    const saved = page.waitForResponse(
+      (r) =>
+        r.url().includes("/users/me/preferences") &&
+        r.request().method() === "PUT",
+    )
+    await choose(page, "pref-accent-teal")
+    expect((await saved).status()).toBe(200)
+
+    // Another computer: nothing is stored in the browser, only the sign-in.
+    await page.evaluate(() => {
+      for (const k of Object.keys(localStorage))
+        if (k.startsWith("app-preferences")) localStorage.removeItem(k)
+    })
+    await page.reload()
+    await expect(page.locator("html")).toHaveAttribute("data-accent", "teal")
+
+    // Put it back for the other specs.
+    await openPreferences(page)
+    const reset = page.waitForResponse(
+      (r) =>
+        r.url().includes("/users/me/preferences") &&
+        r.request().method() === "PUT",
+    )
+    await choose(page, "pref-accent-navy")
+    await reset
+  })
+
+  test("a choice made while the server is unreachable is sent later, not lost", async ({
+    page,
+  }) => {
+    await openPreferences(page)
+    await page.route("**/users/me/preferences", (route) =>
+      route.request().method() === "PUT" ? route.abort() : route.continue(),
+    )
+    await choose(page, "pref-accent-green")
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          Object.keys(localStorage).some((k) =>
+            k.startsWith("app-preferences-unsynced:"),
+          ),
+        ),
+      )
+      .toBe(true)
+    await page.unroute("**/users/me/preferences")
+
+    // The next sign-in sends it instead of adopting the older server copy.
+    const sent = page.waitForResponse(
+      (r) =>
+        r.url().includes("/users/me/preferences") &&
+        r.request().method() === "PUT",
+    )
+    await page.reload()
+    expect((await sent).status()).toBe(200)
+    await expect(page.locator("html")).toHaveAttribute("data-accent", "green")
+
+    await openPreferences(page)
+    const reset = page.waitForResponse(
+      (r) =>
+        r.url().includes("/users/me/preferences") &&
+        r.request().method() === "PUT",
+    )
+    await choose(page, "pref-accent-navy")
+    await reset
+  })
+
+  test("the browser keeps a copy per user for a flash-free start", async ({
+    page,
+  }) => {
     await openPreferences(page)
     await choose(page, "pref-accent-green")
     const keys = await page.evaluate(() =>

@@ -290,7 +290,6 @@
     },
     "population": {
       "ariaLabel": "Pangkalahatang-ideya ng populasyon",
-      "note": "Binibilang ang mga aktibong talaan ng residente. Ang mga residenteng walang petsa ng kapanganakan, kasarian, purok o katayuang sibil ay hindi kasama sa kaukulang card.",
       "totalPopulation": "Kabuuang Populasyon",
       "totalHouseholds": "Kabuuang Rehistradong Sambahayan",
       "totalVoters": "Kabuuang Rehistradong Botante",

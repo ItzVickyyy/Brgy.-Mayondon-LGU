@@ -7,6 +7,7 @@ import {
   type Preferences,
   type PreferenceTheme,
   subscribePreferences,
+  syncPreferencesWithServer,
   unloadUserPreferences,
   updatePreferences,
 } from "@/lib/preferences"
@@ -29,7 +30,13 @@ export function useLoadPreferences(userId: string | undefined) {
       const theme = saved.theme
       timer = window.setTimeout(() => setThemeRef.current(theme), 0)
     }
+    // Then ask the account: a choice made on another computer replaces this one.
+    let cancelled = false
+    void syncPreferencesWithServer(userId).then((fromServer) => {
+      if (!cancelled && fromServer?.theme) setThemeRef.current(fromServer.theme)
+    })
     return () => {
+      cancelled = true
       if (timer !== undefined) window.clearTimeout(timer)
       unloadUserPreferences()
     }

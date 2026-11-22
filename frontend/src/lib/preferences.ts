@@ -1,11 +1,13 @@
 /**
- * Per-user display preferences: theme, accent colour and font size.
+ * Per-account display preferences: theme, accent colour and font size.
  *
- * Where they live: in this browser's localStorage, one entry per signed-in
- * user (`app-preferences:<user id>`), so two staff members sharing one
- * computer each keep their own choices. Nothing is sent to the server, so there
- * is no migration, and the settings work on the offline office network. A
- * choice follows the person on that computer, not to another computer.
+ * Where they live: on the account (`GET/PUT /users/me/preferences`), so a
+ * choice follows the person to any computer. The browser also keeps a copy in
+ * localStorage (`app-preferences:<user id>`): it paints the right look before
+ * the server answers and keeps the settings working when the server cannot be
+ * reached. A change that could not be sent is flagged
+ * (`app-preferences-unsynced:<user id>`) and sent at the next sign-in, so an
+ * offline choice is never overwritten by an older server copy.
  *
  * The accent is a fixed set only (no free colour picker). Each accent keeps the
  * same lightness and chroma as the navy default and only changes the hue (slate
@@ -13,6 +15,8 @@
  * every one was checked for WCAG AA contrast in both themes (see index.css).
  * The font size sets the root size, so every rem-based size scales with it.
  */
+
+import { UsersService } from "@/client"
 
 export const ACCENTS = [
   "navy",
@@ -74,6 +78,7 @@ export const DEFAULT_PREFERENCES: Preferences = {
 }
 
 const KEY_PREFIX = "app-preferences:"
+const UNSYNCED_PREFIX = "app-preferences-unsynced:"
 const LAST_USER_KEY = "app-preferences-last-user"
 
 function isAccent(value: unknown): value is Accent {
@@ -104,6 +109,31 @@ export function readPreferences(userId: string): Preferences {
     }
   } catch {
     return { ...DEFAULT_PREFERENCES }
+  }
+}
+
+function setUnsynced(userId: string, unsynced: boolean) {
+  try {
+    if (unsynced) localStorage.setItem(UNSYNCED_PREFIX + userId, "1")
+    else localStorage.removeItem(UNSYNCED_PREFIX + userId)
+  } catch {
+    // Ignored: the worst case is one extra comparison at the next sign-in.
+  }
+}
+
+function isUnsynced(userId: string): boolean {
+  try {
+    return localStorage.getItem(UNSYNCED_PREFIX + userId) === "1"
+  } catch {
+    return false
+  }
+}
+
+function hasLocalCopy(userId: string): boolean {
+  try {
+    return localStorage.getItem(KEY_PREFIX + userId) !== null
+  } catch {
+    return false
   }
 }
 
@@ -177,6 +207,12 @@ export function loadUserPreferences(userId: string): Preferences {
 
 /** Back to the defaults when the user signs out (the login page is not themed). */
 export function unloadUserPreferences() {
+  // A change made just before signing out is sent now, not lost with the timer.
+  if (saveTimer !== undefined && current.userId) {
+    window.clearTimeout(saveTimer)
+    saveTimer = undefined
+    void sendToServer(current.userId, current.preferences)
+  }
   current = { userId: null, preferences: { ...DEFAULT_PREFERENCES } }
   try {
     localStorage.removeItem(LAST_USER_KEY)
@@ -191,7 +227,72 @@ export function unloadUserPreferences() {
 export function updatePreferences(patch: Partial<Preferences>) {
   const preferences: Preferences = { ...current.preferences, ...patch }
   current = { ...current, preferences }
-  if (current.userId) writePreferences(current.userId, preferences)
+  if (current.userId) {
+    writePreferences(current.userId, preferences)
+    scheduleSave(current.userId)
+  }
   applyAppearance(preferences)
   emit()
+}
+
+let saveTimer: number | undefined
+
+async function sendToServer(userId: string, preferences: Preferences) {
+  try {
+    await UsersService.saveMyPreferences({
+      body: {
+        theme: preferences.theme ?? null,
+        accent: preferences.accent,
+        font_size: preferences.fontSize,
+      },
+    })
+    setUnsynced(userId, false)
+  } catch {
+    setUnsynced(userId, true) // offline or server down: sent at the next sign-in
+  }
+}
+
+/** Sends the current choices to the account shortly after the last change. */
+function scheduleSave(userId: string) {
+  setUnsynced(userId, true)
+  if (saveTimer !== undefined) window.clearTimeout(saveTimer)
+  saveTimer = window.setTimeout(() => {
+    saveTimer = undefined
+    if (current.userId === userId)
+      void sendToServer(userId, current.preferences)
+  }, 400)
+}
+
+/**
+ * Brings this browser and the account in line once, after sign-in.
+ * - The account has preferences and nothing is waiting to be sent: use them
+ *   (another computer's choice arrives here) and refresh the local copy.
+ * - Otherwise (a first run after this feature, or an unsent offline change):
+ *   the local choice goes up to the account.
+ * Returns the preferences to show, or null when nothing changed.
+ */
+export async function syncPreferencesWithServer(
+  userId: string,
+): Promise<Preferences | null> {
+  try {
+    const { data: server } = await UsersService.readMyPreferences()
+    if (current.userId !== userId) return null // signed out meanwhile
+    if (server && !isUnsynced(userId)) {
+      const preferences: Preferences = {
+        theme: server.theme ?? undefined,
+        accent: isAccent(server.accent) ? server.accent : "navy",
+        fontSize: isFontSize(server.font_size) ? server.font_size : "medium",
+      }
+      writePreferences(userId, preferences)
+      current = { userId, preferences }
+      applyAppearance(preferences)
+      emit()
+      return preferences
+    }
+    if (hasLocalCopy(userId) || isUnsynced(userId))
+      await sendToServer(userId, current.preferences)
+  } catch {
+    // Offline: keep the local copy.
+  }
+  return null
 }

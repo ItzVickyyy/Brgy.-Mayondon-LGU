@@ -290,7 +290,6 @@
     },
     "population": {
       "ariaLabel": "Population overview",
-      "note": "Counts active resident records. Residents with no birthdate, sex, purok or civil status are left out of that card.",
       "totalPopulation": "Total Population",
       "totalHouseholds": "Total Registered Households",
       "totalVoters": "Total Registered Voters",

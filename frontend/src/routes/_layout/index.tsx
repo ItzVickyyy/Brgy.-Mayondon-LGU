@@ -334,12 +334,12 @@ function Dashboard() {
           {/* Call to action: opens Issuances with the New Issuance dialog ready. */}
           <Button
             type="button"
-            className="min-h-11 w-full sm:w-auto"
+            className="h-12 w-full gap-2 px-6 text-base font-semibold shadow-md ring-2 ring-primary/25 ring-offset-2 ring-offset-background hover:shadow-lg sm:w-auto"
             onClick={() =>
               void navigate({ to: "/issuances", search: { new: 1 } })
             }
           >
-            <Plus aria-hidden="true" />
+            <Plus className="size-5" strokeWidth={2.5} aria-hidden="true" />
             {t("dashboard.issueDocument")}
           </Button>
         </div>

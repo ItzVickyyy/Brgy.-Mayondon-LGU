@@ -23,6 +23,7 @@ from app.models import (
     UserCreate,
     UserCreateByAdmin,
     UserCreated,
+    UserPreferences,
     UserPublic,
     UserRegister,
     UserRole,
@@ -244,6 +245,28 @@ def read_user_me(current_user: CurrentUserAllowTemporary) -> Any:
     Get current user.
     """
     return current_user
+
+
+@router.get("/me/preferences", response_model=UserPreferences | None)
+def read_my_preferences(current_user: CurrentUserAllowTemporary) -> Any:
+    """Own display preferences, or null while none were ever saved."""
+    if not current_user.preferences:
+        return None
+    return UserPreferences.model_validate(current_user.preferences)
+
+
+@router.put("/me/preferences", response_model=UserPreferences)
+def save_my_preferences(
+    *,
+    session: SessionDep,
+    preferences_in: UserPreferences,
+    current_user: CurrentUserAllowTemporary,
+) -> Any:
+    """Save own display preferences (not audited: not a record of work)."""
+    current_user.preferences = preferences_in.model_dump(exclude_none=True)
+    session.add(current_user)
+    session.commit()
+    return preferences_in
 
 
 def _require_no_issued_documents(session: SessionDep, user: User) -> None:

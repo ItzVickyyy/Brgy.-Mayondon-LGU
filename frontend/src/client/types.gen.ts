@@ -3122,6 +3122,27 @@ export type UserCreated = {
 };
 
 /**
+ * UserPreferences
+ *
+ * Display preferences of one account. ``theme`` stays empty until the
+ * person has chosen one, so a new computer keeps following its own system.
+ */
+export type UserPreferences = {
+    /**
+     * Theme
+     */
+    theme?: 'light' | 'dark' | 'system' | null;
+    /**
+     * Accent
+     */
+    accent?: 'navy' | 'teal' | 'green' | 'purple' | 'maroon' | 'rose' | 'bronze' | 'olive' | 'sky' | 'slate';
+    /**
+     * Font Size
+     */
+    font_size?: 'small' | 'medium' | 'large';
+};
+
+/**
  * UserPublic
  */
 export type UserPublic = {
@@ -4069,6 +4090,49 @@ export type usersUpdatePasswordMeResponses = {
 };
 
 export type usersUpdatePasswordMeResponse = usersUpdatePasswordMeResponses[keyof usersUpdatePasswordMeResponses];
+
+export type usersReadMyPreferencesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/preferences';
+};
+
+export type usersReadMyPreferencesResponses = {
+    /**
+     * Response Users-Read My Preferences
+     *
+     * Successful Response
+     */
+    200: UserPreferences | null;
+};
+
+export type usersReadMyPreferencesResponse = usersReadMyPreferencesResponses[keyof usersReadMyPreferencesResponses];
+
+export type usersSaveMyPreferencesData = {
+    body: UserPreferences;
+    path?: never;
+    query?: never;
+    url: '/api/v1/users/me/preferences';
+};
+
+export type usersSaveMyPreferencesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type usersSaveMyPreferencesError = usersSaveMyPreferencesErrors[keyof usersSaveMyPreferencesErrors];
+
+export type usersSaveMyPreferencesResponses = {
+    /**
+     * Successful Response
+     */
+    200: UserPreferences;
+};
+
+export type usersSaveMyPreferencesResponse = usersSaveMyPreferencesResponses[keyof usersSaveMyPreferencesResponses];
 
 export type usersRegisterUserData = {
     body: UserRegister;

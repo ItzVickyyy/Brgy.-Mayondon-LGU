@@ -580,10 +580,6 @@ export function PopulationOverview({
           </div>
         </article>
       </div>
-
-      <p className="text-xs text-muted-foreground">
-        {t("dashboard.population.note")}
-      </p>
     </section>
   )
 }

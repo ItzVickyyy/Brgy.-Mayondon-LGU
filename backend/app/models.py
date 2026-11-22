@@ -1,10 +1,10 @@
 import uuid
 from datetime import UTC, datetime
 from enum import StrEnum
-from typing import Self
+from typing import Literal, Self
 
 from pydantic import EmailStr, field_validator, model_validator
-from sqlalchemy import CheckConstraint, DateTime, Enum, false
+from sqlalchemy import JSON, CheckConstraint, DateTime, Enum, false
 from sqlmodel import Field, SQLModel
 
 
@@ -139,6 +139,26 @@ class UserUpdateMe(SQLModel):
     profile_photo_url: str | None = Field(default=None, max_length=1000)
 
 
+class UserPreferences(SQLModel):
+    """Display preferences of one account. ``theme`` stays empty until the
+    person has chosen one, so a new computer keeps following its own system."""
+
+    theme: Literal["light", "dark", "system"] | None = None
+    accent: Literal[
+        "navy",
+        "teal",
+        "green",
+        "purple",
+        "maroon",
+        "rose",
+        "bronze",
+        "olive",
+        "sky",
+        "slate",
+    ] = "navy"
+    font_size: Literal["small", "medium", "large"] = "medium"
+
+
 class UpdatePassword(SQLModel):
     current_password: str = Field(min_length=12, max_length=128)
     new_password: str = Field(min_length=12, max_length=128)
@@ -183,6 +203,10 @@ class User(UserBase, table=True):
         default=False,
         sa_column_kwargs={"server_default": false()},
     )
+    # Display preferences (theme, accent, font size), kept per account so they
+    # follow the person to any computer. Never part of UserPublic: they are read
+    # and written only through /users/me/preferences.
+    preferences: dict[str, str] | None = Field(default=None, sa_type=JSON)
 
 
 class PasswordRecoveryRateLimit(SQLModel, table=True):
