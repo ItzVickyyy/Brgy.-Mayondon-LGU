@@ -133,3 +133,37 @@ def test_start_up_encrypts_photos_saved_before_the_key_and_is_repeatable(
     assert _stored(db, rid).startswith(fc.BYTES_PREFIX)
     assert fc.encrypt_existing(db) == 0
     assert client.get(url, headers=staff_token_headers).content == PNG
+
+
+def test_the_status_counts_include_photos(
+    client: TestClient,
+    staff_token_headers: Headers,
+    superuser_token_headers: Headers,
+    db: Session,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    url_status = f"{API}/system/data-protection"
+
+    def status() -> dict:
+        res = client.get(url_status, headers=superuser_token_headers)
+        assert res.status_code == 200, res.text
+        return res.json()
+
+    _forget_other_photos(db)
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", "")
+    rid = _create(client, staff_token_headers)["id"]
+    put = f"{API}/residents/{rid}/photo"
+    assert client.put(put, headers=staff_token_headers, content=PNG).status_code == 200
+    before = status()
+    assert before["plain_count"] >= 1  # a plain photo is reported as unprotected
+
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", KEY)
+    assert fc.encrypt_existing(db) >= 1
+    ok = status()
+    assert ok["plain_count"] == before["plain_count"] - 1
+    assert ok["unreadable_count"] == before["unreadable_count"]
+
+    monkeypatch.setattr(settings, "DATA_ENCRYPTION_KEY", OTHER_KEY)  # key changed
+    wrong = status()
+    assert wrong["unreadable_count"] == ok["unreadable_count"] + 1
+    assert client.delete(put, headers=staff_token_headers).status_code == 200

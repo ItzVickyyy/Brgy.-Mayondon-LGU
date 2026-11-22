@@ -162,6 +162,31 @@ def _photos_not_encrypted(session: Session) -> list[object]:
     )
 
 
+def _unreadable_photos(session: Session) -> int:
+    """Encrypted photos the key in .env cannot open. One photo in memory at a time."""
+    connection = session.connection()
+    ids = (
+        connection.execute(
+            text(
+                "SELECT resident_id FROM resident_photos "
+                "WHERE substring(content from 1 for 5) = :p ORDER BY resident_id"
+            ),
+            {"p": BYTES_PREFIX},
+        )
+        .scalars()
+        .all()
+    )
+    bad = 0
+    for resident_id in ids:
+        stored = connection.execute(
+            text("SELECT content FROM resident_photos WHERE resident_id = :i"),
+            {"i": resident_id},
+        ).scalar()
+        if stored is not None and decrypt_bytes(bytes(stored)) is None:
+            bad += 1
+    return bad
+
+
 def encrypt_existing(session: Session) -> int:
     """Encrypt health conditions and photos saved as plain text before a key was set.
 
@@ -227,7 +252,10 @@ def encrypt_existing(session: Session) -> int:
 
 
 class DataProtection(NamedTuple):
-    """What the administrator needs to know about the health-condition key (patch 214)."""
+    """What the administrator needs to know about the data key (patches 214 and 217).
+
+    The counts cover health conditions and resident photos together.
+    """
 
     key_configured: bool
     # Stored as plain text (no key was set when they were saved).
@@ -253,4 +281,6 @@ def protection_status(session: Session) -> DataProtection:
     unreadable = sum(
         1 for value in rows if value.startswith(PREFIX) and decrypt_text(value) is None
     )
+    plain += len(_photos_not_encrypted(session))
+    unreadable += _unreadable_photos(session)
     return DataProtection(is_available(), plain, unreadable)
