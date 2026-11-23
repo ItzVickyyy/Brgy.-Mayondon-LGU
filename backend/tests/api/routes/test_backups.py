@@ -237,9 +237,26 @@ def test_verify_reports_a_missing_file(
     result = client.post(
         f"{API}/backups/{made['id']}/verify", headers=superuser_token_headers
     ).json()
-    assert result["status"] == "failed"
+    # A file that is not seen is reported, but the backup is not marked damaged.
+    assert result["status"] == "ok"
     assert "no longer in the folder" in result["error"]
     assert result["file_exists"] is False
+
+
+def test_old_missing_file_failure_heals_when_the_file_is_back(
+    client: TestClient, superuser_token_headers: dict[str, str], backup_folder: Path
+) -> None:
+    made = _make(client, superuser_token_headers)
+    with Session(engine) as session:
+        run = session.get(BackupRun, uuid.UUID(made["id"]))
+        assert run is not None
+        run.status = "failed"
+        run.error = backup_service.MISSING_FILE_MESSAGE
+        session.add(run)
+        session.commit()
+    listed = client.get(f"{API}/backups/", headers=superuser_token_headers).json()
+    row = next(r for r in listed["data"] if r["id"] == made["id"])
+    assert row["status"] == "ok" and row["error"] is None
 
 
 def test_unknown_backup_is_404(

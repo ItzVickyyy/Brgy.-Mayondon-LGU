@@ -55,6 +55,7 @@ def list_backups(
     _user: BackupUser,
     limit: Annotated[int, Query(ge=1, le=500)] = 100,
 ) -> BackupListPublic:
+    backup_service.heal_missing_file_failures(session)
     runs = session.exec(
         select(BackupRun).order_by(col(BackupRun.started_at).desc()).limit(limit)
     ).all()

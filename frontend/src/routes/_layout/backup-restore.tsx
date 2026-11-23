@@ -140,7 +140,8 @@ function BackupRestore() {
     mutationFn: async (id: string) =>
       (await BackupsService.verifyBackup({ path: { backup_id: id } })).data,
     onSuccess: (run) => {
-      if (run.status === "ok") notice("verified", run.file_name ?? "")
+      if (run.status === "ok" && !run.error)
+        notice("verified", run.file_name ?? "")
       else
         showErrorToast(
           run.error

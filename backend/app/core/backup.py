@@ -326,6 +326,41 @@ def create_backup(
         _release_lock(lock)
 
 
+MISSING_FILE_MESSAGE = "The backup file is no longer in the folder."
+
+
+def heal_missing_file_failures(session: Session) -> int:
+    """Re-check rows an older version failed only because the file was not seen.
+
+    Such a row is put back to ``ok`` when its file is in the folder now and
+    matches the recorded checksum. Returns how many rows were restored.
+    """
+    rows = session.exec(
+        select(BackupRun).where(
+            col(BackupRun.status) == "failed",
+            col(BackupRun.error) == MISSING_FILE_MESSAGE,
+            col(BackupRun.file_name).is_not(None),
+        )
+    ).all()
+    healed = 0
+    for run in rows:
+        try:
+            path = backup_path(run.file_name or "")
+            if not path.is_file():
+                continue
+            if run.sha256 and file_sha256(path) != run.sha256:
+                continue
+        except BackupError, OSError:
+            continue
+        run.status = "ok"
+        run.error = None
+        session.add(run)
+        healed += 1
+    if healed:
+        session.commit()
+    return healed
+
+
 def verify_backup(session: Session, run: BackupRun, *, actor: User | None) -> BackupRun:
     """Re-read a stored backup and compare its checksum with the one recorded."""
     problem: str | None = None
@@ -335,7 +370,7 @@ def verify_backup(session: Session, run: BackupRun, *, actor: User | None) -> Ba
         try:
             path = backup_path(run.file_name)
             if not path.is_file():
-                raise BackupError("The backup file is no longer in the folder.")
+                raise BackupError(MISSING_FILE_MESSAGE)
             if path.name.endswith(".enc"):
                 # Without the private key only the framing can be checked; the
                 # full proof is `backup_cli decrypt --check` (docs/11 section G).
@@ -355,6 +390,11 @@ def verify_backup(session: Session, run: BackupRun, *, actor: User | None) -> Ba
     if problem is None:
         run.verified_at = datetime.now(UTC)
         run.error = None
+    elif problem == MISSING_FILE_MESSAGE:
+        # A file that cannot be seen right now is not a damaged backup: keep the
+        # row as it was (the page already shows the file as missing) so a later
+        # check can pass once the folder is visible again.
+        run.error = problem
     else:
         run.status = "failed"
         run.error = problem
