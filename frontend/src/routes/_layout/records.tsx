@@ -428,30 +428,24 @@ function RecordsManagement() {
                                     setProfileTab("Details")
                                   },
                                 }}
-                                items={[
+                                actions={[
                                   {
                                     label: t("records.actions.editDetails"),
-                                    icon: (
-                                      <Pencil
-                                        aria-hidden="true"
-                                        className="size-4"
-                                      />
-                                    ),
+                                    variant: "tintBlue",
+                                    icon: <Pencil aria-hidden="true" />,
                                     onSelect: () => openForm(resident),
                                   },
                                   {
                                     label: t("records.actions.newIssuance"),
-                                    icon: (
-                                      <FilePlus2
-                                        aria-hidden="true"
-                                        className="size-4"
-                                      />
-                                    ),
+                                    variant: "tintGreen",
+                                    icon: <FilePlus2 aria-hidden="true" />,
                                     onSelect: () =>
                                       window.location.assign(
                                         `/issuances?resident=${encodeURIComponent(resident.id)}`,
                                       ),
                                   },
+                                ]}
+                                items={[
                                   {
                                     label: t("records.actions.archive"),
                                     icon: (

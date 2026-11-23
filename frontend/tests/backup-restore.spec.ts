@@ -20,23 +20,16 @@ test("make a backup, check it, and get the restore command", async ({
   const row = page.getByRole("row", { name: /mayondon-db-/ }).first()
   await expect(row.getByText("Verified")).toBeVisible()
 
-  // Verify again from the row menu.
-  await row.getByRole("button", { name: /more/i }).click()
-  await page.getByRole("menuitem", { name: "Verify file" }).click()
+  // Verify again from the row button.
+  await row.getByRole("button", { name: "Verify file" }).click()
   await expect(page.getByText(/was checked and is readable/)).toBeVisible()
 
-  // Download the file from the row menu.
-  await row.getByRole("button", { name: /more/i }).click()
+  // Download the file from the row button.
   const downloadPromise = page.waitForEvent("download")
-  await page.getByRole("menuitem", { name: "Download copy" }).click()
+  await row.getByRole("button", { name: "Download copy" }).click()
   const download = await downloadPromise
   expect(download.suggestedFilename()).toMatch(/^mayondon-db-.*\.dump$/)
   await expect(page.getByText(/Download of .* started/)).toBeVisible()
-  // Closing the row menu gives focus back to its button and scrolls the page
-  // up to it. Wait for that, or it can happen after the dropdown below opens
-  // and move the page away from it.
-  await expect(row.getByRole("button", { name: /more/i })).toBeFocused()
-
   // Restore: choose the backup, type the word, get the command (nothing is restored).
   const archive = page.getByLabel("Backup archive")
   await chooseOption(archive, 1)

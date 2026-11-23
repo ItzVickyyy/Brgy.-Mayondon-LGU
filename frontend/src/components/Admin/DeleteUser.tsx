@@ -15,7 +15,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { LoadingButton } from "@/components/ui/loading-button"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
@@ -55,14 +54,15 @@ const DeleteUser = ({ id, onSuccess }: DeleteUserProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DropdownMenuItem
-        variant="destructive"
-        onSelect={(e) => e.preventDefault()}
+      <Button
+        type="button"
+        variant="tintRose"
+        size="sm"
         onClick={() => setIsOpen(true)}
       >
-        <Trash2 />
+        <Trash2 aria-hidden="true" />
         {t("admin.users.delete.menu")}
-      </DropdownMenuItem>
+      </Button>
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogHeader>

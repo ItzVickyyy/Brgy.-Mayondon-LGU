@@ -72,7 +72,12 @@ export function TablePagination({
 }: TablePaginationProps) {
   const { t } = useTranslation()
   const pageSizeId = useId()
-  if (total === 0) return null
+  // A short list needs no page controls: nothing to page through and no row count to choose.
+  // Stays visible once there are more rows than the smallest page size, or when pages exist.
+  const smallestPage = pageSizeOptions.length
+    ? Math.min(...pageSizeOptions)
+    : (pageSize ?? PAGE_SIZE_OPTIONS[0])
+  if (total === 0 || (pageCount <= 1 && total <= smallestPage)) return null
 
   return (
     <div className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5 print:hidden">

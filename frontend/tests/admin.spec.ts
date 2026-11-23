@@ -104,11 +104,12 @@ test.describe("Admin user management", () => {
     await page.getByPlaceholder("Search name or email").fill(email)
 
     const userRow = page.getByRole("row").filter({ hasText: email })
-    await userRow.getByRole("button", { name: /^More actions for/ }).click()
+    await userRow.getByRole("button", { name: "Delete User" }).click()
 
-    await page.getByRole("menuitem", { name: "Delete User" }).click()
-
-    await page.getByRole("button", { name: "Delete" }).click()
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Delete", exact: true })
+      .click()
 
     await expect(
       page.getByRole("row").filter({ hasText: email }),

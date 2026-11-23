@@ -141,3 +141,14 @@ test("Print is one button that asks Data only or Form and data", async ({
   await page.getByTestId("print-mode-cancel").click()
   await expect(page.getByTestId("print-mode-data")).toBeHidden()
 })
+
+test("a short list shows no page controls", async ({ page }) => {
+  await mockApi(page)
+  await page.setViewportSize({ width: 1440, height: 1100 })
+  await page.goto("/issuances")
+  await expect(page.locator("table tbody tr").first()).toBeVisible()
+  await expect(page.getByText("Rows per page")).toHaveCount(0)
+  await expect(
+    page.getByRole("navigation", { name: "Pagination" }),
+  ).toHaveCount(0)
+})

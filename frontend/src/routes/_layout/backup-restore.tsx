@@ -441,29 +441,29 @@ function BackupRestore() {
                               }
                             : undefined
                         }
-                        items={[
-                          {
-                            label: t("admin.backup.actions.verify"),
-                            icon: (
-                              <ShieldCheck
-                                aria-hidden="true"
-                                className="size-4"
-                              />
-                            ),
-                            hidden: backup.status !== "ok",
-                            disabled: verifyMutation.isPending,
-                            onSelect: () => verifyMutation.mutate(backup.id),
-                          },
-                          {
-                            label: t("admin.backup.actions.download"),
-                            icon: (
-                              <Download aria-hidden="true" className="size-4" />
-                            ),
-                            adminOnly: true,
-                            hidden:
-                              backup.status !== "ok" || !backup.file_exists,
-                            onSelect: () => download(backup),
-                          },
+                        actions={[
+                          ...(backup.status === "ok"
+                            ? [
+                                {
+                                  label: t("admin.backup.actions.verify"),
+                                  variant: "tintTeal" as const,
+                                  icon: <ShieldCheck aria-hidden="true" />,
+                                  disabled: verifyMutation.isPending,
+                                  onSelect: () =>
+                                    verifyMutation.mutate(backup.id),
+                                },
+                              ]
+                            : []),
+                          ...(backup.status === "ok" && backup.file_exists
+                            ? [
+                                {
+                                  label: t("admin.backup.actions.download"),
+                                  variant: "tintBlue" as const,
+                                  icon: <Download aria-hidden="true" />,
+                                  onSelect: () => download(backup),
+                                },
+                              ]
+                            : []),
                         ]}
                       />
                     </td>

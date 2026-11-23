@@ -31,6 +31,8 @@ export type RowPrimaryAction = {
     | "tintBlue"
     | "tintGreen"
     | "tintTeal"
+    | "tintAmber"
+    | "tintRose"
   disabled?: boolean
   title?: string
   icon?: ReactNode
@@ -40,6 +42,8 @@ type RowActionsProps = {
   name: string
   isAdmin: boolean
   primary?: RowPrimaryAction
+  /** More buttons shown right after the primary one (never hidden in the three-dot menu). */
+  actions?: RowPrimaryAction[]
   items?: RowActionItem[]
   leading?: ReactNode // extra control shown before the primary button
 }
@@ -48,6 +52,7 @@ export function RowActions({
   name,
   isAdmin,
   primary,
+  actions = [],
   items = [],
   leading,
 }: RowActionsProps) {
@@ -72,6 +77,20 @@ export function RowActions({
           {primary.label}
         </Button>
       ) : null}
+      {actions.map((action) => (
+        <Button
+          key={action.label}
+          type="button"
+          size="sm"
+          variant={action.variant ?? "outline"}
+          onClick={action.onSelect}
+          disabled={action.disabled}
+          title={action.title}
+        >
+          {action.icon}
+          {action.label}
+        </Button>
+      ))}
       {visibleItems.length > 0 ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

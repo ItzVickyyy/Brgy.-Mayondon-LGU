@@ -454,33 +454,30 @@ function OfficialsManagement() {
                               onSelect: () => setViewOfficial(official),
                             }
                       }
-                      items={[
-                        {
-                          label: t("admin.officials.actions.endTerm"),
-                          icon: (
-                            <UserRoundX aria-hidden="true" className="size-4" />
-                          ),
-                          hidden: official.status !== "Current",
-                          destructive: true,
-                          onSelect: () => {
-                            clearMessages()
-                            setTermEndDate(official.termEnd ?? "")
-                            setEndTermOfficial(official)
-                          },
-                        },
-                        {
-                          label: t("admin.officials.actions.reinstate"),
-                          icon: (
-                            <UserRoundCheck
-                              aria-hidden="true"
-                              className="size-4"
-                            />
-                          ),
-                          hidden: official.status !== "Former",
-                          disabled: mutation.isPending,
-                          onSelect: () => reinstate(official),
-                        },
-                      ]}
+                      actions={
+                        official.status === "Current"
+                          ? [
+                              {
+                                label: t("admin.officials.actions.endTerm"),
+                                variant: "tintRose",
+                                icon: <UserRoundX aria-hidden="true" />,
+                                onSelect: () => {
+                                  clearMessages()
+                                  setTermEndDate(official.termEnd ?? "")
+                                  setEndTermOfficial(official)
+                                },
+                              },
+                            ]
+                          : [
+                              {
+                                label: t("admin.officials.actions.reinstate"),
+                                variant: "tintGreen",
+                                icon: <UserRoundCheck aria-hidden="true" />,
+                                disabled: mutation.isPending,
+                                onSelect: () => reinstate(official),
+                              },
+                            ]
+                      }
                     />
                   </td>
                 </tr>

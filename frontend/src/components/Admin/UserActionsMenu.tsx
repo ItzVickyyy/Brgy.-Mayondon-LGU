@@ -1,17 +1,11 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { EllipsisVertical, UserRoundCheck, UserRoundX } from "lucide-react"
+import { UserRoundCheck, UserRoundX } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { type UserPublic, UsersService } from "@/client"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { handleError } from "@/utils"
@@ -29,7 +23,6 @@ interface UserActionsMenuProps {
 
 export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
   const [pendingActive, setPendingActive] = useState<boolean | null>(null)
   const { user: currentUser } = useAuth()
   const queryClient = useQueryClient()
@@ -48,7 +41,6 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
           : t("admin.users.notifications.deactivated"),
       )
       setPendingActive(null)
-      setOpen(false)
     },
     onError: handleError.bind(showErrorToast),
     onSettled: () => {
@@ -65,42 +57,30 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
           user={user}
           asPrimaryButton
           protectRoleAndStatus={user.isLastActiveAdmin}
-          onSuccess={() => setOpen(false)}
+          onSuccess={() => undefined}
         />
-        <DropdownMenu open={open} onOpenChange={setOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label={t("admin.users.actions.moreFor", {
-                name: user.full_name || user.email,
-              })}
-            >
-              <EllipsisVertical aria-hidden="true" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DeleteUser id={user.id} onSuccess={() => setOpen(false)} />
-            <DropdownMenuItem
-              disabled={user.is_active && user.isLastActiveAdmin}
-              title={
-                user.is_active && user.isLastActiveAdmin
-                  ? t("admin.users.actions.cannotDeactivateLast")
-                  : undefined
-              }
-              onSelect={() => setPendingActive(!user.is_active)}
-            >
-              {user.is_active ? (
-                <UserRoundX aria-hidden="true" />
-              ) : (
-                <UserRoundCheck aria-hidden="true" />
-              )}
-              {user.is_active
-                ? t("admin.users.actions.deactivate")
-                : t("admin.users.actions.reactivate")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button
+          type="button"
+          variant={user.is_active ? "tintAmber" : "tintGreen"}
+          size="sm"
+          disabled={user.is_active && user.isLastActiveAdmin}
+          title={
+            user.is_active && user.isLastActiveAdmin
+              ? t("admin.users.actions.cannotDeactivateLast")
+              : undefined
+          }
+          onClick={() => setPendingActive(!user.is_active)}
+        >
+          {user.is_active ? (
+            <UserRoundX aria-hidden="true" />
+          ) : (
+            <UserRoundCheck aria-hidden="true" />
+          )}
+          {user.is_active
+            ? t("admin.users.actions.deactivate")
+            : t("admin.users.actions.reactivate")}
+        </Button>
+        <DeleteUser id={user.id} onSuccess={() => undefined} />
       </div>
 
       <ConfirmDialog
