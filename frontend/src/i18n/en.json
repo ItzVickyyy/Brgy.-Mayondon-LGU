@@ -1422,8 +1422,23 @@
         "discard": "Discard draft",
         "archive": "Archive",
         "restore": "Restore",
-        "savePdf": "Save as PDF",
-        "saveWord": "Save as Word"
+        "export": "Export",
+        "exportFor": "Export for {{name}}"
+      },
+      "exportDialog": {
+        "title": "Export document",
+        "description": "Choose the file type to save this document as.",
+        "cancel": "Cancel",
+        "formats": {
+          "docx": {
+            "name": "Word",
+            "hint": "A document (.docx) with the filled form as the page background."
+          },
+          "pdf": {
+            "name": "PDF",
+            "hint": "A fixed layout (.pdf) that is ready to send or print."
+          }
+        }
       },
       "confirm": {
         "voidTitle": "Void issuance?",

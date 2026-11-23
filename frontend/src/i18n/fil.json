@@ -1422,8 +1422,23 @@
         "discard": "Itapon ang draft",
         "archive": "I-archive",
         "restore": "Ibalik",
-        "savePdf": "I-save bilang PDF",
-        "saveWord": "I-save bilang Word"
+        "export": "I-export",
+        "exportFor": "I-export para kay {{name}}"
+      },
+      "exportDialog": {
+        "title": "I-export ang dokumento",
+        "description": "Piliin ang uri ng file na pagsesave-an ng dokumentong ito.",
+        "cancel": "Kanselahin",
+        "formats": {
+          "docx": {
+            "name": "Word",
+            "hint": "Isang dokumento (.docx) na ang napunang form ang background ng bawat pahina."
+          },
+          "pdf": {
+            "name": "PDF",
+            "hint": "Nakaayos na layout (.pdf) na handang ipadala o i-print."
+          }
+        }
       },
       "confirm": {
         "voidTitle": "I-void ang isyu?",

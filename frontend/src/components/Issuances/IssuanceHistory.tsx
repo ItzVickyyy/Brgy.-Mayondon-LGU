@@ -7,11 +7,10 @@ import {
 import type { ParseKeys, TFunction } from "i18next"
 import {
   CalendarDays,
+  Download,
   FileCheck2,
-  FileDown,
   FilePenLine,
   FileText,
-  FileType,
   Printer,
   Search,
   X,
@@ -37,6 +36,7 @@ import { RowActions } from "@/components/Common/RowActions"
 import { Select } from "@/components/Common/Select"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
+import { IssuanceExportDialog } from "@/components/Issuances/IssuanceExportDialog"
 import { SummaryCard } from "@/components/Issuances/IssuanceLayout"
 import type { DocumentCode } from "@/components/Issuances/NewIssuance/documentConfig"
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
@@ -57,6 +57,7 @@ import { isSystemAdministrator } from "@/lib/access"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate } from "@/lib/locale"
 import { templateIdByDocumentCode } from "@/lib/print/buildPrintData"
+import type { ExportFormat } from "@/lib/print/exportDocument"
 import type { PrintMode } from "@/lib/print/printMode"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { cn } from "@/lib/utils"
@@ -312,6 +313,11 @@ export function IssuanceHistory({
   const [pageSize, setPageSize] = useState(10)
   const [viewItem, setViewItem] = useState<IssuanceListItem | null>(null)
   const [pending, setPending] = useState<PendingAction | null>(null)
+  // The row whose Export popup is open.
+  const [exportItem, setExportItem] = useState<{
+    item: IssuanceListItem
+    documentName: string
+  } | null>(null)
   const [errorNotice, setErrorNotice] = useState("")
 
   useEffect(() => {
@@ -506,7 +512,7 @@ export function IssuanceHistory({
   /** Saves an issued document as a PDF or Word file; the answer goes to the page notice (good news) or the error banner. */
   async function saveCopy(
     item: IssuanceListItem,
-    format: "pdf" | "docx",
+    format: ExportFormat,
     documentName: string,
   ) {
     setErrorNotice("")
@@ -827,35 +833,67 @@ export function IssuanceHistory({
                             name={item.resident_name}
                             isAdmin={isAdmin}
                             leading={
-                              isIssued && canReprint ? (
-                                <PrintSplitButton
-                                  name={item.resident_name}
-                                  onPrint={async (mode) => {
-                                    try {
-                                      const message = await onPrint(item, mode)
-                                      if (message) onNotice(message)
-                                    } catch (error) {
-                                      setErrorNotice(readApiError(error).message)
+                              isIssued ? (
+                                <>
+                                  {canReprint ? (
+                                    <PrintSplitButton
+                                      name={item.resident_name}
+                                      onPrint={async (mode) => {
+                                        try {
+                                          const message = await onPrint(
+                                            item,
+                                            mode,
+                                          )
+                                          if (message) onNotice(message)
+                                        } catch (error) {
+                                          setErrorNotice(
+                                            readApiError(error).message,
+                                          )
+                                        }
+                                      }}
+                                    />
+                                  ) : (
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="outline"
+                                      disabled
+                                      aria-label={t(
+                                        "issuances.history.actions.printFor",
+                                        { name: item.resident_name },
+                                      )}
+                                      title={t(
+                                        "issuances.history.actions.printUnavailable",
+                                      )}
+                                    >
+                                      <Printer aria-hidden="true" />
+                                      {t("issuances.history.actions.print")}
+                                    </Button>
+                                  )}
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={!canReprint}
+                                    aria-label={t(
+                                      "issuances.history.actions.exportFor",
+                                      { name: item.resident_name },
+                                    )}
+                                    title={
+                                      canReprint
+                                        ? undefined
+                                        : t(
+                                            "issuances.history.actions.printUnavailable",
+                                          )
                                     }
-                                  }}
-                                />
-                              ) : isIssued ? (
-                                <Button
-                                  type="button"
-                                  size="sm"
-                                  variant="outline"
-                                  disabled
-                                  aria-label={t(
-                                    "issuances.history.actions.printFor",
-                                    { name: item.resident_name },
-                                  )}
-                                  title={t(
-                                    "issuances.history.actions.printUnavailable",
-                                  )}
-                                >
-                                  <Printer aria-hidden="true" />
-                                  {t("issuances.history.actions.print")}
-                                </Button>
+                                    onClick={() =>
+                                      setExportItem({ item, documentName })
+                                    }
+                                  >
+                                    <Download aria-hidden="true" />
+                                    {t("issuances.history.actions.export")}
+                                  </Button>
+                                </>
                               ) : undefined
                             }
                             primary={{
@@ -888,42 +926,6 @@ export function IssuanceHistory({
                                 ),
                                 onSelect: () =>
                                   setPending({ item, action: "correct" }),
-                              },
-                              {
-                                label: t("issuances.history.actions.saveWord"),
-                                hidden: !isIssued,
-                                disabled: !canReprint,
-                                title: canReprint
-                                  ? undefined
-                                  : t(
-                                      "issuances.history.actions.printUnavailable",
-                                    ),
-                                icon: (
-                                  <FileType
-                                    aria-hidden="true"
-                                    className="size-4"
-                                  />
-                                ),
-                                onSelect: () =>
-                                  void saveCopy(item, "docx", documentName),
-                              },
-                              {
-                                label: t("issuances.history.actions.savePdf"),
-                                hidden: !isIssued,
-                                disabled: !canReprint,
-                                title: canReprint
-                                  ? undefined
-                                  : t(
-                                      "issuances.history.actions.printUnavailable",
-                                    ),
-                                icon: (
-                                  <FileDown
-                                    aria-hidden="true"
-                                    className="size-4"
-                                  />
-                                ),
-                                onSelect: () =>
-                                  void saveCopy(item, "pdf", documentName),
                               },
                               {
                                 label: t("issuances.history.actions.archive"),
@@ -1019,6 +1021,17 @@ export function IssuanceHistory({
         onClose={() => setViewItem(null)}
       />
 
+      <IssuanceExportDialog
+        open={exportItem !== null}
+        onOpenChange={(open) => {
+          if (!open) setExportItem(null)
+        }}
+        onChoose={(format) => {
+          const target = exportItem
+          setExportItem(null)
+          if (target) void saveCopy(target.item, format, target.documentName)
+        }}
+      />
       <ConfirmDialog
         open={pending !== null}
         onOpenChange={(open) => {

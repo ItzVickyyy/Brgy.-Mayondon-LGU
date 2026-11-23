@@ -106,9 +106,21 @@ test("the three-dot menu keeps the agreed order", async ({ page }) => {
   const labels = await page.getByRole("menuitem").allInnerTexts()
   expect(labels.map((l) => l.trim())).toEqual([
     "Correct & edit",
-    "Save as Word",
-    "Save as PDF",
     "Archive",
     "Void issuance",
   ])
+})
+
+test("every issued row has an Export button that opens a Word / PDF popup", async ({
+  page,
+}) => {
+  await mockApi(page)
+  await page.setViewportSize({ width: 1440, height: 1100 })
+  await page.goto("/issuances")
+  const row = page.locator("table tbody tr").first()
+  await row.getByRole("button", { name: /^Export for Resident/ }).click()
+  await expect(page.getByTestId("issuance-export-docx")).toBeVisible()
+  await expect(page.getByTestId("issuance-export-pdf")).toBeVisible()
+  await page.getByTestId("issuance-export-cancel").click()
+  await expect(page.getByTestId("issuance-export-docx")).toBeHidden()
 })
