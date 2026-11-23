@@ -12,6 +12,7 @@ import { getPrintMode, type PrintMode } from "@/lib/print/printMode"
 import { printTemplates } from "@/lib/print/templates"
 
 const IMAGE_WAIT_MS = 3000
+const FRAME_WAIT_MS = 500
 
 /** Resolves once every overlay image has loaded (or after a short timeout), so a photo never prints blank. */
 function waitForOverlayImages(): Promise<void> {
@@ -50,16 +51,24 @@ export function usePrintIssuance(): {
   const done = useRef<(() => void) | null>(null)
 
   // Once the overlay is mounted: wait for photos, open the print dialog, then unmount the overlay.
+  // `finally` guarantees the busy flag is released even if a step throws or never reports back.
   useEffect(() => {
     if (!data) return
     let cancelled = false
     void (async () => {
-      await waitForOverlayImages()
-      await new Promise((resolve) => requestAnimationFrame(() => resolve(null)))
-      if (!cancelled) window.print() // blocks until the print dialog closes in most browsers
-      setData(null)
-      done.current?.()
-      done.current = null
+      try {
+        await waitForOverlayImages()
+        // requestAnimationFrame never fires in a background tab, so a timer is the fallback.
+        await new Promise((resolve) => {
+          requestAnimationFrame(() => resolve(null))
+          window.setTimeout(() => resolve(null), FRAME_WAIT_MS)
+        })
+        if (!cancelled) window.print() // blocks until the print dialog closes in most browsers
+      } finally {
+        setData(null)
+        done.current?.()
+        done.current = null
+      }
     })()
     return () => {
       cancelled = true

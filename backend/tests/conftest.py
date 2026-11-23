@@ -5,6 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, col, delete
 
+from app.core import field_crypto
 from app.core.config import settings
 from app.core.db import engine, init_db
 from app.core.login_throttle import login_ip_key
@@ -36,6 +37,13 @@ def _refuse_real_database() -> None:
         "(docs/12-Development-Database.md) or set ALLOW_TESTS_ON_THIS_DATABASE=1.",
         returncode=2,
     )
+
+
+@pytest.fixture(autouse=True)
+def _no_protection_cache(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The data-protection status is cached for minutes in the real program; every test needs a
+    fresh count."""
+    monkeypatch.setattr(field_crypto, "PROTECTION_CACHE_SECONDS", 0.0)
 
 
 @pytest.fixture(scope="session", autouse=True)

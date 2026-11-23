@@ -6,13 +6,14 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
-import sentry_sdk
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 from starlette.routing import Match
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from app.api.main import api_router
 from app.core.config import settings
@@ -35,6 +36,10 @@ def custom_generate_unique_id(route: APIRoute) -> str:
 
 
 if settings.SENTRY_DSN and settings.FASTAPI_ENV != "development":
+    # Imported only when used: it takes about a tenth of a second to load, for nothing on an
+    # office computer that has no Sentry address.
+    import sentry_sdk
+
     sentry_sdk.init(dsn=str(settings.SENTRY_DSN), enable_tracing=True)
 
 # The interactive API page and the endpoint list are for developers only. On a real installation
@@ -48,6 +53,47 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json" if DOCS_ENABLED else None,
     generate_unique_id_function=custom_generate_unique_id,
 )
+
+
+# Vite names the files it builds ``name-<hash>.ext`` directly in /assets, and a changed file gets a
+# new name, so a browser may keep such a file for good. Other files (index.html, the print-form
+# pictures in /assets/print-forms) keep their names when they change and must be re-checked.
+_HASHED_ASSET = re.compile(r"^/assets/[^/]+-[A-Za-z0-9_-]{8,}\.[A-Za-z0-9]+$")
+
+# Already compressed or encrypted: squeezing them again costs processor time and saves nothing.
+_NOT_COMPRESSED_SUFFIXES = (
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".webp",
+    ".gif",
+    ".ico",
+    ".woff",
+    ".woff2",
+    ".zip",
+    ".enc",
+    "/photo",
+)
+
+
+class CompressTextOnly:
+    """gzip for pages, scripts, styles and JSON (the first load of the program is mostly a
+    script bundle). Resident photos, pictures, fonts and backup downloads pass through as they
+    are."""
+
+    def __init__(self, app: ASGIApp) -> None:
+        self._app = app
+        self._gzip = GZipMiddleware(app, minimum_size=1024, compresslevel=5)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] == "http":
+            path = scope["path"]
+            if path.endswith(_NOT_COMPRESSED_SUFFIXES) or path.startswith(
+                f"{settings.API_V1_STR}/backups/"
+            ):
+                await self._app(scope, receive, send)
+                return
+        await self._gzip(scope, receive, send)
 
 
 _INLINE_SCRIPT = re.compile(r"<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>", re.S)
@@ -107,6 +153,16 @@ async def add_security_headers(
         # Resident data must never be kept in a browser or proxy cache on a
         # shared office computer.
         response.headers.setdefault("Cache-Control", "no-store")
+    elif _HASHED_ASSET.match(path):
+        # The browser keeps the program's own scripts and styles and does not ask the server
+        # about them again on every page load (the single biggest saving on a slow office network).
+        response.headers.setdefault(
+            "Cache-Control", "public, max-age=31536000, immutable"
+        )
+    elif response.headers.get("content-type", "").startswith("text/html"):
+        # index.html names the current scripts, so after an update it must be fetched again.
+        # "no-cache" still lets the browser reuse it when the server says it did not change.
+        response.headers.setdefault("Cache-Control", "no-cache")
     return response
 
 
@@ -151,6 +207,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(CompressTextOnly)
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 

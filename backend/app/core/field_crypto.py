@@ -20,6 +20,9 @@ Names, addresses and birthdates stay plain text because the program searches and
 import base64
 import logging
 import secrets
+import threading
+import time
+from functools import lru_cache
 from typing import NamedTuple
 
 from cryptography.exceptions import InvalidTag
@@ -44,7 +47,10 @@ class DataKeyMissing(Exception):
     """No ``DATA_ENCRYPTION_KEY`` is set, so nothing can be encrypted or decrypted."""
 
 
+@lru_cache(maxsize=4)
 def _aead(key_text: str) -> AESGCM:
+    """The cipher for a key. Derived once per key, not once per value (an AESGCM object holds no
+    per-message state, so one can be shared by every request)."""
     if not key_text:
         raise DataKeyMissing
     derived = HKDF(
@@ -163,25 +169,19 @@ def _photos_not_encrypted(session: Session) -> list[object]:
 
 
 def _unreadable_photos(session: Session) -> int:
-    """Encrypted photos the key in .env cannot open. One photo in memory at a time."""
-    connection = session.connection()
-    ids = (
-        connection.execute(
-            text(
-                "SELECT resident_id FROM resident_photos "
-                "WHERE substring(content from 1 for 5) = :p ORDER BY resident_id"
-            ),
-            {"p": BYTES_PREFIX},
-        )
-        .scalars()
-        .all()
+    """Encrypted photos the key in .env cannot open. One photo in memory at a time.
+
+    One streamed query (a small batch of photos at a time) instead of one query per photo: with
+    1,500 photos the per-photo version spent about a second just waiting for the database.
+    """
+    result = session.connection().execute(
+        text(
+            "SELECT content FROM resident_photos WHERE substring(content from 1 for 5) = :p"
+        ).execution_options(stream_results=True, yield_per=20),
+        {"p": BYTES_PREFIX},
     )
     bad = 0
-    for resident_id in ids:
-        stored = connection.execute(
-            text("SELECT content FROM resident_photos WHERE resident_id = :i"),
-            {"i": resident_id},
-        ).scalar()
+    for (stored,) in result:
         if stored is not None and decrypt_bytes(bytes(stored)) is None:
             bad += 1
     return bad
@@ -284,3 +284,33 @@ def protection_status(session: Session) -> DataProtection:
     plain += len(_photos_not_encrypted(session))
     unreadable += _unreadable_photos(session)
     return DataProtection(is_available(), plain, unreadable)
+
+
+# The bell asks for this every 5 minutes from every administrator's browser, and the answer only
+# changes when a photo or health condition is saved or the key in .env changes (which needs a
+# restart, and so empties this cache). Checking every stored photo costs time that grows with the
+# number of photos, so the last answer is kept for a few minutes. The tests set this to 0.
+PROTECTION_CACHE_SECONDS = 300.0
+_protection_lock = threading.Lock()
+_protection_cache: tuple[float, str, DataProtection] | None = None
+
+
+def protection_status_cached(session: Session) -> DataProtection:
+    """``protection_status``, reused for ``PROTECTION_CACHE_SECONDS`` (per worker process).
+
+    Only one request does the work at a time; the others wait and then use its answer.
+    """
+    global _protection_cache  # noqa: PLW0603 (a one-entry cache for the whole process)
+    key_id = settings.DATA_ENCRYPTION_KEY or ""
+    with _protection_lock:
+        cached = _protection_cache
+        now = time.monotonic()
+        if (
+            cached is not None
+            and cached[1] == key_id
+            and now - cached[0] < PROTECTION_CACHE_SECONDS
+        ):
+            return cached[2]
+        status = protection_status(session)
+        _protection_cache = (time.monotonic(), key_id, status)
+        return status

@@ -8,6 +8,7 @@ normalised, then stored only as Argon2 hashes, like passwords.
 import hashlib
 import hmac
 import unicodedata
+from functools import lru_cache
 
 from app.core import security
 from app.core.config import settings
@@ -16,8 +17,12 @@ QUESTION_IDS: tuple[str, ...] = tuple(f"q{n:02d}" for n in range(1, 11))
 QUESTIONS_REQUIRED = 3
 MIN_ANSWER_LENGTH = 2
 
-# Checked for unknown accounts so the time taken does not reveal them.
-_DUMMY_HASH = security.get_password_hash("security-questions-dummy")
+
+# Checked for unknown accounts so the time taken does not reveal them. Made on first use, not when
+# the program starts: one Argon2 hash is about a seventh of a second of every start-up.
+@lru_cache(maxsize=1)
+def _dummy_hash() -> str:
+    return security.get_password_hash("security-questions-dummy")
 
 
 def normalize_answer(answer: str) -> str:
@@ -52,7 +57,7 @@ def verify_answer(question_id: str, answer: str, answer_hash: str) -> bool:
 def spend_dummy_verification(answers: list[str]) -> None:
     """Do the same work as a real check when there is no account to check."""
     for answer in answers:
-        security.verify_password(_material("q00", answer), _DUMMY_HASH)
+        security.verify_password(_material("q00", answer), _dummy_hash())
 
 
 def decoy_question_ids(email: str) -> list[str]:
