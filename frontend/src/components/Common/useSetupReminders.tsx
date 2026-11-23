@@ -54,12 +54,12 @@ export const BACKUP_URGENT_DAYS = 7
  * Backup page's list; failed and still-running attempts do not count.
  */
 export function daysSinceGoodBackup(
-  runs: { status: string; started_at: string }[],
+  runs: { status: string; started_at: string; file_exists?: boolean }[],
   now = Date.now(),
 ): number | null {
   let newest = Number.NEGATIVE_INFINITY
   for (const run of runs) {
-    if (run.status !== "ok") continue
+    if (run.status !== "ok" || run.file_exists === false) continue
     const time = Date.parse(run.started_at)
     if (Number.isFinite(time) && time > newest) newest = time
   }

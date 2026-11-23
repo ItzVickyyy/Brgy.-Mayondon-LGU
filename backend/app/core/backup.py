@@ -271,6 +271,13 @@ def create_backup(
                 raise BackupError("The backup file is empty.")
             checksum = file_sha256(partial_path)
             partial_path.replace(final_path)
+            # Prove the finished file is in the folder (a folder that is not really shared
+            # with this computer would otherwise look fine until the container is recreated).
+            if not final_path.is_file() or final_path.stat().st_size != size:
+                raise BackupError(
+                    "The backup file could not be found in the backup folder after it was "
+                    "written. Check that the backups folder is shared with Docker."
+                )
         except Exception as exc:
             partial_path.unlink(missing_ok=True)
             plain_partial.unlink(missing_ok=True)

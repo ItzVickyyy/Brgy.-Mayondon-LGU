@@ -458,3 +458,21 @@ def test_real_pg_dump_round_trip(
         f"{API}/backups/{made['id']}/verify", headers=superuser_token_headers
     ).json()
     assert again["status"] == "ok"
+
+
+def test_a_backup_whose_file_is_not_in_the_folder_afterwards_fails(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A folder that is not really shared must not look like a good backup."""
+
+    def vanishing_replace(self: Path, target: Path) -> Path:
+        self.unlink()
+        return target
+
+    monkeypatch.setattr(Path, "replace", vanishing_replace)
+    made = _make(client, superuser_token_headers)
+    assert made["status"] == "failed"
+    assert "could not be found in the backup folder" in made["error"]
+    assert made["file_exists"] is False

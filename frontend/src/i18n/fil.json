@@ -2385,6 +2385,10 @@
         },
         "fileGone": "Wala na ang file sa folder ng backup"
       },
+      "filesMissing": {
+        "title": "Wala sa folder ng backup ang mga file ng backup",
+        "text": "Naitala ang mga backup na ito, ngunit walang makitang file ng alinman sa mga ito, kaya walang mai-restore. Buksan ang folder na backups sa program folder ng computer na ito: dapat lumabas doon ang mga bagong file na may pangalang mayondon-db-… pagkatapos ng Back up now. Kung walang laman ang folder, hindi ibinabahagi ng Docker Desktop ang folder na iyon sa program. Ipasuri ito sa IT support bago umasa sa anumang backup."
+      },
       "types": {
         "Scheduled": "Nakaiskedyul",
         "Manual": "Manu-mano"

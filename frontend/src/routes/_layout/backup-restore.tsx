@@ -191,7 +191,11 @@ function BackupRestore() {
     10,
     listQuery.data?.count ?? 0,
   )
-  const latestGood = backups.find((run) => run.status === "ok")
+  const okRuns = backups.filter((run) => run.status === "ok")
+  const latestGood = okRuns.find((run) => run.file_exists)
+  // Backups are listed as made, but not one of them has its file in the folder.
+  const allFilesGone =
+    okRuns.length > 0 && !okRuns.some((run) => run.file_exists)
   const daysSinceLatest = latestGood
     ? Math.max(
         0,
@@ -327,6 +331,20 @@ function BackupRestore() {
         </section>
       </div>
 
+      {allFilesGone ? (
+        <div
+          role="alert"
+          data-testid="backup-files-missing"
+          className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm"
+        >
+          <p className="font-semibold">
+            {t("admin.backup.filesMissing.title")}
+          </p>
+          <p className="mt-1 leading-6 text-muted-foreground">
+            {t("admin.backup.filesMissing.text")}
+          </p>
+        </div>
+      ) : null}
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4 sm:p-5">
           <div>

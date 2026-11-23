@@ -2385,6 +2385,10 @@
         },
         "fileGone": "File no longer in the backup folder"
       },
+      "filesMissing": {
+        "title": "The backup files are not in the backup folder",
+        "text": "These backups were recorded, but none of their files can be found, so none of them can be restored. Open the backups folder in the program folder on this computer: new files named mayondon-db-… should appear there after Back up now. If the folder stays empty, Docker Desktop is not sharing that folder with the program. Ask your IT support to check it before relying on any backup."
+      },
       "types": {
         "Scheduled": "Scheduled",
         "Manual": "Manual"
