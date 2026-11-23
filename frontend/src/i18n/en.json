@@ -1415,15 +1415,27 @@
         "reprint": "Reprint",
         "print": "Print",
         "printFor": "Print for {{name}}",
-        "printChoose": "Choose how to print for {{name}}",
         "printUnavailable": "This document type has no print template yet, so it cannot be printed or saved as a file from here.",
-        "printData": "Data only (pre-printed paper)",
-        "printForm": "Form and data (blank paper)",
         "discard": "Discard draft",
         "archive": "Archive",
         "restore": "Restore",
         "export": "Export",
         "exportFor": "Export for {{name}}"
+      },
+      "printDialog": {
+        "title": "Print document",
+        "description": "Choose how to print this document.",
+        "cancel": "Cancel",
+        "modes": {
+          "data": {
+            "name": "Data only",
+            "hint": "Prints only the typed values, for the barangay's pre-printed forms."
+          },
+          "form": {
+            "name": "Form and data",
+            "hint": "Prints the form together with the values, for blank paper."
+          }
+        }
       },
       "exportDialog": {
         "title": "Export document",

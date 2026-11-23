@@ -124,3 +124,20 @@ test("every issued row has an Export button that opens a Word / PDF popup", asyn
   await page.getByTestId("issuance-export-cancel").click()
   await expect(page.getByTestId("issuance-export-docx")).toBeHidden()
 })
+
+test("Print is one button that asks Data only or Form and data", async ({
+  page,
+}) => {
+  await mockApi(page)
+  await page.setViewportSize({ width: 1440, height: 1100 })
+  await page.goto("/issuances")
+  const row = page.locator("table tbody tr").first()
+  await expect(
+    row.getByRole("button", { name: /^Choose how to print/ }),
+  ).toHaveCount(0)
+  await row.getByRole("button", { name: /^Print for Resident/ }).click()
+  await expect(page.getByTestId("print-mode-data")).toBeVisible()
+  await expect(page.getByTestId("print-mode-form")).toBeVisible()
+  await page.getByTestId("print-mode-cancel").click()
+  await expect(page.getByTestId("print-mode-data")).toBeHidden()
+})

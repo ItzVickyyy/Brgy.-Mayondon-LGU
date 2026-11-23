@@ -1415,15 +1415,27 @@
         "reprint": "I-reprint",
         "print": "I-print",
         "printFor": "I-print para kay {{name}}",
-        "printChoose": "Piliin kung paano i-print para kay {{name}}",
         "printUnavailable": "Wala pang print template ang uri ng dokumentong ito, kaya hindi ito maipi-print o mase-save bilang file mula rito.",
-        "printData": "Data lamang (naka-print nang papel)",
-        "printForm": "Form at data (blangkong papel)",
         "discard": "Itapon ang draft",
         "archive": "I-archive",
         "restore": "Ibalik",
         "export": "I-export",
         "exportFor": "I-export para kay {{name}}"
+      },
+      "printDialog": {
+        "title": "I-print ang dokumento",
+        "description": "Piliin kung paano i-print ang dokumentong ito.",
+        "cancel": "Kanselahin",
+        "modes": {
+          "data": {
+            "name": "Data lamang",
+            "hint": "Ang mga nai-type na halaga lamang ang ipi-print, para sa naka-print nang mga form ng barangay."
+          },
+          "form": {
+            "name": "Form at data",
+            "hint": "Ipi-print ang form kasama ang mga halaga, para sa blangkong papel."
+          }
+        }
       },
       "exportDialog": {
         "title": "I-export ang dokumento",

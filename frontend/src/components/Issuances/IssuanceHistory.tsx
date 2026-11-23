@@ -40,7 +40,7 @@ import { IssuanceExportDialog } from "@/components/Issuances/IssuanceExportDialo
 import { SummaryCard } from "@/components/Issuances/IssuanceLayout"
 import type { DocumentCode } from "@/components/Issuances/NewIssuance/documentConfig"
 import { issuanceApi } from "@/components/Issuances/NewIssuance/issuanceApi"
-import { PrintSplitButton } from "@/components/Issuances/PrintSplitButton"
+import { PrintModeDialog } from "@/components/Issuances/PrintModeDialog"
 import { useExportIssuance } from "@/components/Issuances/useExportIssuance"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -58,7 +58,7 @@ import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate } from "@/lib/locale"
 import { templateIdByDocumentCode } from "@/lib/print/buildPrintData"
 import type { ExportFormat } from "@/lib/print/exportDocument"
-import type { PrintMode } from "@/lib/print/printMode"
+import { type PrintMode, setPrintMode } from "@/lib/print/printMode"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { cn } from "@/lib/utils"
 
@@ -313,6 +313,8 @@ export function IssuanceHistory({
   const [pageSize, setPageSize] = useState(10)
   const [viewItem, setViewItem] = useState<IssuanceListItem | null>(null)
   const [pending, setPending] = useState<PendingAction | null>(null)
+  // The row whose Print popup (data only / form and data) is open.
+  const [printItem, setPrintItem] = useState<IssuanceListItem | null>(null)
   // The row whose Export popup is open.
   const [exportItem, setExportItem] = useState<{
     item: IssuanceListItem
@@ -835,41 +837,27 @@ export function IssuanceHistory({
                             leading={
                               isIssued ? (
                                 <>
-                                  {canReprint ? (
-                                    <PrintSplitButton
-                                      name={item.resident_name}
-                                      onPrint={async (mode) => {
-                                        try {
-                                          const message = await onPrint(
-                                            item,
-                                            mode,
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="outline"
+                                    disabled={!canReprint}
+                                    aria-label={t(
+                                      "issuances.history.actions.printFor",
+                                      { name: item.resident_name },
+                                    )}
+                                    title={
+                                      canReprint
+                                        ? undefined
+                                        : t(
+                                            "issuances.history.actions.printUnavailable",
                                           )
-                                          if (message) onNotice(message)
-                                        } catch (error) {
-                                          setErrorNotice(
-                                            readApiError(error).message,
-                                          )
-                                        }
-                                      }}
-                                    />
-                                  ) : (
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="outline"
-                                      disabled
-                                      aria-label={t(
-                                        "issuances.history.actions.printFor",
-                                        { name: item.resident_name },
-                                      )}
-                                      title={t(
-                                        "issuances.history.actions.printUnavailable",
-                                      )}
-                                    >
-                                      <Printer aria-hidden="true" />
-                                      {t("issuances.history.actions.print")}
-                                    </Button>
-                                  )}
+                                    }
+                                    onClick={() => setPrintItem(item)}
+                                  >
+                                    <Printer aria-hidden="true" />
+                                    {t("issuances.history.actions.print")}
+                                  </Button>
                                   <Button
                                     type="button"
                                     size="sm"
@@ -1021,6 +1009,26 @@ export function IssuanceHistory({
         onClose={() => setViewItem(null)}
       />
 
+      <PrintModeDialog
+        open={printItem !== null}
+        onOpenChange={(open) => {
+          if (!open) setPrintItem(null)
+        }}
+        onChoose={(mode) => {
+          const target = printItem
+          setPrintItem(null)
+          if (!target) return
+          setPrintMode(mode)
+          void (async () => {
+            try {
+              const message = await onPrint(target, mode)
+              if (message) onNotice(message)
+            } catch (error) {
+              setErrorNotice(readApiError(error).message)
+            }
+          })()
+        }}
+      />
       <IssuanceExportDialog
         open={exportItem !== null}
         onOpenChange={(open) => {
