@@ -40,7 +40,7 @@ test("editing a name-only record: address saves quietly, a matching birthdate wa
   const stubRow = page
     .getByRole("row", { name: new RegExp(tag) })
     .filter({ hasNotText: "1985" })
-  await stubRow.getByRole("button", { name: "View profile" }).click()
+  await stubRow.getByRole("button", { name: "Profile", exact: true }).click()
   await page.getByRole("button", { name: "Edit details", exact: true }).click()
 
   // Only the house number changes: no warning, it saves.

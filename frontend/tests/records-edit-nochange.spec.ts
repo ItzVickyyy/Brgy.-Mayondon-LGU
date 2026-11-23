@@ -44,7 +44,7 @@ test("saving Edit resident details with no change is not logged", async ({
     .fill(lastName)
   const row = page.getByRole("row", { name: new RegExp(lastName) })
   await expect(row).toHaveCount(1)
-  await row.getByRole("button", { name: "View profile" }).click()
+  await row.getByRole("button", { name: "Profile", exact: true }).click()
   await page.getByRole("button", { name: "Edit details", exact: true }).click()
   await page.getByRole("button", { name: "Save changes", exact: true }).click()
   await expect(page.getByText(/No changes were made to/)).toBeVisible()

@@ -709,8 +709,8 @@
       "archived": "Archived"
     },
     "actions": {
-      "viewProfile": "View profile",
-      "editDetails": "Edit details",
+      "viewProfile": "Profile",
+      "editDetails": "Edit",
       "newIssuance": "New issuance",
       "archive": "Archive",
       "restore": "Restore from archive"

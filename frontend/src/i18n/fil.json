@@ -709,8 +709,8 @@
       "archived": "Naka-archive"
     },
     "actions": {
-      "viewProfile": "Tingnan ang profile",
-      "editDetails": "I-edit ang mga detalye",
+      "viewProfile": "Profile",
+      "editDetails": "I-edit",
       "newIssuance": "Bagong pag-isyu",
       "archive": "I-archive",
       "restore": "Ibalik mula sa archive"

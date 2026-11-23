@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils"
 // A tiny press-down so clicks feel acknowledged (off for reduced motion).
 const press = "active:scale-[0.98] motion-reduce:active:scale-100"
 
-// Soft tinted buttons (Dashboard stat colors, see index.css): clear but not bright. The tone sets --tone; the
-// border, fill and text are mixed from it so the same classes work in light and dark mode.
-const tint = (tone: string) =>
-  `${tone} border border-[color-mix(in_oklab,var(--tone)_45%,var(--border))] bg-[color-mix(in_oklab,var(--tone)_10%,var(--background))] text-[color-mix(in_oklab,var(--tone)_72%,var(--foreground))] shadow-xs hover:bg-[color-mix(in_oklab,var(--tone)_20%,var(--background))] ${press}`
+// Solid colored buttons (Dashboard stat colors, see index.css). The tone sets --tone: the fill is the tone,
+// a little darker in light mode; amber takes dark text for contrast.
+const tint = (tone: string, text = "text-white dark:text-[oklch(0.2_0.02_260)]") =>
+  `${tone} border border-transparent bg-[color-mix(in_oklab,var(--tone)_88%,black)] ${text} shadow-xs hover:bg-[color-mix(in_oklab,var(--tone)_76%,black)] dark:bg-[var(--tone)] dark:hover:bg-[color-mix(in_oklab,var(--tone)_85%,white)] ${press}`
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
@@ -31,7 +31,7 @@ const buttonVariants = cva(
         tintBlue: tint("[--tone:var(--stat-blue)]"),
         tintGreen: tint("[--tone:var(--stat-green)]"),
         tintTeal: tint("[--tone:var(--stat-teal)]"),
-        tintAmber: tint("[--tone:var(--stat-amber)]"),
+        tintAmber: tint("[--tone:var(--stat-amber)]", "text-[oklch(0.2_0.03_75)]"),
         tintRose: tint("[--tone:var(--stat-rose)]"),
         tintViolet: tint("[--tone:var(--stat-violet)]"),
         link: "text-brand underline-offset-4 hover:underline",
