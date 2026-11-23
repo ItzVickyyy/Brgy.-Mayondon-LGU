@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
-import { Search } from "lucide-react"
+import { ArchiveRestore, Eye, Search } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -118,7 +118,7 @@ export function ArchivedResidentsView({
                   {columns.map((column) => (
                     <th
                       key={column}
-                      className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-right" : ""}`}
+                      className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
                     >
                       {column === "resident" || column === "actions"
                         ? t(`records.list.columns.${column}`)
@@ -162,18 +162,21 @@ export function ArchivedResidentsView({
                           isAdmin
                             ? {
                                 label: t("records.actions.restore"),
-                                variant: "outline",
+                                variant: "tintGreen",
+                                icon: <ArchiveRestore aria-hidden="true" />,
                                 onSelect: () => onRestore(resident),
                               }
                             : {
                                 label: t("records.actions.viewProfile"),
-                                variant: "outline",
+                                variant: "tintTeal",
+                                icon: <Eye aria-hidden="true" />,
                                 onSelect: () => onViewProfile(resident),
                               }
                         }
                         items={[
                           {
                             label: t("records.actions.viewProfile"),
+                            icon: <Eye aria-hidden="true" className="size-4" />,
                             adminOnly: true,
                             onSelect: () => onViewProfile(resident),
                           },

@@ -112,12 +112,12 @@ export function useUserColumns(): ColumnDef<
       {
         id: "actions",
         header: () => (
-          <span className="block text-right">
+          <span className="block text-center">
             {t("admin.users.columns.actions")}
           </span>
         ),
         cell: ({ row }) => (
-          <div className="flex justify-end">
+          <div className="flex justify-center">
             <UserActionsMenu key={row.original.id} user={row.original} />
           </div>
         ),

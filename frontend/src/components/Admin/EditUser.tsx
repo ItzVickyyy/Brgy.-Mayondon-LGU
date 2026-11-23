@@ -213,7 +213,7 @@ const EditUser = ({
       {asPrimaryButton ? (
         <Button
           type="button"
-          variant="outline"
+          variant="tintBlue"
           size="sm"
           onClick={() => setIsOpen(true)}
         >

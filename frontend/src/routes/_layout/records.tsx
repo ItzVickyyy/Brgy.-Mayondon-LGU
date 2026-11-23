@@ -5,7 +5,16 @@ import {
   useQueryClient,
 } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
-import { Archive, CreditCard, Search, UserRound, Users } from "lucide-react"
+import {
+  Archive,
+  CreditCard,
+  Eye,
+  FilePlus2,
+  Pencil,
+  Search,
+  UserRound,
+  Users,
+} from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
@@ -342,7 +351,7 @@ function RecordsManagement() {
                         {residentColumns.map((column) => (
                           <th
                             key={column}
-                            className={`px-3 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-right" : ""}`}
+                            className={`px-3 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
                           >
                             {t(`records.list.columns.${column}`)}
                           </th>
@@ -412,7 +421,8 @@ function RecordsManagement() {
                                 isAdmin={isAdmin}
                                 primary={{
                                   label: t("records.actions.viewProfile"),
-                                  variant: "outline",
+                                  variant: "tintTeal",
+                                  icon: <Eye aria-hidden="true" />,
                                   onSelect: () => {
                                     setSelectedResident(resident)
                                     setProfileTab("Details")
@@ -421,10 +431,22 @@ function RecordsManagement() {
                                 items={[
                                   {
                                     label: t("records.actions.editDetails"),
+                                    icon: (
+                                      <Pencil
+                                        aria-hidden="true"
+                                        className="size-4"
+                                      />
+                                    ),
                                     onSelect: () => openForm(resident),
                                   },
                                   {
                                     label: t("records.actions.newIssuance"),
+                                    icon: (
+                                      <FilePlus2
+                                        aria-hidden="true"
+                                        className="size-4"
+                                      />
+                                    ),
                                     onSelect: () =>
                                       window.location.assign(
                                         `/issuances?resident=${encodeURIComponent(resident.id)}`,
@@ -432,6 +454,12 @@ function RecordsManagement() {
                                   },
                                   {
                                     label: t("records.actions.archive"),
+                                    icon: (
+                                      <Archive
+                                        aria-hidden="true"
+                                        className="size-4"
+                                      />
+                                    ),
                                     adminOnly: true,
                                     destructive: true,
                                     onSelect: () => setArchiveTarget(resident),

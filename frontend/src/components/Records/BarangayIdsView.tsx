@@ -250,7 +250,7 @@ export function BarangayIdsView() {
                     {idColumns.map((column) => (
                       <th
                         key={column}
-                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-right" : ""}`}
+                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
                       >
                         {t(`records.ids.columns.${column}`)}
                       </th>
@@ -325,13 +325,15 @@ export function BarangayIdsView() {
                                 : needsRenewal
                                   ? {
                                       label: t("records.ids.renew"),
+                                      variant: "tintGreen",
                                       icon: <RefreshCw aria-hidden="true" />,
                                       onSelect: () =>
                                         openIdIssuance(record.resident_id),
                                     }
                                   : {
                                       label: t("records.ids.replaceCard"),
-                                      variant: "outline",
+                                      variant: "tintBlue",
+                                      icon: <CreditCard aria-hidden="true" />,
                                       title: t("records.ids.replaceHint"),
                                       onSelect: () =>
                                         openIdIssuance(record.resident_id),
@@ -340,6 +342,12 @@ export function BarangayIdsView() {
                             items={[
                               {
                                 label: t("records.ids.replaceCard"),
+                                icon: (
+                                  <CreditCard
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
                                 hidden: archived || !needsRenewal,
                                 title: t("records.ids.replaceHint"),
                                 onSelect: () =>

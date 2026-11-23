@@ -737,7 +737,7 @@ export function IssuanceHistory({
                     {historyColumns.map((column) => (
                       <th
                         key={column}
-                        className={`px-3 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-right" : ""}`}
+                        className={`px-3 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
                       >
                         {t(`issuances.history.columns.${column}`)}
                       </th>

@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   Clock3,
   DatabaseBackup,
+  Download,
   HardDriveDownload,
   RotateCcw,
   ShieldCheck,
@@ -355,7 +356,7 @@ function BackupRestore() {
                     key={id}
                     className={
                       id === "actions"
-                        ? "sticky right-0 bg-muted sticky-head-cell px-4 py-3 text-right font-medium sm:px-5"
+                        ? "sticky right-0 bg-muted sticky-head-cell px-4 py-3 text-center font-medium sm:px-5"
                         : "px-4 py-3 align-middle font-medium sm:px-5"
                     }
                   >
@@ -430,7 +431,7 @@ function BackupRestore() {
                           status === "Verified" && backup.file_exists
                             ? {
                                 label: t("admin.backup.actions.restore"),
-                                variant: "outline",
+                                variant: "tintGreen",
                                 icon: <RotateCcw aria-hidden="true" />,
                                 onSelect: () => {
                                   setSelectedBackup(backup.id)
@@ -443,12 +444,21 @@ function BackupRestore() {
                         items={[
                           {
                             label: t("admin.backup.actions.verify"),
+                            icon: (
+                              <ShieldCheck
+                                aria-hidden="true"
+                                className="size-4"
+                              />
+                            ),
                             hidden: backup.status !== "ok",
                             disabled: verifyMutation.isPending,
                             onSelect: () => verifyMutation.mutate(backup.id),
                           },
                           {
                             label: t("admin.backup.actions.download"),
+                            icon: (
+                              <Download aria-hidden="true" className="size-4" />
+                            ),
                             adminOnly: true,
                             hidden:
                               backup.status !== "ok" || !backup.file_exists,

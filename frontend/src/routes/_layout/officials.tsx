@@ -1,7 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { TFunction } from "i18next"
-import { Search, UserRound, UserRoundPlus } from "lucide-react"
+import {
+  Eye,
+  Pencil,
+  Search,
+  UserRound,
+  UserRoundCheck,
+  UserRoundPlus,
+  UserRoundX,
+} from "lucide-react"
 import { useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -394,7 +402,7 @@ function OfficialsManagement() {
                     key={id}
                     className={
                       id === "actions"
-                        ? "sticky right-0 bg-muted sticky-head-cell px-4 py-3 text-right font-medium sm:px-5"
+                        ? "sticky right-0 bg-muted sticky-head-cell px-4 py-3 text-center font-medium sm:px-5"
                         : "px-4 py-3 align-middle font-medium sm:px-5"
                     }
                   >
@@ -435,18 +443,23 @@ function OfficialsManagement() {
                         official.status === "Current"
                           ? {
                               label: t("admin.officials.actions.edit"),
-                              variant: "outline",
+                              variant: "tintBlue",
+                              icon: <Pencil aria-hidden="true" />,
                               onSelect: () => openEditForm(official),
                             }
                           : {
                               label: t("admin.officials.actions.view"),
-                              variant: "outline",
+                              variant: "tintTeal",
+                              icon: <Eye aria-hidden="true" />,
                               onSelect: () => setViewOfficial(official),
                             }
                       }
                       items={[
                         {
                           label: t("admin.officials.actions.endTerm"),
+                          icon: (
+                            <UserRoundX aria-hidden="true" className="size-4" />
+                          ),
                           hidden: official.status !== "Current",
                           destructive: true,
                           onSelect: () => {
@@ -457,6 +470,12 @@ function OfficialsManagement() {
                         },
                         {
                           label: t("admin.officials.actions.reinstate"),
+                          icon: (
+                            <UserRoundCheck
+                              aria-hidden="true"
+                              className="size-4"
+                            />
+                          ),
                           hidden: official.status !== "Former",
                           disabled: mutation.isPending,
                           onSelect: () => reinstate(official),
