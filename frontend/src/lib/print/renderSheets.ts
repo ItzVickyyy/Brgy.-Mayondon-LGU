@@ -9,13 +9,18 @@ import {
   DEFAULT_FONT_PT,
   LINE_HEIGHT_RATIO,
   layoutOverlay,
+  STAMP_FONT_PT,
+  STAMP_LINE,
+  STAMP_PAD,
+  STAMP_VALUE_DX,
 } from "./overlayLayout"
+import { STAMP_FONT, VALUE_FONT } from "./overlayStyles"
 import { paperDimensions } from "./paperSizes"
 import { printTemplates } from "./templates"
 
 /** 2.5 pixels per point is about 180 dpi: sharp on screen and on paper, a few hundred KB per page. */
 const SCALE = 2.5
-const FONT = "Arial, Helvetica, sans-serif"
+const FONT = VALUE_FONT
 
 function loadImage(url: string): Promise<HTMLImageElement | undefined> {
   return new Promise((resolve) => {
@@ -59,7 +64,7 @@ export async function renderSheets(data: PrintData): Promise<RenderedDocument> {
   const measureContext = measureCanvas.getContext("2d")
   const measure = (text: string, size: number) => {
     if (!measureContext) return text.length * size * 0.55
-    measureContext.font = `${size * SCALE}px ${FONT}`
+    measureContext.font = `bold ${size * SCALE}px ${FONT}`
     return measureContext.measureText(text).width / SCALE
   }
   const laid = layoutOverlay(data, measure)
@@ -111,9 +116,31 @@ export async function renderSheets(data: PrintData): Promise<RenderedDocument> {
     }
     context.fillStyle = "#000000"
     context.textBaseline = "middle"
+    if (page?.stamp) {
+      const box = page.stamp
+      context.strokeStyle = "#000000"
+      context.lineWidth = 0.75 * SCALE
+      context.strokeRect(
+        box.x * SCALE,
+        box.y * SCALE,
+        box.w * SCALE,
+        box.h * SCALE,
+      )
+      context.textAlign = "left"
+      ;[{ label: box.title, value: "" }, ...box.rows].forEach((row, index) => {
+        const middle =
+          (box.y + STAMP_PAD + index * STAMP_LINE + STAMP_LINE / 2) * SCALE
+        context.font = `${STAMP_FONT_PT * SCALE}px ${STAMP_FONT}`
+        context.fillText(row.label, (box.x + STAMP_PAD) * SCALE, middle)
+        if (row.value) {
+          context.font = `bold ${STAMP_FONT_PT * SCALE}px ${STAMP_FONT}`
+          context.fillText(row.value, (box.x + STAMP_VALUE_DX) * SCALE, middle)
+        }
+      })
+    }
     const lineMiddle = (DEFAULT_FONT_PT * LINE_HEIGHT_RATIO) / 2
     for (const item of page?.texts ?? []) {
-      context.font = `${item.size * SCALE}px ${FONT}`
+      context.font = `bold ${item.size * SCALE}px ${FONT}`
       context.textAlign = item.align === "center" ? "center" : "left"
       context.fillText(item.text, item.x * SCALE, (item.y + lineMiddle) * SCALE)
     }

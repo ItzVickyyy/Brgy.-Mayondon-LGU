@@ -34,6 +34,14 @@ export type PrintPhotoBox = {
   h: number
   page?: number
 }
+/** The "DOCUMENTARY STAMP TAX PAID" box of the barangay's clearances (Clearance Issuing.xls): a ruled box with the title and three lines, always printed. */
+export type PrintStampBox = {
+  x: number
+  y: number
+  w: number
+  h: number
+  page?: number
+}
 export type PrintTemplate = {
   id: PrintTemplateId
   documentCode: string
@@ -44,6 +52,7 @@ export type PrintTemplate = {
   fields: PrintFieldBox[]
   marks?: PrintMarkBox[]
   photo?: PrintPhotoBox
+  stamp?: PrintStampBox
 }
 export type PrintTemplateId =
   | "clearance"
@@ -103,12 +112,14 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "purpose", x: 135, y: 458.7, w: 255 },
       { key: "remarks", x: 135, y: 497.7, w: 320 },
       // Bottom block: values go right of the colons at x 230.6 (measured on the page image of the barangay form).
-      { key: "idType", x: 243, y: 613.4, w: 250 },
-      { key: "idNumber", x: 243, y: 631.4, w: 250 },
-      { key: "idPlace", x: 243, y: 648.4, w: 250 },
-      { key: "idDate", x: 243, y: 665.4, w: 250 },
-      { key: "orNumber", x: 243, y: 683.4, w: 250 },
+      // Width stops at x 393 so the values never run into the stamp box (x 400-580).
+      { key: "idType", x: 243, y: 613.4, w: 150 },
+      { key: "idNumber", x: 243, y: 631.4, w: 150 },
+      { key: "idPlace", x: 243, y: 648.4, w: 150 },
+      { key: "idDate", x: 243, y: 665.4, w: 150 },
+      { key: "orNumber", x: 243, y: 683.4, w: 150 },
     ],
+    stamp: { x: 400, y: 626, w: 180, h: 56 }, // right of the Valid I.D. block, below "DRY SEAL"
     photo: { x: 402, y: 340, w: 82, h: 79 }, // inside the pre-printed photo box (x 400.8-485.4, y 339-420.7) so its border stays visible; thumbmark box and signature line stay blank
   },
   franchise: {
@@ -126,11 +137,12 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "motorNumber", x: 207, y: 445.9 },
       { key: "color", x: 207, y: 465.9 },
       { key: "plateNumber", x: 207, y: 484.9 },
-      { key: "idNumber", x: 213, y: 630, w: 250 }, // colons at x 200.8
-      { key: "idPlace", x: 213, y: 646, w: 250 },
-      { key: "idDate", x: 213, y: 662, w: 250 },
-      { key: "orNumber", x: 213, y: 678, w: 250 },
+      { key: "idNumber", x: 213, y: 630, w: 180 }, // colons at x 200.8; width stops before the stamp box (x 400)
+      { key: "idPlace", x: 213, y: 646, w: 180 },
+      { key: "idDate", x: 213, y: 662, w: 180 },
+      { key: "orNumber", x: 213, y: 678, w: 180 },
     ],
+    stamp: { x: 400, y: 628, w: 180, h: 56 },
   },
   utility: {
     id: "utility",
@@ -142,11 +154,12 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "name", x: 207, y: 373.8, w: 330 },
       { key: "address", x: 207, y: 392.8, w: 330 },
       { key: "location", x: 207, y: 451.8, w: 330 },
-      { key: "idNumber", x: 213, y: 629, w: 250 }, // colons at x 200.8
-      { key: "idPlace", x: 213, y: 645, w: 250 },
-      { key: "idDate", x: 213, y: 661, w: 250 },
-      { key: "orNumber", x: 213, y: 677, w: 250 },
+      { key: "idNumber", x: 213, y: 629, w: 180 }, // colons at x 200.8; width stops before the stamp box (x 400)
+      { key: "idPlace", x: 213, y: 645, w: 180 },
+      { key: "idDate", x: 213, y: 661, w: 180 },
+      { key: "orNumber", x: 213, y: 677, w: 180 },
     ],
+    stamp: { x: 400, y: 627, w: 180, h: 56 },
     // Centres of the small pre-printed squares (7.8 x 7 pt). A mark is printed only in the chosen square.
     marks: [
       { key: "electric", when: "yes", x: 216.7, y: 345.7 },

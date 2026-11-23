@@ -1,4 +1,4 @@
-import { useMemo } from "react"
+import { Fragment, useMemo } from "react"
 import { createPortal } from "react-dom"
 import type { PrintData } from "@/lib/print/buildPrintData"
 import {
@@ -6,8 +6,12 @@ import {
   LINE_HEIGHT_RATIO,
   layoutOverlay,
   type Offset,
+  STAMP_FONT_PT,
+  STAMP_LINE,
+  STAMP_PAD,
+  STAMP_VALUE_DX,
 } from "@/lib/print/overlayLayout"
-import { overlayCss } from "@/lib/print/overlayStyles"
+import { overlayCss, STAMP_FONT, VALUE_FONT } from "@/lib/print/overlayStyles"
 import { paperDimensions } from "@/lib/print/paperSizes"
 import { printTemplates } from "@/lib/print/templates"
 
@@ -16,7 +20,7 @@ function measureText(text: string, sizePt: number): number {
   canvas ??= document.createElement("canvas")
   const ctx = canvas.getContext("2d")
   if (!ctx) return text.length * sizePt * 0.55 // rough fallback
-  ctx.font = `${sizePt}pt Arial, Helvetica, sans-serif` // canvas px == CSS px, so convert the result back to pt
+  ctx.font = `bold ${sizePt}pt ${VALUE_FONT}` // canvas px == CSS px, so convert the result back to pt
   return ctx.measureText(text).width * 0.75
 }
 
@@ -51,6 +55,7 @@ export function PrintOverlay({
             texts: [],
             marks: [],
             photo: undefined,
+            stamp: undefined,
           },
       )
   }, [data, offset, backgrounds])
@@ -90,6 +95,52 @@ export function PrintOverlay({
                 objectFit: "cover",
               }}
             />
+          )}
+          {page.stamp && (
+            <>
+              <div
+                style={{
+                  left: `${page.stamp.x}pt`,
+                  top: `${page.stamp.y}pt`,
+                  width: `${page.stamp.w}pt`,
+                  height: `${page.stamp.h}pt`,
+                  boxSizing: "border-box",
+                  border: "0.75pt solid #000",
+                }}
+              />
+              {[{ label: page.stamp.title, value: "" }, ...page.stamp.rows].map(
+                (row, index) => (
+                  <Fragment key={row.label}>
+                    <span
+                      style={{
+                        left: `${page.stamp!.x + STAMP_PAD}pt`,
+                        top: `${page.stamp!.y + STAMP_PAD + index * STAMP_LINE}pt`,
+                        fontFamily: STAMP_FONT,
+                        fontWeight: 400,
+                        fontSize: `${STAMP_FONT_PT}pt`,
+                        lineHeight: `${STAMP_LINE}pt`,
+                      }}
+                    >
+                      {row.label}
+                    </span>
+                    {row.value && (
+                      <span
+                        style={{
+                          left: `${page.stamp!.x + STAMP_VALUE_DX}pt`,
+                          top: `${page.stamp!.y + STAMP_PAD + index * STAMP_LINE}pt`,
+                          fontFamily: STAMP_FONT,
+                          fontWeight: 700,
+                          fontSize: `${STAMP_FONT_PT}pt`,
+                          lineHeight: `${STAMP_LINE}pt`,
+                        }}
+                      >
+                        {row.value}
+                      </span>
+                    )}
+                  </Fragment>
+                ),
+              )}
+            </>
           )}
           {page.texts.map((item, index) => (
             <span

@@ -1,12 +1,17 @@
 import { type PaperSize, pageRule, paperDimensions } from "./paperSizes"
 
+/** Typed values use the barangay's own font (Cambria Bold in Clearance Issuing.xls); Caladea is the metric-compatible stand-in where Cambria is not installed. */
+export const VALUE_FONT = "Cambria, Caladea, 'Times New Roman', serif"
+/** The stamp box is Arial in the same workbook. */
+export const STAMP_FONT = "Arial, Helvetica, sans-serif"
+
 // Shared by PrintOverlay and CalibrationSheet. Typed values only (docs/04 section 3): no labels, borders, logos or signatures. No margins, 100% scale; the page size comes from the document (Short or Long).
 export const overlayCss = (size: PaperSize): string => `
 ${pageRule(size)}
 .print-overlay-root { display: none }
 .print-overlay-root[data-preview="true"] { display: block; position: fixed; inset: 0; z-index: 9999; overflow: auto; background: #888; padding: 16px }
 .print-overlay-page { position: relative; width: ${paperDimensions[size].widthPt}pt; height: ${paperDimensions[size].heightPt}pt; overflow: hidden; background: #fff; margin: 0 auto 16px;
-  font-family: Arial, Helvetica, sans-serif; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact }
+  font-family: ${VALUE_FONT}; font-weight: 700; color: #000; -webkit-print-color-adjust: exact; print-color-adjust: exact }
 .print-overlay-page > * { position: absolute; white-space: nowrap }
 @media print {
   html, body { margin: 0 !important; padding: 0 !important }

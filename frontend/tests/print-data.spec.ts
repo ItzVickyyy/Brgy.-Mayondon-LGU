@@ -388,4 +388,34 @@ test.describe("buildPrintData", () => {
     expect(wrapLines("aaa bbb ccc ddd", [7], 1)).toEqual(["aaa bbb ccc ddd"])
     expect(wrapLines("", [7], 3)).toEqual([])
   })
+
+  test("clearances carry the stamp box values; a free certificate reads FOC", () => {
+    const paid = buildPrintData(
+      make("BARANGAY_CLEARANCE", {
+        details: { type: "BARANGAY_CLEARANCE" },
+        payment: {
+          isFree: false,
+          officialReceiptNo: "0359328",
+          dateOfPayment: "2026-09-15",
+          certifiedBy: "KRGV",
+        },
+      }),
+      lookups,
+      name,
+    )!
+    expect(paid.values).toMatchObject({
+      stampOr: "0359328",
+      stampDate: "09/15/2026",
+      stampBy: "KRGV",
+    })
+    const free = buildPrintData(
+      make("FRANCHISE_CLEARANCE", {
+        details: { type: "FRANCHISE_CLEARANCE" },
+        payment: { isFree: true, officialReceiptNo: "" },
+      }),
+      lookups,
+      name,
+    )!
+    expect(free.values.stampOr).toBe("FOC")
+  })
 })

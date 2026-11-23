@@ -92,4 +92,33 @@ test.describe("print overlay layout", () => {
       )[0].photo,
     ).toBeUndefined()
   })
+
+  test("clearance, franchise and utility print the stamp box; the others do not", () => {
+    const values = {
+      stampOr: "0359328",
+      stampDate: "09/15/2026",
+      stampBy: "KRGV",
+    }
+    for (const templateId of ["clearance", "franchise", "utility"] as const) {
+      const [page] = layoutOverlay({ templateId, values }, measure)
+      expect(page.stamp?.title).toBe('"DOCUMENTARY STAMP TAX PAID"')
+      expect(page.stamp?.rows.map((row) => row.value)).toEqual([
+        "0359328",
+        "09/15/2026",
+        "KRGV",
+      ])
+    }
+    const [other] = layoutOverlay({ templateId: "indigency", values }, measure)
+    expect(other.stamp).toBeUndefined()
+  })
+
+  test("the stamp box prints even before a receipt is typed, and follows the calibration offset", () => {
+    const [page] = layoutOverlay(
+      { templateId: "clearance", values: {} },
+      measure,
+      { x: 2, y: -3 },
+    )
+    expect(page.stamp).toMatchObject({ x: 402, y: 623 })
+    expect(page.stamp?.rows.every((row) => row.value === "")).toBe(true)
+  })
 })

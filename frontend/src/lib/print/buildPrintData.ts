@@ -64,6 +64,12 @@ const byId = (list: LookupName[], id?: number) =>
 const cap = (value: string) =>
   value ? value.charAt(0).toUpperCase() + value.slice(1) : ""
 
+/** "2026-09-15" -> "09/15/2026", the way the stamp box reads in Clearance Issuing.xls. */
+function slashDate(iso?: string | null): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso ?? "")
+  return match ? `${match[2]}/${match[3]}/${match[1]}` : ""
+}
+
 /** 1 -> "1st", 22 -> "22nd", 13 -> "13th": the form reads "this ___ day of". */
 export function ordinal(day: string): string {
   const n = Number(day)
@@ -150,6 +156,12 @@ export function buildPrintData(
     orNumber: payload.payment?.isFree
       ? ""
       : (payload.payment?.officialReceiptNo ?? ""),
+    // "DOCUMENTARY STAMP TAX PAID" box (clearances only): a free certificate reads FOC, as on the barangay's own sample.
+    stampOr: payload.payment?.isFree
+      ? "FOC"
+      : (payload.payment?.officialReceiptNo ?? ""),
+    stampDate: slashDate(payload.payment?.dateOfPayment),
+    stampBy: payload.payment?.certifiedBy ?? "",
     sector: sectors.join(" / "),
     sectorLine: sectors.length ? `SECTOR : ${sectors.join(" / ")}` : "",
   }
@@ -245,6 +257,7 @@ export function buildPrintData(
   const printed = new Set([
     ...template.fields.map((f) => f.key),
     ...(template.marks ?? []).map((m) => m.key),
+    ...(template.stamp ? ["stampOr", "stampDate", "stampBy"] : []),
   ])
   const filtered = Object.fromEntries(
     Object.entries(values).filter(([key]) => printed.has(key)),
