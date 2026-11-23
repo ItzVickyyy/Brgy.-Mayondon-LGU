@@ -21,8 +21,11 @@ services:
     stop_grace_period: 60s
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d app"]
-      interval: 10s
-      retries: 5
+      # Checked every 5 seconds (was 10): the program is reported healthy up to 5 seconds
+      # sooner after a start or update. Retries doubled so it takes just as long to be
+      # called unhealthy.
+      interval: 5s
+      retries: 10
       start_period: 30s
       timeout: 10s
     volumes:
@@ -88,9 +91,10 @@ services:
 
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/utils/health-check/"]
-      interval: 10s
+      # Same as the database: 5-second checks, 10 retries (see above).
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
       # Room for the start-up database update (app/migrate_on_start.py).
       start_period: 90s
 

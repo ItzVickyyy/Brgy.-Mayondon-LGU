@@ -105,7 +105,7 @@ def read_data_protection(
 
     Only counts are returned, never a value. Not audited (a status read, like ``/system/update``).
     """
-    status = field_crypto.protection_status(session)
+    status = field_crypto.protection_status_cached(session)
     return DataProtectionPublic(
         key_configured=status.key_configured,
         plain_count=status.plain_count,
