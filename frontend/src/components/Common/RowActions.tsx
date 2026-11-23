@@ -63,7 +63,7 @@ export function RowActions({
   )
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className="flex items-center justify-end gap-2">
       {leading}
       {primary ? (
         <Button
@@ -119,6 +119,9 @@ export function RowActions({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+      ) : items.length > 0 ? (
+        // Keeps the buttons of rows without a menu lined up with the other rows.
+        <span aria-hidden="true" className="size-11 shrink-0" />
       ) : null}
     </div>
   )

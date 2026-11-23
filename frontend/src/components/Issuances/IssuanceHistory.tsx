@@ -13,8 +13,8 @@ import {
   Download,
   Eye,
   FileCheck2,
-  FilePenLine,
   FileText,
+  Pencil,
   Printer,
   Search,
   Trash2,
@@ -840,52 +840,44 @@ export function IssuanceHistory({
                             name={item.resident_name}
                             isAdmin={isAdmin}
                             leading={
-                              isIssued ? (
+                              isIssued || isDraft ? (
                                 <>
                                   <Button
                                     type="button"
                                     size="sm"
                                     variant="tintBlue"
-                                    disabled={!canReprint}
-                                    aria-label={t(
-                                      "issuances.history.actions.printFor",
-                                      { name: item.resident_name },
-                                    )}
-                                    title={
-                                      canReprint
-                                        ? undefined
-                                        : t(
-                                            "issuances.history.actions.printUnavailable",
-                                          )
-                                    }
-                                    onClick={() => setPrintItem(item)}
-                                  >
-                                    <Printer aria-hidden="true" />
-                                    {t("issuances.history.actions.print")}
-                                  </Button>
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="tintViolet"
-                                    disabled={!canReprint}
-                                    aria-label={t(
-                                      "issuances.history.actions.exportFor",
-                                      { name: item.resident_name },
-                                    )}
-                                    title={
-                                      canReprint
-                                        ? undefined
-                                        : t(
-                                            "issuances.history.actions.printUnavailable",
-                                          )
-                                    }
                                     onClick={() =>
-                                      setExportItem({ item, documentName })
+                                      isDraft
+                                        ? onContinueDraft(item.id)
+                                        : setPending({ item, action: "correct" })
                                     }
                                   >
-                                    <Download aria-hidden="true" />
-                                    {t("issuances.history.actions.export")}
+                                    <Pencil aria-hidden="true" />
+                                    {t("issuances.history.actions.edit")}
                                   </Button>
+                                  {isIssued ? (
+                                    <Button
+                                      type="button"
+                                      size="sm"
+                                      variant="tintViolet"
+                                      disabled={!canReprint}
+                                      aria-label={t(
+                                        "issuances.history.actions.printFor",
+                                        { name: item.resident_name },
+                                      )}
+                                      title={
+                                        canReprint
+                                          ? undefined
+                                          : t(
+                                              "issuances.history.actions.printUnavailable",
+                                            )
+                                      }
+                                      onClick={() => setPrintItem(item)}
+                                    >
+                                      <Printer aria-hidden="true" />
+                                      {t("issuances.history.actions.print")}
+                                    </Button>
+                                  ) : null}
                                 </>
                               ) : undefined
                             }
@@ -897,29 +889,20 @@ export function IssuanceHistory({
                             }}
                             items={[
                               {
-                                label: t(
-                                  "issuances.history.actions.continueDraft",
-                                ),
-                                hidden: !isDraft,
-                                icon: (
-                                  <FilePenLine
-                                    aria-hidden="true"
-                                    className="size-4"
-                                  />
-                                ),
-                                onSelect: () => onContinueDraft(item.id),
-                              },
-                              {
-                                label: t("issuances.history.actions.correct"),
+                                label: t("issuances.history.actions.export"),
                                 hidden: !isIssued,
+                                disabled: !canReprint,
+                                title: canReprint
+                                  ? undefined
+                                  : t("issuances.history.actions.printUnavailable"),
                                 icon: (
-                                  <FilePenLine
+                                  <Download
                                     aria-hidden="true"
                                     className="size-4"
                                   />
                                 ),
                                 onSelect: () =>
-                                  setPending({ item, action: "correct" }),
+                                  setExportItem({ item, documentName }),
                               },
                               {
                                 label: t("issuances.history.actions.archive"),

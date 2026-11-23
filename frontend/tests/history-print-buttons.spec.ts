@@ -105,20 +105,21 @@ test("the three-dot menu keeps the agreed order", async ({ page }) => {
   await row.getByRole("button", { name: /more|actions|iba pa/i }).click()
   const labels = await page.getByRole("menuitem").allInnerTexts()
   expect(labels.map((l) => l.trim())).toEqual([
-    "Correct & edit",
+    "Export",
     "Archive",
     "Void issuance",
   ])
 })
 
-test("every issued row has an Export button that opens a Word / PDF popup", async ({
+test("Export is in the three-dot menu and opens a Word / PDF popup", async ({
   page,
 }) => {
   await mockApi(page)
   await page.setViewportSize({ width: 1440, height: 1100 })
   await page.goto("/issuances")
   const row = page.locator("table tbody tr").first()
-  await row.getByRole("button", { name: /^Export for Resident/ }).click()
+  await row.getByRole("button", { name: /more|actions|iba pa/i }).click()
+  await page.getByRole("menuitem", { name: "Export" }).click()
   await expect(page.getByTestId("issuance-export-docx")).toBeVisible()
   await expect(page.getByTestId("issuance-export-pdf")).toBeVisible()
   await page.getByTestId("issuance-export-cancel").click()
@@ -151,4 +152,24 @@ test("a short list shows no page controls", async ({ page }) => {
   await expect(
     page.getByRole("navigation", { name: "Pagination" }),
   ).toHaveCount(0)
+})
+
+test("an issued row reads Edit, Print, View, then the three-dot menu", async ({
+  page,
+}) => {
+  await mockApi(page)
+  await page.setViewportSize({ width: 1440, height: 1100 })
+  await page.goto("/issuances")
+  const row = page.locator("table tbody tr").first()
+  await expect(row).toBeVisible()
+  const labels = await row
+    .locator("td")
+    .last()
+    .getByRole("button")
+    .allInnerTexts()
+  expect(labels.map((l) => l.trim()).slice(0, 3)).toEqual([
+    "Edit",
+    "Print",
+    "View",
+  ])
 })

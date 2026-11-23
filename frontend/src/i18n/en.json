@@ -1410,6 +1410,7 @@
       "actions": {
         "view": "View",
         "void": "Void issuance",
+        "edit": "Edit",
         "continueDraft": "Continue draft",
         "correct": "Correct & edit",
         "reprint": "Reprint",

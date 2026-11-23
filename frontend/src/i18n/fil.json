@@ -1410,6 +1410,7 @@
       "actions": {
         "view": "Tingnan",
         "void": "I-void ang isyu",
+        "edit": "I-edit",
         "continueDraft": "Ituloy ang draft",
         "correct": "Itama at i-edit",
         "reprint": "I-reprint",
