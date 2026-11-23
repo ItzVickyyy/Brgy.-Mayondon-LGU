@@ -459,7 +459,8 @@ function OfficialsManagement() {
                           ? [
                               {
                                 label: t("admin.officials.actions.endTerm"),
-                                variant: "tintRose",
+                                variant: "tintAmber",
+                                title: t("admin.officials.actions.endTermHint"),
                                 icon: <UserRoundX aria-hidden="true" />,
                                 onSelect: () => {
                                   clearMessages()

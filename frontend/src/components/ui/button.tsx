@@ -33,6 +33,7 @@ const buttonVariants = cva(
         tintTeal: tint("[--tone:var(--stat-teal)]"),
         tintAmber: tint("[--tone:var(--stat-amber)]"),
         tintRose: tint("[--tone:var(--stat-rose)]"),
+        tintViolet: tint("[--tone:var(--stat-violet)]"),
         link: "text-brand underline-offset-4 hover:underline",
       },
       size: {

@@ -866,7 +866,7 @@ export function IssuanceHistory({
                                   <Button
                                     type="button"
                                     size="sm"
-                                    variant="tintGreen"
+                                    variant="tintViolet"
                                     disabled={!canReprint}
                                     aria-label={t(
                                       "issuances.history.actions.exportFor",

@@ -141,7 +141,12 @@ function BackupRestore() {
       (await BackupsService.verifyBackup({ path: { backup_id: id } })).data,
     onSuccess: (run) => {
       if (run.status === "ok") notice("verified", run.file_name ?? "")
-      else showErrorToast(t("admin.backup.failures.verify"))
+      else
+        showErrorToast(
+          run.error
+            ? `${t("admin.backup.failures.verify")} ${run.error}`
+            : t("admin.backup.failures.verify"),
+        )
     },
     onError: (err: Error) => handleError.call(showErrorToast, err),
     onSettled: refresh,
@@ -442,7 +447,7 @@ function BackupRestore() {
                             : undefined
                         }
                         actions={[
-                          ...(backup.status === "ok"
+                          ...(backup.status === "ok" && backup.file_exists
                             ? [
                                 {
                                   label: t("admin.backup.actions.verify"),
@@ -458,7 +463,7 @@ function BackupRestore() {
                             ? [
                                 {
                                   label: t("admin.backup.actions.download"),
-                                  variant: "tintBlue" as const,
+                                  variant: "tintViolet" as const,
                                   icon: <Download aria-hidden="true" />,
                                   onSelect: () => download(backup),
                                 },

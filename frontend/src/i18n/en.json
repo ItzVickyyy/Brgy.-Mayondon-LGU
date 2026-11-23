@@ -2117,7 +2117,8 @@
       "actions": {
         "edit": "Edit",
         "view": "View",
-        "endTerm": "End term / mark as former",
+        "endTerm": "End term",
+        "endTermHint": "Mark as former",
         "reinstate": "Reinstate"
       },
       "loading": "Loading officials...",

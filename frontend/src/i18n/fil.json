@@ -2117,7 +2117,8 @@
       "actions": {
         "edit": "I-edit",
         "view": "Tingnan",
-        "endTerm": "Tapusin ang termino / markahan bilang dating opisyal",
+        "endTerm": "Tapusin ang termino",
+        "endTermHint": "Markahan bilang dating opisyal",
         "reinstate": "Ibalik"
       },
       "loading": "Nilo-load ang mga opisyal...",

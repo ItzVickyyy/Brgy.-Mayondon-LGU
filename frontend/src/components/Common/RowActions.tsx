@@ -33,6 +33,7 @@ export type RowPrimaryAction = {
     | "tintTeal"
     | "tintAmber"
     | "tintRose"
+    | "tintViolet"
   disabled?: boolean
   title?: string
   icon?: ReactNode
