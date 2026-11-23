@@ -13,7 +13,7 @@ import { isSystemAdministrator } from "@/lib/access"
 
 /**
  * How soon it needs doing. The dot on the bell takes the colour of the most
- * urgent open reminder: urgent = red, soon = orange, optional = green.
+ * urgent open reminder: urgent = red, soon = amber, optional = blue.
  */
 export type ReminderSeverity = "urgent" | "soon" | "optional"
 
@@ -134,10 +134,10 @@ function wasDismissed(userId: string): boolean {
  * - Plain HTTP (patch 212): System Administrator only, while the page was opened over
  *   `http://` from another computer (not `localhost`). "Remind me later" hides it for 14 days.
  * - Health-condition key (patch 214): System Administrator only. Red when saved values cannot be
- *   opened with the key on this computer, orange when no key is set (they are stored as plain
+ *   opened with the key on this computer, amber when no key is set (they are stored as plain
  *   text). No "remind me later": it is fixed once, on the server computer.
  * Severity: two-factor and the missing backup tool are urgent (red); recovery
- * questions an administrator cannot dismiss are soon (orange); recovery
+ * questions an administrator cannot dismiss are soon (amber); recovery
  * questions staff may postpone are optional (green).
  */
 export function useSetupReminders(): SetupReminder[] {

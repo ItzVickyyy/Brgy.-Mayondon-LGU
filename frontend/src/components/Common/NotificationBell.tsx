@@ -10,9 +10,12 @@ import {
   BellOff,
   Check,
   CheckCheck,
+  Clock,
   DatabaseBackup,
   FileUp,
+  Info,
   type LucideIcon,
+  OctagonAlert,
   ShieldCheck,
   SlidersHorizontal,
   UserRound,
@@ -46,18 +49,23 @@ import {
   useSetupReminders,
 } from "./useSetupReminders"
 
-// Red = needs action now, orange = soon, green = optional. A reminder is a plain
-// card with a solid stripe on its left edge and a solid label (no tinted fill),
-// so the list stays calm and the colour only marks how soon it needs doing.
+// Three clearly different colours (and icons, so colour is never the only cue):
+// red = needs action now, amber = soon, blue = optional. A reminder is a plain
+// card with a solid stripe on its left edge and a solid label (no tinted fill).
 const SEVERITY_STRIPE: Record<ReminderSeverity, string> = {
   urgent: "border-l-red-600 dark:border-l-red-400",
-  soon: "border-l-orange-600 dark:border-l-orange-400",
-  optional: "border-l-green-700 dark:border-l-green-400",
+  soon: "border-l-amber-500 dark:border-l-amber-400",
+  optional: "border-l-blue-600 dark:border-l-blue-400",
 }
 const SEVERITY_LABEL: Record<ReminderSeverity, string> = {
   urgent: "bg-red-700 text-white dark:bg-red-400 dark:text-red-950",
-  soon: "bg-orange-700 text-white dark:bg-orange-400 dark:text-orange-950",
-  optional: "bg-green-800 text-white dark:bg-green-400 dark:text-green-950",
+  soon: "bg-amber-400 text-amber-950 dark:bg-amber-400 dark:text-amber-950",
+  optional: "bg-blue-700 text-white dark:bg-blue-400 dark:text-blue-950",
+}
+const SEVERITY_ICON: Record<ReminderSeverity, LucideIcon> = {
+  urgent: OctagonAlert,
+  soon: Clock,
+  optional: Info,
 }
 
 // One icon per kind of notice, taken from the start of the audit action
@@ -165,6 +173,7 @@ function ReminderRow({
   onAction: (id: SetupReminder["id"]) => void
 }) {
   const { t } = useTranslation()
+  const SeverityIcon = SEVERITY_ICON[reminder.severity]
   return (
     <li
       data-testid={reminder.testId}
@@ -172,8 +181,9 @@ function ReminderRow({
       className={`mx-3 mb-2 rounded-md border border-l-4 bg-card px-3 py-3 text-card-foreground last:mb-3 ${SEVERITY_STRIPE[reminder.severity]}`}
     >
       <p
-        className={`mb-1.5 inline-block rounded-sm px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${SEVERITY_LABEL[reminder.severity]}`}
+        className={`mb-1.5 inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide ${SEVERITY_LABEL[reminder.severity]}`}
       >
+        <SeverityIcon aria-hidden="true" className="size-3" />
         {t(`notifications.priority.${reminder.severity}`)}
       </p>
       {reminder.title ? (
@@ -444,7 +454,7 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
           align="end"
           sideOffset={8}
           collisionPadding={8}
-          className="max-h-[min(34rem,var(--radix-dropdown-menu-content-available-height))] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto p-0"
+          className="max-h-[min(34rem,var(--radix-dropdown-menu-content-available-height))] w-[min(25rem,calc(100vw-1.5rem))] overflow-y-auto p-0"
         >
           <div className="sticky top-0 z-10 bg-popover">
             <div className="flex items-center justify-between gap-2 border-t-2 border-t-brand px-3 py-2.5">
