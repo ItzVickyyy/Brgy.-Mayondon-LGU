@@ -6,13 +6,18 @@ import {
 } from "@tanstack/react-query"
 import type { ParseKeys, TFunction } from "i18next"
 import {
+  Archive,
+  ArchiveRestore,
+  Ban,
   CalendarDays,
   Download,
+  Eye,
   FileCheck2,
   FilePenLine,
   FileText,
   Printer,
   Search,
+  Trash2,
   X,
 } from "lucide-react"
 import { useEffect, useState } from "react"
@@ -840,7 +845,7 @@ export function IssuanceHistory({
                                   <Button
                                     type="button"
                                     size="sm"
-                                    variant="outline"
+                                    variant="tintBlue"
                                     disabled={!canReprint}
                                     aria-label={t(
                                       "issuances.history.actions.printFor",
@@ -861,7 +866,7 @@ export function IssuanceHistory({
                                   <Button
                                     type="button"
                                     size="sm"
-                                    variant="outline"
+                                    variant="tintGreen"
                                     disabled={!canReprint}
                                     aria-label={t(
                                       "issuances.history.actions.exportFor",
@@ -886,7 +891,8 @@ export function IssuanceHistory({
                             }
                             primary={{
                               label: t("issuances.history.actions.view"),
-                              variant: "outline",
+                              variant: "tintTeal",
+                              icon: <Eye aria-hidden="true" />,
                               onSelect: () => setViewItem(item),
                             }}
                             items={[
@@ -917,6 +923,12 @@ export function IssuanceHistory({
                               },
                               {
                                 label: t("issuances.history.actions.archive"),
+                                icon: (
+                                  <Archive
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
                                 adminOnly: true,
                                 hidden: isDraft || isArchived,
                                 onSelect: () =>
@@ -924,6 +936,12 @@ export function IssuanceHistory({
                               },
                               {
                                 label: t("issuances.history.actions.restore"),
+                                icon: (
+                                  <ArchiveRestore
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
                                 adminOnly: true,
                                 hidden: !isArchived,
                                 onSelect: () =>
@@ -931,6 +949,12 @@ export function IssuanceHistory({
                               },
                               {
                                 label: t("issuances.history.actions.void"),
+                                icon: (
+                                  <Ban
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
                                 adminOnly: true,
                                 hidden: !isIssued,
                                 destructive: true,
@@ -939,6 +963,12 @@ export function IssuanceHistory({
                               },
                               {
                                 label: t("issuances.history.actions.discard"),
+                                icon: (
+                                  <Trash2
+                                    aria-hidden="true"
+                                    className="size-4"
+                                  />
+                                ),
                                 hidden: !isDraft,
                                 destructive: true,
                                 onSelect: () =>

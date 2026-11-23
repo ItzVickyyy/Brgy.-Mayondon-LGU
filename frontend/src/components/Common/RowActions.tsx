@@ -24,7 +24,13 @@ export type RowActionItem = {
 export type RowPrimaryAction = {
   label: string
   onSelect: () => void
-  variant?: "default" | "outline" | "secondary"
+  variant?:
+    | "default"
+    | "outline"
+    | "secondary"
+    | "tintBlue"
+    | "tintGreen"
+    | "tintTeal"
   disabled?: boolean
   title?: string
   icon?: ReactNode
