@@ -70,8 +70,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
         <Toaster
-          richColors
           closeButton
+          visibleToasts={4}
+          duration={5000}
+          gap={10}
           position="top-right"
           offset={{ top: 72, right: 16 }}
           mobileOffset={{ top: 72, right: 16, left: 16 }}

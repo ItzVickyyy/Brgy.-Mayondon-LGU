@@ -10,12 +10,15 @@ const useCustomToast = () => {
   const showSuccessToast = (description: string) => {
     toast.success(t("common.toast.success"), {
       description,
+      duration: 4000,
     })
   }
 
   const showErrorToast = (description: string) => {
+    // Errors stay longer: there is something to read and possibly act on.
     toast.error(t("common.toast.error"), {
       description,
+      duration: 8000,
     })
   }
 

@@ -117,7 +117,7 @@ export function useUserColumns(): ColumnDef<
           </span>
         ),
         cell: ({ row }) => (
-          <div className="flex justify-center">
+          <div className="flex justify-end">
             <UserActionsMenu key={row.original.id} user={row.original} />
           </div>
         ),

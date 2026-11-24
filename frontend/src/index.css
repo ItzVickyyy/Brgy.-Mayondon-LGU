@@ -679,6 +679,67 @@ tr:focus-within > .row-hover-cell {
   }
 }
 
+/* Toasts: one calm card per message with a coloured edge and icon. The colour
+   comes from the same tokens as the rest of the app, so light and dark follow
+   the theme. Sonner's own "rich colors" are not used. */
+[data-sonner-toast].app-toast {
+  --toast-accent: var(--muted-foreground);
+  --normal-bg: color-mix(in oklab, var(--toast-accent) 9%, var(--popover));
+  --normal-border: color-mix(in oklab, var(--toast-accent) 35%, var(--border));
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px 14px 14px;
+  border-left: 4px solid var(--toast-accent);
+  box-shadow:
+    0 8px 24px -8px rgb(0 0 0 / 0.25),
+    0 2px 6px rgb(0 0 0 / 0.08);
+  --toast-close-button-start: unset;
+  --toast-close-button-end: 0;
+  --toast-close-button-transform: translate(35%, -35%);
+}
+[data-sonner-toast].app-toast[data-type="success"] {
+  --toast-accent: var(--stat-green);
+}
+[data-sonner-toast].app-toast[data-type="error"] {
+  --toast-accent: var(--destructive);
+}
+[data-sonner-toast].app-toast[data-type="warning"] {
+  --toast-accent: var(--stat-amber);
+}
+[data-sonner-toast].app-toast[data-type="info"] {
+  --toast-accent: var(--stat-blue);
+}
+[data-sonner-toast].app-toast [data-icon] {
+  margin: 1px 0 0;
+  color: color-mix(
+    in oklab,
+    var(--toast-accent) 78%,
+    var(--popover-foreground)
+  );
+}
+[data-sonner-toast].app-toast [data-title] {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--popover-foreground);
+}
+[data-sonner-toast].app-toast [data-description] {
+  margin-top: 2px;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: color-mix(in oklab, var(--popover-foreground) 78%, transparent);
+}
+[data-sonner-toast].app-toast [data-close-button] {
+  border-color: var(--border);
+  background: var(--popover);
+  color: var(--popover-foreground);
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-sonner-toast].app-toast {
+    transition: none;
+  }
+}
+
 /* Management Reports print: the page script adds "report-printing" to the body
    while it prints, so nothing else in the app is affected. */
 @media print {
