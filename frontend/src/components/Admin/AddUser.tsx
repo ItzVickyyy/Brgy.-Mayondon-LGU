@@ -45,6 +45,7 @@ import { Input } from "@/components/ui/input"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { DEFAULT_PASSWORD } from "@/config/site"
 import useCustomToast from "@/hooks/useCustomToast"
+import { ruleProps } from "@/lib/inputRules"
 import { handleError } from "@/utils"
 
 // Endings the server's address check refuses (reserved names). Any other
@@ -251,8 +252,8 @@ const AddUser = () => {
                             <Input
                               placeholder={t("account.placeholders.firstName")}
                               type="text"
-                              maxLength={100}
                               {...field}
+                              {...ruleProps("name", field.onChange, 100)}
                             />
                           </FormControl>
                           <FormMessage />
@@ -271,8 +272,8 @@ const AddUser = () => {
                             <Input
                               placeholder={t("account.placeholders.middleName")}
                               type="text"
-                              maxLength={100}
                               {...field}
+                              {...ruleProps("name", field.onChange, 100)}
                             />
                           </FormControl>
                           <FormMessage />
@@ -292,8 +293,8 @@ const AddUser = () => {
                             <Input
                               placeholder={t("account.placeholders.lastName")}
                               type="text"
-                              maxLength={100}
                               {...field}
+                              {...ruleProps("name", field.onChange, 100)}
                             />
                           </FormControl>
                           <FormMessage />
@@ -314,8 +315,8 @@ const AddUser = () => {
                                 "account.placeholders.extensionName",
                               )}
                               type="text"
-                              maxLength={20}
                               {...field}
+                              {...ruleProps("name", field.onChange, 20)}
                             />
                           </FormControl>
                           <FormMessage />

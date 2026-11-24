@@ -1038,7 +1038,11 @@
       "requiredMark": "kailangan",
       "errors": {
         "firstName": "Ilagay ang unang pangalan.",
-        "lastName": "Ilagay ang apelyido."
+        "lastName": "Ilagay ang apelyido.",
+        "purok": "Gumamit ng bilang mula 1 hanggang 99.",
+        "year": "Taon mula 1900 hanggang {{year}}.",
+        "phone": "Gumamit ng 7 hanggang 13 digit.",
+        "checkFields": "Pakiayusin muna ang mga may markang kahon bago i-save."
       }
     },
     "profile": {
@@ -2773,6 +2777,7 @@
       "more": "Higit pang aksyon para kay {{name}}"
     },
     "dialogs": {
+      "shortcutHint": "Shortcut: {{key}}",
       "shortcutsTitle": "Mga keyboard shortcut",
       "shortcutsDescription": "Hindi gagana ang mga shortcut habang nagta-type ka sa isang field.",
       "helpTitle": "Humingi ng tulong",
@@ -2787,8 +2792,10 @@
         "Pumunta sa Dashboard",
         "Pumunta sa Pamamahala ng mga Talaan",
         "Pumunta sa Pamamahala ng Pag-isyu",
+        "Pumunta sa Pamamahala ng mga Ulat",
         "Pumunta sa Talaan ng Aktibidad",
-        "Magsimula ng Bagong Pag-isyu sa pahina ng Pag-isyu",
+        "Magdagdag ng bago: Bagong Pag-isyu, o Magdagdag ng Residente sa Mga Talaan",
+        "I-isyu at i-print (sa loob ng window ng Bagong Pag-isyu)",
         "Ipakita o itago ang sidebar",
         "Pumunta sa susunod na control",
         "Pumunta sa naunang control",

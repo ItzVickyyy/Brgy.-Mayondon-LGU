@@ -18,6 +18,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import useCustomToast from "@/hooks/useCustomToast"
+import { sanitize } from "@/lib/inputRules"
 import { handleError } from "@/utils"
 
 type ProfileForm = {
@@ -630,15 +631,25 @@ export function MyAccountModal({
                               onChange={(event) =>
                                 setAddressParts((previous) => ({
                                   ...previous,
-                                  [field.key]: event.target.value,
+                                  [field.key]:
+                                    field.key === "zip_code"
+                                      ? sanitize(
+                                          "digits",
+                                          event.target.value,
+                                          4,
+                                        )
+                                      : event.target.value,
                                 }))
+                              }
+                              inputMode={
+                                field.key === "zip_code" ? "numeric" : undefined
                               }
                               placeholder={
                                 field.placeholder
                                   ? t(field.placeholder)
                                   : undefined
                               }
-                              maxLength={field.key === "zip_code" ? 10 : 255}
+                              maxLength={field.key === "zip_code" ? 4 : 255}
                               className="min-h-11 bg-background"
                             />
                           </div>

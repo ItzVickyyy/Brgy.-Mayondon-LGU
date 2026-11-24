@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { CheckCircle2, ChevronDown, CircleAlert, Clock, FileDown, FileType, Keyboard, LoaderCircle, Printer, Search } from "lucide-react"
-import { type ReactNode, useEffect, useMemo, useRef, useState } from "react"
+import { type ChangeEvent, type ReactNode, useEffect, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { BarangayIdsService } from "@/client"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
@@ -15,6 +15,7 @@ import { ISSUE_DATE_MAX_DAYS_BACK } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { defaultIdValidUntil, idValidityNoteKey } from "@/lib/idValidity"
+import { ruleProps, sanitize } from "@/lib/inputRules"
 import { calculateAge, formatPrintedName } from "@/lib/issuance-format"
 import { documentName, fieldHelp, fieldLabel, fieldOptionLabel, validationMessage } from "@/lib/issuanceLabels"
 import { formatLocaleDate, getLocaleOr } from "@/lib/locale"
@@ -476,7 +477,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     } else if (field.type === "date") {
       control = <DateField id={fieldId} value={String(value)} min={field.group === "identity" || field.group === "payment" ? "1900-01-01" : undefined} max={field.group === "identity" || field.group === "payment" ? localIsoDate() : undefined} onChange={onValueChange as (next: string) => void} invalid={invalid} describedBy={describedBy} message={message} messageId={`${fieldId}-error`} />
     } else {
-      control = <input id={fieldId} type={field.type === "number" ? "number" : "text"} value={String(value)} onChange={(event) => onValueChange(event.target.value)} className={cn(formControlClass, invalid && "border-destructive")} aria-invalid={invalid} aria-describedby={describedBy} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} readOnly={field.readOnly || (autoIdNumber && !canTypeIdNumber)} placeholder={autoIdNumber ? (canTypeIdNumber ? t("issuances.new.series.adminPlaceholder", { number: seriesQuery.data?.preview ?? "" }) : t("issuances.new.series.placeholder")) : undefined} />
+      control = <input id={fieldId} type="text" inputMode={field.type === "number" ? "numeric" : undefined} value={String(value)} onChange={(event) => onValueChange(field.type === "number" ? sanitize("digits", event.target.value) : event.target.value)} {...(field.rule ? ruleProps(field.rule, onValueChange) : {})} className={cn(formControlClass, invalid && "border-destructive")} aria-invalid={invalid} aria-describedby={describedBy} disabled={field.name === "officialReceiptNo" && Boolean(payment?.isFree)} readOnly={field.readOnly || (autoIdNumber && !canTypeIdNumber)} placeholder={autoIdNumber ? (canTypeIdNumber ? t("issuances.new.series.adminPlaceholder", { number: seriesQuery.data?.preview ?? "" }) : t("issuances.new.series.placeholder")) : undefined} />
     }
     return <div key={field.name} className={fieldLabelClass}>
       {field.type === "multiselect" ? <span id={`${fieldId}-label`}>{labelText}</span> : <label htmlFor={fieldId}>{labelText}</label>}
@@ -934,7 +935,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     if (need === "residentSince") {
       const sinceBirth = Boolean(residentUpdates.residentSinceBirth ?? selectedResident.residentSinceBirth)
       return <div key={need} className="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-        <label className={fieldLabelClass}>{t("issuances.new.resident.fields.livingSince")}<input id="resident-missing-residentSince" type="number" min="1900" max={new Date().getFullYear()} placeholder={t("issuances.new.resident.yearExample")} value={sinceBirth ? "" : String(residentUpdates.residentSince ?? "")} onChange={(event) => patch({ residentSince: event.target.value ? Number(event.target.value) : undefined, residentSinceBirth: false })} className={formControlClass} disabled={sinceBirth} /></label>
+        <label className={fieldLabelClass}>{t("issuances.new.resident.fields.livingSince")}<input id="resident-missing-residentSince" placeholder={t("issuances.new.resident.yearExample")} value={sinceBirth ? "" : String(residentUpdates.residentSince ?? "")} {...ruleProps("year", (next) => patch({ residentSince: next ? Number(next) : undefined, residentSinceBirth: false }))} className={formControlClass} disabled={sinceBirth} /></label>
         <CheckField label={t("issuances.new.resident.fields.sinceBirth")} checked={sinceBirth} onChange={(checked) => patch({ residentSinceBirth: checked, residentSince: checked ? 0 : undefined })} />
       </div>
     }
@@ -953,7 +954,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       return <div key={need} className="space-y-2">
         <p className="text-sm font-medium">{t("issuances.new.resident.missing.emergencyTitle")}</p>
         <div className="grid gap-3 sm:grid-cols-3">
-          {(["name", "address", "phone"] as const).map((part) => <label key={part} className={fieldLabelClass}>{part === "phone" ? t("issuances.new.resident.missing.contactNumber") : part === "name" ? t("issuances.new.resident.missing.fullName") : t("issuances.new.resident.missing.address")}<input id={part === "name" ? "resident-missing-emergencyContact" : undefined} value={current[part]} onChange={(event) => patch({ emergencyContact: { ...current, [part]: event.target.value } })} className={formControlClass} autoComplete="off" /></label>)}
+          {(["name", "address", "phone"] as const).map((part) => <label key={part} className={fieldLabelClass}>{part === "phone" ? t("issuances.new.resident.missing.contactNumber") : part === "name" ? t("issuances.new.resident.missing.fullName") : t("issuances.new.resident.missing.address")}<input id={part === "name" ? "resident-missing-emergencyContact" : undefined} value={current[part]} {...(part === "address" ? { onChange: (event: ChangeEvent<HTMLInputElement>) => patch({ emergencyContact: { ...current, [part]: event.target.value } }) } : ruleProps(part === "phone" ? "phone" : "name", (next) => patch({ emergencyContact: { ...current, [part]: next } })))} className={formControlClass} /></label>)}
         </div>
       </div>
     }
@@ -1231,7 +1232,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                     <div className={fieldLabelClass}><label htmlFor="quickadd-purok">{t("issuances.new.resident.fields.purok")}</label><SelectField id="quickadd-purok" value={String(quickAdd.purok)} onChange={(next) => setQuickAdd((previous) => ({ ...previous, purok: Number(next) }))} options={purokChoices} /></div>
                   </div>
                   <div className="grid items-end gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
-                    <label className={fieldLabelClass}>{t("issuances.new.resident.fields.livingSince")}<input type="number" min="1900" max={new Date().getFullYear()} placeholder={t("issuances.new.resident.yearExample")} value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} onChange={(event) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: event.target.value ? Number(event.target.value) : undefined }))} className={formControlClass} /></label>
+                    <label className={fieldLabelClass}>{t("issuances.new.resident.fields.livingSince")}<input placeholder={t("issuances.new.resident.yearExample")} value={quickAdd.residentSinceYear ?? ""} disabled={quickAdd.residentSinceBirth} {...ruleProps("year", (next) => setQuickAdd((previous) => ({ ...previous, residentSinceYear: next ? Number(next) : undefined })))} className={formControlClass} /></label>
                     <CheckField label={t("issuances.new.resident.fields.sinceBirth")} checked={quickAdd.residentSinceBirth} onChange={(checked) => setQuickAdd((previous) => ({ ...previous, residentSinceBirth: checked, residentSinceYear: undefined }))} />
                   </div>
                   <div className="flex flex-wrap justify-end gap-2"><Button type="button" variant="ghost" disabled={!quickAddHasValues() || quickSaving} onClick={() => { if (editingResident && selectedResident) { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }) } else setQuickAdd(emptyQuickAdd); setQuickAttempted(false); setQuickDuplicateSignature(null) }}>{editingResident ? t("issuances.new.resident.buttons.resetChanges") : t("issuances.new.resident.buttons.clear")}</Button>{!editingResident && quickDuplicateSignature === JSON.stringify(quickAdd) ? <Button type="button" variant="outline" disabled={quickSaving} onClick={() => void createResident(true)}>{quickSaving ? t("issuances.new.resident.buttons.saving") : t("issuances.new.resident.buttons.saveAnyway")}</Button> : null}<Button type="button" disabled={quickSaving} onClick={() => void createResident()}>{quickSaving ? t("issuances.new.resident.buttons.saving") : editingResident ? t("issuances.new.resident.buttons.saveChanges") : t("issuances.new.resident.buttons.saveAndSelect")}</Button></div>

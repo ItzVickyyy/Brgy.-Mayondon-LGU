@@ -5,6 +5,7 @@ import { CalibrationSheet } from "@/components/Issuances/CalibrationSheet"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { blockNumberBoxJunk } from "@/lib/inputRules"
 import { notify } from "@/lib/notifications"
 import {
   clampOffset,
@@ -83,6 +84,7 @@ export function CalibrationPanel() {
             min={-MAX_OFFSET_PT}
             max={MAX_OFFSET_PT}
             value={offset.x}
+            onKeyDown={blockNumberBoxJunk}
             onChange={(e) => change("x", e.target.value)}
           />
         </div>
@@ -97,6 +99,7 @@ export function CalibrationPanel() {
             min={-MAX_OFFSET_PT}
             max={MAX_OFFSET_PT}
             value={offset.y}
+            onKeyDown={blockNumberBoxJunk}
             onChange={(e) => change("y", e.target.value)}
           />
         </div>

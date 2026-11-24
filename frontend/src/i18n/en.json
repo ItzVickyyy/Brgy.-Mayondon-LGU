@@ -1038,7 +1038,11 @@
       "requiredMark": "required",
       "errors": {
         "firstName": "Enter the first name.",
-        "lastName": "Enter the last name."
+        "lastName": "Enter the last name.",
+        "purok": "Use a number from 1 to 99.",
+        "year": "Use a year from 1900 to {{year}}.",
+        "phone": "Use 7 to 13 digits.",
+        "checkFields": "Please correct the highlighted boxes before saving."
       }
     },
     "profile": {
@@ -2773,6 +2777,7 @@
       "more": "More actions for {{name}}"
     },
     "dialogs": {
+      "shortcutHint": "Shortcut: {{key}}",
       "shortcutsTitle": "Keyboard shortcuts",
       "shortcutsDescription": "Shortcuts do not work while you are typing in a box.",
       "helpTitle": "Get help",
@@ -2787,8 +2792,10 @@
         "Go to Dashboard",
         "Go to Records Management",
         "Go to Issuance Management",
+        "Go to Management Reports",
         "Go to Activity Log",
-        "Start a New Issuance (on the Issuance page)",
+        "Add new: New Issuance, or Add Resident on Records",
+        "Issue and print (inside the New Issuance window)",
         "Show or hide the sidebar",
         "Move to the next control",
         "Move to the previous control",

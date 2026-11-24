@@ -7,8 +7,16 @@ export const SHORTCUTS: ShortcutItem[] = [
   { keys: ["G", "then", "D"], description: "Go to Dashboard" },
   { keys: ["G", "then", "R"], description: "Go to Records Management" },
   { keys: ["G", "then", "I"], description: "Go to Issuance Management" },
+  { keys: ["G", "then", "M"], description: "Go to Management Reports" },
   { keys: ["G", "then", "A"], description: "Go to Activity Log" },
-  { keys: ["N"], description: "Start a New Issuance (on the Issuance page)" },
+  {
+    keys: ["N"],
+    description: "Add new: New Issuance, or Add Resident on Records",
+  },
+  {
+    keys: ["Ctrl", "+", "Enter"],
+    description: "Issue and print (inside the New Issuance window)",
+  },
   { keys: ["Ctrl", "+", "B"], description: "Show or hide the sidebar" },
   { keys: ["Tab"], description: "Move to the next control" },
   { keys: ["Shift", "+", "Tab"], description: "Move to the previous control" },
@@ -18,10 +26,11 @@ export const SHORTCUTS: ShortcutItem[] = [
 /** Second key after G, mapped to a page. */
 export const GO_TO: Record<
   string,
-  "/" | "/records" | "/issuances" | "/activity-log"
+  "/" | "/records" | "/issuances" | "/reports" | "/activity-log"
 > = {
   d: "/",
   r: "/records",
   i: "/issuances",
+  m: "/reports",
   a: "/activity-log",
 }

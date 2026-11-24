@@ -255,7 +255,13 @@ function RecordsManagement() {
             {t("records.subtitle")}
           </p>
         </div>
-        <Button variant="cta" size="cta" onClick={() => openForm(null)}>
+        <Button
+          variant="cta"
+          size="cta"
+          data-shortcut="new-resident"
+          title={t("common.dialogs.shortcutHint", { key: "N" })}
+          onClick={() => openForm(null)}
+        >
           <UserRound aria-hidden="true" />
           {t("records.addResident")}
         </Button>

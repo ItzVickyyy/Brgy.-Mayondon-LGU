@@ -5,6 +5,7 @@ import {
   indigencyPurposeOptions,
   indigencySectorOptions,
 } from "@/components/Issuances/config"
+import type { InputRule } from "@/lib/inputRules"
 
 export type DocumentCode =
   | "BARANGAY_CLEARANCE"
@@ -41,6 +42,8 @@ export type DetailFieldConfig = {
   maxSelected?: number
   /** Shown but not editable; the value comes from the signed-in account. */
   readOnly?: boolean
+  /** What may be typed: see `lib/inputRules.ts`. Leave out for free text. */
+  rule?: InputRule
 }
 
 export type DocumentConfig = {
@@ -92,6 +95,7 @@ const identityFields: DetailFieldConfig[] = [
     name: "idNumber",
     label: "ID number",
     type: "text",
+    rule: "code",
     required: true,
     group: "identity",
   },
@@ -126,6 +130,7 @@ const ctcFields: DetailFieldConfig[] = [
     name: "idNumber",
     label: "CTC number",
     type: "text",
+    rule: "code",
     required: true,
     group: "identity",
   },
@@ -151,6 +156,7 @@ const paymentFields: DetailFieldConfig[] = [
     name: "officialReceiptNo",
     label: "Official receipt no.",
     type: "text",
+    rule: "code",
     required: true,
     group: "payment",
   },
@@ -251,6 +257,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
         name: "motorNumber",
         label: "Motor no.",
         type: "text",
+        rule: "code",
         required: true,
         group: "main",
       },
@@ -265,6 +272,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
         name: "plateNumber",
         label: "Plate no.",
         type: "text",
+        rule: "code",
         required: true,
         group: "main",
       },
@@ -560,6 +568,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
         name: "idNumber",
         label: "Barangay ID number",
         type: "text",
+        rule: "code",
         required: true,
         group: "main",
         help: "Type the number printed on the card. Leave it as shown to keep the resident's current number.",

@@ -29,6 +29,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import {
+  isValidPhone,
+  isValidPurok,
+  isValidYear,
+  ruleProps,
+} from "@/lib/inputRules"
 import { civilStatusLabel } from "@/lib/residentLabels"
 import {
   civilStatuses,
@@ -247,6 +253,16 @@ export function ResidentFormDialog({
 
   async function submit(confirmDuplicate: boolean) {
     if (submitting.current) return
+    if (
+      (form.emergency_contact_phone &&
+        !isValidPhone(form.emergency_contact_phone)) ||
+      !isValidPurok(form.purok) ||
+      (!form.resident_since_birth && !isValidYear(form.resident_since_year))
+    ) {
+      setSubmitted(true)
+      setError(t("records.form.errors.checkFields"))
+      return
+    }
     submitting.current = true
     setSaving(true)
     setError("")
@@ -391,7 +407,7 @@ export function ResidentFormDialog({
                   <input
                     id="resident-form-first-name"
                     value={form.first_name}
-                    onChange={(event) => set("first_name", event.target.value)}
+                    {...ruleProps("name", (next) => set("first_name", next))}
                     className={formControlClass}
                     required
                     aria-invalid={showFirstError || undefined}
@@ -409,7 +425,7 @@ export function ResidentFormDialog({
                   {t("records.form.middleName")}
                   <input
                     value={form.middle_name}
-                    onChange={(event) => set("middle_name", event.target.value)}
+                    {...ruleProps("name", (next) => set("middle_name", next))}
                     className={formControlClass}
                   />
                 </label>
@@ -421,7 +437,7 @@ export function ResidentFormDialog({
                   <input
                     id="resident-form-last-name"
                     value={form.last_name}
-                    onChange={(event) => set("last_name", event.target.value)}
+                    {...ruleProps("name", (next) => set("last_name", next))}
                     className={formControlClass}
                     required
                     aria-invalid={showLastError || undefined}
@@ -604,29 +620,47 @@ export function ResidentFormDialog({
                 <label className={labelClass}>
                   {t("records.form.purok")}
                   <input
-                    type="number"
-                    min={1}
                     value={form.purok}
-                    onChange={(event) => set("purok", event.target.value)}
+                    {...ruleProps("digits", (next) => set("purok", next), 2)}
+                    aria-invalid={!isValidPurok(form.purok) || undefined}
                     className={formControlClass}
                   />
+                  <FieldError>
+                    {isValidPurok(form.purok)
+                      ? null
+                      : t("records.form.errors.purok")}
+                  </FieldError>
                 </label>
               </div>
               <div className="grid items-end gap-4 sm:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
                 <label className={labelClass}>
                   {t("records.form.residentSince")}
                   <input
-                    type="number"
-                    min={1900}
                     value={
                       form.resident_since_birth ? "" : form.resident_since_year
                     }
                     disabled={form.resident_since_birth}
-                    onChange={(event) =>
-                      set("resident_since_year", event.target.value)
+                    {...ruleProps("year", (next) =>
+                      set("resident_since_year", next),
+                    )}
+                    aria-invalid={
+                      !form.resident_since_birth &&
+                      form.resident_since_year.length === 4 &&
+                      !isValidYear(form.resident_since_year)
+                        ? true
+                        : undefined
                     }
                     className={formControlClass}
                   />
+                  <FieldError>
+                    {form.resident_since_birth ||
+                    form.resident_since_year.length < 4 ||
+                    isValidYear(form.resident_since_year)
+                      ? null
+                      : t("records.form.errors.year", {
+                          year: new Date().getFullYear(),
+                        })}
+                  </FieldError>
                 </label>
                 <label className="flex min-h-11 items-center gap-2 text-sm font-normal">
                   <input
@@ -740,9 +774,9 @@ export function ResidentFormDialog({
                 {t("records.form.emergency.name")}
                 <input
                   value={form.emergency_contact_name}
-                  onChange={(event) =>
-                    set("emergency_contact_name", event.target.value)
-                  }
+                  {...ruleProps("name", (next) =>
+                    set("emergency_contact_name", next),
+                  )}
                   className={formControlClass}
                 />
               </label>
@@ -760,11 +794,24 @@ export function ResidentFormDialog({
                 {t("records.form.emergency.phone")}
                 <input
                   value={form.emergency_contact_phone}
-                  onChange={(event) =>
-                    set("emergency_contact_phone", event.target.value)
+                  {...ruleProps("phone", (next) =>
+                    set("emergency_contact_phone", next),
+                  )}
+                  placeholder="09XX XXX XXXX"
+                  aria-invalid={
+                    form.emergency_contact_phone &&
+                    !isValidPhone(form.emergency_contact_phone)
+                      ? true
+                      : undefined
                   }
                   className={formControlClass}
                 />
+                <FieldError>
+                  {form.emergency_contact_phone &&
+                  !isValidPhone(form.emergency_contact_phone)
+                    ? t("records.form.errors.phone")
+                    : null}
+                </FieldError>
               </label>
             </ModalSection>
 

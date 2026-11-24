@@ -66,7 +66,7 @@ export function KeyboardShortcuts() {
         goTimer.current = window.setTimeout(stopWaiting, GO_TIMEOUT_MS)
       } else if (event.key.toLowerCase() === "n") {
         const button = document.querySelector<HTMLButtonElement>(
-          '[data-shortcut="new-issuance"]',
+          '[data-shortcut="new-issuance"], [data-shortcut="new-resident"]',
         )
         if (button && !button.disabled) {
           event.preventDefault()

@@ -73,6 +73,7 @@ function IssuancesManagement() {
             size="cta"
             className="w-full sm:w-auto"
             data-shortcut="new-issuance"
+            title={t("common.dialogs.shortcutHint", { key: "N" })}
             onClick={() => setIsSimplifiedDialogOpen(true)}
           >
             <Plus aria-hidden="true" />
