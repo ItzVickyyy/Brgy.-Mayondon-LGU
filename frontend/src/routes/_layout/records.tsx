@@ -56,8 +56,15 @@ export const Route = createFileRoute("/_layout/records")({
   component: RecordsManagement,
   validateSearch: (
     search: Record<string, unknown>,
-  ): { view?: "barangay-ids" } =>
-    search.view === "barangay-ids" ? { view: "barangay-ids" } : {},
+  ): { view?: "barangay-ids"; q?: string } => ({
+    ...(search.view === "barangay-ids"
+      ? { view: "barangay-ids" as const }
+      : {}),
+    // Ctrl+K hands over the name to look for.
+    ...(typeof search.q === "string" && search.q.trim()
+      ? { q: search.q.trim().slice(0, 100) }
+      : {}),
+  }),
   head: () => ({ meta: [{ title: pageTitle("Records Management") }] }),
 })
 
@@ -86,11 +93,11 @@ const residentColumns: ResidentColumn[] = [
 
 function RecordsManagement() {
   const { t } = useTranslation()
-  const initialView = Route.useSearch().view
+  const { view: initialView, q: initialQuery } = Route.useSearch()
   const queryClient = useQueryClient()
   const [view, setView] = useState<View>(initialView ?? "residents")
-  const [search, setSearch] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [search, setSearch] = useState(initialQuery ?? "")
+  const [debouncedSearch, setDebouncedSearch] = useState(initialQuery ?? "")
   const [pageIndex, setPageIndex] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [archiveTarget, setArchiveTarget] = useState<ResidentPublic | null>(
@@ -107,6 +114,13 @@ function RecordsManagement() {
   const [profileTab, setProfileTab] = useState("Details")
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
+
+  // Ctrl+K while already on this page: show the person that was picked.
+  useEffect(() => {
+    if (initialQuery === undefined) return
+    setSearch(initialQuery)
+    setView("residents")
+  }, [initialQuery])
 
   useEffect(() => {
     const timer = window.setTimeout(

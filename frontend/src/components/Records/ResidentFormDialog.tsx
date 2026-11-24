@@ -29,12 +29,18 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import useAuth from "@/hooks/useAuth"
 import {
   isValidPhone,
   isValidPurok,
   isValidYear,
   ruleProps,
 } from "@/lib/inputRules"
+import {
+  clearResidentDraft,
+  readResidentDraft,
+  writeResidentDraft,
+} from "@/lib/residentDraft"
 import { civilStatusLabel } from "@/lib/residentLabels"
 import {
   civilStatuses,
@@ -222,6 +228,9 @@ export function ResidentFormDialog({
   onSaved,
 }: ResidentFormDialogProps) {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  const userId = user?.id
+  const [draftBack, setDraftBack] = useState(false)
   const [form, setForm] = useState<FormState>(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState("")
@@ -237,13 +246,33 @@ export function ResidentFormDialog({
 
   useEffect(() => {
     if (!open) return
-    setForm(resident ? formFromResident(resident) : emptyForm())
+    const draft =
+      !resident && userId ? readResidentDraft(userId, emptyForm()) : null
+    setDraftBack(Boolean(draft))
+    setForm(
+      resident ? formFromResident(resident) : (draft?.form ?? emptyForm()),
+    )
     setError("")
     setDuplicate(false)
     setMatches([])
     setSubmitted(false)
     setPhotoDataUrl("")
-  }, [open, resident])
+  }, [open, resident, userId])
+
+  // A new resident being typed is kept as a draft; an empty form leaves none.
+  useEffect(() => {
+    if (!open || resident || !userId) return
+    if (JSON.stringify(form) === JSON.stringify(emptyForm())) {
+      clearResidentDraft(userId)
+    } else writeResidentDraft(userId, form)
+  }, [form, open, resident, userId])
+
+  function discardDraft() {
+    if (userId) clearResidentDraft(userId)
+    setForm(emptyForm())
+    setDraftBack(false)
+    setSubmitted(false)
+  }
 
   function set<K extends keyof FormState>(key: K, value: FormState[K]) {
     setForm((current) => ({ ...current, [key]: value }))
@@ -334,6 +363,7 @@ export function ResidentFormDialog({
         resident !== null &&
         !photoDataUrl &&
         saved.updated_at === resident.updated_at
+      if (!resident && userId) clearResidentDraft(userId)
       onSaved(
         saved,
         resident ? (unchanged ? "unchanged" : "updated") : "created",
@@ -368,6 +398,24 @@ export function ResidentFormDialog({
           </DialogTitle>
           <DialogDescription>{t("records.form.description")}</DialogDescription>
         </DialogHeader>
+
+        {draftBack && !resident ? (
+          <div
+            data-testid="resident-draft-notice"
+            className="flex flex-wrap items-center justify-between gap-2 border-b bg-muted/40 px-5 py-2 text-sm sm:px-6"
+          >
+            <span>{t("records.form.draft.restored")}</span>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              data-testid="resident-draft-discard"
+              onClick={discardDraft}
+            >
+              {t("records.form.draft.discard")}
+            </Button>
+          </div>
+        ) : null}
 
         <form
           className="flex min-h-0 flex-1 flex-col"

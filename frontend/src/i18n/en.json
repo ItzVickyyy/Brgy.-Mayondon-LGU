@@ -1034,6 +1034,10 @@
       "saving": "Saving...",
       "saveChanges": "Save changes",
       "addSubmit": "Add resident",
+      "draft": {
+        "restored": "Your unsaved entry from earlier was brought back.",
+        "discard": "Discard draft"
+      },
       "requiredNote": "Fields marked with * are required.",
       "requiredMark": "required",
       "errors": {

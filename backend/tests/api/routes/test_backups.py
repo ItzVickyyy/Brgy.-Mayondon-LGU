@@ -243,8 +243,9 @@ def test_verify_reports_a_missing_file(
     assert result["file_exists"] is False
 
 
+@pytest.mark.usefixtures("backup_folder")
 def test_old_missing_file_failure_heals_when_the_file_is_back(
-    client: TestClient, superuser_token_headers: dict[str, str], backup_folder: Path
+    client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     made = _make(client, superuser_token_headers)
     with Session(engine) as session:

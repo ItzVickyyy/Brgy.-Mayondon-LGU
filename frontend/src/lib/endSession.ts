@@ -3,6 +3,8 @@
  * forgets it in this browser. The browser part always happens; the server part is best effort
  * (it still runs while the page is being left) and never shows an error.
  */
+import { clearAllResidentDrafts } from "@/lib/residentDraft"
+
 const TOKEN_KEY = "access_token"
 
 export function endSession(): void {
@@ -10,6 +12,7 @@ export function endSession(): void {
   try {
     token = localStorage.getItem(TOKEN_KEY)
     localStorage.removeItem(TOKEN_KEY)
+    clearAllResidentDrafts()
   } catch {
     // Storage blocked: nothing to end here.
   }

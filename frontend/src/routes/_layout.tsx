@@ -22,6 +22,7 @@ import { IdleSignOut } from "@/components/Common/IdleSignOut"
 import { KeyboardShortcuts } from "@/components/Common/KeyboardShortcuts"
 import { NotificationBell } from "@/components/Common/NotificationBell"
 import { AppShellSkeleton } from "@/components/Common/PageSkeleton"
+import { QuickSearch } from "@/components/Common/QuickSearch"
 import AppSidebar from "@/components/Sidebar/AppSidebar"
 import { User } from "@/components/Sidebar/User"
 import { Button } from "@/components/ui/button"
@@ -120,6 +121,7 @@ function Layout() {
   return (
     <SidebarProvider>
       <KeyboardShortcuts />
+      <QuickSearch />
       <IdleSignOut />
       <AppSidebar />
       <SidebarInset>

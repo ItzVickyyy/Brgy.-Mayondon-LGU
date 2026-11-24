@@ -162,6 +162,46 @@ def test_validation_rejects_bad_input(
         assert r.status_code == 422, bad
 
 
+def test_names_and_phone_are_checked_on_create_and_only_when_changed(
+    client: TestClient, staff_token_headers: Headers, db: Session
+) -> None:
+    for bad in (
+        {"first_name": "Juan2"},
+        {"last_name": "Cruz<b>"},
+        {"emergency_contact_phone": "09ab"},
+        {"occupation": "<x>"},
+    ):
+        r = client.post(
+            f"{API}/residents/", headers=staff_token_headers, json=_payload(**bad)
+        )
+        assert r.status_code == 422, bad
+    made = _create(
+        client,
+        staff_token_headers,
+        first_name="Niño",
+        emergency_contact_phone="+639171234567",
+    )
+    # An old record with a value from before the rules can still be saved
+    # while that value is left alone.
+    resident = db.get(Resident, uuid.UUID(made["id"]))
+    assert resident is not None
+    resident.occupation = "driver <old>"
+    db.add(resident)
+    db.commit()
+    r = client.patch(
+        f"{API}/residents/{made['id']}",
+        headers=staff_token_headers,
+        json={"occupation": "driver <old>", "civil_status": "Married"},
+    )
+    assert r.status_code == 200, r.text
+    r = client.patch(
+        f"{API}/residents/{made['id']}",
+        headers=staff_token_headers,
+        json={"occupation": "driver <new>"},
+    )
+    assert r.status_code == 422
+
+
 def test_unknown_street_or_sector_is_rejected(
     client: TestClient, staff_token_headers: Headers
 ) -> None:

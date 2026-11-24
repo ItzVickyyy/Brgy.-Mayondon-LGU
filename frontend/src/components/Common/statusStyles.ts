@@ -25,7 +25,7 @@ export const badgeTone = {
   teal:
     "border-[color-mix(in_oklab,var(--stat-teal)_40%,transparent)] bg-[color-mix(in_oklab,var(--stat-teal)_15%,transparent)] text-[color-mix(in_oklab,var(--stat-teal)_62%,var(--foreground))] " +
     dot,
-  grey: "border-border bg-muted text-muted-foreground " + dot,
+  grey: `border-border bg-muted text-muted-foreground ${dot}`,
 } as const
 
 const { green, amber, red, grey } = badgeTone

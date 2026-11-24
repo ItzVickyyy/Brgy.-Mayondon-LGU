@@ -19,6 +19,7 @@ from app.core.audit import record_audit_event, record_read_event
 from app.core.dates import age_on, today_manila
 from app.core.duplicates import find_possible_duplicates, lock_person
 from app.core.permissions import Permission
+from app.core.resident_validation import check_values
 from app.core.search import search_words, word_matches
 from app.models import User
 from app.models_foundation import Sector, Street
@@ -361,6 +362,14 @@ def read_resident(resident_id: uuid.UUID, session: SessionDep, user: EditUser) -
     return _public(session, resident)
 
 
+def _refuse_bad_values(
+    values: dict[str, Any], current: dict[str, Any] | None = None
+) -> None:
+    problem = check_values(values, current=current)
+    if problem:
+        raise HTTPException(status_code=422, detail=problem)
+
+
 def _refuse_possible_duplicates(
     session: Session,
     *,
@@ -414,6 +423,7 @@ def create_resident(
 ) -> Any:
     """Add a resident. Same names and birthdate as an existing record are warned
     about (409, code ``possible_duplicate``), not blocked: the clerk can confirm."""
+    _refuse_bad_values(body.model_dump())
     sector_ids = _check_references(
         session, street_id=body.street_id, sector_ids=body.sector_ids
     )
@@ -478,6 +488,14 @@ def update_resident(
             raise HTTPException(status_code=422, detail=f"{required} cannot be empty")
     if changes.get("resident_since_birth") is None:
         changes.pop("resident_since_birth", None)
+    # Only values that differ from the stored ones are checked (old records stay editable).
+    _refuse_bad_values(
+        {
+            "birthdate": resident.birthdate,
+            **changes,
+        },
+        current={key: getattr(resident, key, None) for key in changes},
+    )
     sector_ids = _check_references(
         session,
         street_id=changes.get("street_id"),

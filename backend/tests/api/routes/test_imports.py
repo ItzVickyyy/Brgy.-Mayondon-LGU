@@ -22,6 +22,7 @@ from app.core.db import engine
 from app.models_foundation import AuditLog, Street
 from app.models_import import ImportBatch, ImportRow
 from app.models_residents import Resident
+from tests.utils.utils import random_lower_string
 
 API = f"{settings.API_V1_STR}/imports"
 
@@ -39,7 +40,8 @@ HEADERS = [
 
 
 def _tag() -> str:
-    return uuid.uuid4().hex[:8].capitalize()
+    # Letters only: names with digits are refused by the resident rules.
+    return random_lower_string()[:8].capitalize()
 
 
 def _csv(rows: list[list[str]], headers: list[str] | None = None) -> bytes:

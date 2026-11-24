@@ -1034,6 +1034,10 @@
       "saving": "Sine-save...",
       "saveChanges": "I-save ang mga pagbabago",
       "addSubmit": "Magdagdag ng residente",
+      "draft": {
+        "restored": "Ibinalik ang hindi pa na-save na inilagay mo kanina.",
+        "discard": "Itapon ang draft"
+      },
       "requiredNote": "Kailangan ang mga field na may markang *.",
       "requiredMark": "kailangan",
       "errors": {

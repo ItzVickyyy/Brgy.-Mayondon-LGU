@@ -17,6 +17,10 @@ export const SHORTCUTS: ShortcutItem[] = [
     keys: ["Ctrl", "+", "Enter"],
     description: "Issue and print (inside the New Issuance window)",
   },
+  {
+    keys: ["Ctrl", "+", "K"],
+    description: "Find a resident by name, from any page",
+  },
   { keys: ["Ctrl", "+", "B"], description: "Show or hide the sidebar" },
   { keys: ["Tab"], description: "Move to the next control" },
   { keys: ["Shift", "+", "Tab"], description: "Move to the previous control" },
