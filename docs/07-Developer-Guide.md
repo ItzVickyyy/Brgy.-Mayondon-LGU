@@ -180,6 +180,7 @@ Optional: VS Code. You do not need Node.js or a separate PostgreSQL install. Ver
    `uv run alembic upgrade head` and `uv run python app/initial_data.py`.
    The second creates the admin from `FIRST_SUPERUSER` / `FIRST_SUPERUSER_PASSWORD`. Check with `uv run alembic current`.
 6. **Start the API:** `uv run fastapi dev` — API at `http://127.0.0.1:8000`, interactive docs at `http://127.0.0.1:8000/docs`. Expect "Application startup complete".
+   Browser tests (Playwright) and any two browsers sharing the admin login need `SINGLE_SESSION_PER_ACCOUNT=false` in `.env` (or in that window: `$env:SINGLE_SESSION_PER_ACCOUNT = "false"`). The default is on, so a newer sign-in signs the older one out; `compose.override.yml` and the backend tests already turn it off.
 7. **Start the frontend** (third terminal, repo root): `bun install` then `bun run dev`; open `http://localhost:5173/`. A Vite message recommending `@vitejs/plugin-react` is a suggestion, not a failure.
 8. **Log in** with `FIRST_SUPERUSER` / `FIRST_SUPERUSER_PASSWORD` from `.env`. Do not guess credentials or paste passwords into docs. There is no public sign-up; an administrator creates accounts. If the page or login fails, check the browser Console (F12) and both terminals; confirm `http://localhost:8000/docs` responds.
 

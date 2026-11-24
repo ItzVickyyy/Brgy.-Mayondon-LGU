@@ -51,6 +51,10 @@ cd backend
 ..\.venv\Scripts\python.exe -m fastapi dev app/main.py --port 8003   # a backend with hot reload
 ```
 
+Add `$env:SINGLE_SESSION_PER_ACCOUNT = "false"` in the same window before starting a backend
+for browser tests: the rule "one account, one computer" is on by default and would sign the
+shared test login out whenever another browser signs in. The pytest run turns it off itself.
+
 For the Vite dev screen (`bun run dev` in `frontend`), set
 `$env:VITE_API_URL = "http://localhost:8003"` (or `8002` to use the Docker sample backend)
 in the window that starts it. Use the password from your `.env.dev` if you changed it.
