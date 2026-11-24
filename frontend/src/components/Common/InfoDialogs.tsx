@@ -44,8 +44,8 @@ type DialogProps = { open: boolean; onOpenChange: (open: boolean) => void }
 const widths = {
   /** Short pages such as Version. */
   md: "sm:max-w-md",
-  /** Reading pages: Get help, Terms, Privacy, About. */
-  lg: "sm:max-w-2xl",
+  /** Every reading page (Get help, Learn more, Terms, Privacy, Dev Note, About) shares this one width. */
+  lg: "sm:max-w-5xl",
 } as const
 
 /**
@@ -124,9 +124,17 @@ export function InfoDialog({
   )
 }
 
-function Section({ title, children }: { title: string; children: ReactNode }) {
+function Section({
+  title,
+  children,
+  className,
+}: {
+  title: string
+  children: ReactNode
+  className?: string
+}) {
   return (
-    <section className="space-y-1.5">
+    <section className={cn("space-y-1.5", className)}>
       <h3 className="font-semibold text-brand">{title}</h3>
       {children}
     </section>
@@ -194,7 +202,9 @@ function HelpGroup({
         ) : null}
         <span className="min-w-0 flex-1">{title}</span>
       </summary>
-      <div className="space-y-4 border-t px-3 pb-4 pt-3">{children}</div>
+      <div className="grid gap-x-8 gap-y-4 border-t px-4 pb-4 pt-3 md:grid-cols-2 md:[&>:not(section)]:col-span-2">
+        {children}
+      </div>
     </details>
   )
 }
@@ -1469,69 +1479,71 @@ export function LearnMoreDialog(props: DialogProps) {
       title="About this system"
       description={`${SITE.systemName}, ${SITE.location}`}
     >
-      <Section title="What it is">
-        <p>
-          A staff-only system for the barangay office. It keeps resident
-          records, prepares and prints documents on the barangay&apos;s
-          pre-printed forms, keeps a history of everything issued, including
-          Barangay ID cards, and shows summaries and reports for office use.
-        </p>
-      </Section>
-      <Section title="What it helps you do">
-        <Bullets
-          items={[
-            "Keep resident records in one place.",
-            "Prepare and print clearances, certifications and Barangay IDs.",
-            "Check which documents were issued, corrected or voided.",
-            "See which clearances and IDs are about to expire.",
-            "Review who did what in the system.",
-          ]}
-        />
-      </Section>
-      <Section title="What it is not">
-        <p>
-          It is not a public website. Residents do not have accounts, apply
-          online or pay online. It does not replace documents issued by other
-          agencies.
-        </p>
-      </Section>
-      <Section title="Who can use it">
-        <p>
-          Only barangay office personnel with an account made by the System
-          Administrator. There are two roles:
-        </p>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <RoleCard title="Staff">
-            Work with resident records, issuances and their own activity.
-          </RoleCard>
-          <RoleCard title="System Administrator">
-            Also manages user accounts, officials, reports and backups.
-          </RoleCard>
-        </div>
-      </Section>
-      <Section title="How it runs">
-        <p>
-          It runs on a computer in the barangay office and is used over the
-          office network. It does not need the internet. Resident data and
-          photos stay on that computer and are not uploaded online.
-        </p>
-      </Section>
-      <Section title="Your records are protected">
-        <Bullets
-          items={[
-            "Every sign-in needs an email and password. Do not share yours.",
-            "Issuing, correcting and account changes are recorded with your name and the time.",
-            "Issued documents are not edited directly. Corrections are made with a reason and kept in the history.",
-          ]}
-        />
-        <p>
-          Read the Terms of Use and the Privacy Policy at the bottom of the page
-          for the full rules.
-        </p>
-      </Section>
-      <Section title="Built by">
-        <p>{SITE.developedBy}.</p>
-      </Section>
+      <div className="grid gap-x-8 gap-y-5 md:grid-cols-2">
+        <Section title="What it is" className="md:col-span-2">
+          <p>
+            A staff-only system for the barangay office. It keeps resident
+            records, prepares and prints documents on the barangay&apos;s
+            pre-printed forms, keeps a history of everything issued, including
+            Barangay ID cards, and shows summaries and reports for office use.
+          </p>
+        </Section>
+        <Section title="What it helps you do">
+          <Bullets
+            items={[
+              "Keep resident records in one place.",
+              "Prepare and print clearances, certifications and Barangay IDs.",
+              "Check which documents were issued, corrected or voided.",
+              "See which clearances and IDs are about to expire.",
+              "Review who did what in the system.",
+            ]}
+          />
+        </Section>
+        <Section title="What it is not">
+          <p>
+            It is not a public website. Residents do not have accounts, apply
+            online or pay online. It does not replace documents issued by other
+            agencies.
+          </p>
+        </Section>
+        <Section title="Who can use it" className="md:col-span-2">
+          <p>
+            Only barangay office personnel with an account made by the System
+            Administrator. There are two roles:
+          </p>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <RoleCard title="Staff">
+              Work with resident records, issuances and their own activity.
+            </RoleCard>
+            <RoleCard title="System Administrator">
+              Also manages user accounts, officials, reports and backups.
+            </RoleCard>
+          </div>
+        </Section>
+        <Section title="How it runs">
+          <p>
+            It runs on a computer in the barangay office and is used over the
+            office network. It does not need the internet. Resident data and
+            photos stay on that computer and are not uploaded online.
+          </p>
+        </Section>
+        <Section title="Your records are protected">
+          <Bullets
+            items={[
+              "Every sign-in needs an email and password. Do not share yours.",
+              "Issuing, correcting and account changes are recorded with your name and the time.",
+              "Issued documents are not edited directly. Corrections are made with a reason and kept in the history.",
+            ]}
+          />
+          <p>
+            Read the Terms of Use and the Privacy Policy at the bottom of the
+            page for the full rules.
+          </p>
+        </Section>
+        <Section title="Built by" className="md:col-span-2">
+          <p>{SITE.developedBy}.</p>
+        </Section>
+      </div>
     </InfoDialog>
   )
 }
