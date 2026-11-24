@@ -115,5 +115,32 @@ pwsh -NoProfile -File "$root/scripts/enable-https.ps1" -EnvFile "$eh/.env" -EnvO
 grep -q $'^APP_BIND=0.0.0.0\r$' "$eh/.env" && grep -q $'^COMPOSE_PROFILES=\r$' "$eh/.env" && grep -q 'SECRET_KEY=keepme' "$eh/.env" && a=ok || a=bad; check "enable-https -Off goes back to plain HTTP" $a
 pwsh -NoProfile -File "$root/scripts/enable-https.ps1" -EnvFile "$eh/missing" -EnvOnly >/dev/null 2>&1 && a=bad || a=ok; check "enable-https stops without a .env" $a
 
+# --- 5. enable-https.ps1 restart retry (patch 238): a failed "up -d" stops the backend, waits, tries once more
+mkdir "$tmp/eb"
+cat > "$tmp/eb/docker" <<'FAKE'
+#!/bin/sh
+echo "docker $*" >> "$FAKE_LOG"
+case "$*" in
+  "compose -f compose.yml up -d")
+    n=$(cat "$FAKE_COUNT" 2>/dev/null || echo 0); n=$((n + 1)); echo $n > "$FAKE_COUNT"
+    [ "$n" -le "${FAKE_UP_FAILS:-0}" ] && exit 1 ;;
+esac
+exit 0
+FAKE
+chmod +x "$tmp/eb/docker"
+printf 'A=1\r\nCOMPOSE_FILE=compose.yml\r\nSECRET_KEY=keepme\r\n' > "$eh/.env2"
+export MAYONDON_RETRY_SECONDS=0
+rm -f "$tmp/eb.log" "$tmp/eb.count"
+PATH="$tmp/eb:$PATH" FAKE_LOG="$tmp/eb.log" FAKE_COUNT="$tmp/eb.count" FAKE_UP_FAILS=1 pwsh -NoProfile -File "$root/scripts/enable-https.ps1" -EnvFile "$eh/.env2" -Off >/dev/null 2>&1 && a=ok || a=bad
+check "enable-https retries once when the first restart fails, and then succeeds" $a
+[ "$(grep -c 'up -d' "$tmp/eb.log")" = 2 ] && grep -q 'stop backend' "$tmp/eb.log" && a=ok || a=bad
+check "enable-https stops the backend before the retry (and never runs down)" $a
+rm -f "$tmp/eb.log" "$tmp/eb.count"
+out=$(PATH="$tmp/eb:$PATH" FAKE_LOG="$tmp/eb.log" FAKE_COUNT="$tmp/eb.count" FAKE_UP_FAILS=9 pwsh -NoProfile -File "$root/scripts/enable-https.ps1" -EnvFile "$eh/.env2" -Off 2>&1) && a=bad || a=ok
+check "enable-https gives up after one retry" $a
+[ "$(grep -c 'up -d' "$tmp/eb.log")" = 2 ] && echo "$out" | grep -q 'Way back' && ! grep -q ' down' "$tmp/eb.log" && a=ok || a=bad
+check "enable-https prints the way back and never runs down" $a
+unset MAYONDON_RETRY_SECONDS
+
 [ $fail = 0 ] && echo "Office scripts OK." || echo "Office scripts have problems."
 exit $fail

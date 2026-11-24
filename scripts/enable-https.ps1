@@ -83,9 +83,20 @@ if ($text -eq $original) {
 if ($EnvOnly) { exit 0 }
 
 Set-Location $repoRoot
+# Docker Desktop on Windows can free the old port a few seconds late after the binding moves
+# (the backend and caddy then stay "Created"). So on a failure: stop the backend, wait, try once more.
+$retryWait = 15
+if ($env:MAYONDON_RETRY_SECONDS) { $retryWait = [int]$env:MAYONDON_RETRY_SECONDS }  # tests only
 & docker compose -f compose.yml up -d
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "The program could not be restarted. Put the old .env back (the .env.before-https-* file) and run: docker compose -f compose.yml up -d" -ForegroundColor Red
+    Write-Host "The program did not start (Docker may free the port a few seconds late). Trying once more in $retryWait seconds..." -ForegroundColor Yellow
+    & docker compose -f compose.yml stop backend
+    Start-Sleep -Seconds $retryWait
+    & docker compose -f compose.yml up -d
+}
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "The program could not be restarted. Nothing was deleted." -ForegroundColor Red
+    Write-Host "Way back: run  .\scripts\enable-https.ps1 -Off   or put the saved .env.before-https-* file back as .env, then run: docker compose -f compose.yml up -d" -ForegroundColor Red
     exit 1
 }
 
