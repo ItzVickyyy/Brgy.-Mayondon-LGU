@@ -30,10 +30,7 @@ import {
 } from "@/lib/utilizationCert"
 import { UtilizationSheet } from "./UtilizationSheet"
 
-const A4_PAGE_RULE = "@page { size: 210mm 297mm; margin: 0 }"
 const IMAGE_WAIT_MS = 3000
-// Kept after window.print() returns, so a browser whose print() does not block never loses the sheet.
-const PRINT_GRACE_MS = 1000
 
 /** The letterhead logo and the seal must be decoded before the print preview is drawn. */
 function waitForSheetImages(): Promise<void> {
@@ -87,46 +84,6 @@ export function UtilizationCertDialog({
     if (figures.isError) showErrorToast(t("utilization.loadFailed"))
   }, [figures.isError, showErrorToast, t])
 
-  // Prints the certificate only: index.css hides everything else while the body carries
-  // "cou-printing", and a dark theme is printed as light. Chrome fires "afterprint" as soon as the
-  // preview is drawn and lays the page out again whenever a setting in the preview changes, so the
-  // print state must not end on that event (the preview would go blank): it ends when the blocking
-  // window.print() call returns, as the issuance print does.
-  useEffect(() => {
-    if (!printing) return
-    const root = document.documentElement
-    const wasDark = root.classList.contains("dark")
-    let cancelled = false
-    const pageStyle = document.createElement("style")
-    pageStyle.setAttribute("data-cou-page", "")
-    pageStyle.textContent = A4_PAGE_RULE
-    document.head.appendChild(pageStyle)
-    document.body.classList.add("cou-printing")
-    root.classList.remove("dark")
-    void (async () => {
-      try {
-        await waitForSheetImages()
-        // requestAnimationFrame never fires in a background tab, so a timer is the fallback.
-        await new Promise((resolve) => {
-          requestAnimationFrame(() => resolve(null))
-          window.setTimeout(() => resolve(null), 250)
-        })
-        if (!cancelled) window.print() // blocks until the print dialog closes in most browsers
-        await new Promise((resolve) =>
-          window.setTimeout(resolve, PRINT_GRACE_MS),
-        )
-      } finally {
-        if (!cancelled) setPrinting(false)
-      }
-    })()
-    return () => {
-      cancelled = true
-      pageStyle.remove()
-      document.body.classList.remove("cou-printing")
-      if (wasDark) root.classList.add("dark")
-    }
-  }, [printing])
-
   async function handlePrint() {
     if (!figures.data || printing) return
     try {
@@ -137,6 +94,18 @@ export function UtilizationCertDialog({
       return
     }
     setPrinting(true)
+    try {
+      await waitForSheetImages()
+      // requestAnimationFrame never fires in a background tab, so a timer is the fallback.
+      await new Promise((resolve) => {
+        requestAnimationFrame(() => resolve(null))
+        window.setTimeout(() => resolve(null), 250)
+      })
+      // index.css prints only the certificate while it is mounted; nothing is torn down afterwards.
+      window.print()
+    } finally {
+      setPrinting(false)
+    }
   }
 
   const data = figures.data
@@ -272,7 +241,7 @@ export function UtilizationCertDialog({
           </div>
         </DialogContent>
       </Dialog>
-      {data && (open || printing)
+      {open && data
         ? createPortal(
             <div className="cou-print-root" aria-hidden="true">
               <UtilizationSheet

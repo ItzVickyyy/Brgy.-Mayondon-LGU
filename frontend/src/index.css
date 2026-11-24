@@ -908,26 +908,36 @@ tr:focus-within > .row-hover-cell {
   }
 }
 
-/* Certificate of Utilization (Profile menu > Utilization Cert.): the dialog adds "cou-printing" to the
-   body while it prints, so nothing else in the app is affected. The sheet follows the barangay's Word
-   file: A4, Arial 11 pt, Cambria letterhead, navy 1F3A68. It never shows on screen. */
+/* Certificate of Utilization (Profile menu > Utilization Cert.). The sheet is mounted in a print-only
+   container for as long as the dialog is open, and the print rules below depend only on that container
+   being in the page, never on a class that code adds and removes: Chrome draws (and redraws) its print
+   preview after window.print() has returned and "afterprint" has fired, so anything torn down then
+   leaves a blank preview. The sheet follows the barangay's Word file: A4, Arial 11 pt, Cambria
+   letterhead, navy 1F3A68, explicit colours (the dark theme never reaches it). Never shows on screen. */
 .cou-print-root {
   display: none;
 }
+@page cou-a4 {
+  size: 210mm 297mm;
+  margin: 0;
+}
 @media print {
-  body.cou-printing > *:not(.cou-print-root) {
+  body:has(> .cou-print-root) > *:not(.cou-print-root) {
     /* biome-ignore lint/complexity/noImportantStyles: only the certificate may print */
     display: none !important;
   }
-  body.cou-printing,
-  body.cou-printing .cou-print-root {
+  body:has(> .cou-print-root) {
     background: #fff;
     color: #000;
   }
-  body.cou-printing .cou-print-root {
+  .cou-print-root {
     display: block;
+    page: cou-a4;
+    background: #fff;
+    color: #000;
   }
   .cou-sheet {
+    page: cou-a4;
     box-sizing: border-box;
     width: 210mm;
     height: 296mm;

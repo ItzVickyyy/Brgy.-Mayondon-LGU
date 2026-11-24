@@ -50,20 +50,13 @@ async function signedIn(page: Page, punong: string | null) {
     localStorage.setItem("vite-ui-theme", "light")
   })
   // Printing is a browser dialog: count the calls instead of opening it. Like Chrome, fire
-  // "afterprint" while the preview is still open, and record what the page looked like at that moment.
+  // "afterprint" straight away: the sheet must not depend on any state that event could end.
   await page.addInitScript(() => {
-    const w = window as unknown as {
-      __prints: number
-      __sheetAfterAfterprint: boolean
-    }
+    const w = window as unknown as { __prints: number }
     w.__prints = 0
-    w.__sheetAfterAfterprint = false
     window.print = () => {
       w.__prints += 1
       window.dispatchEvent(new Event("afterprint"))
-      w.__sheetAfterAfterprint =
-        document.body.classList.contains("cou-printing") &&
-        document.querySelector(".cou-print-root .cou-sheet") !== null
     }
   })
   return printed
@@ -109,16 +102,13 @@ test("Print fills the certificate, records the print and opens the dialog", asyn
     )
     .toBe(1)
   expect(printed).toHaveLength(1)
-  // Chrome's early "afterprint" must not tear the sheet down while the preview is open.
-  expect(
-    await page.evaluate(
-      () =>
-        (window as unknown as { __sheetAfterAfterprint: boolean })
-          .__sheetAfterAfterprint,
-    ),
-  ).toBe(true)
-  // Once print() returns the page is back to normal.
-  await expect(page.locator("body.cou-printing")).toHaveCount(0)
+  // Chrome draws its preview after print() returns: the print-only sheet must still be in the page,
+  // and in print media nothing else may show.
+  await page.waitForTimeout(1500)
+  await page.emulateMedia({ media: "print" })
+  await expect(page.getByTestId("utilization-sheet")).toBeVisible()
+  await expect(page.getByTestId("utilization-dialog")).toBeHidden()
+  await page.emulateMedia({ media: "screen" })
   expect(JSON.parse(printed[0] as string)).toEqual({ month: "2026-11" })
   const sheet = page.getByTestId("utilization-sheet")
   await expect(sheet).toContainText("CERTIFICATE OF UTILIZATION")
