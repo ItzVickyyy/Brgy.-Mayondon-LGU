@@ -1,11 +1,11 @@
-"""One account, one computer at a time (patch 256)."""
+"""One account, one computer at a time (patch 259)."""
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import Session
+from sqlmodel import Session, col, select, update
 
 from app.core.config import settings
-from app.models import UserRole
+from app.models import User, UserRole
 from tests.utils.user import create_user_with_role, user_authentication_headers
 
 ME = f"{settings.API_V1_STR}/users/me"
@@ -82,7 +82,20 @@ def test_account_with_no_recorded_sign_in_is_not_refused(
     headers = user_authentication_headers(
         client=client, email=user.email, password=password
     )
-    user.active_session_jti = None  # an account from before the migration
-    db.add(user)
+    # The sign-in must have stored a jti, or clearing it below proves nothing.
+    db.expire_all()
+    stored = db.exec(
+        select(User.active_session_jti).where(col(User.id) == user.id)
+    ).one()
+    assert stored is not None
+    # An account from before the migration: clear the column with a real UPDATE.
+    # (Setting the attribute on ``user`` would send nothing: the object already holds
+    # None from before the sign-in, so SQLAlchemy sees no change.)
+    db.exec(update(User).where(col(User.id) == user.id).values(active_session_jti=None))
     db.commit()
+    db.expire_all()
+    assert (
+        db.exec(select(User.active_session_jti).where(col(User.id) == user.id)).one()
+        is None
+    )
     assert client.get(ME, headers=headers).status_code == 200
