@@ -151,4 +151,74 @@ test.describe("popups in the profile menu", () => {
     await expect(dialog.getByText("Your records are protected")).toBeVisible()
     await expect(dialog).not.toContainText(forbidden)
   })
+
+  async function openHelp(page: Page) {
+    await page.goto("/")
+    await page.getByRole("button", { name: /user menu/i }).click()
+    await page.getByRole("menuitem", { name: "Get help" }).click()
+    const dialog = page.getByRole("dialog", { name: "Get help" })
+    await expect(dialog).toBeVisible()
+    return dialog
+  }
+
+  test("the Get help search shows only matching topics and clearing it restores the list", async ({
+    page,
+  }) => {
+    await signedIn(page)
+    const dialog = await openHelp(page)
+    const box = dialog.getByTestId("help-search")
+    await box.fill("save anyway")
+    await expect(dialog.getByTestId("help-search-count")).toContainText("topic")
+    await expect(
+      dialog.getByText(
+        "The system says this resident may already be on record.",
+      ),
+    ).toBeVisible()
+    await expect(dialog.getByText("Signing out", { exact: true })).toBeHidden()
+    await expect(
+      dialog.getByText("Getting started", { exact: true }),
+    ).toBeHidden()
+
+    await box.fill("")
+    await expect(
+      dialog.getByText("Getting started", { exact: true }),
+    ).toBeVisible()
+    await expect(dialog.getByText("Signing out", { exact: true })).toBeVisible()
+    await expect(dialog.getByTestId("help-search-count")).toHaveText("")
+
+    await box.fill("zzzz nothing")
+    await expect(dialog.getByTestId("help-search-count")).toContainText(
+      "Nothing matches",
+    )
+  })
+
+  test("the backup-file problem is shown to administrators only", async ({
+    page,
+  }) => {
+    await signedIn(page)
+    let dialog = await openHelp(page)
+    await dialog
+      .getByTestId("help-search")
+      .fill("no longer in the backup folder")
+    await expect(dialog.getByTestId("help-search-count")).toContainText(
+      "1 topic",
+    )
+    await page.keyboard.press("Escape")
+
+    await page.unroute("**/api/v1/**")
+    await signedIn(page, {
+      ...admin,
+      is_superuser: false,
+      role: "staff",
+      full_name: "Test Staff",
+    })
+    await page.reload()
+    dialog = await openHelp(page)
+    await dialog
+      .getByTestId("help-search")
+      .fill("no longer in the backup folder")
+    await expect(dialog.getByTestId("help-search-count")).toContainText(
+      "Nothing matches",
+    )
+  })
 })

@@ -6,10 +6,11 @@ import {
   type LucideIcon,
   MessageSquareText,
   ScrollText,
+  Search,
   ShieldCheck,
   Tag,
 } from "lucide-react"
-import type { ReactNode } from "react"
+import { type ReactNode, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import {
@@ -179,6 +180,8 @@ function HelpGroup({
   return (
     <details
       open={defaultOpen}
+      data-help-group=""
+      data-default-open={defaultOpen ? "true" : "false"}
       className="group rounded-lg border bg-card open:shadow-xs"
     >
       <summary className="flex min-h-11 cursor-pointer select-none list-none items-center gap-2.5 rounded-lg px-3 py-2 font-semibold hover:bg-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-details-marker]:hidden">
@@ -193,6 +196,103 @@ function HelpGroup({
       </summary>
       <div className="space-y-4 border-t px-3 pb-4 pt-3">{children}</div>
     </details>
+  )
+}
+
+/**
+ * Get help search (patch 252). The help text is plain markup, so the filter works on the page
+ * itself: a topic (a `section`, or a `li` such as a problem or shortcut) stays when it holds every
+ * typed word, a group opens when something in it matches and hides when nothing does, and
+ * clearing the box puts every group back as it started. Returns how many topics match.
+ */
+export function applyHelpFilter(root: HTMLElement, query: string): number {
+  const words = query.toLowerCase().split(/\s+/).filter(Boolean)
+  const has = (text: string | null) =>
+    words.every((word) => (text ?? "").toLowerCase().includes(word))
+  let matched = 0
+  for (const group of root.querySelectorAll<HTMLDetailsElement>(
+    "details[data-help-group]",
+  )) {
+    const topics = Array.from(
+      group.querySelectorAll<HTMLElement>("section, li"),
+    ).filter((el) => {
+      const outer = el.parentElement?.closest("section, li")
+      return !outer || !group.contains(outer)
+    })
+    if (words.length === 0) {
+      for (const topic of topics) topic.hidden = false
+      group.hidden = false
+      group.open = group.dataset.defaultOpen === "true"
+      continue
+    }
+    const titleHit = has(group.querySelector("summary")?.textContent ?? "")
+    let any = false
+    if (topics.length === 0) {
+      any = titleHit || has(group.textContent)
+      if (any) matched += 1
+    } else {
+      for (const topic of topics) {
+        const ok = titleHit || has(topic.textContent)
+        topic.hidden = !ok
+        if (ok) {
+          any = true
+          matched += 1
+        }
+      }
+    }
+    group.hidden = !any
+    group.open = any
+  }
+  return matched
+}
+
+function HelpSearch({ children }: { children: ReactNode }) {
+  const [query, setQuery] = useState("")
+  const [matched, setMatched] = useState<number | null>(null)
+  const body = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!body.current) return
+    const count = applyHelpFilter(body.current, query)
+    setMatched(query.trim() ? count : null)
+  }, [query])
+
+  return (
+    <>
+      <div className="sticky top-0 z-10 -mt-1 bg-background pb-2 pt-1">
+        <div className="relative">
+          <Search
+            aria-hidden="true"
+            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+          />
+          <input
+            type="search"
+            data-testid="help-search"
+            aria-label="Search the help"
+            placeholder="Search the help, for example: print, password, backup"
+            value={query}
+            maxLength={80}
+            autoComplete="off"
+            onChange={(event) => setQuery(event.target.value)}
+            className="h-11 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          />
+        </div>
+        <p
+          aria-live="polite"
+          data-testid="help-search-count"
+          className="mt-1 min-h-5 text-xs text-muted-foreground"
+        >
+          {matched === null
+            ? ""
+            : matched === 0
+              ? "Nothing matches. Try one word, such as print or password."
+              : `${matched} ${matched === 1 ? "topic matches" : "topics match"}.`}
+        </p>
+      </div>
+      <div ref={body} className="space-y-5">
+        {children}
+      </div>
+    </>
   )
 }
 
@@ -891,408 +991,459 @@ export function HelpDialog(props: DialogProps) {
       title="Get help"
       description="Short guides for everyday office work. Everything here works without an internet connection."
     >
-      <HelpGroup title="Getting started" defaultOpen>
-        <Section title="Signing in">
-          <Steps
-            items={[
-              "Open the system on the office computer or any computer on the office network.",
-              "Type your email address and password, then choose Sign in.",
-              "Your account is made by the System Administrator. There is no public sign-up.",
-            ]}
-          />
-        </Section>
-        <Section title="Your first sign-in">
-          <p>
-            If the System Administrator gave you a temporary password, the
-            system asks you to set a new one before you continue. The new
-            password must have at least 12 characters. After saving it, sign in
-            again with the new password.
-          </p>
-        </Section>
-        <Section title="Signing out">
-          <p>
-            Open the profile menu (your name) and choose Logout. Always sign out
-            when you leave the computer. A computer left alone is signed out
-            after 30 minutes.
-          </p>
-        </Section>
-        <Section title="Your account and the profile menu">
-          <p>
-            The profile menu has My Account (your details, photo and password),
-            Preferences (theme, colour and text size), Language, Get help, Learn
-            more and Logout.
-          </p>
-        </Section>
-        <Section title="What each person can see">
-          <p>
-            Staff use the Dashboard, Activity Log, Issuance Management and
-            Records Management. Officials, User Accounts, Management Reports and
-            Backup and Restore are for System Administrators only.
-          </p>
-        </Section>
-      </HelpGroup>
-
-      <HelpGroup title="Dashboard">
-        <p>
-          The Dashboard is the first page after you sign in. Use the Period menu
-          (Today, This Week, This Month, Past 3 Months, Past 6 Months, This
-          Year, Overall) to change the numbers.
-        </p>
-        <Bullets
-          items={[
-            <>
-              <strong>Documents Issued This Month:</strong> how many documents
-              the office issued.
-            </>,
-            <>
-              <strong>Clearances and Barangay IDs expiring in 30 days:</strong>{" "}
-              records that will need renewing soon.
-            </>,
-            <>
-              <strong>Pending Document Requests:</strong> drafts that were
-              started but not yet issued.
-            </>,
-            <>
-              <strong>Quick Actions:</strong> shortcuts to find a resident,
-              create an issuance or review history.
-            </>,
-          ]}
-        />
-      </HelpGroup>
-
-      <HelpGroup title="Finding and managing residents">
-        <Section title="Find a resident">
-          <Steps
-            items={[
-              "Open Records Management.",
-              "Type a name, address or ID number in the search box. Press / to jump to it.",
-              "Choose Active, Archived or All to change which residents are listed.",
-              "Select a resident to open the profile.",
-            ]}
-          />
-        </Section>
-        <Section title="Add or edit a resident">
-          <p>
-            Use the add button on the Residents tab, fill in the form, and save.
-            To change details later, open the resident and choose edit. A
-            resident must have complete details (birthdate, birthplace, sex,
-            civil status, address and photo) before some documents can be
-            issued.
-          </p>
-        </Section>
-        <Section title="Archive and restore">
-          <p>
-            Residents who moved away or passed away should be archived, not
-            deleted. Archiving asks for a reason. Choose Archived in the filter
-            to find them and restore them if needed.
-          </p>
-        </Section>
-        <Section title="Other tabs in Records Management">
-          <Bullets
-            items={[
-              <>
-                <strong>Barangay IDs:</strong> every ID card issued, with its
-                status (Valid, Expiring soon, Expired).
-              </>,
-              ...(isAdmin
-                ? [
-                    <>
-                      <strong>Import Masterlist:</strong> bring in many
-                      residents at once from a CSV, XLSX or XLS file. Follow the
-                      steps shown on the page and review the results before
-                      finishing.
-                    </>,
-                  ]
-                : []),
-            ]}
-          />
-        </Section>
-      </HelpGroup>
-
-      <HelpGroup title="Issuing documents">
-        <Section title="Create a new issuance">
-          <Steps
-            items={[
-              "Open Issuance Management and choose New Issuance.",
-              "Step 1, What are you issuing? Pick the document type.",
-              "Step 2, Who is it for? Type the resident's name and pick them from the list. If they are not listed, fill in the short form to add them.",
-              "If the document needs a photo, take the resident's photo in the Photo step.",
-              "Fill in Document details. Fields with a red asterisk are required.",
-              "Copy the ID presented and the official receipt details where asked.",
-              "Check the Will print panel. When it says Ready to issue, choose Issue & print (or Issue to print later).",
-            ]}
-          />
-        </Section>
-        <Section title="Buttons at the bottom of the form">
-          <Bullets
-            items={[
-              <>
-                <strong>Save draft &amp; close:</strong> keeps your work to
-                finish later. Drafts appear in the history with the status
-                Draft.
-              </>,
-              <>
-                <strong>Issue:</strong> finalizes the document and gives it a
-                reference number.
-              </>,
-              <>
-                <strong>Issue &amp; print:</strong> issues it and opens printing
-                right away.
-              </>,
-              <>
-                <strong>Cancel:</strong> closes the form. You can keep the draft
-                or discard the changes.
-              </>,
-            ]}
-          />
-        </Section>
-        <Section title="Documents the system can prepare">
-          <Bullets
-            items={[
-              <>
-                <strong>Barangay Clearance</strong> (valid for 2 months)
-              </>,
-              <>
-                <strong>Franchise Clearance</strong> for tricycles
-              </>,
-              <strong key="electrical">Electrical and Water Clearance</strong>,
-              <strong key="residency">Certification of Residency</strong>,
-              <strong key="indigency">Certificate of Indigency</strong>,
-              <>
-                <strong>Assistance Certification</strong> (financial, medical or
-                burial; medical also records the health condition)
-              </>,
-              <>
-                <strong>First-Time Jobseeker</strong> (one per resident, valid
-                for 12 months)
-              </>,
-              <>
-                <strong>Barangay ID</strong> (new, renewal or replacement)
-              </>,
-            ]}
-          />
-        </Section>
-        <Section title="Barangay ID requirements">
-          <p>
-            The resident record must already have the birthdate, birthplace,
-            sex, civil status, address, emergency contact (name, address and
-            number) and a photo. A new card is refused if the resident already
-            has a Barangay ID number. A renewal or replacement keeps the current
-            number unless you type another.
-          </p>
-        </Section>
-      </HelpGroup>
-
-      <HelpGroup title="Printing">
-        <Section title="Print a document">
-          <p>
-            After issuing, choose Print. Most documents print only the filled-in
-            details onto the barangay's pre-printed forms, so load the right
-            form in the printer first. Residency and First-Time Jobseeker print
-            as full pages.
-          </p>
-        </Section>
-        <Section title="Reprint">
-          <p>
-            Open Issuance Management, find the document in the history and
-            choose Print again. A reprint keeps the same reference number.
-          </p>
-        </Section>
-        <Section title="Save as PDF or Word">
-          <p>
-            On the screen after issuing, or in the three-dot menu of a row in
-            the history, choose Save as PDF or Save as Word. The file is the
-            filled form as a picture of the page, so the values cannot be edited
-            in Word. Saving a copy counts as a copy in the history.
-          </p>
-        </Section>
-        <Section title="Text does not line up with the blanks">
-          <Steps
-            items={[
-              "On Issuance Management, choose Issuance settings, then Printing setup.",
-              "Print the calibration sheet on plain paper. Set the printer to 100% scale with no headers, footers or fit-to-page.",
-              "Hold the sheet against the pre-printed form and check where the red boxes land.",
-              "Enter how far to shift right and down (in points), then print the sheet again until the boxes sit on the blanks.",
-            ]}
-          />
-        </Section>
-      </HelpGroup>
-
-      <HelpGroup title="Issuance history, corrections and voiding">
-        <Section title="Find an issued document">
-          <p>
-            The history lists every document. Search by name or reference number
-            and filter by document type, status (Issued, Draft, Voided) and date
-            range.
-          </p>
-        </Section>
-        <Section title="Mistake in an issued document">
-          <p>
-            Issued documents are never edited directly. Choose Correct, enter
-            the reason, and the system creates a correction draft with the old
-            details filled in. Fix them and issue the new document. The reason
-            is kept in the history.
-          </p>
-        </Section>
-        <Section title="Void or discard">
-          <Bullets
-            items={[
-              <>
-                <strong>Void:</strong> cancels an issued document that should
-                not be used. A reason is required and the record stays in the
-                history marked Voided.
-              </>,
-              <>
-                <strong>Discard:</strong> removes a draft that was never issued.
-              </>,
-            ]}
-          />
-        </Section>
-      </HelpGroup>
-
-      <HelpGroup title="Activity Log">
-        <p>
-          The Activity Log shows who did what, when, and whether it worked
-          (Success, Failed or Denied). Filter by module, outcome and date range.{" "}
-          {isAdmin
-            ? "As a System Administrator you can see everyone's activity and filter by user."
-            : "You can see the activity connected to your own account."}
-        </p>
-      </HelpGroup>
-
-      {isAdmin ? (
-        <HelpGroup title="For System Administrators">
-          <Section title="User Accounts">
+      <HelpSearch>
+        <HelpGroup title="Getting started" defaultOpen>
+          <Section title="Signing in">
             <Steps
               items={[
-                "Open User Accounts and choose Add User.",
-                "Enter the full name, email and role (System Administrator or Staff).",
-                "Give the starting password to the person in person. They must change it at first sign-in.",
-                "To stop someone from using the system, set the account to inactive instead of deleting it.",
+                "Open the system on the office computer or any computer on the office network.",
+                "Type your email address and password, then choose Sign in.",
+                "Your account is made by the System Administrator. There is no public sign-up.",
               ]}
             />
+          </Section>
+          <Section title="Your first sign-in">
             <p>
-              Keep at least one active System Administrator at all times. The
-              system will not let you remove the last one.
+              If the System Administrator gave you a temporary password, the
+              system asks you to set a new one before you continue. The new
+              password must have at least 12 characters. After saving it, sign
+              in again with the new password.
             </p>
           </Section>
-          <Section title="Resetting a forgotten password">
+          <Section title="Signing out">
             <p>
-              Edit the person's account and set a new temporary password. The
-              person is asked to choose their own password when they sign in.
+              Open the profile menu (your name) and choose Logout. Always sign
+              out when you leave the computer. A computer left alone is signed
+              out after 30 minutes.
             </p>
           </Section>
-          <Section title="Officials">
+          <Section title="Your account and the profile menu">
             <p>
-              Keep the list of barangay officials up to date. Add new officials
-              with their position and term dates. When a term ends, use End term
-              so the person becomes Former. Officials listed here appear as
-              signatories and witnesses on documents.
+              The profile menu has My Account (your details, photo and
+              password), Preferences (theme, colour and text size), Language,
+              Get help, Learn more and Logout.
             </p>
           </Section>
-          <Section title="Issuance settings">
+          <Section title="What each person can see">
             <p>
-              On Issuance Management, choose Issuance settings to change the
-              lists used in forms (ID types, sectors, streets, subdivisions,
-              tricycle associations, purposes, offices and educational
-              attainment) and to set up Printing. Renaming an item relabels old
-              documents. An item that is already used cannot be deleted.
-            </p>
-          </Section>
-          <Section title="Management Reports">
-            <p>
-              Choose a report (issuances by document type, by purpose, expiring
-              records, or account activity) and a period. The report shows on
-              the page. Reports can be printed or saved as an Excel, Word, PDF
-              or CSV file.
-            </p>
-          </Section>
-          <Section title="Backup and Restore">
-            <p>
-              Choose Back up now on the Backup and Restore page. The backup is
-              saved in the <code className="font-mono">backups</code> folder and
-              checked. Copy backups to an external drive regularly and keep the
-              encryption key and its passphrase apart from the computer. A
-              restore replaces the whole database, so it is not run from the
-              screen: the page checks the backup you choose and shows the
-              command to run on the office computer.
-            </p>
-          </Section>
-          <Section title="Updates">
-            <p>
-              The system looks for a new version and installs it at night. When
-              a version is waiting, an Update reminder appears in the
-              notification bell, and you can choose Update now to install it
-              right away.
+              Staff use the Dashboard, Activity Log, Issuance Management and
+              Records Management. Officials, User Accounts, Management Reports
+              and Backup and Restore are for System Administrators only.
             </p>
           </Section>
         </HelpGroup>
-      ) : null}
 
-      <HelpGroup title="Common problems">
-        <ul className="list-disc space-y-2 pl-5">
-          <Problem q="I forgot my password.">
-            Choose Forgot password on the sign-in page. If the office has no
-            email set up, the page says so. In that case ask the System
-            Administrator to set a temporary password for you.
-          </Problem>
-          <Problem q="It says my email or password is incorrect.">
-            Check that Caps Lock is off and the email is typed in full.
-            Passwords are case-sensitive. If it still fails, ask the System
-            Administrator to check that your account is active.
-          </Problem>
-          <Problem q="A page says I have no permission.">
-            That page is for System Administrators only.
-          </Problem>
-          <Problem q="The page will not load.">
-            Check that the office computer that hosts the system is on and that
-            you are connected to the office network. If it still does not load,
-            tell the System Administrator.
-          </Problem>
-          <Problem q="I cannot find a resident.">
-            Try fewer words or only the last name. Check the filter is not set
-            to Active when the resident was archived. If they are really not
-            there, add them from the New Issuance form or Records Management.
-          </Problem>
-          <Problem q="The Issue button says details are missing.">
-            Look for the yellow box that lists what is missing, usually the
-            resident's birthdate, civil status, address or photo. Fill it in and
-            try again.
-          </Problem>
-          <Problem q="I cannot take the resident's photo.">
-            Allow the browser to use the camera when it asks. Check the camera
-            is plugged in and not used by another program.
-          </Problem>
-          <Problem q="Printing is cut off or in the wrong place.">
-            Print at 100% scale with no headers or footers, then use Printing
-            setup to shift the text. Make sure the pre-printed form is loaded
-            the right way round.
-          </Problem>
-          <Problem q="I issued the wrong document or entered a wrong detail.">
-            Do not delete it. Use Correct, or Void if it should not be used, and
-            then issue a new one.
-          </Problem>
-        </ul>
-      </HelpGroup>
+        <HelpGroup title="Dashboard">
+          <p>
+            The Dashboard is the first page after you sign in. Use the Period
+            menu (Today, This Week, This Month, Past 3 Months, Past 6 Months,
+            This Year, Overall) to change the numbers.
+          </p>
+          <Bullets
+            items={[
+              <>
+                <strong>Documents Issued This Month:</strong> how many documents
+                the office issued.
+              </>,
+              <>
+                <strong>
+                  Clearances and Barangay IDs expiring in 30 days:
+                </strong>{" "}
+                records that will need renewing soon.
+              </>,
+              <>
+                <strong>Pending Document Requests:</strong> drafts that were
+                started but not yet issued.
+              </>,
+              <>
+                <strong>Quick Actions:</strong> shortcuts to find a resident,
+                create an issuance or review history.
+              </>,
+            ]}
+          />
+        </HelpGroup>
 
-      <HelpGroup title="Good habits">
-        <Bullets
-          items={[
-            "Check every detail before you issue or print.",
-            "Use resident information only for barangay office work.",
-            "Never share your password. Sign out when you step away.",
-            "Actions such as issuing, correcting and account changes are recorded with your name and the time.",
-          ]}
-        />
-      </HelpGroup>
+        <HelpGroup title="Finding and managing residents">
+          <Section title="Find a resident">
+            <Steps
+              items={[
+                "Open Records Management.",
+                "Type a name, address or ID number in the search box. Press / to jump to it.",
+                "From any page, press Ctrl+K, type part of a name and press Enter to open Records already searching for that person.",
+                "Choose Active, Archived or All to change which residents are listed.",
+                "Select a resident to open the profile.",
+              ]}
+            />
+          </Section>
+          <Section title="Add or edit a resident">
+            <p>
+              Use the add button on the Residents tab, fill in the form, and
+              save. To change details later, open the resident and choose edit.
+              A resident must have complete details (birthdate, birthplace, sex,
+              civil status, address and photo) before some documents can be
+              issued.
+            </p>
+            <p>
+              Names take letters only, so digits and symbols are not accepted. A
+              phone number needs 7 to 13 digits, a purok is 1 to 99 and the year
+              of residence runs from 1900 to this year. If you close the window
+              before saving a new resident, what you typed is kept and brought
+              back the next time you choose add; choose Discard draft to start
+              clean.
+            </p>
+          </Section>
+          <Section title="Archive and restore">
+            <p>
+              Residents who moved away or passed away should be archived, not
+              deleted. Archiving asks for a reason. Choose Archived in the
+              filter to find them and restore them if needed.
+            </p>
+          </Section>
+          <Section title="Other tabs in Records Management">
+            <Bullets
+              items={[
+                <>
+                  <strong>Barangay IDs:</strong> every ID card issued, with its
+                  status (Valid, Expiring soon, Expired).
+                </>,
+                ...(isAdmin
+                  ? [
+                      <>
+                        <strong>Import Masterlist:</strong> bring in many
+                        residents at once from a CSV, XLSX or XLS file. Follow
+                        the steps shown on the page and review the results
+                        before finishing.
+                      </>,
+                    ]
+                  : []),
+              ]}
+            />
+          </Section>
+        </HelpGroup>
 
-      <HelpGroup title="Keyboard shortcuts">
-        <ShortcutsList />
-      </HelpGroup>
+        <HelpGroup title="Issuing documents">
+          <Section title="Create a new issuance">
+            <Steps
+              items={[
+                "Open Issuance Management and choose New Issuance.",
+                "Step 1, What are you issuing? Pick the document type.",
+                "Step 2, Who is it for? Type the resident's name and pick them from the list. If they are not listed, fill in the short form to add them.",
+                "If the document needs a photo, take the resident's photo in the Photo step.",
+                "Fill in Document details. Fields with a red asterisk are required.",
+                "Copy the ID presented and the official receipt details where asked.",
+                "Check the Will print panel. When it says Ready to issue, choose Issue & print (or Issue to print later).",
+              ]}
+            />
+          </Section>
+          <Section title="Buttons at the bottom of the form">
+            <Bullets
+              items={[
+                <>
+                  <strong>Save draft &amp; close:</strong> keeps your work to
+                  finish later. Drafts appear in the history with the status
+                  Draft.
+                </>,
+                <>
+                  <strong>Issue:</strong> finalizes the document and gives it a
+                  reference number.
+                </>,
+                <>
+                  <strong>Issue &amp; print:</strong> issues it and opens
+                  printing right away.
+                </>,
+                <>
+                  <strong>Cancel:</strong> closes the form. You can keep the
+                  draft or discard the changes.
+                </>,
+              ]}
+            />
+          </Section>
+          <Section title="Documents the system can prepare">
+            <Bullets
+              items={[
+                <>
+                  <strong>Barangay Clearance</strong> (valid for 2 months)
+                </>,
+                <>
+                  <strong>Franchise Clearance</strong> for tricycles
+                </>,
+                <strong key="electrical">
+                  Electrical and Water Clearance
+                </strong>,
+                <strong key="residency">Certification of Residency</strong>,
+                <strong key="indigency">Certificate of Indigency</strong>,
+                <>
+                  <strong>Assistance Certification</strong> (financial, medical
+                  or burial; medical also records the health condition)
+                </>,
+                <>
+                  <strong>First-Time Jobseeker</strong> (one per resident, valid
+                  for 12 months)
+                </>,
+                <>
+                  <strong>Barangay ID</strong> (new, renewal or replacement)
+                </>,
+              ]}
+            />
+          </Section>
+          <Section title="Barangay ID requirements">
+            <p>
+              The resident record must already have the birthdate, birthplace,
+              sex, civil status, address, emergency contact (name, address and
+              number) and a photo. A new card is refused if the resident already
+              has a Barangay ID number. A renewal or replacement keeps the
+              current number unless you type another.
+            </p>
+          </Section>
+        </HelpGroup>
 
-      <HelpGroup title="Contact the developers">
-        <DeveloperContact />
-      </HelpGroup>
+        <HelpGroup title="Printing">
+          <Section title="Print a document">
+            <p>
+              After issuing, choose Print. Most documents print only the
+              filled-in details onto the barangay's pre-printed forms, so load
+              the right form in the printer first. Residency and First-Time
+              Jobseeker print as full pages.
+            </p>
+          </Section>
+          <Section title="Reprint">
+            <p>
+              Open Issuance Management, find the document in the history and
+              choose Print again. A reprint keeps the same reference number.
+            </p>
+          </Section>
+          <Section title="Save as PDF or Word">
+            <p>
+              On the screen after issuing, or in the three-dot menu of a row in
+              the history, choose Save as PDF or Save as Word. The file is the
+              filled form as a picture of the page, so the values cannot be
+              edited in Word. Saving a copy counts as a copy in the history.
+            </p>
+          </Section>
+          <Section title="Text does not line up with the blanks">
+            <Steps
+              items={[
+                "On Issuance Management, choose Issuance settings, then Printing setup.",
+                "Print the calibration sheet on plain paper. Set the printer to 100% scale with no headers, footers or fit-to-page.",
+                "Hold the sheet against the pre-printed form and check where the red boxes land.",
+                "Enter how far to shift right and down (in points), then print the sheet again until the boxes sit on the blanks.",
+              ]}
+            />
+          </Section>
+        </HelpGroup>
+
+        <HelpGroup title="Issuance history, corrections and voiding">
+          <Section title="Find an issued document">
+            <p>
+              The history lists every document. Search by name or reference
+              number and filter by document type, status (Issued, Draft, Voided)
+              and date range.
+            </p>
+          </Section>
+          <Section title="Mistake in an issued document">
+            <p>
+              Issued documents are never edited directly. Choose Correct, enter
+              the reason, and the system creates a correction draft with the old
+              details filled in. Fix them and issue the new document. The reason
+              is kept in the history.
+            </p>
+          </Section>
+          <Section title="Void or discard">
+            <Bullets
+              items={[
+                <>
+                  <strong>Void:</strong> cancels an issued document that should
+                  not be used. A reason is required and the record stays in the
+                  history marked Voided.
+                </>,
+                <>
+                  <strong>Discard:</strong> removes a draft that was never
+                  issued.
+                </>,
+              ]}
+            />
+          </Section>
+        </HelpGroup>
+
+        <HelpGroup title="Activity Log">
+          <p>
+            The Activity Log shows who did what, when, and whether it worked
+            (Success, Failed or Denied). Filter by module, outcome and date
+            range.{" "}
+            {isAdmin
+              ? "As a System Administrator you can see everyone's activity and filter by user."
+              : "You can see the activity connected to your own account."}
+          </p>
+        </HelpGroup>
+
+        {isAdmin ? (
+          <HelpGroup title="For System Administrators">
+            <Section title="User Accounts">
+              <Steps
+                items={[
+                  "Open User Accounts and choose Add User.",
+                  "Enter the full name, email and role (System Administrator or Staff).",
+                  "Give the starting password to the person in person. They must change it at first sign-in.",
+                  "To stop someone from using the system, set the account to inactive instead of deleting it.",
+                ]}
+              />
+              <p>
+                Keep at least one active System Administrator at all times. The
+                system will not let you remove the last one.
+              </p>
+            </Section>
+            <Section title="Resetting a forgotten password">
+              <p>
+                Edit the person's account and set a new temporary password. The
+                person is asked to choose their own password when they sign in.
+              </p>
+            </Section>
+            <Section title="Officials">
+              <p>
+                Keep the list of barangay officials up to date. Add new
+                officials with their position and term dates. When a term ends,
+                use End term so the person becomes Former. Officials listed here
+                appear as signatories and witnesses on documents.
+              </p>
+            </Section>
+            <Section title="Issuance settings">
+              <p>
+                On Issuance Management, choose Issuance settings to change the
+                lists used in forms (ID types, sectors, streets, subdivisions,
+                tricycle associations, purposes, offices and educational
+                attainment) and to set up Printing. Renaming an item relabels
+                old documents. An item that is already used cannot be deleted.
+              </p>
+            </Section>
+            <Section title="Management Reports">
+              <p>
+                Choose a report (issuances by document type, by purpose,
+                expiring records, or account activity) and a period. The report
+                shows on the page. Reports can be printed or saved as an Excel,
+                Word, PDF or CSV file.
+              </p>
+            </Section>
+            <Section title="Backup and Restore">
+              <p>
+                Choose Back up now on the Backup and Restore page. The backup is
+                saved in the <code className="font-mono">backups</code> folder
+                and checked. Copy backups to an external drive regularly and
+                keep the encryption key and its passphrase apart from the
+                computer. A restore replaces the whole database, so it is not
+                run from the screen: the page checks the backup you choose and
+                shows the command to run on the office computer.
+              </p>
+            </Section>
+            <Section title="Updates">
+              <p>
+                The system looks for a new version and installs it at night.
+                When a version is waiting, an Update reminder appears in the
+                notification bell, and you can choose Update now to install it
+                right away.
+              </p>
+            </Section>
+          </HelpGroup>
+        ) : null}
+
+        <HelpGroup title="Common problems">
+          <ul className="list-disc space-y-2 pl-5">
+            <Problem q="I forgot my password.">
+              Choose Forgot password on the sign-in page. If the office has no
+              email set up, the page says so. In that case ask the System
+              Administrator to set a temporary password for you.
+            </Problem>
+            <Problem q="It says my email or password is incorrect.">
+              Check that Caps Lock is off and the email is typed in full.
+              Passwords are case-sensitive. If it still fails, ask the System
+              Administrator to check that your account is active.
+            </Problem>
+            <Problem q="A page says I have no permission.">
+              That page is for System Administrators only.
+            </Problem>
+            <Problem q="The page will not load.">
+              Check that the office computer that hosts the system is on and
+              that you are connected to the office network. If it still does not
+              load, tell the System Administrator.
+            </Problem>
+            <Problem q="Save says to correct the highlighted boxes.">
+              A box has a value the system does not accept. Names take letters
+              only (no digits or symbols), a phone number needs 7 to 13 digits,
+              a purok is 1 to 99 and the year of residence is from 1900 to this
+              year, not before the year of birth. Fix the boxes with the red
+              note and save again.
+            </Problem>
+            <Problem q="The system says this resident may already be on record.">
+              Someone with the same name and birthdate is already saved. Open
+              the list and check before you add a second record. Choose Save
+              anyway only when it really is a different person.
+            </Problem>
+            <Problem q="I was signed out.">
+              The system signs you out after 30 minutes without use, and a
+              sign-in lasts at most 8 hours. Sign in again. A new resident you
+              were typing is kept as a draft, but an issuance in progress is not
+              unless you chose Save draft and close.
+            </Problem>
+            <Problem q="Asked to confirm because a document was already issued today.">
+              The same document for the same resident on the same day needs a
+              confirmation, so it is not issued twice by accident. Confirm only
+              when a second copy is really needed.
+            </Problem>
+            <Problem q="Where is the quick search?">
+              Press Ctrl+K on any page, type part of a name and press Enter. The
+              full list of shortcuts is in the Keyboard shortcuts group below.
+            </Problem>
+            {isAdmin ? (
+              <Problem q="The backup list says a file is no longer in the backup folder.">
+                Refresh the page and choose Verify once. If the notice stays,
+                choose Back up now to make a new one and tell the developers the
+                time the notice appeared and which backup it was.
+              </Problem>
+            ) : null}
+            <Problem q="I cannot find a resident.">
+              Try fewer words or only the last name. Check the filter is not set
+              to Active when the resident was archived. If they are really not
+              there, add them from the New Issuance form or Records Management.
+            </Problem>
+            <Problem q="The Issue button says details are missing.">
+              Look for the yellow box that lists what is missing, usually the
+              resident's birthdate, civil status, address or photo. Fill it in
+              and try again.
+            </Problem>
+            <Problem q="I cannot take the resident's photo.">
+              Allow the browser to use the camera when it asks. Check the camera
+              is plugged in and not used by another program.
+            </Problem>
+            <Problem q="Printing is cut off or in the wrong place.">
+              Print at 100% scale with no headers or footers, then use Printing
+              setup to shift the text. Make sure the pre-printed form is loaded
+              the right way round.
+            </Problem>
+            <Problem q="I issued the wrong document or entered a wrong detail.">
+              Do not delete it. Use Correct, or Void if it should not be used,
+              and then issue a new one.
+            </Problem>
+          </ul>
+        </HelpGroup>
+
+        <HelpGroup title="Good habits">
+          <Bullets
+            items={[
+              "Check every detail before you issue or print.",
+              "Use resident information only for barangay office work.",
+              "Never share your password. Sign out when you step away.",
+              "Actions such as issuing, correcting and account changes are recorded with your name and the time.",
+            ]}
+          />
+        </HelpGroup>
+
+        <HelpGroup title="Keyboard shortcuts">
+          <ShortcutsList />
+        </HelpGroup>
+
+        <HelpGroup title="Contact the developers">
+          <DeveloperContact />
+        </HelpGroup>
+      </HelpSearch>
     </InfoDialog>
   )
 }
