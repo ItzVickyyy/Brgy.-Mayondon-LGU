@@ -32,6 +32,8 @@ import { UtilizationSheet } from "./UtilizationSheet"
 
 const A4_PAGE_RULE = "@page { size: 210mm 297mm; margin: 0 }"
 const IMAGE_WAIT_MS = 3000
+// Kept after window.print() returns, so a browser whose print() does not block never loses the sheet.
+const PRINT_GRACE_MS = 1000
 
 /** The letterhead logo and the seal must be decoded before the print preview is drawn. */
 function waitForSheetImages(): Promise<void> {
@@ -110,6 +112,9 @@ export function UtilizationCertDialog({
           window.setTimeout(() => resolve(null), 250)
         })
         if (!cancelled) window.print() // blocks until the print dialog closes in most browsers
+        await new Promise((resolve) =>
+          window.setTimeout(resolve, PRINT_GRACE_MS),
+        )
       } finally {
         if (!cancelled) setPrinting(false)
       }
