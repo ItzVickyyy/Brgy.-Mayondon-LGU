@@ -138,3 +138,16 @@ test("the certificate is hidden on screen", async ({ page }) => {
   await openDialog(page)
   await expect(page.getByTestId("utilization-sheet")).toBeHidden()
 })
+
+test("the certificate also shows in print media on Issuance Management", async ({
+  page,
+}) => {
+  await signedIn(page, "Juan Dela Cruz")
+  await page.goto("/issuances")
+  await page.getByRole("button", { name: /user menu/i }).click()
+  await page.getByRole("menuitem", { name: "Utilization Cert." }).click()
+  await expect(page.getByTestId("utilization-dialog")).toBeVisible()
+  await page.emulateMedia({ media: "print" })
+  // That page hides "body *" in print for its own form overlay; the certificate must opt back in.
+  await expect(page.getByTestId("utilization-sheet")).toBeVisible()
+})

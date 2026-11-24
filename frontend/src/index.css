@@ -936,6 +936,13 @@ tr:focus-within > .row-hover-cell {
     background: #fff;
     color: #000;
   }
+  /* The Issuance Management page hides "body *" in print (routes/_layout/issuances.tsx); the
+     certificate must show there too. */
+  .cou-print-root,
+  .cou-print-root * {
+    /* biome-ignore lint/complexity/noImportantStyles: must beat the issuance page's body * rule */
+    visibility: visible !important;
+  }
   .cou-sheet {
     page: cou-a4;
     box-sizing: border-box;
