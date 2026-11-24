@@ -10,6 +10,7 @@ import {
   modalHeader,
   modalShell,
 } from "@/components/Common/ModalLayout"
+import { statusStyles } from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -130,7 +131,12 @@ export function IdSeriesCard() {
               {t("records.ids.series.title")}
             </h2>
             {series ? (
-              <Badge variant={series.enabled ? "default" : "secondary"}>
+              <Badge
+                variant="outline"
+                className={
+                  series.enabled ? statusStyles.Active : statusStyles.Inactive
+                }
+              >
                 {series.enabled
                   ? t("records.ids.series.on")
                   : t("records.ids.series.off")}

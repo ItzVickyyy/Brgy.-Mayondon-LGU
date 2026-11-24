@@ -1,39 +1,62 @@
+// Capsule (badge) colours, shared by every table. One tone = one meaning, the same everywhere:
+// green = fine / done, amber = needs attention, red = failed / over, blue = information,
+// violet = administrator, teal = staff, grey = inactive / neutral.
+// Each tone is a soft tint of the app's own `--stat-*` colour with a small dot, so light and dark
+// mode follow the theme and the meaning never depends on colour alone (the text always says it).
+const dot =
+  "gap-1.5 before:size-1.5 before:shrink-0 before:rounded-full before:bg-current before:content-['']"
+
+export const badgeTone = {
+  green:
+    "border-[color-mix(in_oklab,var(--stat-green)_40%,transparent)] bg-[color-mix(in_oklab,var(--stat-green)_15%,transparent)] text-[color-mix(in_oklab,var(--stat-green)_62%,var(--foreground))] " +
+    dot,
+  amber:
+    "border-[color-mix(in_oklab,var(--stat-amber)_40%,transparent)] bg-[color-mix(in_oklab,var(--stat-amber)_15%,transparent)] text-[color-mix(in_oklab,var(--stat-amber)_62%,var(--foreground))] " +
+    dot,
+  red:
+    "border-[color-mix(in_oklab,var(--stat-rose)_40%,transparent)] bg-[color-mix(in_oklab,var(--stat-rose)_15%,transparent)] text-[color-mix(in_oklab,var(--stat-rose)_62%,var(--foreground))] " +
+    dot,
+  blue:
+    "border-[color-mix(in_oklab,var(--stat-blue)_40%,transparent)] bg-[color-mix(in_oklab,var(--stat-blue)_15%,transparent)] text-[color-mix(in_oklab,var(--stat-blue)_62%,var(--foreground))] " +
+    dot,
+  violet:
+    "border-[color-mix(in_oklab,var(--stat-violet)_40%,transparent)] bg-[color-mix(in_oklab,var(--stat-violet)_15%,transparent)] text-[color-mix(in_oklab,var(--stat-violet)_62%,var(--foreground))] " +
+    dot,
+  teal:
+    "border-[color-mix(in_oklab,var(--stat-teal)_40%,transparent)] bg-[color-mix(in_oklab,var(--stat-teal)_15%,transparent)] text-[color-mix(in_oklab,var(--stat-teal)_62%,var(--foreground))] " +
+    dot,
+  grey: "border-border bg-muted text-muted-foreground " + dot,
+} as const
+
+const { green, amber, red, grey } = badgeTone
+
 export const statusStyles: Record<string, string> = {
-  Success:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Completed:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Approved:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Current:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Valid:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Issued:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Verified:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  Active:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950 dark:text-emerald-300",
-  "Expiring soon":
-    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
-  Pending:
-    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
-  Denied:
-    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
-  Expiring:
-    "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-300",
-  Expired:
-    "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
-  Failed:
-    "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
-  Rejected:
-    "border-red-200 bg-red-50 text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-300",
-  Archived: "border-border bg-muted text-muted-foreground",
-  None: "border-border bg-muted text-muted-foreground",
-  Former: "border-border bg-muted text-muted-foreground",
-  Voided: "border-border bg-muted text-muted-foreground",
-  "Not checked": "border-border bg-muted text-muted-foreground",
-  Inactive: "border-border bg-muted text-muted-foreground",
-  "In progress": "border-border bg-muted text-muted-foreground",
+  Success: green,
+  Completed: green,
+  Approved: green,
+  Current: green,
+  Valid: green,
+  Issued: green,
+  Verified: green,
+  Active: green,
+  "Expiring soon": amber,
+  Pending: amber,
+  Denied: amber,
+  Expiring: amber,
+  Expired: red,
+  Failed: red,
+  Rejected: red,
+  Archived: grey,
+  None: grey,
+  Former: grey,
+  Voided: grey,
+  "Not checked": grey,
+  Inactive: grey,
+  "In progress": badgeTone.blue,
 }
+
+/** Role capsules: administrators violet, staff teal. */
+export const roleStyles = {
+  admin: badgeTone.violet,
+  staff: badgeTone.teal,
+} as const

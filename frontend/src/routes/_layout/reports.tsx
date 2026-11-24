@@ -15,7 +15,7 @@ import { formControlClass } from "@/components/Common/formStyles"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { Select } from "@/components/Common/Select"
 import { StatCard } from "@/components/Common/StatCard"
-import { statusStyles } from "@/components/Common/statusStyles"
+import { roleStyles, statusStyles } from "@/components/Common/statusStyles"
 import {
   TablePagination,
   usePagination,
@@ -896,8 +896,8 @@ function Reports() {
                       variant="outline"
                       className={
                         row.role === "admin"
-                          ? "border-brand/30 bg-brand/10 text-brand"
-                          : statusStyles.Inactive
+                          ? roleStyles.admin
+                          : roleStyles.staff
                       }
                     >
                       {labelOf(roleKeys, row.role, t)}

@@ -4,7 +4,11 @@ import { useTranslation } from "react-i18next"
 
 import type { UserPublic } from "@/client"
 import type { DataTableFeatures } from "@/components/Common/DataTable"
-import { statusStyles } from "@/components/Common/statusStyles"
+import {
+  badgeTone,
+  roleStyles,
+  statusStyles,
+} from "@/components/Common/statusStyles"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
 import { UserActionsMenu } from "./UserActionsMenu"
@@ -37,22 +41,19 @@ export function useUserColumns(): ColumnDef<
                 {fullName || t("admin.users.na")}
               </span>
               {row.original.isCurrentUser && (
-                <Badge variant="outline" className="text-xs">
+                <Badge variant="outline" className={badgeTone.blue}>
                   {t("admin.users.you")}
                 </Badge>
               )}
               {row.original.must_change_password && (
-                <Badge
-                  variant="outline"
-                  className="border-brand/30 bg-brand/10 text-brand"
-                >
+                <Badge variant="outline" className={badgeTone.amber}>
                   {t("admin.users.tempPassword")}
                 </Badge>
               )}
               {row.original.locked_until && (
                 <Badge
                   variant="outline"
-                  className="h-auto max-w-full whitespace-normal border-destructive/40 bg-destructive/10 text-destructive"
+                  className={`h-auto max-w-full whitespace-normal ${badgeTone.red}`}
                 >
                   {t("admin.users.lockedUntil", {
                     time: new Date(
@@ -82,9 +83,7 @@ export function useUserColumns(): ColumnDef<
           <Badge
             variant="outline"
             className={
-              row.original.is_superuser
-                ? "border-brand/30 bg-brand/10 text-brand"
-                : "border-border bg-muted text-muted-foreground"
+              row.original.is_superuser ? roleStyles.admin : roleStyles.staff
             }
           >
             {row.original.is_superuser
