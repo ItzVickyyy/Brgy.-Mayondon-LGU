@@ -103,24 +103,24 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
     paper,
     fields: [
       date(199),
-      { key: "name", x: 135, y: 322.7, w: 255 },
-      { key: "address", x: 135, y: 341.7, w: 255 },
-      { key: "age", x: 135, y: 361.7 },
-      { key: "birthdate", x: 135, y: 380.7 },
-      { key: "birthplace", x: 135, y: 400.7, w: 255 },
-      { key: "civilStatus", x: 135, y: 419.7 },
-      { key: "purpose", x: 135, y: 458.7, w: 255 },
-      { key: "remarks", x: 135, y: 497.7, w: 320 },
+      { key: "name", x: 135, y: 308.3, w: 255 },
+      { key: "address", x: 135, y: 324.1, w: 255 },
+      { key: "age", x: 135, y: 340 },
+      { key: "birthdate", x: 135, y: 355.8 },
+      { key: "birthplace", x: 135, y: 371.7, w: 255 },
+      { key: "civilStatus", x: 135, y: 387.5 },
+      { key: "purpose", x: 135, y: 418.8, w: 255 },
+      { key: "remarks", x: 135, y: 450.5, w: 320 },
       // Bottom block: values go right of the colons at x 230.6 (measured on the page image of the barangay form).
       // Width stops at x 393 so the values never run into the stamp box (x 400-580).
-      { key: "idType", x: 243, y: 613.4, w: 150 },
-      { key: "idNumber", x: 243, y: 631.4, w: 150 },
-      { key: "idPlace", x: 243, y: 648.4, w: 150 },
-      { key: "idDate", x: 243, y: 665.4, w: 150 },
-      { key: "orNumber", x: 243, y: 683.4, w: 150 },
+      { key: "idType", x: 243, y: 608.9, w: 150, size: 11 },
+      { key: "idNumber", x: 243, y: 623.3, w: 150, size: 11 },
+      { key: "idPlace", x: 243, y: 637.7, w: 150, size: 11 },
+      { key: "idDate", x: 243, y: 652.1, w: 150, size: 11 },
+      { key: "orNumber", x: 243, y: 666.8, w: 150, size: 11 },
     ],
-    stamp: { x: 400, y: 626, w: 180, h: 56 }, // right of the Valid I.D. block, below "DRY SEAL"
-    photo: { x: 402, y: 340, w: 82, h: 79 }, // inside the pre-printed photo box (x 400.8-485.4, y 339-420.7) so its border stays visible; thumbmark box and signature line stay blank
+    stamp: { x: 400, y: 612, w: 180, h: 56 }, // right of the Valid I.D. block, below "DRY SEAL"
+    photo: { x: 402, y: 325, w: 82, h: 79 }, // inside the pre-printed photo box (x 400.8-485.4, y 324.3-405.3) so its border stays visible; thumbmark box and signature line stay blank
   },
   franchise: {
     id: "franchise",

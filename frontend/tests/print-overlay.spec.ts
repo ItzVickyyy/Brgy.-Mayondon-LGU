@@ -81,7 +81,7 @@ test.describe("print overlay layout", () => {
     expect(clearance[0].photo).toEqual({
       url: "data:image/png;base64,AAA",
       x: 403,
-      y: 341,
+      y: 326,
       w: 82,
       h: 79,
     })
