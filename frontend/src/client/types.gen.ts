@@ -3510,6 +3510,54 @@ export type UtilityPublic = {
 };
 
 /**
+ * UtilizationCertificate
+ *
+ * The figures the monthly Certificate of Utilization fills in itself.
+ *
+ * Counts only: no resident is named. ``clients_served`` is the number of
+ * different residents who received at least one issued document in the month
+ * (a resident who came three times counts once).
+ */
+export type UtilizationCertificate = {
+    /**
+     * Month
+     */
+    month: string;
+    /**
+     * Month Start
+     */
+    month_start: string;
+    /**
+     * Month End
+     */
+    month_end: string;
+    /**
+     * Clients Served
+     */
+    clients_served: number;
+    /**
+     * Documents Issued
+     */
+    documents_issued: number;
+    /**
+     * Punong Barangay
+     */
+    punong_barangay: string | null;
+};
+
+/**
+ * UtilizationPrintedRequest
+ *
+ * What the browser reports just before it opens the print dialog.
+ */
+export type UtilizationPrintedRequest = {
+    /**
+     * Month
+     */
+    month: string;
+};
+
+/**
  * ValidationError
  */
 export type ValidationError = {
@@ -6544,6 +6592,63 @@ export type reportsRecordExportResponses = {
 };
 
 export type reportsRecordExportResponse = reportsRecordExportResponses[keyof reportsRecordExportResponses];
+
+export type utilizationUtilizationData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Month
+         *
+         * Month as YYYY-MM; default this month
+         */
+        month?: string | null;
+    };
+    url: '/api/v1/utilization/';
+};
+
+export type utilizationUtilizationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type utilizationUtilizationError = utilizationUtilizationErrors[keyof utilizationUtilizationErrors];
+
+export type utilizationUtilizationResponses = {
+    /**
+     * Successful Response
+     */
+    200: UtilizationCertificate;
+};
+
+export type utilizationUtilizationResponse = utilizationUtilizationResponses[keyof utilizationUtilizationResponses];
+
+export type utilizationUtilizationPrintedData = {
+    body: UtilizationPrintedRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/utilization/printed';
+};
+
+export type utilizationUtilizationPrintedErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type utilizationUtilizationPrintedError = utilizationUtilizationPrintedErrors[keyof utilizationUtilizationPrintedErrors];
+
+export type utilizationUtilizationPrintedResponses = {
+    /**
+     * Successful Response
+     */
+    204: void;
+};
+
+export type utilizationUtilizationPrintedResponse = utilizationUtilizationPrintedResponses[keyof utilizationUtilizationPrintedResponses];
 
 export type backupsListBackupsData = {
     body?: never;

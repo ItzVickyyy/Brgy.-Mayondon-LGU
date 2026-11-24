@@ -26,7 +26,12 @@
     "preferences": "Preferences",
     "getHelp": "Get help",
     "learnMore": "Learn more",
+    "utilizationCert": "Utilization Cert.",
     "logout": "Logout"
+  },
+  "utilization": {
+    "printFailed": "Could not record the print",
+    "loadFailed": "Could not load the figures"
   },
   "preferences": {
     "title": "Preferences",
@@ -584,6 +589,9 @@
       },
       "report": {
         "export": "Report exported or printed"
+      },
+      "utilization": {
+        "print": "Utilization certificate printed"
       },
       "audit": {
         "prune": "Old viewed entries removed"

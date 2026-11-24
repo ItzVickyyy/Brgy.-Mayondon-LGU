@@ -1,6 +1,7 @@
 import {
   Check,
   CircleHelp,
+  FileBadge,
   Info,
   Languages,
   LogOut,
@@ -12,6 +13,7 @@ import { useTranslation } from "react-i18next"
 import { HelpDialog, LearnMoreDialog } from "@/components/Common/InfoDialogs"
 import { MyAccountModal } from "@/components/Settings/MyAccountModal"
 import { PreferencesModal } from "@/components/Settings/PreferencesModal"
+import { UtilizationCertDialog } from "@/components/Utilization/UtilizationCertDialog"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -51,6 +53,7 @@ export function User({
   const [logoutOpen, setLogoutOpen] = useState(false)
   const [helpOpen, setHelpOpen] = useState(false)
   const [learnOpen, setLearnOpen] = useState(false)
+  const [utilizationOpen, setUtilizationOpen] = useState(false)
 
   if (!user) return null
 
@@ -188,6 +191,16 @@ export function User({
               <Info className="size-4" />
               {t("userMenu.learnMore")}
             </DropdownMenuItem>
+            <DropdownMenuItem
+              data-testid="utilization-cert-menu"
+              onSelect={() => {
+                handleMenuClick()
+                setUtilizationOpen(true)
+              }}
+            >
+              <FileBadge className="size-4" />
+              {t("userMenu.utilizationCert")}
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onSelect={() => {
@@ -212,6 +225,10 @@ export function User({
       />
       <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
       <LearnMoreDialog open={learnOpen} onOpenChange={setLearnOpen} />
+      <UtilizationCertDialog
+        open={utilizationOpen}
+        onOpenChange={setUtilizationOpen}
+      />
       <Dialog open={logoutOpen} onOpenChange={setLogoutOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>

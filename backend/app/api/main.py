@@ -18,6 +18,7 @@ from app.api.routes import (
     security_questions,
     system,
     users,
+    utilization,
     utils,
 )
 from app.core.config import settings
@@ -46,6 +47,7 @@ def create_api_router(
     router.include_router(notifications.router)
     router.include_router(dashboard.router)
     router.include_router(reports.router)
+    router.include_router(utilization.router)
     router.include_router(backups.router)
     router.include_router(system.router)
     router.include_router(imports.router)

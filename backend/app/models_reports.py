@@ -4,8 +4,9 @@ name the resident because they are work lists for the office, not totals."""
 
 import uuid
 from datetime import date, datetime
-from typing import Literal
+from typing import Annotated, Literal
 
+from pydantic import StringConstraints
 from sqlmodel import SQLModel
 
 
@@ -201,3 +202,24 @@ class RecordsOverview(SQLModel):
     residents_archived: int
     residents_by_sector: list[SectorCount]  # active residents only
     ids_by_status: IdStatusCounts
+
+
+class UtilizationCertificate(SQLModel):
+    """The figures the monthly Certificate of Utilization fills in itself.
+
+    Counts only: no resident is named. ``clients_served`` is the number of
+    different residents who received at least one issued document in the month
+    (a resident who came three times counts once)."""
+
+    month: str  # "YYYY-MM"
+    month_start: date
+    month_end: date  # inclusive; today for the current month
+    clients_served: int
+    documents_issued: int
+    punong_barangay: str | None  # name of the current Punong Barangay, if any
+
+
+class UtilizationPrintedRequest(SQLModel):
+    """What the browser reports just before it opens the print dialog."""
+
+    month: Annotated[str, StringConstraints(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")]

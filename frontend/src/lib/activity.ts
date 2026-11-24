@@ -54,6 +54,7 @@ const activityKeys = {
   "tricycle_association.delete": "activity.actions.tricycle_association.delete",
   "auth.account_locked": "activity.actions.auth.account_locked",
   "report.export": "activity.actions.report.export",
+  "utilization.print": "activity.actions.utilization.print",
   "audit.prune": "activity.actions.audit.prune",
   "issuance.issue": "activity.actions.issuance.issue",
   "issuance.correct": "activity.actions.issuance.correct",

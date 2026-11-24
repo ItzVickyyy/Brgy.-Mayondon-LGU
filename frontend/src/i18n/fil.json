@@ -26,7 +26,12 @@
     "preferences": "Mga Kagustuhan",
     "getHelp": "Humingi ng tulong",
     "learnMore": "Alamin pa",
+    "utilizationCert": "Sertipiko ng Paggamit",
     "logout": "Mag-logout"
+  },
+  "utilization": {
+    "printFailed": "Hindi naitala ang pag-print",
+    "loadFailed": "Hindi ma-load ang mga bilang"
   },
   "preferences": {
     "title": "Mga Kagustuhan",
@@ -584,6 +589,9 @@
       },
       "report": {
         "export": "Na-export o na-print ang ulat"
+      },
+      "utilization": {
+        "print": "Na-print ang Sertipiko ng Paggamit"
       },
       "audit": {
         "prune": "Naalis ang lumang tiningnan na entry"

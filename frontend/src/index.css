@@ -907,3 +907,150 @@ tr:focus-within > .row-hover-cell {
     text-align: center;
   }
 }
+
+/* Certificate of Utilization (Profile menu > Utilization Cert.): the dialog adds "cou-printing" to the
+   body while it prints, so nothing else in the app is affected. The sheet follows the barangay's Word
+   file: A4, Arial 11 pt, Cambria letterhead, navy 1F3A68. It never shows on screen. */
+.cou-print-root {
+  display: none;
+}
+@media print {
+  body.cou-printing > *:not(.cou-print-root) {
+    /* biome-ignore lint/complexity/noImportantStyles: only the certificate may print */
+    display: none !important;
+  }
+  body.cou-printing,
+  body.cou-printing .cou-print-root {
+    background: #fff;
+    color: #000;
+  }
+  body.cou-printing .cou-print-root {
+    display: block;
+  }
+  .cou-sheet {
+    box-sizing: border-box;
+    width: 210mm;
+    height: 296mm;
+    padding: 12.7mm 17.8mm 12.7mm;
+    position: relative;
+    overflow: hidden;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 11pt;
+    line-height: 1.25;
+    color: #000;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  :where(.cou-sheet) p {
+    margin: 0;
+  }
+  .cou-head {
+    display: flex;
+    align-items: center;
+    gap: 10pt;
+    padding-bottom: 6pt;
+    border-bottom: 1.5pt solid #1b5e20;
+  }
+  .cou-head__logo {
+    width: 86pt;
+    height: 86pt;
+    object-fit: contain;
+    flex: none;
+  }
+  .cou-head__lines {
+    flex: 1;
+    text-align: center;
+    font-family: Cambria, Caladea, "Times New Roman", serif;
+    font-size: 10pt;
+    margin-right: 86pt;
+  }
+  .cou-head__barangay {
+    font-weight: 700;
+    font-size: 14pt;
+  }
+  .cou-head__office {
+    font-weight: 700;
+    font-size: 16pt;
+  }
+  .cou-head__contact {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 8pt;
+    font-weight: 700;
+  }
+  .cou-title {
+    margin: 14pt 0 2pt;
+    text-align: center;
+    font-size: 16pt;
+    font-weight: 700;
+    color: #1f3a68;
+  }
+  .cou-month {
+    text-align: center;
+    margin-bottom: 12pt;
+  }
+  .cou-text {
+    text-align: justify;
+    margin-bottom: 10pt;
+  }
+  .cou-table {
+    width: 100%;
+    margin: 8pt 0 14pt;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+  }
+  .cou-table th,
+  .cou-table td {
+    border: 0.75pt solid #000;
+    padding: 4pt 6pt;
+    text-align: left;
+    vertical-align: middle;
+  }
+  .cou-table th {
+    width: 24%;
+    background: #e8f5e9;
+    font-weight: 700;
+  }
+  .cou-table__bold {
+    font-weight: 700;
+  }
+  .cou-total {
+    margin-bottom: 12pt;
+  }
+  .cou-sign {
+    margin: 22pt 0 0 52%;
+    text-align: center;
+    font-size: 10pt;
+  }
+  .cou-sign__lead {
+    text-align: left;
+    margin-bottom: 30pt;
+  }
+  .cou-sign__name {
+    min-height: 13pt;
+    border-top: 0.75pt solid #000;
+    padding-top: 3pt;
+    font-weight: 700;
+  }
+  .cou-foot {
+    position: absolute;
+    left: 17.8mm;
+    right: 17.8mm;
+    bottom: 9mm;
+    display: flex;
+    align-items: center;
+    gap: 6pt;
+    padding-top: 4pt;
+    border-top: 1.25pt solid #1b5e20;
+    font-size: 7.5pt;
+    color: #555;
+  }
+  .cou-foot__seal {
+    width: 28pt;
+    height: 28pt;
+    flex: none;
+  }
+  .cou-foot__strong {
+    font-weight: 700;
+    color: #1f3a68;
+  }
+}
