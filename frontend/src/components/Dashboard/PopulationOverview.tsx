@@ -142,7 +142,7 @@ function Donut({
   const current = segments.find((item) => item.key === active)
   return (
     <div
-      className="relative mx-auto size-28 shrink-0"
+      className="relative mx-auto size-36 shrink-0 sm:size-40"
       role="img"
       aria-label={segments
         .map((item) => `${item.label}: ${formatLocaleNumber(item.value)}`)
@@ -185,8 +185,8 @@ function Donut({
         })}
       </svg>
       {/* The centre shows the total, or the hovered segment's own count. */}
-      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-5 text-center">
-        <span className="stat-figure text-base">
+      <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center px-8 text-center">
+        <span className="stat-figure text-xl">
           {formatLocaleNumber(current ? current.value : total)}
         </span>
         <span className="max-w-full truncate text-xs leading-4 text-muted-foreground">
@@ -447,7 +447,10 @@ export function PopulationOverview({
                   />
                 </>
               ) : (
-                <Skeleton className="size-28 rounded-full" aria-hidden="true" />
+                <Skeleton
+                  className="size-36 rounded-full sm:size-40"
+                  aria-hidden="true"
+                />
               )}
             </div>
           </div>
@@ -558,7 +561,7 @@ export function PopulationOverview({
           <CardTitle icon={ChartPie}>
             {t("dashboard.population.civilStatus")}
           </CardTitle>
-          <div className="mt-3 flex flex-1 flex-col items-center justify-center gap-4 sm:flex-row">
+          <div className="mt-3 flex min-w-0 flex-1 flex-col items-center justify-center gap-4 sm:flex-row xl:flex-col 2xl:flex-row">
             {ready ? (
               <>
                 <Donut
@@ -575,7 +578,10 @@ export function PopulationOverview({
                 />
               </>
             ) : (
-              <Skeleton className="size-28 rounded-full" aria-hidden="true" />
+              <Skeleton
+                className="size-36 rounded-full sm:size-40"
+                aria-hidden="true"
+              />
             )}
           </div>
         </article>
