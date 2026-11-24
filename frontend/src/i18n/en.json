@@ -1800,6 +1800,19 @@
           "sat": "Sa"
         }
       },
+      "photoViewer": {
+        "title": "Photo",
+        "description": "Drag to move the photo and use the slider to zoom. The bright square is the part that prints on the form.",
+        "frameLabel": "Photo. Drag or use the arrow keys to move, plus and minus to zoom.",
+        "zoom": "Zoom",
+        "zoomIn": "Zoom in",
+        "zoomOut": "Zoom out",
+        "reset": "Reset",
+        "apply": "Use this framing",
+        "cancel": "Cancel",
+        "close": "Close",
+        "view": "Click to enlarge or adjust the photo"
+      },
       "photoCapture": {
         "removing": "Removing the background. This stays on this computer.",
         "fallback": "Background could not be removed. Using the original photo.",

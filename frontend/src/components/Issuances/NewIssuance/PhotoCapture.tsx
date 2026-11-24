@@ -1,5 +1,5 @@
 import type { TFunction } from "i18next"
-import { Camera, ImageOff, LoaderCircle, RefreshCw, Upload, UserRound } from "lucide-react"
+import { Camera, ImageOff, LoaderCircle, RefreshCw, Upload, UserRound, ZoomIn } from "lucide-react"
 import { type ChangeEvent, useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Select } from "@/components/Common/Select"
@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { photoUploadMessage } from "@/lib/issuanceLabels"
 import { canvasToPhotoUrl, cropToPortrait, PHOTO_HEIGHT, PHOTO_WIDTH, removeBackground } from "@/lib/photo-background"
 import { PHOTO_UPLOAD_ACCEPT, PHOTO_UPLOAD_OPEN_ERROR, validatePhotoFile } from "@/lib/photo-upload"
+import { PHOTO_ON_FILE } from "./issuanceApi"
+import { PhotoViewer } from "./PhotoViewer"
 
 type Phase = "camera" | "working"
 
@@ -54,6 +56,7 @@ async function loadImageFile(file: File): Promise<HTMLImageElement> {
 export function PhotoCapture({ id, value, onChange }: PhotoCaptureProps) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
+  const [viewerOpen, setViewerOpen] = useState(false)
   const [fallbackNotice, setFallbackNotice] = useState(false)
   const [photoVersions, setPhotoVersions] = useState<PhotoVersions | null>(null)
   const [keepOriginal, setKeepOriginal] = useState(false)
@@ -111,6 +114,9 @@ export function PhotoCapture({ id, value, onChange }: PhotoCaptureProps) {
     }
   }
 
+  // The photo can be opened once it is a real picture (a resident's saved photo shows a marker until it has loaded).
+  const canView = Boolean(value) && value !== PHOTO_ON_FILE
+
   const hint = processing
     ? t("issuances.new.photoCapture.removing")
     : fallbackNotice
@@ -121,9 +127,16 @@ export function PhotoCapture({ id, value, onChange }: PhotoCaptureProps) {
 
   return (
     <div className="flex items-center gap-4">
-      <div className="flex h-28 w-[84px] shrink-0 items-center justify-center overflow-hidden rounded-md border bg-white">
-        {value ? <img src={value} alt={t("issuances.new.photoCapture.alt")} className="size-full object-cover" /> : <UserRound className="size-8 text-muted-foreground/50" aria-hidden="true" />}
-      </div>
+      {canView ? (
+        <button type="button" onClick={() => setViewerOpen(true)} title={t("issuances.new.photoViewer.view")} aria-label={t("issuances.new.photoViewer.view")} data-testid="photo-thumbnail" className="group relative flex h-28 w-[84px] shrink-0 cursor-zoom-in items-center justify-center overflow-hidden rounded-md border bg-white focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none">
+          <img src={value} alt={t("issuances.new.photoCapture.alt")} className="size-full object-cover" />
+          <span className="pointer-events-none absolute bottom-1 right-1 rounded-full bg-black/60 p-1 text-white" aria-hidden="true"><ZoomIn className="size-3.5" /></span>
+        </button>
+      ) : (
+        <div className="flex h-28 w-[84px] shrink-0 items-center justify-center overflow-hidden rounded-md border bg-white">
+          {value ? <img src={value} alt={t("issuances.new.photoCapture.alt")} className="size-full object-cover" /> : <UserRound className="size-8 text-muted-foreground/50" aria-hidden="true" />}
+        </div>
+      )}
       <div className="flex min-w-0 flex-col items-start gap-1.5">
         <div className="flex flex-wrap gap-2">
           <Button id={id} type="button" variant={value ? "outline" : "default"} onClick={() => setOpen(true)} disabled={processing}>
@@ -148,6 +161,7 @@ export function PhotoCapture({ id, value, onChange }: PhotoCaptureProps) {
           </label>
         ) : null}
       </div>
+      {canView && value ? <PhotoViewer open={viewerOpen} onOpenChange={setViewerOpen} src={value} onApply={(photoUrl) => { setPhotoVersions(null); setKeepOriginal(false); setFallbackNotice(false); applyPhoto(photoUrl) }} /> : null}
       <PhotoCaptureDialog open={open} onOpenChange={setOpen} onUse={handleUse} />
     </div>
   )

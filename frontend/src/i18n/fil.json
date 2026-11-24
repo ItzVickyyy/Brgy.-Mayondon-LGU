@@ -1800,6 +1800,19 @@
           "sat": "Sa"
         }
       },
+      "photoViewer": {
+        "title": "Litrato",
+        "description": "I-drag para igalaw ang litrato at gamitin ang slider para mag-zoom. Ang maliwanag na parisukat ang lalabas sa print ng form.",
+        "frameLabel": "Litrato. I-drag o gamitin ang mga arrow key para igalaw, plus at minus para mag-zoom.",
+        "zoom": "Zoom",
+        "zoomIn": "I-zoom in",
+        "zoomOut": "I-zoom out",
+        "reset": "I-reset",
+        "apply": "Gamitin ang framing na ito",
+        "cancel": "Kanselahin",
+        "close": "Isara",
+        "view": "I-click para palakihin o ayusin ang litrato"
+      },
       "photoCapture": {
         "removing": "Inaalis ang background. Nananatili ito sa computer na ito.",
         "fallback": "Hindi maalis ang background. Ginagamit ang orihinal na litrato.",
