@@ -97,7 +97,7 @@ test("one unreadable value reads in the singular", async ({ page }) => {
   await page.goto("/")
   await page.getByTestId("notification-bell").click()
   await expect(page.getByTestId("data-key-reminder")).toContainText(
-    "1 saved health condition cannot",
+    "1 saved health condition or photo cannot",
   )
 })
 

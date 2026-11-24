@@ -2965,28 +2965,28 @@
       "action": "Ano ang gagawin",
       "close": "Isara",
       "missing": {
-        "title": "Walang proteksyon ang mga kondisyong pangkalusugan",
-        "text": "Wala sa computer na ito ang susi ng proteksyon para sa mga kondisyong pangkalusugan, kaya nakasave ang mga ito bilang plain text sa database. Ang pagdagdag ng susi ang solusyon.",
-        "teaser": "Hindi protektado ang mga kondisyong pangkalusugan",
+        "title": "Walang proteksyon ang mga kondisyong pangkalusugan at larawan",
+        "text": "Wala sa computer na ito ang susi ng proteksyon, kaya nakasave nang walang proteksyon sa database ang mga kondisyong pangkalusugan at mga larawan ng residente. Ang pagdagdag ng susi ang solusyon.",
+        "teaser": "Hindi protektado ang mga kondisyong pangkalusugan at larawan",
         "dialog": {
-          "title": "Protektahan ang mga kondisyong pangkalusugan",
-          "description": "Kung walang susi, nakasave bilang plain text sa database ang kondisyong pangkalusugan ng medical assistance request.",
+          "title": "Protektahan ang mga kondisyong pangkalusugan at larawan",
+          "description": "Kung walang susi, nakasave nang walang proteksyon sa database ang kondisyong pangkalusugan ng medical assistance request at ang mga larawan ng residente.",
           "steps": {
             "one": "Sa server computer, bubuksan ng taong nag-aalaga ng programa ang program folder at patatakbuhin ang ensure-data-key.ps1 sa scripts folder. Idinadagdag nito ang susi at hindi ito ipinapakita.",
-            "two": "Pagkatapos, sisimulan niya muli ang programa gamit ang: docker compose -f compose.yml up -d. Mapoprotektahan sa pagsisimulang iyon ang mga kondisyong nakasave na.",
-            "three": "Kokopyahin niya ang .env file sa USB drive. Kung wala ang eksaktong susing iyon, hindi na muling mababasa ang mga protektadong kondisyon, kaya itago ito nang maayos."
+            "two": "Pagkatapos, sisimulan niya muli ang programa gamit ang: docker compose -f compose.yml up -d. Mapoprotektahan sa pagsisimulang iyon ang mga kondisyon at larawang nakasave na.",
+            "three": "Kokopyahin niya ang .env file sa USB drive. Kung wala ang eksaktong susing iyon, hindi na muling mababasa ang mga protektadong kondisyon at larawan, kaya itago ito nang maayos."
           }
         }
       },
       "unreadable": {
-        "title": "May mga kondisyong pangkalusugan na hindi mabasa",
-        "text_one": "{{count}} nakasave na kondisyong pangkalusugan ang hindi mabuksan ng susi sa computer na ito. Maaaring nawala o napalitan ang susi.",
-        "text_other": "{{count}} nakasave na kondisyong pangkalusugan ang hindi mabuksan ng susi sa computer na ito. Maaaring nawala o napalitan ang susi.",
-        "teaser": "Hindi mabasa ang mga kondisyong pangkalusugan",
+        "title": "May mga protektadong talaan na hindi mabasa",
+        "text_one": "{{count}} nakasave na kondisyong pangkalusugan o larawan ang hindi mabuksan ng susi sa computer na ito. Maaaring nawala o napalitan ang susi.",
+        "text_other": "{{count}} nakasave na kondisyong pangkalusugan o larawan ang hindi mabuksan ng susi sa computer na ito. Maaaring nawala o napalitan ang susi.",
+        "teaser": "Hindi mabasa ang mga protektadong talaan",
         "dialog": {
-          "title": "Hindi mabasa ang mga kondisyong pangkalusugan",
-          "description_one": "{{count}} nakasave na kondisyong pangkalusugan ang hindi mabuksan ng susi sa computer na ito.",
-          "description_other": "{{count}} nakasave na kondisyong pangkalusugan ang hindi mabuksan ng susi sa computer na ito.",
+          "title": "Hindi mabasa ang mga protektadong talaan",
+          "description_one": "{{count}} nakasave na kondisyong pangkalusugan o larawan ang hindi mabuksan ng susi sa computer na ito.",
+          "description_other": "{{count}} nakasave na kondisyong pangkalusugan o larawan ang hindi mabuksan ng susi sa computer na ito.",
           "steps": {
             "one": "Huwag patakbuhin ang ensure-data-key.ps1 at huwag gumawa ng bagong susi: hindi mabubuksan ng bagong susi ang mga lumang value.",
             "two": "Hanapin ang .env file na nasa USB drive (o mas lumang kopya) at ilagay ang DATA_ENCRYPTION_KEY na linya nito sa .env ng server computer.",

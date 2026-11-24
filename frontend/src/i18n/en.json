@@ -2965,28 +2965,28 @@
       "action": "What to do",
       "close": "Close",
       "missing": {
-        "title": "Health conditions are saved without protection",
-        "text": "The protection key for health conditions is missing on this computer, so they are stored as plain text in the database. Adding the key fixes this.",
-        "teaser": "Health conditions are not protected",
+        "title": "Health conditions and photos are saved without protection",
+        "text": "The protection key is missing on this computer, so health conditions and resident photos are stored unprotected in the database. Adding the key fixes this.",
+        "teaser": "Health conditions and photos are not protected",
         "dialog": {
-          "title": "Protect the health conditions",
-          "description": "Without the key, the health condition of a medical assistance request is saved as plain text in the database.",
+          "title": "Protect health conditions and photos",
+          "description": "Without the key, the health condition of a medical assistance request and resident photos are saved unprotected in the database.",
           "steps": {
             "one": "On the server computer, the person who looks after the program opens the program folder and runs ensure-data-key.ps1 from the scripts folder. It adds the key and never shows it.",
-            "two": "They then start the program again with: docker compose -f compose.yml up -d. Health conditions already saved are protected at that start.",
-            "three": "They copy the .env file to the USB drive. Without that exact key, protected health conditions can never be read again, so keep it safe."
+            "two": "They then start the program again with: docker compose -f compose.yml up -d. Health conditions and photos already saved are protected at that start.",
+            "three": "They copy the .env file to the USB drive. Without that exact key, protected health conditions and photos can never be read again, so keep it safe."
           }
         }
       },
       "unreadable": {
-        "title": "Some health conditions cannot be read",
-        "text_one": "{{count}} saved health condition cannot be opened with the key on this computer. The key may have been lost or changed.",
-        "text_other": "{{count}} saved health conditions cannot be opened with the key on this computer. The key may have been lost or changed.",
-        "teaser": "Health conditions cannot be read",
+        "title": "Some protected records cannot be read",
+        "text_one": "{{count}} saved health condition or photo cannot be opened with the key on this computer. The key may have been lost or changed.",
+        "text_other": "{{count}} saved health conditions or photos cannot be opened with the key on this computer. The key may have been lost or changed.",
+        "teaser": "Protected records cannot be read",
         "dialog": {
-          "title": "Health conditions cannot be read",
-          "description_one": "{{count}} saved health condition cannot be opened with the key on this computer.",
-          "description_other": "{{count}} saved health conditions cannot be opened with the key on this computer.",
+          "title": "Protected records cannot be read",
+          "description_one": "{{count}} saved health condition or photo cannot be opened with the key on this computer.",
+          "description_other": "{{count}} saved health conditions or photos cannot be opened with the key on this computer.",
           "steps": {
             "one": "Do not run ensure-data-key.ps1 and do not make a new key: a new key cannot open the old values.",
             "two": "Find the .env file that was on the USB drive (or an older copy) and put its DATA_ENCRYPTION_KEY line into the .env on the server computer.",
