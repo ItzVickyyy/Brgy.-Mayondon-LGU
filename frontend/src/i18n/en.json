@@ -460,6 +460,7 @@
       "rows": "rows",
       "role": "role",
       "reason": "reason",
+      "scope": "asked for",
       "created": "created",
       "updated": "updated",
       "skipped": "skipped",
@@ -603,6 +604,7 @@
       "auth": {
         "login": "Signed in",
         "login_failed": "Sign-in failed",
+        "confirm_failed": "Password check failed",
         "secrets_rotate": "System secrets changed",
         "account_locked": "Account locked after failed sign-ins",
         "recovery_questions_set": "Recovery questions set",
@@ -2733,6 +2735,15 @@
     "email": "Email"
   },
   "common": {
+    "confirmPassword": {
+      "title": "Type your password again",
+      "label": "Your password",
+      "submit": "Continue",
+      "cancel": "Cancel",
+      "failed": "The password could not be checked. Try again.",
+      "restoreDescription": "A restore replaces the whole database. Confirm it is you before the command is shown.",
+      "downloadDescription": "A backup holds all the barangay records. Confirm it is you before the copy is downloaded."
+    },
     "idle": {
       "title": "Are you still there?",
       "message": "There has been no activity for a while. To protect resident records you will be signed out in {{seconds}} seconds.",

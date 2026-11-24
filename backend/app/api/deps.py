@@ -117,3 +117,35 @@ def require_admin(current_user: CurrentUser) -> User:
 def get_current_active_superuser(current_user: CurrentUser) -> User:
     """Backward-compatible name for existing template routes."""
     return require_admin(current_user)
+
+
+def check_confirm_token(token: str | None, user: User, scope: str) -> None:
+    """Refuse unless ``token`` proves this person typed their password again for ``scope``.
+
+    The token comes from ``POST /login/confirm-password`` and travels in the
+    ``X-Confirm-Token`` header. The answer is always the same 403 so the screen
+    can open the password box again.
+    """
+    refusal = HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={
+            "code": "password_confirmation_required",
+            "message": "Type your password again to continue.",
+        },
+    )
+    if not token:
+        raise refusal
+    try:
+        payload = jwt.decode(
+            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+        )
+        data = TokenPayload(**payload)
+    except InvalidTokenError, ValidationError:
+        raise refusal
+    if (
+        data.purpose != security.CONFIRM_TOKEN_PURPOSE
+        or data.scope != scope
+        or data.sub != str(user.id)
+        or not security.verify_password_fingerprint(data.pwdv, user.hashed_password)
+    ):
+        raise refusal

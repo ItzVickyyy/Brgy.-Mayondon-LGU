@@ -24,3 +24,19 @@ def get_superuser_token_headers(client: TestClient) -> dict[str, str]:
     a_token = tokens["access_token"]
     headers = {"Authorization": f"Bearer {a_token}"}
     return headers
+
+
+def confirmed_headers(
+    client: TestClient,
+    headers: dict[str, str],
+    scope: str,
+    password: str = settings.FIRST_SUPERUSER_PASSWORD,
+) -> dict[str, str]:
+    """``headers`` plus a fresh ``X-Confirm-Token`` for ``scope`` (password typed again)."""
+    response = client.post(
+        f"{settings.API_V1_STR}/login/confirm-password",
+        headers=headers,
+        json={"password": password, "scope": scope},
+    )
+    assert response.status_code == 200, response.text
+    return {**headers, "X-Confirm-Token": response.json()["confirm_token"]}

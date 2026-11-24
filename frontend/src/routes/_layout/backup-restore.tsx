@@ -14,6 +14,11 @@ import { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
 import { type BackupRunPublic, BackupsService } from "@/client"
+import {
+  ConfirmPasswordDialog,
+  type ConfirmScope,
+  confirmHeaders,
+} from "@/components/Common/ConfirmPasswordDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
 import { NoPermission } from "@/components/Common/NoPermission"
@@ -111,6 +116,11 @@ function BackupRestore() {
   const [confirmRestore, setConfirmRestore] = useState(false)
   const [selectedBackup, setSelectedBackup] = useState("")
   const [restoreConfirmation, setRestoreConfirmation] = useState("")
+  // The password box: which action it is for, and what to do once it is right.
+  const [asking, setAsking] = useState<{
+    scope: ConfirmScope
+    run: (token: string) => void
+  } | null>(null)
   const [restoreCommand, setRestoreCommand] = useState<{
     name: string
     command: string
@@ -153,8 +163,13 @@ function BackupRestore() {
     onSettled: refresh,
   })
   const restoreMutation = useMutation({
-    mutationFn: async (id: string) =>
-      (await BackupsService.requestRestore({ path: { backup_id: id } })).data,
+    mutationFn: async ({ id, token }: { id: string; token: string }) =>
+      (
+        await BackupsService.requestRestore({
+          path: { backup_id: id },
+          headers: confirmHeaders(token),
+        })
+      ).data,
     onSuccess: (result) => {
       setRestoreCommand({ name: result.file_name, command: result.command })
       notice("restoreChecked", result.file_name)
@@ -165,10 +180,11 @@ function BackupRestore() {
     onSettled: refresh,
   })
 
-  async function download(run: BackupRunPublic) {
+  async function download(run: BackupRunPublic, token: string) {
     try {
       const response = await BackupsService.downloadBackup({
         path: { backup_id: run.id },
+        headers: confirmHeaders(token),
         responseType: "blob",
       } as Parameters<typeof BackupsService.downloadBackup>[0])
       const url = URL.createObjectURL(response.data as unknown as Blob)
@@ -484,7 +500,11 @@ function BackupRestore() {
                                   label: t("admin.backup.actions.download"),
                                   variant: "tintViolet" as const,
                                   icon: <Download aria-hidden="true" />,
-                                  onSelect: () => download(backup),
+                                  onSelect: () =>
+                                    setAsking({
+                                      scope: "backup.download",
+                                      run: (token) => download(backup, token),
+                                    }),
                                 },
                               ]
                             : []),
@@ -597,7 +617,13 @@ function BackupRestore() {
                 restoreConfirmation !== RESTORE_WORD ||
                 restoreMutation.isPending
               }
-              onClick={() => restoreMutation.mutate(selectedBackup)}
+              onClick={() =>
+                setAsking({
+                  scope: "backup.restore",
+                  run: (token) =>
+                    restoreMutation.mutate({ id: selectedBackup, token }),
+                })
+              }
             >
               <ShieldCheck aria-hidden="true" />
               {t("admin.backup.restore.confirmButton")}
@@ -605,6 +631,21 @@ function BackupRestore() {
           </div>
         ) : null}
       </section>
+      <ConfirmPasswordDialog
+        open={asking !== null}
+        scope={asking?.scope ?? "backup.restore"}
+        description={
+          asking?.scope === "backup.download"
+            ? t("common.confirmPassword.downloadDescription")
+            : t("common.confirmPassword.restoreDescription")
+        }
+        onCancel={() => setAsking(null)}
+        onConfirmed={(token) => {
+          const next = asking
+          setAsking(null)
+          next?.run(token)
+        }}
+      />
     </div>
   )
 }

@@ -460,6 +460,7 @@
       "rows": "mga hilera",
       "role": "tungkulin",
       "reason": "dahilan",
+      "scope": "hiningi para sa",
       "created": "nagawa",
       "updated": "na-update",
       "skipped": "nilaktawan",
@@ -603,6 +604,7 @@
       "auth": {
         "login": "Nag-sign in",
         "login_failed": "Nabigo ang pag-sign in",
+        "confirm_failed": "Nabigo ang pag-check ng password",
         "secrets_rotate": "Pinalitan ang mga lihim ng sistema",
         "account_locked": "Na-lock ang account dahil sa bigong pag-sign in",
         "recovery_questions_set": "Naitakda ang mga tanong sa pagbawi",
@@ -2733,6 +2735,15 @@
     "email": "Email"
   },
   "common": {
+    "confirmPassword": {
+      "title": "I-type muli ang iyong password",
+      "label": "Ang iyong password",
+      "submit": "Magpatuloy",
+      "cancel": "Kanselahin",
+      "failed": "Hindi ma-check ang password. Subukan muli.",
+      "restoreDescription": "Pinapalitan ng restore ang buong database. Tiyaking ikaw ito bago ipakita ang command.",
+      "downloadDescription": "Hawak ng backup ang lahat ng talaan ng barangay. Tiyaking ikaw ito bago i-download ang kopya."
+    },
     "idle": {
       "title": "Nandiyan ka pa ba?",
       "message": "Matagal nang walang ginagawa. Para maprotektahan ang mga talaan ng residente, masa-sign out ka sa loob ng {{seconds}} segundo.",

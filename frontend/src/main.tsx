@@ -30,7 +30,10 @@ const handleApiError = (error: Error) => {
     const responseData = error.response?.data as
       | { detail?: { code?: string } }
       | undefined
-    if (responseData?.detail?.code === "password_change_required") return
+    // These two 403s mean "do one more step", not "you are signed out".
+    const code = responseData?.detail?.code
+    if (code === "password_change_required") return
+    if (code === "password_confirmation_required") return
   }
 
   if (

@@ -466,6 +466,34 @@ export type CivilStatusCount = {
 };
 
 /**
+ * ConfirmPasswordRequest
+ */
+export type ConfirmPasswordRequest = {
+    /**
+     * Password
+     */
+    password: string;
+    /**
+     * Scope
+     */
+    scope: 'backup.restore' | 'backup.download';
+};
+
+/**
+ * ConfirmPasswordResult
+ */
+export type ConfirmPasswordResult = {
+    /**
+     * Confirm Token
+     */
+    confirm_token: string;
+    /**
+     * Expires In Seconds
+     */
+    expires_in_seconds: number;
+};
+
+/**
  * DashboardPopulation
  *
  * Active residents only; not affected by the dashboard period.
@@ -3622,6 +3650,31 @@ export type loginLoginAccessTokenResponses = {
 
 export type loginLoginAccessTokenResponse = loginLoginAccessTokenResponses[keyof loginLoginAccessTokenResponses];
 
+export type loginConfirmPasswordData = {
+    body: ConfirmPasswordRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/login/confirm-password';
+};
+
+export type loginConfirmPasswordErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type loginConfirmPasswordError = loginConfirmPasswordErrors[keyof loginConfirmPasswordErrors];
+
+export type loginConfirmPasswordResponses = {
+    /**
+     * Successful Response
+     */
+    200: ConfirmPasswordResult;
+};
+
+export type loginConfirmPasswordResponse = loginConfirmPasswordResponses[keyof loginConfirmPasswordResponses];
+
 export type loginLogoutData = {
     body?: never;
     path?: never;
@@ -6728,6 +6781,12 @@ export type backupsVerifyBackupResponse = backupsVerifyBackupResponses[keyof bac
 
 export type backupsDownloadBackupData = {
     body?: never;
+    headers?: {
+        /**
+         * X-Confirm-Token
+         */
+        'x-confirm-token'?: string | null;
+    };
     path: {
         /**
          * Backup Id
@@ -6756,6 +6815,12 @@ export type backupsDownloadBackupResponses = {
 
 export type backupsRequestRestoreData = {
     body?: never;
+    headers?: {
+        /**
+         * X-Confirm-Token
+         */
+        'x-confirm-token'?: string | null;
+    };
     path: {
         /**
          * Backup Id

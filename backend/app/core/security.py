@@ -21,6 +21,9 @@ password_hash = PasswordHash(
 
 ALGORITHM = "HS256"
 MFA_TOKEN_PURPOSE = "mfa"
+CONFIRM_TOKEN_PURPOSE = "confirm"
+# The actions that ask for the password again, and nothing else.
+CONFIRM_SCOPES = ("backup.restore", "backup.download")
 
 # The starting password of every account an administrator creates (or resets).
 # The account is flagged must_change_password, so it only works until the
@@ -75,6 +78,29 @@ def create_mfa_token(subject: str | Any, hashed_password: str) -> str:
             "sub": str(subject),
             "pwdv": password_fingerprint(hashed_password),
             "purpose": MFA_TOKEN_PURPOSE,
+        },
+        settings.SECRET_KEY,
+        algorithm=ALGORITHM,
+    )
+
+
+def create_confirm_token(subject: str | Any, hashed_password: str, scope: str) -> str:
+    """Proof that the signed-in person just typed their password again.
+
+    It carries ``purpose=confirm`` and one ``scope``, lives two minutes, and is
+    refused by the normal request check (like the two-factor token), so it can
+    never be used as a sign-in. Changing the password makes it stale (``pwdv``).
+    """
+    expire = datetime.now(UTC) + timedelta(
+        seconds=settings.CONFIRM_TOKEN_EXPIRE_SECONDS
+    )
+    return jwt.encode(
+        {
+            "exp": expire,
+            "sub": str(subject),
+            "pwdv": password_fingerprint(hashed_password),
+            "purpose": CONFIRM_TOKEN_PURPOSE,
+            "scope": scope,
         },
         settings.SECRET_KEY,
         algorithm=ALGORITHM,

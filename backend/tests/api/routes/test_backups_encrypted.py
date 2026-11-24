@@ -9,6 +9,7 @@ from fastapi.testclient import TestClient
 from app.core import backup as backup_service
 from app.core import backup_crypto as crypto
 from app.core.config import settings
+from tests.utils.utils import confirmed_headers
 
 API = settings.API_V1_STR
 DUMP_BYTES = b"PGDMP-fake-archive-for-tests"
@@ -77,7 +78,8 @@ def test_backup_is_encrypted_and_no_plain_copy_is_left(
     )
     assert verified.status_code == 200 and verified.json()["status"] == "ok"
     request = client.post(
-        f"{API}/backups/{made['id']}/restore-request", headers=superuser_token_headers
+        f"{API}/backups/{made['id']}/restore-request",
+        headers=confirmed_headers(client, superuser_token_headers, "backup.restore"),
     )
     assert "-KeyFile" in request.json()["command"]
     assert made["file_name"] in request.json()["command"]

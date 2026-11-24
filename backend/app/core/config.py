@@ -48,6 +48,8 @@ class Settings(BaseSettings):
     DATA_ENCRYPTION_KEY: str = ""
     # How long the "now type your code" step stays open after the password.
     MFA_TOKEN_EXPIRE_MINUTES: int = Field(default=5, gt=0)
+    # How long a typed-again password (Restore, Download copy) stays good.
+    CONFIRM_TOKEN_EXPIRE_SECONDS: int = Field(default=120, gt=0)
     FRONTEND_HOST: str = "http://localhost:5173"
     # Comma-separated trusted origins, useful for production and selected previews.
     # FRONTEND_HOST remains as a backwards-compatible local/default origin.

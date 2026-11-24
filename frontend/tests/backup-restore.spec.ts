@@ -1,6 +1,7 @@
 // Backup and Restore page against the real backend (System Administrator).
 // Skipped when the backend cannot make backups (pg_dump or the folder missing).
 import { expect, test } from "@playwright/test"
+import { firstSuperuserPassword } from "./config"
 import { chooseOption } from "./utils/select"
 
 test("make a backup, check it, and get the restore command", async ({
@@ -25,11 +26,14 @@ test("make a backup, check it, and get the restore command", async ({
   await expect(page.getByText(/Backup verified/)).toBeVisible()
 
   // Download the file from the row button.
+  // The password is asked again first.
   const downloadPromise = page.waitForEvent("download")
   await row.getByRole("button", { name: "Download copy" }).click()
+  await page.getByTestId("confirm-password-input").fill(firstSuperuserPassword)
+  await page.getByTestId("confirm-password-submit").click()
   const download = await downloadPromise
   expect(download.suggestedFilename()).toMatch(/^mayondon-db-.*\.dump$/)
-  await expect(page.getByText(/Download of .* started/)).toBeVisible()
+  await expect(page.getByText("Download started")).toBeVisible()
   // Restore: choose the backup, type the word, get the command (nothing is restored).
   const archive = page.getByLabel("Backup archive")
   await chooseOption(archive, 1)
@@ -38,6 +42,8 @@ test("make a backup, check it, and get the restore command", async ({
   await expect(confirm).toBeDisabled()
   await page.getByPlaceholder("RESTORE").fill("RESTORE")
   await confirm.click()
+  await page.getByTestId("confirm-password-input").fill(firstSuperuserPassword)
+  await page.getByTestId("confirm-password-submit").click()
   await expect(page.getByText("Ready to restore")).toBeVisible()
   await expect(page.getByText(/restore-db\.ps1 -BackupFile/)).toBeVisible()
 })

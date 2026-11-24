@@ -23,6 +23,7 @@ from app.core.config import settings
 from app.core.db import engine
 from app.models_backup import BackupRun
 from app.models_foundation import AuditLog
+from tests.utils.utils import confirmed_headers
 
 API = settings.API_V1_STR
 DUMP_BYTES = b"PGDMP-fake-archive-for-tests"
@@ -264,13 +265,18 @@ def test_unknown_backup_is_404(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:
     missing = uuid.uuid4()
-    for method, suffix in [
-        ("post", "verify"),
-        ("get", "download"),
-        ("post", "restore-request"),
+    for method, suffix, scope in [
+        ("post", "verify", None),
+        ("get", "download", "backup.download"),
+        ("post", "restore-request", "backup.restore"),
     ]:
+        headers = (
+            confirmed_headers(client, superuser_token_headers, scope)
+            if scope
+            else superuser_token_headers
+        )
         response = client.request(
-            method, f"{API}/backups/{missing}/{suffix}", headers=superuser_token_headers
+            method, f"{API}/backups/{missing}/{suffix}", headers=headers
         )
         assert response.status_code == 404
 
@@ -280,7 +286,8 @@ def test_download_streams_the_file_and_is_audited(
 ) -> None:
     made = _make(client, superuser_token_headers)
     response = client.get(
-        f"{API}/backups/{made['id']}/download", headers=superuser_token_headers
+        f"{API}/backups/{made['id']}/download",
+        headers=confirmed_headers(client, superuser_token_headers, "backup.download"),
     )
     assert response.status_code == 200
     assert response.content == DUMP_BYTES
@@ -289,7 +296,8 @@ def test_download_streams_the_file_and_is_audited(
 
     (backup_folder / made["file_name"]).unlink()
     gone = client.get(
-        f"{API}/backups/{made['id']}/download", headers=superuser_token_headers
+        f"{API}/backups/{made['id']}/download",
+        headers=confirmed_headers(client, superuser_token_headers, "backup.download"),
     )
     assert gone.status_code == 404
 
@@ -306,7 +314,8 @@ def test_failed_backup_cannot_be_downloaded(
     )
     made = _make(client, superuser_token_headers)
     response = client.get(
-        f"{API}/backups/{made['id']}/download", headers=superuser_token_headers
+        f"{API}/backups/{made['id']}/download",
+        headers=confirmed_headers(client, superuser_token_headers, "backup.download"),
     )
     assert response.status_code == 404
 
@@ -316,7 +325,10 @@ def test_restore_request_checks_the_file_and_gives_the_command(
 ) -> None:
     made = _make(client, superuser_token_headers)
     url = f"{API}/backups/{made['id']}/restore-request"
-    response = client.post(url, headers=superuser_token_headers)
+    response = client.post(
+        url,
+        headers=confirmed_headers(client, superuser_token_headers, "backup.restore"),
+    )
     assert response.status_code == 200
     body = response.json()
     assert body["file_name"] == made["file_name"]
@@ -328,7 +340,10 @@ def test_restore_request_checks_the_file_and_gives_the_command(
 
     # A changed file is refused and no restore request is logged for it.
     (backup_folder / made["file_name"]).write_bytes(b"tampered")
-    refused = client.post(url, headers=superuser_token_headers)
+    refused = client.post(
+        url,
+        headers=confirmed_headers(client, superuser_token_headers, "backup.restore"),
+    )
     assert refused.status_code == 409
     assert len(_audit("backup.restore_requested", made["id"])) == 1
 
@@ -347,7 +362,8 @@ def test_restore_request_for_an_encrypted_backup_asks_for_the_key_file(
     assert made["file_name"].endswith(".dump.enc")
 
     response = client.post(
-        f"{API}/backups/{made['id']}/restore-request", headers=superuser_token_headers
+        f"{API}/backups/{made['id']}/restore-request",
+        headers=confirmed_headers(client, superuser_token_headers, "backup.restore"),
     )
     assert response.status_code == 200
     body = response.json()

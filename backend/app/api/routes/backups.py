@@ -2,19 +2,21 @@
 
 ``POST /backups`` makes a backup now; ``GET /backups`` lists the history;
 ``POST /backups/{id}/verify`` re-reads a stored file; ``GET /backups/{id}/download``
-streams it. Restoring is not an API action: ``POST /backups/{id}/restore-request``
+streams it. Download and restore-request also need the password typed again
+(``POST /login/confirm-password``, header ``X-Confirm-Token``). Restoring is not an API action: ``POST /backups/{id}/restore-request``
 only checks the file, writes the audit event and returns the PowerShell command
 to run on the server computer (see app/core/backup.py for why).
 """
 
 import uuid
+from collections.abc import Callable
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query
 from fastapi.responses import FileResponse
 from sqlmodel import col, func, select
 
-from app.api.deps import SessionDep, require_permission
+from app.api.deps import SessionDep, check_confirm_token, require_permission
 from app.core import backup as backup_service
 from app.core.audit import record_audit_event
 from app.core.config import settings
@@ -30,6 +32,23 @@ from app.models_backup import (
 router = APIRouter(prefix="/backups", tags=["backups"])
 
 BackupUser = Annotated[User, Depends(require_permission(Permission.BACKUP_RESTORE))]
+
+
+def _confirmed(scope: str) -> Callable[..., User]:
+    """Backup permission AND a password typed again a moment ago (``X-Confirm-Token``)."""
+
+    def dependency(
+        user: BackupUser,
+        x_confirm_token: Annotated[str | None, Header()] = None,
+    ) -> User:
+        check_confirm_token(x_confirm_token, user, scope)
+        return user
+
+    return dependency
+
+
+RestoreUser = Annotated[User, Depends(_confirmed("backup.restore"))]
+DownloadUser = Annotated[User, Depends(_confirmed("backup.download"))]
 
 
 def _public(run: BackupRun) -> BackupRunPublic:
@@ -89,7 +108,7 @@ def verify_backup(
 
 @router.get("/{backup_id}/download")
 def download_backup(
-    backup_id: uuid.UUID, session: SessionDep, user: BackupUser
+    backup_id: uuid.UUID, session: SessionDep, user: DownloadUser
 ) -> FileResponse:
     run = _get_or_404(session, backup_id)
     if run.status != "ok" or not run.file_name:
@@ -116,7 +135,7 @@ def download_backup(
 
 @router.post("/{backup_id}/restore-request", response_model=RestoreRequestPublic)
 def request_restore(
-    backup_id: uuid.UUID, session: SessionDep, user: BackupUser
+    backup_id: uuid.UUID, session: SessionDep, user: RestoreUser
 ) -> RestoreRequestPublic:
     """Check the file and log the request. The restore itself is run offline."""
     run = _get_or_404(session, backup_id)

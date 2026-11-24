@@ -13,6 +13,9 @@ function extractErrorMessage(err: Error): string {
         : i18n.t("apiErrors.requestFailed")
     }
     if (typeof errDetail === "string") return errDetail
+    // A refusal that carries its own sentence, e.g. { code, message }.
+    const message = (errDetail as { message?: unknown } | undefined)?.message
+    if (typeof message === "string") return message
     if (err.response?.status === 403) return i18n.t("apiErrors.forbidden")
     return err.message || i18n.t("apiErrors.generic")
   }

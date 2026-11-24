@@ -283,6 +283,18 @@ class TokenPayload(SQLModel):
     purpose: str | None = None
     # Id of this sign-in token, so signing out can end it. Tokens made before it was added have none.
     jti: str | None = None
+    # Only on the short "typed my password again" token: the one action it covers.
+    scope: str | None = None
+
+
+class ConfirmPasswordRequest(SQLModel):
+    password: str = Field(min_length=1, max_length=128)
+    scope: Literal["backup.restore", "backup.download"]
+
+
+class ConfirmPasswordResult(SQLModel):
+    confirm_token: str
+    expires_in_seconds: int
 
 
 class PasswordRecoveryRequest(SQLModel):

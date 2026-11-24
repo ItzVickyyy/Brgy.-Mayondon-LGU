@@ -20,6 +20,8 @@ from app.core.config import settings
 from app.core.login_throttle import login_ip_locked, record_login_failure
 from app.core.password_recovery import is_password_recovery_rate_limited
 from app.models import (
+    ConfirmPasswordRequest,
+    ConfirmPasswordResult,
     LoginResult,
     Message,
     NewPassword,
@@ -118,6 +120,57 @@ def login_access_token(
             mfa_token=security.create_mfa_token(user.id, user.hashed_password),
         )
     return _finish_login(session, user)
+
+
+@router.post("/login/confirm-password")
+def confirm_password(
+    session: SessionDep, user: CurrentUser, body: ConfirmPasswordRequest
+) -> ConfirmPasswordResult:
+    """Check the signed-in person's password again before a risky action.
+
+    Returns a two-minute token for ONE scope (Restore, Download copy); the
+    action's own route demands it in ``X-Confirm-Token``. Wrong passwords count
+    toward the same lock-out as signing in. The typed password is never stored.
+    """
+    was_locked = _is_locked_now(user)
+    checked = crud.authenticate(
+        session=session, email=user.email, password=body.password
+    )
+    if checked is None:
+        session.refresh(user)
+        record_audit_event(
+            session,
+            action="auth.confirm_failed",
+            actor=user,
+            outcome="failed",
+            module="auth",
+            details={
+                "scope": body.scope,
+                "reason": "locked" if was_locked else "incorrect_password",
+            },
+            commit=True,
+        )
+        if not was_locked and _is_locked_now(user):
+            record_audit_event(
+                session,
+                action="auth.account_locked",
+                actor=user,
+                outcome="failed",
+                module="auth",
+                commit=True,
+            )
+        raise HTTPException(
+            status_code=400,
+            detail="Too many wrong attempts. Wait a few minutes and try again."
+            if _is_locked_now(user)
+            else "Incorrect password",
+        )
+    return ConfirmPasswordResult(
+        confirm_token=security.create_confirm_token(
+            checked.id, checked.hashed_password, body.scope
+        ),
+        expires_in_seconds=settings.CONFIRM_TOKEN_EXPIRE_SECONDS,
+    )
 
 
 def _is_locked_now(user: Any) -> bool:
