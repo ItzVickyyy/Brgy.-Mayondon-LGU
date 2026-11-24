@@ -140,3 +140,19 @@ def test_photos_pictures_and_backups_are_never_compressed(path: str) -> None:
     assert response.status_code == 200
     assert "content-encoding" not in response.headers
     assert len(response.content) > 5000 - 100
+
+
+def test_photo_cut_out_files_are_kept_one_day_not_forever() -> None:
+    from app import main
+
+    assert not main._HASHED_ASSET.match(
+        "/vision/selfie-segmentation/selfie_segmentation_solution_simd_wasm_bin.wasm"
+    )
+    with TestClient(main.app) as client:
+        found = client.get("/vision/selfie-segmentation/selfie_segmentation.tflite")
+        missing = client.get("/vision/selfie-segmentation/not-there.wasm")
+    if found.headers.get("content-type", "").startswith("text/html"):
+        pytest.skip("the frontend build with the cut-out files is not in this checkout")
+    assert found.headers["cache-control"] == "public, max-age=86400"
+    # A missing path answers with index.html: it must be re-checked, never kept for a day.
+    assert missing.headers.get("cache-control") == "no-cache"

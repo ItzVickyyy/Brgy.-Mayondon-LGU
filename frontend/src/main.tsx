@@ -1,11 +1,5 @@
-import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query"
+import { QueryClientProvider } from "@tanstack/react-query"
 import { createRouter, RouterProvider } from "@tanstack/react-router"
-import { AxiosError } from "axios"
 import { StrictMode } from "react"
 import ReactDOM from "react-dom/client"
 import { client } from "./client/client.gen"
@@ -15,6 +9,7 @@ import { Toaster } from "./components/ui/sonner"
 import "./index.css"
 import "./i18n"
 import { applyRememberedAppearance } from "./lib/preferences"
+import { queryClient } from "./lib/queryClient"
 import { routeTree } from "./routeTree.gen"
 
 // Accent colour and font size of the last signed-in user, before the first paint.
@@ -25,41 +20,15 @@ client.setConfig({
   auth: () => localStorage.getItem("access_token") || "",
 })
 
-const handleApiError = (error: Error) => {
-  if (error instanceof AxiosError) {
-    const responseData = error.response?.data as
-      | { detail?: { code?: string } }
-      | undefined
-    // These two 403s mean "do one more step", not "you are signed out".
-    const code = responseData?.detail?.code
-    if (code === "password_change_required") return
-    if (code === "password_confirmation_required") return
-  }
-
-  if (
-    error instanceof AxiosError &&
-    [401, 403].includes(error.response?.status ?? 0)
-  ) {
-    localStorage.removeItem("access_token")
-    window.location.href = "/login"
-  }
-}
-const queryClient = new QueryClient({
-  queryCache: new QueryCache({
-    onError: handleApiError,
-  }),
-  mutationCache: new MutationCache({
-    onError: handleApiError,
-  }),
-})
-
 // Skeleton (not a spinner) while a page is being prepared. The short delay
 // keeps it from flashing on fast loads; once shown it stays a moment.
 const router = createRouter({
   routeTree,
   defaultPendingComponent: PageSkeleton,
   defaultPendingMs: 150,
-  defaultPendingMinMs: 250,
+  defaultPendingMinMs: 120,
+  // A link's page code and data start loading when the pointer or focus reaches it.
+  defaultPreload: "intent",
 })
 declare module "@tanstack/react-router" {
   interface Register {

@@ -14,7 +14,6 @@ import {
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { UsersService } from "@/client"
 import { AppBackdrop } from "@/components/Common/AppBackdrop"
 import { BackToTop } from "@/components/Common/BackToTop"
 import { Footer } from "@/components/Common/Footer"
@@ -34,6 +33,7 @@ import {
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 import { useLoadPreferences, usePreferences } from "@/hooks/usePreferences"
 import { getLocale } from "@/lib/locale"
+import { loadCurrentUser } from "@/lib/queryClient"
 
 export const Route = createFileRoute("/_layout")({
   component: Layout,
@@ -42,8 +42,8 @@ export const Route = createFileRoute("/_layout")({
     if (!isLoggedIn()) throw redirect({ to: "/login" })
 
     try {
-      const response = await UsersService.readUserMe()
-      if (response.data.must_change_password) {
+      const me = await loadCurrentUser()
+      if (me.must_change_password) {
         throw redirect({ to: "/change-password" })
       }
     } catch (error) {
@@ -59,10 +59,53 @@ export const Route = createFileRoute("/_layout")({
   },
 })
 
-function Layout() {
-  // Subscribes this component to language changes so the clock is re-formatted.
-  const { t } = useTranslation()
+/**
+ * The date and the ticking time in the header. It owns the once-a-second state, so only this small
+ * piece draws every second, not the whole layout, sidebar and page (patch 237). `useTranslation`
+ * re-formats it when the language changes.
+ */
+function HeaderClock() {
+  useTranslation()
   const [now, setNow] = useState(() => new Date())
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(new Date()), 1000)
+    return () => window.clearInterval(timer)
+  }, [])
+
+  const dateText = new Intl.DateTimeFormat(getLocale(), {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    weekday: "long",
+  }).format(now)
+  const formattedDate = dateText.replace(
+    /,\s*(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/,
+    " ($1)",
+  )
+  const timeText = new Intl.DateTimeFormat(getLocale(), {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(now)
+
+  return (
+    <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
+      <span className="inline-flex min-w-0 max-w-full items-center gap-1.5 sm:whitespace-nowrap">
+        <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
+        <span className="min-w-0 leading-tight">{formattedDate}</span>
+      </span>
+      <span className="hidden items-center gap-1.5 whitespace-nowrap tabular-nums sm:inline-flex">
+        <Clock3 className="size-4 shrink-0" aria-hidden="true" />
+        <span>{timeText}</span>
+      </span>
+    </div>
+  )
+}
+
+function Layout() {
+  // Subscribes this component to language changes.
+  const { t } = useTranslation()
   const { user: currentUser } = useAuth()
   // The person's saved theme, accent colour and font size (Preferences).
   useLoadPreferences(currentUser?.id ? String(currentUser.id) : undefined)
@@ -81,7 +124,6 @@ function Layout() {
   })
 
   useEffect(() => {
-    const timer = window.setInterval(() => setNow(new Date()), 1000)
     const handleFullscreenChange = () =>
       setIsFullscreen(Boolean(document.fullscreenElement))
     const handleScroll = () => setIsScrolled(window.scrollY > 4)
@@ -89,7 +131,6 @@ function Layout() {
     document.addEventListener("fullscreenchange", handleFullscreenChange)
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => {
-      window.clearInterval(timer)
       document.removeEventListener("fullscreenchange", handleFullscreenChange)
       window.removeEventListener("scroll", handleScroll)
     }
@@ -101,22 +142,6 @@ function Layout() {
     if (document.fullscreenElement) await document.exitFullscreen()
     else await document.documentElement.requestFullscreen()
   }
-
-  const dateText = new Intl.DateTimeFormat(getLocale(), {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    weekday: "long",
-  }).format(now)
-  const formattedDate = dateText.replace(
-    /,\s*(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/,
-    " ($1)",
-  )
-  const timeText = new Intl.DateTimeFormat(getLocale(), {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).format(now)
 
   return (
     <SidebarProvider>
@@ -138,16 +163,7 @@ function Layout() {
         >
           <div className="flex min-w-0 flex-1 items-center gap-3">
             <SidebarTrigger className="-ml-1 shrink-0 text-muted-foreground" />
-            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
-              <span className="inline-flex min-w-0 max-w-full items-center gap-1.5 sm:whitespace-nowrap">
-                <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
-                <span className="min-w-0 leading-tight">{formattedDate}</span>
-              </span>
-              <span className="hidden items-center gap-1.5 whitespace-nowrap tabular-nums sm:inline-flex">
-                <Clock3 className="size-4 shrink-0" aria-hidden="true" />
-                <span>{timeText}</span>
-              </span>
-            </div>
+            <HeaderClock />
           </div>
 
           <div className="ml-auto flex shrink-0 items-center justify-end gap-2">

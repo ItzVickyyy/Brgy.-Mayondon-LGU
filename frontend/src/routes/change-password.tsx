@@ -1,10 +1,10 @@
 import { createFileRoute, redirect } from "@tanstack/react-router"
 
-import { UsersService } from "@/client"
 import { AuthLayout } from "@/components/Common/AuthLayout"
 import ChangePassword from "@/components/UserSettings/ChangePassword"
 import { pageTitle } from "@/config/site"
 import { isLoggedIn } from "@/hooks/useAuth"
+import { loadCurrentUser } from "@/lib/queryClient"
 
 export const Route = createFileRoute("/change-password")({
   component: ForcedPasswordChange,
@@ -13,8 +13,8 @@ export const Route = createFileRoute("/change-password")({
 
     let mustChangePassword = false
     try {
-      const response = await UsersService.readUserMe()
-      mustChangePassword = response.data.must_change_password === true
+      const me = await loadCurrentUser()
+      mustChangePassword = me.must_change_password === true
     } catch (error) {
       if (error && typeof error === "object" && "status" in error) {
         const status = error.status

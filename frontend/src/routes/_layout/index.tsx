@@ -27,10 +27,36 @@ import useAuth from "@/hooks/useAuth"
 import { activityTitle } from "@/lib/activity"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
+import { queryClient } from "@/lib/queryClient"
 import { statCycle, statTones } from "@/lib/statTones"
+
+// Shared by the page and by the route loader below, so the loader's early request is the very
+// request the page then uses (patch 237).
+const dashboardQueryOptions = (period: Period) => ({
+  queryKey: ["dashboard", period] as const,
+  queryFn: async () =>
+    (await DashboardService.dashboard({ query: { period } })).data,
+})
+
+const dashboardActivityQueryOptions = {
+  queryKey: ["dashboard-activity"] as const,
+  queryFn: async () =>
+    (
+      await ActivityService.listActivity({
+        query: { limit: 5, exclude_module: "auth", hide_reads: true },
+      })
+    ).data,
+}
 
 export const Route = createFileRoute("/_layout/")({
   component: Dashboard,
+  // Start the two dashboard requests with the page code instead of after the page has drawn.
+  // Not awaited: the page shows its skeletons at once and fills in when the answers arrive, and a
+  // failed request is reported by the page's own queries, not here.
+  loader: () => {
+    void queryClient.prefetchQuery(dashboardQueryOptions("year"))
+    void queryClient.prefetchQuery(dashboardActivityQueryOptions)
+  },
   head: () => ({ meta: [{ title: pageTitle("Dashboard") }] }),
 })
 
@@ -208,23 +234,13 @@ function Dashboard() {
   const navigate = useNavigate()
   const [period, setPeriod] = useState<Period>("year")
   const dashboardQuery = useQuery({
-    queryKey: ["dashboard", period],
-    queryFn: async () =>
-      (await DashboardService.dashboard({ query: { period } })).data,
+    ...dashboardQueryOptions(period),
     // Keep the old figures on screen while the new period loads, so the page
     // does not collapse to skeletons and jump (and lose its scrollbar).
     placeholderData: keepPreviousData,
   })
   // Staff always get only their own rows from this endpoint; Admin gets everyone's.
-  const activityQuery = useQuery({
-    queryKey: ["dashboard-activity"],
-    queryFn: async () =>
-      (
-        await ActivityService.listActivity({
-          query: { limit: 5, exclude_module: "auth", hide_reads: true },
-        })
-      ).data,
-  })
+  const activityQuery = useQuery(dashboardActivityQueryOptions)
   const dashboard = dashboardQuery.data
   const summary = dashboard?.summary
   const months = dashboard?.issuances_over_time ?? []

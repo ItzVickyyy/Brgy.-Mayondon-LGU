@@ -60,6 +60,9 @@ app = FastAPI(
 # pictures in /assets/print-forms) keep their names when they change and must be re-checked.
 _HASHED_ASSET = re.compile(r"^/assets/[^/]+-[A-Za-z0-9_-]{8,}\.[A-Za-z0-9]+$")
 
+# Photo background removal files (MediaPipe model and WebAssembly), copied into the build by Vite.
+_VISION_PREFIX = "/vision/selfie-segmentation/"
+
 # Already compressed or encrypted: squeezing them again costs processor time and saves nothing.
 _NOT_COMPRESSED_SUFFIXES = (
     ".png",
@@ -159,6 +162,15 @@ async def add_security_headers(
         response.headers.setdefault(
             "Cache-Control", "public, max-age=31536000, immutable"
         )
+    elif (
+        path.startswith(_VISION_PREFIX)
+        and response.status_code == 200
+        and not response.headers.get("content-type", "").startswith("text/html")
+    ):
+        # The photo cut-out files (one is 5.7 MB) keep their names when they change, so they are
+        # kept one day, not for good. A missing file falls back to index.html (HTML) and is left
+        # to the HTML rule below, so a mistyped path is never remembered for a day.
+        response.headers.setdefault("Cache-Control", "public, max-age=86400")
     elif response.headers.get("content-type", "").startswith("text/html"):
         # index.html names the current scripts, so after an update it must be fetched again.
         # "no-cache" still lets the browser reuse it when the server says it did not change.

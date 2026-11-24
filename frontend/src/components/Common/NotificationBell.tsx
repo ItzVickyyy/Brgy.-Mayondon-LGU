@@ -39,6 +39,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import useAuth from "@/hooks/useAuth"
+import { useDeferredStart } from "@/hooks/useDeferredStart"
 import { isSystemAdministrator } from "@/lib/access"
 import { getLocale } from "@/lib/locale"
 import { noticeSentence } from "@/lib/notifications"
@@ -299,9 +300,12 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const queryKey = queryKeyFor(ownerId)
+  // The first request waits a second so the page itself draws first (patch 237).
+  const ready = useDeferredStart()
 
   const bell = useQuery({
     queryKey,
+    enabled: ready,
     queryFn: async () => (await NotificationsService.listNotifications()).data,
     refetchInterval: REFRESH_MS,
     refetchIntervalInBackground: false,
@@ -349,7 +353,7 @@ export function NotificationBell({ ownerId }: { ownerId: string }) {
   const { user: signedIn } = useAuth()
   // Same query as the reminder (fetched once); only the dialog's wording is read here.
   const protectionData = useDataProtection(
-    Boolean(signedIn) && isSystemAdministrator(signedIn),
+    Boolean(signedIn) && isSystemAdministrator(signedIn) && ready,
   ).data
   const [filter, setFilter] = useState<"all" | "unread">("all")
   const now = useNow()

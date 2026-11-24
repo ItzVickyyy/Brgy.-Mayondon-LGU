@@ -115,7 +115,7 @@ test("Download copy asks for the password and sends the token", async ({
   await downloadPromise
   await expect(dialog).toHaveCount(0)
   expect(seen.downloadToken).toBe("token-for-backup.download")
-  expect(seen.confirms.at(-1)?.scope).toBe("backup.download")
+  expect(seen.confirms[seen.confirms.length - 1]?.scope).toBe("backup.download")
 })
 
 test("Restore asks for the password after the word, then shows the command", async ({
@@ -123,7 +123,8 @@ test("Restore asks for the password after the word, then shows the command", asy
 }) => {
   const seen = await mockApi(page)
   await page.goto("/backup-restore")
-  await page.getByRole("button", { name: "Restore" }).first().click()
+  await expect(page.getByRole("cell", { name: backup.file_name })).toBeVisible()
+  await page.getByRole("button", { name: "Restore", exact: true }).click()
   await page.getByPlaceholder("RESTORE").fill("RESTORE")
   await page.getByRole("button", { name: "Check and Show Command" }).click()
   await expect(page.getByTestId("confirm-password-dialog")).toBeVisible()
@@ -162,7 +163,8 @@ test("an expired confirmation does not sign the person out", async ({
     }),
   )
   await page.goto("/backup-restore")
-  await page.getByRole("button", { name: "Restore" }).first().click()
+  await expect(page.getByRole("cell", { name: backup.file_name })).toBeVisible()
+  await page.getByRole("button", { name: "Restore", exact: true }).click()
   await page.getByPlaceholder("RESTORE").fill("RESTORE")
   await page.getByRole("button", { name: "Check and Show Command" }).click()
   await page.getByTestId("confirm-password-input").fill("right-password")

@@ -9,6 +9,7 @@ import { useSecurityQuestionsStatus } from "@/components/SecurityQuestions/useSe
 import { useMfaStatus } from "@/components/TwoFactor/useMfaStatus"
 import { useUpdateStatus } from "@/components/Updates/useUpdateStatus"
 import useAuth from "@/hooks/useAuth"
+import { useDeferredStart } from "@/hooks/useDeferredStart"
 import { isSystemAdministrator } from "@/lib/access"
 
 /**
@@ -143,20 +144,23 @@ function wasDismissed(userId: string): boolean {
 export function useSetupReminders(): SetupReminder[] {
   const { t } = useTranslation()
   const { user } = useAuth()
-  const questions = useSecurityQuestionsStatus(Boolean(user))
-  const mfa = useMfaStatus(Boolean(user))
+  // Their requests wait for the first second so the first screen draws first (patch 237).
+  const ready = useDeferredStart()
+  const questions = useSecurityQuestionsStatus(Boolean(user) && ready)
+  const mfa = useMfaStatus(Boolean(user) && ready)
   const [dismissed, setDismissed] = useState(false)
   const isAdmin = Boolean(user) && isSystemAdministrator(user)
+  const adminReady = isAdmin && ready
   // Same query as the Backup and Restore page, so it is fetched once.
   const backups = useQuery({
     queryKey: ["backups"],
     queryFn: async () => (await BackupsService.listBackups()).data,
-    enabled: isAdmin,
+    enabled: adminReady,
     staleTime: 60_000,
   })
 
-  const update = useUpdateStatus(isAdmin)
-  const protection = useDataProtection(isAdmin)
+  const update = useUpdateStatus(adminReady)
+  const protection = useDataProtection(adminReady)
   // Re-read the "remind me later" time when the dialog sets it.
   const [, setSnoozeTick] = useState(0)
   useEffect(() => {

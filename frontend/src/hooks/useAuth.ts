@@ -12,6 +12,11 @@ import {
   UsersService,
 } from "@/client"
 import { endSession } from "@/lib/endSession"
+import {
+  CURRENT_USER_KEY,
+  clearCurrentUser,
+  currentUserQueryOptions,
+} from "@/lib/queryClient"
 import { handleError } from "@/utils"
 import useCustomToast from "./useCustomToast"
 
@@ -25,11 +30,11 @@ const useAuth = () => {
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
 
-  const { data: user, error: userError } = useQuery<UserPublic | null, Error>({
-    queryKey: ["currentUser"],
-    queryFn: async () => (await UsersService.readUserMe()).data,
+  // One shared answer (see lib/queryClient.ts): the route guard and every component that asks
+  // "who is signed in" read the same cached /users/me for a minute.
+  const { data: user, error: userError } = useQuery<UserPublic, Error>({
+    ...currentUserQueryOptions,
     enabled: isLoggedIn(),
-    retry: false,
   })
 
   useEffect(() => {
@@ -38,10 +43,10 @@ const useAuth = () => {
     const status = userError.status
     if (status === 401 || status === 403) {
       localStorage.removeItem("access_token")
-      queryClient.removeQueries({ queryKey: ["currentUser"] })
+      clearCurrentUser()
       navigate({ to: "/login", replace: true })
     }
-  }, [userError, queryClient, navigate])
+  }, [userError, navigate])
 
   const signUpMutation = useMutation({
     mutationFn: (data: UserRegister) =>
@@ -59,6 +64,8 @@ const useAuth = () => {
   // access token comes from the second step (``verifyMfaMutation``).
   const finishSignIn = (result: LoginResult) => {
     if (!result.access_token) return false
+    // A new sign-in must never show the previous person's cached details.
+    queryClient.removeQueries({ queryKey: CURRENT_USER_KEY })
     localStorage.setItem("access_token", result.access_token)
     return true
   }
@@ -102,6 +109,7 @@ const useAuth = () => {
 
   const logout = () => {
     endSession()
+    clearCurrentUser()
     queryClient.removeQueries({ queryKey: ["notifications"] })
     navigate({ to: "/login" })
     showSuccessToast(t("common.toast.signedOut"))
