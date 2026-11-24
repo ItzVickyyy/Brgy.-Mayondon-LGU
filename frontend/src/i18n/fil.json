@@ -843,14 +843,14 @@
       "cancelImport": "Kanselahin ang pag-import",
       "cancelTitle": "Kanselahin ang pag-import na ito?",
       "cancelDescription": "Buburahin ang mga na-upload na hanay at walang mase-save.",
-      "done": "Tapos na ang pag-import ng {{file}}.",
-      "doneStored": "Tapos na ang pag-import ng masterlist.",
+      "done": "Na-import ang {{file}}",
+      "doneStored": "Na-import ang masterlist",
       "toasts": {
-        "uploaded": "Na-upload ang file. Itugma ang mga column nito sa mga field ng residente.",
-        "mappingSaved": "Na-save ang pagtutugma ng mga column at nasuri ang mga hanay.",
-        "cancelled": "Kinansela ang pag-import at walang na-save.",
-        "reportDownloaded": "Na-download ang ulat ng mga error.",
-        "streetsAdded": "Naidagdag ang mga kalye at nasuri muli ang mga hanay."
+        "uploaded": "Na-upload ang file. Itugma ang mga column.",
+        "mappingSaved": "Naitugma ang mga column",
+        "cancelled": "Kinansela ang import",
+        "reportDownloaded": "Na-download ang ulat",
+        "streetsAdded": "Naidagdag ang mga kalye"
       },
       "resultLabels": {
         "created": "Nagawa",
@@ -928,10 +928,10 @@
       "confirm": "Ibalik ang talaan"
     },
     "notices": {
-      "archived": "Na-archive si {{name}}.",
-      "restored": "Naibalik si {{name}}.",
-      "added": "Naidagdag si {{name}}.",
-      "updated": "Na-update si {{name}}.",
+      "archived": "Na-archive si {{name}}",
+      "restored": "Naibalik si {{name}}",
+      "added": "Naidagdag si {{name}}",
+      "updated": "Na-update si {{name}}",
       "photoFailedStored": "{{message}} Nabigo ang pag-upload ng larawan.",
       "proofFailedStored": "{{message}} Hindi nai-save ang patunay ng rehistro bilang botante.",
       "archivedStored": "May na-archive na talaan ng residente.",
@@ -939,9 +939,9 @@
       "addedStored": "May naidagdag na talaan ng residente.",
       "updatedStored": "May na-update na talaan ng residente.",
       "unchangedStored": "Walang ginawang pagbabago sa isang talaan ng residente.",
-      "unchanged": "Walang binago kay {{name}}.",
-      "photoFailed": "{{message}} Nabigo ang pag-upload ng larawan: {{error}}",
-      "proofFailed": "{{message}} Hindi nai-save ang patunay ng rehistro bilang botante: {{error}}"
+      "unchanged": "Walang binago kay {{name}}",
+      "photoFailed": "{{message}}. Hindi na-save ang larawan: {{error}}",
+      "proofFailed": "{{message}}. Hindi na-save ang patunay: {{error}}"
     },
     "residency": {
       "regular": "Karaniwang residente",
@@ -1140,7 +1140,7 @@
         "enable": "Awtomatikong ibigay ang mga bagong ID number",
         "example": "Ang susunod na card ay magiging",
         "save": "I-save",
-        "saved": "Na-save ang serye ng ID number."
+        "saved": "Na-save ang serye ng ID"
       },
       "summaryAria": "Buod ng Barangay ID",
       "stats": {
@@ -1294,9 +1294,9 @@
       "delete": "Burahin",
       "editLabel": "I-edit si {{name}}",
       "notices": {
-        "added": "Naidagdag ang item sa listahan.",
-        "renamed": "Napalitan ang pangalan ng item sa listahan.",
-        "deleted": "Nabura ang item sa listahan."
+        "added": "Naidagdag ang item",
+        "renamed": "Napalitan ang pangalan ng item",
+        "deleted": "Nabura ang item"
       },
       "nameRequired": "Maglagay ng pangalan bago idagdag sa listahan.",
       "inUse": "Ginagamit na ng isang talaan ang item na ito at hindi ito maaaring burahin. Palitan lamang ang pangalan kung tama ang bagong pangalan para sa mga umiiral na talaan.",
@@ -1322,13 +1322,12 @@
     "newIssuance": "Bagong Isyu",
     "print": "I-print",
     "dismissMessage": "Isara ang mensahe",
-    "noticeDraft": "Na-save bilang draft ang {{ref}}.",
-    "noticeDraftPlain": "Na-save bilang draft ang draft.",
-    "noticeIssued": "Naitala bilang naisyu ang {{ref}}.",
+    "noticeDraft": "Na-save na draft ang {{ref}}",
+    "noticeDraftPlain": "Na-save ang draft",
+    "noticeIssued": "Naisyu ang {{ref}}",
     "settings": {
       "title": "Mga setting ng isyu",
-      "description": "Setup sa pag-print at ang mga listahan ng mapagpipilian sa mga porma. Mga administrator lang ang makapagbabago ng mga listahan.",
-      "descriptionStaff": "Ihanay ang tina-type na teksto sa mga naka-print nang porma.",
+      "description": "Setup sa pag-print at ang mga listahan ng mapagpipilian sa mga porma.",
       "tabs": {
         "printing": "Setup sa pag-print",
         "idType": "Mga balidong ID",
@@ -1955,13 +1954,13 @@
         "stepsOther": "Ilagay ang dry seal."
       },
       "notices": {
-        "busy": "May isinasagawa nang pag-print.",
-        "opened": "Nabuksan na ang print dialog. Ilagay ang pre-printed na form, mag-print sa 100% na scale nang walang header o footer, at pindutin muli ang Print para sa isa pang kopya.",
-        "unable": "Hindi maihanda ang dokumentong ito para sa pag-print.",
-        "notFound": "Hindi makita ang isyung ito, kaya hindi ito mapi-print.",
-        "voided": "Ang {{ref}} ay na-void at hindi na mapi-print.",
-        "noTemplate": "Wala pang print template ang uri ng dokumentong ito, kaya hindi ito mapi-print mula rito.",
-        "notRecorded": "Hindi naitala sa Activity Log ang pag-print, kaya hindi ito sinimulan. Pakisubukang muli."
+        "busy": "May ipinapa-print pa",
+        "opened": "Nabuksan ang print. I-print sa 100%, walang header o footer.",
+        "unable": "Hindi mahanda ang dokumentong ito",
+        "notFound": "Hindi nakita ang isyu",
+        "voided": "Binawi ang {{ref}}",
+        "noTemplate": "Wala pang template sa pag-print",
+        "notRecorded": "Hindi naitala ang pag-print. Subukan muli."
       },
       "calibration": {
         "intro": "I-print ang calibration sheet sa plain na papel sa 100% na scale (walang header, footer o fit-to-page), pagkatapos ay idikit ito sa pre-printed na form. Ayusin ang offset hanggang ang mga pulang kahon ay nasa mga patlang.",
@@ -1972,7 +1971,7 @@
         "save": "I-save ang offset",
         "printSheet": "I-print ang calibration sheet",
         "reset": "I-reset sa 0",
-        "saved": "Na-save sa computer na ito.",
+        "saved": "Na-save",
         "saveFailed": "Hindi ma-save: hindi magagamit ang storage ng browser.",
         "gridLabel": "Calibration grid sa pag-print",
         "templates": {
@@ -2098,20 +2097,20 @@
         "deactivateConfirm": "I-deactivate ang account"
       },
       "notifications": {
-        "created": "Matagumpay na nagawa ang user",
-        "deleted": "Matagumpay na nabura ang user",
-        "updated": "Matagumpay na na-update ang user",
-        "reactivated": "Muling na-activate ang account ng user",
-        "deactivated": "Na-deactivate ang account ng user",
-        "createdEmailed": "Nagawa ang user at ipinadala sa {{email}} ang default na password"
+        "created": "Nagawa ang user",
+        "deleted": "Nabura ang user",
+        "updated": "Na-update ang user",
+        "reactivated": "Na-reactivate ang account",
+        "deactivated": "Na-deactivate ang account",
+        "createdEmailed": "Nagawa ang user. Ipinadala ang password sa {{email}}"
       }
     },
     "officials": {
       "title": "Mga Opisyal",
       "subtitle": "Panatilihin ang listahan ng mga opisyal ng barangay at ng kanilang termino.",
       "addButton": "Magdagdag ng Opisyal",
-      "noticeAdded": "Naidagdag na ang opisyal.",
-      "noticeUpdated": "Na-update na ang opisyal.",
+      "noticeAdded": "Naidagdag ang opisyal",
+      "noticeUpdated": "Na-update ang opisyal",
       "listTitle": "Listahan ng mga Opisyal",
       "listDescription": "Maghanap ng mga opisyal at suriin ang katayuan ng kanilang termino.",
       "searchLabel": "Maghanap ng mga opisyal",
@@ -2344,9 +2343,9 @@
         }
       },
       "notices": {
-        "notLoaded": "Hindi pa tapos mag-load ang ulat, kaya hindi pa ito maie-export.",
-        "notRecorded": "Hindi nai-record sa Activity Log ang pag-export, kaya hindi ito sinimulan. Subukang muli.",
-        "exportStarted": "Nagsimula na ang pag-export ng {{format}} para sa ipinapakitang ulat."
+        "notLoaded": "Naglo-load pa ang ulat",
+        "notRecorded": "Hindi naitala ang export. Subukan muli.",
+        "exportStarted": "Nagsimula ang export na {{format}}"
       },
       "noPurpose": "(Walang nakasaad na layunin)"
     },
@@ -2432,14 +2431,14 @@
         "readyDescription": "Nasuri ang {{name}} at naitala ang kahilingan sa Activity Log. Wala pang na-restore. Para mag-restore, itigil ang app at patakbuhin ang command na ito sa PowerShell mula sa folder ng proyekto sa server computer:"
       },
       "notices": {
-        "created": "Nagawa at nasuri ang backup na {{name}}.",
-        "verified": "Nasuri ang backup na {{name}} at nababasa ito.",
-        "downloaded": "Nagsimula ang pag-download ng {{name}}.",
-        "restoreChecked": "Naitala ang kahilingang mag-restore para sa {{name}}."
+        "created": "Nagawa ang backup",
+        "verified": "Na-verify ang backup",
+        "downloaded": "Nagsimula ang download",
+        "restoreChecked": "Naitala ang hiling na restore"
       },
       "failures": {
-        "create": "Hindi nagawa ang backup. Tingnan ang listahan para sa detalye.",
-        "verify": "Nabigo ang pagsusuri ng backup. Tingnan ang listahan para sa detalye."
+        "create": "Nabigo ang backup. Tingnan ang listahan.",
+        "verify": "Nabigo ang pagsusuri. Tingnan ang listahan."
       }
     }
   },
@@ -2566,13 +2565,13 @@
       "serverTime": "Oras ng server: {{time}}. Dapat parehong oras ang ipakita ng orasan ng telepono mo (hanggang isang minutong pagkakaiba) o hindi magtutugma ang mga code.",
       "clockWarning": "Ang orasan ng computer na ito ay may agwat na mga {{minutes}} minuto sa server. Ayusin muna ang orasan ng telepono at ng server computer bago magpatuloy.",
       "codeLabel": "6-digit na code mula sa app",
-      "enabled": "Naka-on na ang two-factor na pag-sign in"
+      "enabled": "Naka-on ang two-factor"
     },
     "codes": {
       "copy": "Kopyahin",
       "download": "I-save bilang file",
-      "copied": "Nakopya ang mga recovery code",
-      "copyFailed": "Hindi makopya. Isulat na lang ang mga code.",
+      "copied": "Nakopya ang mga code",
+      "copyFailed": "Hindi nakopya. Isulat ang mga code.",
       "fileHeading": "Barangay Mayondon: mga recovery code ng two-factor (isang beses lang magagamit ang bawat isa)",
       "savedConfirm": "Naitago ko ang mga code na ito sa ligtas na lugar.",
       "done": "Tapos na"
@@ -2588,8 +2587,8 @@
       "newCodesDescription": "Ngayon lang ito ipapakita. Itago ito sa papel sa ligtas na lugar.",
       "codeLabel": "Code",
       "codeHelp": "Ang 6-digit na code mula sa app, o isang recovery code.",
-      "turnedOff": "Na-off ang two-factor na pag-sign in",
-      "codesMade": "Nakagawa ng bagong recovery code"
+      "turnedOff": "Na-off ang two-factor",
+      "codesMade": "Nagawa ang mga bagong recovery code"
     },
     "login": {
       "title": "Ilagay ang iyong code",
@@ -2609,14 +2608,14 @@
       "adminNote": "Sa server computer lang maaaring i-reset ang two-factor ng isang administrator (tingnan ang gabay sa Deployment).",
       "confirmTitle": "I-off ang two-factor na pag-sign in?",
       "confirmMessage": "Password lang ang gagamitin ni {{name}} sa pag-sign in at maaari niyang i-set up muli ang two-factor. Gamitin ito kapag nawala ang telepono.",
-      "reset": "Na-off ang two-factor na pag-sign in para sa taong ito",
+      "reset": "Na-off ang two-factor",
       "askedLabel": "Hinilinging gumamit ng two-factor",
       "yes": "Oo",
       "no": "Hindi",
       "ask": "Hilingin ito",
       "stopAsking": "Itigil ang paghiling",
-      "asked": "Hihilingin sa taong ito na i-on ang two-factor na pag-sign in.",
-      "stopped": "Hindi na hinihilingan ang taong ito na gumamit ng two-factor na pag-sign in."
+      "asked": "Hiniling ang two-factor",
+      "stopped": "Hindi na kailangan ang two-factor"
     }
   },
   "securityQuestions": {
@@ -2658,9 +2657,9 @@
       "confirmPassword": "Kumpirmahin ang bagong password",
       "submit": "I-reset ang password",
       "back": "Gumamit ng ibang email",
-      "success": "Napalitan na ang iyong password. Maaari ka nang mag-sign in.",
-      "failed": "Hindi tinanggap ang mga sagot. Suriin at subukang muli.",
-      "tooMany": "Napakaraming pagsubok. Subukang muli pagkalipas ng 30 minuto, o magtanong sa System Administrator.",
+      "success": "Napalitan ang password. Mag-sign in na.",
+      "failed": "Hindi tinanggap ang mga sagot. Subukan muli.",
+      "tooMany": "Sobrang daming subok. Maghintay ng 30 minuto.",
       "noQuestionsHint": "Kung hindi ka pa nakapagtakda ng mga tanong sa pagbawi, hilingin sa System Administrator na magtakda ng pansamantalang password para sa iyo.",
       "useQuestions": "Gamitin na lang ang mga tanong sa seguridad"
     },
@@ -2858,13 +2857,11 @@
       "resetPassword": "I-reset ang Password"
     },
     "toast": {
-      "success": "Matagumpay!",
-      "error": "May nangyaring error!",
-      "myAccountUpdated": "Matagumpay na na-update ang Aking Account",
-      "passwordUpdated": "Matagumpay na na-update ang password",
-      "recoveryLinkSent": "Kung nakarehistro ang email na iyon, may ipinadalang link sa pagbawi",
-      "signedIn": "Naka-sign in ka na. Maligayang pagbabalik!",
-      "signedOut": "Nag-log out ka na."
+      "myAccountUpdated": "Na-update ang account",
+      "passwordUpdated": "Na-update ang password",
+      "recoveryLinkSent": "Naipadala ang link kung may ganitong email",
+      "signedIn": "Naka-sign in na",
+      "signedOut": "Naka-sign out na"
     },
     "errorPage": {
       "code": "Error",

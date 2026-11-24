@@ -16,13 +16,13 @@ test("make a backup, check it, and get the restore command", async ({
   test.skip(await backUp.isDisabled(), "backups are not set up on this server")
 
   await backUp.click()
-  await expect(page.getByText(/was created and checked/)).toBeVisible()
+  await expect(page.getByText(/Backup created/)).toBeVisible()
   const row = page.getByRole("row", { name: /mayondon-db-/ }).first()
   await expect(row.getByText("Verified")).toBeVisible()
 
   // Verify again from the row button.
   await row.getByRole("button", { name: "Verify file" }).click()
-  await expect(page.getByText(/was checked and is readable/)).toBeVisible()
+  await expect(page.getByText(/Backup verified/)).toBeVisible()
 
   // Download the file from the row button.
   const downloadPromise = page.waitForEvent("download")

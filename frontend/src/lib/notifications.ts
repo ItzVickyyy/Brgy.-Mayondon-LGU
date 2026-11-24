@@ -32,8 +32,8 @@ export function notify(
   options?: { toastText?: string },
 ) {
   const text = options?.toastText ?? noticeText(input)
-  if (tone === "warning") toast.warning(text)
-  else toast.success(text)
+  if (tone === "warning") toast.warning(text, { duration: 6000 })
+  else toast.success(text, { duration: 3000 })
 }
 
 /**

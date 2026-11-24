@@ -140,7 +140,7 @@ bash scripts/generate-client.sh
 
 ### Editable issuance lookup lists
 
-`/api/v1/lookups/issuance-purposes` is readable by any signed-in user. Only users with `LOOKUPS_MANAGE` (System Administrator) may create, rename or delete a purpose. The list uses `IssuancePurpose` rows and the existing `LookupNameIn` validation (trimmed, 1–150 characters). A purpose referenced by an issuance cannot be deleted (409); rename it instead. Issuances store the purpose ID, so a rename changes the displayed label on existing records and purpose reports. Each change writes an `issuance_purpose.create`, `.rename` or `.delete` audit event.
+`/api/v1/lookups/issuance-purposes` is readable by any signed-in user. Only users with `LOOKUPS_MANAGE` (staff and System Administrator) may create, rename or delete a purpose. The list uses `IssuancePurpose` rows and the existing `LookupNameIn` validation (trimmed, 1–150 characters). A purpose referenced by an issuance cannot be deleted (409); rename it instead. Issuances store the purpose ID, so a rename changes the displayed label on existing records and purpose reports. Each change writes an `issuance_purpose.create`, `.rename` or `.delete` audit event.
 
 The Issuance settings dialog exposes the list to administrators. New Issuance loads purpose names and IDs from the server. Clearance and Indigency use the shared list; Residency hides the three assistance-only names in `residencyExcludedPurposes`. That exclusion is name-based, so renaming one of those entries removes it from the Residency exclusion. The mock issuance API supplies deterministic IDs for frontend-only tests.
 
@@ -214,7 +214,7 @@ Do not mark a milestone complete until its required work **and** client approval
 
 ### Addressed-office suggestions
 
-`AddressedOffice` rows are administrator-managed suggestions for the Indigency `addressedToOffice` combobox. Any signed-in user can read the list; only `LOOKUPS_MANAGE` users can add, rename or delete suggestions. The combobox remains free-text so a clerk can enter an office not on the list. `IssuanceIndigency.addressed_to_office` remains a text snapshot, not a foreign key: changing or deleting a suggestion affects future choices only and never rewrites an already issued certificate.
+`AddressedOffice` rows are suggestions managed from Issuance settings for the Indigency `addressedToOffice` combobox. Any signed-in user can read the list; only `LOOKUPS_MANAGE` users can add, rename or delete suggestions. The combobox remains free-text so a clerk can enter an office not on the list. `IssuanceIndigency.addressed_to_office` remains a text snapshot, not a foreign key: changing or deleting a suggestion affects future choices only and never rewrites an already issued certificate.
 
 ### Educational-attainment suggestions
 

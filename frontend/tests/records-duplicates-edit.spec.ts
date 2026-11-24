@@ -46,7 +46,7 @@ test("editing a name-only record: address saves quietly, a matching birthdate wa
   // Only the house number changes: no warning, it saves.
   await page.getByLabel(/House/i).first().fill("12")
   await page.getByRole("button", { name: "Save changes", exact: true }).click()
-  await expect(page.getByText(/was updated/)).toBeVisible()
+  await expect(page.getByText(/ updated$/)).toBeVisible()
   await expect(page.getByTestId("duplicate-matches")).toHaveCount(0)
 
   // Filling in the birthdate of the person who is already on record warns.
@@ -58,5 +58,5 @@ test("editing a name-only record: address saves quietly, a matching birthdate wa
   await expect(matches).toContainText(tag)
   await expect(matches).toContainText("born 1985-02-03")
   await page.getByRole("button", { name: "Save anyway" }).click()
-  await expect(page.getByText(/was updated/).first()).toBeVisible()
+  await expect(page.getByText(/ updated$/).first()).toBeVisible()
 })

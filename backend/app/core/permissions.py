@@ -23,12 +23,12 @@ class Permission(StrEnum):
     ISSUANCE_WRITE = "issuance.write"  # create, review, print, correct with reason
     ID_WRITE = "id.write"  # barangay ID create, renew, print
     ACTIVITY_VIEW_OWN = "activity.view_own"
+    LOOKUPS_MANAGE = "lookups.manage"  # editable issuance, address and suggestion lists
 
     # System Administrator only
     USERS_MANAGE = "users.manage"  # user accounts, roles, access
     REGISTRATIONS_REVIEW = "registrations.review"
     OFFICIALS_MANAGE = "officials.manage"
-    LOOKUPS_MANAGE = "lookups.manage"  # editable issuance, address and suggestion lists
     RECORDS_IMPORT = "records.import"  # import masterlist
     RECORDS_ARCHIVE = "records.archive"
     ISSUANCE_VOID = "issuance.void"
@@ -47,6 +47,7 @@ _STAFF_PERMISSIONS = frozenset(
         Permission.ISSUANCE_WRITE,
         Permission.ID_WRITE,
         Permission.ACTIVITY_VIEW_OWN,
+        Permission.LOOKUPS_MANAGE,
     }
 )
 

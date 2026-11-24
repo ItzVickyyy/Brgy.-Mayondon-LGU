@@ -130,29 +130,6 @@ def test_document_types_are_read_only(
 # --- Streets and tricycle associations --------------------------------------
 
 
-def test_staff_cannot_change_streets_or_associations(
-    client: TestClient,
-    db: Session,
-    staff_token_headers: dict[str, str],
-    superuser_token_headers: dict[str, str],
-) -> None:
-    created = client.post(
-        f"{LK}/streets", json={"name": _name("Staff")}, headers=superuser_token_headers
-    ).json()
-    sid = created["id"]
-    for path in ("streets", "subdivisions", "tricycle-associations"):
-        r = client.post(f"{LK}/{path}", json={"name": "X"}, headers=staff_token_headers)
-        assert r.status_code == 403
-        r = client.patch(
-            f"{LK}/{path}/{sid}", json={"name": "Y"}, headers=staff_token_headers
-        )
-        assert r.status_code == 403
-        r = client.delete(f"{LK}/{path}/{sid}", headers=staff_token_headers)
-        assert r.status_code == 403
-    assert db.get(Street, sid) is not None  # untouched
-    client.delete(f"{LK}/streets/{sid}", headers=superuser_token_headers)
-
-
 def test_admin_street_lifecycle_is_audited(
     client: TestClient, db: Session, superuser_token_headers: dict[str, str]
 ) -> None:
@@ -402,27 +379,6 @@ def test_id_type_name_is_limited_to_fifty_characters(
     assert r.status_code == 422
 
 
-def test_staff_cannot_change_id_types(
-    client: TestClient, staff_token_headers: dict[str, str]
-) -> None:
-    assert (
-        client.post(
-            f"{LK}/id-types", json={"name": "X"}, headers=staff_token_headers
-        ).status_code
-        == 403
-    )
-    assert (
-        client.patch(
-            f"{LK}/id-types/1", json={"name": "X"}, headers=staff_token_headers
-        ).status_code
-        == 403
-    )
-    assert (
-        client.delete(f"{LK}/id-types/1", headers=staff_token_headers).status_code
-        == 403
-    )
-
-
 # --- Officials --------------------------------------------------------------
 
 
@@ -660,65 +616,6 @@ def test_sector_name_is_limited_to_one_hundred_characters(
     assert r.status_code == 422
 
 
-def test_staff_cannot_change_sectors(
-    client: TestClient, staff_token_headers: dict[str, str]
-) -> None:
-    assert (
-        client.post(
-            f"{LK}/sectors", json={"name": "X"}, headers=staff_token_headers
-        ).status_code
-        == 403
-    )
-    assert (
-        client.patch(
-            f"{LK}/sectors/1", json={"name": "X"}, headers=staff_token_headers
-        ).status_code
-        == 403
-    )
-    assert (
-        client.delete(f"{LK}/sectors/1", headers=staff_token_headers).status_code == 403
-    )
-
-
-def test_staff_cannot_change_issuance_purposes(
-    client: TestClient,
-    db: Session,
-    staff_token_headers: dict[str, str],
-    superuser_token_headers: dict[str, str],
-) -> None:
-    created = client.post(
-        f"{LK}/issuance-purposes",
-        json={"name": _name("ZZ test purpose")},
-        headers=superuser_token_headers,
-    )
-    assert created.status_code == 201
-    item_id = created.json()["id"]
-    assert (
-        client.post(
-            f"{LK}/issuance-purposes",
-            json={"name": "Nope"},
-            headers=staff_token_headers,
-        ).status_code
-        == 403
-    )
-    assert (
-        client.patch(
-            f"{LK}/issuance-purposes/{item_id}",
-            json={"name": "Nope"},
-            headers=staff_token_headers,
-        ).status_code
-        == 403
-    )
-    assert (
-        client.delete(
-            f"{LK}/issuance-purposes/{item_id}", headers=staff_token_headers
-        ).status_code
-        == 403
-    )
-    assert db.get(IssuancePurpose, item_id) is not None
-    client.delete(f"{LK}/issuance-purposes/{item_id}", headers=superuser_token_headers)
-
-
 def test_admin_issuance_purpose_lifecycle_is_audited(
     client: TestClient, db: Session, superuser_token_headers: dict[str, str]
 ) -> None:
@@ -787,43 +684,6 @@ def test_issuance_purpose_validation_and_duplicate_names(
     )
 
 
-def test_staff_cannot_change_addressed_office_suggestions(
-    client: TestClient,
-    staff_token_headers: dict[str, str],
-    superuser_token_headers: dict[str, str],
-) -> None:
-    created = client.post(
-        f"{LK}/addressed-offices",
-        json={"name": _name("ZZ test office")},
-        headers=superuser_token_headers,
-    )
-    assert created.status_code == 201
-    item_id = created.json()["id"]
-    assert (
-        client.post(
-            f"{LK}/addressed-offices",
-            json={"name": "Nope"},
-            headers=staff_token_headers,
-        ).status_code
-        == 403
-    )
-    assert (
-        client.patch(
-            f"{LK}/addressed-offices/{item_id}",
-            json={"name": "Nope"},
-            headers=staff_token_headers,
-        ).status_code
-        == 403
-    )
-    assert (
-        client.delete(
-            f"{LK}/addressed-offices/{item_id}", headers=staff_token_headers
-        ).status_code
-        == 403
-    )
-    client.delete(f"{LK}/addressed-offices/{item_id}", headers=superuser_token_headers)
-
-
 def test_admin_addressed_office_suggestion_lifecycle(
     client: TestClient, db: Session, superuser_token_headers: dict[str, str]
 ) -> None:
@@ -876,46 +736,6 @@ def test_admin_addressed_office_suggestion_lifecycle(
     }
 
 
-def test_staff_cannot_change_educational_attainment_suggestions(
-    client: TestClient,
-    staff_token_headers: dict[str, str],
-    superuser_token_headers: dict[str, str],
-) -> None:
-    created = client.post(
-        f"{LK}/educational-attainments",
-        json={"name": _name("ZZ test attainment")},
-        headers=superuser_token_headers,
-    )
-    assert created.status_code == 201
-    item_id = created.json()["id"]
-    assert (
-        client.post(
-            f"{LK}/educational-attainments",
-            json={"name": "Nope"},
-            headers=staff_token_headers,
-        ).status_code
-        == 403
-    )
-    assert (
-        client.patch(
-            f"{LK}/educational-attainments/{item_id}",
-            json={"name": "Nope"},
-            headers=staff_token_headers,
-        ).status_code
-        == 403
-    )
-    assert (
-        client.delete(
-            f"{LK}/educational-attainments/{item_id}", headers=staff_token_headers
-        ).status_code
-        == 403
-    )
-    client.delete(
-        f"{LK}/educational-attainments/{item_id}",
-        headers=superuser_token_headers,
-    )
-
-
 def test_admin_educational_attainment_suggestion_lifecycle(
     client: TestClient, db: Session, superuser_token_headers: dict[str, str]
 ) -> None:
@@ -965,3 +785,34 @@ def test_admin_educational_attainment_suggestion_lifecycle(
         "educational_attainment.rename",
         "educational_attainment.delete",
     }
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "streets",
+        "subdivisions",
+        "tricycle-associations",
+        "id-types",
+        "sectors",
+        "issuance-purposes",
+        "addressed-offices",
+        "educational-attainments",
+    ],
+)
+def test_staff_can_manage_every_issuance_settings_list(
+    client: TestClient, staff_token_headers: dict[str, str], path: str
+) -> None:
+    created = client.post(
+        f"{LK}/{path}", json={"name": _name("ZZ staff")}, headers=staff_token_headers
+    )
+    assert created.status_code == 201, created.text
+    item_id = created.json()["id"]
+    renamed = client.patch(
+        f"{LK}/{path}/{item_id}",
+        json={"name": _name("ZZ staff renamed")},
+        headers=staff_token_headers,
+    )
+    assert renamed.status_code == 200, renamed.text
+    deleted = client.delete(f"{LK}/{path}/{item_id}", headers=staff_token_headers)
+    assert deleted.status_code == 204, deleted.text
