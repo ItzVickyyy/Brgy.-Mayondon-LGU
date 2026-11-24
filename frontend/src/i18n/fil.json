@@ -2445,6 +2445,7 @@
         "typeLabel": "I-type ang {{word}} para magpatuloy",
         "confirmButton": "Suriin at Ipakita ang Command",
         "choose": "Pumili ng backup",
+        "none": "Wala pang na-check na backup file sa backup folder. Mag-backup muna, saka i-verify ang file.",
         "readyTitle": "Handa nang i-restore",
         "readyDescription": "Nasuri ang {{name}} at naitala ang kahilingan sa Activity Log. Wala pang na-restore. Para mag-restore, itigil ang app at patakbuhin ang command na ito sa PowerShell mula sa folder ng proyekto sa server computer:"
       },

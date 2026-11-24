@@ -2,7 +2,6 @@
 // Skipped when the backend cannot make backups (pg_dump or the folder missing).
 import { expect, test } from "@playwright/test"
 import { firstSuperuserPassword } from "./config"
-import { chooseOption } from "./utils/select"
 
 test("make a backup, check it, and get the restore command", async ({
   page,
@@ -35,8 +34,10 @@ test("make a backup, check it, and get the restore command", async ({
   expect(download.suggestedFilename()).toMatch(/^mayondon-db-.*\.dump$/)
   await expect(page.getByText("Download started")).toBeVisible()
   // Restore: choose the backup, type the word, get the command (nothing is restored).
-  const archive = page.getByLabel("Backup archive")
-  await chooseOption(archive, 1)
+  // The Restore card sits beside Backup Schedule and lists the checked files.
+  const restoreCard = page.getByTestId("restore-card")
+  await expect(restoreCard).toBeVisible()
+  await restoreCard.getByTestId("restore-file").first().click()
   await page.getByRole("button", { name: "Prepare Restore" }).click()
   const confirm = page.getByRole("button", { name: "Check and Show Command" })
   await expect(confirm).toBeDisabled()

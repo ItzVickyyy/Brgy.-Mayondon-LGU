@@ -2445,6 +2445,7 @@
         "typeLabel": "Type {{word}} to continue",
         "confirmButton": "Check and Show Command",
         "choose": "Choose a backup",
+        "none": "No checked backup files are in the backup folder yet. Back up now, then verify the file.",
         "readyTitle": "Ready to restore",
         "readyDescription": "{{name}} was checked and the request is recorded in the Activity Log. Nothing has been restored yet. To restore, stop the app and run this command in PowerShell from the project folder on the server computer:"
       },

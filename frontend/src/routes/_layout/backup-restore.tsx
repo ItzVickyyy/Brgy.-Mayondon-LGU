@@ -23,7 +23,6 @@ import { EmptyState } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { RowActions } from "@/components/Common/RowActions"
-import { Select } from "@/components/Common/Select"
 import { statusStyles } from "@/components/Common/statusStyles"
 import {
   TablePagination,
@@ -261,7 +260,7 @@ function BackupRestore() {
         </div>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
         <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-brand/10 p-2.5">
@@ -345,6 +344,142 @@ function BackupRestore() {
               {t("admin.backup.schedule.note")}
             </p>
           </div>
+        </section>
+
+        <section
+          data-testid="restore-card"
+          className="rounded-xl border border-destructive/30 bg-card p-4 shadow-sm sm:p-5"
+        >
+          <div className="flex items-start gap-3">
+            <div className="rounded-lg bg-destructive/10 p-2.5">
+              <RotateCcw className="size-5 text-destructive" />
+            </div>
+            <div>
+              <h2 className="font-semibold">
+                {t("admin.backup.restore.title")}
+              </h2>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {t("admin.backup.restore.description")}
+              </p>
+            </div>
+          </div>
+          <div className="mt-5 space-y-2">
+            <p
+              id="backup-restore-archive-label"
+              className="text-sm font-medium"
+            >
+              {t("admin.backup.restore.archive")}
+            </p>
+            {restorable.length === 0 ? (
+              <p className="rounded-lg border border-dashed p-3 text-sm text-muted-foreground">
+                {t("admin.backup.restore.none")}
+              </p>
+            ) : (
+              <div
+                role="radiogroup"
+                aria-labelledby="backup-restore-archive-label"
+                className="max-h-56 space-y-1.5 overflow-y-auto rounded-lg border bg-background p-1.5"
+              >
+                {restorable.map((backup) => {
+                  const picked = selectedBackup === backup.id
+                  return (
+                    <label
+                      key={backup.id}
+                      data-testid="restore-file"
+                      className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-md border px-3 py-2 text-sm transition-colors has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring ${
+                        picked
+                          ? "border-destructive/50 bg-destructive/5"
+                          : "border-transparent hover:bg-accent/50"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="backup-restore-archive"
+                        value={backup.id}
+                        checked={picked}
+                        onChange={() => {
+                          setSelectedBackup(backup.id)
+                          setConfirmRestore(false)
+                          setRestoreConfirmation("")
+                        }}
+                        className="size-4 shrink-0 accent-[var(--destructive)]"
+                      />
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-mono text-xs sm:text-sm">
+                          {backup.file_name}
+                        </span>
+                        <span className="block text-xs text-muted-foreground">
+                          {formatMoment(backup.started_at)} ·{" "}
+                          {formatSize(backup.size_bytes)}
+                        </span>
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+          <Button
+            variant="outline"
+            className="mt-4 min-h-11 w-full border-destructive/50 text-destructive hover:bg-destructive/5"
+            disabled={!selectedBackup && !confirmRestore}
+            onClick={() => setConfirmRestore((value) => !value)}
+          >
+            <RotateCcw aria-hidden="true" />
+            {confirmRestore
+              ? t("admin.backup.restore.cancel")
+              : t("admin.backup.restore.prepare")}
+          </Button>
+          {confirmRestore ? (
+            <div className="mt-4 rounded-lg border border-destructive/40 bg-destructive/5 p-4">
+              <p className="font-semibold">
+                {t("admin.backup.restore.confirmTitle")}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-muted-foreground">
+                <Trans
+                  i18nKey="admin.backup.restore.confirmDescription"
+                  values={{ word: RESTORE_WORD }}
+                  components={{
+                    strong: <strong className="text-foreground" />,
+                  }}
+                />
+              </p>
+              <p className="mt-3 rounded-md bg-background p-3 font-mono text-sm">
+                {backups.find((run) => run.id === selectedBackup)?.file_name}
+              </p>
+              <label className="mt-4 block text-sm font-medium">
+                {t("admin.backup.restore.typeLabel", { word: RESTORE_WORD })}
+                <input
+                  value={restoreConfirmation}
+                  onChange={(event) =>
+                    setRestoreConfirmation(event.target.value)
+                  }
+                  placeholder={RESTORE_WORD}
+                  autoComplete="off"
+                  className={`${formControlClass} mt-2`}
+                />
+              </label>
+              <Button
+                variant="destructive"
+                className="mt-4 min-h-11"
+                disabled={
+                  !restorable.some((backup) => backup.id === selectedBackup) ||
+                  restoreConfirmation !== RESTORE_WORD ||
+                  restoreMutation.isPending
+                }
+                onClick={() =>
+                  setAsking({
+                    scope: "backup.restore",
+                    run: (token) =>
+                      restoreMutation.mutate({ id: selectedBackup, token }),
+                  })
+                }
+              >
+                <ShieldCheck aria-hidden="true" />
+                {t("admin.backup.restore.confirmButton")}
+              </Button>
+            </div>
+          ) : null}
         </section>
       </div>
 
@@ -535,102 +670,6 @@ function BackupRestore() {
         />
       </section>
 
-      <section className="rounded-xl border border-destructive/30 bg-card p-4 shadow-sm sm:p-5">
-        <div className="flex items-start gap-3">
-          <div className="rounded-lg bg-destructive/10 p-2.5">
-            <RotateCcw className="size-5 text-destructive" />
-          </div>
-          <div>
-            <h2 className="font-semibold">{t("admin.backup.restore.title")}</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {t("admin.backup.restore.description")}
-            </p>
-          </div>
-        </div>
-        <div className="mt-5 grid gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-          <label
-            htmlFor="backup-restore-archive"
-            className="flex flex-col gap-2 text-sm font-medium"
-          >
-            {t("admin.backup.restore.archive")}
-            <Select
-              id="backup-restore-archive"
-              value={selectedBackup}
-              disabled={restorable.length === 0}
-              onChange={(event) => {
-                setSelectedBackup(event.target.value)
-                setConfirmRestore(false)
-                setRestoreConfirmation("")
-              }}
-              className={`${formControlClass} font-normal`}
-            >
-              <option value="">{t("admin.backup.restore.choose")}</option>
-              {restorable.map((backup) => (
-                <option key={backup.id} value={backup.id}>
-                  {backup.file_name}
-                </option>
-              ))}
-            </Select>
-          </label>
-          <Button
-            variant="outline"
-            className="min-h-11 border-destructive/50 text-destructive hover:bg-destructive/5"
-            disabled={!selectedBackup && !confirmRestore}
-            onClick={() => setConfirmRestore((value) => !value)}
-          >
-            <RotateCcw aria-hidden="true" />
-            {confirmRestore
-              ? t("admin.backup.restore.cancel")
-              : t("admin.backup.restore.prepare")}
-          </Button>
-        </div>
-        {confirmRestore ? (
-          <div className="mt-4 rounded-lg border border-destructive/40 bg-destructive/5 p-4">
-            <p className="font-semibold">
-              {t("admin.backup.restore.confirmTitle")}
-            </p>
-            <p className="mt-1 text-sm leading-6 text-muted-foreground">
-              <Trans
-                i18nKey="admin.backup.restore.confirmDescription"
-                values={{ word: RESTORE_WORD }}
-                components={{ strong: <strong className="text-foreground" /> }}
-              />
-            </p>
-            <p className="mt-3 rounded-md bg-background p-3 font-mono text-sm">
-              {backups.find((run) => run.id === selectedBackup)?.file_name}
-            </p>
-            <label className="mt-4 block text-sm font-medium">
-              {t("admin.backup.restore.typeLabel", { word: RESTORE_WORD })}
-              <input
-                value={restoreConfirmation}
-                onChange={(event) => setRestoreConfirmation(event.target.value)}
-                placeholder={RESTORE_WORD}
-                autoComplete="off"
-                className={`${formControlClass} mt-2 sm:max-w-xs`}
-              />
-            </label>
-            <Button
-              variant="destructive"
-              className="mt-4 min-h-11"
-              disabled={
-                !restorable.some((backup) => backup.id === selectedBackup) ||
-                restoreConfirmation !== RESTORE_WORD ||
-                restoreMutation.isPending
-              }
-              onClick={() =>
-                setAsking({
-                  scope: "backup.restore",
-                  run: (token) =>
-                    restoreMutation.mutate({ id: selectedBackup, token }),
-                })
-              }
-            >
-              <ShieldCheck aria-hidden="true" />
-              {t("admin.backup.restore.confirmButton")}
-            </Button>
-          </div>
-        ) : null}
-      </section>
       <ConfirmPasswordDialog
         open={asking !== null}
         scope={asking?.scope ?? "backup.restore"}
