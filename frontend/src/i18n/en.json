@@ -240,6 +240,7 @@
     "subtitle": "Sign in to access the barangay personnel portal.",
     "passwordChanged": "Your password has been changed. Sign in again.",
     "idleSignedOut": "You were signed out because the screen was left idle. Sign in again to continue.",
+    "signedInElsewhere": "You were signed out because this account was signed in on another computer. Only one computer can use an account at a time. Sign in again to continue here.",
     "emailLabel": "Email address",
     "emailPlaceholder": "Enter your email address",
     "passwordLabel": "Password",

@@ -187,11 +187,18 @@ def _finish_login(session: SessionDep, user: Any) -> LoginResult:
         session, action="auth.login", actor=user, module="auth", commit=True
     )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    jti = uuid.uuid4().hex
+    # The newest sign-in is the only one that works: any older token of this account
+    # stops at once (see get_current_user_allow_temporary).
+    user.active_session_jti = jti
+    session.add(user)
+    session.commit()
     return LoginResult(
         access_token=security.create_access_token(
             user.id,
             expires_delta=access_token_expires,
             hashed_password=user.hashed_password,
+            jti=jti,
         )
     )
 

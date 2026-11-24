@@ -207,6 +207,9 @@ class User(UserBase, table=True):
     # follow the person to any computer. Never part of UserPublic: they are read
     # and written only through /users/me/preferences.
     preferences: dict[str, str] | None = Field(default=None, sa_type=JSON)
+    # The ``jti`` of the one sign-in token this account may use now (patch 256). A newer
+    # sign-in replaces it, so the older computer is signed out. Never part of UserPublic.
+    active_session_jti: str | None = Field(default=None, max_length=64)
 
 
 class PasswordRecoveryRateLimit(SQLModel, table=True):

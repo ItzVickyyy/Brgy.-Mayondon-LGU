@@ -47,6 +47,9 @@ services:
     environment:
       FASTAPI_ENV: "development"
       ENABLE_DEV_ROUTES: "true"
+      # The browser tests share one administrator login, so development turns the
+      # one-computer-per-account rule off; the office (compose.yml alone) keeps it on.
+      SINGLE_SESSION_PER_ACCOUNT: "false"
       SMTP_HOST: "mailpit"
       SMTP_PORT: "1025"
       SMTP_TLS: "false"

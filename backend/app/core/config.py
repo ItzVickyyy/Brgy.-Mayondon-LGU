@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     # the person signs in again (a shorter life limits what a left-open or stolen
     # session can read).
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(default=60 * 8, gt=0)
+    # One account, one computer at a time: signing in ends the account's older sign-in
+    # (patch 256). Only tests and development servers that share one login switch it off.
+    SINGLE_SESSION_PER_ACCOUNT: bool = True
     LOGIN_MAX_FAILED_ATTEMPTS: int = Field(default=5, gt=0)
     LOGIN_LOCKOUT_MINUTES: int = Field(default=15, gt=0)
     # Wrong sign-ins from one computer (any e-mail, known or not) before it must wait out

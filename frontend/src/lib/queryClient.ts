@@ -14,7 +14,21 @@ import { type UserPublic, UsersService } from "@/client"
 
 export const CURRENT_USER_KEY = ["currentUser"] as const
 
+/** The server refused the token because the same account signed in on another computer. */
+export function isSignedInElsewhere(error: unknown): boolean {
+  if (!(error instanceof AxiosError)) return false
+  const data = error.response?.data as
+    | { detail?: { code?: string } }
+    | undefined
+  return data?.detail?.code === "signed_in_elsewhere"
+}
+
 const handleApiError = (error: Error) => {
+  if (isSignedInElsewhere(error)) {
+    localStorage.removeItem("access_token")
+    window.location.href = "/login?elsewhere=1"
+    return
+  }
   if (error instanceof AxiosError) {
     const responseData = error.response?.data as
       | { detail?: { code?: string } }

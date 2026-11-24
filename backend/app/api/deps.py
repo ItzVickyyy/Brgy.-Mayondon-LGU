@@ -63,6 +63,19 @@ def get_current_user_allow_temporary(session: SessionDep, token: TokenDep) -> Us
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials",
         )
+    if (
+        settings.SINGLE_SESSION_PER_ACCOUNT
+        and user.active_session_jti is not None
+        and token_data.jti != user.active_session_jti
+    ):
+        # The account was signed in somewhere else after this token was made.
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "code": "signed_in_elsewhere",
+                "message": "This account was signed in on another computer.",
+            },
+        )
     if not user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return user

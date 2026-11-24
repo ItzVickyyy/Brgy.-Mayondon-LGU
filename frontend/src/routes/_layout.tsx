@@ -33,7 +33,7 @@ import {
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 import { useLoadPreferences, usePreferences } from "@/hooks/usePreferences"
 import { getLocale } from "@/lib/locale"
-import { loadCurrentUser } from "@/lib/queryClient"
+import { isSignedInElsewhere, loadCurrentUser } from "@/lib/queryClient"
 
 export const Route = createFileRoute("/_layout")({
   component: Layout,
@@ -47,6 +47,10 @@ export const Route = createFileRoute("/_layout")({
         throw redirect({ to: "/change-password" })
       }
     } catch (error) {
+      if (isSignedInElsewhere(error)) {
+        localStorage.removeItem("access_token")
+        throw redirect({ href: "/login?elsewhere=1" })
+      }
       if (error && typeof error === "object" && "status" in error) {
         const status = error.status
         if (status === 401 || status === 403) {

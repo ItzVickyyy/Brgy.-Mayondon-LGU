@@ -104,6 +104,8 @@ function Login() {
     new URLSearchParams(window.location.search).get("passwordChanged") === "1"
   const idleNotice =
     new URLSearchParams(window.location.search).get("idle") === "1"
+  const elsewhereNotice =
+    new URLSearchParams(window.location.search).get("elsewhere") === "1"
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     mode: "onSubmit",
@@ -170,6 +172,16 @@ function Login() {
               className="animate-in fade-in-0 rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground duration-200"
             >
               {t("login.idleSignedOut")}
+            </p>
+          ) : null}
+
+          {elsewhereNotice ? (
+            <p
+              role="status"
+              data-testid="signed-in-elsewhere"
+              className="animate-in fade-in-0 rounded-md border border-brand/20 bg-brand/10 px-3 py-2 text-sm text-foreground duration-200"
+            >
+              {t("login.signedInElsewhere")}
             </p>
           ) : null}
 

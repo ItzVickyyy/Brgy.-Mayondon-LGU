@@ -51,14 +51,17 @@ def verify_password_fingerprint(
 
 
 def create_access_token(
-    subject: str | Any, expires_delta: timedelta, hashed_password: str
+    subject: str | Any,
+    expires_delta: timedelta,
+    hashed_password: str,
+    jti: str | None = None,
 ) -> str:
     expire = datetime.now(UTC) + expires_delta
     to_encode = {
         "exp": expire,
         "sub": str(subject),
         "pwdv": password_fingerprint(hashed_password),
-        "jti": uuid.uuid4().hex,
+        "jti": jti or uuid.uuid4().hex,
     }
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt

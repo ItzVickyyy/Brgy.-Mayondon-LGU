@@ -240,6 +240,7 @@
     "subtitle": "Mag-sign in para mapasok ang portal ng mga tauhan ng barangay.",
     "passwordChanged": "Napalitan na ang iyong password. Mag-sign in muli.",
     "idleSignedOut": "Na-sign out ka dahil matagal na walang ginagalaw sa screen. Mag-sign in muli para magpatuloy.",
+    "signedInElsewhere": "Na-sign out ka dahil may ibang computer na nag-sign in sa account na ito. Isang computer lang ang puwedeng gumamit ng account sa isang pagkakataon. Mag-sign in muli para magpatuloy dito.",
     "emailLabel": "Email address",
     "emailPlaceholder": "Ilagay ang iyong email address",
     "passwordLabel": "Password",

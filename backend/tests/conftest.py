@@ -46,6 +46,13 @@ def _no_protection_cache(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(field_crypto, "PROTECTION_CACHE_SECONDS", 0.0)
 
 
+@pytest.fixture(autouse=True)
+def _allow_shared_logins(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Tests sign the same account in many times; only test_single_session.py turns the
+    one-computer-per-account rule back on."""
+    monkeypatch.setattr(settings, "SINGLE_SESSION_PER_ACCOUNT", False)
+
+
 @pytest.fixture(scope="session", autouse=True)
 def db() -> Generator[Session]:
     _refuse_real_database()

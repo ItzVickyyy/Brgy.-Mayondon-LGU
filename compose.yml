@@ -61,6 +61,8 @@ services:
       MFA_ENCRYPTION_KEY: ${MFA_ENCRYPTION_KEY:-}
       # Locks the health condition of an assistance certificate in the database. Empty = plain text.
       DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:-}
+      # One account may be signed in on one computer at a time (the newest sign-in wins).
+      SINGLE_SESSION_PER_ACCOUNT: ${SINGLE_SESSION_PER_ACCOUNT:-true}
       FIRST_SUPERUSER: ${FIRST_SUPERUSER:?Variable not set}
       FIRST_SUPERUSER_PASSWORD: ${FIRST_SUPERUSER_PASSWORD:?Variable not set}
       SMTP_HOST: ${SMTP_HOST:-}
