@@ -49,12 +49,21 @@ async function signedIn(page: Page, punong: string | null) {
     localStorage.setItem("app-language", "en")
     localStorage.setItem("vite-ui-theme", "light")
   })
-  // Printing is a browser dialog: count the calls instead of opening it.
+  // Printing is a browser dialog: count the calls instead of opening it. Like Chrome, fire
+  // "afterprint" while the preview is still open, and record what the page looked like at that moment.
   await page.addInitScript(() => {
-    ;(window as unknown as { __prints: number }).__prints = 0
+    const w = window as unknown as {
+      __prints: number
+      __sheetAfterAfterprint: boolean
+    }
+    w.__prints = 0
+    w.__sheetAfterAfterprint = false
     window.print = () => {
-      ;(window as unknown as { __prints: number }).__prints += 1
+      w.__prints += 1
       window.dispatchEvent(new Event("afterprint"))
+      w.__sheetAfterAfterprint =
+        document.body.classList.contains("cou-printing") &&
+        document.querySelector(".cou-print-root .cou-sheet") !== null
     }
   })
   return printed
@@ -100,6 +109,16 @@ test("Print fills the certificate, records the print and opens the dialog", asyn
     )
     .toBe(1)
   expect(printed).toHaveLength(1)
+  // Chrome's early "afterprint" must not tear the sheet down while the preview is open.
+  expect(
+    await page.evaluate(
+      () =>
+        (window as unknown as { __sheetAfterAfterprint: boolean })
+          .__sheetAfterAfterprint,
+    ),
+  ).toBe(true)
+  // Once print() returns the page is back to normal.
+  await expect(page.locator("body.cou-printing")).toHaveCount(0)
   expect(JSON.parse(printed[0] as string)).toEqual({ month: "2026-11" })
   const sheet = page.getByTestId("utilization-sheet")
   await expect(sheet).toContainText("CERTIFICATE OF UTILIZATION")

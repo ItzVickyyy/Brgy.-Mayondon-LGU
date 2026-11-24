@@ -31,6 +31,26 @@ import {
 import { UtilizationSheet } from "./UtilizationSheet"
 
 const A4_PAGE_RULE = "@page { size: 210mm 297mm; margin: 0 }"
+const IMAGE_WAIT_MS = 3000
+
+/** The letterhead logo and the seal must be decoded before the print preview is drawn. */
+function waitForSheetImages(): Promise<void> {
+  const pending = Array.from(
+    document.querySelectorAll<HTMLImageElement>(".cou-print-root img"),
+  )
+    .filter((image) => !image.complete)
+    .map(
+      (image) =>
+        new Promise<void>((resolve) => {
+          image.onload = image.onerror = () => resolve()
+        }),
+    )
+  if (!pending.length) return Promise.resolve()
+  return Promise.race([
+    Promise.all(pending).then(() => undefined),
+    new Promise<void>((resolve) => window.setTimeout(resolve, IMAGE_WAIT_MS)),
+  ])
+}
 
 /**
  * Profile menu > Utilization Cert. The LSPU extension program asks the barangay for a Certificate of
@@ -66,27 +86,36 @@ export function UtilizationCertDialog({
   }, [figures.isError, showErrorToast, t])
 
   // Prints the certificate only: index.css hides everything else while the body carries
-  // "cou-printing", and a dark theme is printed as light.
+  // "cou-printing", and a dark theme is printed as light. Chrome fires "afterprint" as soon as the
+  // preview is drawn and lays the page out again whenever a setting in the preview changes, so the
+  // print state must not end on that event (the preview would go blank): it ends when the blocking
+  // window.print() call returns, as the issuance print does.
   useEffect(() => {
     if (!printing) return
     const root = document.documentElement
     const wasDark = root.classList.contains("dark")
-    const finish = () => {
-      document.body.classList.remove("cou-printing")
-      if (wasDark) root.classList.add("dark")
-      setPrinting(false)
-    }
+    let cancelled = false
     const pageStyle = document.createElement("style")
     pageStyle.setAttribute("data-cou-page", "")
     pageStyle.textContent = A4_PAGE_RULE
     document.head.appendChild(pageStyle)
     document.body.classList.add("cou-printing")
     root.classList.remove("dark")
-    window.addEventListener("afterprint", finish, { once: true })
-    const timer = window.setTimeout(() => window.print(), 250)
+    void (async () => {
+      try {
+        await waitForSheetImages()
+        // requestAnimationFrame never fires in a background tab, so a timer is the fallback.
+        await new Promise((resolve) => {
+          requestAnimationFrame(() => resolve(null))
+          window.setTimeout(() => resolve(null), 250)
+        })
+        if (!cancelled) window.print() // blocks until the print dialog closes in most browsers
+      } finally {
+        if (!cancelled) setPrinting(false)
+      }
+    })()
     return () => {
-      window.clearTimeout(timer)
-      window.removeEventListener("afterprint", finish)
+      cancelled = true
       pageStyle.remove()
       document.body.classList.remove("cou-printing")
       if (wasDark) root.classList.add("dark")
@@ -238,7 +267,7 @@ export function UtilizationCertDialog({
           </div>
         </DialogContent>
       </Dialog>
-      {open && data
+      {data && (open || printing)
         ? createPortal(
             <div className="cou-print-root" aria-hidden="true">
               <UtilizationSheet
