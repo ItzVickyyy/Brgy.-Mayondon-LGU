@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils"
 // and footer stay put while only the middle scrolls, so Save is always in
 // reach on a short laptop screen. Pass `modalShell` as the DialogContent
 // className together with a width such as `sm:max-w-4xl`. (A plain `max-w-*`
-// is overridden by the dialog's own `sm:max-w-lg`, so always use `sm:max-w-*`.)
+// is overridden by the dialog's own `sm:max-w-lg`, so always use `sm:max-w-*`.
+// The dialog's own `w-[calc(100%-2rem)]` keeps a 1 rem side margin at any width.)
 export const modalShell =
   "flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-0"
 // Same fixed height for the resident profile and the add/edit resident form,

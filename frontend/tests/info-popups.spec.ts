@@ -59,6 +59,24 @@ test.describe("popups on the login page", () => {
     })
   }
 
+  for (const width of [390, 700, 900, 1024]) {
+    test(`a wide popup keeps a side margin at ${width} px`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 800 })
+      await page.goto("/login")
+      await page
+        .getByRole("button", { name: "Terms of Use", exact: true })
+        .click()
+      const dialog = page.getByRole("dialog", { name: "Terms of Use" })
+      await expect(dialog).toBeVisible()
+      // The open animation scales the box, so wait until it has settled.
+      await expect
+        .poll(async () => (await dialog.boundingBox())?.x ?? -1)
+        .toBeGreaterThanOrEqual(15)
+    })
+  }
+
   test("Terms of Use has 14 numbered sections and the contents bar jumps to one", async ({
     page,
   }) => {
