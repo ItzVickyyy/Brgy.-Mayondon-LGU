@@ -573,6 +573,7 @@ def write_admin_password(
                 )
             user.hashed_password = get_password_hash(new_password)
             user.must_change_password = False
+            user.password_changed_at = datetime.now(UTC)
             session.add(user)
             record_audit_event(
                 session,

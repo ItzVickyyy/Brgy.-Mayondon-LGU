@@ -136,14 +136,13 @@ test.describe("popups on the login page", () => {
   })
 })
 
-test.describe("popups in the profile menu", () => {
+test.describe("popups in the profile menu and the Get help button", () => {
   test("Get help has no draft wording and ends with the developers' contact guide", async ({
     page,
   }) => {
     await signedIn(page)
     await page.goto("/")
-    await page.getByRole("button", { name: /user menu/i }).click()
-    await page.getByRole("menuitem", { name: "Get help" }).click()
+    await page.getByTestId("sidebar-get-help").click()
     const dialog = page.getByRole("dialog", { name: "Get help" })
     await expect(dialog).toBeVisible()
     await expect(dialog).not.toContainText(forbidden)
@@ -172,8 +171,7 @@ test.describe("popups in the profile menu", () => {
 
   async function openHelp(page: Page) {
     await page.goto("/")
-    await page.getByRole("button", { name: /user menu/i }).click()
-    await page.getByRole("menuitem", { name: "Get help" }).click()
+    await page.getByTestId("sidebar-get-help").click()
     const dialog = page.getByRole("dialog", { name: "Get help" })
     await expect(dialog).toBeVisible()
     return dialog

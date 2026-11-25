@@ -32,6 +32,23 @@ CONFIRM_SCOPES = ("backup.restore", "backup.download")
 DEFAULT_PASSWORD = "ChangeThisPassword"
 
 
+def password_expires_at(changed_at: datetime | None) -> datetime | None:
+    """When a password set at ``changed_at`` stops being valid (None = never).
+
+    The limit is ``PASSWORD_MAX_AGE_DAYS`` (90 days, about 3 months); 0 turns the rule off.
+    An account with no recorded date has no limit until its next password change.
+    """
+    if changed_at is None or settings.PASSWORD_MAX_AGE_DAYS <= 0:
+        return None
+    start = changed_at if changed_at.tzinfo else changed_at.replace(tzinfo=UTC)
+    return start + timedelta(days=settings.PASSWORD_MAX_AGE_DAYS)
+
+
+def password_is_expired(changed_at: datetime | None) -> bool:
+    expires = password_expires_at(changed_at)
+    return expires is not None and expires <= datetime.now(UTC)
+
+
 def password_fingerprint(hashed_password: str) -> str:
     """Return a keyed fingerprint that changes when the password hash changes."""
     return hmac.new(

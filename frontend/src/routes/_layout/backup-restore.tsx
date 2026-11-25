@@ -242,9 +242,6 @@ function BackupRestore() {
           <h1 className="page-title relative mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             {t("admin.backup.title")}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("admin.backup.subtitle")}
-          </p>
         </div>
       </div>
 

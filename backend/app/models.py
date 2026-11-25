@@ -187,6 +187,26 @@ class User(UserBase, table=True):
         default=False,
         sa_column_kwargs={"server_default": false()},
     )
+    # When the password was last set. The password expires PASSWORD_MAX_AGE_DAYS
+    # after this (patch 282). Every code path that sets a password stamps it.
+    password_changed_at: datetime | None = Field(
+        default_factory=get_datetime_utc,
+        sa_type=DateTime(timezone=True),
+        nullable=True,
+    )
+
+    @property
+    def password_expires_at(self) -> datetime | None:
+        from app.core.security import password_expires_at
+
+        return password_expires_at(self.password_changed_at)
+
+    @property
+    def password_expired(self) -> bool:
+        from app.core.security import password_is_expired
+
+        return password_is_expired(self.password_changed_at)
+
     # Two-factor sign-in (step 14). The secret is stored encrypted (see
     # core/mfa.py) and is never part of any response model. While
     # ``mfa_enabled`` is false a stored secret is a half-finished set-up.
@@ -233,6 +253,9 @@ class UserPublic(UserBase):
     id: uuid.UUID
     created_at: datetime | None = None
     must_change_password: bool = False
+    # True when the password is older than PASSWORD_MAX_AGE_DAYS (patch 282).
+    password_expired: bool = False
+    password_expires_at: datetime | None = None
     mfa_enabled: bool = False
     # Set only while the account is locked after too many failed sign-ins.
     locked_until: datetime | None = None

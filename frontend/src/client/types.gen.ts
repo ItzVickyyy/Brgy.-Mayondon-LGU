@@ -3208,6 +3208,14 @@ export type UserCreated = {
      */
     must_change_password?: boolean;
     /**
+     * Password Expired
+     */
+    password_expired?: boolean;
+    /**
+     * Password Expires At
+     */
+    password_expires_at?: string | null;
+    /**
      * Mfa Enabled
      */
     mfa_enabled?: boolean;
@@ -3327,6 +3335,14 @@ export type UserPublic = {
      * Must Change Password
      */
     must_change_password?: boolean;
+    /**
+     * Password Expired
+     */
+    password_expired?: boolean;
+    /**
+     * Password Expires At
+     */
+    password_expires_at?: string | null;
     /**
      * Mfa Enabled
      */

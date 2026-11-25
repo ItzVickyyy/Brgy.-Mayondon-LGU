@@ -94,6 +94,16 @@ def get_current_user(
                 "message": "You must change your temporary password first.",
             },
         )
+    if user.password_expired:
+        # Same code on purpose: the screen that handles a temporary password
+        # handles an old one too (patch 282).
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail={
+                "code": "password_change_required",
+                "message": "Your password is more than 3 months old. Set a new one first.",
+            },
+        )
     return user
 
 

@@ -9,6 +9,7 @@ import {
   Search,
   ShieldCheck,
   Tag,
+  X,
 } from "lucide-react"
 import { type ReactNode, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
@@ -61,6 +62,7 @@ export function InfoDialog({
   icon: Icon,
   size = "lg",
   flushTop = false,
+  headerExtra,
   children,
 }: DialogProps & {
   title: string
@@ -68,6 +70,8 @@ export function InfoDialog({
   icon?: LucideIcon
   size?: keyof typeof widths
   flushTop?: boolean
+  /** Shown under the title inside the fixed header (the Get help search box). */
+  headerExtra?: ReactNode
   children: ReactNode
 }) {
   const { t } = useTranslation()
@@ -99,6 +103,7 @@ export function InfoDialog({
               )}
             </div>
           </div>
+          {headerExtra}
         </DialogHeader>
         <div
           className={cn(
@@ -256,53 +261,63 @@ export function applyHelpFilter(root: HTMLElement, query: string): number {
   return matched
 }
 
-function HelpSearch({ children }: { children: ReactNode }) {
-  const [query, setQuery] = useState("")
-  const [matched, setMatched] = useState<number | null>(null)
-  const body = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!body.current) return
-    const count = applyHelpFilter(body.current, query)
-    setMatched(query.trim() ? count : null)
-  }, [query])
-
+function HelpSearchBox({
+  query,
+  onQueryChange,
+  matched,
+}: {
+  query: string
+  onQueryChange: (value: string) => void
+  matched: number | null
+}) {
+  const input = useRef<HTMLInputElement>(null)
   return (
-    <>
-      <div className="sticky top-0 z-10 -mt-1 bg-background pb-2 pt-1">
-        <div className="relative">
-          <Search
-            aria-hidden="true"
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-          />
-          <input
-            type="search"
-            data-testid="help-search"
-            aria-label="Search the help"
-            placeholder="Search the help, for example: print, password, backup"
-            value={query}
-            maxLength={80}
-            autoComplete="off"
-            onChange={(event) => setQuery(event.target.value)}
-            className="h-11 w-full rounded-md border bg-background pl-9 pr-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          />
-        </div>
-        <p
-          aria-live="polite"
-          data-testid="help-search-count"
-          className="mt-1 min-h-5 text-xs text-muted-foreground"
-        >
-          {matched === null
-            ? ""
-            : matched === 0
-              ? "Nothing matches. Try one word, such as print or password."
-              : `${matched} ${matched === 1 ? "topic matches" : "topics match"}.`}
-        </p>
+    // The header keeps room on the right for the close button; the search sits
+    // below that button, so it takes the room back and lines up with the content.
+    <div className="-mr-11 mt-3 sm:-mr-10">
+      <div className="relative">
+        <Search
+          aria-hidden="true"
+          className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+        />
+        <input
+          ref={input}
+          type="search"
+          data-testid="help-search"
+          aria-label="Search the help"
+          placeholder="Search help: print, password, backup"
+          value={query}
+          maxLength={80}
+          autoComplete="off"
+          onChange={(event) => onQueryChange(event.target.value)}
+          className="h-11 w-full rounded-lg border bg-muted/40 pl-10 pr-11 text-sm outline-none transition-colors placeholder:text-muted-foreground hover:bg-muted/60 focus-visible:border-ring focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-ring [&::-webkit-search-cancel-button]:appearance-none"
+        />
+        {query ? (
+          <button
+            type="button"
+            aria-label="Clear search"
+            onClick={() => {
+              onQueryChange("")
+              input.current?.focus()
+            }}
+            className="absolute right-1.5 top-1/2 flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <X aria-hidden="true" className="size-4" />
+          </button>
+        ) : null}
       </div>
-      <div ref={body} className="space-y-5">
-        {children}
-      </div>
-    </>
+      <p
+        aria-live="polite"
+        data-testid="help-search-count"
+        className="mt-1.5 min-h-4 text-xs text-muted-foreground"
+      >
+        {matched === null
+          ? ""
+          : matched === 0
+            ? "Nothing matches. Try one word, such as print or password."
+            : `${matched} ${matched === 1 ? "topic matches" : "topics match"}.`}
+      </p>
+    </div>
   )
 }
 
@@ -993,6 +1008,21 @@ function DeveloperContact() {
 export function HelpDialog(props: DialogProps) {
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
+  const [query, setQuery] = useState("")
+  const [matched, setMatched] = useState<number | null>(null)
+  const body = useRef<HTMLDivElement>(null)
+  const { open } = props
+
+  // The search starts empty every time the pop-up opens.
+  useEffect(() => {
+    if (!open) setQuery("")
+  }, [open])
+
+  useEffect(() => {
+    if (!open || !body.current) return
+    const count = applyHelpFilter(body.current, query)
+    setMatched(query.trim() ? count : null)
+  }, [open, query])
 
   return (
     <InfoDialog
@@ -1000,8 +1030,15 @@ export function HelpDialog(props: DialogProps) {
       icon={CircleHelp}
       title="Get help"
       description="Short guides for everyday office work. Everything here works without an internet connection."
+      headerExtra={
+        <HelpSearchBox
+          query={query}
+          onQueryChange={setQuery}
+          matched={matched}
+        />
+      }
     >
-      <HelpSearch>
+      <div ref={body} className="space-y-5">
         <HelpGroup title="Getting started" defaultOpen>
           <Section title="Signing in">
             <Steps
@@ -1031,7 +1068,8 @@ export function HelpDialog(props: DialogProps) {
             <p>
               The profile menu has My Account (your details, photo and
               password), Preferences (theme, colour and text size), Language,
-              Get help, Learn more and Logout.
+              Learn more and Logout. Get help is the question-mark button at the
+              bottom of the left menu.
             </p>
           </Section>
           <Section title="What each person can see">
@@ -1453,7 +1491,7 @@ export function HelpDialog(props: DialogProps) {
         <HelpGroup title="Contact the developers">
           <DeveloperContact />
         </HelpGroup>
-      </HelpSearch>
+      </div>
     </InfoDialog>
   )
 }

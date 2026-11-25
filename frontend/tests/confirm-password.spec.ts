@@ -123,7 +123,9 @@ test("Restore asks for the password after the word, then shows the command", asy
 }) => {
   const seen = await mockApi(page)
   await page.goto("/backup-restore")
-  await expect(page.getByRole("cell", { name: backup.file_name })).toBeVisible()
+  await expect(
+    page.getByRole("cell", { name: backup.file_name, exact: true }),
+  ).toBeVisible()
   await page.getByRole("button", { name: "Restore", exact: true }).click()
   await page.getByPlaceholder("RESTORE").fill("RESTORE")
   await page.getByRole("button", { name: "Check and Show Command" }).click()
@@ -163,7 +165,9 @@ test("an expired confirmation does not sign the person out", async ({
     }),
   )
   await page.goto("/backup-restore")
-  await expect(page.getByRole("cell", { name: backup.file_name })).toBeVisible()
+  await expect(
+    page.getByRole("cell", { name: backup.file_name, exact: true }),
+  ).toBeVisible()
   await page.getByRole("button", { name: "Restore", exact: true }).click()
   await page.getByPlaceholder("RESTORE").fill("RESTORE")
   await page.getByRole("button", { name: "Check and Show Command" }).click()

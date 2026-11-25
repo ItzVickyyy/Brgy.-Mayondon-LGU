@@ -17,7 +17,9 @@ import {
 } from "@/components/ui/form"
 import { LoadingButton } from "@/components/ui/loading-button"
 import { PasswordInput } from "@/components/ui/password-input"
+import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
+import { formatLocaleDate } from "@/lib/locale"
 import { handleError } from "@/utils"
 
 const buildSchema = (t: TFunction) =>
@@ -42,8 +44,24 @@ const buildSchema = (t: TFunction) =>
 
 type FormData = z.infer<ReturnType<typeof buildSchema>>
 
-const ChangePassword = ({ forced = false }: { forced?: boolean }) => {
+const ChangePassword = ({
+  forced = false,
+  expired = false,
+}: {
+  forced?: boolean
+  /** The forced change is because the password is older than 3 months, not temporary. */
+  expired?: boolean
+}) => {
   const { t } = useTranslation()
+  const { user } = useAuth()
+  const expiresOn = user?.password_expires_at
+    ? formatLocaleDate(new Date(user.password_expires_at), {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "Asia/Manila",
+      })
+    : null
   const formSchema = useMemo(() => buildSchema(t), [t])
   const { showSuccessToast, showErrorToast } = useCustomToast()
   const form = useForm<FormData>({
@@ -81,16 +99,34 @@ const ChangePassword = ({ forced = false }: { forced?: boolean }) => {
       {forced ? (
         <div className="mb-6 space-y-2 text-center">
           <h1 className="text-2xl font-bold tracking-tight">
-            {t("password.forced.title")}
+            {t(
+              expired
+                ? "password.forced.expiredTitle"
+                : "password.forced.title",
+            )}
           </h1>
           <p className="text-sm text-muted-foreground">
-            {t("password.forced.description")}
+            {t(
+              expired
+                ? "password.forced.expiredDescription"
+                : "password.forced.description",
+            )}
           </p>
         </div>
       ) : (
-        <h3 className="py-4 text-lg font-semibold">
-          {t("password.changeTitle")}
-        </h3>
+        <>
+          <h3 className="pt-4 text-lg font-semibold">
+            {t("password.changeTitle")}
+          </h3>
+          <p
+            data-testid="password-expiry-note"
+            className="mb-4 mt-1 text-sm text-muted-foreground"
+          >
+            {expiresOn
+              ? t("password.expiryNote", { date: expiresOn })
+              : t("password.expiryRule")}
+          </p>
+        </>
       )}
       <Form {...form}>
         <form

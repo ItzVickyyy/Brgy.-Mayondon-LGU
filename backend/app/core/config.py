@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # One account, one computer at a time: signing in ends the account's older sign-in
     # (patch 259). Only tests and development servers that share one login switch it off.
     SINGLE_SESSION_PER_ACCOUNT: bool = True
+    # A password is good for 90 days (about 3 months); after that the person must set a
+    # new one before doing anything else (patch 282). 0 turns the rule off.
+    PASSWORD_MAX_AGE_DAYS: int = Field(default=90, ge=0)
     LOGIN_MAX_FAILED_ATTEMPTS: int = Field(default=5, gt=0)
     LOGIN_LOCKOUT_MINUTES: int = Field(default=15, gt=0)
     # Wrong sign-ins from one computer (any e-mail, known or not) before it must wait out

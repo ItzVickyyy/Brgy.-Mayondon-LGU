@@ -43,7 +43,7 @@ export const Route = createFileRoute("/_layout")({
 
     try {
       const me = await loadCurrentUser()
-      if (me.must_change_password) {
+      if (me.must_change_password || me.password_expired) {
         throw redirect({ to: "/change-password" })
       }
     } catch (error) {

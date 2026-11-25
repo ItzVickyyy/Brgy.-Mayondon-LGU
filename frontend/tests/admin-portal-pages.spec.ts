@@ -3,11 +3,8 @@ import { expect, test } from "@playwright/test"
 test("Dashboard page is accessible", async ({ page }) => {
   await page.goto("/")
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible()
-  await expect(
-    page.getByText(
-      "An overview of document issuance, upcoming expiries, and work requiring attention.",
-    ),
-  ).toBeVisible()
+  // Pages have no sub-label under the title (patch 282).
+  await expect(page.locator("h1 + p")).toHaveCount(0)
 })
 
 test("Issuances Management page is accessible", async ({ page }) => {

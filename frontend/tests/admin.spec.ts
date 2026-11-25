@@ -11,9 +11,7 @@ test("Admin page is accessible and shows correct title", async ({ page }) => {
   await expect(
     page.getByRole("heading", { name: "User Accounts", exact: true }),
   ).toBeVisible()
-  await expect(
-    page.getByText("Manage system users and their access roles."),
-  ).toBeVisible()
+  await expect(page.locator("h1 + p")).toHaveCount(0)
 })
 
 test("Add User button is visible", async ({ page }) => {

@@ -47,6 +47,7 @@ def update_user(
         hashed_password = get_password_hash(password)
         extra_data["hashed_password"] = hashed_password
         extra_data["must_change_password"] = temporary
+        extra_data["password_changed_at"] = datetime.now(UTC)
         # A password change should also release any failed-login lockout.
         db_user.failed_login_attempts = 0
         db_user.locked_until = None

@@ -31,7 +31,7 @@ interface MainProps {
 // Width is not transitioned here on purpose: the button simply follows the
 // sidebar as it opens and closes, so the highlight never snaps ahead of it.
 // Motion is switched off globally when the system asks for reduced motion.
-const NAV_BUTTON_CLASS = [
+export const NAV_BUTTON_CLASS = [
   "nav-react",
   "relative rounded-md transition-[background-color,color]",
   "text-sidebar-foreground/75 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
@@ -46,7 +46,7 @@ const NAV_BUTTON_CLASS = [
 // minus the paddings, icon and gap), so while the sidebar slides it is clipped
 // rather than re-truncated with an ellipsis. It fades out first when closing
 // and fades in last when opening.
-const NAV_LABEL_CLASS = [
+export const NAV_LABEL_CLASS = [
   "block w-[calc(var(--sidebar-width)-3.5rem)] shrink-0 truncate whitespace-nowrap",
   "transition-opacity duration-150 ease-out",
   "group-data-[collapsible=icon]:opacity-0",

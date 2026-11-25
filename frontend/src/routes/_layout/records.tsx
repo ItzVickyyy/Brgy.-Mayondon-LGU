@@ -57,6 +57,7 @@ import {
   residentAddress,
   streetNameMap,
 } from "@/lib/residents"
+import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
 
 export const Route = createFileRoute("/_layout/records")({
@@ -284,9 +285,6 @@ function RecordsManagement() {
           <h1 className="page-title relative mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             {t("records.title")}
           </h1>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-            {t("records.subtitle")}
-          </p>
         </div>
         <Button
           variant="cta"
@@ -434,6 +432,10 @@ function RecordsManagement() {
                         return (
                           <tr
                             key={resident.id}
+                            {...rowOpen(() => {
+                              setSelectedResident(resident)
+                              setProfileTab("Details")
+                            })}
                             className="transition-colors hover:bg-muted/30 @max-[47rem]/records:relative @max-[47rem]/records:flex @max-[47rem]/records:flex-wrap @max-[47rem]/records:gap-x-3 @max-[47rem]/records:gap-y-1 @max-[47rem]/records:px-4 @max-[47rem]/records:py-3"
                           >
                             <td

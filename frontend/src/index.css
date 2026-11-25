@@ -694,7 +694,26 @@ html[data-font-size="large"] {
    purpose: it has to beat the bg-card utility. */
 tr:hover > .row-hover-cell,
 tr:focus-within > .row-hover-cell {
-  background-color: color-mix(in oklab, var(--card), var(--muted) 30%);
+  background-color: var(--row-hover);
+}
+
+/* Row hover on every table body (one rule for all pages): a clear tint plus an
+   accent bar on the row's left edge. Total rows (font-semibold) keep their own
+   look. Pointer devices only; nothing moves. A row that opens a view on double
+   click (rowOpen in lib/rowOpen.ts) also gets the pointer cursor. */
+:root {
+  --row-hover: color-mix(in oklab, var(--card), var(--muted) 70%);
+}
+@media screen and (hover: hover) {
+  tbody > tr:not(.font-semibold):hover {
+    background-color: var(--row-hover);
+  }
+  tbody > tr:not(.font-semibold):hover > td:first-child {
+    box-shadow: inset 3px 0 0 var(--sidebar-primary);
+  }
+  tbody > tr[data-row-open] {
+    cursor: pointer;
+  }
 }
 
 /* Left-edge shadow on a sticky Actions / Outcome cell, only while its table

@@ -142,18 +142,48 @@ function detailLabel(key: string, t: TFunction) {
   return labelKey ? t(labelKey) : key.replace(/_/g, " ")
 }
 
-function detailsText(details: { [key: string]: unknown } | null, t: TFunction) {
-  if (!details) return ""
-  return Object.entries(details)
-    .map(([key, value]) => {
-      if (Array.isArray(value) && value.length === 0) return ""
-      const text = Array.isArray(value)
-        ? value.map((item) => String(item).replace(/_/g, " ")).join(", ")
-        : String(value)
-      return `${detailLabel(key, t)}: ${text}`
+// Details that only matter to the program (ids, flags already said in the title).
+const hiddenDetailKeys = new Set(["automatic", "draft_id", "corrects"])
+
+function capitalise(value: string) {
+  return value.charAt(0).toLocaleUpperCase() + value.slice(1)
+}
+
+function detailValue(value: unknown, t: TFunction) {
+  if (typeof value === "boolean") {
+    return t(value ? "activity.yes" : "activity.no")
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => String(item).replace(/_/g, " ")).join(", ")
+  }
+  return String(value)
+}
+
+// One labelled line per detail ("Reference no.: IC-2026-001"), so a row reads
+// as a short list and not as one long sentence.
+function detailLines(
+  details: { [key: string]: unknown } | null,
+  reason: string | null,
+  t: TFunction,
+) {
+  const lines: { label: string; value: string }[] = []
+  if (reason) {
+    // A document replaced by an edit stores "Replaced by correction X. Reason: Y";
+    // the reference is already listed below, so show only Y.
+    const why = reason.replace(/^Replaced by correction [^.]*\. Reason: /, "")
+    lines.push({ label: t("activity.reasonLabel"), value: why })
+  }
+  for (const [key, value] of Object.entries(details ?? {})) {
+    if (hiddenDetailKeys.has(key)) continue
+    if (key === "reason" && value === reason) continue
+    if (value === null || value === undefined || value === "") continue
+    if (Array.isArray(value) && value.length === 0) continue
+    lines.push({
+      label: capitalise(detailLabel(key, t)),
+      value: detailValue(value, t),
     })
-    .filter(Boolean)
-    .join(" · ")
+  }
+  return lines
 }
 
 function shortId(value: string) {
@@ -277,11 +307,6 @@ function ActivityLog() {
           <h1 className="page-title relative mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             {t("activity.title")}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {isAdmin
-              ? t("activity.subtitleAdmin")
-              : t("activity.subtitleStaff")}
-          </p>
         </div>
       </div>
 
@@ -423,7 +448,7 @@ function ActivityLog() {
                   .map((row) => [
                     formatTimestamp(row.occurred_at),
                     ...(isAdmin ? [row.actor_email ?? "—"] : []),
-                    activityTitle(row.action, t),
+                    activityTitle(row.action, t, row.details),
                     moduleLabel(row.module, t),
                     row.record_id ?? "—",
                     isOutcome(row.outcome)
@@ -456,7 +481,7 @@ function ActivityLog() {
                 <tbody className="divide-y">
                   {items.map((row) => {
                     const known = isOutcome(row.outcome)
-                    const details = detailsText(row.details, t)
+                    const lines = detailLines(row.details, row.reason, t)
                     return (
                       <tr
                         key={row.id}
@@ -464,7 +489,7 @@ function ActivityLog() {
                       >
                         <td className={selectCol}>
                           <RowCheckbox
-                            label={activityTitle(row.action, t)}
+                            label={activityTitle(row.action, t, row.details)}
                             checked={pickRows.isSelected(String(row.id))}
                             onChange={() => pickRows.toggle(String(row.id))}
                           />
@@ -483,17 +508,24 @@ function ActivityLog() {
                         ) : null}
                         <td className="px-4 py-3 align-middle sm:px-5">
                           <p className="font-medium">
-                            {activityTitle(row.action, t)}
+                            {activityTitle(row.action, t, row.details)}
                           </p>
-                          {row.reason ? (
-                            <p className="mt-1 max-w-xs text-xs text-muted-foreground">
-                              {row.reason}
-                            </p>
-                          ) : null}
-                          {details ? (
-                            <p className="mt-1 max-w-xs text-xs text-muted-foreground">
-                              {details}
-                            </p>
+                          {lines.length ? (
+                            <dl className="mt-1.5 flex max-w-sm flex-col gap-0.5 text-xs">
+                              {lines.map((line) => (
+                                <div
+                                  key={`${line.label}-${line.value}`}
+                                  className="flex flex-wrap gap-x-1.5"
+                                >
+                                  <dt className="text-muted-foreground">
+                                    {line.label}:
+                                  </dt>
+                                  <dd className="min-w-0 break-words">
+                                    {line.value}
+                                  </dd>
+                                </div>
+                              ))}
+                            </dl>
                           ) : null}
                         </td>
                         <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">

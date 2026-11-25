@@ -81,6 +81,7 @@ export async function loadCurrentUser(): Promise<UserPublic> {
   const fresh =
     cached !== undefined &&
     cached.must_change_password !== true &&
+    cached.password_expired !== true &&
     updatedAt !== undefined &&
     Date.now() - updatedAt < currentUserQueryOptions.staleTime
   if (fresh) return cached

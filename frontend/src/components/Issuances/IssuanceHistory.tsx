@@ -72,6 +72,7 @@ import { templateIdByDocumentCode } from "@/lib/print/buildPrintData"
 import type { ExportFormat } from "@/lib/print/exportDocument"
 import { type PrintMode, setPrintMode } from "@/lib/print/printMode"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
+import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
 import { cn } from "@/lib/utils"
 
@@ -808,6 +809,7 @@ export function IssuanceHistory({
                     return (
                       <tr
                         key={item.id}
+                        {...rowOpen(() => setViewItem(item))}
                         className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow}`}
                       >
                         <td className={`${selectCol} ${cardTable.select}`}>

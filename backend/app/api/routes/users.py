@@ -1,5 +1,6 @@
 import logging
 import uuid
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -220,6 +221,7 @@ def update_password_me(
         )
     hashed_password = get_password_hash(body.new_password)
     current_user.hashed_password = hashed_password
+    current_user.password_changed_at = datetime.now(UTC)
     replaced_temporary = current_user.must_change_password
     current_user.must_change_password = False
     # A password change releases any failed-login lockout for this account.

@@ -95,7 +95,16 @@ const activityKeys = {
 } as const satisfies Record<string, ParseKeys>
 
 // Pass the `t` from useTranslation() so the title follows the language.
-export function activityTitle(action: string, t: TFunction) {
+export function activityTitle(
+  action: string,
+  t: TFunction,
+  details?: { [key: string]: unknown } | null,
+) {
+  // A document voided by an edit (a correction replacing it) is one event for
+  // the office: it was edited, and the old copy was voided.
+  if (action === "issuance.void" && details?.automatic === true) {
+    return t("activity.actions.issuance.correct_void")
+  }
   const key = (activityKeys as Record<string, ParseKeys>)[action]
   if (key) return t(key)
   // An action with no wording yet: show the code as plain words.

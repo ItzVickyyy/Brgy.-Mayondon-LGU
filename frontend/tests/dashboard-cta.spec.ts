@@ -11,13 +11,8 @@ test("Issue Document is a prominent button and the population note is gone", asy
   await expect(button).toBeVisible()
   const box = await button.boundingBox()
   expect(box?.height).toBeGreaterThanOrEqual(48)
-  const heading = await page.getByRole("heading", { level: 1 }).boundingBox()
-  const subtitle = page.locator("h1 + p")
-  const subtitleBox = await subtitle.boundingBox()
-  // The button fits inside the title block's height, so nothing moves.
-  const titleHeight =
-    (subtitleBox?.y ?? 0) + (subtitleBox?.height ?? 0) - (heading?.y ?? 0)
-  expect(box?.height).toBeLessThanOrEqual(titleHeight)
+  // The page title has no sub-label under it (patch 282).
+  await expect(page.locator("h1 + p")).toHaveCount(0)
 
   await expect(page.getByText("Counts active resident records")).toHaveCount(0)
 })

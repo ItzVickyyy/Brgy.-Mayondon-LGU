@@ -342,9 +342,6 @@ function Dashboard() {
           <h1 className="page-title relative mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             {t("dashboard.title")}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("dashboard.subtitle")}
-          </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           {/* Call to action: opens Issuances with the New Issuance dialog ready. */}
@@ -832,7 +829,7 @@ function Dashboard() {
                 >
                   <div>
                     <p className="text-sm font-medium">
-                      {activityTitle(activity.action, t)}
+                      {activityTitle(activity.action, t, activity.details)}
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {detail}

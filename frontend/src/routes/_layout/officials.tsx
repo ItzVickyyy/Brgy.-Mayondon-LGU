@@ -62,6 +62,7 @@ import { isSystemAdministrator } from "@/lib/access"
 import { getLocaleOr } from "@/lib/locale"
 import { notify } from "@/lib/notifications"
 import { readApiError } from "@/lib/residents"
+import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
 
 type OfficialRecord = {
@@ -333,9 +334,6 @@ function OfficialsManagement() {
           <h1 className="page-title relative mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             {t("admin.officials.title")}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {t("admin.officials.subtitle")}
-          </p>
         </div>
         <Button variant="cta" size="cta" onClick={openAddForm}>
           <UserRoundPlus aria-hidden="true" />
@@ -452,6 +450,7 @@ function OfficialsManagement() {
               {officialPagination.paginatedItems.map((official) => (
                 <tr
                   key={official.id}
+                  {...rowOpen(() => setViewOfficial(official))}
                   className={`transition-colors hover:bg-muted/30 ${official.status === "Former" ? "opacity-70" : ""}`}
                 >
                   <td className={selectCol}>

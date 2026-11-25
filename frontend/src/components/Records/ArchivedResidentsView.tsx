@@ -20,6 +20,7 @@ import {
 import { TablePagination } from "@/components/Common/TablePagination"
 import { cardTable } from "@/lib/cardTable"
 import { formatLocaleDate } from "@/lib/locale"
+import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
 
 type ArchivedResidentsViewProps = {
@@ -180,6 +181,7 @@ export function ArchivedResidentsView({
                 {residents.map((resident) => (
                   <tr
                     key={resident.id}
+                    {...rowOpen(() => onViewProfile(resident))}
                     className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow}`}
                   >
                     <td className={`${selectCol} ${cardTable.select}`}>

@@ -1,6 +1,5 @@
 import {
   Check,
-  CircleHelp,
   FileBadge,
   Info,
   Languages,
@@ -10,7 +9,7 @@ import {
 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { HelpDialog, LearnMoreDialog } from "@/components/Common/InfoDialogs"
+import { LearnMoreDialog } from "@/components/Common/InfoDialogs"
 import { MyAccountModal } from "@/components/Settings/MyAccountModal"
 import { PreferencesModal } from "@/components/Settings/PreferencesModal"
 import { UtilizationCertDialog } from "@/components/Utilization/UtilizationCertDialog"
@@ -51,7 +50,6 @@ export function User({
   const selectedLanguage: Language =
     i18n.resolvedLanguage === "fil" ? "fil" : "en"
   const [logoutOpen, setLogoutOpen] = useState(false)
-  const [helpOpen, setHelpOpen] = useState(false)
   const [learnOpen, setLearnOpen] = useState(false)
   const [utilizationOpen, setUtilizationOpen] = useState(false)
 
@@ -176,15 +174,6 @@ export function User({
             <DropdownMenuItem
               onSelect={() => {
                 handleMenuClick()
-                setHelpOpen(true)
-              }}
-            >
-              <CircleHelp className="size-4" />
-              {t("userMenu.getHelp")}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onSelect={() => {
-                handleMenuClick()
                 setLearnOpen(true)
               }}
             >
@@ -223,7 +212,6 @@ export function User({
         open={preferencesOpen}
         onOpenChange={setPreferencesOpen}
       />
-      <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
       <LearnMoreDialog open={learnOpen} onOpenChange={setLearnOpen} />
       <UtilizationCertDialog
         open={utilizationOpen}

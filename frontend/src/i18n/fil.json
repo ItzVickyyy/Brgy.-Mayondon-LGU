@@ -454,6 +454,9 @@
       "description": "Subukan ang ibang salitang hahanapin o ibang filter."
     },
     "you": "Ikaw",
+    "reasonLabel": "Dahilan",
+    "yes": "Oo",
+    "no": "Hindi",
     "youWithName": "{{name}} (Ikaw)",
     "detailKeys": {
       "duplicate_of": "Ulit ng",
@@ -532,6 +535,7 @@
         "issue": "Naisyu ang dokumento",
         "correct": "Nagsimula ang pagwawasto",
         "void": "Na-void ang dokumento",
+        "correct_void": "Na-edit at Na-void ang Dokumento",
         "print": "Na-print ang dokumento",
         "view_sensitive": "Tiningnan ang pinaghihigpitang detalye",
         "archive": "Na-archive ang dokumento",
@@ -727,7 +731,7 @@
       "archived": "Naka-archive"
     },
     "actions": {
-      "viewProfile": "Profile",
+      "viewProfile": "Tingnan",
       "editDetails": "I-edit",
       "newIssuance": "Bagong pag-isyu",
       "archive": "I-archive",
@@ -2716,8 +2720,12 @@
     "changeTitle": "Palitan ang Password",
     "forced": {
       "title": "Palitan ang iyong password",
-      "description": "Binigyan ka ng System Administrator ng pansamantalang password. Magtakda ng bagong password upang magpatuloy sa paggamit ng sistema."
+      "description": "Binigyan ka ng System Administrator ng pansamantalang password. Magtakda ng bagong password upang magpatuloy sa paggamit ng sistema.",
+      "expiredTitle": "Oras na para palitan ang iyong password",
+      "expiredDescription": "Para sa iyong seguridad, pinapalitan ang password tuwing 3 buwan. Mas luma na rito ang iyong password. Magtakda ng bago upang magpatuloy."
     },
+    "expiryNote": "Pinapalitan ang password tuwing 3 buwan. Ang kasalukuyan mong password ay may bisa hanggang {{date}}.",
+    "expiryRule": "Pinapalitan ang password tuwing 3 buwan. Hihingi ang sistema ng bago kapag oras na.",
     "current": "Kasalukuyang Password",
     "new": "Bagong Password",
     "confirm": "Kumpirmahin ang Password",
