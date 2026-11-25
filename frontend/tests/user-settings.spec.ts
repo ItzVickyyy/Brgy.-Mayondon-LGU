@@ -58,7 +58,9 @@ test.describe("Edit user profile", () => {
     await dialog.getByLabel("First Name").fill(updatedName)
     await dialog.getByRole("button", { name: "Save Changes" }).click()
 
-    await expect(page.getByText("Account updated")).toBeVisible()
+    await expect(
+      page.getByText("Account updated", { exact: true }),
+    ).toBeVisible()
     await expect(
       dialog.getByText(updatedName, { exact: true }).first(),
     ).toBeVisible()
@@ -90,7 +92,9 @@ test.describe("Edit user email", () => {
     await dialog.getByLabel("Email").fill(updatedEmail)
     await dialog.getByRole("button", { name: "Save Changes" }).click()
 
-    await expect(page.getByText("Account updated")).toBeVisible()
+    await expect(
+      page.getByText("Account updated", { exact: true }),
+    ).toBeVisible()
     await expect(
       dialog.getByText(updatedEmail, { exact: true }).first(),
     ).toBeVisible()

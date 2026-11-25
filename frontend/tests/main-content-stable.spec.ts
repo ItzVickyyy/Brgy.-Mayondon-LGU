@@ -79,7 +79,9 @@ test("content keeps its left edge and the Period change does not reload the page
   await expect(page.getByText("Total issued")).toBeVisible()
   const during = await content.boundingBox()
   expect(during?.x).toBe(before?.x)
-  expect(during?.height).toBe(before?.height)
+  // Within 1 px: the height can differ by a sub-pixel fraction (1755 vs 1755.00003).
+  const drift = Math.abs((during?.height ?? 0) - (before?.height ?? 0))
+  expect(drift).toBeLessThan(1)
   await page.waitForTimeout(900)
   const after = await content.boundingBox()
   expect(after?.x).toBe(before?.x)
