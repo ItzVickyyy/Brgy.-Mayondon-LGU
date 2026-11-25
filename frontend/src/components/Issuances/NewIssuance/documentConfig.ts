@@ -518,15 +518,7 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
         options: ["Yes", "No"],
         group: "main",
       },
-      {
-        name: "parts",
-        label: "Parts to print",
-        type: "multiselect",
-        required: true,
-        default: ["Applicant sheet", "Oath", "Certification"],
-        options: ["Applicant sheet", "Oath", "Certification"],
-        group: "main",
-      },
+      // No "Parts to print" box: the packet always prints all three sheets (open decision D-16), so a box that did nothing would only mislead. The form still sends all three `parts` (see useNewIssuanceForm.ts).
       {
         name: "witnessName",
         label: "Witness",

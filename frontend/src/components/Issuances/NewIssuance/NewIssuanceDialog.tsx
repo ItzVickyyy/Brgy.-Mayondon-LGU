@@ -77,7 +77,6 @@ const fieldLabelClass = "flex min-w-0 flex-col gap-1.5 text-sm font-medium"
 function normalizedOptionValue(fieldName: string, option: string) {
   if (fieldName === "services" || fieldName === "connectionType" || fieldName === "classification" || fieldName === "assistanceType" || fieldName === "transactionType") return option.toLowerCase()
   if (fieldName === "isJobstartBeneficiary") return option === "Yes" ? "true" : "false"
-  if (fieldName === "parts") return ({ "Applicant sheet": "applicant_sheet", Oath: "oath", Certification: "certification" } as Record<string, string>)[option] ?? option
   return option
 }
 
@@ -999,7 +998,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     else value = detailValues[field.name]
     const previewOptionLabel = (item: unknown) => {
       const raw = String(item)
-      if (!["services", "connectionType", "classification", "assistanceType", "transactionType", "parts", "educationalAttainment"].includes(field.name)) return raw
+      if (!["services", "connectionType", "classification", "assistanceType", "transactionType", "educationalAttainment"].includes(field.name)) return raw
       const option = field.options?.find((candidate) => normalizedOptionValue(field.name, candidate) === raw)
       return option ? fieldOptionLabel(field.name, option, t) : raw
     }
