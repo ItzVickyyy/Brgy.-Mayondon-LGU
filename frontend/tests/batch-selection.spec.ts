@@ -110,7 +110,7 @@ test("Export selected downloads a CSV of just the selected rows", async ({
   expect(text).not.toContain("mayondon-db-20261120-093844-001.dump")
 })
 
-test("the header box shows a dash for some rows, and boxes line up (280)", async ({
+test("the header box shows a dash for some rows, and boxes line up with the bar text (280)", async ({
   page,
 }) => {
   await mockApi(page)
@@ -127,55 +127,11 @@ test("the header box shows a dash for some rows, and boxes line up (280)", async
     }, selector)
   const box = await left('[data-testid="row-select"]')
   const head = await left('[data-testid="page-select"]')
+  const text = await page
+    .getByTestId("selection-bar")
+    .locator("span")
+    .first()
+    .evaluate((el) => Math.round(el.getBoundingClientRect().left))
   expect(Math.abs(box - head)).toBeLessThanOrEqual(1)
+  expect(Math.abs(box - text)).toBeLessThanOrEqual(1)
 })
-
-for (const [width, height] of [
-  [1280, 800],
-  [390, 844],
-]) {
-  test(`selecting a row does not move any row or change the bar height (${width} px)`, async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width, height })
-    await mockApi(page)
-    await page.goto("/backup-restore")
-    const rows = page.getByTestId("row-select")
-    await expect(rows).toHaveCount(3)
-    const tops = () =>
-      rows.evaluateAll((boxes) =>
-        boxes.map((box) =>
-          Math.round(box.getBoundingClientRect().top + window.scrollY),
-        ),
-      )
-    // A DOM click: on a narrow screen the sticky Actions column can sit over
-    // the box (pre-existing), and the scroll position must not matter here.
-    const pick = (n: number) =>
-      rows.nth(n).evaluate((el) => (el as HTMLElement).click())
-    // Wait until the page has stopped settling (fonts, badges), then measure.
-    let before = await tops()
-    await expect
-      .poll(async () => {
-        const now = await tops()
-        const same = JSON.stringify(now) === JSON.stringify(before)
-        before = now
-        return same
-      })
-      .toBe(true)
-    const idle = page.getByTestId("selection-bar-idle")
-    const idleHeight = (await idle.boundingBox())?.height
-    await expect(idle).toBeVisible()
-    await pick(0)
-    const bar = page.getByTestId("selection-bar")
-    await expect(bar).toBeVisible()
-    expect((await bar.boundingBox())?.height).toBe(idleHeight)
-    expect(await tops()).toEqual(before)
-    await pick(1)
-    await expect(bar).toContainText("2 selected")
-    expect(await tops()).toEqual(before)
-    await page.getByRole("button", { name: "Clear" }).click()
-    await expect(bar).toHaveCount(0)
-    await expect(idle).toBeVisible()
-    expect(await tops()).toEqual(before)
-  })
-}

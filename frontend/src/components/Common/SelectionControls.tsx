@@ -31,7 +31,7 @@ export function RowCheckbox({
       checked={checked}
       onCheckedChange={onChange}
       aria-label={t("common.selection.selectRow", { name: label })}
-      className="block size-5"
+      className="size-5"
     />
   )
 }
@@ -53,7 +53,7 @@ export function PageCheckbox({
       checked={all ? true : some ? "indeterminate" : false}
       onCheckedChange={onChange}
       aria-label={t("common.selection.selectPage")}
-      className="block size-5"
+      className="size-5"
     />
   )
 }
@@ -131,7 +131,7 @@ function tabText(rows: ReportCell[][]) {
 }
 
 /**
- * Bar above a table (always there, so rows never move when one is picked): count, Clear, Export selected
+ * Bar above a table while rows are selected: count, Clear, Export selected
  * (CSV, formula-safe), Print selected, Copy and any table-specific
  * `children` buttons.
  */
@@ -150,9 +150,9 @@ export function SelectionBar({
 }) {
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const idle = count === 0
+  if (count === 0) return null
   async function copy() {
-    if (!csvRows || idle) return
+    if (!csvRows) return
     try {
       await navigator.clipboard.writeText(tabText(csvRows()))
       showSuccessToast(t("common.selection.copied", { count }))
@@ -160,44 +160,35 @@ export function SelectionBar({
       showErrorToast(t("common.selection.copyFailed"))
     }
   }
-  // Always drawn, so choosing a row never changes the height above the table:
-  // with nothing chosen it is the same bar with a hint and every button off.
   return (
     <section
-      data-testid={idle ? "selection-bar-idle" : "selection-bar"}
+      data-testid="selection-bar"
       aria-label={t("common.selection.bar")}
-      className={`selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b px-4 py-2 text-sm sm:px-5 ${idle ? "bg-muted/30 text-muted-foreground" : "bg-brand/5"}`}
+      className="selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b bg-brand/5 px-4 py-2 text-sm sm:px-5"
     >
       <span
-        className="order-1 min-w-0 flex-1 truncate font-medium"
+        className="order-1 min-w-0 flex-1 font-medium sm:mr-auto sm:flex-none"
         aria-live="polite"
       >
-        {idle
-          ? t("common.selection.hint")
-          : t("common.selection.count", { count })}
+        {t("common.selection.count", { count })}
       </span>
       <Button
         type="button"
         variant="ghost"
         size="sm"
         className="order-2 min-h-11 sm:order-3"
-        disabled={idle}
         onClick={onClear}
       >
         <X aria-hidden="true" />
         {t("common.selection.clear")}
       </Button>
-      <div
-        inert={idle}
-        className={`order-3 flex w-full flex-wrap items-center gap-2 sm:order-2 sm:w-auto ${idle ? "opacity-50" : ""}`}
-      >
+      <div className="order-3 flex w-full flex-wrap items-center gap-2 sm:order-2 sm:w-auto">
         {csvName && csvRows ? (
           <Button
             type="button"
             variant="tintViolet"
             size="sm"
             className="min-h-11 w-full sm:w-auto"
-            disabled={idle}
             onClick={() => saveCsv(csvName, csvRows())}
           >
             <Download aria-hidden="true" />
@@ -212,7 +203,6 @@ export function SelectionBar({
               size="sm"
               data-testid="selection-print"
               className="min-h-11 flex-1 sm:flex-none"
-              disabled={idle}
               onClick={() => printRows(document.title, csvRows())}
             >
               <Printer aria-hidden="true" />
@@ -224,7 +214,6 @@ export function SelectionBar({
               size="sm"
               data-testid="selection-copy"
               className="min-h-11 flex-1 sm:flex-none"
-              disabled={idle}
               onClick={copy}
             >
               <Clipboard aria-hidden="true" />
