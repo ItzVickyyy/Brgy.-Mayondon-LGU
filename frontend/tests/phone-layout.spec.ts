@@ -90,7 +90,10 @@ for (const language of ["en", "fil"]) {
     await expect(fade).toBeVisible()
     const rowBox = (await row.boundingBox())!
     const fadeBox = (await fade.boundingBox())!
-    expect(fadeBox.x + fadeBox.width).toBeCloseTo(rowBox.x + rowBox.width, 0)
+    // The pop-up may still be settling its opening motion: allow 2 px.
+    expect(
+      Math.abs(fadeBox.x + fadeBox.width - (rowBox.x + rowBox.width)),
+    ).toBeLessThanOrEqual(2)
     // The fade is decoration: it never takes a tap away from a tab.
     expect(
       await fade.evaluate((el) => getComputedStyle(el).pointerEvents),
