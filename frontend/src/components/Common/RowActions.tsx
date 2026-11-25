@@ -47,6 +47,8 @@ type RowActionsProps = {
   actions?: RowPrimaryAction[]
   items?: RowActionItem[]
   leading?: ReactNode // extra control shown before the primary button
+  /** Tighter gaps and button padding, for a table that must fit a 1280 px screen. */
+  compact?: boolean
 }
 
 export function RowActions({
@@ -56,6 +58,7 @@ export function RowActions({
   actions = [],
   items = [],
   leading,
+  compact = false,
 }: RowActionsProps) {
   const { t } = useTranslation()
   const visibleItems = items.filter(
@@ -63,7 +66,9 @@ export function RowActions({
   )
 
   return (
-    <div className="flex items-center justify-end gap-2">
+    <div
+      className={`flex items-center justify-end ${compact ? "gap-1.5" : "gap-2"}`}
+    >
       {leading}
       {primary ? (
         <Button
@@ -73,6 +78,7 @@ export function RowActions({
           onClick={primary.onSelect}
           disabled={primary.disabled}
           title={primary.title}
+          className={compact ? "px-2.5" : undefined}
         >
           {primary.icon}
           {primary.label}
@@ -87,6 +93,7 @@ export function RowActions({
           onClick={action.onSelect}
           disabled={action.disabled}
           title={action.title}
+          className={compact ? "px-2.5" : undefined}
         >
           {action.icon}
           {action.label}

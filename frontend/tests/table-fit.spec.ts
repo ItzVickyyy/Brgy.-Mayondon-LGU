@@ -2,8 +2,12 @@
 // a sideways scroll bar, in English and in Filipino (whose labels are longer).
 // Before, the Filipino tables were 42 to 152 px too wide, so the sticky Actions
 // column slid over the last data column. The first residents row has a long
-// Occupation to prove that column is cut short instead of widening. The API is
-// mocked with real responses (synthetic residents), so this spec needs only the
+// Occupation to prove that column is cut short instead of widening, and the
+// street names are long like the real ones (patch 274: with short mock streets
+// this spec passed while real lists overran by 31 px in English and 72 px in
+// Filipino). The Records table is also tried 16 px narrower, so a font that
+// measures a little wider on another computer still fits. The API is mocked
+// with real responses (synthetic residents), so this spec needs only the
 // running frontend.
 import { expect, test } from "@playwright/test"
 
@@ -18,9 +22,9 @@ const admin = {
 const residents = {
   data: [
     {
-      first_name: "Grace",
+      first_name: "Maria Cristina",
       middle_name: "Flores",
-      last_name: "Alcantara",
+      last_name: "Dela Cruz-Villanueva",
       suffix: null,
       birthdate: "1937-08-02",
       birth_place: "Nagcarlan, Laguna",
@@ -40,7 +44,7 @@ const residents = {
       emergency_contact_address: null,
       emergency_contact_phone: null,
       id: "e7d083c5-29b4-402c-bc22-72c418d43c0f",
-      full_name: "Grace Flores Alcantara",
+      full_name: "Maria Cristina Flores Dela Cruz-Villanueva",
       age: 89,
       sector_ids: [],
       has_photo: false,
@@ -98,6 +102,10 @@ const residents = {
   ],
   count: 54,
 }
+const streets = [
+  { id: 3, name: "Don Pedro Maglinao Street" },
+  { id: 7, name: "Rizal Extension Road" },
+]
 const documentTypes = [
   {
     id: 1,
@@ -155,46 +163,49 @@ const issuances = {
 }
 
 const pages = [
-  { path: "/records", name: "Records" },
-  { path: "/issuances", name: "Issuance History" },
+  { path: "/records", name: "Records", widths: [1280, 1264] },
+  { path: "/issuances", name: "Issuance History", widths: [1280] },
 ]
 
 for (const language of ["en", "fil"])
-  for (const { path, name } of pages) {
-    test(`${name} table fits 1280 px without scrolling (${language})`, async ({
-      page,
-    }) => {
-      await page.route("**/api/v1/**", async (route) => {
-        const json = (body: unknown) =>
-          route.fulfill({
-            contentType: "application/json",
-            body: JSON.stringify(body),
-          })
-        const url = route.request().url()
-        if (url.includes("/users/me")) return json(admin)
-        if (url.includes("/lookups/document-types")) return json(documentTypes)
-        if (url.includes("/lookups/")) return json([])
-        if (url.includes("/dashboard"))
-          return json({ total_issued: 2, by_document_type: [] })
-        if (url.includes("/residents/") && !url.includes("/residents/stats"))
-          return json(residents)
-        if (url.includes("/issuances/")) return json(issuances)
-        return json({ data: [], count: 0 })
-      })
-      await page.addInitScript((lang) => {
-        localStorage.setItem("access_token", "test-token")
-        localStorage.setItem("app-language", lang)
-        localStorage.setItem("vite-ui-theme", "light")
-      }, language)
-      await page.setViewportSize({ width: 1280, height: 900 })
-      await page.goto(path)
+  for (const { path, name, widths } of pages)
+    for (const width of widths) {
+      test(`${name} table fits ${width} px without scrolling (${language})`, async ({
+        page,
+      }) => {
+        await page.route("**/api/v1/**", async (route) => {
+          const json = (body: unknown) =>
+            route.fulfill({
+              contentType: "application/json",
+              body: JSON.stringify(body),
+            })
+          const url = route.request().url()
+          if (url.includes("/users/me")) return json(admin)
+          if (url.includes("/lookups/document-types"))
+            return json(documentTypes)
+          if (url.includes("/lookups/streets")) return json(streets)
+          if (url.includes("/lookups/")) return json([])
+          if (url.includes("/dashboard"))
+            return json({ total_issued: 2, by_document_type: [] })
+          if (url.includes("/residents/") && !url.includes("/residents/stats"))
+            return json(residents)
+          if (url.includes("/issuances/")) return json(issuances)
+          return json({ data: [], count: 0 })
+        })
+        await page.addInitScript((lang) => {
+          localStorage.setItem("access_token", "test-token")
+          localStorage.setItem("app-language", lang)
+          localStorage.setItem("vite-ui-theme", "light")
+        }, language)
+        await page.setViewportSize({ width, height: 900 })
+        await page.goto(path)
 
-      const table = page.locator("table").first()
-      await expect(table.locator("tbody tr").first()).toBeVisible()
-      const over = await table.evaluate((el) => {
-        const box = el.closest(".overflow-x-auto") as HTMLElement
-        return box.scrollWidth - box.clientWidth
+        const table = page.locator("table").first()
+        await expect(table.locator("tbody tr").first()).toBeVisible()
+        const over = await table.evaluate((el) => {
+          const box = el.closest(".overflow-x-auto") as HTMLElement
+          return box.scrollWidth - box.clientWidth
+        })
+        expect(over).toBeLessThanOrEqual(1)
       })
-      expect(over).toBeLessThanOrEqual(1)
-    })
-  }
+    }
