@@ -28,6 +28,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { cardTable } from "@/lib/cardTable"
 import { formatBusinessDate } from "@/lib/residents"
 import { IdSeriesCard } from "./IdSeriesCard"
 
@@ -243,21 +244,25 @@ export function BarangayIdsView() {
           />
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] text-left text-sm">
-                <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+            <div className={cardTable.box}>
+              <table
+                className={`w-full min-w-[900px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}
+              >
+                <thead
+                  className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
+                >
                   <tr>
                     {idColumns.map((column) => (
                       <th
                         key={column}
-                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
+                        className={`px-2.5 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
                       >
                         {t(`records.ids.columns.${column}`)}
                       </th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className={`divide-y ${cardTable.body}`}>
                   {records.map((record) => {
                     const archived = record.resident_status === "archived"
                     const needsRenewal =
@@ -266,9 +271,11 @@ export function BarangayIdsView() {
                     return (
                       <tr
                         key={record.issuance_id}
-                        className={`transition-colors hover:bg-muted/30 ${archived ? "opacity-70" : ""}`}
+                        className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${archived ? "opacity-70" : ""}`}
                       >
-                        <td className="px-4 py-3 align-middle sm:px-5">
+                        <td
+                          className={`px-2.5 py-3 align-middle ${cardTable.full}`}
+                        >
                           <p className="font-semibold">
                             {record.resident_name}
                           </p>
@@ -276,26 +283,40 @@ export function BarangayIdsView() {
                             {record.reference_no}
                           </p>
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 align-middle font-mono sm:px-5">
+                        <td
+                          data-label={t("records.ids.columns.idNumber")}
+                          className={`whitespace-nowrap px-2.5 py-3 align-middle font-mono ${cardTable.labelled}`}
+                        >
                           {record.id_number}
                         </td>
-                        <td className="px-4 py-3 align-middle sm:px-5">
+                        <td
+                          data-label={t("records.ids.columns.card")}
+                          className={`px-2.5 py-3 align-middle ${cardTable.labelled}`}
+                        >
                           {isTransactionType(record.transaction_type)
                             ? t(
                                 `records.ids.transaction.${record.transaction_type}`,
                               )
                             : record.transaction_type}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                        <td
+                          data-label={t("records.ids.columns.issued")}
+                          className={`whitespace-nowrap px-2.5 py-3 align-middle ${cardTable.labelled}`}
+                        >
                           {formatBusinessDate(record.issue_date)}
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                        <td
+                          data-label={t("records.ids.columns.validUntil")}
+                          className={`whitespace-nowrap px-2.5 py-3 align-middle ${cardTable.labelled}`}
+                        >
                           <p>{formatBusinessDate(record.valid_until)}</p>
                           <p className="mt-1 text-xs text-muted-foreground">
                             {expiryRelative(record.valid_until, t)}
                           </p>
                         </td>
-                        <td className="px-4 py-3 align-middle sm:px-5">
+                        <td
+                          className={`px-2.5 py-3 align-middle ${cardTable.cell}`}
+                        >
                           <div className="flex flex-wrap gap-1">
                             <Badge
                               variant="outline"
@@ -315,8 +336,12 @@ export function BarangayIdsView() {
                             ) : null}
                           </div>
                         </td>
-                        <td className="sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle sm:px-5 sticky-edge">
+                        <td
+                          className={`sticky right-0 bg-card row-hover-cell px-2.5 py-3 align-middle sticky-edge ${cardTable.actions}`}
+                        >
                           <RowActions
+                            compact
+                            className="@max-[59rem]/cards:flex-wrap @max-[59rem]/cards:justify-start"
                             name={record.resident_name}
                             isAdmin={isAdmin}
                             primary={

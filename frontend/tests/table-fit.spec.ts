@@ -102,6 +102,21 @@ const residents = {
   ],
   count: 54,
 }
+const barangayIds = {
+  count: 3,
+  data: [0, 1, 2].map((i) => ({
+    issuance_id: `a${i}`,
+    reference_no: `BRGY-2026-00012${i}`,
+    resident_id: `r${i}`,
+    resident_name: "Maria Cristina Flores Dela Cruz-Villanueva",
+    resident_status: "active",
+    id_number: `2026-000${i}`,
+    transaction_type: "Renewal",
+    issue_date: `2026-03-0${i + 1}`,
+    valid_until: `2027-03-0${i + 1}`,
+    status: ["valid", "expiring_soon", "expired"][i],
+  })),
+}
 const streets = [
   { id: 3, name: "Don Pedro Maglinao Street" },
   { id: 7, name: "Rizal Extension Road" },
@@ -168,11 +183,26 @@ const pages = [
     name: "Records",
     widths: [1280, 1264, 1152, 1024, 776, 390],
   },
-  { path: "/issuances", name: "Issuance History", widths: [1280] },
+  {
+    path: "/issuances",
+    name: "Issuance History",
+    widths: [1280, 1024, 776, 390],
+  },
+  {
+    path: "/records?view=barangay-ids",
+    name: "Barangay IDs",
+    widths: [1280, 1024, 776, 390],
+  },
+  {
+    path: "/records",
+    name: "Archived residents",
+    widths: [1280, 1024, 776, 390],
+    tab: /^(Archived|Naka-archive)$/,
+  },
 ]
 
 for (const language of ["en", "fil"])
-  for (const { path, name, widths } of pages)
+  for (const { path, name, widths, tab } of pages)
     for (const width of widths) {
       test(`${name} table fits ${width} px without scrolling (${language})`, async ({
         page,
@@ -188,6 +218,7 @@ for (const language of ["en", "fil"])
           if (url.includes("/lookups/document-types"))
             return json(documentTypes)
           if (url.includes("/lookups/streets")) return json(streets)
+          if (url.includes("/barangay-ids")) return json(barangayIds)
           if (url.includes("/lookups/")) return json([])
           if (url.includes("/dashboard"))
             return json({ total_issued: 2, by_document_type: [] })
@@ -203,6 +234,7 @@ for (const language of ["en", "fil"])
         }, language)
         await page.setViewportSize({ width, height: 900 })
         await page.goto(path)
+        if (tab) await page.getByText(tab).first().click()
 
         const table = page.locator("table").first()
         await expect(table.locator("tbody tr").first()).toBeVisible()

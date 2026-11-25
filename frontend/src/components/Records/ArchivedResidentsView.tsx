@@ -12,6 +12,7 @@ import {
 import { formControlClass } from "@/components/Common/formStyles"
 import { RowActions } from "@/components/Common/RowActions"
 import { TablePagination } from "@/components/Common/TablePagination"
+import { cardTable } from "@/lib/cardTable"
 import { formatLocaleDate } from "@/lib/locale"
 
 type ArchivedResidentsViewProps = {
@@ -111,14 +112,18 @@ export function ArchivedResidentsView({
         />
       ) : (
         <>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[820px] text-left text-sm">
-              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+          <div className={cardTable.box}>
+            <table
+              className={`w-full min-w-[820px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}
+            >
+              <thead
+                className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
+              >
                 <tr>
                   {columns.map((column) => (
                     <th
                       key={column}
-                      className={`px-4 py-3 align-middle font-medium sm:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
+                      className={`px-4 py-3 align-middle font-medium @[59rem]/cards:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
                     >
                       {column === "resident" || column === "actions"
                         ? t(`records.list.columns.${column}`)
@@ -127,16 +132,21 @@ export function ArchivedResidentsView({
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className={`divide-y ${cardTable.body}`}>
                 {residents.map((resident) => (
                   <tr
                     key={resident.id}
-                    className="transition-colors hover:bg-muted/30"
+                    className={`transition-colors hover:bg-muted/30 ${cardTable.row}`}
                   >
-                    <td className="px-4 py-3 align-middle sm:px-5">
+                    <td
+                      className={`px-4 py-3 align-middle @[59rem]/cards:px-5 ${cardTable.full}`}
+                    >
                       <p className="font-semibold">{resident.full_name}</p>
                     </td>
-                    <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                    <td
+                      data-label={t("records.archive.columns.archivedOn")}
+                      className={`whitespace-nowrap px-4 py-3 align-middle @[59rem]/cards:px-5 ${cardTable.labelled}`}
+                    >
                       {resident.archived_at
                         ? formatLocaleDate(new Date(resident.archived_at), {
                             month: "short",
@@ -146,16 +156,26 @@ export function ArchivedResidentsView({
                           })
                         : "—"}
                     </td>
-                    <td className="px-4 py-3 align-middle sm:px-5">
+                    <td
+                      data-label={t("records.archive.columns.archivedBy")}
+                      className={`px-4 py-3 align-middle @[59rem]/cards:px-5 ${cardTable.labelled}`}
+                    >
                       {resident.archived_by_name || "—"}
                     </td>
-                    <td className="max-w-[320px] px-4 py-3 align-middle sm:px-5">
+                    <td
+                      data-label={t("records.archive.columns.reason")}
+                      className={`max-w-[320px] px-4 py-3 align-middle @[59rem]/cards:px-5 ${cardTable.labelled} @max-[59rem]/cards:max-w-none @max-[59rem]/cards:w-full`}
+                    >
                       <p className="line-clamp-2 break-words">
                         {resident.archive_reason || "—"}
                       </p>
                     </td>
-                    <td className="sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle sm:px-5 sticky-edge">
+                    <td
+                      className={`sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle @[59rem]/cards:px-5 sticky-edge ${cardTable.actions}`}
+                    >
                       <RowActions
+                        compact
+                        className="@max-[59rem]/cards:flex-wrap @max-[59rem]/cards:justify-start"
                         name={resident.full_name}
                         isAdmin={isAdmin}
                         primary={

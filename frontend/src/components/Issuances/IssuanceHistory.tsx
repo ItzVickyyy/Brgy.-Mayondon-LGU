@@ -59,6 +59,7 @@ import {
 } from "@/components/ui/dialog"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { cardTable } from "@/lib/cardTable"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
 import { formatLocaleDate } from "@/lib/locale"
 import { templateIdByDocumentCode } from "@/lib/print/buildPrintData"
@@ -730,9 +731,13 @@ export function IssuanceHistory({
           />
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[880px] text-left text-sm">
-                <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+            <div className={cardTable.box}>
+              <table
+                className={`w-full min-w-[880px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}
+              >
+                <thead
+                  className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
+                >
                   <tr>
                     {historyColumns.map((column) => (
                       <th
@@ -744,7 +749,7 @@ export function IssuanceHistory({
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className={`divide-y ${cardTable.body}`}>
                   {items.map((item) => {
                     const isDraft = item.status === "draft"
                     const isArchived = Boolean(item.archived_at)
@@ -766,27 +771,39 @@ export function IssuanceHistory({
                     return (
                       <tr
                         key={item.id}
-                        className="transition-colors hover:bg-muted/30"
+                        className={`transition-colors hover:bg-muted/30 ${cardTable.row}`}
                       >
-                        <td className="px-3 py-3 align-middle">
+                        <td className={`px-3 py-3 align-middle ${cardTable.full}`}>
                           <p className="font-semibold">{item.resident_name}</p>
                           <p className="mt-1 font-mono text-xs text-muted-foreground">
                             {item.reference_no ??
                               t("issuances.history.notNumbered")}
                           </p>
                         </td>
-                        <td className="max-w-xs px-3 py-3 align-middle">
+                        <td
+                          data-label={t("issuances.history.columns.document")}
+                          className={`max-w-xs px-3 py-3 align-middle ${cardTable.labelled}`}
+                        >
                           {documentName}
                         </td>
-                        <td className="px-3 py-3 align-middle text-muted-foreground">
+                        <td
+                          data-label={t("issuances.history.columns.purpose")}
+                          className={`px-3 py-3 align-middle text-muted-foreground ${cardTable.labelled}`}
+                        >
                           {(item.purpose_id &&
                             purposeNames.get(item.purpose_id)) ||
                             "—"}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-3 align-middle">
+                        <td
+                          data-label={t("issuances.history.columns.dateIssued")}
+                          className={`whitespace-nowrap px-3 py-3 align-middle ${cardTable.labelled}`}
+                        >
                           {isDraft ? "—" : formatBusinessDate(item.issue_date)}
                         </td>
-                        <td className="whitespace-nowrap px-3 py-3 align-middle">
+                        <td
+                          data-label={t("issuances.history.columns.validUntil")}
+                          className={`whitespace-nowrap px-3 py-3 align-middle ${cardTable.labelled}`}
+                        >
                           {item.expires_on ? (
                             <div className="flex flex-col items-start gap-1">
                               <span>{formatBusinessDate(item.expires_on)}</span>
@@ -803,7 +820,7 @@ export function IssuanceHistory({
                             "—"
                           )}
                         </td>
-                        <td className="px-3 py-3 align-middle">
+                        <td className={`px-3 py-3 align-middle ${cardTable.cell}`}>
                           <Badge
                             variant="outline"
                             className={statusStyles[styleKey]}
@@ -835,8 +852,11 @@ export function IssuanceHistory({
                             </p>
                           ) : null}
                         </td>
-                        <td className="px-3 py-3 align-middle sticky right-0 bg-card row-hover-cell sticky-edge">
+                        <td
+                          className={`px-3 py-3 align-middle sticky right-0 bg-card row-hover-cell sticky-edge ${cardTable.actions}`}
+                        >
                           <RowActions
+                            className="@max-[59rem]/cards:flex-wrap @max-[59rem]/cards:justify-start"
                             name={item.resident_name}
                             isAdmin={isAdmin}
                             leading={

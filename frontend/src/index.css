@@ -1080,3 +1080,11 @@ tr:focus-within > .row-hover-cell {
     box-shadow: none;
   }
 }
+/* Same for the Archived, Barangay IDs and Issuance History lists (box under 59rem,
+   see lib/cardTable.ts). */
+@container cards (max-width: 59rem) {
+  .sticky-edge {
+    animation: none;
+    box-shadow: none;
+  }
+}
