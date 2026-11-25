@@ -10,7 +10,7 @@ from jwt.exceptions import InvalidTokenError
 from pydantic import ValidationError
 from sqlalchemy import delete
 from sqlalchemy.dialects.postgresql import insert
-from sqlmodel import col
+from sqlmodel import col, select
 
 from app import crud
 from app.api.deps import CurrentUser, SessionDep, TokenDep, require_admin
@@ -32,6 +32,7 @@ from app.models import (
     UserPublic,
     UserUpdate,
 )
+from app.models_foundation import AuditLog
 from app.models_security import MfaLogin
 from app.utils import (
     generate_password_reset_token,
@@ -182,10 +183,47 @@ def _is_locked_now(user: Any) -> bool:
     return bool(until > datetime.now(UTC))
 
 
+def _replaces_live_session(session: SessionDep, user: Any) -> bool:
+    """True when this sign-in cuts off an earlier one that could still have been in use.
+
+    Signing out revokes the old token, and an old token stops working when it expires,
+    so only a token that is neither revoked nor older than its lifetime counts.
+    """
+    previous = user.active_session_jti
+    if not settings.SINGLE_SESSION_PER_ACCOUNT or not previous:
+        return False
+    if session.get(RevokedToken, previous) is not None:
+        return False
+    last_login = session.exec(
+        select(AuditLog.occurred_at)
+        .where(
+            col(AuditLog.actor_user_id) == user.id,
+            col(AuditLog.action) == "auth.login",
+        )
+        .order_by(col(AuditLog.occurred_at).desc())
+        .limit(1)
+    ).first()
+    if last_login is None:
+        return False
+    if last_login.tzinfo is None:
+        last_login = last_login.replace(tzinfo=UTC)
+    lifetime = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    return bool(datetime.now(UTC) - last_login < lifetime)
+
+
 def _finish_login(session: SessionDep, user: Any) -> LoginResult:
+    replaced = _replaces_live_session(session, user)
     record_audit_event(
         session, action="auth.login", actor=user, module="auth", commit=True
     )
+    if replaced:
+        record_audit_event(
+            session,
+            action="auth.session_replaced",
+            actor=user,
+            module="auth",
+            commit=True,
+        )
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     jti = uuid.uuid4().hex
     # The newest sign-in is the only one that works: any older token of this account

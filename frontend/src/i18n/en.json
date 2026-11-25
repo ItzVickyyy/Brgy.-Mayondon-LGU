@@ -605,6 +605,7 @@
       "auth": {
         "login": "Signed in",
         "login_failed": "Sign-in failed",
+        "session_replaced": "Earlier sign-in ended by a new sign-in",
         "confirm_failed": "Password check failed",
         "secrets_rotate": "System secrets changed",
         "account_locked": "Account locked after failed sign-ins",

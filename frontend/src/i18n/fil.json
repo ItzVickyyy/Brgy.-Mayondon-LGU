@@ -605,6 +605,7 @@
       "auth": {
         "login": "Nag-sign in",
         "login_failed": "Nabigo ang pag-sign in",
+        "session_replaced": "Natapos ang naunang sign-in dahil sa bagong sign-in",
         "confirm_failed": "Nabigo ang pag-check ng password",
         "secrets_rotate": "Pinalitan ang mga lihim ng sistema",
         "account_locked": "Na-lock ang account dahil sa bigong pag-sign in",

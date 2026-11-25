@@ -67,6 +67,7 @@ const activityKeys = {
   "official.update": "activity.actions.official.update",
   "auth.login": "activity.actions.auth.login",
   "auth.login_failed": "activity.actions.auth.login_failed",
+  "auth.session_replaced": "activity.actions.auth.session_replaced",
   "auth.confirm_failed": "activity.actions.auth.confirm_failed",
   "auth.secrets_rotate": "activity.actions.auth.secrets_rotate",
   "auth.recovery_questions_set": "activity.actions.auth.recovery_questions_set",

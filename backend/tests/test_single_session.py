@@ -6,6 +6,7 @@ from sqlmodel import Session, col, select, update
 
 from app.core.config import settings
 from app.models import User, UserRole
+from app.models_foundation import AuditLog
 from tests.utils.user import create_user_with_role, user_authentication_headers
 
 ME = f"{settings.API_V1_STR}/users/me"
@@ -99,3 +100,45 @@ def test_account_with_no_recorded_sign_in_is_not_refused(
         is None
     )
     assert client.get(ME, headers=headers).status_code == 200
+
+
+def _replaced_count(db: Session, email: str) -> int:
+    db.expire_all()
+    rows = db.exec(
+        select(AuditLog.id).where(
+            col(AuditLog.actor_email) == email,
+            col(AuditLog.action) == "auth.session_replaced",
+        )
+    ).all()
+    return len(rows)
+
+
+@pytest.mark.usefixtures("one_session")
+def test_replacing_a_live_sign_in_is_recorded(client: TestClient, db: Session) -> None:
+    user, password = create_user_with_role(db, UserRole.staff)
+    user_authentication_headers(client=client, email=user.email, password=password)
+    assert _replaced_count(db, user.email) == 0  # the first sign-in replaces nothing
+    user_authentication_headers(client=client, email=user.email, password=password)
+    assert _replaced_count(db, user.email) == 1
+
+
+@pytest.mark.usefixtures("one_session")
+def test_signing_out_first_is_not_a_replacement(
+    client: TestClient, db: Session
+) -> None:
+    user, password = create_user_with_role(db, UserRole.staff)
+    first = user_authentication_headers(
+        client=client, email=user.email, password=password
+    )
+    assert client.post(LOGOUT, headers=first).status_code == 200
+    user_authentication_headers(client=client, email=user.email, password=password)
+    assert _replaced_count(db, user.email) == 0
+
+
+def test_nothing_is_recorded_when_the_rule_is_off(
+    client: TestClient, db: Session
+) -> None:
+    user, password = create_user_with_role(db, UserRole.staff)
+    user_authentication_headers(client=client, email=user.email, password=password)
+    user_authentication_headers(client=client, email=user.email, password=password)
+    assert _replaced_count(db, user.email) == 0
