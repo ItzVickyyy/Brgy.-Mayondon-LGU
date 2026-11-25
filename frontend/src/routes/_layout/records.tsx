@@ -91,6 +91,16 @@ const residentColumns: ResidentColumn[] = [
   "actions",
 ]
 
+// Records list at narrow widths (container queries on the table's own box, so the
+// sidebar is accounted for): from 59rem all seven columns; from 47rem Civil status
+// and Occupation (optional, never printed) drop out; below 47rem every row is a card.
+const cardCell = "@max-[47rem]/records:block @max-[47rem]/records:p-0"
+function optionalColumn(column: ResidentColumn) {
+  return column === "civilStatus" || column === "occupation"
+    ? "hidden @[59rem]/records:table-cell"
+    : ""
+}
+
 function RecordsManagement() {
   const { t } = useTranslation()
   const { view: initialView, q: initialQuery } = Route.useSearch()
@@ -364,29 +374,31 @@ function RecordsManagement() {
               />
             ) : (
               <>
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[900px] text-left text-sm">
-                    <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+                <div className="@container/records overflow-x-auto">
+                  <table className="w-full text-left text-sm @max-[47rem]/records:block @[47rem]/records:min-w-[720px] @[59rem]/records:min-w-[900px]">
+                    <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground @max-[47rem]/records:hidden">
                       <tr>
                         {residentColumns.map((column) => (
                           <th
                             key={column}
-                            className={`px-2 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
+                            className={`px-2 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""} ${optionalColumn(column)}`}
                           >
                             {t(`records.list.columns.${column}`)}
                           </th>
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y">
+                    <tbody className="divide-y @max-[47rem]/records:block">
                       {residents.map((resident) => {
                         const address = residentAddress(resident, streetNames)
                         return (
                           <tr
                             key={resident.id}
-                            className="transition-colors hover:bg-muted/30"
+                            className="transition-colors hover:bg-muted/30 @max-[47rem]/records:flex @max-[47rem]/records:flex-wrap @max-[47rem]/records:gap-x-3 @max-[47rem]/records:gap-y-1 @max-[47rem]/records:px-4 @max-[47rem]/records:py-3"
                           >
-                            <td className="px-2 py-3 align-middle">
+                            <td
+                              className={`px-2 py-3 align-middle ${cardCell} @max-[47rem]/records:w-full`}
+                            >
                               <p className="font-semibold">
                                 {resident.full_name}
                               </p>
@@ -395,14 +407,16 @@ function RecordsManagement() {
                               </p>
                             </td>
                             <td
-                              className="px-2 py-3 align-middle"
+                              className={`px-2 py-3 align-middle ${cardCell} @max-[47rem]/records:w-full`}
                               title={address}
                             >
-                              <div className="line-clamp-2 max-w-[8.5rem] break-words">
+                              <div className="line-clamp-2 max-w-[8.5rem] break-words @max-[47rem]/records:max-w-none">
                                 {address || "—"}
                               </div>
                             </td>
-                            <td className="px-2 py-3 align-middle">
+                            <td
+                              className={`px-2 py-3 align-middle ${cardCell}`}
+                            >
                               {resident.birthdate ? (
                                 <>
                                   <span className="whitespace-nowrap">
@@ -423,23 +437,30 @@ function RecordsManagement() {
                                 "—"
                               )}
                             </td>
-                            <td className="px-2 py-3 align-middle">
+                            <td
+                              className={`px-2 py-3 align-middle ${cardCell}`}
+                            >
                               {resident.sex ? sexLabel(resident.sex, t) : "—"}
                             </td>
-                            <td className="px-2 py-3 align-middle">
+                            <td
+                              className={`px-2 py-3 align-middle ${optionalColumn("civilStatus")}`}
+                            >
                               {resident.civil_status
                                 ? civilStatusLabel(resident.civil_status, t)
                                 : "—"}
                             </td>
                             <td
-                              className="max-w-[5rem] truncate px-2 py-3 align-middle"
+                              className={`max-w-[5rem] truncate px-2 py-3 align-middle ${optionalColumn("occupation")}`}
                               title={resident.occupation ?? undefined}
                             >
                               {resident.occupation || "—"}
                             </td>
-                            <td className="sticky right-0 bg-card row-hover-cell px-2 py-3 align-middle sticky-edge">
+                            <td
+                              className={`sticky right-0 bg-card row-hover-cell px-2 py-3 align-middle sticky-edge ${cardCell} @max-[47rem]/records:static @max-[47rem]/records:w-full @max-[47rem]/records:bg-transparent`}
+                            >
                               <RowActions
                                 compact
+                                className="@max-[47rem]/records:flex-wrap @max-[47rem]/records:justify-start"
                                 name={resident.full_name}
                                 isAdmin={isAdmin}
                                 primary={{

@@ -163,7 +163,11 @@ const issuances = {
 }
 
 const pages = [
-  { path: "/records", name: "Records", widths: [1280, 1264] },
+  {
+    path: "/records",
+    name: "Records",
+    widths: [1280, 1264, 1152, 1024, 776, 390],
+  },
   { path: "/issuances", name: "Issuance History", widths: [1280] },
 ]
 

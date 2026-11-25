@@ -49,6 +49,8 @@ type RowActionsProps = {
   leading?: ReactNode // extra control shown before the primary button
   /** Tighter gaps and button padding, for a table that must fit a 1280 px screen. */
   compact?: boolean
+  /** Extra classes for the wrapper (e.g. left-aligned wrapping inside a card). */
+  className?: string
 }
 
 export function RowActions({
@@ -59,6 +61,7 @@ export function RowActions({
   items = [],
   leading,
   compact = false,
+  className = "",
 }: RowActionsProps) {
   const { t } = useTranslation()
   const visibleItems = items.filter(
@@ -67,7 +70,7 @@ export function RowActions({
 
   return (
     <div
-      className={`flex items-center justify-end ${compact ? "gap-1.5" : "gap-2"}`}
+      className={`flex items-center justify-end ${compact ? "gap-1.5" : "gap-2"} ${className}`}
     >
       {leading}
       {primary ? (

@@ -1071,3 +1071,12 @@ tr:focus-within > .row-hover-cell {
     color: #1f3a68;
   }
 }
+
+/* Records list as cards (box under 47rem): the Actions cell is no longer sticky,
+   so it gets no edge shadow. Unlayered on purpose, to beat the rules above. */
+@container records (max-width: 47rem) {
+  .sticky-edge {
+    animation: none;
+    box-shadow: none;
+  }
+}

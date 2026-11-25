@@ -71,32 +71,39 @@ export function IssuanceSettingsDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="flex min-h-0 flex-1 flex-col sm:flex-row">
-          <div
-            role="tablist"
-            aria-orientation="vertical"
-            aria-label={t("issuances.settings.title")}
-            className="flex shrink-0 gap-1 overflow-x-auto border-b px-3 sm:w-64 sm:flex-col sm:overflow-y-auto sm:overflow-x-hidden sm:border-r sm:border-b-0 sm:bg-muted/30 sm:p-3"
-          >
-            {tabs.map((name) => (
-              <button
-                key={name}
-                type="button"
-                role="tab"
-                id={`settings-tab-${name}`}
-                aria-selected={active === name}
-                aria-controls="settings-panel"
-                data-testid={`settings-tab-${name}`}
-                onClick={() => setTab(name)}
-                className={cn(
-                  "min-h-11 shrink-0 border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-full sm:rounded-md sm:border-b-0 sm:border-l-2 sm:py-2 sm:text-left",
-                  active === name
-                    ? "border-primary text-brand sm:bg-background sm:shadow-xs"
-                    : "border-transparent text-muted-foreground hover:text-foreground sm:hover:bg-muted",
-                )}
-              >
-                {t(`issuances.settings.tabs.${name}`)}
-              </button>
-            ))}
+          <div className="relative shrink-0 sm:contents">
+            <div
+              role="tablist"
+              aria-orientation="vertical"
+              aria-label={t("issuances.settings.title")}
+              className="flex shrink-0 gap-1 overflow-x-auto border-b px-3 sm:w-64 sm:flex-col sm:overflow-y-auto sm:overflow-x-hidden sm:border-r sm:border-b-0 sm:bg-muted/30 sm:p-3"
+            >
+              {tabs.map((name) => (
+                <button
+                  key={name}
+                  type="button"
+                  role="tab"
+                  id={`settings-tab-${name}`}
+                  aria-selected={active === name}
+                  aria-controls="settings-panel"
+                  data-testid={`settings-tab-${name}`}
+                  onClick={() => setTab(name)}
+                  className={cn(
+                    "min-h-11 shrink-0 border-b-2 px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-full sm:rounded-md sm:border-b-0 sm:border-l-2 sm:py-2 sm:text-left",
+                    active === name
+                      ? "border-primary text-brand sm:bg-background sm:shadow-xs"
+                      : "border-transparent text-muted-foreground hover:text-foreground sm:hover:bg-muted",
+                  )}
+                >
+                  {t(`issuances.settings.tabs.${name}`)}
+                </button>
+              ))}
+            </div>
+            <div
+              aria-hidden="true"
+              data-testid="settings-tabs-fade"
+              className="pointer-events-none absolute inset-y-0 right-0 bottom-px w-8 bg-gradient-to-l from-background to-transparent sm:hidden"
+            />
           </div>
           <div
             role="tabpanel"
