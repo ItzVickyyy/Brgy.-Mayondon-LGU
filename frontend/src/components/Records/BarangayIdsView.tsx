@@ -21,6 +21,11 @@ import {
 import { formControlClass } from "@/components/Common/formStyles"
 import { RowActions } from "@/components/Common/RowActions"
 import { Select } from "@/components/Common/Select"
+import {
+  PageCheckbox,
+  RowCheckbox,
+  SelectionBar,
+} from "@/components/Common/SelectionControls"
 import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
@@ -30,6 +35,7 @@ import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { cardTable } from "@/lib/cardTable"
 import { formatBusinessDate } from "@/lib/residents"
+import { useRowSelection } from "@/lib/useRowSelection"
 import { IdSeriesCard } from "./IdSeriesCard"
 
 type StatusFilter = "all" | BarangayIdListItem["status"]
@@ -146,6 +152,8 @@ export function BarangayIdsView() {
   const pageCount = Math.max(1, Math.ceil(total / pageSize))
   const start = total ? pageIndex * pageSize + 1 : 0
   const end = Math.min((pageIndex + 1) * pageSize, total)
+  // Server pages: a selection lasts only while its rows are on screen.
+  const pick = useRowSelection(records, (record) => String(record.issuance_id))
 
   const allCount = useIdCount("all")
   const validCount = useIdCount("valid")
@@ -244,6 +252,28 @@ export function BarangayIdsView() {
           />
         ) : (
           <>
+            <SelectionBar
+              count={pick.count}
+              onClear={pick.clear}
+              csvName="barangay-ids-selected.csv"
+              csvRows={() => [
+                idColumns
+                  .filter((column) => column !== "actions")
+                  .map((column) => t(`records.ids.columns.${column}`)),
+                ...pick
+                  .pick(records)
+                  .map((record) => [
+                    `${record.resident_name} (${record.reference_no})`,
+                    record.id_number,
+                    isTransactionType(record.transaction_type)
+                      ? t(`records.ids.transaction.${record.transaction_type}`)
+                      : record.transaction_type,
+                    formatBusinessDate(record.issue_date),
+                    formatBusinessDate(record.valid_until),
+                    t(`records.idStatus.${record.status}`),
+                  ]),
+              ]}
+            />
             <div className={cardTable.box}>
               <table
                 className={`w-full min-w-[900px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}
@@ -252,6 +282,13 @@ export function BarangayIdsView() {
                   className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
                 >
                   <tr>
+                    <th className="w-11 px-2.5 py-3 align-middle">
+                      <PageCheckbox
+                        all={pick.allOnPage}
+                        some={pick.someOnPage}
+                        onChange={pick.togglePage}
+                      />
+                    </th>
                     {idColumns.map((column) => (
                       <th
                         key={column}
@@ -271,10 +308,23 @@ export function BarangayIdsView() {
                     return (
                       <tr
                         key={record.issuance_id}
-                        className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${archived ? "opacity-70" : ""}`}
+                        className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow} ${archived ? "opacity-70" : ""}`}
                       >
                         <td
-                          className={`px-2.5 py-3 align-middle ${cardTable.full}`}
+                          className={`px-2.5 py-3 align-middle ${cardTable.select}`}
+                        >
+                          <RowCheckbox
+                            label={record.resident_name}
+                            checked={pick.isSelected(
+                              String(record.issuance_id),
+                            )}
+                            onChange={() =>
+                              pick.toggle(String(record.issuance_id))
+                            }
+                          />
+                        </td>
+                        <td
+                          className={`px-2.5 py-3 align-middle ${cardTable.full} ${cardTable.selectName}`}
                         >
                           <p className="font-semibold">
                             {record.resident_name}

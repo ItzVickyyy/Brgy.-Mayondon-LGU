@@ -2919,6 +2919,15 @@
       "enterFullscreen": "Enter full screen",
       "exitFullscreen": "Exit full screen",
       "close": "Close"
+    },
+    "selection": {
+      "selectRow": "Select {{name}}",
+      "selectPage": "Select all rows on this page",
+      "bar": "Selected rows",
+      "count_one": "{{count}} selected",
+      "count_other": "{{count}} selected",
+      "export": "Export selected (CSV)",
+      "clear": "Clear selection"
     }
   },
   "apiErrors": {

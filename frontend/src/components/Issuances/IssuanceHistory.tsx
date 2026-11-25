@@ -39,6 +39,11 @@ import {
 } from "@/components/Common/ModalLayout"
 import { RowActions } from "@/components/Common/RowActions"
 import { Select } from "@/components/Common/Select"
+import {
+  PageCheckbox,
+  RowCheckbox,
+  SelectionBar,
+} from "@/components/Common/SelectionControls"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { IssuanceExportDialog } from "@/components/Issuances/IssuanceExportDialog"
@@ -66,6 +71,7 @@ import { templateIdByDocumentCode } from "@/lib/print/buildPrintData"
 import type { ExportFormat } from "@/lib/print/exportDocument"
 import { type PrintMode, setPrintMode } from "@/lib/print/printMode"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
+import { useRowSelection } from "@/lib/useRowSelection"
 import { cn } from "@/lib/utils"
 
 type StatusFilter = "all" | "issued" | "draft" | "voided"
@@ -404,6 +410,8 @@ export function IssuanceHistory({
   const pageCount = Math.max(1, Math.ceil(total / pageSize))
   const start = total ? pageIndex * pageSize + 1 : 0
   const end = Math.min((pageIndex + 1) * pageSize, total)
+  // Server pages: a selection lasts only while its rows are on screen.
+  const pick = useRowSelection(items, (item) => String(item.id))
 
   const overallQuery = useQuery({
     queryKey: ["issuances-summary", "overall"],
@@ -731,6 +739,27 @@ export function IssuanceHistory({
           />
         ) : (
           <>
+            <SelectionBar
+              count={pick.count}
+              onClear={pick.clear}
+              csvName="issuance-history-selected.csv"
+              csvRows={() => [
+                historyColumns
+                  .filter((column) => column !== "actions")
+                  .map((column) => t(`issuances.history.columns.${column}`)),
+                ...pick.pick(items).map((item) => [
+                  `${item.resident_name} (${item.reference_no ?? t("issuances.history.notNumbered")})`,
+                  documentNames.get(item.document_type_id) ??
+                    item.document_type_code,
+                  (item.purpose_id && purposeNames.get(item.purpose_id)) || "—",
+                  item.status === "draft"
+                    ? "—"
+                    : formatBusinessDate(item.issue_date),
+                  item.expires_on ? formatBusinessDate(item.expires_on) : "—",
+                  statusLabel(item.status, t),
+                ]),
+              ]}
+            />
             <div className={cardTable.box}>
               <table
                 className={`w-full min-w-[880px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}
@@ -739,6 +768,13 @@ export function IssuanceHistory({
                   className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
                 >
                   <tr>
+                    <th className="w-11 px-3 py-3 align-middle">
+                      <PageCheckbox
+                        all={pick.allOnPage}
+                        some={pick.someOnPage}
+                        onChange={pick.togglePage}
+                      />
+                    </th>
                     {historyColumns.map((column) => (
                       <th
                         key={column}
@@ -771,9 +807,18 @@ export function IssuanceHistory({
                     return (
                       <tr
                         key={item.id}
-                        className={`transition-colors hover:bg-muted/30 ${cardTable.row}`}
+                        className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow}`}
                       >
-                        <td className={`px-3 py-3 align-middle ${cardTable.full}`}>
+                        <td className={`px-3 py-3 align-middle ${cardTable.select}`}>
+                          <RowCheckbox
+                            label={item.resident_name}
+                            checked={pick.isSelected(String(item.id))}
+                            onChange={() => pick.toggle(String(item.id))}
+                          />
+                        </td>
+                        <td
+                          className={`px-3 py-3 align-middle ${cardTable.full} ${cardTable.selectName}`}
+                        >
                           <p className="font-semibold">{item.resident_name}</p>
                           <p className="mt-1 font-mono text-xs text-muted-foreground">
                             {item.reference_no ??

@@ -11,9 +11,15 @@ import {
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
 import { RowActions } from "@/components/Common/RowActions"
+import {
+  PageCheckbox,
+  RowCheckbox,
+  SelectionBar,
+} from "@/components/Common/SelectionControls"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { cardTable } from "@/lib/cardTable"
 import { formatLocaleDate } from "@/lib/locale"
+import { useRowSelection } from "@/lib/useRowSelection"
 
 type ArchivedResidentsViewProps = {
   isAdmin: boolean
@@ -69,6 +75,9 @@ export function ArchivedResidentsView({
   const start = total ? pageIndex * pageSize + 1 : 0
   const end = Math.min((pageIndex + 1) * pageSize, total)
 
+  // Server pages: a selection lasts only while its rows are on screen.
+  const pick = useRowSelection(residents, (resident) => String(resident.id))
+
   const columns = [
     "resident",
     "archivedOn",
@@ -112,6 +121,33 @@ export function ArchivedResidentsView({
         />
       ) : (
         <>
+          <SelectionBar
+            count={pick.count}
+            onClear={pick.clear}
+            csvName="archived-residents-selected.csv"
+            csvRows={() => [
+              columns
+                .filter((column) => column !== "actions")
+                .map((column) =>
+                  column === "resident"
+                    ? t("records.list.columns.resident")
+                    : t(`records.archive.columns.${column}`),
+                ),
+              ...pick.pick(residents).map((resident) => [
+                resident.full_name,
+                resident.archived_at
+                  ? formatLocaleDate(new Date(resident.archived_at), {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                      timeZone: "Asia/Manila",
+                    })
+                  : "—",
+                resident.archived_by_name || "—",
+                resident.archive_reason || "—",
+              ]),
+            ]}
+          />
           <div className={cardTable.box}>
             <table
               className={`w-full min-w-[820px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}
@@ -120,6 +156,13 @@ export function ArchivedResidentsView({
                 className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
               >
                 <tr>
+                  <th className="w-11 px-4 py-3 align-middle">
+                    <PageCheckbox
+                      all={pick.allOnPage}
+                      some={pick.someOnPage}
+                      onChange={pick.togglePage}
+                    />
+                  </th>
                   {columns.map((column) => (
                     <th
                       key={column}
@@ -136,10 +179,19 @@ export function ArchivedResidentsView({
                 {residents.map((resident) => (
                   <tr
                     key={resident.id}
-                    className={`transition-colors hover:bg-muted/30 ${cardTable.row}`}
+                    className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow}`}
                   >
                     <td
-                      className={`px-4 py-3 align-middle @[59rem]/cards:px-5 ${cardTable.full}`}
+                      className={`px-4 py-3 align-middle ${cardTable.select}`}
+                    >
+                      <RowCheckbox
+                        label={resident.full_name}
+                        checked={pick.isSelected(String(resident.id))}
+                        onChange={() => pick.toggle(String(resident.id))}
+                      />
+                    </td>
+                    <td
+                      className={`px-4 py-3 align-middle @[59rem]/cards:px-5 ${cardTable.full} ${cardTable.selectName}`}
                     >
                       <p className="font-semibold">{resident.full_name}</p>
                     </td>

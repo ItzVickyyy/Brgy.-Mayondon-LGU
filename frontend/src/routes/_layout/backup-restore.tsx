@@ -23,6 +23,11 @@ import { EmptyState } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
 import { NoPermission } from "@/components/Common/NoPermission"
 import { RowActions } from "@/components/Common/RowActions"
+import {
+  PageCheckbox,
+  RowCheckbox,
+  SelectionBar,
+} from "@/components/Common/SelectionControls"
 import { statusStyles } from "@/components/Common/statusStyles"
 import {
   TablePagination,
@@ -36,6 +41,7 @@ import useCustomToast from "@/hooks/useCustomToast"
 import { isSystemAdministrator } from "@/lib/access"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
 import { notify } from "@/lib/notifications"
+import { useRowSelection } from "@/lib/useRowSelection"
 import { handleError } from "@/utils"
 
 export const Route = createFileRoute("/_layout/backup-restore")({
@@ -207,6 +213,11 @@ function BackupRestore() {
     10,
     listQuery.data?.count ?? 0,
   )
+  const pickBackups = useRowSelection(
+    backupPagination.paginatedItems,
+    (run) => String(run.id),
+    sortedBackups.map((run) => String(run.id)),
+  )
   const okRuns = backups.filter((run) => run.status === "ok")
   const latestGood = okRuns.find((run) => run.file_exists)
   // Backups are listed as made, but not one of them has its file in the folder.
@@ -260,8 +271,8 @@ function BackupRestore() {
         </div>
       ) : null}
 
-      <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">
-        <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+      <div className="grid items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <section className="flex h-full flex-col rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-brand/10 p-2.5">
               <DatabaseBackup className="size-5 text-brand" />
@@ -304,7 +315,7 @@ function BackupRestore() {
             </div>
           </div>
           <Button
-            className="mt-5 min-h-11 w-full"
+            className="mt-auto min-h-11 w-full"
             disabled={!toolAvailable || createMutation.isPending}
             onClick={() => createMutation.mutate()}
           >
@@ -315,7 +326,7 @@ function BackupRestore() {
           </Button>
         </section>
 
-        <section className="rounded-xl border bg-card p-4 shadow-sm sm:p-5">
+        <section className="flex h-full flex-col rounded-xl border bg-card p-4 shadow-sm sm:p-5">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-brand/10 p-2.5">
               <Clock3 className="size-5 text-brand" />
@@ -348,7 +359,7 @@ function BackupRestore() {
 
         <section
           data-testid="restore-card"
-          className="rounded-xl border border-destructive/30 bg-card p-4 shadow-sm sm:p-5"
+          className="flex h-full flex-col rounded-xl border border-destructive/30 bg-card p-4 shadow-sm sm:p-5"
         >
           <div className="flex items-start gap-3">
             <div className="rounded-lg bg-destructive/10 p-2.5">
@@ -522,10 +533,36 @@ function BackupRestore() {
             </Badge>
           ) : null}
         </div>
+        <SelectionBar
+          count={pickBackups.count}
+          onClear={pickBackups.clear}
+          csvName="backups-selected.csv"
+          csvRows={() => [
+            columnIds
+              .filter((id) => id !== "actions")
+              .map((id) => t(`admin.backup.history.columns.${id}`)),
+            ...pickBackups
+              .pick(sortedBackups)
+              .map((run) => [
+                run.file_name ?? "—",
+                formatMoment(run.started_at),
+                labelOf(typeKeys, run.kind, t),
+                formatSize(run.size_bytes),
+                labelOf(statusKeys, statusOf(run), t),
+              ]),
+          ]}
+        />
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
+                <th className="w-11 px-4 py-3 align-middle sm:pl-5">
+                  <PageCheckbox
+                    all={pickBackups.allOnPage}
+                    some={pickBackups.someOnPage}
+                    onChange={pickBackups.togglePage}
+                  />
+                </th>
                 {columnIds.map((id) => (
                   <th
                     key={id}
@@ -549,6 +586,13 @@ function BackupRestore() {
                     key={backup.id}
                     className="transition-colors hover:bg-muted/30"
                   >
+                    <td className="w-11 px-4 py-3 align-middle sm:pl-5">
+                      <RowCheckbox
+                        label={name}
+                        checked={pickBackups.isSelected(String(backup.id))}
+                        onChange={() => pickBackups.toggle(String(backup.id))}
+                      />
+                    </td>
                     <td className="px-4 py-3 align-middle sm:px-5">
                       <span className="font-mono font-medium">{name}</span>
                     </td>

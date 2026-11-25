@@ -34,6 +34,11 @@ import {
 import { NoPermission } from "@/components/Common/NoPermission"
 import { RowActions } from "@/components/Common/RowActions"
 import { Select } from "@/components/Common/Select"
+import {
+  PageCheckbox,
+  RowCheckbox,
+  SelectionBar,
+} from "@/components/Common/SelectionControls"
 import { statusStyles } from "@/components/Common/statusStyles"
 import {
   TablePagination,
@@ -56,6 +61,7 @@ import { isSystemAdministrator } from "@/lib/access"
 import { getLocaleOr } from "@/lib/locale"
 import { notify } from "@/lib/notifications"
 import { readApiError } from "@/lib/residents"
+import { useRowSelection } from "@/lib/useRowSelection"
 
 type OfficialRecord = {
   id: string
@@ -236,6 +242,11 @@ function OfficialsManagement() {
     10,
     `${search}|${statusFilter}`,
   )
+  const pickOfficials = useRowSelection(
+    officialPagination.paginatedItems,
+    (official) => String(official.id),
+    filteredOfficials.map((official) => String(official.id)),
+  )
 
   if (!isAdmin) return <NoPermission />
 
@@ -393,10 +404,35 @@ function OfficialsManagement() {
           </div>
         </div>
 
+        <SelectionBar
+          count={pickOfficials.count}
+          onClear={pickOfficials.clear}
+          csvName="officials-selected.csv"
+          csvRows={() => [
+            columnIds
+              .filter((id) => id !== "actions")
+              .map((id) => t(`admin.officials.columns.${id}`)),
+            ...pickOfficials
+              .pick(filteredOfficials)
+              .map((official) => [
+                official.name,
+                official.position,
+                `${formatTermDate(official.termStart, noEndDate)} – ${formatTermDate(official.termEnd, noEndDate)}`,
+                statusLabel(official.status, t),
+              ]),
+          ]}
+        />
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
+                <th className="w-11 px-4 py-3 align-middle sm:pl-5">
+                  <PageCheckbox
+                    all={pickOfficials.allOnPage}
+                    some={pickOfficials.someOnPage}
+                    onChange={pickOfficials.togglePage}
+                  />
+                </th>
                 {columnIds.map((id) => (
                   <th
                     key={id}
@@ -417,6 +453,13 @@ function OfficialsManagement() {
                   key={official.id}
                   className={`transition-colors hover:bg-muted/30 ${official.status === "Former" ? "opacity-70" : ""}`}
                 >
+                  <td className="w-11 px-4 py-3 align-middle sm:pl-5">
+                    <RowCheckbox
+                      label={official.name}
+                      checked={pickOfficials.isSelected(String(official.id))}
+                      onChange={() => pickOfficials.toggle(String(official.id))}
+                    />
+                  </td>
                   <td className="px-4 py-3 align-middle sm:px-5">
                     <p className="font-semibold">{official.name}</p>
                   </td>

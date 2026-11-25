@@ -9,6 +9,11 @@ import {
 } from "@tanstack/react-table"
 import { useTranslation } from "react-i18next"
 import { EmptyState } from "@/components/Common/FeedbackState"
+import {
+  PageCheckbox,
+  RowCheckbox,
+  SelectionBar,
+} from "@/components/Common/SelectionControls"
 import { TablePagination } from "@/components/Common/TablePagination"
 import {
   Table,
@@ -18,6 +23,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import type { ReportCell } from "@/lib/reports/reportFiles"
+import { useRowSelection } from "@/lib/useRowSelection"
 
 const dataTableFeatures = tableFeatures({
   rowPaginationFeature,
@@ -31,6 +38,13 @@ interface DataTableProps<TData extends RowData> {
   data: TData[]
   emptyTitle?: string
   emptyDescription?: string
+  /** Batch selection (278): a stable id and a name (for screen readers) per row. */
+  selection?: {
+    getRowId: (row: TData) => string
+    getRowLabel: (row: TData) => string
+    csvName: string
+    csvRows: (rows: TData[]) => ReportCell[][]
+  }
 }
 
 export function DataTable<TData extends RowData>({
@@ -38,6 +52,7 @@ export function DataTable<TData extends RowData>({
   data,
   emptyTitle,
   emptyDescription,
+  selection,
 }: DataTableProps<TData>) {
   const { t } = useTranslation()
   const table = useTable({
@@ -47,12 +62,36 @@ export function DataTable<TData extends RowData>({
     initialState: { pagination: { pageIndex: 0, pageSize: 10 } },
   })
 
+  const pageRows = table.getRowModel().rows.map((row) => row.original)
+  const pick = useRowSelection(
+    pageRows,
+    (row) => selection?.getRowId(row) ?? "",
+    selection ? data.map(selection.getRowId) : [],
+  )
+
   return (
     <div className="flex flex-col gap-4">
+      {selection ? (
+        <SelectionBar
+          count={pick.count}
+          onClear={pick.clear}
+          csvName={selection.csvName}
+          csvRows={() => selection.csvRows(pick.pick(data))}
+        />
+      ) : null}
       <Table containerClassName="overflow-x-auto rounded-none border-0">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
+              {selection ? (
+                <TableHead className="w-11">
+                  <PageCheckbox
+                    all={pick.allOnPage}
+                    some={pick.someOnPage}
+                    onChange={pick.togglePage}
+                  />
+                </TableHead>
+              ) : null}
               {headerGroup.headers.map((header) => {
                 return (
                   <TableHead
@@ -79,6 +118,19 @@ export function DataTable<TData extends RowData>({
           {table.getRowModel().rows.length
             ? table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} className="hover:bg-muted/30">
+                  {selection ? (
+                    <TableCell className="w-11">
+                      <RowCheckbox
+                        label={selection.getRowLabel(row.original)}
+                        checked={pick.isSelected(
+                          selection.getRowId(row.original),
+                        )}
+                        onChange={() =>
+                          pick.toggle(selection.getRowId(row.original))
+                        }
+                      />
+                    </TableCell>
+                  ) : null}
                   {row.getAllCells().map((cell) => (
                     <TableCell
                       key={cell.id}

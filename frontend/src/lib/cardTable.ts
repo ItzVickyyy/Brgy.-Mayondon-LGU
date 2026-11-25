@@ -17,4 +17,11 @@ export const cardTable = {
     "@max-[59rem]/cards:block @max-[59rem]/cards:p-0 @max-[59rem]/cards:before:mr-1 @max-[59rem]/cards:before:text-xs @max-[59rem]/cards:before:text-muted-foreground @max-[59rem]/cards:before:content-[attr(data-label)]",
   actions:
     "@max-[59rem]/cards:static @max-[59rem]/cards:block @max-[59rem]/cards:w-full @max-[59rem]/cards:bg-transparent @max-[59rem]/cards:p-0 @max-[59rem]/cards:pt-1",
+  // Batch selection (278): a checkbox column in table mode; in card mode the box
+  // sits at the card's top-right corner and the name cell leaves room for it.
+  // `selectRow` goes on the <tr>, `selectName` on the name cell.
+  select:
+    "w-11 @max-[59rem]/cards:absolute @max-[59rem]/cards:right-2 @max-[59rem]/cards:top-2 @max-[59rem]/cards:block @max-[59rem]/cards:w-auto @max-[59rem]/cards:p-0",
+  selectRow: "@max-[59rem]/cards:relative",
+  selectName: "@max-[59rem]/cards:pr-9",
 } as const

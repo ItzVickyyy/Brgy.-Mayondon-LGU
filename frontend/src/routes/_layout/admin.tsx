@@ -153,6 +153,25 @@ function UsersTable() {
       <DataTable
         columns={columns}
         data={visibleData}
+        selection={{
+          getRowId: (user) => String(user.id),
+          getRowLabel: (user) => user.full_name || user.email,
+          csvName: "user-accounts-selected.csv",
+          csvRows: (rows) => [
+            [
+              t("admin.users.columns.name"),
+              t("admin.users.columns.email"),
+              t("admin.users.columns.role"),
+            ],
+            ...rows.map((user) => [
+              user.full_name ?? "",
+              user.email,
+              user.is_superuser
+                ? t("admin.users.roleAdmin")
+                : t("admin.users.roleStaff"),
+            ]),
+          ],
+        }}
         emptyTitle={t("admin.users.noMatch.title")}
         emptyDescription={t("admin.users.noMatch.description")}
       />

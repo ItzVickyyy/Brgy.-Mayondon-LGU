@@ -13,6 +13,11 @@ import {
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
 import { Select } from "@/components/Common/Select"
+import {
+  PageCheckbox,
+  RowCheckbox,
+  SelectionBar,
+} from "@/components/Common/SelectionControls"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { Badge } from "@/components/ui/badge"
@@ -22,6 +27,7 @@ import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { activityTitle } from "@/lib/activity"
 import { formatLocaleDate } from "@/lib/locale"
+import { useRowSelection } from "@/lib/useRowSelection"
 
 export const Route = createFileRoute("/_layout/activity-log")({
   component: ActivityLog,
@@ -258,6 +264,8 @@ function ActivityLog() {
     "record",
     "outcome",
   ]
+  // Server pages: a selection lasts only while its rows are on screen.
+  const pickRows = useRowSelection(items, (row) => String(row.id))
   const modules = optionsQuery.data?.modules ?? []
   const actors = optionsQuery.data?.actors ?? []
 
@@ -403,10 +411,37 @@ function ActivityLog() {
           />
         ) : (
           <>
+            <SelectionBar
+              count={pickRows.count}
+              onClear={pickRows.clear}
+              csvName="activity-selected.csv"
+              csvRows={() => [
+                columns.map((item) => t(`activity.columns.${item}`)),
+                ...pickRows
+                  .pick(items)
+                  .map((row) => [
+                    formatTimestamp(row.occurred_at),
+                    ...(isAdmin ? [row.actor_email ?? "—"] : []),
+                    activityTitle(row.action, t),
+                    moduleLabel(row.module, t),
+                    row.record_id ?? "—",
+                    isOutcome(row.outcome)
+                      ? t(`activity.outcomes.${row.outcome as Outcome}`)
+                      : row.outcome,
+                  ]),
+              ]}
+            />
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
+                    <th className="w-11 px-4 py-3 align-middle sm:pl-5">
+                      <PageCheckbox
+                        all={pickRows.allOnPage}
+                        some={pickRows.someOnPage}
+                        onChange={pickRows.togglePage}
+                      />
+                    </th>
                     {columns.map((item) => (
                       <th
                         key={item}
@@ -426,6 +461,13 @@ function ActivityLog() {
                         key={row.id}
                         className="transition-colors hover:bg-muted/30"
                       >
+                        <td className="w-11 px-4 py-3 align-middle sm:pl-5">
+                          <RowCheckbox
+                            label={activityTitle(row.action, t)}
+                            checked={pickRows.isSelected(String(row.id))}
+                            onChange={() => pickRows.toggle(String(row.id))}
+                          />
+                        </td>
                         <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
                           {formatTimestamp(row.occurred_at)}
                         </td>

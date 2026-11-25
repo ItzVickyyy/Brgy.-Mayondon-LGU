@@ -31,6 +31,11 @@ import {
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
 import { RowActions } from "@/components/Common/RowActions"
+import {
+  PageCheckbox,
+  RowCheckbox,
+  SelectionBar,
+} from "@/components/Common/SelectionControls"
 import { StatCard } from "@/components/Common/StatCard"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { ArchivedResidentsView } from "@/components/Records/ArchivedResidentsView"
@@ -51,6 +56,7 @@ import {
   residentAddress,
   streetNameMap,
 } from "@/lib/residents"
+import { useRowSelection } from "@/lib/useRowSelection"
 
 export const Route = createFileRoute("/_layout/records")({
   component: RecordsManagement,
@@ -178,6 +184,8 @@ function RecordsManagement() {
   })
   const residents = residentsQuery.data?.data ?? []
   const total = residentsQuery.data?.count ?? 0
+  // Server pages: a selection lasts only while its rows are on screen.
+  const pick = useRowSelection(residents, (resident) => String(resident.id))
   const pageCount = Math.max(1, Math.ceil(total / pageSize))
   const start = total ? pageIndex * pageSize + 1 : 0
   const end = Math.min((pageIndex + 1) * pageSize, total)
@@ -374,10 +382,41 @@ function RecordsManagement() {
               />
             ) : (
               <>
+                <SelectionBar
+                  count={pick.count}
+                  onClear={pick.clear}
+                  csvName="residents-selected.csv"
+                  csvRows={() => [
+                    residentColumns
+                      .filter((column) => column !== "actions")
+                      .map((column) => t(`records.list.columns.${column}`)),
+                    ...pick
+                      .pick(residents)
+                      .map((resident) => [
+                        `${resident.full_name} (${resident.id_number || "—"})`,
+                        residentAddress(resident, streetNames) || "—",
+                        resident.birthdate
+                          ? formatBusinessDate(resident.birthdate)
+                          : "—",
+                        resident.sex ? sexLabel(resident.sex, t) : "—",
+                        resident.civil_status
+                          ? civilStatusLabel(resident.civil_status, t)
+                          : "—",
+                        resident.occupation || "—",
+                      ]),
+                  ]}
+                />
                 <div className="@container/records overflow-x-auto">
                   <table className="w-full text-left text-sm @max-[47rem]/records:block @[47rem]/records:min-w-[720px] @[59rem]/records:min-w-[900px]">
                     <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground @max-[47rem]/records:hidden">
                       <tr>
+                        <th className="w-7 px-1 py-3 align-middle">
+                          <PageCheckbox
+                            all={pick.allOnPage}
+                            some={pick.someOnPage}
+                            onChange={pick.togglePage}
+                          />
+                        </th>
                         {residentColumns.map((column) => (
                           <th
                             key={column}
@@ -394,10 +433,19 @@ function RecordsManagement() {
                         return (
                           <tr
                             key={resident.id}
-                            className="transition-colors hover:bg-muted/30 @max-[47rem]/records:flex @max-[47rem]/records:flex-wrap @max-[47rem]/records:gap-x-3 @max-[47rem]/records:gap-y-1 @max-[47rem]/records:px-4 @max-[47rem]/records:py-3"
+                            className="transition-colors hover:bg-muted/30 @max-[47rem]/records:relative @max-[47rem]/records:flex @max-[47rem]/records:flex-wrap @max-[47rem]/records:gap-x-3 @max-[47rem]/records:gap-y-1 @max-[47rem]/records:px-4 @max-[47rem]/records:py-3"
                           >
+                            <td className="w-7 px-1 py-3 align-middle @max-[47rem]/records:absolute @max-[47rem]/records:right-2 @max-[47rem]/records:top-2 @max-[47rem]/records:block @max-[47rem]/records:w-auto @max-[47rem]/records:p-0">
+                              <RowCheckbox
+                                label={resident.full_name}
+                                checked={pick.isSelected(String(resident.id))}
+                                onChange={() =>
+                                  pick.toggle(String(resident.id))
+                                }
+                              />
+                            </td>
                             <td
-                              className={`px-2 py-3 align-middle ${cardCell} @max-[47rem]/records:w-full`}
+                              className={`px-2 py-3 align-middle ${cardCell} @max-[47rem]/records:w-full @max-[47rem]/records:pr-9`}
                             >
                               <p className="font-semibold">
                                 {resident.full_name}
@@ -410,7 +458,7 @@ function RecordsManagement() {
                               className={`px-2 py-3 align-middle ${cardCell} @max-[47rem]/records:w-full`}
                               title={address}
                             >
-                              <div className="line-clamp-2 max-w-[8.5rem] break-words @max-[47rem]/records:max-w-none">
+                              <div className="line-clamp-2 max-w-[8rem] break-words @max-[47rem]/records:max-w-none">
                                 {address || "—"}
                               </div>
                             </td>

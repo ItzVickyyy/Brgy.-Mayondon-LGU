@@ -2919,6 +2919,15 @@
       "enterFullscreen": "Pumasok sa full screen",
       "exitFullscreen": "Lumabas sa full screen",
       "close": "Isara"
+    },
+    "selection": {
+      "selectRow": "Piliin si {{name}}",
+      "selectPage": "Piliin ang lahat ng hilera sa pahinang ito",
+      "bar": "Mga napiling hilera",
+      "count_one": "{{count}} ang napili",
+      "count_other": "{{count}} ang napili",
+      "export": "I-export ang napili (CSV)",
+      "clear": "Alisin ang pagpili"
     }
   },
   "apiErrors": {
