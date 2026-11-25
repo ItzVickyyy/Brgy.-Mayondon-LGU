@@ -74,7 +74,7 @@ test("content keeps its left edge and the Period change does not reload the page
   // does not move or resize the page.
   const before = await content.boundingBox()
   await page.locator("#dashboard-period").click()
-  await page.getByRole("option").nth(1).click()
+  await page.getByRole("option", { name: "This Month" }).click()
   await page.waitForTimeout(150)
   await expect(page.getByText("Total issued")).toBeVisible()
   const during = await content.boundingBox()
