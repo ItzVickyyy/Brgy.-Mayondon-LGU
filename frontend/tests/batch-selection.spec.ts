@@ -110,7 +110,7 @@ test("Export selected downloads a CSV of just the selected rows", async ({
   expect(text).not.toContain("mayondon-db-20261120-093844-001.dump")
 })
 
-test("the header box shows a dash for some rows, and boxes line up with the bar text (280)", async ({
+test("the header box shows a dash for some rows, and boxes line up (280)", async ({
   page,
 }) => {
   await mockApi(page)
@@ -127,11 +127,45 @@ test("the header box shows a dash for some rows, and boxes line up with the bar 
     }, selector)
   const box = await left('[data-testid="row-select"]')
   const head = await left('[data-testid="page-select"]')
-  const text = await page
-    .getByTestId("selection-bar")
-    .locator("span")
-    .first()
-    .evaluate((el) => Math.round(el.getBoundingClientRect().left))
   expect(Math.abs(box - head)).toBeLessThanOrEqual(1)
-  expect(Math.abs(box - text)).toBeLessThanOrEqual(1)
 })
+
+for (const [width, height] of [
+  [1280, 800],
+  [390, 844],
+]) {
+  test(`selecting a row does not move any row, and the bar stays on screen (${width} px)`, async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width, height })
+    await mockApi(page)
+    await page.goto("/backup-restore")
+    const rows = page.getByTestId("row-select")
+    await expect(rows).toHaveCount(3)
+    const tops = () =>
+      rows.evaluateAll((boxes) =>
+        boxes.map((box) =>
+          Math.round(box.getBoundingClientRect().top + window.scrollY),
+        ),
+      )
+    // A DOM click: on a narrow screen the sticky Actions column can sit over
+    // the box (pre-existing), and the scroll position must not matter here.
+    const pick = (n: number) =>
+      rows.nth(n).evaluate((el) => (el as HTMLElement).click())
+    const before = await tops()
+    await pick(0)
+    const bar = page.getByTestId("selection-bar")
+    await expect(bar).toBeVisible()
+    expect(await tops()).toEqual(before)
+    await pick(1)
+    await expect(bar).toContainText("2 selected")
+    expect(await tops()).toEqual(before)
+    const box = await bar.boundingBox()
+    expect(box).not.toBeNull()
+    expect(box?.y ?? 0).toBeGreaterThanOrEqual(0)
+    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(height)
+    await page.getByRole("button", { name: "Clear" }).click()
+    await expect(bar).toHaveCount(0)
+    expect(await tops()).toEqual(before)
+  })
+}

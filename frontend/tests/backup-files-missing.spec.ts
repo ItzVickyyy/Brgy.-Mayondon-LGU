@@ -55,7 +55,11 @@ test("a warning shows when no recorded backup has its file", async ({
 }) => {
   await mockApi(page, [run(1, false), run(2, false)])
   await page.goto("/backup-restore")
-  await expect(page.getByTestId("backup-files-missing")).toBeVisible()
+  await expect(
+    page.getByText("The backup files are not in the backup folder"),
+  ).toBeVisible()
+  // A notification, not a card in the page.
+  await expect(page.getByTestId("backup-files-missing")).toHaveCount(0)
 })
 
 test("no warning while at least one backup file is there", async ({ page }) => {
@@ -64,5 +68,7 @@ test("no warning while at least one backup file is there", async ({ page }) => {
   await expect(
     page.getByText("mayondon-db-20261120-093844-002.dump").first(),
   ).toBeVisible()
-  await expect(page.getByTestId("backup-files-missing")).toHaveCount(0)
+  await expect(
+    page.getByText("The backup files are not in the backup folder"),
+  ).toHaveCount(0)
 })

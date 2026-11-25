@@ -10,8 +10,9 @@ import {
   RotateCcw,
   ShieldCheck,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
+import { toast } from "sonner"
 
 import { type BackupRunPublic, BackupsService, LoginService } from "@/client"
 import {
@@ -304,6 +305,20 @@ function BackupRestore() {
   // Backups are listed as made, but not one of them has its file in the folder.
   const allFilesGone =
     okRuns.length > 0 && !okRuns.some((run) => run.file_exists)
+  // Told once as a notification, not as a card that pushes the page down. The
+  // fixed id stops a second copy when the list is fetched again.
+  useEffect(() => {
+    if (allFilesGone) {
+      toast.warning(t("admin.backup.filesMissing.title"), {
+        id: "backup-files-missing",
+        description: t("admin.backup.filesMissing.text"),
+        duration: 20000,
+        closeButton: true,
+      })
+    } else {
+      toast.dismiss("backup-files-missing")
+    }
+  }, [allFilesGone, t])
   const daysSinceLatest = latestGood
     ? Math.max(
         0,
@@ -633,20 +648,6 @@ function BackupRestore() {
         </DialogContent>
       </Dialog>
 
-      {allFilesGone ? (
-        <div
-          role="alert"
-          data-testid="backup-files-missing"
-          className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm"
-        >
-          <p className="font-semibold">
-            {t("admin.backup.filesMissing.title")}
-          </p>
-          <p className="mt-1 leading-6 text-muted-foreground">
-            {t("admin.backup.filesMissing.text")}
-          </p>
-        </div>
-      ) : null}
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
         <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4 sm:p-5">
           <div>

@@ -1,5 +1,6 @@
 import { Clipboard, Download, Printer, X } from "lucide-react"
-import type { ReactNode } from "react"
+import { type ReactNode, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -31,7 +32,7 @@ export function RowCheckbox({
       checked={checked}
       onCheckedChange={onChange}
       aria-label={t("common.selection.selectRow", { name: label })}
-      className="size-5"
+      className="block size-5"
     />
   )
 }
@@ -53,7 +54,7 @@ export function PageCheckbox({
       checked={all ? true : some ? "indeterminate" : false}
       onCheckedChange={onChange}
       aria-label={t("common.selection.selectPage")}
-      className="size-5"
+      className="block size-5"
     />
   )
 }
@@ -131,7 +132,7 @@ function tabText(rows: ReportCell[][]) {
 }
 
 /**
- * Bar above a table while rows are selected: count, Clear, Export selected
+ * Bar that floats at the bottom of the screen while rows are selected: count, Clear, Export selected
  * (CSV, formula-safe), Print selected, Copy and any table-specific
  * `children` buttons.
  */
@@ -150,7 +151,15 @@ export function SelectionBar({
 }) {
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  if (count === 0) return null
+  const shown = count > 0
+  // Room at the bottom of the page while the bar floats, so it never hides
+  // the last rows or the page buttons (the page height changes, the rows do not).
+  useEffect(() => {
+    if (!shown) return
+    document.body.classList.add("has-selection-bar")
+    return () => document.body.classList.remove("has-selection-bar")
+  }, [shown])
+  if (!shown) return null
   async function copy() {
     if (!csvRows) return
     try {
@@ -160,11 +169,13 @@ export function SelectionBar({
       showErrorToast(t("common.selection.copyFailed"))
     }
   }
-  return (
+  // Floats over the page (drawn in `body`, so no card or container can move
+  // it) instead of sitting above the table: opening it must not push rows down.
+  return createPortal(
     <section
       data-testid="selection-bar"
       aria-label={t("common.selection.bar")}
-      className="selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b bg-brand/5 px-4 py-2 text-sm sm:px-5"
+      className="selection-bar fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-4xl md:left-[17rem] md:right-4 flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border bg-card px-4 py-2 text-sm shadow-lg print:hidden sm:bottom-4 sm:px-5"
     >
       <span
         className="order-1 min-w-0 flex-1 font-medium sm:mr-auto sm:flex-none"
@@ -223,6 +234,7 @@ export function SelectionBar({
         ) : null}
         {children}
       </div>
-    </section>
+    </section>,
+    document.body,
   )
 }
