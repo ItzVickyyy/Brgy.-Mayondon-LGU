@@ -55,6 +55,12 @@
       "sky": "Sky",
       "slate": "Slate"
     },
+    "gold": {
+      "label": "Gold highlights",
+      "on": "On",
+      "off": "Off",
+      "hint": "Adds a thin gold touch to page titles, pop-ups, table headers and the current menu item."
+    },
     "fontSize": {
       "label": "Font size",
       "small": "Small",

@@ -70,11 +70,14 @@ export type Preferences = {
   theme?: PreferenceTheme
   accent: Accent
   fontSize: FontSize
+  /** Gold highlights on (default) or off. Independent of the accent colour. */
+  goldAccent: boolean
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
   accent: "navy",
   fontSize: "medium",
+  goldAccent: true,
 }
 
 const KEY_PREFIX = "app-preferences:"
@@ -106,6 +109,10 @@ export function readPreferences(userId: string): Preferences {
       fontSize: isFontSize(data.fontSize)
         ? data.fontSize
         : DEFAULT_PREFERENCES.fontSize,
+      goldAccent:
+        typeof data.goldAccent === "boolean"
+          ? data.goldAccent
+          : DEFAULT_PREFERENCES.goldAccent,
     }
   } catch {
     return { ...DEFAULT_PREFERENCES }
@@ -147,9 +154,12 @@ function writePreferences(userId: string, preferences: Preferences) {
 
 /** Puts the accent and font size on the page (the CSS reads these attributes). */
 export function applyAppearance(
-  preferences: Pick<Preferences, "accent" | "fontSize">,
+  preferences: Pick<Preferences, "accent" | "fontSize" | "goldAccent">,
 ) {
   const root = document.documentElement
+  // Gold is on unless the attribute says off (the CSS reads `data-gold`).
+  if (preferences.goldAccent) delete root.dataset.gold
+  else root.dataset.gold = "off"
   if (preferences.accent === "navy") delete root.dataset.accent
   else root.dataset.accent = preferences.accent
   if (preferences.fontSize === "medium") delete root.dataset.fontSize
@@ -244,6 +254,7 @@ async function sendToServer(userId: string, preferences: Preferences) {
         theme: preferences.theme ?? null,
         accent: preferences.accent,
         font_size: preferences.fontSize,
+        gold_accent: preferences.goldAccent,
       },
     })
     setUnsynced(userId, false)
@@ -282,6 +293,7 @@ export async function syncPreferencesWithServer(
         theme: server.theme ?? undefined,
         accent: isAccent(server.accent) ? server.accent : "navy",
         fontSize: isFontSize(server.font_size) ? server.font_size : "medium",
+        goldAccent: server.gold_accent !== false,
       }
       writePreferences(userId, preferences)
       current = { userId, preferences }

@@ -16,7 +16,12 @@ def test_preferences_start_empty(
     # A second call proves the round trip; the first reset any earlier value.
     r = client.get(URL, headers=normal_user_token_headers)
     assert r.status_code == 200
-    assert r.json() == {"theme": None, "accent": "navy", "font_size": "medium"}
+    assert r.json() == {
+        "theme": None,
+        "accent": "navy",
+        "font_size": "medium",
+        "gold_accent": True,
+    }
 
 
 def test_preferences_round_trip_and_stay_per_account(
@@ -24,7 +29,12 @@ def test_preferences_round_trip_and_stay_per_account(
     normal_user_token_headers: dict[str, str],
     superuser_token_headers: dict[str, str],
 ) -> None:
-    saved = {"theme": "dark", "accent": "teal", "font_size": "large"}
+    saved = {
+        "theme": "dark",
+        "accent": "teal",
+        "font_size": "large",
+        "gold_accent": False,
+    }
     r = client.put(URL, headers=normal_user_token_headers, json=saved)
     assert r.status_code == 200
     assert r.json() == saved
@@ -39,6 +49,28 @@ def test_preferences_round_trip_and_stay_per_account(
     assert client.get(URL, headers=normal_user_token_headers).json() == saved
 
 
+def test_gold_accent_is_on_unless_switched_off(
+    client: TestClient, normal_user_token_headers: dict[str, str]
+) -> None:
+    # An older client that never sends the field keeps gold on.
+    r = client.put(
+        URL,
+        headers=normal_user_token_headers,
+        json={"accent": "navy", "font_size": "medium"},
+    )
+    assert r.json()["gold_accent"] is True
+    r = client.put(
+        URL,
+        headers=normal_user_token_headers,
+        json={"accent": "navy", "font_size": "medium", "gold_accent": False},
+    )
+    assert r.json()["gold_accent"] is False
+    assert (
+        client.get(URL, headers=normal_user_token_headers).json()["gold_accent"]
+        is False
+    )
+
+
 def test_preferences_reject_unknown_values(
     client: TestClient, normal_user_token_headers: dict[str, str]
 ) -> None:
@@ -46,6 +78,7 @@ def test_preferences_reject_unknown_values(
         {"accent": "hotpink", "font_size": "medium"},
         {"accent": "navy", "font_size": "huge"},
         {"theme": "blue", "accent": "navy", "font_size": "medium"},
+        {"accent": "navy", "font_size": "medium", "gold_accent": "maybe"},
     ):
         r = client.put(URL, headers=normal_user_token_headers, json=body)
         assert r.status_code == 422

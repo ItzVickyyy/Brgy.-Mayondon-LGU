@@ -56,7 +56,7 @@ function IssuancesManagement() {
       {/* Page header */}
       <header className="print:hidden flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="page-title relative mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             {t("issuances.title")}
           </h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">

@@ -157,6 +157,9 @@ class UserPreferences(SQLModel):
         "slate",
     ] = "navy"
     font_size: Literal["small", "medium", "large"] = "medium"
+    # Gold highlights (page-title bar, dialog edge, table header rule, active
+    # menu icon). On unless the person switched them off.
+    gold_accent: bool = True
 
 
 class UpdatePassword(SQLModel):

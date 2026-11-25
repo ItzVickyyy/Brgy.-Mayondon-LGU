@@ -15,6 +15,7 @@ import {
   PageCheckbox,
   RowCheckbox,
   SelectionBar,
+  selectCol,
 } from "@/components/Common/SelectionControls"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { cardTable } from "@/lib/cardTable"
@@ -156,7 +157,7 @@ export function ArchivedResidentsView({
                 className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
               >
                 <tr>
-                  <th className="w-11 px-4 py-3 align-middle">
+                  <th className={selectCol}>
                     <PageCheckbox
                       all={pick.allOnPage}
                       some={pick.someOnPage}
@@ -181,9 +182,7 @@ export function ArchivedResidentsView({
                     key={resident.id}
                     className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow}`}
                   >
-                    <td
-                      className={`px-4 py-3 align-middle ${cardTable.select}`}
-                    >
+                    <td className={`${selectCol} ${cardTable.select}`}>
                       <RowCheckbox
                         label={resident.full_name}
                         checked={pick.isSelected(String(resident.id))}

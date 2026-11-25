@@ -109,3 +109,29 @@ test("Export selected downloads a CSV of just the selected rows", async ({
   expect(text).toContain("mayondon-db-20261120-093844-002.dump")
   expect(text).not.toContain("mayondon-db-20261120-093844-001.dump")
 })
+
+test("the header box shows a dash for some rows, and boxes line up with the bar text (280)", async ({
+  page,
+}) => {
+  await mockApi(page)
+  await page.goto("/backup-restore")
+  await page.getByTestId("row-select").first().click()
+  await expect(page.getByTestId("page-select")).toHaveAttribute(
+    "data-state",
+    "indeterminate",
+  )
+  const left = async (selector: string) =>
+    page.evaluate((s) => {
+      const el = document.querySelector(s) as HTMLElement
+      return Math.round(el.getBoundingClientRect().left)
+    }, selector)
+  const box = await left('[data-testid="row-select"]')
+  const head = await left('[data-testid="page-select"]')
+  const text = await page
+    .getByTestId("selection-bar")
+    .locator("span")
+    .first()
+    .evaluate((el) => Math.round(el.getBoundingClientRect().left))
+  expect(Math.abs(box - head)).toBeLessThanOrEqual(1)
+  expect(Math.abs(box - text)).toBeLessThanOrEqual(1)
+})

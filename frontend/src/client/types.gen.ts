@@ -3240,6 +3240,10 @@ export type UserPreferences = {
      * Font Size
      */
     font_size?: 'small' | 'medium' | 'large';
+    /**
+     * Gold Accent
+     */
+    gold_accent?: boolean;
 };
 
 /**

@@ -35,6 +35,7 @@ import {
   PageCheckbox,
   RowCheckbox,
   SelectionBar,
+  selectCol,
 } from "@/components/Common/SelectionControls"
 import { StatCard } from "@/components/Common/StatCard"
 import { TablePagination } from "@/components/Common/TablePagination"
@@ -280,7 +281,7 @@ function RecordsManagement() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="page-title relative mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             {t("records.title")}
           </h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
@@ -410,7 +411,7 @@ function RecordsManagement() {
                   <table className="w-full text-left text-sm @max-[47rem]/records:block @[47rem]/records:min-w-[720px] @[59rem]/records:min-w-[900px]">
                     <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground @max-[47rem]/records:hidden">
                       <tr>
-                        <th className="w-7 px-1 py-3 align-middle">
+                        <th className={selectCol}>
                           <PageCheckbox
                             all={pick.allOnPage}
                             some={pick.someOnPage}
@@ -435,7 +436,9 @@ function RecordsManagement() {
                             key={resident.id}
                             className="transition-colors hover:bg-muted/30 @max-[47rem]/records:relative @max-[47rem]/records:flex @max-[47rem]/records:flex-wrap @max-[47rem]/records:gap-x-3 @max-[47rem]/records:gap-y-1 @max-[47rem]/records:px-4 @max-[47rem]/records:py-3"
                           >
-                            <td className="w-7 px-1 py-3 align-middle @max-[47rem]/records:absolute @max-[47rem]/records:right-2 @max-[47rem]/records:top-2 @max-[47rem]/records:block @max-[47rem]/records:w-auto @max-[47rem]/records:p-0">
+                            <td
+                              className={`${selectCol} @max-[47rem]/records:absolute @max-[47rem]/records:right-2 @max-[47rem]/records:top-2 @max-[47rem]/records:block @max-[47rem]/records:w-auto @max-[47rem]/records:p-0`}
+                            >
                               <RowCheckbox
                                 label={resident.full_name}
                                 checked={pick.isSelected(String(resident.id))}

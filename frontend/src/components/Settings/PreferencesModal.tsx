@@ -104,6 +104,7 @@ export function PreferencesModal({
     setTheme,
     setAccent,
     setFontSize,
+    setGoldAccent,
     reset,
   } = usePreferences()
 
@@ -200,6 +201,34 @@ export function PreferencesModal({
                 </span>
               </label>
             ))}
+          </Group>
+
+          <Group label={t("preferences.gold.label")} className="grid-cols-2">
+            <Choice
+              name="pref-gold"
+              value="on"
+              checked={preferences.goldAccent}
+              onSelect={() => setGoldAccent(true)}
+              testId="pref-gold-on"
+            >
+              <span
+                aria-hidden="true"
+                className="size-3 shrink-0 rounded-full bg-[var(--gold)]"
+              />
+              {t("preferences.gold.on")}
+            </Choice>
+            <Choice
+              name="pref-gold"
+              value="off"
+              checked={!preferences.goldAccent}
+              onSelect={() => setGoldAccent(false)}
+              testId="pref-gold-off"
+            >
+              {t("preferences.gold.off")}
+            </Choice>
+            <p className="col-span-2 text-xs leading-5 text-muted-foreground">
+              {t("preferences.gold.hint")}
+            </p>
           </Group>
 
           <Group

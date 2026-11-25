@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { type ReportCell, reportCsv } from "@/lib/reports/reportFiles"
 
+/**
+ * The checkbox column, same on every table: 20 px from the card edge (the
+ * same inset as the text above it), box 20 px, 44 px wide in all.
+ * Header and row cells both use it.
+ */
+export const selectCol = "w-11 py-3 pl-5 pr-0 align-middle"
+
 /** The checkbox in a row (`label` = the row's name, for screen readers). */
 export function RowCheckbox({
   checked,
@@ -85,18 +92,31 @@ export function SelectionBar({
     <section
       data-testid="selection-bar"
       aria-label={t("common.selection.bar")}
-      className="flex flex-wrap items-center gap-2 border-b bg-brand/5 px-4 py-2 text-sm sm:px-5"
+      className="selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b bg-brand/5 px-4 py-2 text-sm sm:px-5"
     >
-      <span className="font-medium" aria-live="polite">
+      <span
+        className="order-1 min-w-0 flex-1 font-medium sm:mr-auto sm:flex-none"
+        aria-live="polite"
+      >
         {t("common.selection.count", { count })}
       </span>
-      <div className="ml-auto flex flex-wrap items-center gap-2">
+      <Button
+        type="button"
+        variant="ghost"
+        size="sm"
+        className="order-2 min-h-11 sm:order-3"
+        onClick={onClear}
+      >
+        <X aria-hidden="true" />
+        {t("common.selection.clear")}
+      </Button>
+      <div className="order-3 flex w-full flex-wrap items-center gap-2 sm:order-2 sm:w-auto">
         {csvName && csvRows ? (
           <Button
             type="button"
             variant="tintViolet"
             size="sm"
-            className="min-h-11"
+            className="min-h-11 w-full sm:w-auto"
             onClick={() => saveCsv(csvName, csvRows())}
           >
             <Download aria-hidden="true" />
@@ -104,16 +124,6 @@ export function SelectionBar({
           </Button>
         ) : null}
         {children}
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="min-h-11"
-          onClick={onClear}
-        >
-          <X aria-hidden="true" />
-          {t("common.selection.clear")}
-        </Button>
       </div>
     </section>
   )

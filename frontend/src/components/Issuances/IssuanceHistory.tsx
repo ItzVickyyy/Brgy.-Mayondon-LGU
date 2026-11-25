@@ -43,6 +43,7 @@ import {
   PageCheckbox,
   RowCheckbox,
   SelectionBar,
+  selectCol,
 } from "@/components/Common/SelectionControls"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
@@ -768,7 +769,7 @@ export function IssuanceHistory({
                   className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
                 >
                   <tr>
-                    <th className="w-11 px-3 py-3 align-middle">
+                    <th className={selectCol}>
                       <PageCheckbox
                         all={pick.allOnPage}
                         some={pick.someOnPage}
@@ -778,7 +779,7 @@ export function IssuanceHistory({
                     {historyColumns.map((column) => (
                       <th
                         key={column}
-                        className={`px-3 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
+                        className={`px-2.5 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
                       >
                         {t(`issuances.history.columns.${column}`)}
                       </th>
@@ -809,7 +810,7 @@ export function IssuanceHistory({
                         key={item.id}
                         className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow}`}
                       >
-                        <td className={`px-3 py-3 align-middle ${cardTable.select}`}>
+                        <td className={`${selectCol} ${cardTable.select}`}>
                           <RowCheckbox
                             label={item.resident_name}
                             checked={pick.isSelected(String(item.id))}
@@ -817,7 +818,7 @@ export function IssuanceHistory({
                           />
                         </td>
                         <td
-                          className={`px-3 py-3 align-middle ${cardTable.full} ${cardTable.selectName}`}
+                          className={`px-2.5 py-3 align-middle ${cardTable.full} ${cardTable.selectName}`}
                         >
                           <p className="font-semibold">{item.resident_name}</p>
                           <p className="mt-1 font-mono text-xs text-muted-foreground">
@@ -827,13 +828,13 @@ export function IssuanceHistory({
                         </td>
                         <td
                           data-label={t("issuances.history.columns.document")}
-                          className={`max-w-xs px-3 py-3 align-middle ${cardTable.labelled}`}
+                          className={`max-w-xs px-2.5 py-3 align-middle ${cardTable.labelled}`}
                         >
                           {documentName}
                         </td>
                         <td
                           data-label={t("issuances.history.columns.purpose")}
-                          className={`px-3 py-3 align-middle text-muted-foreground ${cardTable.labelled}`}
+                          className={`px-2.5 py-3 align-middle text-muted-foreground ${cardTable.labelled}`}
                         >
                           {(item.purpose_id &&
                             purposeNames.get(item.purpose_id)) ||
@@ -841,13 +842,13 @@ export function IssuanceHistory({
                         </td>
                         <td
                           data-label={t("issuances.history.columns.dateIssued")}
-                          className={`whitespace-nowrap px-3 py-3 align-middle ${cardTable.labelled}`}
+                          className={`whitespace-nowrap px-2.5 py-3 align-middle ${cardTable.labelled}`}
                         >
                           {isDraft ? "—" : formatBusinessDate(item.issue_date)}
                         </td>
                         <td
                           data-label={t("issuances.history.columns.validUntil")}
-                          className={`whitespace-nowrap px-3 py-3 align-middle ${cardTable.labelled}`}
+                          className={`whitespace-nowrap px-2.5 py-3 align-middle ${cardTable.labelled}`}
                         >
                           {item.expires_on ? (
                             <div className="flex flex-col items-start gap-1">
@@ -865,7 +866,7 @@ export function IssuanceHistory({
                             "—"
                           )}
                         </td>
-                        <td className={`px-3 py-3 align-middle ${cardTable.cell}`}>
+                        <td className={`px-2.5 py-3 align-middle ${cardTable.cell}`}>
                           <Badge
                             variant="outline"
                             className={statusStyles[styleKey]}
@@ -898,7 +899,7 @@ export function IssuanceHistory({
                           ) : null}
                         </td>
                         <td
-                          className={`px-3 py-3 align-middle sticky right-0 bg-card row-hover-cell sticky-edge ${cardTable.actions}`}
+                          className={`px-2.5 py-3 align-middle sticky right-0 bg-card row-hover-cell sticky-edge ${cardTable.actions}`}
                         >
                           <RowActions
                             className="@max-[59rem]/cards:flex-wrap @max-[59rem]/cards:justify-start"

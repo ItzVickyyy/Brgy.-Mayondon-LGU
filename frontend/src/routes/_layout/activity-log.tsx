@@ -17,6 +17,7 @@ import {
   PageCheckbox,
   RowCheckbox,
   SelectionBar,
+  selectCol,
 } from "@/components/Common/SelectionControls"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
@@ -273,7 +274,7 @@ function ActivityLog() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="page-title relative mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             {t("activity.title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -435,7 +436,7 @@ function ActivityLog() {
               <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
                   <tr>
-                    <th className="w-11 px-4 py-3 align-middle sm:pl-5">
+                    <th className={selectCol}>
                       <PageCheckbox
                         all={pickRows.allOnPage}
                         some={pickRows.someOnPage}
@@ -461,7 +462,7 @@ function ActivityLog() {
                         key={row.id}
                         className="transition-colors hover:bg-muted/30"
                       >
-                        <td className="w-11 px-4 py-3 align-middle sm:pl-5">
+                        <td className={selectCol}>
                           <RowCheckbox
                             label={activityTitle(row.action, t)}
                             checked={pickRows.isSelected(String(row.id))}

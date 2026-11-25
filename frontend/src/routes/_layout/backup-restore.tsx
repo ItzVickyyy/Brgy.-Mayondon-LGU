@@ -27,6 +27,7 @@ import {
   PageCheckbox,
   RowCheckbox,
   SelectionBar,
+  selectCol,
 } from "@/components/Common/SelectionControls"
 import { statusStyles } from "@/components/Common/statusStyles"
 import {
@@ -238,7 +239,7 @@ function BackupRestore() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
+          <h1 className="page-title relative mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
             {t("admin.backup.title")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -556,7 +557,7 @@ function BackupRestore() {
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
               <tr>
-                <th className="w-11 px-4 py-3 align-middle sm:pl-5">
+                <th className={selectCol}>
                   <PageCheckbox
                     all={pickBackups.allOnPage}
                     some={pickBackups.someOnPage}
@@ -586,7 +587,7 @@ function BackupRestore() {
                     key={backup.id}
                     className="transition-colors hover:bg-muted/30"
                   >
-                    <td className="w-11 px-4 py-3 align-middle sm:pl-5">
+                    <td className={selectCol}>
                       <RowCheckbox
                         label={name}
                         checked={pickBackups.isSelected(String(backup.id))}

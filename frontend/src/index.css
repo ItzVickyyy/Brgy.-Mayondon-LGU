@@ -95,6 +95,8 @@
   --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(1 0 0 / 12%);
   --sidebar-ring: oklch(0.8 0.12 85);
+  /* Gold highlight (decorative bars and edges only, never text). */
+  --gold: oklch(0.74 0.13 82);
 }
 
 .dark {
@@ -137,6 +139,7 @@
   --sidebar-accent-foreground: oklch(1 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.8 0.12 85);
+  --gold: oklch(0.8 0.12 85);
 }
 
 /* Preferences: accent colour. Navy is the default above (no attribute). Each
@@ -196,6 +199,53 @@ html.dark[data-accent] {
   --accent-foreground: oklch(0.96 0.006 250);
   --chart-1: oklch(0.65 calc(0.13 * var(--accent-chroma, 1)) var(--accent-hue));
   --sidebar: oklch(0.21 calc(0.05 * var(--accent-chroma, 1)) var(--accent-hue));
+}
+
+/* Preferences: gold highlights. On unless the page carries data-gold="off"
+   (lib/preferences.ts). Gold is decorative only (bars, edges, one icon), so no
+   text depends on it, it does not change with the accent colour, and nothing
+   moves: the title bar sits in the gap under the title, the others replace
+   an existing border colour or add a hairline. With it off the page looks as
+   it did before: only the sidebar's thin current-page marker is gold. */
+html:not([data-gold="off"]) .page-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -0.45rem;
+  width: 2.75rem;
+  height: 3px;
+  border-radius: 2px;
+  background-color: var(--gold);
+  pointer-events: none;
+}
+html:not([data-gold="off"]) [data-slot="dialog-content"] {
+  border-top: 3px solid var(--gold);
+}
+@media screen {
+  html:not([data-gold="off"]) thead th {
+    box-shadow: inset 0 -2px 0 color-mix(in oklab, var(--gold) 80%, transparent);
+  }
+}
+html:not([data-gold="off"]) [data-sidebar="header"] {
+  border-bottom: 1px solid color-mix(in oklab, var(--gold) 35%, transparent);
+}
+html:not([data-gold="off"])
+  [data-sidebar="menu-button"][data-active="true"]
+  svg {
+  color: var(--sidebar-primary);
+}
+/* A little more gold (280): the bar above a table while rows are selected, and
+   the current tab (an inset line, so nothing changes size). */
+html:not([data-gold="off"]) .selection-bar {
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+html:not([data-gold="off"]) [role="tab"][aria-selected="true"] {
+  box-shadow: inset 0 -3px 0 var(--gold);
+}
+@media print {
+  html:not([data-gold="off"]) .page-title::after {
+    display: none;
+  }
 }
 
 /* Preferences: font size. Everything is sized in rem, so the root size scales

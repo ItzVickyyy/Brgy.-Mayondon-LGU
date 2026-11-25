@@ -84,7 +84,7 @@ export function DataTable<TData extends RowData>({
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {selection ? (
-                <TableHead className="w-11">
+                <TableHead className="w-11 pl-5 pr-0">
                   <PageCheckbox
                     all={pick.allOnPage}
                     some={pick.someOnPage}
@@ -119,7 +119,7 @@ export function DataTable<TData extends RowData>({
             ? table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id} className="hover:bg-muted/30">
                   {selection ? (
-                    <TableCell className="w-11">
+                    <TableCell className="w-11 pl-5 pr-0">
                       <RowCheckbox
                         label={selection.getRowLabel(row.original)}
                         checked={pick.isSelected(

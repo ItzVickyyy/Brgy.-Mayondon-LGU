@@ -25,6 +25,7 @@ import {
   PageCheckbox,
   RowCheckbox,
   SelectionBar,
+  selectCol,
 } from "@/components/Common/SelectionControls"
 import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
@@ -282,7 +283,7 @@ export function BarangayIdsView() {
                   className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
                 >
                   <tr>
-                    <th className="w-11 px-2.5 py-3 align-middle">
+                    <th className={selectCol}>
                       <PageCheckbox
                         all={pick.allOnPage}
                         some={pick.someOnPage}
@@ -310,9 +311,7 @@ export function BarangayIdsView() {
                         key={record.issuance_id}
                         className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow} ${archived ? "opacity-70" : ""}`}
                       >
-                        <td
-                          className={`px-2.5 py-3 align-middle ${cardTable.select}`}
-                        >
+                        <td className={`${selectCol} ${cardTable.select}`}>
                           <RowCheckbox
                             label={record.resident_name}
                             checked={pick.isSelected(
