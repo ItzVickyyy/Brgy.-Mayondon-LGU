@@ -301,22 +301,10 @@ html:not([data-gold="off"])
 /* A little more gold (280): the bar above a table while rows are selected, and
    the current tab (an inset line, so nothing changes size). */
 html:not([data-gold="off"]) .selection-bar {
-  box-shadow:
-    inset 3px 0 0 var(--gold),
-    0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow: inset 3px 0 0 var(--gold);
 }
 html:not([data-gold="off"]) [role="tab"][aria-selected="true"] {
   box-shadow: inset 0 -3px 0 var(--gold);
-}
-/* Room under the page while the selection bar floats over its bottom edge. */
-body.has-selection-bar #main-content {
-  padding-bottom: 16rem; /* phone: the bar is three lines tall */
-}
-@media (min-width: 640px) {
-  body.has-selection-bar #main-content {
-    padding-bottom: 9rem;
-  }
 }
 @media print {
   html:not([data-gold="off"]) .page-title::after {

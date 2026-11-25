@@ -1,6 +1,5 @@
 import { Clipboard, Download, Printer, X } from "lucide-react"
-import { type ReactNode, useEffect } from "react"
-import { createPortal } from "react-dom"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
@@ -132,7 +131,7 @@ function tabText(rows: ReportCell[][]) {
 }
 
 /**
- * Bar that floats at the bottom of the screen while rows are selected: count, Clear, Export selected
+ * Bar above a table (always there, so rows never move when one is picked): count, Clear, Export selected
  * (CSV, formula-safe), Print selected, Copy and any table-specific
  * `children` buttons.
  */
@@ -151,17 +150,9 @@ export function SelectionBar({
 }) {
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
-  const shown = count > 0
-  // Room at the bottom of the page while the bar floats, so it never hides
-  // the last rows or the page buttons (the page height changes, the rows do not).
-  useEffect(() => {
-    if (!shown) return
-    document.body.classList.add("has-selection-bar")
-    return () => document.body.classList.remove("has-selection-bar")
-  }, [shown])
-  if (!shown) return null
+  const idle = count === 0
   async function copy() {
-    if (!csvRows) return
+    if (!csvRows || idle) return
     try {
       await navigator.clipboard.writeText(tabText(csvRows()))
       showSuccessToast(t("common.selection.copied", { count }))
@@ -169,37 +160,44 @@ export function SelectionBar({
       showErrorToast(t("common.selection.copyFailed"))
     }
   }
-  // Floats over the page (drawn in `body`, so no card or container can move
-  // it) instead of sitting above the table: opening it must not push rows down.
-  return createPortal(
+  // Always drawn, so choosing a row never changes the height above the table:
+  // with nothing chosen it is the same bar with a hint and every button off.
+  return (
     <section
-      data-testid="selection-bar"
+      data-testid={idle ? "selection-bar-idle" : "selection-bar"}
       aria-label={t("common.selection.bar")}
-      className="selection-bar fixed inset-x-3 bottom-3 z-40 mx-auto flex max-w-4xl md:left-[17rem] md:right-4 flex-wrap items-center gap-x-3 gap-y-2 rounded-xl border bg-card px-4 py-2 text-sm shadow-lg print:hidden sm:bottom-4 sm:px-5"
+      className={`selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b px-4 py-2 text-sm sm:px-5 ${idle ? "bg-muted/30 text-muted-foreground" : "bg-brand/5"}`}
     >
       <span
-        className="order-1 min-w-0 flex-1 font-medium sm:mr-auto sm:flex-none"
+        className="order-1 min-w-0 flex-1 truncate font-medium"
         aria-live="polite"
       >
-        {t("common.selection.count", { count })}
+        {idle
+          ? t("common.selection.hint")
+          : t("common.selection.count", { count })}
       </span>
       <Button
         type="button"
         variant="ghost"
         size="sm"
         className="order-2 min-h-11 sm:order-3"
+        disabled={idle}
         onClick={onClear}
       >
         <X aria-hidden="true" />
         {t("common.selection.clear")}
       </Button>
-      <div className="order-3 flex w-full flex-wrap items-center gap-2 sm:order-2 sm:w-auto">
+      <div
+        inert={idle}
+        className={`order-3 flex w-full flex-wrap items-center gap-2 sm:order-2 sm:w-auto ${idle ? "opacity-50" : ""}`}
+      >
         {csvName && csvRows ? (
           <Button
             type="button"
             variant="tintViolet"
             size="sm"
             className="min-h-11 w-full sm:w-auto"
+            disabled={idle}
             onClick={() => saveCsv(csvName, csvRows())}
           >
             <Download aria-hidden="true" />
@@ -214,6 +212,7 @@ export function SelectionBar({
               size="sm"
               data-testid="selection-print"
               className="min-h-11 flex-1 sm:flex-none"
+              disabled={idle}
               onClick={() => printRows(document.title, csvRows())}
             >
               <Printer aria-hidden="true" />
@@ -225,6 +224,7 @@ export function SelectionBar({
               size="sm"
               data-testid="selection-copy"
               className="min-h-11 flex-1 sm:flex-none"
+              disabled={idle}
               onClick={copy}
             >
               <Clipboard aria-hidden="true" />
@@ -234,7 +234,6 @@ export function SelectionBar({
         ) : null}
         {children}
       </div>
-    </section>,
-    document.body,
+    </section>
   )
 }

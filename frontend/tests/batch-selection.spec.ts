@@ -134,7 +134,7 @@ for (const [width, height] of [
   [1280, 800],
   [390, 844],
 ]) {
-  test(`selecting a row does not move any row, and the bar stays on screen (${width} px)`, async ({
+  test(`selecting a row does not move any row or change the bar height (${width} px)`, async ({
     page,
   }) => {
     await page.setViewportSize({ width, height })
@@ -152,20 +152,30 @@ for (const [width, height] of [
     // the box (pre-existing), and the scroll position must not matter here.
     const pick = (n: number) =>
       rows.nth(n).evaluate((el) => (el as HTMLElement).click())
-    const before = await tops()
+    // Wait until the page has stopped settling (fonts, badges), then measure.
+    let before = await tops()
+    await expect
+      .poll(async () => {
+        const now = await tops()
+        const same = JSON.stringify(now) === JSON.stringify(before)
+        before = now
+        return same
+      })
+      .toBe(true)
+    const idle = page.getByTestId("selection-bar-idle")
+    const idleHeight = (await idle.boundingBox())?.height
+    await expect(idle).toBeVisible()
     await pick(0)
     const bar = page.getByTestId("selection-bar")
     await expect(bar).toBeVisible()
+    expect((await bar.boundingBox())?.height).toBe(idleHeight)
     expect(await tops()).toEqual(before)
     await pick(1)
     await expect(bar).toContainText("2 selected")
     expect(await tops()).toEqual(before)
-    const box = await bar.boundingBox()
-    expect(box).not.toBeNull()
-    expect(box?.y ?? 0).toBeGreaterThanOrEqual(0)
-    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual(height)
     await page.getByRole("button", { name: "Clear" }).click()
     await expect(bar).toHaveCount(0)
+    await expect(idle).toBeVisible()
     expect(await tops()).toEqual(before)
   })
 }
