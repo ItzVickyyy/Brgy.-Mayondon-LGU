@@ -178,7 +178,7 @@ function Layout() {
               type="button"
               variant="outline"
               size="icon"
-              className="icon-react icon-turn size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
+              className="icon-react icon-turn size-9 shrink-0 border-border bg-card text-foreground shadow-xs hover:bg-muted"
               aria-label={
                 isDark ? t("common.ui.lightMode") : t("common.ui.darkMode")
               }
@@ -197,7 +197,7 @@ function Layout() {
               type="button"
               variant="outline"
               size="icon"
-              className="icon-react icon-grow size-9 shrink-0 border-border bg-muted/40 text-foreground hover:bg-muted"
+              className="icon-react icon-grow size-9 shrink-0 border-border bg-card text-foreground shadow-xs hover:bg-muted"
               aria-label={
                 isFullscreen
                   ? t("common.ui.exitFullscreen")
