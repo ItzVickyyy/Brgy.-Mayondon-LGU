@@ -2,6 +2,7 @@
 // history import) warns when the same person is already on record; changing
 // only the address does not warn. Needs the running app.
 import { expect, test } from "@playwright/test"
+import { letterTag } from "./utils/random"
 
 test("editing a name-only record: address saves quietly, a matching birthdate warns", async ({
   page,
@@ -12,7 +13,7 @@ test("editing a name-only record: address saves quietly, a matching birthdate wa
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   }
-  const tag = `Stub${Date.now() % 1000000}`
+  const tag = letterTag("Stub")
   const person = {
     first_name: "Rosa",
     middle_name: "Reyes",

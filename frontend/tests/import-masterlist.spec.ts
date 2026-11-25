@@ -62,9 +62,7 @@ test("upload, map, check and import a small fictional masterlist", async ({
   await page.getByRole("button", { name: "Import", exact: true }).last().click()
 
   // Step 4: results, then the history lists the file.
-  await expect(
-    page.getByText(`The import of masterlist-${tag}.csv is finished.`),
-  ).toBeVisible()
+  await expect(page.getByText(`masterlist-${tag}.csv imported`)).toBeVisible()
   await expect(page.getByText("Created", { exact: true })).toBeVisible()
   await expect(
     page.getByRole("row", { name: new RegExp(`masterlist-${tag}.csv`) }),

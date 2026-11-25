@@ -18,3 +18,12 @@ export const randomItemTitle = () =>
 
 export const randomItemDescription = () =>
   `Description ${Math.random().toString(36).substring(7)}`
+
+// A name that passes the resident rules (letters only, patch 251): the same time-based
+// number as before, with each digit written as a letter.
+export const letterTag = (prefix: string) =>
+  prefix +
+  String(Date.now() % 1000000).replace(
+    /\d/g,
+    (digit) => "abcdefghij"[Number(digit)],
+  )

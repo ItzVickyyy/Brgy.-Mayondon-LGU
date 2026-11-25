@@ -2,6 +2,7 @@
 // record warns and lists who matched; "Save anyway" confirms a real namesake.
 // A double click on Add resident makes one record. Needs the running app.
 import { expect, test } from "@playwright/test"
+import { letterTag } from "./utils/random"
 
 test("a spelling variant is warned about with the match listed, then saved anyway", async ({
   page,
@@ -12,7 +13,7 @@ test("a spelling variant is warned about with the match listed, then saved anywa
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   }
-  const tag = `Dup${Date.now() % 1000000}`
+  const tag = letterTag("Dup")
   const made = await page.request.post("/api/v1/residents/", {
     headers,
     data: {
@@ -49,7 +50,7 @@ test("a double click on Add resident saves one record", async ({ page }) => {
   await page.goto("/records")
   const token = await page.evaluate(() => localStorage.getItem("access_token"))
   const headers = { Authorization: `Bearer ${token}` }
-  const tag = `Dbl${Date.now() % 1000000}`
+  const tag = letterTag("Dbl")
   await page.getByRole("button", { name: "Add Resident" }).first().click()
   await page.locator("#resident-form-first-name").fill("Click")
   await page.locator("#resident-form-last-name").fill(tag)

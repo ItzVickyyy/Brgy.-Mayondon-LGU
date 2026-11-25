@@ -371,7 +371,7 @@ function RecordsManagement() {
                         {residentColumns.map((column) => (
                           <th
                             key={column}
-                            className={`px-3 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
+                            className={`px-2.5 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
                           >
                             {t(`records.list.columns.${column}`)}
                           </th>
@@ -386,7 +386,7 @@ function RecordsManagement() {
                             key={resident.id}
                             className="transition-colors hover:bg-muted/30"
                           >
-                            <td className="px-3 py-3 align-middle">
+                            <td className="px-2.5 py-3 align-middle">
                               <p className="font-semibold">
                                 {resident.full_name}
                               </p>
@@ -395,12 +395,12 @@ function RecordsManagement() {
                               </p>
                             </td>
                             <td
-                              className="max-w-[180px] truncate px-3 py-3 align-middle"
+                              className="max-w-[180px] truncate px-2.5 py-3 align-middle"
                               title={address}
                             >
                               {address || "—"}
                             </td>
-                            <td className="px-3 py-3 align-middle">
+                            <td className="px-2.5 py-3 align-middle">
                               {resident.birthdate ? (
                                 <>
                                   <span className="whitespace-nowrap">
@@ -421,28 +421,33 @@ function RecordsManagement() {
                                 "—"
                               )}
                             </td>
-                            <td className="px-3 py-3 align-middle">
+                            <td className="px-2.5 py-3 align-middle">
                               {resident.sex ? sexLabel(resident.sex, t) : "—"}
                             </td>
-                            <td className="px-3 py-3 align-middle">
+                            <td className="px-2.5 py-3 align-middle">
                               {resident.civil_status
                                 ? civilStatusLabel(resident.civil_status, t)
                                 : "—"}
                             </td>
                             <td
-                              className="max-w-[140px] truncate px-3 py-3 align-middle"
+                              className="max-w-[5rem] truncate px-2.5 py-3 align-middle"
                               title={resident.occupation ?? undefined}
                             >
                               {resident.occupation || "—"}
                             </td>
-                            <td className="sticky right-0 bg-card row-hover-cell px-3 py-3 align-middle sticky-edge">
+                            <td className="sticky right-0 bg-card row-hover-cell px-2.5 py-3 align-middle sticky-edge">
                               <RowActions
                                 name={resident.full_name}
                                 isAdmin={isAdmin}
                                 primary={{
                                   label: t("records.actions.viewProfile"),
                                   variant: "tintTeal",
-                                  icon: <Eye aria-hidden="true" />,
+                                  icon: (
+                                    <Eye
+                                      aria-hidden="true"
+                                      className="max-2xl:hidden"
+                                    />
+                                  ),
                                   onSelect: () => {
                                     setSelectedResident(resident)
                                     setProfileTab("Details")
@@ -452,13 +457,23 @@ function RecordsManagement() {
                                   {
                                     label: t("records.actions.editDetails"),
                                     variant: "tintBlue",
-                                    icon: <Pencil aria-hidden="true" />,
+                                    icon: (
+                                      <Pencil
+                                        aria-hidden="true"
+                                        className="max-2xl:hidden"
+                                      />
+                                    ),
                                     onSelect: () => openForm(resident),
                                   },
                                   {
                                     label: t("records.actions.newIssuance"),
                                     variant: "tintGreen",
-                                    icon: <FilePlus2 aria-hidden="true" />,
+                                    icon: (
+                                      <FilePlus2
+                                        aria-hidden="true"
+                                        className="max-2xl:hidden"
+                                      />
+                                    ),
                                     onSelect: () =>
                                       window.location.assign(
                                         `/issuances?resident=${encodeURIComponent(resident.id)}`,

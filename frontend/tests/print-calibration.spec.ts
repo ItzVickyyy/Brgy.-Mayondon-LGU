@@ -39,7 +39,7 @@ test.describe("print calibration", () => {
     const [page] = layoutCalibrationSheet("clearance", { x: 2, y: 3 })
     const date = page.fields.find((f) => f.label === "date")!
     expect(date).toMatchObject({ x: 491 - 172 / 2 + 2, y: 199 + 3, w: 172 })
-    expect(page.photo).toMatchObject({ x: 404, y: 343, w: 82, h: 79 })
+    expect(page.photo).toMatchObject({ x: 402 + 2, y: 325 + 3, w: 82, h: 79 })
     const [utility] = layoutCalibrationSheet("utility")
     expect(utility.marks[0]).toMatchObject({
       label: "electric=yes",

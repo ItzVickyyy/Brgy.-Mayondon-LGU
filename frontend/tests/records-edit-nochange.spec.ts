@@ -1,6 +1,7 @@
 // Saving a resident with nothing changed writes no Activity Log row and says so;
 // changing one field logs only that field. Needs the running app.
 import { expect, test } from "@playwright/test"
+import { letterTag } from "./utils/random"
 
 test("saving Edit resident details with no change is not logged", async ({
   page,
@@ -11,7 +12,7 @@ test("saving Edit resident details with no change is not logged", async ({
     Authorization: `Bearer ${token}`,
     "Content-Type": "application/json",
   }
-  const lastName = `NoChange${Date.now() % 1000000}`
+  const lastName = letterTag("NoChange")
   const created = await (
     await page.request.post("/api/v1/residents/?confirm_duplicate=true", {
       headers,

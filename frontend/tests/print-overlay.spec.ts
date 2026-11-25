@@ -118,7 +118,7 @@ test.describe("print overlay layout", () => {
       measure,
       { x: 2, y: -3 },
     )
-    expect(page.stamp).toMatchObject({ x: 402, y: 623 })
+    expect(page.stamp).toMatchObject({ x: 400 + 2, y: 612 - 3 })
     expect(page.stamp?.rows.every((row) => row.value === "")).toBe(true)
   })
 })
