@@ -76,7 +76,7 @@ Last updated: November 7, 2026
 | D-37 | The API docs page (`/docs`) loads CDN assets and won't render fully offline. Needed offline? | Not needed for staff; package assets only if required | Team | Final | **Closed** (Nov 1) |
 | D-38 | **Data Privacy Act procedures:** purpose, access, retention, correction, disclosure and incident handling as approved by the barangay; any privacy notice or consent wording | Ask whether the barangay has existing procedures | Client | Data | Open |
 | D-40 | **Real-data gate:** exactly what approvals (client + instructor) and passing checks must exist before real resident data is entered. Until then, synthetic data only. | See [05](05-Roles-Security-and-Privacy.md) Part D | Client / Instr. | Data | Open |
-| D-41 | **Testing participants:** who evaluates (Instrument B needs about [10] respondents including the client), when, and who can take part in staff training | Six staff + client head + admin assistant | Client / Team | Test | Open |
+| D-41 | **Testing participants:** who evaluates (Instrument B needs about [10] respondents including the client), when, and who can take part in staff training | Six staff + client head + admin assistant | Client / Team | Test | **Open:** working roster set Nov 25, 2026 (decision 106: 10 respondents, listed in [`testing/Instrument-B-User-Survey.md`](testing/Instrument-B-User-Survey.md)); client names, dates and the staff-training attendees still pending |
 | D-42 | **Certificate of Utilization:** name and position of the client's head who signs; whether the barangay has letterhead; the date of turnover | — | Client | Test | Open |
 
 ---
