@@ -2456,7 +2456,7 @@
         "prepare": "Ihanda ang Restore",
         "cancel": "Kanselahin ang Restore",
         "confirmTitle": "Kumpirmahin ang restore",
-        "confirmDescription": "Sinusuri lang nito ang file at ipinapakita ang command sa pag-restore; wala pang napapalitan. I-type ang <strong>{{word}}</strong> para magpatuloy.",
+        "confirmDescription": "Sinusuri lang nito ang file at ipinapakita ang command sa pag-restore; wala pang napapalitan. I-type ang <strong>{{word}}</strong> at ang iyong password para magpatuloy.",
         "typeLabel": "I-type ang {{word}} para magpatuloy",
         "confirmButton": "Suriin at Ipakita ang Command",
         "choose": "Pumili ng backup",

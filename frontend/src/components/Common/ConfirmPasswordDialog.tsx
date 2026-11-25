@@ -28,7 +28,8 @@ export const confirmHeaders = (token: string) => ({
   "X-Confirm-Token": token,
 })
 
-function messageOf(err: unknown, fallback: string): string {
+/** The server's message for a failed password check, or `fallback`. */
+export function messageOf(err: unknown, fallback: string): string {
   if (err instanceof AxiosError) {
     const detail = (err.response?.data as { detail?: unknown } | undefined)
       ?.detail

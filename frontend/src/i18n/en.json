@@ -2456,7 +2456,7 @@
         "prepare": "Prepare Restore",
         "cancel": "Cancel Restore",
         "confirmTitle": "Confirm restore",
-        "confirmDescription": "This only checks the file and shows the restore command; nothing is replaced yet. Type <strong>{{word}}</strong> to continue.",
+        "confirmDescription": "This only checks the file and shows the restore command; nothing is replaced yet. Type <strong>{{word}}</strong> and your password to continue.",
         "typeLabel": "Type {{word}} to continue",
         "confirmButton": "Check and Show Command",
         "choose": "Choose a backup",

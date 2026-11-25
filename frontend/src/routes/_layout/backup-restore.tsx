@@ -13,11 +13,12 @@ import {
 import { useState } from "react"
 import { Trans, useTranslation } from "react-i18next"
 
-import { type BackupRunPublic, BackupsService } from "@/client"
+import { type BackupRunPublic, BackupsService, LoginService } from "@/client"
 import {
   ConfirmPasswordDialog,
   type ConfirmScope,
   confirmHeaders,
+  messageOf,
 } from "@/components/Common/ConfirmPasswordDialog"
 import { EmptyState } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
@@ -49,6 +50,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { PasswordInput } from "@/components/ui/password-input"
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
@@ -126,6 +128,9 @@ function notice(key: NoticeKey, name: string) {
 // The word the person must type; it is compared in code, so it is never translated.
 const RESTORE_WORD = "RESTORE"
 
+// A failed password check, told apart from a failed restore request.
+class PasswordCheckError extends Error {}
+
 function BackupRestore() {
   const { t } = useTranslation()
   const { user } = useAuth()
@@ -135,7 +140,10 @@ function BackupRestore() {
   const [confirmRestore, setConfirmRestore] = useState(false)
   const [selectedBackup, setSelectedBackup] = useState("")
   const [restoreConfirmation, setRestoreConfirmation] = useState("")
-  // The password box: which action it is for, and what to do once it is right.
+  // The password is typed in the restore pop-up itself (one step, not two).
+  const [restorePassword, setRestorePassword] = useState("")
+  const [restorePasswordError, setRestorePasswordError] = useState("")
+  // The password box for the other risky action (Download copy).
   const [asking, setAsking] = useState<{
     scope: ConfirmScope
     run: (token: string) => void
@@ -181,21 +189,46 @@ function BackupRestore() {
     onError: (err: Error) => handleError.call(showErrorToast, err),
     onSettled: refresh,
   })
+  function closeRestore() {
+    setConfirmRestore(false)
+    setRestoreConfirmation("")
+    setRestorePassword("")
+    setRestorePasswordError("")
+  }
+  // One click: check the password (a wrong one stays in the pop-up as a
+  // message and keeps the typed word), then record the restore request.
   const restoreMutation = useMutation({
-    mutationFn: async ({ id, token }: { id: string; token: string }) =>
-      (
+    mutationFn: async ({ id, password }: { id: string; password: string }) => {
+      let token: string
+      try {
+        token = (
+          await LoginService.confirmPassword({
+            body: { password, scope: "backup.restore" },
+          })
+        ).data.confirm_token
+      } catch (err) {
+        throw new PasswordCheckError(
+          messageOf(err, t("common.confirmPassword.failed")),
+        )
+      }
+      return (
         await BackupsService.requestRestore({
           path: { backup_id: id },
           headers: confirmHeaders(token),
         })
-      ).data,
+      ).data
+    },
     onSuccess: (result) => {
       setRestoreCommand({ name: result.file_name, command: result.command })
       notice("restoreChecked", result.file_name)
-      setConfirmRestore(false)
-      setRestoreConfirmation("")
+      closeRestore()
     },
-    onError: (err: Error) => handleError.call(showErrorToast, err),
+    onError: (err: Error) => {
+      setRestorePassword("")
+      if (err instanceof PasswordCheckError)
+        setRestorePasswordError(err.message)
+      else handleError.call(showErrorToast, err)
+    },
     onSettled: refresh,
   })
 
@@ -225,14 +258,11 @@ function BackupRestore() {
   const restoreReady =
     restorable.some((backup) => backup.id === selectedBackup) &&
     restoreConfirmation === RESTORE_WORD &&
+    restorePassword !== "" &&
     !restoreMutation.isPending
-  // The pop-up stays open under the password box, so a wrong password does
-  // not lose the typed word.
-  function askRestorePassword() {
-    setAsking({
-      scope: "backup.restore",
-      run: (token) => restoreMutation.mutate({ id: selectedBackup, token }),
-    })
+  function submitRestore() {
+    setRestorePasswordError("")
+    restoreMutation.mutate({ id: selectedBackup, password: restorePassword })
   }
   const backupPagination = usePagination(
     sortedBackups,
@@ -479,7 +509,7 @@ function BackupRestore() {
             className="mt-4 min-h-11 w-full border-destructive/50 text-destructive hover:bg-destructive/5"
             disabled={!selectedBackup}
             onClick={() => {
-              setRestoreConfirmation("")
+              closeRestore()
               setConfirmRestore(true)
             }}
           >
@@ -492,10 +522,7 @@ function BackupRestore() {
       <Dialog
         open={confirmRestore}
         onOpenChange={(next) => {
-          if (!next) {
-            setConfirmRestore(false)
-            setRestoreConfirmation("")
-          }
+          if (!next) closeRestore()
         }}
       >
         <DialogContent
@@ -506,7 +533,7 @@ function BackupRestore() {
             className="flex min-h-0 flex-1 flex-col"
             onSubmit={(event) => {
               event.preventDefault()
-              if (restoreReady) askRestorePassword()
+              if (restoreReady) submitRestore()
             }}
           >
             <DialogHeader className={modalHeader}>
@@ -553,6 +580,32 @@ function BackupRestore() {
                   className={`${formControlClass} mt-2`}
                 />
               </label>
+              <div className="grid gap-2">
+                <label
+                  htmlFor="restore-password"
+                  className="text-sm font-medium"
+                >
+                  {t("common.confirmPassword.label")}
+                </label>
+                <PasswordInput
+                  id="restore-password"
+                  data-testid="restore-password"
+                  autoComplete="current-password"
+                  value={restorePassword}
+                  error={restorePasswordError}
+                  onChange={(event) => {
+                    setRestorePassword(event.target.value)
+                    setRestorePasswordError("")
+                  }}
+                />
+                <p
+                  role="alert"
+                  data-testid="restore-password-error"
+                  className="min-h-5 text-sm text-destructive"
+                >
+                  {restorePasswordError}
+                </p>
+              </div>
             </div>
             <div
               className={`${modalFooter} flex flex-col-reverse gap-2 sm:flex-row sm:justify-end`}
@@ -562,10 +615,7 @@ function BackupRestore() {
                 variant="outline"
                 className="min-h-11"
                 data-testid="restore-confirm-cancel"
-                onClick={() => {
-                  setConfirmRestore(false)
-                  setRestoreConfirmation("")
-                }}
+                onClick={closeRestore}
               >
                 {t("admin.backup.restore.cancel")}
               </Button>
@@ -756,7 +806,7 @@ function BackupRestore() {
                                 icon: <RotateCcw aria-hidden="true" />,
                                 onSelect: () => {
                                   setSelectedBackup(backup.id)
-                                  setRestoreConfirmation("")
+                                  closeRestore()
                                   setConfirmRestore(true)
                                 },
                               }

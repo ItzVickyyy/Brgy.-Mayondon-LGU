@@ -89,12 +89,12 @@ test("Prepare Restore opens a pop-up, not a panel in the card", async ({
   const confirm = dialog.getByRole("button", { name: "Check and Show Command" })
   await expect(confirm).toBeDisabled()
   await dialog.getByPlaceholder("RESTORE").fill("RESTORE")
+  // The word alone is not enough: the password is asked in the same pop-up.
+  await expect(confirm).toBeDisabled()
+  await dialog.getByTestId("restore-password").fill("secret")
   await expect(confirm).toBeEnabled()
-  await confirm.click()
-  // The password box opens on top, and the pop-up stays under it.
-  await expect(page.getByTestId("confirm-password-dialog")).toBeVisible()
-  await page.getByTestId("confirm-password-cancel").click()
-  await expect(dialog).toBeVisible()
+  // One pop-up only: there is no second password box.
+  await expect(page.getByTestId("confirm-password-dialog")).toHaveCount(0)
 
   await dialog.getByTestId("restore-confirm-cancel").click()
   await expect(dialog).toHaveCount(0)
@@ -195,4 +195,29 @@ test("the profile menu trigger looks like a button", async ({ page }) => {
   })
   expect(style.border).not.toBe("0px")
   expect(style.radius).not.toBe("0px")
+})
+
+test("a wrong password stays in the restore pop-up and keeps the typed word", async ({
+  page,
+}) => {
+  await mockApi(page)
+  await page.route("**/login/confirm-password", (route) =>
+    route.fulfill({
+      status: 400,
+      contentType: "application/json",
+      body: JSON.stringify({ detail: "Incorrect password" }),
+    }),
+  )
+  await page.goto("/backup-restore")
+  await page.getByTestId("restore-file").first().click()
+  await page.getByRole("button", { name: "Prepare Restore" }).click()
+  const dialog = page.getByTestId("restore-confirm-dialog")
+  await dialog.getByPlaceholder("RESTORE").fill("RESTORE")
+  await dialog.getByTestId("restore-password").fill("wrong")
+  await dialog.getByRole("button", { name: "Check and Show Command" }).click()
+  await expect(dialog.getByTestId("restore-password-error")).toHaveText(
+    "Incorrect password",
+  )
+  await expect(dialog.getByPlaceholder("RESTORE")).toHaveValue("RESTORE")
+  await expect(dialog.getByTestId("restore-password")).toHaveValue("")
 })
