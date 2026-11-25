@@ -36,6 +36,8 @@ export type RowPrimaryAction = {
     | "tintViolet"
   disabled?: boolean
   title?: string
+  /** Spoken name when the visible label is too short on its own (e.g. "Print for Maria Santos"). */
+  ariaLabel?: string
   icon?: ReactNode
 }
 
@@ -81,6 +83,7 @@ export function RowActions({
           onClick={primary.onSelect}
           disabled={primary.disabled}
           title={primary.title}
+          aria-label={primary.ariaLabel}
           className={compact ? "px-2.5" : undefined}
         >
           {primary.icon}
@@ -96,6 +99,7 @@ export function RowActions({
           onClick={action.onSelect}
           disabled={action.disabled}
           title={action.title}
+          aria-label={action.ariaLabel}
           className={compact ? "px-2.5" : undefined}
         >
           {action.icon}

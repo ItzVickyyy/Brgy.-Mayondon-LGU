@@ -154,7 +154,7 @@ test("a short list shows no page controls", async ({ page }) => {
   ).toHaveCount(0)
 })
 
-test("an issued row reads Edit, Print, View, then the three-dot menu", async ({
+test("an issued row reads View, Edit, Print, then the three-dot menu", async ({
   page,
 }) => {
   await mockApi(page)
@@ -168,8 +168,8 @@ test("an issued row reads Edit, Print, View, then the three-dot menu", async ({
     .getByRole("button")
     .allInnerTexts()
   expect(labels.map((l) => l.trim()).slice(0, 3)).toEqual([
+    "View",
     "Edit",
     "Print",
-    "View",
   ])
 })

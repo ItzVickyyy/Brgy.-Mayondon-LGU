@@ -905,54 +905,50 @@ export function IssuanceHistory({
                             className="@max-[59rem]/cards:flex-wrap @max-[59rem]/cards:justify-start"
                             name={item.resident_name}
                             isAdmin={isAdmin}
-                            leading={
-                              isIssued || isDraft ? (
-                                <>
-                                  <Button
-                                    type="button"
-                                    size="sm"
-                                    variant="tintBlue"
-                                    onClick={() =>
-                                      isDraft
-                                        ? onContinueDraft(item.id)
-                                        : setPending({ item, action: "correct" })
-                                    }
-                                  >
-                                    <Pencil aria-hidden="true" />
-                                    {t("issuances.history.actions.edit")}
-                                  </Button>
-                                  {isIssued ? (
-                                    <Button
-                                      type="button"
-                                      size="sm"
-                                      variant="tintViolet"
-                                      disabled={!canReprint}
-                                      aria-label={t(
-                                        "issuances.history.actions.printFor",
-                                        { name: item.resident_name },
-                                      )}
-                                      title={
-                                        canReprint
-                                          ? undefined
-                                          : t(
-                                              "issuances.history.actions.printUnavailable",
-                                            )
-                                      }
-                                      onClick={() => setPrintItem(item)}
-                                    >
-                                      <Printer aria-hidden="true" />
-                                      {t("issuances.history.actions.print")}
-                                    </Button>
-                                  ) : null}
-                                </>
-                              ) : undefined
-                            }
                             primary={{
                               label: t("issuances.history.actions.view"),
                               variant: "tintTeal",
                               icon: <Eye aria-hidden="true" />,
                               onSelect: () => setViewItem(item),
                             }}
+                            actions={[
+                              ...(isIssued || isDraft
+                                ? [
+                                    {
+                                      label: t("issuances.history.actions.edit"),
+                                      variant: "tintBlue" as const,
+                                      icon: <Pencil aria-hidden="true" />,
+                                      onSelect: () =>
+                                        isDraft
+                                          ? onContinueDraft(item.id)
+                                          : setPending({
+                                              item,
+                                              action: "correct",
+                                            }),
+                                    },
+                                  ]
+                                : []),
+                              ...(isIssued
+                                ? [
+                                    {
+                                      label: t("issuances.history.actions.print"),
+                                      variant: "tintViolet" as const,
+                                      icon: <Printer aria-hidden="true" />,
+                                      disabled: !canReprint,
+                                      ariaLabel: t(
+                                        "issuances.history.actions.printFor",
+                                        { name: item.resident_name },
+                                      ),
+                                      title: canReprint
+                                        ? undefined
+                                        : t(
+                                            "issuances.history.actions.printUnavailable",
+                                          ),
+                                      onSelect: () => setPrintItem(item),
+                                    },
+                                  ]
+                                : []),
+                            ]}
                             items={[
                               {
                                 label: t("issuances.history.actions.export"),

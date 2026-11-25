@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils"
 // A tiny press-down so clicks feel acknowledged (off for reduced motion).
 const press = "active:scale-[0.98] motion-reduce:active:scale-100"
 
-// Solid colored buttons (Dashboard stat colors, see index.css). The tone sets --tone: the fill is the tone,
+// Solid colored buttons (--action-* colors: the Dashboard colors leaning toward the accent, see index.css). The tone sets --tone: the fill is the tone,
 // a little darker in light mode. Text is white in light mode; in dark mode the fill is light, so the text is dark (amber included).
 const tint = (tone: string, text = "text-white dark:text-[oklch(0.2_0.02_260)]") =>
   `${tone} border border-transparent bg-[color-mix(in_oklab,var(--tone)_88%,black)] ${text} shadow-xs hover:bg-[color-mix(in_oklab,var(--tone)_76%,black)] dark:bg-[var(--tone)] dark:hover:bg-[color-mix(in_oklab,var(--tone)_85%,white)] ${press}`
@@ -28,12 +28,12 @@ const buttonVariants = cva(
         ghost: `hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50 in-data-[slot=dialog-content]:border in-data-[slot=dialog-content]:border-input in-data-[slot=dialog-content]:bg-background in-data-[slot=dialog-content]:font-semibold in-data-[slot=dialog-content]:shadow-xs ${press}`,
         // Main call to action: navy fill with the soft navy ring of the original Issue Document button.
         cta: `bg-primary text-primary-foreground shadow-md ring-2 ring-primary/25 ring-offset-2 ring-offset-background hover:bg-primary/90 hover:shadow-lg ${press}`,
-        tintBlue: tint("[--tone:var(--stat-blue)]"),
-        tintGreen: tint("[--tone:var(--stat-green)]"),
-        tintTeal: tint("[--tone:var(--stat-teal)]"),
-        tintAmber: tint("[--tone:var(--stat-amber)]", "text-white dark:text-[oklch(0.2_0.03_75)]"),
-        tintRose: tint("[--tone:var(--stat-rose)]"),
-        tintViolet: tint("[--tone:var(--stat-violet)]"),
+        tintBlue: tint("[--tone:var(--action-blue)]"),
+        tintGreen: tint("[--tone:var(--action-green)]"),
+        tintTeal: tint("[--tone:var(--action-teal)]"),
+        tintAmber: tint("[--tone:var(--action-amber)]", "text-white dark:text-[oklch(0.2_0.03_75)]"),
+        tintRose: tint("[--tone:var(--action-rose)]"),
+        tintViolet: tint("[--tone:var(--action-violet)]"),
         link: "text-brand underline-offset-4 hover:underline",
       },
       size: {
