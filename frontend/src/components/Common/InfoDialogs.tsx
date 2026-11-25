@@ -8,6 +8,7 @@ import {
   ScrollText,
   Search,
   ShieldCheck,
+  Sparkles,
   Tag,
   X,
 } from "lucide-react"
@@ -35,6 +36,7 @@ import {
   type DevNotePerson,
 } from "@/config/dev-note"
 import { SITE } from "@/config/site"
+import { WHATS_NEW } from "@/config/whats-new"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { SHORTCUTS } from "@/lib/shortcuts"
@@ -1581,6 +1583,33 @@ export function LearnMoreDialog(props: DialogProps) {
         <Section title="Built by" className="md:col-span-2">
           <p>{SITE.developedBy}.</p>
         </Section>
+      </div>
+    </InfoDialog>
+  )
+}
+
+export function WhatsNewDialog(props: DialogProps) {
+  return (
+    <InfoDialog
+      {...props}
+      icon={Sparkles}
+      size="md"
+      title="What’s new"
+      description={SITE.systemName}
+    >
+      <div className="space-y-4" data-testid="whats-new-list">
+        {WHATS_NEW.map((entry) => (
+          <section key={entry.title}>
+            <h3 className="mb-1.5 text-sm font-semibold text-brand">
+              {entry.title}
+            </h3>
+            <ul className="list-disc space-y-1 pl-5 leading-6">
+              {entry.points.map((point) => (
+                <li key={point}>{point}</li>
+              ))}
+            </ul>
+          </section>
+        ))}
       </div>
     </InfoDialog>
   )

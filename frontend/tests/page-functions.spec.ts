@@ -153,3 +153,46 @@ test("Verify selected checks each chosen backup file", async ({ page }) => {
   await verify
   await expect(page.getByText("3 backups verified")).toBeVisible()
 })
+
+test("Get help opens a small menu beside the button with Help and What's new", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await mockApi(page)
+  await page.goto("/")
+  const button = page.getByTestId("sidebar-get-help")
+  await button.click()
+  const menu = page.getByTestId("get-help-menu")
+  await expect(menu).toBeVisible()
+  const buttonBox = (await button.boundingBox())!
+  const menuBox = (await menu.boundingBox())!
+  // Beside the button: to its right, not on top of it.
+  expect(menuBox.x).toBeGreaterThanOrEqual(buttonBox.x + buttonBox.width - 2)
+  await expect(menu.getByRole("menuitem")).toHaveText(["Help", "What’s new"])
+
+  await menu.getByRole("menuitem", { name: "What’s new" }).click()
+  const dialog = page.getByRole("dialog", { name: "What’s new" })
+  await expect(dialog).toBeVisible()
+  await expect(dialog.getByTestId("whats-new-list")).toContainText(
+    "Backup and Restore",
+  )
+  await page.keyboard.press("Escape")
+
+  await button.click()
+  await page.getByRole("menuitem", { name: "Help", exact: true }).click()
+  await expect(page.getByRole("dialog", { name: "Get help" })).toBeVisible()
+})
+
+test("the profile menu trigger looks like a button", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await mockApi(page)
+  await page.goto("/")
+  const trigger = page.getByRole("button", { name: /user menu/i })
+  await expect(trigger).toBeVisible()
+  const style = await trigger.evaluate((el) => {
+    const css = getComputedStyle(el)
+    return { border: css.borderTopWidth, radius: css.borderTopLeftRadius }
+  })
+  expect(style.border).not.toBe("0px")
+  expect(style.radius).not.toBe("0px")
+})

@@ -71,10 +71,10 @@ export function User({
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
-              variant="ghost"
+              variant={compact ? "outline" : "ghost"}
               className={
                 compact
-                  ? "min-h-11 w-auto max-w-[280px] min-w-0 justify-start gap-2 rounded-lg px-1.5 py-1.5 text-left hover:bg-muted/70 sm:px-2"
+                  ? "min-h-11 w-auto max-w-[280px] min-w-0 justify-start gap-2 rounded-lg border-border bg-card px-1.5 py-1.5 text-left shadow-xs hover:bg-muted sm:px-2"
                   : "h-auto w-full min-w-0 justify-start gap-2 rounded-lg px-2 py-2 text-left group-data-[collapsible=icon]:mx-auto group-data-[collapsible=icon]:size-8! group-data-[collapsible=icon]:min-w-8 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:rounded-md group-data-[collapsible=icon]:px-0 group-data-[collapsible=icon]:py-0"
               }
               aria-label={t("userMenu.ariaLabel")}

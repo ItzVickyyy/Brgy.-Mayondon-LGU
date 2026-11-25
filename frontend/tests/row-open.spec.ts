@@ -128,6 +128,7 @@ test("Get help is a sidebar button and its search sits in the pop-up header", as
   const buttonBox = await button.boundingBox()
   expect(buttonBox!.y).toBeGreaterThan(sidebar!.y + sidebar!.height * 0.8)
   await button.click()
+  await page.getByRole("menuitem", { name: "Help", exact: true }).click()
 
   const dialog = page.getByRole("dialog", { name: "Get help" })
   await expect(dialog).toBeVisible()
@@ -166,6 +167,7 @@ test("on a phone, Get help opens its pop-up after the menu closes", async ({
   await page.goto("/")
   await page.locator("[data-sidebar='trigger']").first().click()
   await page.getByTestId("sidebar-get-help").click()
+  await page.getByRole("menuitem", { name: "Help", exact: true }).click()
   const dialog = page.getByRole("dialog", { name: "Get help" })
   await expect(dialog).toBeVisible()
   await expect(dialog.getByTestId("help-search")).toBeVisible()

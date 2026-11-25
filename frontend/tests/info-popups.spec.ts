@@ -143,6 +143,7 @@ test.describe("popups in the profile menu and the Get help button", () => {
     await signedIn(page)
     await page.goto("/")
     await page.getByTestId("sidebar-get-help").click()
+    await page.getByRole("menuitem", { name: "Help", exact: true }).click()
     const dialog = page.getByRole("dialog", { name: "Get help" })
     await expect(dialog).toBeVisible()
     await expect(dialog).not.toContainText(forbidden)
@@ -172,6 +173,7 @@ test.describe("popups in the profile menu and the Get help button", () => {
   async function openHelp(page: Page) {
     await page.goto("/")
     await page.getByTestId("sidebar-get-help").click()
+    await page.getByRole("menuitem", { name: "Help", exact: true }).click()
     const dialog = page.getByRole("dialog", { name: "Get help" })
     await expect(dialog).toBeVisible()
     return dialog

@@ -3,19 +3,27 @@ import {
   Activity,
   BarChart3,
   BookUser,
+  ChevronRight,
   CircleHelp,
   DatabaseBackup,
   FileCheck2,
   LayoutDashboard,
   ShieldCheck,
+  Sparkles,
   Users,
 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { HelpDialog } from "@/components/Common/InfoDialogs"
+import { HelpDialog, WhatsNewDialog } from "@/components/Common/InfoDialogs"
 import { Logo } from "@/components/Common/Logo"
 import { SidebarBackdrop } from "@/components/Common/SidebarBackdrop"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   Sidebar,
   SidebarContent,
@@ -93,29 +101,66 @@ const items: NavigationItem[] = [
   },
 ]
 
-// Get help lives at the bottom of the menu, in reach on every page. The pop-up itself
-// is kept by AppSidebar, outside the menu: on a phone the menu closes when this button
-// is pressed, and a pop-up inside it would close with it.
-function HelpButton({ onOpen }: { onOpen: () => void }) {
+// Get help lives at the bottom of the menu, in reach on every page. It opens a small
+// menu beside the button (Help, What's new). The pop-ups themselves are kept by
+// AppSidebar, outside the menu: on a phone the menu closes when an item is chosen, and a
+// pop-up inside it would close with it.
+function HelpButton({
+  onHelp,
+  onWhatsNew,
+}: {
+  onHelp: () => void
+  onWhatsNew: () => void
+}) {
   const { t } = useTranslation()
   const { isMobile, setOpenMobile } = useSidebar()
+  const choose = (open: () => void) => () => {
+    if (isMobile) setOpenMobile(false)
+    open()
+  }
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <SidebarMenuButton
-          type="button"
-          data-testid="sidebar-get-help"
-          tooltip={t("userMenu.getHelp")}
-          className={NAV_BUTTON_CLASS}
-          onClick={() => {
-            if (isMobile) setOpenMobile(false)
-            onOpen()
-          }}
-        >
-          <CircleHelp aria-hidden="true" />
-          <span className={NAV_LABEL_CLASS}>{t("userMenu.getHelp")}</span>
-        </SidebarMenuButton>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <SidebarMenuButton
+              type="button"
+              data-testid="sidebar-get-help"
+              tooltip={t("userMenu.getHelp")}
+              className={NAV_BUTTON_CLASS}
+            >
+              <CircleHelp aria-hidden="true" />
+              <span className={NAV_LABEL_CLASS}>{t("userMenu.getHelp")}</span>
+              <ChevronRight
+                aria-hidden="true"
+                className="ml-auto size-4 opacity-60 group-data-[collapsible=icon]:hidden"
+              />
+            </SidebarMenuButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            data-testid="get-help-menu"
+            className="w-52"
+            side={isMobile ? "top" : "right"}
+            align={isMobile ? "start" : "end"}
+            sideOffset={10}
+          >
+            <DropdownMenuItem
+              className="min-h-11 gap-2"
+              onSelect={choose(onHelp)}
+            >
+              <CircleHelp className="size-4" aria-hidden="true" />
+              {t("userMenu.help")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="min-h-11 gap-2"
+              onSelect={choose(onWhatsNew)}
+            >
+              <Sparkles className="size-4" aria-hidden="true" />
+              {t("userMenu.whatsNew")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
   )
@@ -125,6 +170,7 @@ export function AppSidebar() {
   const { user: currentUser } = useAuth()
   const { t } = useTranslation()
   const [helpOpen, setHelpOpen] = useState(false)
+  const [whatsNewOpen, setWhatsNewOpen] = useState(false)
   const visibleItems: Item[] = items
     .filter((item) => !item.adminOnly || isSystemAdministrator(currentUser))
     .map(({ titleKey, sectionKey, ...item }) => ({
@@ -144,10 +190,14 @@ export function AppSidebar() {
           <Main items={visibleItems} />
         </SidebarContent>
         <SidebarFooter className="relative border-t border-sidebar-border p-2">
-          <HelpButton onOpen={() => setHelpOpen(true)} />
+          <HelpButton
+            onHelp={() => setHelpOpen(true)}
+            onWhatsNew={() => setWhatsNewOpen(true)}
+          />
         </SidebarFooter>
       </Sidebar>
       <HelpDialog open={helpOpen} onOpenChange={setHelpOpen} />
+      <WhatsNewDialog open={whatsNewOpen} onOpenChange={setWhatsNewOpen} />
     </>
   )
 }
