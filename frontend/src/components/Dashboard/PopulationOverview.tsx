@@ -430,7 +430,7 @@ export function PopulationOverview({
             {t("dashboard.population.genderBreakdown")}
           </CardTitle>
           <div className="@container mt-3 flex flex-1 flex-col justify-center">
-            <div className="flex flex-col items-center justify-center gap-4 sm:flex-row @[20rem]:grid @[20rem]:grid-cols-[1fr_auto_1fr]">
+            <div className="flex flex-col items-center justify-center gap-4 @[14.75rem]:flex-row @[20rem]:grid @[20rem]:grid-cols-[1fr_auto_1fr]">
               {ready ? (
                 <>
                   <span className="hidden @[20rem]:block" aria-hidden="true" />
@@ -561,28 +561,30 @@ export function PopulationOverview({
           <CardTitle icon={ChartPie}>
             {t("dashboard.population.civilStatus")}
           </CardTitle>
-          <div className="mt-3 flex min-w-0 flex-1 flex-col items-center justify-center gap-4 sm:flex-row xl:flex-col 2xl:flex-row">
-            {ready ? (
-              <>
-                <Donut
-                  segments={civil}
-                  total={total}
-                  active={civilActive}
-                  onActive={setCivilActive}
+          <div className="@container mt-3 flex min-w-0 flex-1 flex-col justify-center">
+            <div className="flex min-w-0 flex-col items-center justify-center gap-4 @[19.5rem]:flex-row">
+              {ready ? (
+                <>
+                  <Donut
+                    segments={civil}
+                    total={total}
+                    active={civilActive}
+                    onActive={setCivilActive}
+                  />
+                  <Legend
+                    segments={civil}
+                    active={civilActive}
+                    onActive={setCivilActive}
+                    inline
+                  />
+                </>
+              ) : (
+                <Skeleton
+                  className="size-36 rounded-full sm:size-40"
+                  aria-hidden="true"
                 />
-                <Legend
-                  segments={civil}
-                  active={civilActive}
-                  onActive={setCivilActive}
-                  inline
-                />
-              </>
-            ) : (
-              <Skeleton
-                className="size-36 rounded-full sm:size-40"
-                aria-hidden="true"
-              />
-            )}
+              )}
+            </div>
           </div>
         </article>
 
