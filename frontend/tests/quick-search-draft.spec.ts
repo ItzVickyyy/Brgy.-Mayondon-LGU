@@ -1,6 +1,6 @@
 // Ctrl+K finds a resident from any page, and an unsaved new-resident form comes back as a
 // draft (and goes away when discarded). The API is mocked, so this spec needs only the running app.
-import { expect, test } from "@playwright/test"
+import { expect, type Locator, type Page, test } from "@playwright/test"
 
 const admin = {
   id: "22222222-0000-0000-0000-000000000001",
@@ -18,6 +18,15 @@ const person = {
   birthdate: "1990-05-17",
   purok: 3,
 }
+
+/** Waits until the signed-in layout (which owns the shortcuts) is on screen, then clicks the empty page so no field has focus. Pressing a key straight after goto/reload can beat the app's start-up. */
+async function focusPage(page: Page, waitFor?: Locator) {
+  await expect(page.getByRole("button", { name: "User menu" })).toBeVisible()
+  if (waitFor) await expect(waitFor).toBeVisible()
+  await page.locator("body").click({ position: { x: 5, y: 5 } })
+}
+const addResident = (page: Page) =>
+  page.locator('[data-shortcut="new-resident"]')
 
 test.beforeEach(async ({ page }) => {
   await page.route("**/api/v1/**", async (route) => {
@@ -47,7 +56,7 @@ test("Ctrl+K lists matches and opens Records searching for the person", async ({
   page,
 }) => {
   await page.goto("/")
-  await page.locator("body").click({ position: { x: 5, y: 5 } })
+  await focusPage(page)
   await page.keyboard.press("Control+k")
   const box = page.getByTestId("quick-search-input")
   await expect(box).toBeFocused()
@@ -66,7 +75,7 @@ test("an unsaved new resident comes back as a draft and can be discarded", async
   page,
 }) => {
   await page.goto("/records")
-  await page.locator("body").click({ position: { x: 5, y: 5 } })
+  await focusPage(page, addResident(page))
   await page.keyboard.press("n")
   const dialog = page.getByRole("dialog")
   await dialog.locator("#resident-form-first-name").fill("Juana")
@@ -75,7 +84,7 @@ test("an unsaved new resident comes back as a draft and can be discarded", async
   await expect(dialog).toBeHidden()
 
   await page.reload()
-  await page.locator("body").click({ position: { x: 5, y: 5 } })
+  await focusPage(page, addResident(page))
   await page.keyboard.press("n")
   await expect(page.getByTestId("resident-draft-notice")).toBeVisible()
   await expect(page.locator("#resident-form-first-name")).toHaveValue("Juana")
@@ -85,7 +94,7 @@ test("an unsaved new resident comes back as a draft and can be discarded", async
   await expect(page.locator("#resident-form-first-name")).toHaveValue("")
   await page.keyboard.press("Escape")
   await page.reload()
-  await page.locator("body").click({ position: { x: 5, y: 5 } })
+  await focusPage(page, addResident(page))
   await page.keyboard.press("n")
   await expect(page.getByTestId("resident-draft-notice")).toBeHidden()
 })
