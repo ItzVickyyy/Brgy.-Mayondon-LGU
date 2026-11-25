@@ -88,12 +88,36 @@
   --stat-teal: oklch(0.6 0.1 195);
   /* Row-button colors: the six Dashboard colors with 12% of the chosen accent mixed in, so they sit well beside
      it but keep their meaning (teal look, blue change, violet send out, green add, amber caution, rose delete). */
-  --action-blue: color-mix(in oklch, var(--stat-blue) 88%, oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
-  --action-green: color-mix(in oklch, var(--stat-green) 88%, oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
-  --action-amber: color-mix(in oklch, var(--stat-amber) 88%, oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
-  --action-violet: color-mix(in oklch, var(--stat-violet) 88%, oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
-  --action-rose: color-mix(in oklch, var(--stat-rose) 88%, oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
-  --action-teal: color-mix(in oklch, var(--stat-teal) 88%, oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
+  --action-blue: color-mix(
+    in oklch,
+    var(--stat-blue) 88%,
+    oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
+  --action-green: color-mix(
+    in oklch,
+    var(--stat-green) 88%,
+    oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
+  --action-amber: color-mix(
+    in oklch,
+    var(--stat-amber) 88%,
+    oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
+  --action-violet: color-mix(
+    in oklch,
+    var(--stat-violet) 88%,
+    oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
+  --action-rose: color-mix(
+    in oklch,
+    var(--stat-rose) 88%,
+    oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
+  --action-teal: color-mix(
+    in oklch,
+    var(--stat-teal) 88%,
+    oklch(0.55 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
   /* Sidebar: one solid navy, white text, a gold marker for the current page. */
   --sidebar: oklch(0.27 0.06 258);
   --sidebar-foreground: oklch(0.95 0.008 250);
@@ -141,12 +165,36 @@
   --stat-teal: oklch(0.76 0.1 195);
   /* Row-button colors: the six Dashboard colors with 12% of the chosen accent mixed in, so they sit well beside
      it but keep their meaning (teal look, blue change, violet send out, green add, amber caution, rose delete). */
-  --action-blue: color-mix(in oklch, var(--stat-blue) 88%, oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
-  --action-green: color-mix(in oklch, var(--stat-green) 88%, oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
-  --action-amber: color-mix(in oklch, var(--stat-amber) 88%, oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
-  --action-violet: color-mix(in oklch, var(--stat-violet) 88%, oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
-  --action-rose: color-mix(in oklch, var(--stat-rose) 88%, oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
-  --action-teal: color-mix(in oklch, var(--stat-teal) 88%, oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258)));
+  --action-blue: color-mix(
+    in oklch,
+    var(--stat-blue) 88%,
+    oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
+  --action-green: color-mix(
+    in oklch,
+    var(--stat-green) 88%,
+    oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
+  --action-amber: color-mix(
+    in oklch,
+    var(--stat-amber) 88%,
+    oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
+  --action-violet: color-mix(
+    in oklch,
+    var(--stat-violet) 88%,
+    oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
+  --action-rose: color-mix(
+    in oklch,
+    var(--stat-rose) 88%,
+    oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
+  --action-teal: color-mix(
+    in oklch,
+    var(--stat-teal) 88%,
+    oklch(0.75 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue, 258))
+  );
   --sidebar: oklch(0.21 0.05 258);
   --sidebar-foreground: oklch(0.95 0.008 250);
   --sidebar-primary: oklch(0.8 0.12 85);

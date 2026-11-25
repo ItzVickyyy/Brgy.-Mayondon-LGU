@@ -2444,6 +2444,7 @@
       "actions": {
         "restore": "I-restore",
         "verify": "I-verify ang file",
+        "verifySelected": "I-verify ang napili",
         "download": "I-download ang kopya"
       },
       "restore": {
@@ -2465,7 +2466,9 @@
         "created": "Nagawa ang backup",
         "verified": "Na-verify ang backup",
         "downloaded": "Nagsimula ang download",
-        "restoreChecked": "Naitala ang hiling na restore"
+        "restoreChecked": "Naitala ang hiling na restore",
+        "verifiedMany_one": "Na-verify ang {{count}} backup",
+        "verifiedMany_other": "Na-verify ang {{count}} backup"
       },
       "failures": {
         "create": "Nabigo ang backup. Tingnan ang listahan.",
@@ -2941,7 +2944,12 @@
       "count_one": "{{count}} ang napili",
       "count_other": "{{count}} ang napili",
       "export": "I-export ang napili (CSV)",
-      "clear": "Alisin ang pagpili"
+      "clear": "Alisin ang pagpili",
+      "print": "I-print ang napili",
+      "copy": "Kopyahin",
+      "copied_one": "Nakopya ang {{count}} hilera",
+      "copied_other": "Nakopya ang {{count}} hilera",
+      "copyFailed": "Hindi makopya. Payagan ang clipboard at subukan muli."
     }
   },
   "apiErrors": {

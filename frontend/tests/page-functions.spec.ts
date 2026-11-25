@@ -1,0 +1,155 @@
+// Patch 283: the restore confirmation is a pop-up, and selected rows can be
+// printed, copied and (on Backup) verified. The API is mocked (synthetic data).
+import { expect, type Page, test } from "@playwright/test"
+
+const admin = {
+  id: "22222222-0000-0000-0000-000000000001",
+  email: "admin@example.com",
+  is_active: true,
+  is_superuser: true,
+  role: "admin",
+  full_name: "Test Admin",
+}
+
+const run = (n: number) => ({
+  id: `00000000-0000-0000-0000-00000000000${n}`,
+  started_at: "2026-11-20T01:38:44.962818Z",
+  finished_at: "2026-11-20T01:38:45.962818Z",
+  kind: "manual",
+  status: "ok",
+  file_name: `mayondon-db-20261120-093844-00${n}.dump`,
+  size_bytes: 2048,
+  verified_at: "2026-11-20T01:38:45.962818Z",
+  created_by_email: "admin@example.com",
+  error: null,
+  file_exists: true,
+})
+
+async function mockApi(page: Page) {
+  await page.route("**/api/v1/**", async (route) => {
+    const json = (body: unknown) =>
+      route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify(body),
+      })
+    const url = route.request().url()
+    if (url.includes("/users/me")) return json(admin)
+    if (url.includes("/verify")) return json(run(1))
+    if (url.includes("/backups/"))
+      return json({
+        data: [run(1), run(2), run(3)],
+        count: 3,
+        tool_available: true,
+        keep_copies: 14,
+      })
+    return json({ data: [], count: 0 })
+  })
+  await page.addInitScript(() => {
+    localStorage.setItem("access_token", "test-token")
+    localStorage.setItem("app-language", "en")
+    localStorage.setItem("vite-ui-theme", "light")
+    // Record what the hidden print frame holds, because it is removed afterwards.
+    const append = Node.prototype.appendChild
+    Node.prototype.appendChild = function <T extends Node>(child: T): T {
+      const added = append.call(this, child) as T
+      if (child instanceof HTMLIFrameElement) {
+        window.setTimeout(() => {
+          ;(window as unknown as { __printed: string }).__printed =
+            child.contentDocument?.body?.innerText ?? ""
+        }, 200)
+      }
+      return added
+    }
+  })
+}
+
+test("Prepare Restore opens a pop-up, not a panel in the card", async ({
+  page,
+}) => {
+  await mockApi(page)
+  await page.goto("/backup-restore")
+  const prepare = page.getByRole("button", { name: "Prepare Restore" })
+  await expect(prepare).toBeDisabled()
+  await page.getByTestId("restore-file").first().click()
+  await prepare.click()
+
+  const dialog = page.getByTestId("restore-confirm-dialog")
+  await expect(dialog).toBeVisible()
+  await expect(
+    dialog.getByRole("heading", { name: "Confirm restore" }),
+  ).toBeVisible()
+  await expect(page.getByTestId("restore-confirm-file")).toContainText(
+    "mayondon-db-20261120-093844-001.dump",
+  )
+  // Nothing is drawn inside the card any more.
+  await expect(
+    page.getByTestId("restore-card").getByText("Confirm restore"),
+  ).toHaveCount(0)
+
+  const confirm = dialog.getByRole("button", { name: "Check and Show Command" })
+  await expect(confirm).toBeDisabled()
+  await dialog.getByPlaceholder("RESTORE").fill("RESTORE")
+  await expect(confirm).toBeEnabled()
+  await confirm.click()
+  // The password box opens on top, and the pop-up stays under it.
+  await expect(page.getByTestId("confirm-password-dialog")).toBeVisible()
+  await page.getByTestId("confirm-password-cancel").click()
+  await expect(dialog).toBeVisible()
+
+  await dialog.getByTestId("restore-confirm-cancel").click()
+  await expect(dialog).toHaveCount(0)
+})
+
+test("the row Restore button opens the same pop-up", async ({ page }) => {
+  await mockApi(page)
+  await page.goto("/backup-restore")
+  await page
+    .getByRole("button", { name: "Restore", exact: true })
+    .first()
+    .click()
+  await expect(page.getByTestId("restore-confirm-dialog")).toBeVisible()
+  await page.keyboard.press("Escape")
+  await expect(page.getByTestId("restore-confirm-dialog")).toHaveCount(0)
+})
+
+test("Print selected prints only the chosen rows; Copy puts them on the clipboard", async ({
+  page,
+  context,
+}) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"])
+  await mockApi(page)
+  await page.goto("/backup-restore")
+  await page.getByTestId("row-select").nth(1).click()
+
+  await page.getByTestId("selection-print").click()
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () => (window as unknown as { __printed?: string }).__printed ?? "",
+      ),
+    )
+    .toContain("mayondon-db-20261120-093844-002.dump")
+  const printed = await page.evaluate(
+    () => (window as unknown as { __printed: string }).__printed,
+  )
+  expect(printed).not.toContain("mayondon-db-20261120-093844-001.dump")
+
+  await page.getByTestId("selection-copy").click()
+  await expect(page.getByText("1 row copied")).toBeVisible()
+  const text = await page.evaluate(() => navigator.clipboard.readText())
+  expect(text).toContain("mayondon-db-20261120-093844-002.dump")
+  expect(text).toContain("\t")
+  expect(text).not.toContain("mayondon-db-20261120-093844-001.dump")
+})
+
+test("Verify selected checks each chosen backup file", async ({ page }) => {
+  await mockApi(page)
+  await page.goto("/backup-restore")
+  await page.getByTestId("page-select").click()
+  const verify = page.waitForRequest((request) =>
+    request.url().includes("/verify"),
+  )
+  await page.getByTestId("verify-selected").click()
+  await verify
+  await expect(page.getByText("3 backups verified")).toBeVisible()
+})

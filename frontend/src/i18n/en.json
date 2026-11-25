@@ -2444,6 +2444,7 @@
       "actions": {
         "restore": "Restore",
         "verify": "Verify file",
+        "verifySelected": "Verify selected",
         "download": "Download copy"
       },
       "restore": {
@@ -2465,7 +2466,9 @@
         "created": "Backup created",
         "verified": "Backup verified",
         "downloaded": "Download started",
-        "restoreChecked": "Restore request recorded"
+        "restoreChecked": "Restore request recorded",
+        "verifiedMany_one": "{{count}} backups verified",
+        "verifiedMany_other": "{{count}} backups verified"
       },
       "failures": {
         "create": "Backup failed. See the list.",
@@ -2941,7 +2944,12 @@
       "count_one": "{{count}} selected",
       "count_other": "{{count}} selected",
       "export": "Export selected (CSV)",
-      "clear": "Clear selection"
+      "clear": "Clear selection",
+      "print": "Print selected",
+      "copy": "Copy",
+      "copied_one": "{{count}} row copied",
+      "copied_other": "{{count}} rows copied",
+      "copyFailed": "Could not copy. Allow clipboard access and try again."
     }
   },
   "apiErrors": {

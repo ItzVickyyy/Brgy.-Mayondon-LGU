@@ -1,9 +1,10 @@
-import { Download, X } from "lucide-react"
+import { Clipboard, Download, Printer, X } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import useCustomToast from "@/hooks/useCustomToast"
 import { type ReportCell, reportCsv } from "@/lib/reports/reportFiles"
 
 /**
@@ -69,9 +70,70 @@ function saveCsv(name: string, rows: ReportCell[][]) {
   window.setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
 
+const escapeHtml = (value: ReportCell) =>
+  String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+
+/**
+ * Prints the selected rows as a plain table. It is drawn in a hidden frame,
+ * so it never touches the page's own print rules; the frame is removed after
+ * printing (Chrome draws its preview after `print()` returns).
+ */
+function printRows(title: string, rows: ReportCell[][]) {
+  const [head = [], ...body] = rows
+  const frame = document.createElement("iframe")
+  frame.setAttribute("aria-hidden", "true")
+  frame.style.cssText =
+    "position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden"
+  document.body.appendChild(frame)
+  const doc = frame.contentDocument
+  const win = frame.contentWindow
+  if (!doc || !win) {
+    frame.remove()
+    return
+  }
+  doc.open()
+  doc.write(`<!doctype html><html><head><meta charset="utf-8"><title>${escapeHtml(title)}</title><style>
+@page{size:auto;margin:0.6in}
+body{font:11pt Arial,sans-serif;color:#111}
+h1{font-size:14pt;margin:0 0 8pt}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #999;padding:4pt 6pt;text-align:left;vertical-align:top;font-size:9.5pt}
+th{background:#eee}
+tr{break-inside:avoid}
+</style></head><body><h1>${escapeHtml(title)}</h1><table><thead><tr>${head
+    .map((cell) => `<th>${escapeHtml(cell)}</th>`)
+    .join("")}</tr></thead><tbody>${body
+    .map(
+      (row) =>
+        `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join("")}</tr>`,
+    )
+    .join("")}</tbody></table></body></html>`)
+  doc.close()
+  const cleanup = () => window.setTimeout(() => frame.remove(), 500)
+  win.addEventListener("afterprint", cleanup, { once: true })
+  window.setTimeout(() => {
+    win.focus()
+    win.print()
+  }, 50)
+}
+
+/** Tab-separated text, so it pastes into Excel or Word as a table. */
+function tabText(rows: ReportCell[][]) {
+  return rows
+    .map((row) =>
+      row.map((cell) => String(cell).replace(/[\t\r\n]+/g, " ")).join("\t"),
+    )
+    .join("\n")
+}
+
 /**
  * Bar above a table while rows are selected: count, Clear, Export selected
- * (CSV, formula-safe) and any table-specific `children` buttons.
+ * (CSV, formula-safe), Print selected, Copy and any table-specific
+ * `children` buttons.
  */
 export function SelectionBar({
   count,
@@ -87,7 +149,17 @@ export function SelectionBar({
   children?: ReactNode
 }) {
   const { t } = useTranslation()
+  const { showSuccessToast, showErrorToast } = useCustomToast()
   if (count === 0) return null
+  async function copy() {
+    if (!csvRows) return
+    try {
+      await navigator.clipboard.writeText(tabText(csvRows()))
+      showSuccessToast(t("common.selection.copied", { count }))
+    } catch {
+      showErrorToast(t("common.selection.copyFailed"))
+    }
+  }
   return (
     <section
       data-testid="selection-bar"
@@ -122,6 +194,32 @@ export function SelectionBar({
             <Download aria-hidden="true" />
             {t("common.selection.export")}
           </Button>
+        ) : null}
+        {csvRows ? (
+          <>
+            <Button
+              type="button"
+              variant="tintViolet"
+              size="sm"
+              data-testid="selection-print"
+              className="min-h-11 flex-1 sm:flex-none"
+              onClick={() => printRows(document.title, csvRows())}
+            >
+              <Printer aria-hidden="true" />
+              {t("common.selection.print")}
+            </Button>
+            <Button
+              type="button"
+              variant="tintTeal"
+              size="sm"
+              data-testid="selection-copy"
+              className="min-h-11 flex-1 sm:flex-none"
+              onClick={copy}
+            >
+              <Clipboard aria-hidden="true" />
+              {t("common.selection.copy")}
+            </Button>
+          </>
         ) : null}
         {children}
       </div>
