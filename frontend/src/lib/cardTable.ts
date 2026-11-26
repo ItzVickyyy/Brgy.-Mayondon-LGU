@@ -25,3 +25,27 @@ export const cardTable = {
   selectRow: "@max-[59rem]/cards:relative",
   selectName: "@max-[59rem]/cards:pr-9",
 } as const
+
+// The same card layout for the User Accounts table, which is too wide for a 1280 px laptop (its
+// box is about 972 px, 1171 px of columns in English and 1277 px in Filipino): cards below
+// 75rem, container "wide-cards" (patch 311). `index.css` switches off the Actions edge shadow.
+export const wideCardTable = {
+  box: "@container/wide-cards overflow-x-auto",
+  table: "@max-[75rem]/wide-cards:block",
+  head: "@max-[75rem]/wide-cards:hidden",
+  body: "@max-[75rem]/wide-cards:block",
+  row: "@max-[75rem]/wide-cards:flex @max-[75rem]/wide-cards:flex-wrap @max-[75rem]/wide-cards:gap-x-4 @max-[75rem]/wide-cards:gap-y-1 @max-[75rem]/wide-cards:px-4 @max-[75rem]/wide-cards:py-3",
+  cell: "@max-[75rem]/wide-cards:block @max-[75rem]/wide-cards:p-0",
+  full: "@max-[75rem]/wide-cards:block @max-[75rem]/wide-cards:w-full @max-[75rem]/wide-cards:p-0",
+  labelled:
+    "@max-[75rem]/wide-cards:block @max-[75rem]/wide-cards:p-0 @max-[75rem]/wide-cards:before:mr-1 @max-[75rem]/wide-cards:before:text-xs @max-[75rem]/wide-cards:before:text-muted-foreground @max-[75rem]/wide-cards:before:content-[attr(data-label)]",
+  actions:
+    "@max-[75rem]/wide-cards:static @max-[75rem]/wide-cards:block @max-[75rem]/wide-cards:w-full @max-[75rem]/wide-cards:bg-transparent @max-[75rem]/wide-cards:p-0 @max-[75rem]/wide-cards:pt-1",
+  // Batch selection (278): a checkbox column in table mode; in card mode the box
+  // sits at the card's top-right corner and the name cell leaves room for it.
+  // `selectRow` goes on the <tr>, `selectName` on the name cell.
+  select:
+    "w-11 @max-[75rem]/wide-cards:absolute @max-[75rem]/wide-cards:right-2 @max-[75rem]/wide-cards:top-2 @max-[75rem]/wide-cards:block @max-[75rem]/wide-cards:w-auto @max-[75rem]/wide-cards:p-0",
+  selectRow: "@max-[75rem]/wide-cards:relative",
+  selectName: "@max-[75rem]/wide-cards:pr-9",
+} as const

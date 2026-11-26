@@ -24,6 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { wideCardTable } from "@/lib/cardTable"
 import type { ReportCell } from "@/lib/reports/reportFiles"
 import { useRowSelection } from "@/lib/useRowSelection"
 import { type SortValue, useSort } from "@/lib/useSort"
@@ -85,8 +86,11 @@ export function DataTable<TData extends RowData>({
           csvRows={() => selection.csvRows(pick.pick(data))}
         />
       ) : null}
-      <Table containerClassName="overflow-x-auto rounded-none border-0">
-        <TableHeader>
+      <Table
+        containerClassName={`${wideCardTable.box} rounded-none border-0`}
+        className={wideCardTable.table}
+      >
+        <TableHeader className={wideCardTable.head}>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id} className="hover:bg-transparent">
               {selection ? (
@@ -129,12 +133,17 @@ export function DataTable<TData extends RowData>({
             </TableRow>
           ))}
         </TableHeader>
-        <TableBody>
+        <TableBody className={wideCardTable.body}>
           {table.getRowModel().rows.length
             ? table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/30">
+                <TableRow
+                  key={row.id}
+                  className={`hover:bg-muted/30 ${wideCardTable.row} ${wideCardTable.selectRow}`}
+                >
                   {selection ? (
-                    <TableCell className="w-11 pl-5 pr-0">
+                    <TableCell
+                      className={`w-11 pl-5 pr-0 ${wideCardTable.select}`}
+                    >
                       <RowCheckbox
                         label={selection.getRowLabel(row.original)}
                         checked={pick.isSelected(
@@ -146,21 +155,32 @@ export function DataTable<TData extends RowData>({
                       />
                     </TableCell>
                   ) : null}
-                  {row.getAllCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      className={
-                        cell.column.id === "actions"
-                          ? "sticky right-0 bg-card row-hover-cell sticky-edge"
-                          : undefined
-                      }
-                    >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
+                  {row.getAllCells().map((cell, index) => {
+                    const header = cell.column.columnDef.header
+                    const isActions = cell.column.id === "actions"
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        data-label={
+                          typeof header === "string" && index > 0
+                            ? header
+                            : undefined
+                        }
+                        className={
+                          isActions
+                            ? `sticky right-0 bg-card row-hover-cell sticky-edge ${wideCardTable.actions}`
+                            : index === 0
+                              ? `${wideCardTable.full} ${selection ? wideCardTable.selectName : ""}`
+                              : wideCardTable.labelled
+                        }
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    )
+                  })}
                 </TableRow>
               ))
             : null}

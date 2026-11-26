@@ -1371,6 +1371,14 @@ tbody
   }
 }
 
+/* Same for the User Accounts list (box under 75rem, see lib/cardTable.ts). */
+@container wide-cards (max-width: 75rem) {
+  .sticky-edge {
+    animation: none;
+    box-shadow: none;
+  }
+}
+
 /* Status capsules (statusStyles.ts): a small icon in front of the text instead of a dot. Drawn as a
    mask so it takes the capsule's text colour in light, dark and print. A capsule that already has
    its own icon shows only that one. */
