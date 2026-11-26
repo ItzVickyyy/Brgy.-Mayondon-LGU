@@ -1,7 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { ParseKeys, TFunction } from "i18next"
-import { BarChart3, Clock3, Download, FileCheck2, FileUp } from "lucide-react"
+import {
+  BarChart3,
+  Clock3,
+  Download,
+  FileCheck2,
+  FileUp,
+  Printer,
+} from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -1052,11 +1059,12 @@ function Reports() {
                 <option value="year">{t(periodKeys.year)}</option>
               </Select>
             </label>
-            <Button variant="outline" onClick={openExport}>
+            <Button variant="tintGreen" onClick={openExport}>
               <Download aria-hidden="true" />
               {t("admin.reports.generate.export")}
             </Button>
-            <Button variant="outline" onClick={printReport}>
+            <Button variant="tintViolet" onClick={printReport}>
+              <Printer aria-hidden="true" />
               {t("admin.reports.generate.print")}
             </Button>
           </div>

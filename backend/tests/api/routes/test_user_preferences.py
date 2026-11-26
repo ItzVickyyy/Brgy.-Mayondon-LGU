@@ -11,14 +11,15 @@ def test_preferences_start_empty(
     client.put(
         URL,
         headers=normal_user_token_headers,
-        json={"accent": "navy", "font_size": "medium"},
+        json={"font_size": "medium"},
     )
     # A second call proves the round trip; the first reset any earlier value.
+    # The accent was not sent, so it is the default: purple.
     r = client.get(URL, headers=normal_user_token_headers)
     assert r.status_code == 200
     assert r.json() == {
         "theme": None,
-        "accent": "navy",
+        "accent": "purple",
         "font_size": "medium",
         "gold_accent": True,
     }

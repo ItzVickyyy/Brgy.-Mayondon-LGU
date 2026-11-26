@@ -34,6 +34,7 @@ export type RowPrimaryAction = {
     | "tintAmber"
     | "tintRose"
     | "tintViolet"
+    | "tintRed"
   disabled?: boolean
   title?: string
   /** Spoken name when the visible label is too short on its own (e.g. "Print for Maria Santos"). */

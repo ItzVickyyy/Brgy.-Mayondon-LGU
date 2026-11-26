@@ -517,7 +517,7 @@ function OfficialsManagement() {
                           ? [
                               {
                                 label: t("admin.officials.actions.endTerm"),
-                                variant: "tintAmber",
+                                variant: "tintRed",
                                 title: t("admin.officials.actions.endTermHint"),
                                 icon: <UserRoundX aria-hidden="true" />,
                                 onSelect: () => {

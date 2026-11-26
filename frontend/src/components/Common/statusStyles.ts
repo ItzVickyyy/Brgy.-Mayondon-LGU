@@ -26,6 +26,10 @@ export const badgeTone = {
   teal:
     "badge-ic-teal border-[color-mix(in_oklab,var(--stat-teal)_40%,transparent)] bg-[color-mix(in_oklab,var(--stat-teal)_15%,transparent)] text-[color-mix(in_oklab,var(--stat-teal)_62%,var(--foreground))] " +
     dot,
+  // The red of the Delete User button (--destructive): used by Voided only; Expired and Failed keep the softer rose.
+  destructive:
+    "badge-ic-red border-[color-mix(in_oklab,var(--destructive)_50%,transparent)] bg-[color-mix(in_oklab,var(--destructive)_15%,transparent)] text-[color-mix(in_oklab,var(--destructive)_78%,var(--foreground))] " +
+    dot,
   grey: `badge-ic-grey border-border bg-muted text-muted-foreground ${dot}`,
 } as const
 
@@ -50,7 +54,7 @@ export const statusStyles: Record<string, string> = {
   Archived: grey,
   None: grey,
   Former: grey,
-  Voided: grey,
+  Voided: badgeTone.destructive,
   "Not checked": grey,
   Inactive: grey,
   "In progress": `${badgeTone.blue} badge-ic-clock`,

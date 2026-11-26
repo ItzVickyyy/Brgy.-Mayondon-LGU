@@ -1449,6 +1449,8 @@
         "reprint": "Reprint",
         "print": "Print",
         "printFor": "Print for {{name}}",
+        "editUnavailable": "Only an issued document or a draft can be edited.",
+        "printNotIssued": "Only an issued document can be printed.",
         "printUnavailable": "This document type has no print template yet, so it cannot be printed or saved as a file from here.",
         "discard": "Discard draft",
         "archive": "Archive",

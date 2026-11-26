@@ -206,7 +206,8 @@
   --gold: oklch(0.8 0.12 85);
 }
 
-/* Preferences: accent colour. Navy is the default above (no attribute). Each
+/* Preferences: accent colour. Purple is the default (index.html sets data-accent="purple"); navy is the
+   colour of the rules above and has no hue rule of its own. Each
    other accent keeps the navy lightness and chroma and only changes the hue
    (slate also lowers the chroma to 30%), so the contrast is unchanged. Worst
    cases over all ten accents: brand and primary text 8.2:1 or better on the
@@ -242,7 +243,7 @@ html[data-accent="slate"] {
   --accent-hue: 250;
   --accent-chroma: 0.3;
 }
-html[data-accent] {
+html[data-accent]:where(:not([data-accent="navy"])) {
   --primary: oklch(0.36 calc(0.1 * var(--accent-chroma, 1)) var(--accent-hue));
   --brand: oklch(0.36 calc(0.1 * var(--accent-chroma, 1)) var(--accent-hue));
   --ring: oklch(0.5 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue));
@@ -255,7 +256,7 @@ html[data-accent] {
   --chart-1: oklch(0.4 calc(0.11 * var(--accent-chroma, 1)) var(--accent-hue));
   --sidebar: oklch(0.27 calc(0.06 * var(--accent-chroma, 1)) var(--accent-hue));
 }
-html.dark[data-accent] {
+html.dark[data-accent]:where(:not([data-accent="navy"])) {
   --primary: oklch(0.5 calc(0.14 * var(--accent-chroma, 1)) var(--accent-hue));
   --brand: oklch(0.78 calc(0.1 * var(--accent-chroma, 1)) var(--accent-hue));
   --ring: oklch(0.65 calc(0.12 * var(--accent-chroma, 1)) var(--accent-hue));

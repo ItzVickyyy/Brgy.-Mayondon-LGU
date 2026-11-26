@@ -926,42 +926,46 @@ export function IssuanceHistory({
                               onSelect: () => setViewItem(item),
                             }}
                             actions={[
-                              ...(isIssued || isDraft
-                                ? [
-                                    {
-                                      label: t("issuances.history.actions.edit"),
-                                      variant: "tintBlue" as const,
-                                      icon: <Pencil aria-hidden="true" />,
-                                      onSelect: () =>
-                                        isDraft
-                                          ? onContinueDraft(item.id)
-                                          : setPending({
-                                              item,
-                                              action: "correct",
-                                            }),
-                                    },
-                                  ]
-                                : []),
-                              ...(isIssued
-                                ? [
-                                    {
-                                      label: t("issuances.history.actions.print"),
-                                      variant: "tintViolet" as const,
-                                      icon: <Printer aria-hidden="true" />,
-                                      disabled: !canReprint,
-                                      ariaLabel: t(
-                                        "issuances.history.actions.printFor",
-                                        { name: item.resident_name },
+                              // Edit and Print always stay in their place (View | Edit | Print | ⋯);
+                              // when they do not apply to the row they are shown disabled, so the
+                              // buttons never move from row to row.
+                              {
+                                label: t("issuances.history.actions.edit"),
+                                variant: "tintBlue" as const,
+                                icon: <Pencil aria-hidden="true" />,
+                                disabled: !(isIssued || isDraft),
+                                title:
+                                  isIssued || isDraft
+                                    ? undefined
+                                    : t("issuances.history.actions.editUnavailable"),
+                                onSelect: () =>
+                                  isDraft
+                                    ? onContinueDraft(item.id)
+                                    : setPending({
+                                        item,
+                                        action: "correct",
+                                      }),
+                              },
+                              {
+                                label: t("issuances.history.actions.print"),
+                                variant: "tintViolet" as const,
+                                icon: <Printer aria-hidden="true" />,
+                                disabled: !isIssued || !canReprint,
+                                ariaLabel: t(
+                                  "issuances.history.actions.printFor",
+                                  { name: item.resident_name },
+                                ),
+                                title: !isIssued
+                                  ? t(
+                                      "issuances.history.actions.printNotIssued",
+                                    )
+                                  : canReprint
+                                    ? undefined
+                                    : t(
+                                        "issuances.history.actions.printUnavailable",
                                       ),
-                                      title: canReprint
-                                        ? undefined
-                                        : t(
-                                            "issuances.history.actions.printUnavailable",
-                                          ),
-                                      onSelect: () => setPrintItem(item),
-                                    },
-                                  ]
-                                : []),
+                                onSelect: () => setPrintItem(item),
+                              },
                             ]}
                             items={[
                               {

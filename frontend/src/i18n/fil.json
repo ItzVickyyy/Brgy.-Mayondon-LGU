@@ -1449,6 +1449,8 @@
         "reprint": "I-reprint",
         "print": "I-print",
         "printFor": "I-print para kay {{name}}",
+        "editUnavailable": "Ang inilabas na dokumento o draft lang ang maaaring i-edit.",
+        "printNotIssued": "Ang inilabas na dokumento lang ang maaaring i-print.",
         "printUnavailable": "Wala pang print template ang uri ng dokumentong ito, kaya hindi ito maipi-print o mase-save bilang file mula rito.",
         "discard": "Itapon ang draft",
         "archive": "I-archive",

@@ -2,6 +2,7 @@ import { useEffect, useRef, useSyncExternalStore } from "react"
 
 import { useTheme } from "@/components/theme-provider"
 import {
+  DEFAULT_PREFERENCES,
   getPreferences,
   loadUserPreferences,
   type Preferences,
@@ -69,7 +70,7 @@ export function usePreferences() {
       setTheme("system")
       updatePreferences({
         theme: "system",
-        accent: "navy",
+        accent: DEFAULT_PREFERENCES.accent,
         fontSize: "medium",
         goldAccent: true,
       })

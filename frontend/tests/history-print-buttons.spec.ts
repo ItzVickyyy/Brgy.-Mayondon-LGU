@@ -173,3 +173,58 @@ test("an issued row reads View, Edit, Print, then the three-dot menu", async ({
     "Print",
   ])
 })
+
+test("Edit and Print stay in place on every row; they are disabled when they do not apply", async ({
+  page,
+}) => {
+  await mockApi(page)
+  const base = issuances.data[3]
+  const rowsFor = [
+    { ...base, id: "00000000-0000-0000-0000-0000000000a1", status: "issued" },
+    {
+      ...base,
+      id: "00000000-0000-0000-0000-0000000000a2",
+      status: "voided",
+      resident_name: "Resident Voided",
+    },
+    {
+      ...base,
+      id: "00000000-0000-0000-0000-0000000000a3",
+      status: "draft",
+      reference_no: null,
+      resident_name: "Resident Draft",
+    },
+  ]
+  await page.route("**/api/v1/issuances/**", (route) =>
+    route.fulfill({
+      contentType: "application/json",
+      body: JSON.stringify({ data: rowsFor, count: rowsFor.length }),
+    }),
+  )
+  await page.setViewportSize({ width: 1440, height: 1100 })
+  await page.goto("/issuances")
+  const rows = page.locator("table tbody tr")
+  await expect(rows).toHaveCount(3)
+
+  const xs: number[][] = []
+  for (let index = 0; index < 3; index++) {
+    const buttons = rows.nth(index).locator("td").last().getByRole("button")
+    await expect(buttons).toHaveCount(4)
+    const boxes = await Promise.all(
+      [0, 1, 2, 3].map((n) => buttons.nth(n).boundingBox()),
+    )
+    xs.push(boxes.map((box) => Math.round(box?.x ?? -1)))
+  }
+  expect(xs[1]).toEqual(xs[0])
+  expect(xs[2]).toEqual(xs[0])
+
+  // Voided: View stays usable, Edit and Print are there but disabled.
+  const voided = rows.nth(1).locator("td").last().getByRole("button")
+  await expect(voided.nth(0)).toBeEnabled()
+  await expect(voided.nth(1)).toBeDisabled()
+  await expect(voided.nth(2)).toBeDisabled()
+  // Draft: Edit (continue draft) works, Print is disabled.
+  const draft = rows.nth(2).locator("td").last().getByRole("button")
+  await expect(draft.nth(1)).toBeEnabled()
+  await expect(draft.nth(2)).toBeDisabled()
+})

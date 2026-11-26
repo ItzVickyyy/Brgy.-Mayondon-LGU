@@ -155,7 +155,7 @@ class UserPreferences(SQLModel):
         "olive",
         "sky",
         "slate",
-    ] = "navy"
+    ] = "purple"
     font_size: Literal["small", "medium", "large"] = "medium"
     # Gold highlights (page-title bar, dialog edge, table header rule, active
     # menu icon). On unless the person switched them off.

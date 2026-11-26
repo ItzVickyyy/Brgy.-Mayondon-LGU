@@ -10,7 +10,7 @@
  * offline choice is never overwritten by an older server copy.
  *
  * The accent is a fixed set only (no free colour picker). Each accent keeps the
- * same lightness and chroma as the navy default and only changes the hue (slate
+ * same lightness and chroma as navy and only changes the hue (slate
  * also lowers the chroma), and
  * every one was checked for WCAG AA contrast in both themes (see index.css).
  * The font size sets the root size, so every rem-based size scales with it.
@@ -75,7 +75,7 @@ export type Preferences = {
 }
 
 export const DEFAULT_PREFERENCES: Preferences = {
-  accent: "navy",
+  accent: "purple",
   fontSize: "medium",
   goldAccent: true,
 }
@@ -160,8 +160,8 @@ export function applyAppearance(
   // Gold is on unless the attribute says off (the CSS reads `data-gold`).
   if (preferences.goldAccent) delete root.dataset.gold
   else root.dataset.gold = "off"
-  if (preferences.accent === "navy") delete root.dataset.accent
-  else root.dataset.accent = preferences.accent
+  // Always set, navy included: the page starts as purple (index.html), so navy needs its own value.
+  root.dataset.accent = preferences.accent
   if (preferences.fontSize === "medium") delete root.dataset.fontSize
   else root.dataset.fontSize = preferences.fontSize
 }
@@ -291,7 +291,7 @@ export async function syncPreferencesWithServer(
     if (server && !isUnsynced(userId)) {
       const preferences: Preferences = {
         theme: server.theme ?? undefined,
-        accent: isAccent(server.accent) ? server.accent : "navy",
+        accent: isAccent(server.accent) ? server.accent : "purple",
         fontSize: isFontSize(server.font_size) ? server.font_size : "medium",
         goldAccent: server.gold_accent !== false,
       }

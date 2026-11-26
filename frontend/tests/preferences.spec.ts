@@ -99,19 +99,25 @@ test.describe("Preferences", () => {
           .getPropertyValue("--primary")
           .trim(),
       )
-    const navy = await primary()
+    // Purple is the default accent.
+    await expect(page.locator("html")).toHaveAttribute("data-accent", "purple")
+    const purple = await primary()
 
     await choose(page, "pref-accent-teal")
     await expect(page.locator("html")).toHaveAttribute("data-accent", "teal")
-    expect(await primary()).not.toBe(navy)
+    expect(await primary()).not.toBe(purple)
 
     await page.reload()
     await expect(page.locator("html")).toHaveAttribute("data-accent", "teal")
 
     await openPreferences(page)
     await choose(page, "pref-accent-navy")
-    await expect(page.locator("html")).not.toHaveAttribute("data-accent")
-    expect(await primary()).toBe(navy)
+    await expect(page.locator("html")).toHaveAttribute("data-accent", "navy")
+    expect(await primary()).not.toBe(purple)
+
+    await choose(page, "pref-accent-purple")
+    await expect(page.locator("html")).toHaveAttribute("data-accent", "purple")
+    expect(await primary()).toBe(purple)
   })
 
   test("System default is the default theme and follows the computer", async ({
@@ -142,9 +148,9 @@ test.describe("Preferences", () => {
     // Back to System default, which here is dark.
     await expect(dialog.getByTestId("pref-theme-system")).toBeChecked()
     await expect(page.locator("html")).toHaveClass(/dark/)
-    await expect(page.locator("html")).not.toHaveAttribute("data-accent")
+    await expect(page.locator("html")).toHaveAttribute("data-accent", "purple")
     await expect(page.locator("html")).not.toHaveAttribute("data-font-size")
-    await expect(dialog.getByTestId("pref-accent-navy")).toBeChecked()
+    await expect(dialog.getByTestId("pref-accent-purple")).toBeChecked()
     await dialog.getByRole("button", { name: "Done" }).click()
     await expect(dialog).toBeHidden()
   })
@@ -155,7 +161,7 @@ test.describe("Preferences", () => {
       await choose(page, `pref-accent-${accent}`)
       await expect(page.locator("html")).toHaveAttribute("data-accent", accent)
     }
-    await choose(page, "pref-accent-navy")
+    await choose(page, "pref-accent-purple")
   })
 
   test("choices are saved on the account and follow the person to another computer", async ({
@@ -185,7 +191,7 @@ test.describe("Preferences", () => {
         r.url().includes("/users/me/preferences") &&
         r.request().method() === "PUT",
     )
-    await choose(page, "pref-accent-navy")
+    await choose(page, "pref-accent-purple")
     await reset
   })
 
@@ -224,7 +230,7 @@ test.describe("Preferences", () => {
         r.url().includes("/users/me/preferences") &&
         r.request().method() === "PUT",
     )
-    await choose(page, "pref-accent-navy")
+    await choose(page, "pref-accent-purple")
     await reset
   })
 
@@ -243,6 +249,6 @@ test.describe("Preferences", () => {
     )
     expect(saved.accent).toBe("green")
     // Put it back for the other specs.
-    await choose(page, "pref-accent-navy")
+    await choose(page, "pref-accent-purple")
   })
 })
