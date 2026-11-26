@@ -161,3 +161,37 @@ test("the certificate also shows in print media on Issuance Management", async (
   // That page hides "body *" in print for its own form overlay; the certificate must opt back in.
   await expect(page.getByTestId("utilization-sheet")).toBeVisible()
 })
+
+test("a chosen rating prints on the certificate and marks its scale box", async ({
+  page,
+}) => {
+  await signedIn(page, null)
+  const dialog = await openDialog(page)
+  await dialog.getByTestId("utilization-rating-4").click()
+  await expect(dialog.getByTestId("utilization-rating-4")).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  )
+  const sheet = page.getByTestId("utilization-sheet")
+  await expect(sheet.getByTestId("utilization-sheet-rating")).toHaveText("4")
+  await expect(sheet.locator(".cou-scale--picked")).toHaveCount(2)
+  await expect(sheet).toContainText("Rating: 4 out of 5")
+  // Pressing it again clears it: the blank returns for writing by hand.
+  await dialog.getByTestId("utilization-rating-4").click()
+  await expect(sheet).toContainText("Rating: _____ out of 5")
+})
+
+test("remarks typed in the dialog print on the ruled lines", async ({
+  page,
+}) => {
+  await signedIn(page, null)
+  const dialog = await openDialog(page)
+  const remarks = page.getByTestId("utilization-sheet-remarks")
+  await expect(remarks).toHaveText("Remarks / Observations:")
+  await dialog
+    .getByTestId("utilization-remarks")
+    .fill("Used daily by the staff.\nNo downtime reported.")
+  await expect(remarks).toContainText("Used daily by the staff.")
+  await expect(remarks).toContainText("No downtime reported.")
+  await expect(dialog).toContainText("46/400 characters")
+})

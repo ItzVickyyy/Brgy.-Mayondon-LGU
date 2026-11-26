@@ -29,7 +29,9 @@ const DETAILS: readonly (readonly [string, string])[] = [
   ["Partner Agency", "Barangay Mayondon Los Baños Laguna"],
 ]
 
-const SCALE: readonly (readonly [string, string])[] = [
+export const REMARKS_MAX = 400
+
+export const SCALE: readonly (readonly [string, string])[] = [
   ["1", "Poor / Underutilized"],
   ["2", "Below Expectations"],
   ["3", "Satisfactory / Moderately Utilized"],
@@ -40,19 +42,24 @@ const SCALE: readonly (readonly [string, string])[] = [
 /**
  * The printed page. Rendered only into the print-only container of `UtilizationCertDialog`.
  * The system fills in the reporting period, the dates counted and the total of clients served. The
- * rating, the remarks, the date of issue and the signature are left blank on purpose: they belong to
- * the person who certifies, and nothing is rated, signed or dated for anyone.
+ * rating is whatever the person chose in the dialog (1 to 5); with none chosen it prints blank to be
+ * written by hand. The remarks, the date of issue and the signature are always left blank: nothing
+ * is signed or dated for anyone.
  */
 export function UtilizationSheet({
   month,
   monthStart,
   monthEnd,
   clientsServed,
+  rating,
+  remarks = "",
 }: {
   month: string
   monthStart: string
   monthEnd: string
   clientsServed: number
+  rating: number | null
+  remarks?: string
 }) {
   return (
     <article className="cou-sheet" data-testid="utilization-sheet">
@@ -104,31 +111,51 @@ export function UtilizationSheet({
         </span>
       </p>
       <p className="cou-line">
-        <strong>Utilization Performance Rating: _____ out of 5</strong>{" "}
-        <em>(see rating scale below)</em>
+        <strong>Utilization Performance Rating:</strong>{" "}
+        {rating ? (
+          <span
+            className="cou-fill cou-fill--rating"
+            data-testid="utilization-sheet-rating"
+          >
+            {rating}
+          </span>
+        ) : (
+          <strong>_____</strong>
+        )}{" "}
+        <strong>out of 5</strong> <em>(see rating scale below)</em>
       </p>
       <table className="cou-scale">
         <thead>
           <tr>
             {SCALE.map(([score]) => (
-              <th key={score}>{score}</th>
+              <th
+                key={score}
+                className={
+                  Number(score) === rating ? "cou-scale--picked" : undefined
+                }
+              >
+                {score}
+              </th>
             ))}
           </tr>
         </thead>
         <tbody>
           <tr>
             {SCALE.map(([score, meaning]) => (
-              <td key={score}>{meaning}</td>
+              <td
+                key={score}
+                className={
+                  Number(score) === rating ? "cou-scale--picked" : undefined
+                }
+              >
+                {meaning}
+              </td>
             ))}
           </tr>
         </tbody>
       </table>
-      <p className="cou-remarks">
-        <strong>Remarks / Observations:</strong>
-        <span className="cou-rule" />
-      </p>
-      <p className="cou-rule-row">
-        <span className="cou-rule" />
+      <p className="cou-remarks" data-testid="utilization-sheet-remarks">
+        <strong>Remarks / Observations:</strong> {remarks.trim()}
       </p>
       <p className="cou-text cou-text--issued">
         This certification is issued upon the request of the Komunitech Program

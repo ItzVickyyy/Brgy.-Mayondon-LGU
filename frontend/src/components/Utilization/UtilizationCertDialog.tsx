@@ -28,7 +28,7 @@ import {
   parseMonthKey,
   recentMonths,
 } from "@/lib/utilizationCert"
-import { UtilizationSheet } from "./UtilizationSheet"
+import { REMARKS_MAX, SCALE, UtilizationSheet } from "./UtilizationSheet"
 
 const IMAGE_WAIT_MS = 3000
 
@@ -69,6 +69,8 @@ export function UtilizationCertDialog({
   const { showErrorToast } = useCustomToast()
   const months = recentMonths()
   const [month, setMonth] = useState(months[0] ?? "")
+  const [rating, setRating] = useState<number | null>(null)
+  const [remarks, setRemarks] = useState("")
   const [printing, setPrinting] = useState(false)
 
   const figures = useQuery({
@@ -157,9 +159,13 @@ export function UtilizationCertDialog({
                 <li>Check the figures below.</li>
                 <li>Press Print, on A4 paper.</li>
                 <li>
-                  Fill in the rating and remarks by hand, write the date of
-                  issue, and have it signed above the printed name (the form is
-                  certified by the Head, Office of the Municipal Agriculturist).
+                  Choose the rating and write the remarks below (both are
+                  optional; left empty they print as blanks to fill in by hand).
+                </li>
+                <li>
+                  Write the date of issue by hand and have it signed above the
+                  printed name (the form is certified by the Head, Office of the
+                  Municipal Agriculturist).
                 </li>
               </ol>
             </section>
@@ -170,7 +176,10 @@ export function UtilizationCertDialog({
                 aria-label="Month of the certificate"
                 data-testid="utilization-month"
                 value={month}
-                onChange={(event) => setMonth(event.target.value)}
+                onChange={(event) => {
+                  setMonth(event.target.value)
+                  setRating(null)
+                }}
                 searchable={false}
                 wrapperClassName="w-full sm:w-64"
               >
@@ -203,6 +212,62 @@ export function UtilizationCertDialog({
                   : ""}
               </p>
             </section>
+            <section className="space-y-2">
+              <h3 className="font-semibold text-brand">Performance rating</h3>
+              <div
+                role="group"
+                aria-label="Utilization performance rating"
+                data-testid="utilization-rating"
+                className="grid gap-2 sm:grid-cols-5"
+              >
+                {SCALE.map(([score, meaning]) => {
+                  const picked = rating === Number(score)
+                  return (
+                    <button
+                      key={score}
+                      type="button"
+                      aria-pressed={picked}
+                      data-testid={`utilization-rating-${score}`}
+                      onClick={() => setRating(picked ? null : Number(score))}
+                      className={`flex min-h-11 flex-col items-center rounded-lg border px-2 py-2 text-center text-xs leading-tight transition-colors ${
+                        picked
+                          ? "border-brand bg-brand/10 text-brand"
+                          : "hover:bg-muted"
+                      }`}
+                    >
+                      <span className="text-base font-semibold">{score}</span>
+                      {meaning}
+                    </button>
+                  )
+                })}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Optional. Choose the rating to print it on the certificate, or
+                leave it empty to write it by hand. Press the chosen rating
+                again to clear it.
+              </p>
+            </section>
+            <section className="space-y-2">
+              <h3 className="font-semibold text-brand">
+                <label htmlFor="utilization-remarks">
+                  Remarks / Observations
+                </label>
+              </h3>
+              <textarea
+                id="utilization-remarks"
+                data-testid="utilization-remarks"
+                value={remarks}
+                maxLength={REMARKS_MAX}
+                rows={4}
+                onChange={(event) => setRemarks(event.target.value)}
+                className="min-h-24 w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              />
+              <p className="text-xs text-muted-foreground">
+                Optional. {remarks.length}/{REMARKS_MAX} characters. Printed on
+                the lines after "Remarks / Observations:"; left empty, the lines
+                stay blank to write by hand.
+              </p>
+            </section>
           </div>
           <div className={`${modalFooter} flex justify-end gap-2`}>
             <Button
@@ -233,6 +298,8 @@ export function UtilizationCertDialog({
                 monthStart={data.month_start}
                 monthEnd={data.month_end}
                 clientsServed={data.clients_served}
+                rating={rating}
+                remarks={remarks}
               />
             </div>,
             document.body,

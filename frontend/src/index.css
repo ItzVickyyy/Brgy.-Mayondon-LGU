@@ -1233,18 +1233,32 @@ tbody
   .cou-scale td {
     height: 26pt;
   }
-  .cou-remarks,
-  .cou-rule-row {
-    display: flex;
-    align-items: flex-end;
-    gap: 4pt;
+  .cou-scale .cou-scale--picked {
+    background: #e8f5e9;
+    font-weight: 700;
+  }
+  .cou-fill--rating {
+    min-width: 28pt;
+    font-weight: 700;
+  }
+  /* Ruled lines at every text line (16 pt), at least two, so a blank form and a typed remark look
+     alike. */
+  .cou-remarks {
+    min-height: 32pt;
     margin-top: 12pt;
     font-size: 10pt;
-  }
-  .cou-rule {
-    flex: 1;
-    height: 11pt;
-    border-bottom: 0.75pt solid #000;
+    line-height: 16pt;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 15.25pt,
+      #000 15.25pt,
+      #000 16pt
+    );
+    background-size: 100% 16pt;
+    background-repeat: repeat-y;
   }
   .cou-text--issued {
     margin-top: 10pt;
