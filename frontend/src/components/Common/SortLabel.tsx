@@ -33,19 +33,20 @@ export function SortLabel({
       data-sort={dir ?? "none"}
       title={t("common.sort.hint", { column: label })}
       onClick={() => sort.toggle(column)}
-      className={`group relative -mx-2 -my-3 inline-flex min-h-11 items-center rounded-md px-2 font-medium uppercase tracking-wide outline-none transition-colors hover:bg-brand/10 hover:text-brand focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
+      className={`group relative -my-1.5 -ml-2.5 -mr-7 inline-flex min-h-8 items-center rounded-full pl-2.5 pr-7 font-medium uppercase tracking-wide outline-none transition-colors after:absolute after:-inset-y-1.5 after:inset-x-0 after:content-[''] hover:bg-brand/10 hover:text-brand focus-visible:ring-[3px] focus-visible:ring-ring/50 ${
         dir ? "bg-brand/10 text-brand" : ""
       }`}
     >
       {label}
-      {/* The arrow sits in a small round chip: quiet when the column is not sorted,
-          solid navy when it is. Absolutely placed, so it adds no width. */}
+      {/* The arrow chip sits inside the button's right padding, so the tint
+          wraps label and chip together. The negative margins cancel that
+          padding, so the heading takes no more width than its label. */}
       <span
         aria-hidden="true"
-        className={`absolute top-1/2 left-[calc(100%-0.35rem)] grid size-4 -translate-y-1/2 place-items-center rounded-full transition-colors ${
+        className={`absolute top-1/2 right-1.5 grid size-4 -translate-y-1/2 place-items-center rounded-full transition-colors ${
           dir
             ? "bg-primary text-primary-foreground shadow-sm"
-            : "bg-transparent text-muted-foreground group-hover:bg-brand/15 group-hover:text-brand"
+            : "text-muted-foreground group-hover:bg-brand/15 group-hover:text-brand"
         }`}
       >
         <Icon className="size-3" />
