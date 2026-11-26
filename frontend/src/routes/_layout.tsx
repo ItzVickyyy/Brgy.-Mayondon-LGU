@@ -171,6 +171,11 @@ function Layout() {
           </div>
 
           <div className="ml-auto flex shrink-0 items-center justify-end gap-2">
+            {/* The "N selected" count of a table is drawn here (SelectionControls, 292). */}
+            <div
+              id="selection-count-slot"
+              className="flex shrink-0 items-center"
+            />
             {currentUserId ? (
               <NotificationBell ownerId={String(currentUserId)} />
             ) : null}

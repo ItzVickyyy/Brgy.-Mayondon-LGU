@@ -153,6 +153,12 @@ function UsersTable() {
       <DataTable
         columns={columns}
         data={visibleData}
+        sortBy={{
+          full_name: (user) => user.full_name || user.email,
+          email: (user) => user.email,
+          role: (user) => (user.is_superuser ? 0 : 1),
+          is_active: (user) => (user.is_active ? 0 : 1),
+        }}
         selection={{
           getRowId: (user) => String(user.id),
           getRowLabel: (user) => user.full_name || user.email,

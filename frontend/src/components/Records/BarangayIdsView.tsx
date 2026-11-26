@@ -27,6 +27,7 @@ import {
   SelectionBar,
   selectCol,
 } from "@/components/Common/SelectionControls"
+import { SortLabel } from "@/components/Common/SortLabel"
 import { StatCard } from "@/components/Common/StatCard"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
@@ -37,6 +38,7 @@ import { isSystemAdministrator } from "@/lib/access"
 import { cardTable } from "@/lib/cardTable"
 import { formatBusinessDate } from "@/lib/residents"
 import { useRowSelection } from "@/lib/useRowSelection"
+import { useSort } from "@/lib/useSort"
 import { IdSeriesCard } from "./IdSeriesCard"
 
 type StatusFilter = "all" | BarangayIdListItem["status"]
@@ -155,6 +157,15 @@ export function BarangayIdsView() {
   const end = Math.min((pageIndex + 1) * pageSize, total)
   // Server pages: a selection lasts only while its rows are on screen.
   const pick = useRowSelection(records, (record) => String(record.issuance_id))
+  // Click a heading to sort the rows on this page (292).
+  const sort = useSort(records, {
+    resident: (record) => record.resident_name,
+    idNumber: (record) => record.id_number,
+    card: (record) => record.transaction_type,
+    issued: (record) => record.issue_date,
+    validUntil: (record) => record.valid_until,
+    status: (record) => record.status,
+  })
 
   const allCount = useIdCount("all")
   const validCount = useIdCount("valid")
@@ -294,15 +305,20 @@ export function BarangayIdsView() {
                     {idColumns.map((column) => (
                       <th
                         key={column}
+                        aria-sort={sort.ariaSort(column)}
                         className={`px-2.5 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
                       >
-                        {t(`records.ids.columns.${column}`)}
+                        <SortLabel
+                          sort={sort}
+                          column={column}
+                          label={t(`records.ids.columns.${column}`)}
+                        />
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${cardTable.body}`}>
-                  {records.map((record) => {
+                  {sort.sorted.map((record) => {
                     const archived = record.resident_status === "archived"
                     const needsRenewal =
                       record.status === "expiring_soon" ||

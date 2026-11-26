@@ -1,5 +1,6 @@
-import { Download, Printer, X } from "lucide-react"
-import { type ReactNode, useState } from "react"
+import { CircleCheck, Download, Printer, X } from "lucide-react"
+import { type ReactNode, useEffect, useState } from "react"
+import { createPortal } from "react-dom"
 import { useTranslation } from "react-i18next"
 
 import { ExportFormatDialog } from "@/components/Reports/ExportFormatDialog"
@@ -149,9 +150,47 @@ tr{break-inside:avoid}
 }
 
 /**
- * Bar above a table while rows are selected: count, Clear, Export selected
- * (CSV, formula-safe), Print selected, Copy and any table-specific
- * `children` buttons.
+ * The number of selected rows, in the upper right corner (patch 292): a navy
+ * pill in the top bar, just left of the Notification button, so it never
+ * covers a page's own buttons and never takes room in the tools row. It is
+ * drawn into the top bar's `selection-count-slot` through a portal (so no
+ * table, card or container above it can move or clip it); the top bar is
+ * sticky, so the count stays in view while the page scrolls. With no slot it
+ * floats just below the top bar instead. `aria-live` announces the count.
+ */
+function SelectionCount({ count }: { count: number }) {
+  const { t } = useTranslation()
+  const [slot, setSlot] = useState<HTMLElement | null>(null)
+  useEffect(() => {
+    setSlot(document.getElementById("selection-count-slot"))
+  }, [])
+  return createPortal(
+    <div
+      data-testid="selection-count"
+      role="status"
+      aria-live="polite"
+      className={`animate-count-in inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground shadow-md ring-1 ring-black/10 ${
+        slot
+          ? ""
+          : "pointer-events-none fixed right-3 top-[4.75rem] z-30 sm:right-5"
+      }`}
+    >
+      <CircleCheck aria-hidden="true" className="size-4" />
+      {/* On a phone only the number shows (the top bar is narrow); the full words stay for screen readers. */}
+      <span aria-hidden="true" className="sm:hidden">
+        {count}
+      </span>
+      <span className="sr-only sm:not-sr-only">
+        {t("common.selection.count", { count })}
+      </span>
+    </div>,
+    slot ?? document.body,
+  )
+}
+
+/**
+ * Tools for the selected rows: Export (green), Print (violet), any table-specific
+ * `children` buttons and Clear. The count floats in the corner (SelectionCount).
  */
 export function SelectionBar({
   count,
@@ -179,66 +218,66 @@ export function SelectionBar({
   const [exportOpen, setExportOpen] = useState(false)
   if (count === 0) return null
   return (
-    <section
-      data-testid="selection-bar"
-      aria-label={t("common.selection.bar")}
-      className={
-        inline
-          ? "selection-bar animate-selection-in flex w-full flex-wrap items-center gap-2 rounded-lg bg-brand/5 px-2 py-0.5 text-sm sm:ml-auto sm:w-auto sm:shrink-0 sm:flex-nowrap sm:gap-1 sm:whitespace-nowrap"
-          : "selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b bg-brand/5 px-4 py-2 text-sm sm:px-5"
-      }
-    >
-      <span className="mr-1 font-medium" aria-live="polite">
-        {t("common.selection.count", { count })}
-      </span>
-      {csvName && csvRows ? (
-        <>
+    <>
+      <SelectionCount count={count} />
+      <section
+        data-testid="selection-bar"
+        aria-label={t("common.selection.bar")}
+        className={
+          inline
+            ? "selection-bar animate-selection-in flex w-full flex-wrap items-center gap-2 rounded-lg bg-brand/5 px-2 py-0.5 text-sm sm:ml-auto sm:w-auto sm:shrink-0 sm:flex-nowrap sm:gap-1 sm:whitespace-nowrap"
+            : "selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b bg-brand/5 px-4 py-2 text-sm sm:px-5"
+        }
+      >
+        {csvName && csvRows ? (
+          <>
+            <Button
+              type="button"
+              variant="tintGreen"
+              size="sm"
+              data-testid="selection-export"
+              className="min-h-11"
+              onClick={() => setExportOpen(true)}
+            >
+              <Download aria-hidden="true" />
+              {t("common.selection.export")}
+            </Button>
+            <ExportFormatDialog
+              open={exportOpen}
+              onOpenChange={setExportOpen}
+              namespace="common.selection.exportDialog"
+              onChoose={(format) => {
+                saveFile(csvName, format, csvRows())
+                setExportOpen(false)
+              }}
+            />
+          </>
+        ) : null}
+        {csvRows ? (
           <Button
             type="button"
             variant="tintViolet"
             size="sm"
-            data-testid="selection-export"
+            data-testid="selection-print"
             className="min-h-11"
-            onClick={() => setExportOpen(true)}
+            onClick={() => printRows(document.title, csvRows())}
           >
-            <Download aria-hidden="true" />
-            {t("common.selection.export")}
+            <Printer aria-hidden="true" />
+            {t("common.selection.print")}
           </Button>
-          <ExportFormatDialog
-            open={exportOpen}
-            onOpenChange={setExportOpen}
-            namespace="common.selection.exportDialog"
-            onChoose={(format) => {
-              saveFile(csvName, format, csvRows())
-              setExportOpen(false)
-            }}
-          />
-        </>
-      ) : null}
-      {csvRows ? (
+        ) : null}
+        {children}
         <Button
           type="button"
-          variant="tintViolet"
+          variant="ghost"
           size="sm"
-          data-testid="selection-print"
           className="min-h-11"
-          onClick={() => printRows(document.title, csvRows())}
+          onClick={onClear}
         >
-          <Printer aria-hidden="true" />
-          {t("common.selection.print")}
+          <X aria-hidden="true" />
+          {t("common.selection.clear")}
         </Button>
-      ) : null}
-      {children}
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        className="min-h-11"
-        onClick={onClear}
-      >
-        <X aria-hidden="true" />
-        {t("common.selection.clear")}
-      </Button>
-    </section>
+      </section>
+    </>
   )
 }

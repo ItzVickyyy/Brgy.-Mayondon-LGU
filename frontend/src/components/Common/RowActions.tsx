@@ -111,7 +111,7 @@ export function RowActions({
           <DropdownMenuTrigger asChild>
             <Button
               type="button"
-              variant="outline"
+              variant="tintMore"
               size="icon"
               aria-label={t("common.rowActions.more", { name })}
             >

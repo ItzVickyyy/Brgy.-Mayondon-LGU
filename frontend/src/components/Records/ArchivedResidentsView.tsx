@@ -17,11 +17,13 @@ import {
   SelectionBar,
   selectCol,
 } from "@/components/Common/SelectionControls"
+import { SortLabel } from "@/components/Common/SortLabel"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { cardTable } from "@/lib/cardTable"
 import { formatLocaleDate } from "@/lib/locale"
 import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
+import { useSort } from "@/lib/useSort"
 
 type ArchivedResidentsViewProps = {
   isAdmin: boolean
@@ -79,6 +81,13 @@ export function ArchivedResidentsView({
 
   // Server pages: a selection lasts only while its rows are on screen.
   const pick = useRowSelection(residents, (resident) => String(resident.id))
+  // Click a heading to sort the rows on this page (292).
+  const sort = useSort(residents, {
+    resident: (resident) => resident.full_name,
+    archivedOn: (resident) => resident.archived_at,
+    archivedBy: (resident) => resident.archived_by_name,
+    reason: (resident) => resident.archive_reason,
+  })
 
   const columns = [
     "resident",
@@ -171,17 +180,24 @@ export function ArchivedResidentsView({
                   {columns.map((column) => (
                     <th
                       key={column}
+                      aria-sort={sort.ariaSort(column)}
                       className={`px-4 py-3 align-middle font-medium @[59rem]/cards:px-5 ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
                     >
-                      {column === "resident" || column === "actions"
-                        ? t(`records.list.columns.${column}`)
-                        : t(`records.archive.columns.${column}`)}
+                      <SortLabel
+                        sort={sort}
+                        column={column}
+                        label={
+                          column === "resident" || column === "actions"
+                            ? t(`records.list.columns.${column}`)
+                            : t(`records.archive.columns.${column}`)
+                        }
+                      />
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody className={`divide-y ${cardTable.body}`}>
-                {residents.map((resident) => (
+                {sort.sorted.map((resident) => (
                   <tr
                     key={resident.id}
                     {...rowOpen(() => onViewProfile(resident))}

@@ -37,6 +37,7 @@ import {
   SelectionBar,
   selectCol,
 } from "@/components/Common/SelectionControls"
+import { SortLabel } from "@/components/Common/SortLabel"
 import { statusStyles } from "@/components/Common/statusStyles"
 import {
   TablePagination,
@@ -59,6 +60,7 @@ import { isSystemAdministrator } from "@/lib/access"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
 import { notify } from "@/lib/notifications"
 import { useRowSelection } from "@/lib/useRowSelection"
+import { useSort } from "@/lib/useSort"
 import { handleError } from "@/utils"
 
 export const Route = createFileRoute("/_layout/backup-restore")({
@@ -252,7 +254,15 @@ function BackupRestore() {
     }
   }
 
-  const sortedBackups = backups
+  // Click a heading to sort the whole list, then split it into pages (292).
+  const sort = useSort(backups, {
+    backup: (run) => run.file_name,
+    created: (run) => run.started_at,
+    type: (run) => labelOf(typeKeys, run.kind, t),
+    size: (run) => run.size_bytes,
+    check: (run) => labelOf(statusKeys, statusOf(run), t),
+  })
+  const sortedBackups = sort.sorted
   const restorable = backups.filter(
     (run) => statusOf(run) === "Verified" && run.file_exists,
   )
@@ -268,7 +278,7 @@ function BackupRestore() {
   const backupPagination = usePagination(
     sortedBackups,
     10,
-    listQuery.data?.count ?? 0,
+    `${listQuery.data?.count ?? 0}|${sort.key}`,
   )
   const pickBackups = useRowSelection(
     backupPagination.paginatedItems,
@@ -720,13 +730,18 @@ function BackupRestore() {
                 {columnIds.map((id) => (
                   <th
                     key={id}
+                    aria-sort={sort.ariaSort(id)}
                     className={
                       id === "actions"
                         ? "sticky right-0 bg-muted sticky-head-cell px-4 py-3 text-center font-medium sm:px-5"
                         : "px-4 py-3 align-middle font-medium sm:px-5"
                     }
                   >
-                    {t(`admin.backup.history.columns.${id}`)}
+                    <SortLabel
+                      sort={sort}
+                      column={id}
+                      label={t(`admin.backup.history.columns.${id}`)}
+                    />
                   </th>
                 ))}
               </tr>

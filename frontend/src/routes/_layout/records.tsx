@@ -37,6 +37,7 @@ import {
   SelectionBar,
   selectCol,
 } from "@/components/Common/SelectionControls"
+import { SortLabel } from "@/components/Common/SortLabel"
 import { StatCard } from "@/components/Common/StatCard"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { ArchivedResidentsView } from "@/components/Records/ArchivedResidentsView"
@@ -59,6 +60,7 @@ import {
 } from "@/lib/residents"
 import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
+import { useSort } from "@/lib/useSort"
 
 export const Route = createFileRoute("/_layout/records")({
   component: RecordsManagement,
@@ -188,6 +190,15 @@ function RecordsManagement() {
   const total = residentsQuery.data?.count ?? 0
   // Server pages: a selection lasts only while its rows are on screen.
   const pick = useRowSelection(residents, (resident) => String(resident.id))
+  // Click a heading to sort the rows on this page (292).
+  const sort = useSort(residents, {
+    resident: (resident) => resident.full_name,
+    address: (resident) => residentAddress(resident, streetNames),
+    birthdate: (resident) => resident.birthdate,
+    sex: (resident) => resident.sex,
+    civilStatus: (resident) => resident.civil_status,
+    occupation: (resident) => resident.occupation,
+  })
   const pageCount = Math.max(1, Math.ceil(total / pageSize))
   const start = total ? pageIndex * pageSize + 1 : 0
   const end = Math.min((pageIndex + 1) * pageSize, total)
@@ -420,15 +431,20 @@ function RecordsManagement() {
                         {residentColumns.map((column) => (
                           <th
                             key={column}
+                            aria-sort={sort.ariaSort(column)}
                             className={`px-2 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""} ${optionalColumn(column)}`}
                           >
-                            {t(`records.list.columns.${column}`)}
+                            <SortLabel
+                              sort={sort}
+                              column={column}
+                              label={t(`records.list.columns.${column}`)}
+                            />
                           </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody className="divide-y @max-[47rem]/records:block">
-                      {residents.map((resident) => {
+                      {sort.sorted.map((resident) => {
                         const address = residentAddress(resident, streetNames)
                         return (
                           <tr

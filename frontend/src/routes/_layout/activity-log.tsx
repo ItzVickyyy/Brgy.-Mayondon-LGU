@@ -20,6 +20,7 @@ import {
   SelectionBar,
   selectCol,
 } from "@/components/Common/SelectionControls"
+import { SortLabel } from "@/components/Common/SortLabel"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { Badge } from "@/components/ui/badge"
@@ -30,6 +31,7 @@ import { isSystemAdministrator } from "@/lib/access"
 import { activityTitle } from "@/lib/activity"
 import { formatLocaleDate } from "@/lib/locale"
 import { useRowSelection } from "@/lib/useRowSelection"
+import { useSort } from "@/lib/useSort"
 
 export const Route = createFileRoute("/_layout/activity-log")({
   component: ActivityLog,
@@ -298,6 +300,15 @@ function ActivityLog() {
   ]
   // Server pages: a selection lasts only while its rows are on screen.
   const pickRows = useRowSelection(items, (row) => String(row.id))
+  // Click a heading to sort the rows on this page (292).
+  const sort = useSort(items, {
+    dateTime: (row) => row.occurred_at,
+    user: (row) => row.actor_email,
+    action: (row) => activityTitle(row.action, t, row.details),
+    module: (row) => row.module,
+    record: (row) => row.record_id,
+    outcome: (row) => row.outcome,
+  })
   const modules = optionsQuery.data?.modules ?? []
   const actors = optionsQuery.data?.actors ?? []
 
@@ -471,15 +482,20 @@ function ActivityLog() {
                     {columns.map((item) => (
                       <th
                         key={item}
+                        aria-sort={sort.ariaSort(item)}
                         className={`px-4 py-3 align-middle font-medium sm:px-5 ${item === "outcome" ? "sticky right-0 bg-muted sticky-head-cell" : ""}`}
                       >
-                        {t(`activity.columns.${item}`)}
+                        <SortLabel
+                          sort={sort}
+                          column={item}
+                          label={t(`activity.columns.${item}`)}
+                        />
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {items.map((row) => {
+                  {sort.sorted.map((row) => {
                     const known = isOutcome(row.outcome)
                     const lines = detailLines(row.details, row.reason, t)
                     return (

@@ -34,6 +34,9 @@ const buttonVariants = cva(
         tintAmber: tint("[--tone:var(--action-amber)]", "text-white dark:text-[oklch(0.2_0.03_75)]"),
         tintRose: tint("[--tone:var(--action-rose)]"),
         tintViolet: tint("[--tone:var(--action-violet)]"),
+        // The three-dot (More) button of a table row: a soft brand-coloured button, so it reads as
+        // a button next to the solid View / Edit / Print ones. Brand text on a light tint keeps AA contrast.
+        tintMore: `border-2 border-brand/45 bg-brand/10 text-brand shadow-xs hover:border-brand hover:bg-brand/20 data-[state=open]:border-brand data-[state=open]:bg-brand/20 ${press}`,
         link: "text-brand underline-offset-4 hover:underline",
       },
       size: {

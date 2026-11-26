@@ -14,6 +14,7 @@ import {
   RowCheckbox,
   SelectionBar,
 } from "@/components/Common/SelectionControls"
+import { SortLabel } from "@/components/Common/SortLabel"
 import { TablePagination } from "@/components/Common/TablePagination"
 import {
   Table,
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/table"
 import type { ReportCell } from "@/lib/reports/reportFiles"
 import { useRowSelection } from "@/lib/useRowSelection"
+import { type SortValue, useSort } from "@/lib/useSort"
 
 const dataTableFeatures = tableFeatures({
   rowPaginationFeature,
@@ -38,6 +40,8 @@ interface DataTableProps<TData extends RowData> {
   data: TData[]
   emptyTitle?: string
   emptyDescription?: string
+  /** Click-to-sort (292): the value to compare, by column id; a column not listed is not sortable. */
+  sortBy?: Record<string, (row: TData) => SortValue>
   /** Batch selection (278): a stable id and a name (for screen readers) per row. */
   selection?: {
     getRowId: (row: TData) => string
@@ -53,11 +57,13 @@ export function DataTable<TData extends RowData>({
   emptyTitle,
   emptyDescription,
   selection,
+  sortBy = {},
 }: DataTableProps<TData>) {
   const { t } = useTranslation()
+  const sort = useSort(data, sortBy)
   const table = useTable({
     features: dataTableFeatures,
-    data,
+    data: sort.sorted,
     columns,
     initialState: { pagination: { pageIndex: 0, pageSize: 10 } },
   })
@@ -96,18 +102,27 @@ export function DataTable<TData extends RowData>({
                 return (
                   <TableHead
                     key={header.id}
+                    aria-sort={sort.ariaSort(header.column.id)}
                     className={
                       header.column.id === "actions"
                         ? "sticky right-0 bg-muted sticky-head-cell"
                         : undefined
                     }
                   >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                    {header.isPlaceholder ? null : typeof header.column
+                        .columnDef.header === "string" &&
+                      sort.isSortable(header.column.id) ? (
+                      <SortLabel
+                        sort={sort}
+                        column={header.column.id}
+                        label={header.column.columnDef.header}
+                      />
+                    ) : (
+                      flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )
+                    )}
                   </TableHead>
                 )
               })}

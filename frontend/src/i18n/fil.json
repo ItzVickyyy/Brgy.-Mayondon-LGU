@@ -2941,6 +2941,9 @@
       "exitFullscreen": "Lumabas sa full screen",
       "close": "Isara"
     },
+    "sort": {
+      "hint": "Ayusin ayon sa {{column}}"
+    },
     "selection": {
       "selectRow": "Piliin si {{name}}",
       "selectPage": "Piliin ang lahat ng hilera sa pahinang ito",

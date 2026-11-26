@@ -80,10 +80,10 @@ test("rows can be selected one by one, per page, and cleared", async ({
   await expect(page.getByTestId("selection-bar")).toHaveCount(0)
 
   await rows.first().click()
-  await expect(page.getByTestId("selection-bar")).toContainText("1 selected")
+  await expect(page.getByTestId("selection-count")).toContainText("1 selected")
 
   await page.getByTestId("page-select").click()
-  await expect(page.getByTestId("selection-bar")).toContainText("3 selected")
+  await expect(page.getByTestId("selection-count")).toContainText("3 selected")
 
   await page.getByTestId("page-select").click()
   await expect(page.getByTestId("selection-bar")).toHaveCount(0)

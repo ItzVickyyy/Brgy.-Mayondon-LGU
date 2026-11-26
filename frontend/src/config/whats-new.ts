@@ -7,6 +7,8 @@ export const WHATS_NEW: WhatsNewEntry[] = [
   {
     title: "Tables",
     points: [
+      "Click a column heading to sort the table; click again to reverse, and a third time to go back.",
+      "The number of ticked rows shows in the top bar, at the upper right.",
       "Tick rows to export them, print them or copy them to paste into Excel or Word.",
       "Rows light up when you point at them, and a double click opens View.",
       "Action buttons keep one colour for one meaning on every page.",

@@ -46,6 +46,7 @@ import {
   SelectionBar,
   selectCol,
 } from "@/components/Common/SelectionControls"
+import { SortLabel } from "@/components/Common/SortLabel"
 import { statusStyles } from "@/components/Common/statusStyles"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { IssuanceExportDialog } from "@/components/Issuances/IssuanceExportDialog"
@@ -75,6 +76,7 @@ import { type PrintMode, setPrintMode } from "@/lib/print/printMode"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
+import { useSort } from "@/lib/useSort"
 import { cn } from "@/lib/utils"
 
 type StatusFilter = "all" | "issued" | "draft" | "voided"
@@ -415,6 +417,17 @@ export function IssuanceHistory({
   const end = Math.min((pageIndex + 1) * pageSize, total)
   // Server pages: a selection lasts only while its rows are on screen.
   const pick = useRowSelection(items, (item) => String(item.id))
+  // Click a heading to sort the rows on this page (292).
+  const sort = useSort(items, {
+    resident: (item) => item.resident_name,
+    document: (item) =>
+      documentNames.get(item.document_type_id) ?? item.document_type_code,
+    purpose: (item) =>
+      (item.purpose_id && purposeNames.get(item.purpose_id)) || null,
+    dateIssued: (item) => (item.status === "draft" ? null : item.issue_date),
+    validUntil: (item) => item.expires_on,
+    status: (item) => statusLabel(item.status, t),
+  })
 
   const overallQuery = useQuery({
     queryKey: ["issuances-summary", "overall"],
@@ -774,15 +787,20 @@ export function IssuanceHistory({
                     {historyColumns.map((column) => (
                       <th
                         key={column}
+                        aria-sort={sort.ariaSort(column)}
                         className={`px-2.5 py-3 align-middle font-medium ${column === "actions" ? "sticky right-0 bg-muted sticky-head-cell text-center" : ""}`}
                       >
-                        {t(`issuances.history.columns.${column}`)}
+                        <SortLabel
+                          sort={sort}
+                          column={column}
+                          label={t(`issuances.history.columns.${column}`)}
+                        />
                       </th>
                     ))}
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${cardTable.body}`}>
-                  {items.map((item) => {
+                  {sort.sorted.map((item) => {
                     const isDraft = item.status === "draft"
                     const isArchived = Boolean(item.archived_at)
                     const isIssued = item.status === "issued" && !isArchived

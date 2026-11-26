@@ -40,6 +40,7 @@ import {
   SelectionBar,
   selectCol,
 } from "@/components/Common/SelectionControls"
+import { SortLabel } from "@/components/Common/SortLabel"
 import { statusStyles } from "@/components/Common/statusStyles"
 import {
   TablePagination,
@@ -64,6 +65,7 @@ import { notify } from "@/lib/notifications"
 import { readApiError } from "@/lib/residents"
 import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
+import { useSort } from "@/lib/useSort"
 
 type OfficialRecord = {
   id: string
@@ -239,10 +241,17 @@ function OfficialsManagement() {
           a.name.localeCompare(b.name),
       )
   }, [officials, search, statusFilter, t])
+  // Click a heading to sort the whole filtered list, then split it into pages (292).
+  const sort = useSort(filteredOfficials, {
+    name: (official) => official.name,
+    position: (official) => official.position,
+    term: (official) => official.termStart,
+    status: (official) => statusLabel(official.status, t),
+  })
   const officialPagination = usePagination(
-    filteredOfficials,
+    sort.sorted,
     10,
-    `${search}|${statusFilter}`,
+    `${search}|${statusFilter}|${sort.key}`,
   )
   const pickOfficials = useRowSelection(
     officialPagination.paginatedItems,
@@ -436,13 +445,18 @@ function OfficialsManagement() {
                 {columnIds.map((id) => (
                   <th
                     key={id}
+                    aria-sort={sort.ariaSort(id)}
                     className={
                       id === "actions"
                         ? "sticky right-0 bg-muted sticky-head-cell px-4 py-3 text-center font-medium sm:px-5"
                         : "px-4 py-3 align-middle font-medium sm:px-5"
                     }
                   >
-                    {t(`admin.officials.columns.${id}`)}
+                    <SortLabel
+                      sort={sort}
+                      column={id}
+                      label={t(`admin.officials.columns.${id}`)}
+                    />
                   </th>
                 ))}
               </tr>
