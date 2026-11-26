@@ -3,6 +3,7 @@
 // pangalan"), and the Is active box is level with the Role select. The API is
 // mocked, so this spec needs only the running frontend.
 import { expect, test } from "@playwright/test"
+import { waitUntilSettled } from "./utils/settled"
 
 for (const language of ["en", "fil"]) {
   test(`the four name inputs line up in ${language}`, async ({ page }) => {
@@ -33,6 +34,7 @@ for (const language of ["en", "fil"]) {
     await page.locator("button:has(svg.lucide-plus)").first().click()
 
     const dialog = page.getByRole("dialog")
+    await waitUntilSettled(dialog)
     const tops: number[] = []
     for (const name of [
       "first_name",

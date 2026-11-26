@@ -4,6 +4,7 @@
 // is no longer than it needs to be. The API is
 // mocked, so this spec needs only the running frontend.
 import { expect, test } from "@playwright/test"
+import { waitUntilSettled } from "./utils/settled"
 
 const admin = {
   id: "22222222-0000-0000-0000-000000000001",
@@ -53,6 +54,7 @@ for (const language of ["en", "fil"]) {
     await row.getByRole("button", { name: /^(Edit|I-edit|Baguhin)/ }).click()
 
     const dialog = page.getByRole("dialog")
+    await waitUntilSettled(dialog)
     const boxes: { y: number; w: number }[] = []
     for (const name of [
       "first_name",
