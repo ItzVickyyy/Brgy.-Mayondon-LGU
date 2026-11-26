@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test"
 
 // User Accounts (patch 311). The list needs about 1171 px (English) or 1277 px (Filipino), but
 // its box is 972 px on a 1280 px laptop, so the sticky Actions column slid over Role and Status.
-// Below 75rem the list is now cards, so nothing scrolls sideways at any width and every user's
+// Below 80rem the list is now cards, so nothing scrolls sideways at any width and every user's
 // role, status and buttons can be read.
 const admin = {
   id: "22222222-0000-0000-0000-000000000001",
@@ -47,7 +47,7 @@ const users = {
 }
 
 for (const language of ["en", "fil"])
-  for (const width of [1440, 1280, 1024, 390])
+  for (const width of [1920, 1600, 1520, 1440, 1280, 1024, 390])
     test(`User Accounts fits ${width} px without scrolling (${language})`, async ({
       page,
     }) => {

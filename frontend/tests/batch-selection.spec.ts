@@ -73,6 +73,8 @@ for (const language of ["en", "fil"]) {
 test("rows can be selected one by one, per page, and cleared", async ({
   page,
 }) => {
+  // The page box is in the table header, which shows from 1600 px (patch 312).
+  await page.setViewportSize({ width: 1600, height: 900 })
   await mockApi(page)
   await page.goto("/backup-restore")
   const rows = page.getByTestId("row-select")
@@ -132,6 +134,8 @@ test("Export as PDF, Word and Excel each download a file named for the type", as
 test("the header box shows a dash for some rows, and boxes line up (280, 290)", async ({
   page,
 }) => {
+  // The page box is in the table header, which shows from 1600 px (patch 312).
+  await page.setViewportSize({ width: 1600, height: 900 })
   await mockApi(page)
   await page.goto("/backup-restore")
   await page.getByTestId("row-select").first().click()

@@ -57,7 +57,7 @@ import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import useCustomToast from "@/hooks/useCustomToast"
 import { isSystemAdministrator } from "@/lib/access"
-import { cardTable } from "@/lib/cardTable"
+import { wideCardTable } from "@/lib/cardTable"
 import { formatLocaleDate, formatLocaleNumber } from "@/lib/locale"
 import { notify } from "@/lib/notifications"
 import { useRowSelection } from "@/lib/useRowSelection"
@@ -717,12 +717,12 @@ function BackupRestore() {
             </Button>
           </SelectionBar>
         </div>
-        <div className={cardTable.box}>
+        <div className={wideCardTable.box}>
           <table
-            className={`w-full min-w-[900px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}
+            className={`w-full min-w-[900px] text-left text-sm @max-[80rem]/wide-cards:min-w-0 ${wideCardTable.table}`}
           >
             <thead
-              className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
+              className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${wideCardTable.head}`}
             >
               <tr>
                 <th className={selectCol}>
@@ -751,16 +751,16 @@ function BackupRestore() {
                 ))}
               </tr>
             </thead>
-            <tbody className={`divide-y ${cardTable.body}`}>
+            <tbody className={`divide-y ${wideCardTable.body}`}>
               {backupPagination.paginatedItems.map((backup) => {
                 const status = statusOf(backup)
                 const name = backup.file_name ?? "—"
                 return (
                   <tr
                     key={backup.id}
-                    className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow}`}
+                    className={`transition-colors hover:bg-muted/30 ${wideCardTable.row} ${wideCardTable.selectRow}`}
                   >
-                    <td className={`${selectCol} ${cardTable.select}`}>
+                    <td className={`${selectCol} ${wideCardTable.select}`}>
                       <RowCheckbox
                         label={name}
                         checked={pickBackups.isSelected(String(backup.id))}
@@ -768,7 +768,7 @@ function BackupRestore() {
                       />
                     </td>
                     <td
-                      className={`px-4 py-3 align-middle sm:px-5 ${cardTable.full} ${cardTable.selectName}`}
+                      className={`px-4 py-3 align-middle sm:px-5 ${wideCardTable.full} ${wideCardTable.selectName}`}
                     >
                       <span className="break-all font-mono font-medium">
                         {name}
@@ -776,15 +776,15 @@ function BackupRestore() {
                     </td>
                     <td
                       data-label={t("admin.backup.history.columns.created")}
-                      className={`whitespace-nowrap px-4 py-3 align-middle sm:px-5 ${cardTable.labelled}`}
+                      className={`whitespace-nowrap px-4 py-3 align-middle sm:px-5 ${wideCardTable.labelled}`}
                     >
                       {formatMoment(backup.started_at)}
                     </td>
                     <td
                       data-label={t("admin.backup.history.columns.type")}
-                      className={`px-4 py-3 align-middle sm:px-5 ${cardTable.labelled}`}
+                      className={`px-4 py-3 align-middle sm:px-5 ${wideCardTable.labelled}`}
                     >
-                      <p className="@max-[59rem]/cards:inline">
+                      <p className="@max-[80rem]/wide-cards:inline">
                         {labelOf(typeKeys, backup.kind, t)}
                       </p>
                       {backup.created_by_email ? (
@@ -797,13 +797,13 @@ function BackupRestore() {
                     </td>
                     <td
                       data-label={t("admin.backup.history.columns.size")}
-                      className={`whitespace-nowrap px-4 py-3 align-middle sm:px-5 ${cardTable.labelled}`}
+                      className={`whitespace-nowrap px-4 py-3 align-middle sm:px-5 ${wideCardTable.labelled}`}
                     >
                       {formatSize(backup.size_bytes)}
                     </td>
                     <td
                       data-label={t("admin.backup.history.columns.check")}
-                      className={`px-4 py-3 align-middle sm:px-5 ${cardTable.labelled}`}
+                      className={`px-4 py-3 align-middle sm:px-5 ${wideCardTable.labelled}`}
                     >
                       <div className="flex flex-col items-start gap-1">
                         <Badge
@@ -835,12 +835,12 @@ function BackupRestore() {
                       </div>
                     </td>
                     <td
-                      className={`sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle sm:px-5 sticky-edge ${cardTable.actions}`}
+                      className={`sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle sm:px-5 sticky-edge ${wideCardTable.actions}`}
                     >
                       <RowActions
                         name={name}
                         isAdmin
-                        className="@max-[59rem]/cards:flex-wrap @max-[59rem]/cards:justify-start"
+                        className="@max-[80rem]/wide-cards:flex-wrap @max-[80rem]/wide-cards:justify-start"
                         primary={
                           status === "Verified" && backup.file_exists
                             ? {

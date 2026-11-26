@@ -136,6 +136,8 @@ test("Print prints only the chosen rows, and there is no Copy button", async ({
 })
 
 test("Verify selected checks each chosen backup file", async ({ page }) => {
+  // The page box is in the table header, which shows from 1600 px (patch 312).
+  await page.setViewportSize({ width: 1600, height: 900 })
   await mockApi(page)
   await page.goto("/backup-restore")
   await page.getByTestId("page-select").click()

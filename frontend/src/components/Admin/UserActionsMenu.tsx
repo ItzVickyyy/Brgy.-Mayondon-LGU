@@ -52,7 +52,7 @@ export const UserActionsMenu = ({ user }: UserActionsMenuProps) => {
 
   return (
     <>
-      <div className="flex items-center justify-end gap-2 @max-[75rem]/wide-cards:flex-wrap @max-[75rem]/wide-cards:justify-start">
+      <div className="flex items-center justify-end gap-2 @max-[80rem]/wide-cards:flex-wrap @max-[80rem]/wide-cards:justify-start">
         <EditUser
           user={user}
           asPrimaryButton

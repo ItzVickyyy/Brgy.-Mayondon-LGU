@@ -1371,8 +1371,8 @@ tbody
   }
 }
 
-/* Same for the User Accounts list (box under 75rem, see lib/cardTable.ts). */
-@container wide-cards (max-width: 75rem) {
+/* Same for the User Accounts and Backup History lists (box under 80rem, see lib/cardTable.ts). */
+@container wide-cards (max-width: 80rem) {
   .sticky-edge {
     animation: none;
     box-shadow: none;

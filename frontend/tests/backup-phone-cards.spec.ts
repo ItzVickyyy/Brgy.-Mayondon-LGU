@@ -81,10 +81,34 @@ test("on a phone each backup is a card that can be ticked", async ({
   expect(rb?.x ?? -1).toBeGreaterThanOrEqual(0)
 })
 
-test("a wide screen keeps the table with its header", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
+test("a wide screen (1600 px) keeps the table with its header", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1600, height: 900 })
   await page.goto("/backup-restore")
   await expect(
     page.getByRole("columnheader", { name: /Backup/ }).first(),
   ).toBeVisible()
 })
+
+// Patch 312: the table needs 1125 px (English) or 1242 px (Filipino) of columns, but its box is
+// 972 px on a 1280 px laptop, so the sticky Actions column covered the Check capsule. Cards now
+// start below 80rem, so nothing scrolls sideways at any width.
+for (const language of ["en", "fil"])
+  for (const width of [1920, 1600, 1520, 1440, 1280, 1024])
+    test(`Backup History fits ${width} px without scrolling (${language})`, async ({
+      page,
+    }) => {
+      await page.addInitScript((lang) => {
+        localStorage.setItem("app-language", lang)
+      }, language)
+      await page.setViewportSize({ width, height: 900 })
+      await page.goto("/backup-restore")
+      const table = page.locator("table").first()
+      await expect(table.locator("tbody tr").first()).toBeVisible()
+      const over = await table.evaluate((el) => {
+        const box = el.closest(".overflow-x-auto") as HTMLElement
+        return box.scrollWidth - box.clientWidth
+      })
+      expect(over).toBeLessThanOrEqual(1)
+    })

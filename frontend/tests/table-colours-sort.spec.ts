@@ -62,7 +62,8 @@ for (const language of ["en", "fil"]) {
   test(`a heading sorts the rows: up, down, then original order (${language})`, async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 1440, height: 900 })
+    // The headings are only there in table mode (from 1600 px since patch 312).
+    await page.setViewportSize({ width: 1600, height: 900 })
     await mockApi(page, language)
     await page.goto("/backup-restore")
     const head = page.getByTestId("sort-backup")
@@ -94,7 +95,7 @@ for (const language of ["en", "fil"]) {
 }
 
 test("the Actions heading is not a sort button", async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.setViewportSize({ width: 1600, height: 900 })
   await mockApi(page)
   await page.goto("/backup-restore")
   await expect(page.getByTestId("sort-backup")).toBeVisible()
