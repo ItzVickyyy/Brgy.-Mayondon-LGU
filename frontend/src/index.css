@@ -742,14 +742,18 @@ tr:focus-within > .row-hover-cell {
   background-color: var(--row-hover);
 }
 
-/* Row hover on every table body (one rule for all pages): a small background
-   tint only (no bar, since 293). Total rows (font-semibold) keep their own
+/* Row hover on every table body (one rule for all pages): a background tint
+   only (no bar, since 293), the full muted colour so it is easy to see (294). Total rows (font-semibold) keep their own
    look. Pointer devices only; nothing moves. A row that opens a view on double
    click (rowOpen in lib/rowOpen.ts) also gets the pointer cursor. */
 :root {
-  --row-hover: color-mix(in oklab, var(--card), var(--muted) 45%);
+  --row-hover: var(--muted);
 }
 @media screen and (hover: hover) {
+  tbody > tr:not(.font-semibold),
+  tbody > tr > .row-hover-cell {
+    transition: background-color 120ms ease-out;
+  }
   tbody > tr:not(.font-semibold):hover {
     background-color: var(--row-hover);
   }
