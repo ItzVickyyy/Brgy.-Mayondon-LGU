@@ -431,6 +431,7 @@
       "allUsers": "All users",
       "from": "From",
       "to": "To",
+      "dateRange": "Date range",
       "startDateAria": "Start date",
       "endDateAria": "End date"
     },
@@ -1387,6 +1388,7 @@
         "allDocumentTypes": "All document types",
         "status": "Status",
         "allStatuses": "All statuses",
+        "dated": "Dated",
         "datedFrom": "Dated from",
         "datedTo": "Dated to"
       },

@@ -99,31 +99,22 @@ export function ArchivedResidentsView({
             {t("records.archive.description")}
           </p>
         </div>
-        <label className="relative block min-w-0 sm:max-w-sm">
-          <span className="sr-only">{t("records.list.searchLabel")}</span>
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-            aria-hidden="true"
-          />
-          <input
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder={t("records.list.searchPlaceholder")}
-            className={`${formControlClass} pl-9`}
-          />
-        </label>
-      </div>
-      {query.isLoading ? (
-        <LoadingState title={t("records.list.loading")} />
-      ) : query.isError ? (
-        <ErrorState
-          title={t("records.list.loadError.title")}
-          description={t("records.list.loadError.description")}
-          onRetry={() => query.refetch()}
-        />
-      ) : (
-        <>
+        <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <label className="relative block min-w-0 flex-1 sm:max-w-sm">
+            <span className="sr-only">{t("records.list.searchLabel")}</span>
+            <Search
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={t("records.list.searchPlaceholder")}
+              className={`${formControlClass} pl-9`}
+            />
+          </label>
           <SelectionBar
+            inline
             count={pick.count}
             onClear={pick.clear}
             csvName="archived-residents-selected.csv"
@@ -150,6 +141,18 @@ export function ArchivedResidentsView({
               ]),
             ]}
           />
+        </div>
+      </div>
+      {query.isLoading ? (
+        <LoadingState title={t("records.list.loading")} />
+      ) : query.isError ? (
+        <ErrorState
+          title={t("records.list.loadError.title")}
+          description={t("records.list.loadError.description")}
+          onRetry={() => query.refetch()}
+        />
+      ) : (
+        <>
           <div className={cardTable.box}>
             <table
               className={`w-full min-w-[820px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}

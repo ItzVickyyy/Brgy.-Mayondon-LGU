@@ -206,7 +206,7 @@ export function BarangayIdsView() {
               {t("records.ids.description")}
             </p>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <label className="relative block min-w-0 flex-1 sm:max-w-sm">
               <span className="sr-only">{t("records.ids.searchLabel")}</span>
               <Search
@@ -240,20 +240,8 @@ export function BarangayIdsView() {
                 <option value="expired">{t("records.idStatus.expired")}</option>
               </Select>
             </label>
-          </div>
-        </div>
-
-        {idsQuery.isLoading ? (
-          <LoadingState title={t("records.ids.loading")} />
-        ) : idsQuery.isError ? (
-          <ErrorState
-            title={t("records.ids.loadError.title")}
-            description={t("records.ids.loadError.description")}
-            onRetry={() => idsQuery.refetch()}
-          />
-        ) : (
-          <>
             <SelectionBar
+              inline
               count={pick.count}
               onClear={pick.clear}
               csvName="barangay-ids-selected.csv"
@@ -275,6 +263,19 @@ export function BarangayIdsView() {
                   ]),
               ]}
             />
+          </div>
+        </div>
+
+        {idsQuery.isLoading ? (
+          <LoadingState title={t("records.ids.loading")} />
+        ) : idsQuery.isError ? (
+          <ErrorState
+            title={t("records.ids.loadError.title")}
+            description={t("records.ids.loadError.description")}
+            onRetry={() => idsQuery.refetch()}
+          />
+        ) : (
+          <>
             <div className={cardTable.box}>
               <table
                 className={`w-full min-w-[900px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}

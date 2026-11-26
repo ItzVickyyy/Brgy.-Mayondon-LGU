@@ -25,6 +25,7 @@ import { useTranslation } from "react-i18next"
 import type { IssuanceListItem, IssuancePublic } from "@/client"
 import { DashboardService, IssuancesService, LookupsService } from "@/client"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
+import { DateRangeField } from "@/components/Common/DateRangeField"
 import {
   EmptyState,
   ErrorState,
@@ -643,8 +644,8 @@ export function IssuanceHistory({
           </div>
           <div className="flex flex-col gap-3 border-t bg-muted/30 p-4 sm:px-5">
           {/* One row on wide screens: search and the two dropdowns flex, the
-              two dates keep a fixed width so they never wrap onto a second row. */}
-          <div className="grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1.2fr)_minmax(0,0.9fr)_9.75rem_9.75rem]">
+              joined date range keeps a fixed width so it never wraps. */}
+          <div className="grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1.2fr)_minmax(0,0.9fr)_18rem]">
             <label
               className={`${filterLabelClass} sm:col-span-2 xl:col-span-1`}
             >
@@ -696,28 +697,40 @@ export function IssuanceHistory({
                 <option value="voided">{statusLabel("voided", t)}</option>
               </Select>
             </label>
-            <label className={filterLabelClass}>
-              <span>{t("issuances.history.filters.datedFrom")}</span>
-              <input
-                type="date"
-                value={dateFrom}
-                max={dateTo || manilaToday()}
-                onChange={(event) => setDateFrom(event.target.value)}
-                className={formControlClass}
-              />
-            </label>
-            <label className={filterLabelClass}>
-              <span>{t("issuances.history.filters.datedTo")}</span>
-              <input
-                type="date"
-                value={dateTo}
-                min={dateFrom || undefined}
-                max={manilaToday()}
-                onChange={(event) => setDateTo(event.target.value)}
-                className={formControlClass}
-              />
-            </label>
+            <DateRangeField
+              className="sm:col-span-2 xl:col-span-1"
+              label={t("issuances.history.filters.dated")}
+              fromLabel={t("issuances.history.filters.datedFrom")}
+              toLabel={t("issuances.history.filters.datedTo")}
+              from={dateFrom}
+              to={dateTo}
+              onFromChange={setDateFrom}
+              onToChange={setDateTo}
+              max={manilaToday()}
+            />
           </div>
+        <SelectionBar
+          inline
+          count={pick.count}
+          onClear={pick.clear}
+          csvName="issuance-history-selected.csv"
+          csvRows={() => [
+            historyColumns
+              .filter((column) => column !== "actions")
+              .map((column) => t(`issuances.history.columns.${column}`)),
+            ...pick.pick(items).map((item) => [
+              `${item.resident_name} (${item.reference_no ?? t("issuances.history.notNumbered")})`,
+              documentNames.get(item.document_type_id) ??
+                item.document_type_code,
+              (item.purpose_id && purposeNames.get(item.purpose_id)) || "—",
+              item.status === "draft"
+                ? "—"
+                : formatBusinessDate(item.issue_date),
+              item.expires_on ? formatBusinessDate(item.expires_on) : "—",
+              statusLabel(item.status, t),
+            ]),
+          ]}
+        />
           {dateRangeInvalid ? (
             <p role="alert" className="text-sm text-destructive">
               {t("issuances.history.dateRangeInvalid")}
@@ -741,27 +754,6 @@ export function IssuanceHistory({
           />
         ) : (
           <>
-            <SelectionBar
-              count={pick.count}
-              onClear={pick.clear}
-              csvName="issuance-history-selected.csv"
-              csvRows={() => [
-                historyColumns
-                  .filter((column) => column !== "actions")
-                  .map((column) => t(`issuances.history.columns.${column}`)),
-                ...pick.pick(items).map((item) => [
-                  `${item.resident_name} (${item.reference_no ?? t("issuances.history.notNumbered")})`,
-                  documentNames.get(item.document_type_id) ??
-                    item.document_type_code,
-                  (item.purpose_id && purposeNames.get(item.purpose_id)) || "—",
-                  item.status === "draft"
-                    ? "—"
-                    : formatBusinessDate(item.issue_date),
-                  item.expires_on ? formatBusinessDate(item.expires_on) : "—",
-                  statusLabel(item.status, t),
-                ]),
-              ]}
-            />
             <div className={cardTable.box}>
               <table
                 className={`w-full min-w-[880px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}

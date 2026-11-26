@@ -431,6 +431,7 @@
       "allUsers": "Lahat ng user",
       "from": "Mula",
       "to": "Hanggang",
+      "dateRange": "Saklaw ng petsa",
       "startDateAria": "Petsa ng simula",
       "endDateAria": "Petsa ng pagtatapos"
     },
@@ -1387,6 +1388,7 @@
         "allDocumentTypes": "Lahat ng uri ng dokumento",
         "status": "Katayuan",
         "allStatuses": "Lahat ng katayuan",
+        "dated": "Petsa",
         "datedFrom": "Petsa mula",
         "datedTo": "Petsa hanggang"
       },

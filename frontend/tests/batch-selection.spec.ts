@@ -110,7 +110,7 @@ test("Export selected downloads a CSV of just the selected rows", async ({
   expect(text).not.toContain("mayondon-db-20261120-093844-001.dump")
 })
 
-test("the header box shows a dash for some rows, and boxes line up with the bar text (280)", async ({
+test("the header box shows a dash for some rows, and boxes line up (280, 290)", async ({
   page,
 }) => {
   await mockApi(page)
@@ -127,11 +127,5 @@ test("the header box shows a dash for some rows, and boxes line up with the bar 
     }, selector)
   const box = await left('[data-testid="row-select"]')
   const head = await left('[data-testid="page-select"]')
-  const text = await page
-    .getByTestId("selection-bar")
-    .locator("span")
-    .first()
-    .evaluate((el) => Math.round(el.getBoundingClientRect().left))
   expect(Math.abs(box - head)).toBeLessThanOrEqual(1)
-  expect(Math.abs(box - text)).toBeLessThanOrEqual(1)
 })

@@ -672,39 +672,40 @@ function BackupRestore() {
                 : t("admin.backup.history.lastAgo", { count: daysSinceLatest })}
             </Badge>
           ) : null}
-        </div>
-        <SelectionBar
-          count={pickBackups.count}
-          onClear={pickBackups.clear}
-          csvName="backups-selected.csv"
-          csvRows={() => [
-            columnIds
-              .filter((id) => id !== "actions")
-              .map((id) => t(`admin.backup.history.columns.${id}`)),
-            ...pickBackups
-              .pick(sortedBackups)
-              .map((run) => [
-                run.file_name ?? "—",
-                formatMoment(run.started_at),
-                labelOf(typeKeys, run.kind, t),
-                formatSize(run.size_bytes),
-                labelOf(statusKeys, statusOf(run), t),
-              ]),
-          ]}
-        >
-          <Button
-            type="button"
-            variant="tintTeal"
-            size="sm"
-            data-testid="verify-selected"
-            className="min-h-11 flex-1 sm:flex-none"
-            disabled={verifiable.length === 0 || verifyAll.isPending}
-            onClick={() => verifyAll.mutate()}
+          <SelectionBar
+            inline
+            count={pickBackups.count}
+            onClear={pickBackups.clear}
+            csvName="backups-selected.csv"
+            csvRows={() => [
+              columnIds
+                .filter((id) => id !== "actions")
+                .map((id) => t(`admin.backup.history.columns.${id}`)),
+              ...pickBackups
+                .pick(sortedBackups)
+                .map((run) => [
+                  run.file_name ?? "—",
+                  formatMoment(run.started_at),
+                  labelOf(typeKeys, run.kind, t),
+                  formatSize(run.size_bytes),
+                  labelOf(statusKeys, statusOf(run), t),
+                ]),
+            ]}
           >
-            <ShieldCheck aria-hidden="true" />
-            {t("admin.backup.actions.verifySelected")}
-          </Button>
-        </SelectionBar>
+            <Button
+              type="button"
+              variant="tintTeal"
+              size="sm"
+              data-testid="verify-selected"
+              className="min-h-11 flex-1 sm:flex-none"
+              disabled={verifiable.length === 0 || verifyAll.isPending}
+              onClick={() => verifyAll.mutate()}
+            >
+              <ShieldCheck aria-hidden="true" />
+              {t("admin.backup.actions.verifySelected")}
+            </Button>
+          </SelectionBar>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[900px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">

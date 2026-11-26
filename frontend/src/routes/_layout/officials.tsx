@@ -365,7 +365,7 @@ function OfficialsManagement() {
               </p>
             </div>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
             <label className="relative block min-w-0 flex-1 sm:max-w-sm">
               <span className="sr-only">
                 {t("admin.officials.searchLabel")}
@@ -400,27 +400,28 @@ function OfficialsManagement() {
                 <option value="all">{t("admin.officials.allStatuses")}</option>
               </Select>
             </label>
+            <SelectionBar
+              inline
+              count={pickOfficials.count}
+              onClear={pickOfficials.clear}
+              csvName="officials-selected.csv"
+              csvRows={() => [
+                columnIds
+                  .filter((id) => id !== "actions")
+                  .map((id) => t(`admin.officials.columns.${id}`)),
+                ...pickOfficials
+                  .pick(filteredOfficials)
+                  .map((official) => [
+                    official.name,
+                    official.position,
+                    `${formatTermDate(official.termStart, noEndDate)} – ${formatTermDate(official.termEnd, noEndDate)}`,
+                    statusLabel(official.status, t),
+                  ]),
+              ]}
+            />
           </div>
         </div>
 
-        <SelectionBar
-          count={pickOfficials.count}
-          onClear={pickOfficials.clear}
-          csvName="officials-selected.csv"
-          csvRows={() => [
-            columnIds
-              .filter((id) => id !== "actions")
-              .map((id) => t(`admin.officials.columns.${id}`)),
-            ...pickOfficials
-              .pick(filteredOfficials)
-              .map((official) => [
-                official.name,
-                official.position,
-                `${formatTermDate(official.termStart, noEndDate)} – ${formatTermDate(official.termEnd, noEndDate)}`,
-                statusLabel(official.status, t),
-              ]),
-          ]}
-        />
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px] text-left text-sm">
             <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">

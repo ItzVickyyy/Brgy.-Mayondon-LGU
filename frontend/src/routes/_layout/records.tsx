@@ -353,7 +353,7 @@ function RecordsManagement() {
                   {t("records.list.description")}
                 </p>
               </div>
-              <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
                 <label className="relative block min-w-0 flex-1 sm:max-w-sm">
                   <span className="sr-only">
                     {t("records.list.searchLabel")}
@@ -369,19 +369,8 @@ function RecordsManagement() {
                     className={`${inputClass} pl-9`}
                   />
                 </label>
-              </div>
-            </div>
-            {residentsQuery.isLoading ? (
-              <LoadingState title={t("records.list.loading")} />
-            ) : residentsQuery.isError ? (
-              <ErrorState
-                title={t("records.list.loadError.title")}
-                description={t("records.list.loadError.description")}
-                onRetry={() => residentsQuery.refetch()}
-              />
-            ) : (
-              <>
                 <SelectionBar
+                  inline
                   count={pick.count}
                   onClear={pick.clear}
                   csvName="residents-selected.csv"
@@ -405,6 +394,18 @@ function RecordsManagement() {
                       ]),
                   ]}
                 />
+              </div>
+            </div>
+            {residentsQuery.isLoading ? (
+              <LoadingState title={t("records.list.loading")} />
+            ) : residentsQuery.isError ? (
+              <ErrorState
+                title={t("records.list.loadError.title")}
+                description={t("records.list.loadError.description")}
+                onRetry={() => residentsQuery.refetch()}
+              />
+            ) : (
+              <>
                 <div className="@container/records overflow-x-auto">
                   <table className="w-full text-left text-sm @max-[47rem]/records:block @[47rem]/records:min-w-[720px] @[59rem]/records:min-w-[900px]">
                     <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground @max-[47rem]/records:hidden">

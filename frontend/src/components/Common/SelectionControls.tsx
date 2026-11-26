@@ -141,12 +141,21 @@ export function SelectionBar({
   csvName,
   csvRows,
   children,
+  inline = false,
 }: {
   count: number
   onClear: () => void
   csvName?: string
   csvRows?: () => ReportCell[][]
   children?: ReactNode
+  /**
+   * `inline` (290): the tools sit at the right of the table's filter row
+   * (or card header) instead of in a bar above the table. Place it as a child
+   * of that row; it takes the free space on the right and wraps onto its own
+   * right-aligned line when the filters leave no room. Nothing is drawn at
+   * count 0 either way.
+   */
+  inline?: boolean
 }) {
   const { t } = useTranslation()
   const { showSuccessToast, showErrorToast } = useCustomToast()
@@ -164,7 +173,11 @@ export function SelectionBar({
     <section
       data-testid="selection-bar"
       aria-label={t("common.selection.bar")}
-      className="selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b bg-brand/5 px-4 py-2 text-sm sm:px-5"
+      className={
+        inline
+          ? "selection-bar flex w-full flex-wrap items-center gap-x-3 gap-y-2 rounded-lg bg-brand/5 px-3 py-1 text-sm sm:ml-auto sm:w-auto"
+          : "selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b bg-brand/5 px-4 py-2 text-sm sm:px-5"
+      }
     >
       <span
         className="order-1 min-w-0 flex-1 font-medium sm:mr-auto sm:flex-none"

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { ActivityService } from "@/client"
+import { DateRangeField } from "@/components/Common/DateRangeField"
 import {
   EmptyState,
   ErrorState,
@@ -321,7 +322,7 @@ function ActivityLog() {
             </p>
           </div>
           <div
-            className={`grid gap-3 sm:grid-cols-2 ${isAdmin ? "xl:grid-cols-[2fr_repeat(5,minmax(0,1fr))]" : "xl:grid-cols-[2fr_repeat(4,minmax(0,1fr))]"}`}
+            className={`grid gap-3 sm:grid-cols-2 ${isAdmin ? "xl:grid-cols-[2fr_repeat(3,minmax(0,1fr))_18rem]" : "xl:grid-cols-[2fr_repeat(2,minmax(0,1fr))_18rem]"}`}
           >
             <label
               className={`${filterLabelClass} sm:col-span-2 xl:col-span-1`}
@@ -399,27 +400,38 @@ function ActivityLog() {
                 </Select>
               </label>
             ) : null}
-            <label className={filterLabelClass}>
-              <span>{t("activity.filters.from")}</span>
-              <input
-                aria-label={t("activity.filters.startDateAria")}
-                type="date"
-                value={startDate}
-                onChange={(event) => setStartDate(event.target.value)}
-                className={formControlClass}
-              />
-            </label>
-            <label className={filterLabelClass}>
-              <span>{t("activity.filters.to")}</span>
-              <input
-                aria-label={t("activity.filters.endDateAria")}
-                type="date"
-                value={endDate}
-                onChange={(event) => setEndDate(event.target.value)}
-                className={formControlClass}
-              />
-            </label>
+            <DateRangeField
+              className="sm:col-span-2 xl:col-span-1"
+              label={t("activity.filters.dateRange")}
+              fromLabel={t("activity.filters.startDateAria")}
+              toLabel={t("activity.filters.endDateAria")}
+              from={startDate}
+              to={endDate}
+              onFromChange={setStartDate}
+              onToChange={setEndDate}
+            />
           </div>
+          <SelectionBar
+            inline
+            count={pickRows.count}
+            onClear={pickRows.clear}
+            csvName="activity-selected.csv"
+            csvRows={() => [
+              columns.map((item) => t(`activity.columns.${item}`)),
+              ...pickRows
+                .pick(items)
+                .map((row) => [
+                  formatTimestamp(row.occurred_at),
+                  ...(isAdmin ? [row.actor_email ?? "—"] : []),
+                  activityTitle(row.action, t, row.details),
+                  moduleLabel(row.module, t),
+                  row.record_id ?? "—",
+                  isOutcome(row.outcome)
+                    ? t(`activity.outcomes.${row.outcome as Outcome}`)
+                    : row.outcome,
+                ]),
+            ]}
+          />
         </div>
 
         {rangeInvalid ? (
@@ -437,26 +449,6 @@ function ActivityLog() {
           />
         ) : (
           <>
-            <SelectionBar
-              count={pickRows.count}
-              onClear={pickRows.clear}
-              csvName="activity-selected.csv"
-              csvRows={() => [
-                columns.map((item) => t(`activity.columns.${item}`)),
-                ...pickRows
-                  .pick(items)
-                  .map((row) => [
-                    formatTimestamp(row.occurred_at),
-                    ...(isAdmin ? [row.actor_email ?? "—"] : []),
-                    activityTitle(row.action, t, row.details),
-                    moduleLabel(row.module, t),
-                    row.record_id ?? "—",
-                    isOutcome(row.outcome)
-                      ? t(`activity.outcomes.${row.outcome as Outcome}`)
-                      : row.outcome,
-                  ]),
-              ]}
-            />
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px] text-left text-sm">
                 <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
