@@ -1,4 +1,5 @@
-// Restore and Download copy ask for the password again (patch 253).
+// Restore and Download copy ask for the password again (patch 253). Restore takes the word and the
+// password in one pop-up (spec brought up to date in patch 313).
 // The API is mocked (synthetic data), so this spec needs only the running frontend.
 import { expect, type Page, test } from "@playwright/test"
 
@@ -118,7 +119,7 @@ test("Download copy asks for the password and sends the token", async ({
   expect(seen.confirms[seen.confirms.length - 1]?.scope).toBe("backup.download")
 })
 
-test("Restore asks for the password after the word, then shows the command", async ({
+test("Restore takes the word and the password in one pop-up, then shows the command", async ({
   page,
 }) => {
   const seen = await mockApi(page)
@@ -128,14 +129,33 @@ test("Restore asks for the password after the word, then shows the command", asy
   ).toBeVisible()
   await page.getByRole("button", { name: "Restore", exact: true }).click()
   await page.getByPlaceholder("RESTORE").fill("RESTORE")
-  await page.getByRole("button", { name: "Check and Show Command" }).click()
-  await expect(page.getByTestId("confirm-password-dialog")).toBeVisible()
+  const confirm = page.getByRole("button", { name: "Check and Show Command" })
+  // The button waits for the password as well as the word.
+  await expect(confirm).toBeDisabled()
   expect(seen.restoreToken).toBeUndefined()
 
-  await page.getByTestId("confirm-password-input").fill("right-password")
-  await page.getByTestId("confirm-password-input").press("Enter")
+  await page.getByTestId("restore-password").fill("right-password")
+  await expect(confirm).toBeEnabled()
+  await confirm.click()
   await expect(page.getByText("Ready to restore")).toBeVisible()
   expect(seen.restoreToken).toBe("token-for-backup.restore")
+})
+
+test("a wrong password stays in the Restore pop-up as a message and keeps the word", async ({
+  page,
+}) => {
+  const seen = await mockApi(page)
+  await page.goto("/backup-restore")
+  await page.getByRole("button", { name: "Restore", exact: true }).click()
+  await page.getByPlaceholder("RESTORE").fill("RESTORE")
+  await page.getByTestId("restore-password").fill("wrong")
+  await page.getByRole("button", { name: "Check and Show Command" }).click()
+  await expect(page.getByTestId("restore-password-error")).toHaveText(
+    "Incorrect password",
+  )
+  await expect(page.getByPlaceholder("RESTORE")).toHaveValue("RESTORE")
+  await expect(page.getByTestId("restore-password")).toHaveValue("")
+  expect(seen.restoreToken).toBeUndefined()
 })
 
 test("Cancel closes the box and nothing is sent", async ({ page }) => {
@@ -170,9 +190,8 @@ test("an expired confirmation does not sign the person out", async ({
   ).toBeVisible()
   await page.getByRole("button", { name: "Restore", exact: true }).click()
   await page.getByPlaceholder("RESTORE").fill("RESTORE")
+  await page.getByTestId("restore-password").fill("right-password")
   await page.getByRole("button", { name: "Check and Show Command" }).click()
-  await page.getByTestId("confirm-password-input").fill("right-password")
-  await page.getByTestId("confirm-password-submit").click()
   // The refusal is shown as a message; the session stays.
   await expect(
     page.getByText("Type your password again to continue."),
