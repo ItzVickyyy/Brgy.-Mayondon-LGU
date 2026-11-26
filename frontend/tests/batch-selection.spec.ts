@@ -89,18 +89,21 @@ test("rows can be selected one by one, per page, and cleared", async ({
   await expect(page.getByTestId("selection-bar")).toHaveCount(0)
 
   await rows.nth(1).click()
-  await page.getByRole("button", { name: "Clear selection" }).click()
+  await page.getByRole("button", { name: "Clear", exact: true }).click()
   await expect(page.getByTestId("selection-bar")).toHaveCount(0)
 })
 
-test("Export selected downloads a CSV of just the selected rows", async ({
+test("Export asks for a file type; CSV holds just the selected rows", async ({
   page,
 }) => {
   await mockApi(page)
   await page.goto("/backup-restore")
   await page.getByTestId("row-select").nth(1).click()
+  await page.getByRole("button", { name: "Export", exact: true }).click()
+  for (const format of ["xlsx", "docx", "pdf", "csv"])
+    await expect(page.getByTestId(`export-format-${format}`)).toBeVisible()
   const download = page.waitForEvent("download")
-  await page.getByRole("button", { name: "Export selected (CSV)" }).click()
+  await page.getByTestId("export-format-csv").click()
   const file = await download
   expect(file.suggestedFilename()).toBe("backups-selected.csv")
   const path = await file.path()
@@ -108,6 +111,22 @@ test("Export selected downloads a CSV of just the selected rows", async ({
   const text = readFileSync(path, "utf8")
   expect(text).toContain("mayondon-db-20261120-093844-002.dump")
   expect(text).not.toContain("mayondon-db-20261120-093844-001.dump")
+})
+
+test("Export as PDF, Word and Excel each download a file named for the type", async ({
+  page,
+}) => {
+  await mockApi(page)
+  await page.goto("/backup-restore")
+  await page.getByTestId("row-select").nth(1).click()
+  for (const format of ["xlsx", "docx", "pdf"]) {
+    await page.getByRole("button", { name: "Export", exact: true }).click()
+    const download = page.waitForEvent("download")
+    await page.getByTestId(`export-format-${format}`).click()
+    expect((await download).suggestedFilename()).toBe(
+      `backups-selected.${format}`,
+    )
+  }
 })
 
 test("the header box shows a dash for some rows, and boxes line up (280, 290)", async ({

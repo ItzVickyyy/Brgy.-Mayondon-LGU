@@ -35,10 +35,13 @@ export function ExportFormatDialog({
   open,
   onOpenChange,
   onChoose,
+  namespace = "admin.reports.exportDialog",
 }: {
   open: boolean
   onOpenChange: (open: boolean) => void
   onChoose: (format: ReportFormat) => void
+  /** i18n group holding title, description, cancel and formats.<type>.name/hint. */
+  namespace?: "admin.reports.exportDialog" | "common.selection.exportDialog"
 }) {
   const { t } = useTranslation()
   return (
@@ -54,10 +57,10 @@ export function ExportFormatDialog({
             </span>
             <div className="min-w-0 space-y-0.5">
               <DialogTitle className="text-lg leading-tight">
-                {t("admin.reports.exportDialog.title")}
+                {t(`${namespace}.title`)}
               </DialogTitle>
               <DialogDescription className="text-xs sm:text-sm">
-                {t("admin.reports.exportDialog.description")}
+                {t(`${namespace}.description`)}
               </DialogDescription>
             </div>
           </div>
@@ -80,10 +83,10 @@ export function ExportFormatDialog({
               </span>
               <span className="min-w-0">
                 <span className="block text-base font-semibold">
-                  {t(`admin.reports.exportDialog.formats.${format}.name`)}
+                  {t(`${namespace}.formats.${format}.name`)}
                 </span>
                 <span className="block text-xs font-normal text-muted-foreground">
-                  {t(`admin.reports.exportDialog.formats.${format}.hint`)}
+                  {t(`${namespace}.formats.${format}.hint`)}
                 </span>
               </span>
             </Button>
@@ -96,7 +99,7 @@ export function ExportFormatDialog({
             data-testid="export-cancel"
             onClick={() => onOpenChange(false)}
           >
-            {t("admin.reports.exportDialog.cancel")}
+            {t(`${namespace}.cancel`)}
           </Button>
         </div>
       </DialogContent>

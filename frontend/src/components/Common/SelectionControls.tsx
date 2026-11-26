@@ -1,11 +1,16 @@
-import { Clipboard, Download, Printer, X } from "lucide-react"
-import type { ReactNode } from "react"
+import { Download, Printer, X } from "lucide-react"
+import { type ReactNode, useState } from "react"
 import { useTranslation } from "react-i18next"
 
+import { ExportFormatDialog } from "@/components/Reports/ExportFormatDialog"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import useCustomToast from "@/hooks/useCustomToast"
-import { type ReportCell, reportCsv } from "@/lib/reports/reportFiles"
+import {
+  buildReportFile,
+  type ReportCell,
+  type ReportFormat,
+  reportMime,
+} from "@/lib/reports/reportFiles"
 
 /**
  * The checkbox column, same on every table: 20 px from the card edge (the
@@ -58,14 +63,36 @@ export function PageCheckbox({
   )
 }
 
-function saveCsv(name: string, rows: ReportCell[][]) {
-  const blob = new Blob([`\uFEFF${reportCsv(rows)}`], {
-    type: "text/csv;charset=utf-8",
-  })
-  const url = URL.createObjectURL(blob)
+/** Builds the chosen file from the selected rows (first row = headings) and downloads it. */
+function saveFile(name: string, format: ReportFormat, rows: ReportCell[][]) {
+  const blob = new Blob(
+    [
+      buildReportFile(format, {
+        title: document.title.split(" | ")[0] || "Selected rows",
+        subtitle: `${Math.max(rows.length - 1, 0)} selected · ${new Date().toLocaleDateString(
+          "en-US",
+          {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            timeZone: "Asia/Manila",
+          },
+        )}`,
+        rows,
+      }) as BlobPart,
+    ],
+    {
+      type: reportMime[format],
+    },
+  )
+  const url = URL.createObjectURL(
+    format === "csv"
+      ? new Blob([`\uFEFF`, blob], { type: reportMime.csv })
+      : blob,
+  )
   const link = document.createElement("a")
   link.href = url
-  link.download = name
+  link.download = `${name.replace(/\.[a-z]+$/i, "")}.${format}`
   link.click()
   window.setTimeout(() => URL.revokeObjectURL(url), 1000)
 }
@@ -121,15 +148,6 @@ tr{break-inside:avoid}
   }, 50)
 }
 
-/** Tab-separated text, so it pastes into Excel or Word as a table. */
-function tabText(rows: ReportCell[][]) {
-  return rows
-    .map((row) =>
-      row.map((cell) => String(cell).replace(/[\t\r\n]+/g, " ")).join("\t"),
-    )
-    .join("\n")
-}
-
 /**
  * Bar above a table while rows are selected: count, Clear, Export selected
  * (CSV, formula-safe), Print selected, Copy and any table-specific
@@ -145,97 +163,82 @@ export function SelectionBar({
 }: {
   count: number
   onClear: () => void
+  /** File name for Export; the extension is replaced by the chosen type. */
   csvName?: string
   csvRows?: () => ReportCell[][]
   children?: ReactNode
   /**
-   * `inline` (290): the tools sit at the right of the table's filter row
-   * (or card header) instead of in a bar above the table. Place it as a child
-   * of that row; it takes the free space on the right and wraps onto its own
-   * right-aligned line when the filters leave no room. Nothing is drawn at
-   * count 0 either way.
+   * `inline` (290): the tools sit in the table's filter row, after the last
+   * filter (or in the card header), instead of in a bar above the table. They
+   * slide in from the right and never add a line at wide widths, so the rows
+   * below do not move. Nothing is drawn at count 0 either way.
    */
   inline?: boolean
 }) {
   const { t } = useTranslation()
-  const { showSuccessToast, showErrorToast } = useCustomToast()
+  const [exportOpen, setExportOpen] = useState(false)
   if (count === 0) return null
-  async function copy() {
-    if (!csvRows) return
-    try {
-      await navigator.clipboard.writeText(tabText(csvRows()))
-      showSuccessToast(t("common.selection.copied", { count }))
-    } catch {
-      showErrorToast(t("common.selection.copyFailed"))
-    }
-  }
   return (
     <section
       data-testid="selection-bar"
       aria-label={t("common.selection.bar")}
       className={
         inline
-          ? "selection-bar flex w-full flex-wrap items-center gap-x-3 gap-y-2 rounded-lg bg-brand/5 px-3 py-1 text-sm sm:ml-auto sm:w-auto"
+          ? "selection-bar animate-selection-in flex w-full flex-wrap items-center gap-2 rounded-lg bg-brand/5 px-2 py-0.5 text-sm sm:ml-auto sm:w-auto sm:shrink-0 sm:flex-nowrap sm:gap-1 sm:whitespace-nowrap"
           : "selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b bg-brand/5 px-4 py-2 text-sm sm:px-5"
       }
     >
-      <span
-        className="order-1 min-w-0 flex-1 font-medium sm:mr-auto sm:flex-none"
-        aria-live="polite"
-      >
+      <span className="mr-1 font-medium" aria-live="polite">
         {t("common.selection.count", { count })}
       </span>
+      {csvName && csvRows ? (
+        <>
+          <Button
+            type="button"
+            variant="tintViolet"
+            size="sm"
+            data-testid="selection-export"
+            className="min-h-11"
+            onClick={() => setExportOpen(true)}
+          >
+            <Download aria-hidden="true" />
+            {t("common.selection.export")}
+          </Button>
+          <ExportFormatDialog
+            open={exportOpen}
+            onOpenChange={setExportOpen}
+            namespace="common.selection.exportDialog"
+            onChoose={(format) => {
+              saveFile(csvName, format, csvRows())
+              setExportOpen(false)
+            }}
+          />
+        </>
+      ) : null}
+      {csvRows ? (
+        <Button
+          type="button"
+          variant="tintViolet"
+          size="sm"
+          data-testid="selection-print"
+          className="min-h-11"
+          onClick={() => printRows(document.title, csvRows())}
+        >
+          <Printer aria-hidden="true" />
+          {t("common.selection.print")}
+        </Button>
+      ) : null}
+      {children}
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className="order-2 min-h-11 sm:order-3"
+        className="min-h-11"
         onClick={onClear}
       >
         <X aria-hidden="true" />
         {t("common.selection.clear")}
       </Button>
-      <div className="order-3 flex w-full flex-wrap items-center gap-2 sm:order-2 sm:w-auto">
-        {csvName && csvRows ? (
-          <Button
-            type="button"
-            variant="tintViolet"
-            size="sm"
-            className="min-h-11 w-full sm:w-auto"
-            onClick={() => saveCsv(csvName, csvRows())}
-          >
-            <Download aria-hidden="true" />
-            {t("common.selection.export")}
-          </Button>
-        ) : null}
-        {csvRows ? (
-          <>
-            <Button
-              type="button"
-              variant="tintViolet"
-              size="sm"
-              data-testid="selection-print"
-              className="min-h-11 flex-1 sm:flex-none"
-              onClick={() => printRows(document.title, csvRows())}
-            >
-              <Printer aria-hidden="true" />
-              {t("common.selection.print")}
-            </Button>
-            <Button
-              type="button"
-              variant="tintTeal"
-              size="sm"
-              data-testid="selection-copy"
-              className="min-h-11 flex-1 sm:flex-none"
-              onClick={copy}
-            >
-              <Clipboard aria-hidden="true" />
-              {t("common.selection.copy")}
-            </Button>
-          </>
-        ) : null}
-        {children}
-      </div>
     </section>
   )
 }

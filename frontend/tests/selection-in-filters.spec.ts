@@ -86,29 +86,24 @@ for (const language of ["en", "fil"]) {
     await expect(range.locator("legend")).toHaveCount(1)
     await expect(range.locator('input[type="date"]')).toHaveCount(2)
 
-    const panel = page
-      .locator("div.bg-muted\\/30", { has: page.locator("fieldset") })
-      .first()
     await expect(page.getByTestId("selection-bar")).toHaveCount(0)
+    const before = await page.locator("table").first().boundingBox()
     await page.getByTestId("row-select").nth(1).click()
     const bar = page.getByTestId("selection-bar")
     await expect(bar).toHaveCount(1)
-    await expect(panel.getByTestId("selection-bar")).toHaveCount(1)
 
     const barBox = await bar.boundingBox()
-    const panelBox = await panel.boundingBox()
-    const tableBox = await page.locator("table").first().boundingBox()
-    if (!barBox || !panelBox || !tableBox) throw new Error("no boxes")
-    // Inside the filter panel, hugging its right edge, above the table.
-    expect(barBox.y).toBeGreaterThanOrEqual(panelBox.y)
-    expect(barBox.y + barBox.height).toBeLessThanOrEqual(
-      panelBox.y + panelBox.height + 1,
-    )
+    const lastFilter = await range.boundingBox()
+    if (!barBox || !lastFilter) throw new Error("no boxes")
+    // After the Dated box, on the same line, and nothing below moved.
+    expect(barBox.x).toBeGreaterThanOrEqual(lastFilter.x + lastFilter.width)
     expect(
-      panelBox.x + panelBox.width - (barBox.x + barBox.width),
-    ).toBeLessThanOrEqual(24)
-    expect(barBox.y + barBox.height).toBeLessThanOrEqual(tableBox.y)
-    // It does not overflow sideways.
+      Math.abs(
+        barBox.y + barBox.height / 2 - (lastFilter.y + lastFilter.height / 2),
+      ),
+    ).toBeLessThanOrEqual(30)
+    const after = await page.locator("table").first().boundingBox()
+    expect(Math.abs((after?.y ?? 0) - (before?.y ?? 0))).toBeLessThanOrEqual(1)
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= window.innerWidth,

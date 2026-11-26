@@ -645,7 +645,8 @@ export function IssuanceHistory({
           <div className="flex flex-col gap-3 border-t bg-muted/30 p-4 sm:px-5">
           {/* One row on wide screens: search and the two dropdowns flex, the
               joined date range keeps a fixed width so it never wraps. */}
-          <div className="grid items-end gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1.2fr)_minmax(0,0.9fr)_18rem]">
+          <div className="flex flex-col gap-3 min-[1400px]:flex-row min-[1400px]:items-end">
+          <div className="grid items-end gap-3 sm:grid-cols-2 min-w-0 min-[1400px]:flex-1 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.3fr)_minmax(0,1fr)_17.5rem]">
             <label
               className={`${filterLabelClass} sm:col-span-2 xl:col-span-1`}
             >
@@ -731,6 +732,7 @@ export function IssuanceHistory({
             ]),
           ]}
         />
+          </div>
           {dateRangeInvalid ? (
             <p role="alert" className="text-sm text-destructive">
               {t("issuances.history.dateRangeInvalid")}

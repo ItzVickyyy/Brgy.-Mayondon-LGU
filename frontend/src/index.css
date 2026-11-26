@@ -1261,3 +1261,31 @@ tr:focus-within > .row-hover-cell {
 .badge-ic-clock {
   --badge-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3C/svg%3E");
 }
+
+/* Selection tools slide in from the right (290). The width grows too, so the
+   filters beside them make room smoothly; nothing below moves. */
+@keyframes selection-in {
+  0% {
+    opacity: 0;
+    transform: translateX(2rem);
+    max-width: 0;
+    overflow: hidden;
+  }
+  99% {
+    overflow: hidden;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    max-width: 40rem;
+    overflow: visible;
+  }
+}
+.animate-selection-in {
+  animation: selection-in 240ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-selection-in {
+    animation: none;
+  }
+}

@@ -112,11 +112,9 @@ test("the row Restore button opens the same pop-up", async ({ page }) => {
   await expect(page.getByTestId("restore-confirm-dialog")).toHaveCount(0)
 })
 
-test("Print selected prints only the chosen rows; Copy puts them on the clipboard", async ({
+test("Print prints only the chosen rows, and there is no Copy button", async ({
   page,
-  context,
 }) => {
-  await context.grantPermissions(["clipboard-read", "clipboard-write"])
   await mockApi(page)
   await page.goto("/backup-restore")
   await page.getByTestId("row-select").nth(1).click()
@@ -134,12 +132,7 @@ test("Print selected prints only the chosen rows; Copy puts them on the clipboar
   )
   expect(printed).not.toContain("mayondon-db-20261120-093844-001.dump")
 
-  await page.getByTestId("selection-copy").click()
-  await expect(page.getByText("1 row copied")).toBeVisible()
-  const text = await page.evaluate(() => navigator.clipboard.readText())
-  expect(text).toContain("mayondon-db-20261120-093844-002.dump")
-  expect(text).toContain("\t")
-  expect(text).not.toContain("mayondon-db-20261120-093844-001.dump")
+  await expect(page.getByTestId("selection-copy")).toHaveCount(0)
 })
 
 test("Verify selected checks each chosen backup file", async ({ page }) => {

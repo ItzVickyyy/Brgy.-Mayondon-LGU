@@ -30,7 +30,7 @@ export function DateRangeField({
   className?: string
 }) {
   const input =
-    "h-full min-w-0 flex-1 bg-transparent px-3 text-sm text-foreground outline-none"
+    "h-full min-w-0 flex-1 bg-transparent px-2.5 text-sm text-foreground outline-none"
   return (
     <fieldset
       className={cn(

@@ -2947,13 +2947,32 @@
       "bar": "Mga napiling hilera",
       "count_one": "{{count}} ang napili",
       "count_other": "{{count}} ang napili",
-      "export": "I-export ang napili (CSV)",
-      "clear": "Alisin ang pagpili",
-      "print": "I-print ang napili",
-      "copy": "Kopyahin",
-      "copied_one": "Nakopya ang {{count}} hilera",
-      "copied_other": "Nakopya ang {{count}} hilera",
-      "copyFailed": "Hindi makopya. Payagan ang clipboard at subukan muli."
+      "export": "I-export",
+      "clear": "Alisin",
+      "print": "I-print",
+      "exportDialog": {
+        "title": "I-export ang mga napiling hilera",
+        "description": "Piliin ang uri ng file na paglalagyan ng mga napiling hilera.",
+        "cancel": "Kanselahin",
+        "formats": {
+          "xlsx": {
+            "name": "Excel",
+            "hint": "Spreadsheet (.xlsx) na maaaring i-sort at kalkulahin."
+          },
+          "docx": {
+            "name": "Word",
+            "hint": "Dokumento (.docx) na may mga hilera bilang talahanayan."
+          },
+          "pdf": {
+            "name": "PDF",
+            "hint": "Nakapirming layout (.pdf), handa nang ipadala o i-print."
+          },
+          "csv": {
+            "name": "CSV",
+            "hint": "Payak na datos (.csv) para sa ibang programa."
+          }
+        }
+      }
     }
   },
   "apiErrors": {

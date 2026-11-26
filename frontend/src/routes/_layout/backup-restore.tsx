@@ -649,12 +649,12 @@ function BackupRestore() {
       </Dialog>
 
       <section className="overflow-hidden rounded-xl border bg-card shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4 sm:p-5">
-          <div>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b p-4 sm:p-5 lg:flex-nowrap">
+          <div className="min-w-0 flex-1">
             <h2 className="font-semibold tracking-tight">
               {t("admin.backup.history.title")}
             </h2>
-            <p className="mt-1 text-sm text-muted-foreground">
+            <p className="mt-1 truncate text-sm text-muted-foreground">
               {t("admin.backup.history.description")}
             </p>
           </div>

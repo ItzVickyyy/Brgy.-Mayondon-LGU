@@ -2947,13 +2947,32 @@
       "bar": "Selected rows",
       "count_one": "{{count}} selected",
       "count_other": "{{count}} selected",
-      "export": "Export selected (CSV)",
-      "clear": "Clear selection",
-      "print": "Print selected",
-      "copy": "Copy",
-      "copied_one": "{{count}} row copied",
-      "copied_other": "{{count}} rows copied",
-      "copyFailed": "Could not copy. Allow clipboard access and try again."
+      "export": "Export",
+      "clear": "Clear",
+      "print": "Print",
+      "exportDialog": {
+        "title": "Export selected rows",
+        "description": "Choose the file type to save the selected rows as.",
+        "cancel": "Cancel",
+        "formats": {
+          "xlsx": {
+            "name": "Excel",
+            "hint": "A spreadsheet (.xlsx) you can sort and calculate in."
+          },
+          "docx": {
+            "name": "Word",
+            "hint": "A document (.docx) with the rows as a table."
+          },
+          "pdf": {
+            "name": "PDF",
+            "hint": "A fixed layout (.pdf) that is ready to send or print."
+          },
+          "csv": {
+            "name": "CSV",
+            "hint": "Plain data (.csv) for other programs."
+          }
+        }
+      }
     }
   },
   "apiErrors": {

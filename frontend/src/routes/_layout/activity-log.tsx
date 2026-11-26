@@ -321,117 +321,125 @@ function ActivityLog() {
               {t("activity.sectionDescription")}
             </p>
           </div>
-          <div
-            className={`grid gap-3 sm:grid-cols-2 ${isAdmin ? "xl:grid-cols-[2fr_repeat(3,minmax(0,1fr))_18rem]" : "xl:grid-cols-[2fr_repeat(2,minmax(0,1fr))_18rem]"}`}
-          >
-            <label
-              className={`${filterLabelClass} sm:col-span-2 xl:col-span-1`}
+          <div className="flex flex-col gap-3 min-[1400px]:flex-row min-[1400px]:items-end">
+            <div
+              className={`grid min-w-0 gap-3 min-[1400px]:flex-1 sm:grid-cols-2 ${isAdmin ? "xl:grid-cols-[2fr_repeat(3,minmax(0,1fr))_17.5rem]" : "xl:grid-cols-[2fr_repeat(2,minmax(0,1fr))_17.5rem]"}`}
             >
-              <span>{t("activity.filters.search")}</span>
-              <span className="relative block">
-                <Search
-                  className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                  aria-hidden="true"
-                />
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder={t("activity.filters.searchPlaceholder")}
-                  className={`${formControlClass} pl-9`}
-                />
-              </span>
-            </label>
-            <label
-              htmlFor="activity-module-filter"
-              className={filterLabelClass}
-            >
-              <span>{t("activity.filters.module")}</span>
-              <Select
-                id="activity-module-filter"
-                value={moduleFilter}
-                onChange={(event) => setModuleFilter(event.target.value)}
-                className={formControlClass}
-              >
-                <option value="all">{t("activity.filters.allModules")}</option>
-                {modules.map((value) => (
-                  <option key={value} value={value}>
-                    {moduleLabel(value, t)}
-                  </option>
-                ))}
-              </Select>
-            </label>
-            <label
-              htmlFor="activity-outcome-filter"
-              className={filterLabelClass}
-            >
-              <span>{t("activity.filters.outcome")}</span>
-              <Select
-                id="activity-outcome-filter"
-                value={outcomeFilter}
-                onChange={(event) => setOutcomeFilter(event.target.value)}
-                className={formControlClass}
-              >
-                <option value="all">{t("activity.filters.allOutcomes")}</option>
-                {outcomes.map((value) => (
-                  <option key={value} value={value}>
-                    {t(`activity.outcomes.${value}`)}
-                  </option>
-                ))}
-              </Select>
-            </label>
-            {isAdmin ? (
               <label
-                htmlFor="activity-user-filter"
+                className={`${filterLabelClass} sm:col-span-2 xl:col-span-1`}
+              >
+                <span>{t("activity.filters.search")}</span>
+                <span className="relative block">
+                  <Search
+                    className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                    aria-hidden="true"
+                  />
+                  <input
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder={t("activity.filters.searchPlaceholder")}
+                    className={`${formControlClass} pl-9`}
+                  />
+                </span>
+              </label>
+              <label
+                htmlFor="activity-module-filter"
                 className={filterLabelClass}
               >
-                <span>{t("activity.filters.user")}</span>
+                <span>{t("activity.filters.module")}</span>
                 <Select
-                  id="activity-user-filter"
-                  value={actorFilter}
-                  onChange={(event) => setActorFilter(event.target.value)}
+                  id="activity-module-filter"
+                  value={moduleFilter}
+                  onChange={(event) => setModuleFilter(event.target.value)}
                   className={formControlClass}
                 >
-                  <option value="all">{t("activity.filters.allUsers")}</option>
-                  {actors.map((actor) => (
-                    <option key={actor.id} value={actor.id}>
-                      {actor.email}
+                  <option value="all">
+                    {t("activity.filters.allModules")}
+                  </option>
+                  {modules.map((value) => (
+                    <option key={value} value={value}>
+                      {moduleLabel(value, t)}
                     </option>
                   ))}
                 </Select>
               </label>
-            ) : null}
-            <DateRangeField
-              className="sm:col-span-2 xl:col-span-1"
-              label={t("activity.filters.dateRange")}
-              fromLabel={t("activity.filters.startDateAria")}
-              toLabel={t("activity.filters.endDateAria")}
-              from={startDate}
-              to={endDate}
-              onFromChange={setStartDate}
-              onToChange={setEndDate}
+              <label
+                htmlFor="activity-outcome-filter"
+                className={filterLabelClass}
+              >
+                <span>{t("activity.filters.outcome")}</span>
+                <Select
+                  id="activity-outcome-filter"
+                  value={outcomeFilter}
+                  onChange={(event) => setOutcomeFilter(event.target.value)}
+                  className={formControlClass}
+                >
+                  <option value="all">
+                    {t("activity.filters.allOutcomes")}
+                  </option>
+                  {outcomes.map((value) => (
+                    <option key={value} value={value}>
+                      {t(`activity.outcomes.${value}`)}
+                    </option>
+                  ))}
+                </Select>
+              </label>
+              {isAdmin ? (
+                <label
+                  htmlFor="activity-user-filter"
+                  className={filterLabelClass}
+                >
+                  <span>{t("activity.filters.user")}</span>
+                  <Select
+                    id="activity-user-filter"
+                    value={actorFilter}
+                    onChange={(event) => setActorFilter(event.target.value)}
+                    className={formControlClass}
+                  >
+                    <option value="all">
+                      {t("activity.filters.allUsers")}
+                    </option>
+                    {actors.map((actor) => (
+                      <option key={actor.id} value={actor.id}>
+                        {actor.email}
+                      </option>
+                    ))}
+                  </Select>
+                </label>
+              ) : null}
+              <DateRangeField
+                className="sm:col-span-2 xl:col-span-1"
+                label={t("activity.filters.dateRange")}
+                fromLabel={t("activity.filters.startDateAria")}
+                toLabel={t("activity.filters.endDateAria")}
+                from={startDate}
+                to={endDate}
+                onFromChange={setStartDate}
+                onToChange={setEndDate}
+              />
+            </div>
+            <SelectionBar
+              inline
+              count={pickRows.count}
+              onClear={pickRows.clear}
+              csvName="activity-selected.csv"
+              csvRows={() => [
+                columns.map((item) => t(`activity.columns.${item}`)),
+                ...pickRows
+                  .pick(items)
+                  .map((row) => [
+                    formatTimestamp(row.occurred_at),
+                    ...(isAdmin ? [row.actor_email ?? "—"] : []),
+                    activityTitle(row.action, t, row.details),
+                    moduleLabel(row.module, t),
+                    row.record_id ?? "—",
+                    isOutcome(row.outcome)
+                      ? t(`activity.outcomes.${row.outcome as Outcome}`)
+                      : row.outcome,
+                  ]),
+              ]}
             />
           </div>
-          <SelectionBar
-            inline
-            count={pickRows.count}
-            onClear={pickRows.clear}
-            csvName="activity-selected.csv"
-            csvRows={() => [
-              columns.map((item) => t(`activity.columns.${item}`)),
-              ...pickRows
-                .pick(items)
-                .map((row) => [
-                  formatTimestamp(row.occurred_at),
-                  ...(isAdmin ? [row.actor_email ?? "—"] : []),
-                  activityTitle(row.action, t, row.details),
-                  moduleLabel(row.module, t),
-                  row.record_id ?? "—",
-                  isOutcome(row.outcome)
-                    ? t(`activity.outcomes.${row.outcome as Outcome}`)
-                    : row.outcome,
-                ]),
-            ]}
-          />
         </div>
 
         {rangeInvalid ? (
