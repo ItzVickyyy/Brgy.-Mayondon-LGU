@@ -214,11 +214,10 @@ export function UtilizationCertDialog({
             </section>
             <section className="space-y-2">
               <h3 className="font-semibold text-brand">Performance rating</h3>
-              <div
-                role="group"
+              <fieldset
                 aria-label="Utilization performance rating"
                 data-testid="utilization-rating"
-                className="grid gap-2 sm:grid-cols-5"
+                className="m-0 grid min-w-0 gap-2 border-0 p-0 sm:grid-cols-5"
               >
                 {SCALE.map(([score, meaning]) => {
                   const picked = rating === Number(score)
@@ -240,7 +239,7 @@ export function UtilizationCertDialog({
                     </button>
                   )
                 })}
-              </div>
+              </fieldset>
               <p className="text-xs text-muted-foreground">
                 Optional. Choose the rating to print it on the certificate, or
                 leave it empty to write it by hand. Press the chosen rating

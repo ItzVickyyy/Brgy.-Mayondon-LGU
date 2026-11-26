@@ -10,10 +10,18 @@ const expectedHeader: Record<string, string> = {
   expiry: '"Resident","Record","Reference","Expires","Status"',
   accounts:
     '"User","Role","Documents issued","Records added / edited","Last activity"',
+  utilization: '"Month","Dates counted","Clients served","Documents issued"',
 }
 
 // Position of each report in the "Report type" list.
-const reportOrder = ["issuances", "purpose", "expiry", "imports", "accounts"]
+const reportOrder = [
+  "issuances",
+  "purpose",
+  "expiry",
+  "imports",
+  "accounts",
+  "utilization",
+]
 
 const exportLabel = { en: "Export", fil: "I-export" }
 

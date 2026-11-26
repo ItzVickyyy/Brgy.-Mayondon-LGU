@@ -59,7 +59,13 @@ export const Route = createFileRoute("/_layout/reports")({
 })
 
 type Period = "week" | "month" | "quarter" | "year"
-type ReportType = "issuances" | "purpose" | "expiry" | "imports" | "accounts"
+type ReportType =
+  | "issuances"
+  | "purpose"
+  | "expiry"
+  | "imports"
+  | "accounts"
+  | "utilization"
 
 type NoticeKey = "notLoaded" | "notRecorded"
 
@@ -164,6 +170,24 @@ function daysText(daysLeft: number, t: TFunction) {
   return t("admin.reports.days.ago", { count: Math.abs(daysLeft) })
 }
 
+/** "November 2026" for a "YYYY-MM" key, in the interface language (the fixed locale in saved files). */
+function utilizationMonth(key: string, locale?: string) {
+  const [year, month] = key.split("-").map(Number)
+  return formatLocaleDate(
+    new Date(year, month - 1, 1),
+    { month: "long", year: "numeric" },
+    locale,
+  )
+}
+
+/** The dates counted in a month row: "Nov 01, 2026 – Nov 26, 2026". */
+function utilizationDates(
+  row: { month_start: string; month_end: string },
+  locale?: string,
+) {
+  return `${formatReportDate(row.month_start, locale)} – ${formatReportDate(row.month_end, locale)}`
+}
+
 function Reports() {
   const { t } = useTranslation()
   const { user } = useAuth()
@@ -229,6 +253,18 @@ function Reports() {
     enabled: isAdmin && applied?.report === "accounts",
   })
 
+  // Clients served and documents issued, month by month, as in the monthly Certificate of Utilization.
+  const utilizationQuery = useQuery({
+    queryKey: ["reports-utilization", applied?.period],
+    queryFn: async () =>
+      (
+        await ReportsService.utilizationReport({
+          query: { period: applied?.period },
+        })
+      ).data,
+    enabled: isAdmin && applied?.report === "utilization",
+  })
+
   // Import history is a list of the latest imports, so the period does not apply.
   const importsQuery = useQuery({
     queryKey: ["reports-imports"],
@@ -242,6 +278,7 @@ function Reports() {
   const expiringRows = expiryQuery.data?.data ?? []
   const accountRows = accountQuery.data?.data ?? []
   const importRows = importsQuery.data?.data ?? []
+  const utilizationRows = utilizationQuery.data?.data ?? []
 
   const resetKey = `${applied?.report}|${applied?.period}`
   const typePagination = usePagination(typeRows, 10, resetKey)
@@ -249,6 +286,7 @@ function Reports() {
   const expiringPagination = usePagination(expiringRows, 10, resetKey)
   const accountPagination = usePagination(accountRows, 10, resetKey)
   const importsPagination = usePagination(importRows, 10, resetKey)
+  const utilizationPagination = usePagination(utilizationRows, 12, resetKey)
 
   // Prints the previewed report only: the app shell is hidden by index.css while
   // the body carries "report-printing", and a dark theme is printed as light.
@@ -395,6 +433,29 @@ function Reports() {
           row.result?.skipped ?? "",
           row.result?.failed ?? "",
         ]),
+      ]
+    }
+    if (applied.report === "utilization") {
+      if (!utilizationQuery.data) return null
+      return [
+        [
+          tEn("admin.reports.utilization.columns.month"),
+          tEn("admin.reports.utilization.columns.dates"),
+          tEn("admin.reports.utilization.columns.clients"),
+          tEn("admin.reports.utilization.columns.documents"),
+        ],
+        ...utilizationRows.map((row) => [
+          utilizationMonth(row.month, FIXED_LOCALE),
+          utilizationDates(row, FIXED_LOCALE),
+          row.clients_served,
+          row.documents_issued,
+        ]),
+        [
+          tEn("admin.reports.total"),
+          "",
+          utilizationQuery.data.total_clients,
+          utilizationQuery.data.total_documents,
+        ],
       ]
     }
     if (applied.report === "accounts") {
@@ -668,6 +729,86 @@ function Reports() {
             onPageChange={purposePagination.setPageIndex}
             pageSize={purposePagination.pageSize}
             onPageSizeChange={purposePagination.setPageSize}
+          />
+        </div>
+      )
+    }
+
+    if (applied.report === "utilization") {
+      if (utilizationQuery.isLoading)
+        return <LoadingState title={t("admin.reports.loading")} />
+      if (utilizationQuery.isError || !utilizationQuery.data)
+        return loadFailed(() => utilizationQuery.refetch())
+      return (
+        <div className="overflow-x-auto">
+          <h3 className="mb-3 font-semibold tracking-tight">
+            {t("admin.reports.utilization.title", {
+              period: appliedPeriodText,
+            })}
+          </h3>
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <thead className={thead}>
+              <tr>
+                {(["month", "dates", "clients", "documents"] as const).map(
+                  (id) => (
+                    <th key={id} className={th}>
+                      {t(`admin.reports.utilization.columns.${id}`)}
+                    </th>
+                  ),
+                )}
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {(printAll
+                ? utilizationRows
+                : utilizationPagination.paginatedItems
+              ).map((row) => (
+                <tr
+                  key={row.month}
+                  className="transition-colors hover:bg-muted/30"
+                >
+                  <td className={`${td} font-medium`}>
+                    {utilizationMonth(row.month)}
+                  </td>
+                  <td className={td}>{utilizationDates(row)}</td>
+                  <td className={`${td} tabular-nums`}>{row.clients_served}</td>
+                  <td className={`${td} tabular-nums`}>
+                    {row.documents_issued}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t bg-muted/30 font-semibold">
+                <td className={td}>{t("admin.reports.total")}</td>
+                <td className={td}>—</td>
+                <td className={`${td} tabular-nums`}>
+                  {utilizationQuery.data.total_clients}
+                </td>
+                <td className={`${td} tabular-nums`}>
+                  {utilizationQuery.data.total_documents}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {t("admin.reports.utilization.totalNote")}
+          </p>
+          {utilizationQuery.data.total_documents === 0 ? (
+            <EmptyState
+              title={t("admin.reports.utilization.empty.title")}
+              description={t("admin.reports.utilization.empty.description")}
+            />
+          ) : null}
+          <TablePagination
+            start={utilizationPagination.start}
+            end={utilizationPagination.end}
+            total={utilizationPagination.total}
+            pageIndex={utilizationPagination.pageIndex}
+            pageCount={utilizationPagination.pageCount}
+            onPageChange={utilizationPagination.setPageIndex}
+            pageSize={utilizationPagination.pageSize}
+            onPageSizeChange={utilizationPagination.setPageSize}
           />
         </div>
       )
@@ -1037,6 +1178,9 @@ function Reports() {
                 </option>
                 <option value="accounts">
                   {t("admin.reports.reportTypes.accounts")}
+                </option>
+                <option value="utilization">
+                  {t("admin.reports.reportTypes.utilization")}
                 </option>
               </Select>
             </label>

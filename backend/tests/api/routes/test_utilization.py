@@ -138,3 +138,49 @@ def test_printing_is_logged_with_the_month_only(
         f"{UTIL}/printed", headers=staff_token_headers, json={"month": "soon"}
     )
     assert bad.status_code == 422
+
+
+REPORT = f"{API}/reports/utilization"
+
+
+def test_report_is_for_administrators_only(
+    client: TestClient, staff_token_headers: Headers
+) -> None:
+    assert client.get(REPORT).status_code == 401
+    assert client.get(REPORT, headers=staff_token_headers).status_code == 403
+
+
+def test_report_rows_match_the_monthly_certificate(
+    client: TestClient,
+    staff_token_headers: Headers,
+    superuser_token_headers: Headers,
+) -> None:
+    today = today_manila()
+    r = client.get(REPORT, headers=superuser_token_headers, params={"period": "year"})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert [row["month"] for row in body["data"]] == [
+        f"{today.year:04d}-{month:02d}" for month in range(1, today.month + 1)
+    ]
+    assert body["data"][-1]["month_end"] == today.isoformat()
+    for row in body["data"]:
+        # The same figures the monthly certificate prints.
+        month = _figures(client, staff_token_headers, month=row["month"])
+        assert row["clients_served"] == month["clients_served"]
+        assert row["documents_issued"] == month["documents_issued"]
+    assert body["total_documents"] == sum(
+        row["documents_issued"] for row in body["data"]
+    )
+    # A resident who came in two months is one client for the whole period.
+    assert body["total_clients"] <= sum(row["clients_served"] for row in body["data"])
+
+
+def test_report_this_month_is_one_row(
+    client: TestClient, superuser_token_headers: Headers
+) -> None:
+    body = client.get(
+        REPORT, headers=superuser_token_headers, params={"period": "month"}
+    ).json()
+    assert len(body["data"]) == 1
+    assert body["data"][0]["clients_served"] == body["total_clients"]
+    assert body["data"][0]["documents_issued"] == body["total_documents"]

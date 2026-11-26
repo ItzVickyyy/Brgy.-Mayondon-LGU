@@ -2300,7 +2300,8 @@
         "purpose": "Mga isyu ayon sa layunin",
         "expiry": "Mga talaang mag-e-expire",
         "imports": "Buod ng import ng masterlist",
-        "accounts": "Aktibidad ng account"
+        "accounts": "Aktibidad ng account",
+        "utilization": "Ulat ng paggamit"
       },
       "previewArea": {
         "title": "Lugar ng preview ng ulat",
@@ -2368,6 +2369,20 @@
         "empty": {
           "title": "Wala pang pag-import ng masterlist",
           "description": "Lalabas dito ang mga pag-import pagkatapos mag-upload ng file sa pahina ng Records."
+        }
+      },
+      "utilization": {
+        "title": "Ulat ng paggamit · {{period}}",
+        "columns": {
+          "month": "Buwan",
+          "dates": "Mga petsang binilang",
+          "clients": "Mga kliyenteng napagsilbihan",
+          "documents": "Mga dokumentong naisyu"
+        },
+        "totalNote": "Isang beses lang binibilang ang bawat residente sa buong panahon, kaya maaaring mas mababa ang kabuuan kaysa sa pinagsamang bilang ng mga buwan.",
+        "empty": {
+          "title": "Walang datos ng paggamit",
+          "description": "Walang naisyung dokumento sa panahong ito."
         }
       },
       "accounts": {

@@ -15,7 +15,7 @@ from sqlmodel import Session, col, select
 
 from app.api.deps import SessionDep, require_permission
 from app.core.audit import record_audit_event
-from app.core.dates import MANILA_TZ, today_manila
+from app.core.dates import MANILA_TZ, add_months, today_manila
 from app.core.periods import DateRange, Period, resolve_period
 from app.core.permissions import Permission
 from app.core.report_queries import (
@@ -46,6 +46,8 @@ from app.models_reports import (
     ReportExportedRequest,
     ReportSummary,
     SectorCount,
+    UtilizationMonthRow,
+    UtilizationReportPublic,
 )
 from app.models_residents import Resident, ResidentSector
 
@@ -191,6 +193,64 @@ def issuances_by_purpose(
             for pid, name, n in rows
         ],
         total_issued=total,
+    )
+
+
+@router.get("/utilization", response_model=UtilizationReportPublic)
+def utilization_report(
+    session: SessionDep, _user: ReportsUser, period: PeriodQuery = "month"
+) -> Any:
+    """Clients served and documents issued, month by month, for the period.
+
+    Same rule as the monthly Certificate of Utilization and the dashboard:
+    documents in force (issued, not archived); a client is a different resident."""
+    today = today_manila()
+    info = period_info(period, today)
+    current = resolve_period(period, today)
+    in_force = (Issuance.status == "issued", col(Issuance.archived_at).is_(None))
+
+    def figures(range_: DateRange) -> tuple[int, int]:
+        clients = session.exec(
+            select(sa_func.count(sa_func.distinct(col(Issuance.resident_id)))).where(
+                *in_force, *in_range(range_)
+            )
+        ).one()
+        documents = session.exec(
+            select(sa_func.count())
+            .select_from(Issuance)
+            .where(*in_force, *in_range(range_))
+        ).one()
+        return clients, documents
+
+    rows: list[UtilizationMonthRow] = []
+    if current.start is None:
+        # "overall": start at the first month that has an issued document.
+        first_issued = session.exec(
+            select(sa_func.min(col(Issuance.issue_date))).where(*in_force)
+        ).one()
+        cursor = (first_issued or today).replace(day=1)
+    else:
+        cursor = current.start.replace(day=1)
+    while cursor <= current.end:
+        start = max(cursor, current.start) if current.start else cursor
+        end = min(add_months(cursor, 1) - timedelta(days=1), current.end)
+        clients, documents = figures(DateRange(start, end))
+        rows.append(
+            UtilizationMonthRow(
+                month=f"{cursor.year:04d}-{cursor.month:02d}",
+                month_start=start,
+                month_end=end,
+                clients_served=clients,
+                documents_issued=documents,
+            )
+        )
+        cursor = add_months(cursor, 1)
+    total_clients, total_documents = figures(current)
+    return UtilizationReportPublic(
+        period=info,
+        data=rows,
+        total_clients=total_clients,
+        total_documents=total_documents,
     )
 
 

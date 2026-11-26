@@ -32,7 +32,7 @@ import { IssuanceSection } from "./IssuanceSection"
 import { getMissingResidentFields, getResidentAddress, issuanceApi, type MockIssuance, PHOTO_ON_FILE, type QuickResidentInput, type ResidentPatch } from "./issuanceApi"
 import { PhotoCapture } from "./PhotoCapture"
 import { popoverIsOpen } from "./popover"
-import { signatoryRules } from "./schemas"
+import { issuanceInputSchema, signatoryRules } from "./schemas"
 import { defaultDetails, localIsoDate, useNewIssuanceForm } from "./useNewIssuanceForm"
 
 type Props = {
@@ -1089,13 +1089,35 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const requirementFields = [...fieldsByGroup("identity"), ...fieldsByGroup("payment")].filter(fieldVisible)
   const hasRequirements = requirementFields.length > 0
   const signatoryMissing = config.signatoryMode === "select" && availableSignatories.length > 0 && !form.watch("signatoryOfficialId")
-  const residentDone = Boolean(selectedResident) && residentMissingLabels.every((item) => item.name === "photo")
-  // A block turns into a check only when it was really filled in: a resident is chosen, every required box has a
-  // value, no box shows an error, and the block is not just empty (a block with only optional boxes stays a number
-  // until something is typed in it).
+  // Step 2 is a check only when the person is chosen, the resident form is closed (nothing half-edited) and
+  // nothing the document needs is missing from the record (the photo has its own step).
+  const residentDone = Boolean(selectedResident) && !editingResident && residentMissingLabels.every((item) => item.name === "photo")
+  // The form's own rules, run silently on the current values as if the document were being issued. Boxes show their
+  // errors only after a failed Issue, so a half-typed value (a bad date, a short plate number) must be caught here too.
+  const ruleIssues = (() => {
+    const parsed = issuanceInputSchema.safeParse({ ...form.getValues(), residentId: selectedResident?.id ?? "", status: "issued" })
+    return parsed.success ? [] : parsed.error.issues
+  })()
+  const fieldRulePath = (field: DetailFieldConfig): string[] => {
+    if (field.group === "identity") return ["identification", field.name === "idType" ? "idTypeId" : field.name === "idNumber" ? "idNumber" : field.name === "idPlaceOfIssue" ? "placeOfIssue" : "dateOfIssue"]
+    if (field.group === "payment") return ["payment", paymentKeyOf(field.name)]
+    if (field.name === "purpose") return ["purposeText"]
+    if (field.name === "sector") return ["sectors"]
+    return ["details", field.name === "relationship" ? "beneficiaryRelationship" : field.name]
+  }
+  const breaksRule = (field: DetailFieldConfig) => {
+    // "Official receipt" is not asked for a free-of-charge document, and the sector id number is optional.
+    if (field.name === "officialReceiptNo" && payment?.isFree) return false
+    const path = fieldRulePath(field)
+    return ruleIssues.some((issue) => path.every((part, index) => issue.path[index] === part))
+  }
+  // A block turns into a check only when it was really filled in: the resident step is complete, every required box
+  // has a value that passes the form's rules, no box shows an error, and the block is not just empty (a block with
+  // only optional boxes stays a number until something is typed in it).
   const blockDone = (fields: DetailFieldConfig[]) =>
-    Boolean(selectedResident) &&
-    fields.every((field) => (!field.required || fieldHasValue(field)) && !getFieldError(field)) &&
+    residentDone &&
+    Boolean(issueDate) &&
+    fields.every((field) => (!field.required || (fieldHasValue(field) && !breaksRule(field))) && !getFieldError(field)) &&
     fields.some((field) => (field.required && field.name !== "isJobstartBeneficiary") || previewValue(field).trim().length > 0)
   const detailsDone = !signatoryMissing && blockDone(detailFields)
   const requirementsDone = blockDone(requirementFields)

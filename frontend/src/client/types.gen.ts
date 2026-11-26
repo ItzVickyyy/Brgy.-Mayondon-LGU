@@ -2353,7 +2353,7 @@ export type ReportExportedRequest = {
     /**
      * Report
      */
-    report: 'issuances' | 'purpose' | 'expiry' | 'imports' | 'accounts';
+    report: 'issuances' | 'purpose' | 'expiry' | 'imports' | 'accounts' | 'utilization';
     /**
      * Period
      */
@@ -3594,6 +3594,34 @@ export type UtilizationCertificate = {
 };
 
 /**
+ * UtilizationMonthRow
+ *
+ * One calendar month of the Utilization Report (counts only).
+ */
+export type UtilizationMonthRow = {
+    /**
+     * Month
+     */
+    month: string;
+    /**
+     * Month Start
+     */
+    month_start: string;
+    /**
+     * Month End
+     */
+    month_end: string;
+    /**
+     * Clients Served
+     */
+    clients_served: number;
+    /**
+     * Documents Issued
+     */
+    documents_issued: number;
+};
+
+/**
  * UtilizationPrintedRequest
  *
  * What the browser reports just before it opens the print dialog.
@@ -3603,6 +3631,29 @@ export type UtilizationPrintedRequest = {
      * Month
      */
     month: string;
+};
+
+/**
+ * UtilizationReportPublic
+ *
+ * The Utilization Report in Management Reports: clients served and documents
+ * issued per month of the chosen period. ``total_clients`` counts each resident
+ * once for the whole period, so it is not the sum of the monthly rows.
+ */
+export type UtilizationReportPublic = {
+    period: PeriodInfo;
+    /**
+     * Data
+     */
+    data: Array<UtilizationMonthRow>;
+    /**
+     * Total Clients
+     */
+    total_clients: number;
+    /**
+     * Total Documents
+     */
+    total_documents: number;
 };
 
 /**
@@ -6550,6 +6601,38 @@ export type reportsIssuancesByPurposeResponses = {
 };
 
 export type reportsIssuancesByPurposeResponse = reportsIssuancesByPurposeResponses[keyof reportsIssuancesByPurposeResponses];
+
+export type reportsUtilizationReportData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Period
+         *
+         * Reporting period, to date
+         */
+        period?: 'today' | 'week' | 'month' | 'quarter' | '3months' | '6months' | 'year' | 'overall';
+    };
+    url: '/api/v1/reports/utilization';
+};
+
+export type reportsUtilizationReportErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsUtilizationReportError = reportsUtilizationReportErrors[keyof reportsUtilizationReportErrors];
+
+export type reportsUtilizationReportResponses = {
+    /**
+     * Successful Response
+     */
+    200: UtilizationReportPublic;
+};
+
+export type reportsUtilizationReportResponse = reportsUtilizationReportResponses[keyof reportsUtilizationReportResponses];
 
 export type reportsExpiringData = {
     body?: never;

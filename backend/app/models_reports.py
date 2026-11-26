@@ -13,7 +13,9 @@ from sqlmodel import SQLModel
 class ReportExportedRequest(SQLModel):
     """What the browser reports just before it saves or prints a report."""
 
-    report: Literal["issuances", "purpose", "expiry", "imports", "accounts"]
+    report: Literal[
+        "issuances", "purpose", "expiry", "imports", "accounts", "utilization"
+    ]
     period: Literal[
         "today", "week", "month", "quarter", "3months", "6months", "year", "overall"
     ]
@@ -202,6 +204,27 @@ class RecordsOverview(SQLModel):
     residents_archived: int
     residents_by_sector: list[SectorCount]  # active residents only
     ids_by_status: IdStatusCounts
+
+
+class UtilizationMonthRow(SQLModel):
+    """One calendar month of the Utilization Report (counts only)."""
+
+    month: str  # "YYYY-MM"
+    month_start: date
+    month_end: date  # inclusive; clipped to the report period and to today
+    clients_served: int
+    documents_issued: int
+
+
+class UtilizationReportPublic(SQLModel):
+    """The Utilization Report in Management Reports: clients served and documents
+    issued per month of the chosen period. ``total_clients`` counts each resident
+    once for the whole period, so it is not the sum of the monthly rows."""
+
+    period: PeriodInfo
+    data: list[UtilizationMonthRow]
+    total_clients: int
+    total_documents: int
 
 
 class UtilizationCertificate(SQLModel):

@@ -2300,7 +2300,8 @@
         "purpose": "Issuances by purpose",
         "expiry": "Expiring records",
         "imports": "Masterlist import summary",
-        "accounts": "Account activity"
+        "accounts": "Account activity",
+        "utilization": "Utilization report"
       },
       "previewArea": {
         "title": "Report preview area",
@@ -2368,6 +2369,20 @@
         "empty": {
           "title": "No masterlist imports yet",
           "description": "Imports will appear here after a file is uploaded on the Records page."
+        }
+      },
+      "utilization": {
+        "title": "Utilization report · {{period}}",
+        "columns": {
+          "month": "Month",
+          "dates": "Dates counted",
+          "clients": "Clients served",
+          "documents": "Documents issued"
+        },
+        "totalNote": "Each resident is counted once for the whole period, so the total can be less than the sum of the months.",
+        "empty": {
+          "title": "No utilization data",
+          "description": "No documents were issued in this period."
         }
       },
       "accounts": {

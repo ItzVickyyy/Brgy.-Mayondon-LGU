@@ -348,6 +348,15 @@ html[data-font-size="large"] {
   html {
     scrollbar-gutter: stable;
   }
+  /* A pop-up locks the page scroll and its library then adds padding to the body to make up for the scrollbar it
+     hides. The gutter above already keeps that space, so the extra padding pushed the whole page sideways every time
+     a pop-up opened. */
+  html body[data-scroll-locked] {
+    /* biome-ignore lint/complexity/noImportantStyles: must beat the library's own !important inline rule */
+    padding-right: 0 !important;
+    /* biome-ignore lint/complexity/noImportantStyles: must beat the library's own !important inline rule */
+    margin-right: 0 !important;
+  }
   /* Slim scrollbars for wide tables and long lists. */
   * {
     scrollbar-width: thin;
