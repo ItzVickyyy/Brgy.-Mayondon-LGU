@@ -57,12 +57,6 @@
       "sky": "Langit",
       "slate": "Slate"
     },
-    "gold": {
-      "label": "Gintong accent",
-      "on": "Naka-on",
-      "off": "Naka-off",
-      "hint": "Nagdaragdag ng manipis na ginto sa mga pamagat ng pahina, pop-up, header ng talahanayan at kasalukuyang menu."
-    },
     "fontSize": {
       "label": "Laki ng titik",
       "small": "Maliit",

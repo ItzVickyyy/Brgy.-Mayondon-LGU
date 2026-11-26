@@ -65,14 +65,12 @@ export function usePreferences() {
     setAccent: (accent: Preferences["accent"]) => updatePreferences({ accent }),
     setFontSize: (fontSize: Preferences["fontSize"]) =>
       updatePreferences({ fontSize }),
-    setGoldAccent: (goldAccent: boolean) => updatePreferences({ goldAccent }),
     reset: () => {
       setTheme("system")
       updatePreferences({
         theme: "system",
         accent: DEFAULT_PREFERENCES.accent,
         fontSize: "medium",
-        goldAccent: true,
       })
     },
   }

@@ -15,20 +15,14 @@ const choose = (page: import("@playwright/test").Page, testId: string) =>
 const rootFontSize = (page: import("@playwright/test").Page) =>
   page.evaluate(() => getComputedStyle(document.documentElement).fontSize)
 
-const goldAttr = (page: import("@playwright/test").Page) =>
-  page.evaluate(() => document.documentElement.dataset.gold ?? "on")
-
 test.describe("Preferences", () => {
-  test("gold highlights can be switched off and on and are remembered", async ({
+  test("there is no gold switch and the page keeps only the sidebar's gold marker", async ({
     page,
   }) => {
     const dialog = await openPreferences(page)
-    await expect(dialog.getByText("Gold highlights")).toBeVisible()
-    await expect(dialog.getByTestId("pref-gold-on")).toBeChecked()
-    expect(await goldAttr(page)).toBe("on")
-
-    await choose(page, "pref-gold-off")
-    expect(await goldAttr(page)).toBe("off")
+    await expect(dialog.getByText("Gold highlights")).toHaveCount(0)
+    await expect(dialog.getByTestId("pref-gold-on")).toHaveCount(0)
+    await expect(dialog.getByTestId("pref-gold-off")).toHaveCount(0)
     await page.getByRole("button", { name: "Done" }).click()
     await expect(page.locator("h1.page-title").first()).toBeVisible()
     const bar = await page
@@ -36,20 +30,6 @@ test.describe("Preferences", () => {
       .first()
       .evaluate((el) => getComputedStyle(el, "::after").content)
     expect(bar).toBe("none")
-
-    await page.reload()
-    expect(await goldAttr(page)).toBe("off")
-    const again = await openPreferences(page)
-    await expect(again.getByTestId("pref-gold-off")).toBeChecked()
-
-    await choose(page, "pref-gold-on")
-    expect(await goldAttr(page)).toBe("on")
-    await page.getByRole("button", { name: "Done" }).click()
-    const barOn = await page
-      .locator("h1.page-title")
-      .first()
-      .evaluate((el) => getComputedStyle(el, "::after").content)
-    expect(barOn).toBe('""')
   })
 
   test("opens from the user menu, under My Account, with three settings", async ({

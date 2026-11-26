@@ -31,7 +31,6 @@ export const WHATS_NEW: WhatsNewEntry[] = [
     title: "Accounts and appearance",
     points: [
       "Passwords are changed every 90 days; a reminder screen appears when it is time.",
-      "Preferences can turn the thin gold highlights on or off.",
     ],
   },
 ]
