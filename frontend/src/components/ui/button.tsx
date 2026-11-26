@@ -34,8 +34,6 @@ const buttonVariants = cva(
         tintAmber: tint("[--tone:var(--action-amber)]", "text-white dark:text-[oklch(0.2_0.03_75)]"),
         tintRose: tint("[--tone:var(--action-rose)]"),
         tintViolet: tint("[--tone:var(--action-violet)]"),
-        // The red of the Delete User button (the destructive colour, not the softer rose): used by End term.
-        tintRed: `border border-transparent bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 ${press}`,
         // The three-dot (More) button of a table row: a soft brand-coloured button, so it reads as
         // a button next to the solid View / Edit / Print ones. Brand text on a light tint keeps AA contrast.
         tintMore: `border-2 border-brand/45 bg-brand/10 text-brand shadow-xs hover:border-brand hover:bg-brand/20 data-[state=open]:border-brand data-[state=open]:bg-brand/20 ${press}`,
