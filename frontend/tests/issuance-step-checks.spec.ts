@@ -143,3 +143,18 @@ test("each block turns into a check once it is really filled in, and back when a
   await dialog.locator("#issuance-officialReceiptNo").fill("")
   await expect(list.nth(3)).not.toContainText("(complete)")
 })
+
+// Patch 303: an emptied date on the document must not leave checks on (the box refuses out-of-range typing and keeps
+// the last good date, but clearing it is allowed).
+test("emptying the date on the document turns the block checks off", async ({
+  page,
+}) => {
+  const dialog = await openForm(page, true)
+  const list = headings(dialog)
+  await fillEverything(dialog)
+  await expect(list.nth(2)).toContainText("(complete)")
+  await expect(list.nth(3)).toContainText("(complete)")
+  await dialog.locator("#issuance-date").fill("")
+  await expect(list.nth(2)).not.toContainText("(complete)")
+  await expect(list.nth(3)).not.toContainText("(complete)")
+})

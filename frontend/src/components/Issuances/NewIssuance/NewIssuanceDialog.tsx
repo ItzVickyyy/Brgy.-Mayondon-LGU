@@ -1111,18 +1111,26 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     const path = fieldRulePath(field)
     return ruleIssues.some((issue) => path.every((part, index) => issue.path[index] === part))
   }
-  // A block turns into a check only when it was really filled in: the resident step is complete, every required box
-  // has a value that passes the form's rules, no box shows an error, and the block is not just empty (a block with
-  // only optional boxes stays a number until something is typed in it).
-  const blockDone = (fields: DetailFieldConfig[]) =>
+  // Any rule the form would fail on, grouped by the block it belongs to. This catches what the per-box test above cannot
+  // map to one box (a whole identity or payment block missing, a half-typed sector list, a signatory rule).
+  const hasRuleIssue = (roots: string[]) => ruleIssues.some((issue) => roots.includes(String(issue.path[0])))
+  // The date on the document must be a whole date inside the allowed window (the box can hold a half-typed or
+  // out-of-range value while its error is still hidden).
+  const issueDateValid = Boolean(issueDate) && !hasRuleIssue(["issueDate"]) && issueDate >= earliestIssueDate() && issueDate <= localIsoDate()
+  // A block turns into a check only when it was really filled in: the resident step is complete, the date is valid,
+  // every required box has a value that passes the form's rules, no box shows an error, nothing else in the block breaks
+  // a rule, and the block is not just empty (a block with only optional boxes stays a number until something is typed in it).
+  const blockDone = (fields: DetailFieldConfig[], roots: string[]) =>
     residentDone &&
-    Boolean(issueDate) &&
+    issueDateValid &&
+    !hasRuleIssue(roots) &&
     fields.every((field) => (!field.required || (fieldHasValue(field) && !breaksRule(field))) && !getFieldError(field)) &&
     fields.some((field) => (field.required && field.name !== "isJobstartBeneficiary") || previewValue(field).trim().length > 0)
-  const detailsDone = !signatoryMissing && blockDone(detailFields)
-  const requirementsDone = blockDone(requirementFields)
+  const detailsDone = !signatoryMissing && blockDone(detailFields, ["details", "purposeText", "sectors", "signatoryOfficialId"])
+  const requirementsDone = blockDone(requirementFields, ["identification", "payment"])
   const currentPhoto = String(selectedResident && !editingResident ? residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" : quickAdd.photoUrl ?? "")
-  const photoDone = Boolean(currentPhoto)
+  // The photo step is a check only once the person is chosen and the resident form is closed (step 2 is not half-done).
+  const photoDone = Boolean(currentPhoto) && Boolean(selectedResident) && !editingResident
   const detailsStep = needsPhoto ? 4 : 3
   const requirementsStep = detailsStep + 1
   const remaining = missingPreviewLabels.length
