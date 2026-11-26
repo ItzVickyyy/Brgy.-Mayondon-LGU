@@ -1089,9 +1089,16 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const requirementFields = [...fieldsByGroup("identity"), ...fieldsByGroup("payment")].filter(fieldVisible)
   const hasRequirements = requirementFields.length > 0
   const signatoryMissing = config.signatoryMode === "select" && availableSignatories.length > 0 && !form.watch("signatoryOfficialId")
-  const detailsDone = !signatoryMissing && detailFields.every((field) => !field.required || fieldHasValue(field))
-  const requirementsDone = requirementFields.every((field) => !field.required || fieldHasValue(field))
   const residentDone = Boolean(selectedResident) && residentMissingLabels.every((item) => item.name === "photo")
+  // A block turns into a check only when it was really filled in: a resident is chosen, every required box has a
+  // value, no box shows an error, and the block is not just empty (a block with only optional boxes stays a number
+  // until something is typed in it).
+  const blockDone = (fields: DetailFieldConfig[]) =>
+    Boolean(selectedResident) &&
+    fields.every((field) => (!field.required || fieldHasValue(field)) && !getFieldError(field)) &&
+    fields.some((field) => (field.required && field.name !== "isJobstartBeneficiary") || previewValue(field).trim().length > 0)
+  const detailsDone = !signatoryMissing && blockDone(detailFields)
+  const requirementsDone = blockDone(requirementFields)
   const currentPhoto = String(selectedResident && !editingResident ? residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" : quickAdd.photoUrl ?? "")
   const photoDone = Boolean(currentPhoto)
   const detailsStep = needsPhoto ? 4 : 3

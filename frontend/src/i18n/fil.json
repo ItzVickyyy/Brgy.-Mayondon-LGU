@@ -1450,6 +1450,12 @@
         "print": "I-print",
         "printFor": "I-print para kay {{name}}",
         "editUnavailable": "Ang inilabas na dokumento o draft lang ang maaaring i-edit.",
+        "note": {
+          "archived": "Naka-archive. I-restore para ma-edit o ma-print.",
+          "voided": "Na-void. Hindi na ito maaaring i-edit o i-print.",
+          "draft": "Draft. Ilabas muna ito bago i-print.",
+          "noTemplate": "Wala pang print template ang dokumentong ito."
+        },
         "printNotIssued": "Ang inilabas na dokumento lang ang maaaring i-print.",
         "printUnavailable": "Wala pang print template ang uri ng dokumentong ito, kaya hindi ito maipi-print o mase-save bilang file mula rito.",
         "discard": "Itapon ang draft",

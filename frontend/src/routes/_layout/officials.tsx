@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { TFunction } from "i18next"
 import {
+  Check,
   Eye,
   Pencil,
   Search,
@@ -621,25 +622,36 @@ function OfficialsManagement() {
                 required
               />
             </label>
-            <label
-              htmlFor="official-position"
-              className="flex flex-col gap-2 text-sm font-medium sm:col-span-2"
-            >
-              {t("admin.officials.form.position")}
-              <Select
-                id="official-position"
-                value={position}
-                onChange={(event) => setPosition(event.target.value)}
-                className={formControlClass}
+            {/* All positions are shown at once as choices (a drop-down list was cut off by the pop-up's edge). */}
+            <fieldset className="flex min-w-0 flex-col gap-2 sm:col-span-2">
+              <legend className="mb-2 text-sm font-medium">
+                {t("admin.officials.form.position")}
+              </legend>
+              <div
+                data-testid="official-position"
+                className="grid gap-2 sm:grid-cols-2"
               >
                 {(positionOptions.includes(position)
                   ? positionOptions
                   : [position, ...positionOptions]
                 ).map((item) => (
-                  <option key={item}>{item}</option>
+                  <label key={item} className="relative block">
+                    <input
+                      type="radio"
+                      name="official-position"
+                      value={item}
+                      checked={position === item}
+                      onChange={() => setPosition(item)}
+                      className="peer sr-only"
+                    />
+                    <span className="flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-md border bg-background px-3 py-2 text-sm shadow-xs transition-colors hover:bg-muted peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:font-semibold peer-checked:text-brand peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50 [&_svg]:invisible peer-checked:[&_svg]:visible">
+                      {item}
+                      <Check className="size-4 shrink-0" aria-hidden="true" />
+                    </span>
+                  </label>
                 ))}
-              </Select>
-            </label>
+              </div>
+            </fieldset>
             <label className="flex flex-col gap-2 text-sm font-medium">
               {t("admin.officials.form.termStart")}
               <input

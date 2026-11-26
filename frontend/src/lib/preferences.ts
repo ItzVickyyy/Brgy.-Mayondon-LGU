@@ -18,11 +18,12 @@
 
 import { UsersService } from "@/client"
 
+// The order is the order of the swatches in Settings: the default (purple) comes first, navy is where purple used to be.
 export const ACCENTS = [
-  "navy",
+  "purple",
   "teal",
   "green",
-  "purple",
+  "navy",
   "maroon",
   "rose",
   "bronze",

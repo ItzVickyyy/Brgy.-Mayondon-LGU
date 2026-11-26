@@ -54,6 +54,10 @@ type RowActionsProps = {
   compact?: boolean
   /** Extra classes for the wrapper (e.g. left-aligned wrapping inside a card). */
   className?: string
+  /** A small line under the buttons that says why one of them is disabled (it adds no width to the column). */
+  note?: string
+  /** Classes for the note (alignment follows the buttons). */
+  noteClassName?: string
 }
 
 export function RowActions({
@@ -65,13 +69,15 @@ export function RowActions({
   leading,
   compact = false,
   className = "",
+  note,
+  noteClassName = "",
 }: RowActionsProps) {
   const { t } = useTranslation()
   const visibleItems = items.filter(
     (item) => !item.hidden && (!item.adminOnly || isAdmin),
   )
 
-  return (
+  const row = (
     <div
       className={`flex items-center justify-end ${compact ? "gap-1.5" : "gap-2"} ${className}`}
     >
@@ -138,6 +144,19 @@ export function RowActions({
         // Keeps the buttons of rows without a menu lined up with the other rows.
         <span aria-hidden="true" className="size-11 shrink-0" />
       ) : null}
+    </div>
+  )
+  if (!note) return row
+  // `w-0 min-w-full` makes the note as wide as the buttons without making the column wider.
+  return (
+    <div className="flex flex-col items-end gap-1">
+      {row}
+      <p
+        data-testid="row-actions-note"
+        className={`w-0 min-w-full text-right text-xs leading-snug text-muted-foreground ${noteClassName}`}
+      >
+        {note}
+      </p>
     </div>
   )
 }
