@@ -17,6 +17,11 @@ test("Issuances Management page is accessible", async ({ page }) => {
 test("Records Management page starts with an empty resident list", async ({
   page,
 }) => {
+  // Answer with an empty list so the test does not depend on what the shared
+  // development database holds (patch 308).
+  await page.route("**/api/v1/residents/?*", (route) =>
+    route.fulfill({ json: { data: [], count: 0 } }),
+  )
   await page.goto("/records")
   await expect(
     page.getByRole("heading", { name: "Records Management" }),
