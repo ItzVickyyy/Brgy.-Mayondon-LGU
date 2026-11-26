@@ -9,6 +9,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export type RowActionItem = {
   label: string
@@ -53,10 +58,54 @@ type RowActionsProps = {
   compact?: boolean
   /** Extra classes for the wrapper (e.g. left-aligned wrapping inside a card). */
   className?: string
-  /** A small line under the buttons that says why one of them is disabled (it adds no width to the column). */
-  note?: string
-  /** Classes for the note (alignment follows the buttons). */
-  noteClassName?: string
+}
+
+/**
+ * One text button of an Actions column. A disabled button ignores the mouse, so when it has a
+ * `title` (the reason it is disabled) the button sits in a focusable wrapper that shows the reason
+ * as a small tooltip on hover and keyboard focus. An enabled button keeps the plain `title` hint.
+ */
+function ActionButton({
+  action,
+  compact,
+}: {
+  action: RowPrimaryAction
+  compact: boolean
+}) {
+  const showReason = Boolean(action.disabled && action.title)
+  const button = (
+    <Button
+      type="button"
+      size="sm"
+      variant={action.variant ?? "outline"}
+      onClick={action.onSelect}
+      disabled={action.disabled}
+      title={showReason ? undefined : action.title}
+      aria-label={action.ariaLabel}
+      className={compact ? "px-2.5" : undefined}
+    >
+      {action.icon}
+      {action.label}
+    </Button>
+  )
+  if (!showReason) return button
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span
+          // biome-ignore lint/a11y/noNoninteractiveTabindex: a disabled button cannot take focus or hover, so its wrapper does, to show the reason
+          tabIndex={0}
+          data-testid="disabled-reason-trigger"
+          className="inline-flex cursor-not-allowed rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+        >
+          {button}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent side="top" sideOffset={6} className="max-w-56">
+        {action.title}
+      </TooltipContent>
+    </Tooltip>
+  )
 }
 
 export function RowActions({
@@ -68,8 +117,6 @@ export function RowActions({
   leading,
   compact = false,
   className = "",
-  note,
-  noteClassName = "",
 }: RowActionsProps) {
   const { t } = useTranslation()
   const visibleItems = items.filter(
@@ -81,36 +128,9 @@ export function RowActions({
       className={`flex items-center justify-end ${compact ? "gap-1.5" : "gap-2"} ${className}`}
     >
       {leading}
-      {primary ? (
-        <Button
-          type="button"
-          size="sm"
-          variant={primary.variant ?? "default"}
-          onClick={primary.onSelect}
-          disabled={primary.disabled}
-          title={primary.title}
-          aria-label={primary.ariaLabel}
-          className={compact ? "px-2.5" : undefined}
-        >
-          {primary.icon}
-          {primary.label}
-        </Button>
-      ) : null}
+      {primary ? <ActionButton action={primary} compact={compact} /> : null}
       {actions.map((action) => (
-        <Button
-          key={action.label}
-          type="button"
-          size="sm"
-          variant={action.variant ?? "outline"}
-          onClick={action.onSelect}
-          disabled={action.disabled}
-          title={action.title}
-          aria-label={action.ariaLabel}
-          className={compact ? "px-2.5" : undefined}
-        >
-          {action.icon}
-          {action.label}
-        </Button>
+        <ActionButton key={action.label} action={action} compact={compact} />
       ))}
       {visibleItems.length > 0 ? (
         <DropdownMenu>
@@ -145,17 +165,5 @@ export function RowActions({
       ) : null}
     </div>
   )
-  if (!note) return row
-  // `w-0 min-w-full` makes the note as wide as the buttons without making the column wider.
-  return (
-    <div className="flex flex-col items-end gap-1">
-      {row}
-      <p
-        data-testid="row-actions-note"
-        className={`w-0 min-w-full text-right text-xs leading-snug text-muted-foreground ${noteClassName}`}
-      >
-        {note}
-      </p>
-    </div>
-  )
+  return row
 }

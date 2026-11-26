@@ -228,3 +228,23 @@ test("Edit and Print stay in place on every row; they are disabled when they do 
   await expect(draft.nth(1)).toBeEnabled()
   await expect(draft.nth(2)).toBeDisabled()
 })
+
+test("a disabled Print button explains itself on hover", async ({ page }) => {
+  await mockApi(page)
+  await page.setViewportSize({ width: 1440, height: 1100 })
+  await page.goto("/issuances")
+  const rows = page.locator("table tbody tr")
+  await expect(rows).toHaveCount(codes.length)
+
+  // Barangay ID has no print template: its Print button is disabled and says why.
+  const idRow = rows.nth(codes.indexOf("BARANGAY_ID"))
+  await idRow.getByTestId("disabled-reason-trigger").hover()
+  const tip = page.locator('[data-slot="tooltip-content"]')
+  await expect(tip.first()).toContainText("No print template")
+  // No permanent note is drawn under the buttons any more.
+  await expect(page.getByTestId("row-actions-note")).toHaveCount(0)
+
+  // An enabled Print button has no wrapper and shows no reason.
+  const okRow = rows.first()
+  await expect(okRow.getByTestId("disabled-reason-trigger")).toHaveCount(0)
+})

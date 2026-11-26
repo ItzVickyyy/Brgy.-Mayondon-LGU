@@ -919,18 +919,6 @@ export function IssuanceHistory({
                             className="@max-[59rem]/cards:flex-wrap @max-[59rem]/cards:justify-start"
                             name={item.resident_name}
                             isAdmin={isAdmin}
-                            noteClassName="@max-[59rem]/cards:text-left"
-                            note={
-                              isArchived
-                                ? t("issuances.history.actions.note.archived")
-                                : item.status === "voided"
-                                  ? t("issuances.history.actions.note.voided")
-                                  : isDraft
-                                    ? t("issuances.history.actions.note.draft")
-                                    : isIssued && !canReprint
-                                      ? t("issuances.history.actions.note.noTemplate")
-                                      : undefined
-                            }
                             primary={{
                               label: t("issuances.history.actions.view"),
                               variant: "tintTeal",
@@ -949,7 +937,9 @@ export function IssuanceHistory({
                                 title:
                                   isIssued || isDraft
                                     ? undefined
-                                    : t("issuances.history.actions.editUnavailable"),
+                                    : isArchived
+                                      ? t("issuances.history.actions.note.archived")
+                                      : t("issuances.history.actions.note.voided"),
                                 onSelect: () =>
                                   isDraft
                                     ? onContinueDraft(item.id)
@@ -967,15 +957,17 @@ export function IssuanceHistory({
                                   "issuances.history.actions.printFor",
                                   { name: item.resident_name },
                                 ),
-                                title: !isIssued
-                                  ? t(
-                                      "issuances.history.actions.printNotIssued",
-                                    )
-                                  : canReprint
-                                    ? undefined
-                                    : t(
-                                        "issuances.history.actions.printUnavailable",
-                                      ),
+                                title: isArchived
+                                  ? t("issuances.history.actions.note.archived")
+                                  : item.status === "voided"
+                                    ? t("issuances.history.actions.note.voided")
+                                    : isDraft
+                                      ? t("issuances.history.actions.note.draft")
+                                      : !canReprint
+                                        ? t(
+                                            "issuances.history.actions.note.noTemplate",
+                                          )
+                                        : undefined,
                                 onSelect: () => setPrintItem(item),
                               },
                             ]}
