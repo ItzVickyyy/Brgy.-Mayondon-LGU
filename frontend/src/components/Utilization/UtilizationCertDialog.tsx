@@ -53,8 +53,9 @@ function waitForSheetImages(): Promise<void> {
 
 /**
  * Profile menu > Utilization Cert. The LSPU extension program asks the barangay for a Certificate of
- * Utilization every month. The page fills in the month, the number of clients served and the Punong
- * Barangay by itself; the date of issue and the signature stay blank for the office to complete.
+ * Utilization every month. The page fills in the reporting period, the dates counted and the number
+ * of clients served by itself; the rating, remarks, date of issue and signature stay blank for the
+ * person who certifies it.
  * Popup text is English only, like the other information pop-ups.
  */
 export function UtilizationCertDialog({
@@ -145,8 +146,8 @@ export function UtilizationCertDialog({
                 (LSPU-LBC CAS), which developed this system through its
                 KOMUNITECH extension program, asks the barangay for a
                 certificate that the system was used. This page prepares it: the
-                month, the number of clients served and the name of the Punong
-                Barangay are filled in from the system.
+                reporting period, the dates counted and the number of clients
+                served are filled in from the system.
               </p>
             </section>
             <section className="space-y-1.5">
@@ -156,8 +157,9 @@ export function UtilizationCertDialog({
                 <li>Check the figures below.</li>
                 <li>Press Print, on A4 paper.</li>
                 <li>
-                  Write the date of issue by hand, and have the Punong Barangay
-                  sign above the printed name.
+                  Fill in the rating and remarks by hand, write the date of
+                  issue, and have it signed above the printed name (the form is
+                  certified by the Head, Office of the Municipal Agriculturist).
                 </li>
               </ol>
             </section>
@@ -191,14 +193,6 @@ export function UtilizationCertDialog({
                     {data ? formatLocaleNumber(data.documents_issued) : "…"}
                   </dd>
                 </div>
-                <div className="grid grid-cols-[10rem_1fr] gap-x-4 px-3 py-2.5">
-                  <dt className="text-muted-foreground">Punong Barangay</dt>
-                  <dd className="font-medium">
-                    {data
-                      ? (data.punong_barangay ?? "Not set in Officials")
-                      : "…"}
-                  </dd>
-                </div>
               </dl>
               <p className="text-xs text-muted-foreground">
                 A client is one resident who received at least one issued
@@ -208,16 +202,6 @@ export function UtilizationCertDialog({
                   ? ` Counted from ${monthName(monthNumber)} ${Number(data.month_start.slice(8))} to ${Number(data.month_end.slice(8))}.`
                   : ""}
               </p>
-              {data && data.punong_barangay === null ? (
-                <p
-                  role="note"
-                  className="rounded-md border-l-2 border-brand bg-muted/60 px-3 py-2"
-                >
-                  No current Punong Barangay is set under Officials, so the name
-                  line will print blank. Add the official first, or write the
-                  name by hand.
-                </p>
-              ) : null}
             </section>
           </div>
           <div className={`${modalFooter} flex justify-end gap-2`}>
@@ -246,8 +230,9 @@ export function UtilizationCertDialog({
             <div className="cou-print-root" aria-hidden="true">
               <UtilizationSheet
                 month={month}
+                monthStart={data.month_start}
+                monthEnd={data.month_end}
                 clientsServed={data.clients_served}
-                punongBarangay={data.punong_barangay}
               />
             </div>,
             document.body,

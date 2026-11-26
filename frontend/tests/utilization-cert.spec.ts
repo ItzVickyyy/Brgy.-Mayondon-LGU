@@ -86,7 +86,6 @@ test("the button sits under Learn more and opens the explanation", async ({
     dialog.getByRole("heading", { name: "What this is for" }),
   ).toBeVisible()
   await expect(dialog.getByTestId("utilization-clients")).toHaveText("6")
-  await expect(dialog).toContainText("Danilo V. Apolinario")
   await expect(dialog.getByTestId("utilization-print")).toBeEnabled()
 })
 
@@ -112,22 +111,33 @@ test("Print fills the certificate, records the print and opens the dialog", asyn
   expect(JSON.parse(printed[0] as string)).toEqual({ month: "2026-11" })
   const sheet = page.getByTestId("utilization-sheet")
   await expect(sheet).toContainText("CERTIFICATE OF UTILIZATION")
-  await expect(sheet).toContainText("For the Month of November 2026")
-  await expect(sheet.getByTestId("utilization-sheet-clients")).toContainText(
-    "as of November : 6",
+  await expect(sheet).toContainText(
+    "Reporting Period (Month/Year): November 2026",
   )
-  await expect(sheet).toContainText("HON. DANILO V. APOLINARIO")
-  // The date of issue is left for the office to write.
-  await expect(sheet).toContainText("Issued this ______ day of")
+  await expect(sheet.getByTestId("utilization-sheet-clients")).toContainText(
+    "as of: November 1, 2026 – November 28, 2026 Total: 6",
+  )
+  // The certifier is the Head, Office of the Municipal Agriculturist (the Word format); the rating,
+  // remarks, date of issue and signature are left for them.
+  await expect(sheet).toContainText(
+    "Head, Office of the Municipal Agriculturist",
+  )
+  await expect(sheet).toContainText(
+    "Utilization Performance Rating: _____ out of 5",
+  )
+  await expect(sheet).toContainText("Issued this _____ day of")
+  await expect(sheet.locator(".cou-scale th")).toHaveText([
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+  ])
 })
 
-test("another month changes the figures; no official prints a blank name", async ({
-  page,
-}) => {
+test("another month changes the figures", async ({ page }) => {
   await signedIn(page, null)
   const dialog = await openDialog(page)
-  await expect(dialog).toContainText("Not set in Officials")
-  await expect(dialog).toContainText("will print blank")
   await dialog.getByTestId("utilization-month").click()
   await page.getByRole("option").nth(1).click()
   await expect(dialog.getByTestId("utilization-clients")).toHaveText("1,234")

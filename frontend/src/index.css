@@ -1076,8 +1076,8 @@ tbody
    container for as long as the dialog is open, and the print rules below depend only on that container
    being in the page, never on a class that code adds and removes: Chrome draws (and redraws) its print
    preview after window.print() has returned and "afterprint" has fired, so anything torn down then
-   leaves a blank preview. The sheet follows the barangay's Word file: A4, Arial 11 pt, Cambria
-   letterhead, navy 1F3A68, explicit colours (the dark theme never reaches it). Never shows on screen. */
+   leaves a blank preview. The sheet follows the barangay's Word file (BMIRMS_Mayondon.docx): A4, Arial
+   10 pt, navy 1F3A68, green 1B5E20 rules, explicit colours (the dark theme never reaches it). Never shows on screen. */
 .cou-print-root {
   display: none;
 }
@@ -1117,120 +1117,168 @@ tbody
     overflow: hidden;
     font-family: Arial, Helvetica, sans-serif;
     font-size: 11pt;
-    line-height: 1.25;
+    line-height: 1.15;
     color: #000;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  :where(.cou-sheet) p {
+  :where(.cou-sheet) p,
+  :where(.cou-sheet) h1,
+  :where(.cou-sheet) h2 {
     margin: 0;
   }
   .cou-head {
     display: flex;
     align-items: center;
-    gap: 10pt;
-    padding-bottom: 6pt;
-    border-bottom: 1.5pt solid #1b5e20;
+    gap: 6pt;
+    padding-bottom: 4pt;
   }
   .cou-head__logo {
-    width: 86pt;
-    height: 86pt;
+    width: 68pt;
+    height: 61pt;
     object-fit: contain;
     flex: none;
   }
   .cou-head__lines {
     flex: 1;
     text-align: center;
-    font-family: Cambria, Caladea, "Times New Roman", serif;
     font-size: 10pt;
-    margin-right: 86pt;
+    margin-right: 68pt;
+  }
+  .cou-head__municipality {
+    margin-top: 2pt;
+    font-weight: 700;
+    font-size: 13pt;
+    color: #1f3a68;
   }
   .cou-head__barangay {
     font-weight: 700;
-    font-size: 14pt;
-  }
-  .cou-head__office {
-    font-weight: 700;
-    font-size: 16pt;
-  }
-  .cou-head__contact {
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 8pt;
-    font-weight: 700;
+    font-size: 11pt;
   }
   .cou-title {
-    margin: 14pt 0 2pt;
+    margin-top: 10pt;
+    padding-top: 7pt;
+    border-top: 2.25pt double #1b5e20;
     text-align: center;
-    font-size: 16pt;
+    font-size: 22pt;
+    line-height: 1.15;
     font-weight: 700;
     color: #1f3a68;
   }
-  .cou-month {
-    text-align: center;
-    margin-bottom: 12pt;
-  }
   .cou-text {
+    margin-top: 12pt;
     text-align: justify;
-    margin-bottom: 10pt;
+    font-size: 10pt;
+  }
+  .cou-heading {
+    margin: 10pt 0 5pt;
+    font-size: 10pt;
+    font-weight: 700;
   }
   .cou-table {
     width: 100%;
-    margin: 8pt 0 14pt;
     border-collapse: collapse;
-    font-size: 9.5pt;
+    font-size: 10pt;
+    line-height: 1.2;
   }
   .cou-table th,
   .cou-table td {
-    border: 0.75pt solid #000;
-    padding: 4pt 6pt;
+    border: 0.5pt solid #808080;
+    padding: 3pt 6pt;
     text-align: left;
     vertical-align: middle;
   }
   .cou-table th {
-    width: 24%;
+    width: 22%;
     background: #e8f5e9;
     font-weight: 700;
   }
-  .cou-table__bold {
+  .cou-line {
+    margin-bottom: 6pt;
+    font-size: 10pt;
+    line-height: 13.8pt;
+  }
+  .cou-fill {
+    display: inline-block;
+    min-width: 62pt;
+    padding: 0 4pt;
+    border-bottom: 0.75pt solid #000;
+    text-align: center;
+    line-height: 1.1;
+  }
+  .cou-fill--period {
+    min-width: 150pt;
+  }
+  .cou-fill--total {
+    min-width: 40pt;
+  }
+  .cou-scale {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    font-size: 10pt;
+    line-height: 1.2;
+    text-align: center;
+  }
+  .cou-scale th,
+  .cou-scale td {
+    border: 0.75pt solid #000;
+    padding: 2pt 4pt;
+    vertical-align: middle;
+  }
+  .cou-scale th {
+    background: #f2f2f2;
     font-weight: 700;
   }
-  .cou-total {
-    margin-bottom: 12pt;
+  .cou-scale td {
+    height: 26pt;
   }
-  .cou-sign {
-    margin: 22pt 0 0 52%;
-    text-align: center;
+  .cou-remarks,
+  .cou-rule-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 4pt;
+    margin-top: 12pt;
     font-size: 10pt;
   }
-  .cou-sign__lead {
-    text-align: left;
-    margin-bottom: 30pt;
+  .cou-rule {
+    flex: 1;
+    height: 11pt;
+    border-bottom: 0.75pt solid #000;
   }
-  .cou-sign__name {
-    min-height: 13pt;
-    border-top: 0.75pt solid #000;
-    padding-top: 3pt;
-    font-weight: 700;
+  .cou-text--issued {
+    margin-top: 10pt;
+    margin-bottom: 4pt;
+  }
+  .cou-sign {
+    margin-top: 14pt;
+    font-size: 10pt;
+    line-height: 1.2;
+  }
+  .cou-sign__line {
+    margin-top: 28pt;
   }
   .cou-foot {
     position: absolute;
     left: 17.8mm;
     right: 17.8mm;
-    bottom: 9mm;
+    bottom: 8mm;
     display: flex;
     align-items: center;
-    gap: 6pt;
+    gap: 8pt;
     padding-top: 4pt;
-    border-top: 1.25pt solid #1b5e20;
+    border-top: 0.75pt solid #1b5e20;
     font-size: 7.5pt;
+    line-height: 1.25;
     color: #555;
   }
   .cou-foot__seal {
-    width: 28pt;
-    height: 28pt;
+    width: 28.5pt;
+    height: 28.5pt;
     flex: none;
   }
   .cou-foot__strong {
+    font-size: 8pt;
     font-weight: 700;
     color: #1f3a68;
   }

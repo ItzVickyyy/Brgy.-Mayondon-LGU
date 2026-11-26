@@ -66,10 +66,9 @@ export function recentMonths(now: Date = new Date(), count = 12): string[] {
   return keys
 }
 
-/** "HON. DANILO V. APOLINARIO": the name as the certificate prints it. Blank when nobody is set. */
-export function signatoryLine(name: string | null | undefined): string {
-  const clean = (name ?? "").trim().replace(/\s+/g, " ")
-  if (!clean) return ""
-  const upper = clean.toUpperCase()
-  return /^HON\.?\s/.test(upper) ? upper : `HON. ${upper}`
+/** "2026-11-01" -> "November 1, 2026" (the dates the certificate prints). */
+export function longDate(isoDate: string): string {
+  const [year, month, day] = isoDate.split("-").map(Number)
+  if (!year || !month || !day) return ""
+  return `${monthName(month)} ${day}, ${year}`
 }
