@@ -1,5 +1,5 @@
 import { CircleCheck, Download, Printer, X } from "lucide-react"
-import { type ReactNode, useEffect, useState } from "react"
+import { type ReactNode, useState } from "react"
 import { createPortal } from "react-dom"
 import { useTranslation } from "react-i18next"
 
@@ -150,47 +150,34 @@ tr{break-inside:avoid}
 }
 
 /**
- * The number of selected rows, in the upper right corner (patch 292): a navy
- * pill in the top bar, just left of the Notification button, so it never
- * covers a page's own buttons and never takes room in the tools row. It is
- * drawn into the top bar's `selection-count-slot` through a portal (so no
- * table, card or container above it can move or clip it); the top bar is
- * sticky, so the count stays in view while the page scrolls. With no slot it
- * floats just below the top bar instead. `aria-live` announces the count.
+ * The number of selected rows, as a small pill that floats over the page,
+ * bottom centre (patch 293; it was in the top bar in 292). It is fixed to the
+ * screen and click-through, so it never covers a button, never takes room in
+ * the tools row and stays in view while the page scrolls. It is drawn through
+ * a portal so no table, card or container above it can move or clip it.
+ * `aria-live` announces the count.
  */
 function SelectionCount({ count }: { count: number }) {
   const { t } = useTranslation()
-  const [slot, setSlot] = useState<HTMLElement | null>(null)
-  useEffect(() => {
-    setSlot(document.getElementById("selection-count-slot"))
-  }, [])
   return createPortal(
-    <div
-      data-testid="selection-count"
-      role="status"
-      aria-live="polite"
-      className={`animate-count-in inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground shadow-md ring-1 ring-black/10 ${
-        slot
-          ? ""
-          : "pointer-events-none fixed right-3 top-[4.75rem] z-30 sm:right-5"
-      }`}
-    >
-      <CircleCheck aria-hidden="true" className="size-4" />
-      {/* On a phone only the number shows (the top bar is narrow); the full words stay for screen readers. */}
-      <span aria-hidden="true" className="sm:hidden">
-        {count}
-      </span>
-      <span className="sr-only sm:not-sr-only">
+    <div className="pointer-events-none fixed inset-x-0 bottom-5 z-30 flex justify-center px-3">
+      <div
+        data-testid="selection-count"
+        role="status"
+        aria-live="polite"
+        className="animate-count-in inline-flex items-center gap-2 whitespace-nowrap rounded-full bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-lg ring-1 ring-black/10"
+      >
+        <CircleCheck aria-hidden="true" className="size-4" />
         {t("common.selection.count", { count })}
-      </span>
+      </div>
     </div>,
-    slot ?? document.body,
+    document.body,
   )
 }
 
 /**
  * Tools for the selected rows: Export (green), Print (violet), any table-specific
- * `children` buttons and Clear. The count floats in the corner (SelectionCount).
+ * `children` buttons and Clear. The count floats at the bottom of the screen (SelectionCount).
  */
 export function SelectionBar({
   count,

@@ -298,11 +298,8 @@ html:not([data-gold="off"])
   svg {
   color: var(--sidebar-primary);
 }
-/* A little more gold (280): the bar above a table while rows are selected, and
-   the current tab (an inset line, so nothing changes size). */
-html:not([data-gold="off"]) .selection-bar {
-  box-shadow: inset 3px 0 0 var(--gold);
-}
+/* A little more gold (280): the current tab (an inset line, so nothing changes
+   size). The selection bar has no gold since 293. */
 html:not([data-gold="off"]) [role="tab"][aria-selected="true"] {
   box-shadow: inset 0 -3px 0 var(--gold);
 }
@@ -745,19 +742,16 @@ tr:focus-within > .row-hover-cell {
   background-color: var(--row-hover);
 }
 
-/* Row hover on every table body (one rule for all pages): a clear tint plus an
-   accent bar on the row's left edge. Total rows (font-semibold) keep their own
+/* Row hover on every table body (one rule for all pages): a small background
+   tint only (no bar, since 293). Total rows (font-semibold) keep their own
    look. Pointer devices only; nothing moves. A row that opens a view on double
    click (rowOpen in lib/rowOpen.ts) also gets the pointer cursor. */
 :root {
-  --row-hover: color-mix(in oklab, var(--card), var(--muted) 70%);
+  --row-hover: color-mix(in oklab, var(--card), var(--muted) 45%);
 }
 @media screen and (hover: hover) {
   tbody > tr:not(.font-semibold):hover {
     background-color: var(--row-hover);
-  }
-  tbody > tr:not(.font-semibold):hover > td:first-child {
-    box-shadow: inset 3px 0 0 var(--sidebar-primary);
   }
   tbody > tr[data-row-open] {
     cursor: pointer;
@@ -1320,7 +1314,7 @@ tbody
 @keyframes count-in {
   from {
     opacity: 0;
-    transform: translateX(1.5rem);
+    transform: translateY(0.75rem);
   }
 }
 .animate-count-in {

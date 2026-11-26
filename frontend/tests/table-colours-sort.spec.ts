@@ -101,7 +101,7 @@ test("the Actions heading is not a sort button", async ({ page }) => {
   await expect(page.getByTestId("sort-actions")).toHaveCount(0)
 })
 
-test("the count sits in the top bar, upper right, not in the tools bar", async ({
+test("the count floats at the bottom of the screen, not in the top bar", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
@@ -110,36 +110,41 @@ test("the count sits in the top bar, upper right, not in the tools bar", async (
   await expect(page.getByTestId("selection-count")).toHaveCount(0)
   await page.getByTestId("row-select").first().click()
 
-  const count = page.locator("header").getByTestId("selection-count")
+  const count = page.getByTestId("selection-count")
   await expect(count).toContainText("1 selected")
+  await expect(
+    page.locator("header").getByTestId("selection-count"),
+  ).toHaveCount(0)
   await expect(page.getByTestId("selection-bar")).not.toContainText(
     "1 selected",
   )
 
+  // Measure after the slide-in has finished.
+  await count.evaluate((el) =>
+    Promise.all(el.getAnimations().map((a) => a.finished)),
+  )
   const box = await count.boundingBox()
   if (!box) throw new Error("no count box")
-  expect(box.y).toBeLessThan(64) // inside the 64 px top bar
-  expect(box.x).toBeGreaterThan(1440 / 2) // right half of the screen
-  // It is left of the Notification button, never on top of it.
-  const bell = await page.locator("header button").first().boundingBox()
-  expect(bell).not.toBeNull()
+  expect(box.y).toBeGreaterThan(900 / 2) // lower half
+  expect(box.y + box.height).toBeLessThanOrEqual(900)
+  expect(Math.abs(box.x + box.width / 2 - 1440 / 2)).toBeLessThan(12) // centred (a scroll bar may take a few px)
 
-  // The top bar is sticky, so the count stays put when the page scrolls.
+  // It is fixed to the screen, so it stays put when the page scrolls.
   await page.mouse.wheel(0, 400)
   await expect.poll(async () => (await count.boundingBox())?.y).toBe(box.y)
 })
 
-test("the count fits the top bar on a phone", async ({ page }) => {
+test("the count fits a phone screen", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 800 })
   await mockApi(page)
   await page.goto("/backup-restore")
   // At 390 px the sticky Actions column of the Backup table lies over the
-  // checkbox column (known, not part of this patch), so tick it through the DOM.
+  // checkbox column (known), so tick it through the DOM.
   await page
     .getByTestId("row-select")
     .first()
     .evaluate((el) => (el as HTMLElement).click())
-  const count = page.locator("header").getByTestId("selection-count")
+  const count = page.getByTestId("selection-count")
   await expect(count).toBeVisible()
   const box = await count.boundingBox()
   if (!box) throw new Error("no count box")

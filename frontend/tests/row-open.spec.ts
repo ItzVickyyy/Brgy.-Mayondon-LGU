@@ -97,7 +97,7 @@ test("a Records row lights up on hover and opens View on double click", async ({
     .locator("td")
     .first()
     .evaluate((el) => getComputedStyle(el).boxShadow)
-  expect(bar).toContain("inset")
+  expect(bar).toBe("none") // background tint only, no accent bar (293)
   await expect(row).toHaveAttribute("data-row-open", "")
 
   // Double-clicking the selection box only toggles it; it does not open the row.
