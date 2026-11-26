@@ -87,6 +87,12 @@ function HeaderClock() {
     /,\s*(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/,
     " ($1)",
   )
+  // On a phone the full date wrapped to three lines beside the four buttons (patch 309).
+  const shortDate = new Intl.DateTimeFormat(getLocale(), {
+    month: "short",
+    day: "numeric",
+    weekday: "short",
+  }).format(now)
   const timeText = new Intl.DateTimeFormat(getLocale(), {
     hour: "2-digit",
     minute: "2-digit",
@@ -97,7 +103,18 @@ function HeaderClock() {
     <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground sm:text-sm">
       <span className="inline-flex min-w-0 max-w-full items-center gap-1.5 sm:whitespace-nowrap">
         <CalendarDays className="size-4 shrink-0" aria-hidden="true" />
-        <span className="min-w-0 leading-tight">{formattedDate}</span>
+        <span
+          className="min-w-0 whitespace-nowrap leading-tight sm:hidden"
+          data-testid="header-date-short"
+        >
+          {shortDate}
+        </span>
+        <span
+          className="hidden min-w-0 leading-tight sm:inline"
+          data-testid="header-date"
+        >
+          {formattedDate}
+        </span>
       </span>
       <span className="hidden items-center gap-1.5 whitespace-nowrap tabular-nums sm:inline-flex">
         <Clock3 className="size-4 shrink-0" aria-hidden="true" />
