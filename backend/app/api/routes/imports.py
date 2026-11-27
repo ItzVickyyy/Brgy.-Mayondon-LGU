@@ -152,6 +152,11 @@ def list_imports(
     return ImportBatchesPublic(data=[_public(b) for b in rows], count=total)
 
 
+def _printable(name: str) -> str:
+    """A file name safe to keep in the audit log: no control characters, 100 characters."""
+    return "".join(ch if ch.isprintable() else "_" for ch in name)[-100:]
+
+
 @router.post("/", response_model=ImportUploadPublic, status_code=201)
 async def upload_import(
     session: SessionDep, user: ImportUser, file: Annotated[UploadFile, File()]
@@ -163,6 +168,18 @@ async def upload_import(
     try:
         file_type, headers, rows = mi.parse_rows(file_name, content)
     except mi.ImportFileError as exc:
+        # A refused file leaves a trace (the reason is a fixed, safe sentence).
+        record_audit_event(
+            session,
+            action="import.blocked",
+            actor=user,
+            outcome="failed",
+            module="records",
+            record_type="import",
+            reason=str(exc),
+            details={"file_name": _printable(file_name)},
+            commit=True,
+        )
         raise HTTPException(status_code=422, detail=str(exc)) from exc
 
     previous = session.exec(

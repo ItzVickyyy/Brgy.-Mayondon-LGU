@@ -556,7 +556,8 @@
         "upload": "Masterlist file uploaded",
         "preview": "Masterlist import previewed",
         "commit": "Masterlist import finished",
-        "cancel": "Masterlist import cancelled"
+        "cancel": "Masterlist import cancelled",
+        "blocked": "Masterlist file refused"
       },
       "street": {
         "create": "Street added",

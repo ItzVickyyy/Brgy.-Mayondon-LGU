@@ -340,6 +340,85 @@ def test_xlsx_with_macros_is_rejected(
     assert "macros" in r.json()["detail"]
 
 
+def _zip_with(*parts: str) -> bytes:
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr("[Content_Types].xml", "<x/>")
+        for part in parts:
+            archive.writestr(part, b"x")
+    return buffer.getvalue()
+
+
+@pytest.mark.parametrize(
+    ("name", "content", "message"),
+    [
+        # The name says one thing, the first bytes say another.
+        ("a.csv", b"%PDF-1.7\nFirst Name,Last Name\nA,B\n", "not a spreadsheet"),
+        ("a.xlsx", b"\x7fELF\x02\x01\x01\x00", "not a spreadsheet"),
+        ("a.csv", b"MZ\x90\x00\x03\x00\x00\x00", "not a spreadsheet"),
+        ("a.csv", _zip_with("xl/workbook.xml"), "Excel file named .csv"),
+        # Parts a plain list never needs.
+        ("a.xlsx", _zip_with("xl/embeddings/oleObject1.bin"), "embedded objects"),
+        ("a.xlsx", _zip_with("xl/activeX/activeX1.xml"), "embedded objects"),
+        ("a.xlsx", _zip_with("xl/run.ps1"), "embedded objects"),
+    ],
+)
+def test_files_that_are_not_what_they_claim_are_rejected(
+    client: TestClient,
+    superuser_token_headers: dict[str, str],
+    name: str,
+    content: bytes,
+    message: str,
+) -> None:
+    r = _upload(client, superuser_token_headers, content, name)
+    assert r.status_code == 422
+    assert message in r.json()["detail"]
+
+
+def test_a_csv_heading_that_starts_with_mz_is_still_a_csv() -> None:
+    """Only a real Windows program (zero bytes inside) is refused, not the letters MZ."""
+    content = b"MZone,First Name,Last Name\nPurok 1,Ana,Cruz\n"
+    _type, headers, parsed = mi.parse_rows("list.csv", content)
+    assert headers[0] == "MZone"
+    assert len(parsed) == 1
+
+
+def test_xlsx_with_password_or_too_many_parts_is_rejected(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    data = bytearray(_zip_with("xl/workbook.xml"))
+    # The zip writer clears the "encrypted" flag, so set it in the central directory.
+    data[data.rindex(b"PK\x01\x02") + 8] |= 0x1
+    buffer = io.BytesIO(bytes(data))
+    with pytest.raises(mi.ImportFileError, match="Password-protected"):
+        mi.parse_rows("list.xlsx", buffer.getvalue())
+
+    monkeypatch.setattr(mi, "MAX_ZIP_ENTRIES", 2)
+    with pytest.raises(mi.ImportFileError, match="too many parts"):
+        mi.parse_rows("list.xlsx", _zip_with("a.xml", "b.xml"))
+
+
+def test_a_refused_file_is_written_to_the_audit_log(
+    client: TestClient, superuser_token_headers: dict[str, str]
+) -> None:
+    name = f"{_tag()}.xlsx"
+    r = _upload(client, superuser_token_headers, b"not a zip", name)
+    assert r.status_code == 422
+    with Session(engine) as session:
+        events = session.exec(
+            select(AuditLog).where(col(AuditLog.action) == "import.blocked")
+        ).all()
+    mine = [e for e in events if e.details and e.details.get("file_name") == name]
+    assert len(mine) == 1
+    assert mine[0].outcome == "failed"
+    assert mine[0].reason == "This is not a valid .xlsx file"
+
+
+def test_audit_file_names_have_no_control_characters_and_a_limit() -> None:
+    assert imports_route._printable("a\x07b\nc.csv") == "a_b_c.csv"
+    assert len(imports_route._printable("x" * 300 + ".csv")) == 100
+
+
 def test_mapping_rules(
     client: TestClient, superuser_token_headers: dict[str, str]
 ) -> None:

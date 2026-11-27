@@ -40,6 +40,8 @@ MAX_ROWS = 30000
 # Values per ``IN (...)`` query when checking a batch against the database.
 LOOKUP_CHUNK = 5000
 MAX_UNZIPPED_BYTES = 50 * 1024 * 1024
+# A real masterlist workbook holds a few dozen parts; hundreds mean something else.
+MAX_ZIP_ENTRIES = 500
 MAX_COLUMNS = 60
 MAX_CELL_CHARS = 1000
 # ``streets.name`` length.
@@ -116,6 +118,42 @@ class ImportFileError(ValueError):
     """The uploaded file cannot be used; the message is safe to show."""
 
 
+# First bytes of files that are never a masterlist, whatever the name says:
+# Linux programs, PDF, old Office (OLE) files, GIF pictures and archives. Each is long
+# enough that a CSV heading cannot start with it by accident.
+_BINARY_SIGNATURES = (
+    b"\x7fELF",
+    b"%PDF-",
+    b"GIF87a",
+    b"GIF89a",
+    b"\xd0\xcf\x11\xe0\xa1\xb1\x1a\xe1",
+    b"Rar!\x1a\x07",
+    b"7z\xbc\xaf\x27\x1c",
+)
+_ZIP_SIGNATURE = b"PK\x03\x04"
+# Parts inside an .xlsx that a plain list never needs and that can carry code.
+_RISKY_XLSX_PART = re.compile(
+    r"(vbaproject|activex|embeddings/|oleobject|\.(exe|dll|js|vbs|bat|cmd|ps1|html?)$)",
+    re.IGNORECASE,
+)
+
+
+def _check_content(file_name: str, content: bytes) -> None:
+    """Refuse a file whose first bytes say it is not what its name claims."""
+    head = content[:8]
+    # A Windows program starts with "MZ" too, but so can a heading such as "MZone":
+    # a program also has a zero byte in its first lines, a text list never does.
+    windows_program = head.startswith(b"MZ") and b"\x00" in content[:1024]
+    if windows_program or content.startswith(_BINARY_SIGNATURES):
+        raise ImportFileError(
+            "This file is not a spreadsheet. Only .csv and .xlsx files are accepted"
+        )
+    if file_name.lower().endswith(".csv") and head.startswith(_ZIP_SIGNATURE):
+        raise ImportFileError(
+            "This is an Excel file named .csv. Rename it to .xlsx or save it as CSV UTF-8"
+        )
+
+
 # --- reading files ----------------------------------------------------------
 
 
@@ -171,10 +209,19 @@ def _read_xlsx(content: bytes) -> list[list[Any]]:
 
     try:
         with zipfile.ZipFile(io.BytesIO(content)) as archive:
-            names = archive.namelist()
+            infos = archive.infolist()
+            if len(infos) > MAX_ZIP_ENTRIES:
+                raise ImportFileError("The spreadsheet has too many parts")
+            if any(i.flag_bits & 0x1 for i in infos):
+                raise ImportFileError("Password-protected files are not accepted")
+            names = [i.filename for i in infos]
             if any(n.lower().endswith("vbaproject.bin") for n in names):
                 raise ImportFileError("Files with macros are not accepted")
-            if sum(i.file_size for i in archive.infolist()) > MAX_UNZIPPED_BYTES:
+            if any(_RISKY_XLSX_PART.search(n) for n in names):
+                raise ImportFileError(
+                    "Files with embedded objects or programs are not accepted"
+                )
+            if sum(i.file_size for i in infos) > MAX_UNZIPPED_BYTES:
                 raise ImportFileError("The spreadsheet is too large")
     except zipfile.BadZipFile:
         raise ImportFileError("This is not a valid .xlsx file") from None
@@ -211,6 +258,7 @@ def parse_rows(
     lower = file_name.lower()
     if lower.endswith(".xlsm") or lower.endswith(".xlsb") or lower.endswith(".xls"):
         raise ImportFileError("Only .csv and .xlsx files are accepted")
+    _check_content(file_name, content)
     if lower.endswith(".xlsx"):
         file_type = "xlsx"
         raw_rows = _read_xlsx(content)

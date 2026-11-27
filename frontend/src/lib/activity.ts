@@ -28,6 +28,7 @@ const activityKeys = {
   "import.preview": "activity.actions.import.preview",
   "import.commit": "activity.actions.import.commit",
   "import.cancel": "activity.actions.import.cancel",
+  "import.blocked": "activity.actions.import.blocked",
   "street.create": "activity.actions.street.create",
   "street.rename": "activity.actions.street.rename",
   "street.delete": "activity.actions.street.delete",

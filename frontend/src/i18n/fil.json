@@ -556,7 +556,8 @@
         "upload": "Na-upload ang masterlist file",
         "preview": "Na-preview ang masterlist import",
         "commit": "Natapos ang masterlist import",
-        "cancel": "Na-cancel ang masterlist import"
+        "cancel": "Na-cancel ang masterlist import",
+        "blocked": "Tinanggihan ang file ng masterlist"
       },
       "street": {
         "create": "Nadagdag ang kalye",
