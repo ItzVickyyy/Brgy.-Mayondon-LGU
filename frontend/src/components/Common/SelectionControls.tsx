@@ -181,6 +181,15 @@ function SelectionCount({ count }: { count: number }) {
   )
 }
 
+// Tailwind needs whole class names. `true` is the 318 rule (hidden from 1400 px).
+const HIDE_FROM: Record<string, string> = {
+  true: "min-[1400px]:hidden",
+  sm: "sm:hidden",
+  lg: "lg:hidden",
+  xl: "xl:hidden",
+  always: "",
+}
+
 /**
  * Tools for the selected rows: Export (green), Print (violet), any table-specific
  * `children` buttons and Clear. The count floats at the bottom of the screen (SelectionCount).
@@ -193,6 +202,7 @@ export function SelectionBar({
   children,
   inline = false,
   reserveLine = false,
+  lineClassName = "min-h-11",
 }: {
   count: number
   onClear: () => void
@@ -212,19 +222,26 @@ export function SelectionBar({
    * line below 1400 px. The line is kept (with a short hint) while nothing is
    * ticked, so ticking a row never moves the table. From 1400 px the tools sit
    * in the filter row and the line is gone. `"always"` (319) keeps the line at
-   * every width, for a table with no filter row (User Accounts).
+   * every width, for a table with no filter row (User Accounts). (320) `"sm"`,
+   * `"lg"` and `"xl"` keep the line below that width only: the filter row has
+   * a line of its own on a phone, and the tools join the row from there.
    */
-  reserveLine?: boolean | "always"
+  reserveLine?: boolean | "always" | "sm" | "lg" | "xl"
+  /**
+   * (320) Height of the reserved line. It equals the bar's own height in the
+   * layout (44 px: the bar is 48 px with a -2 px margin top and bottom, so it
+   * does not make a row of 44 px inputs taller). Backup uses two lines on a phone.
+   */
+  lineClassName?: string
 }) {
   const { t } = useTranslation()
   const [exportOpen, setExportOpen] = useState(false)
   if (count === 0) {
     if (!(inline && reserveLine)) return null
-    const narrowOnly = reserveLine !== "always"
     return (
       <p
         data-testid="selection-slot"
-        className={`flex min-h-12 items-center px-2 text-sm text-muted-foreground ${narrowOnly ? "min-[1400px]:hidden" : ""}`}
+        className={`flex items-center px-2 text-sm text-muted-foreground ${lineClassName} ${HIDE_FROM[String(reserveLine)] ?? ""}`}
       >
         {t("common.selection.hint")}
       </p>
@@ -238,7 +255,7 @@ export function SelectionBar({
         aria-label={t("common.selection.bar")}
         className={
           inline
-            ? "selection-bar animate-selection-in flex min-h-12 w-full flex-wrap items-center gap-2 rounded-lg bg-brand/5 px-2 py-0.5 text-sm sm:ml-auto sm:w-auto sm:shrink-0 sm:flex-nowrap sm:gap-1 sm:whitespace-nowrap"
+            ? "selection-bar animate-selection-in -my-0.5 flex min-h-12 w-full flex-wrap items-center gap-2 rounded-lg bg-brand/5 px-2 py-0.5 text-sm sm:ml-auto sm:w-auto sm:shrink-0 sm:flex-nowrap sm:gap-1 sm:whitespace-nowrap"
             : "selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b bg-brand/5 px-4 py-2 text-sm sm:px-5"
         }
       >

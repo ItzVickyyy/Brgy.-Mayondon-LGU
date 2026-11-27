@@ -683,8 +683,12 @@ function BackupRestore() {
                 : t("admin.backup.history.lastAgo", { count: daysSinceLatest })}
             </Badge>
           ) : null}
+        </div>
+        <div className="flex flex-col border-b px-4 sm:px-5">
           <SelectionBar
             inline
+            reserveLine="always"
+            lineClassName="min-h-24 sm:min-h-11"
             count={pickBackups.count}
             onClear={pickBackups.clear}
             csvName="backups-selected.csv"

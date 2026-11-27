@@ -375,7 +375,7 @@ function OfficialsManagement() {
               </p>
             </div>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-nowrap sm:items-center">
             <label className="relative block min-w-0 flex-1 sm:max-w-sm">
               <span className="sr-only">
                 {t("admin.officials.searchLabel")}
@@ -412,6 +412,7 @@ function OfficialsManagement() {
             </label>
             <SelectionBar
               inline
+              reserveLine="sm"
               count={pickOfficials.count}
               onClear={pickOfficials.clear}
               csvName="officials-selected.csv"

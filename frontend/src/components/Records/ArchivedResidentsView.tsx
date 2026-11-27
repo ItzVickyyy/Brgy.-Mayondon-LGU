@@ -133,6 +133,7 @@ export function ArchivedResidentsView({
           </label>
           <SelectionBar
             inline
+            reserveLine="sm"
             count={pick.count}
             onClear={pick.clear}
             csvName="archived-residents-selected.csv"

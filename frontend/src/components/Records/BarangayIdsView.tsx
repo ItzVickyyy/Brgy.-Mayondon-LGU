@@ -225,7 +225,7 @@ export function BarangayIdsView() {
               {t("records.ids.description")}
             </p>
           </div>
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-nowrap sm:items-center">
             <label className="relative block min-w-0 flex-1 sm:max-w-sm">
               <span className="sr-only">{t("records.ids.searchLabel")}</span>
               <Search
@@ -261,6 +261,7 @@ export function BarangayIdsView() {
             </label>
             <SelectionBar
               inline
+              reserveLine="sm"
               count={pick.count}
               onClear={pick.clear}
               csvName="barangay-ids-selected.csv"

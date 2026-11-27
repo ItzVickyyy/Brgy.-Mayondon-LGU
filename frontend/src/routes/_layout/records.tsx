@@ -386,6 +386,7 @@ function RecordsManagement() {
                 </label>
                 <SelectionBar
                   inline
+                  reserveLine="sm"
                   count={pick.count}
                   onClear={pick.clear}
                   csvName="residents-selected.csv"
