@@ -5,10 +5,14 @@ import { useCallback, useState } from "react"
  * accessor that returns the value to compare. Clicking a heading cycles
  * ascending -> descending -> back to the original order.
  *
- * Server-paged tables (Records, Archived, Barangay IDs, Issuance History,
- * Activity Log) sort only the rows on the page being shown; tables that hold
- * the whole list (Officials, Backup, User Accounts) sort the full list before
- * it is split into pages. Empty values always go last.
+ * Server-paged tables (Records, Archived, Barangay IDs, Issuance History)
+ * sort only the rows on the page being shown; tables that hold the whole list
+ * (Officials, Backup, User Accounts) sort the full list before it is split
+ * into pages. Empty values always go last.
+ *
+ * The Activity Log uses `useServerSort` instead (314): it only reports which
+ * column and direction were chosen, the endpoint sorts the whole result
+ * (`sort_by`, `sort_dir`) and the page shows its rows as they arrive.
  */
 export type SortValue = string | number | null | undefined
 export type SortDir = "asc" | "desc"
@@ -69,6 +73,40 @@ export function useSort<T>(
       column: string,
     ): "ascending" | "descending" | "none" | undefined => {
       if (!(column in accessors)) return undefined
+      if (!state || state.key !== column) return "none"
+      return state.dir === "asc" ? "ascending" : "descending"
+    },
+  }
+}
+
+/**
+ * Heading clicks for a table whose server does the sorting (314). `columns`
+ * maps a heading to the server's sort column; the click cycle is the same as
+ * `useSort` (ascending, descending, back to the server's default order).
+ * `by` and `dir` go into the query and its key; `key` resets pagination.
+ */
+export function useServerSort(columns: Record<string, string>) {
+  const [state, setState] = useState<SortState>(null)
+
+  const toggle = useCallback((key: string) => {
+    setState((current) => {
+      if (!current || current.key !== key) return { key, dir: "asc" }
+      return current.dir === "asc" ? { key, dir: "desc" } : null
+    })
+  }, [])
+
+  return {
+    by: state ? columns[state.key] : undefined,
+    dir: state?.dir ?? "asc",
+    key: state ? `${state.key}:${state.dir}` : "",
+    toggle,
+    isSortable: (column: string) => column in columns,
+    dirOf: (column: string): SortDir | null =>
+      state && state.key === column ? state.dir : null,
+    ariaSort: (
+      column: string,
+    ): "ascending" | "descending" | "none" | undefined => {
+      if (!(column in columns)) return undefined
       if (!state || state.key !== column) return "none"
       return state.dir === "asc" ? "ascending" : "descending"
     },

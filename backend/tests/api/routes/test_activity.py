@@ -161,6 +161,51 @@ def test_filters_paging_and_order(
     assert update_row["details"] is None or "4" not in str(update_row["details"])
 
 
+def test_sort_applies_to_the_whole_result_not_one_page(
+    client: TestClient, staff_token_headers: Headers, street_id: int
+) -> None:
+    first = _staff_resident(client, staff_token_headers, street_id)
+    second = _staff_resident(client, staff_token_headers, street_id)
+    client.patch(
+        f"{API}/residents/{first['id']}",
+        headers=staff_token_headers,
+        json={"purok": 4},
+    )
+    # Default is newest first; the update is the newest row.
+    assert _list(client, staff_token_headers, limit=1)["data"][0]["action"] == (
+        "resident.update"
+    )
+    # Sorted by action ascending, the first row of page one is a create, and the
+    # update (last alphabetically) is only on the last page.
+    asc = [
+        _list(client, staff_token_headers, sort_by="action", limit=1, skip=n)["data"][0]
+        for n in range(3)
+    ]
+    assert [r["action"] for r in asc] == [
+        "resident.create",
+        "resident.create",
+        "resident.update",
+    ]
+    # Ties keep the newest-first order: second was created after first.
+    assert asc[0]["record_id"] == second["id"]
+    assert asc[1]["record_id"] == first["id"]
+    desc = _list(client, staff_token_headers, sort_by="action", sort_dir="desc")
+    assert [r["action"] for r in desc["data"]] == [
+        "resident.update",
+        "resident.create",
+        "resident.create",
+    ]
+    assert desc["count"] == 3
+    # Sorting never changes the filters' count and needs a known column.
+    assert (
+        _list(client, staff_token_headers, sort_by="module", q="update")["count"] == 1
+    )
+    bad = client.get(
+        f"{ACT}/", headers=staff_token_headers, params={"sort_by": "details"}
+    )
+    assert bad.status_code == 422
+
+
 def test_date_range_uses_manila_days_and_is_validated(
     client: TestClient, staff_token_headers: Headers, street_id: int
 ) -> None:

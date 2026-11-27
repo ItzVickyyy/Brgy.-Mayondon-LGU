@@ -6363,6 +6363,16 @@ export type activityListActivityData = {
          */
         date_to?: string | null;
         /**
+         * Sort By
+         *
+         * Sort the whole result by this column (default: newest first)
+         */
+        sort_by?: 'occurred_at' | 'actor_email' | 'action' | 'module' | 'record_id' | 'outcome' | null;
+        /**
+         * Sort Dir
+         */
+        sort_dir?: 'asc' | 'desc';
+        /**
          * Skip
          */
         skip?: number;

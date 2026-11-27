@@ -5,7 +5,7 @@ import { Search, X } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { ActivityService } from "@/client"
+import { ActivityService, type activityListActivityData } from "@/client"
 import { DateRangeField } from "@/components/Common/DateRangeField"
 import {
   EmptyState,
@@ -31,7 +31,7 @@ import { isSystemAdministrator } from "@/lib/access"
 import { activityTitle } from "@/lib/activity"
 import { formatLocaleDate } from "@/lib/locale"
 import { useRowSelection } from "@/lib/useRowSelection"
-import { useSort } from "@/lib/useSort"
+import { useServerSort } from "@/lib/useSort"
 
 export const Route = createFileRoute("/_layout/activity-log")({
   component: ActivityLog,
@@ -193,6 +193,8 @@ function shortId(value: string) {
   return value.length > 13 ? `${value.slice(0, 8)}…` : value
 }
 
+type SortBy = NonNullable<activityListActivityData["query"]>["sort_by"]
+
 function ActivityLog() {
   const { t } = useTranslation()
   const { user } = useAuth()
@@ -206,6 +208,15 @@ function ActivityLog() {
   const [endDate, setEndDate] = useState("")
   const [pageIndex, setPageIndex] = useState(0)
   const [pageSize, setPageSize] = useState(10)
+  // Heading clicks sort the whole log on the server, not just this page (314).
+  const sort = useServerSort({
+    dateTime: "occurred_at",
+    user: "actor_email",
+    action: "action",
+    module: "module",
+    record: "record_id",
+    outcome: "outcome",
+  })
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -215,7 +226,7 @@ function ActivityLog() {
     return () => window.clearTimeout(timer)
   }, [search])
 
-  // Any filter change returns to the first page.
+  // Any filter or sort change returns to the first page.
   // biome-ignore lint/correctness/useExhaustiveDependencies: the filters are the trigger.
   useEffect(() => {
     setPageIndex(0)
@@ -226,6 +237,7 @@ function ActivityLog() {
     actorFilter,
     startDate,
     endDate,
+    sort.key,
   ])
 
   const rangeInvalid = Boolean(startDate && endDate && startDate > endDate)
@@ -259,6 +271,7 @@ function ActivityLog() {
       actorFilter,
       startDate,
       endDate,
+      sort.key,
       pageIndex,
       pageSize,
     ],
@@ -276,6 +289,8 @@ function ActivityLog() {
               isAdmin && actorFilter !== "all" ? actorFilter : undefined,
             date_from: startDate || undefined,
             date_to: endDate || undefined,
+            sort_by: sort.by as SortBy | undefined,
+            sort_dir: sort.by ? sort.dir : undefined,
             skip: pageIndex * pageSize,
             limit: pageSize,
           },
@@ -300,15 +315,6 @@ function ActivityLog() {
   ]
   // Server pages: a selection lasts only while its rows are on screen.
   const pickRows = useRowSelection(items, (row) => String(row.id))
-  // Click a heading to sort the rows on this page (292).
-  const sort = useSort(items, {
-    dateTime: (row) => row.occurred_at,
-    user: (row) => row.actor_email,
-    action: (row) => activityTitle(row.action, t, row.details),
-    module: (row) => row.module,
-    record: (row) => row.record_id,
-    outcome: (row) => row.outcome,
-  })
   const modules = optionsQuery.data?.modules ?? []
   const actors = optionsQuery.data?.actors ?? []
 
@@ -495,7 +501,7 @@ function ActivityLog() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {sort.sorted.map((row) => {
+                  {items.map((row) => {
                     const known = isOutcome(row.outcome)
                     const lines = detailLines(row.details, row.reason, t)
                     return (

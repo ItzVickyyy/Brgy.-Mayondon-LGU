@@ -35,6 +35,19 @@ ActivityUser = Annotated[
 
 OUTCOMES = ("success", "failed", "denied")
 
+# Columns a heading click may sort by (a whitelist: never a free column name).
+SortColumn = Literal[
+    "occurred_at", "actor_email", "action", "module", "record_id", "outcome"
+]
+SORT_COLUMNS = {
+    "occurred_at": AuditLog.occurred_at,
+    "actor_email": AuditLog.actor_email,
+    "action": AuditLog.action,
+    "module": AuditLog.module,
+    "record_id": AuditLog.record_id,
+    "outcome": AuditLog.outcome,
+}
+
 
 def _sees_everyone(user: User) -> bool:
     return has_permission(user, Permission.ACTIVITY_VIEW_ALL)
@@ -77,11 +90,18 @@ def list_activity(
         date | None, Query(description="Manila date, inclusive")
     ] = None,
     date_to: Annotated[date | None, Query(description="Manila date, inclusive")] = None,
+    sort_by: Annotated[
+        SortColumn | None,
+        Query(
+            description="Sort the whole result by this column (default: newest first)"
+        ),
+    ] = None,
+    sort_dir: Literal["asc", "desc"] = "asc",
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> Any:
-    """Newest first. Staff always get their own rows; asking for another
-    person's rows is a 403, not an empty list."""
+    """Newest first unless ``sort_by`` is given. Staff always get their own
+    rows; asking for another person's rows is a 403, not an empty list."""
     if date_from and date_to and date_from > date_to:
         raise HTTPException(status_code=422, detail="date_from is after date_to")
     stmt = select(AuditLog)
@@ -124,11 +144,16 @@ def list_activity(
             | col(AuditLog.reason).ilike(pattern)
         )
     count = session.exec(select(sa_func.count()).select_from(stmt.subquery())).one()
-    rows = session.exec(
-        stmt.order_by(col(AuditLog.occurred_at).desc(), col(AuditLog.id).desc())
-        .offset(skip)
-        .limit(limit)
-    ).all()
+    if sort_by:
+        sort_col = col(SORT_COLUMNS[sort_by])
+        # Empty values go last either way; ties keep the newest-first order.
+        stmt = stmt.order_by(
+            sort_col.desc().nulls_last()
+            if sort_dir == "desc"
+            else sort_col.asc().nulls_last()
+        )
+    stmt = stmt.order_by(col(AuditLog.occurred_at).desc(), col(AuditLog.id).desc())
+    rows = session.exec(stmt.offset(skip).limit(limit)).all()
     return ActivityPublic(
         data=[
             ActivityItem(
