@@ -421,4 +421,33 @@ test.describe("buildPrintData", () => {
     )!
     expect(free.values.stampOr).toBe("FOC")
   })
+
+  test("clearance prints the loan note and FOC as the xls does", () => {
+    const base = {
+      remarks: "NO DEROGATORY RECORD ON FILE",
+      details: { type: "BARANGAY_CLEARANCE" as const },
+    }
+    const free = buildPrintData(
+      make("BARANGAY_CLEARANCE", {
+        ...base,
+        purposeId: 1,
+        payment: { isFree: true, officialReceiptNo: "" },
+      }),
+      lookups,
+      name,
+    )!
+    expect(free.values.orNumber).toBe("FOC")
+    expect(free.values.purposeNote).toBe("NOT APPLICABLE FOR LOAN PURPOSES")
+    expect(free.values.remarks).toBe("NO DEROGATORY RECORD ON FILE")
+    const franchise = buildPrintData(
+      make("FRANCHISE_CLEARANCE", {
+        details: { type: "FRANCHISE_CLEARANCE" },
+        payment: { isFree: true, officialReceiptNo: "" },
+      }),
+      lookups,
+      name,
+    )!
+    expect(franchise.values.orNumber).toBe("")
+    expect(franchise.values.purposeNote ?? "").toBe("")
+  })
 })

@@ -147,14 +147,24 @@ export function buildPrintData(
     civilStatus: resident?.civilStatus ?? "",
     purpose: byId(lookups.purposes, payload.purposeId),
     remarks: payload.remarks ?? "",
+    // Clearance Issuing.xls prints this line between PURPOSE and REMARKS. The New Issuance form has no box for it, so it follows the purpose: printed unless the purpose is a loan.
+    purposeNote:
+      templateId === "clearance" &&
+      byId(lookups.purposes, payload.purposeId) &&
+      !/loan/i.test(byId(lookups.purposes, payload.purposeId))
+        ? "NOT APPLICABLE FOR LOAN PURPOSES"
+        : "",
     idType: byId(lookups.idTypes, payload.identification?.idTypeId),
     idNumber: payload.identification?.idNumber ?? "",
     idPlace: payload.identification?.placeOfIssue ?? "",
     idDate: payload.identification?.dateOfIssue
       ? formatPaperDate(payload.identification.dateOfIssue)
       : "",
+    // "Paid under OFFICIAL RECEIPT No." of the Barangay Clearance reads FOC when the certificate is free (Clearance Issuing.xls, BRGY CLEARANCE); the other forms leave it blank.
     orNumber: payload.payment?.isFree
-      ? ""
+      ? templateId === "clearance"
+        ? "FOC"
+        : ""
       : (payload.payment?.officialReceiptNo ?? ""),
     // "DOCUMENTARY STAMP TAX PAID" box (clearances only): a free certificate reads FOC, as on the barangay's own sample.
     stampOr: payload.payment?.isFree

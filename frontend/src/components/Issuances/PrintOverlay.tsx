@@ -151,6 +151,7 @@ export function PrintOverlay({
                 fontSize: `${item.size}pt`,
                 fontFamily: item.font === "label" ? LABEL_FONT : item.font === "note" ? STAMP_FONT : undefined,
                 fontWeight: item.font === "note" ? 400 : undefined,
+                color: item.color,
                 lineHeight: `${DEFAULT_FONT_PT * LINE_HEIGHT_RATIO}pt`,
                 transform:
                   item.align === "center" ? "translateX(-50%)" : undefined,

@@ -145,7 +145,9 @@ export async function renderSheets(data: PrintData): Promise<RenderedDocument> {
           ? `${item.size * SCALE}px ${STAMP_FONT}`
           : `bold ${item.size * SCALE}px ${item.font === "label" ? LABEL_FONT : FONT}`
       context.textAlign = item.align === "center" ? "center" : "left"
+      context.fillStyle = item.color ?? "#000000"
       context.fillText(item.text, item.x * SCALE, (item.y + lineMiddle) * SCALE)
+      context.fillStyle = "#000000"
     }
     context.font = `bold ${DEFAULT_FONT_PT * SCALE}px ${FONT}`
     context.textAlign = "center"

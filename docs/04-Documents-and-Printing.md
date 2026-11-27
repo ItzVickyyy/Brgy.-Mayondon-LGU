@@ -71,7 +71,8 @@ Both modes cover the six types that have a print template. Reprint is no longer 
 ### 4.1 Barangay Clearance
 - Date at top right, above the pre-printed Date line
 - Name, address, **age calculated from birthdate**, birthdate, birthplace, civil status
-- Purpose and remarks. The purpose note and the "c/o" second remarks line were removed from the New Issuance form and from the print overlay.
+- Purpose, then two lines as in `Clearance Issuing.xls` (sheet BRGY CLEARANCE): `NOT APPLICABLE FOR LOAN PURPOSES` (Arial Narrow bold 14 pt, red `#ff0000` as in the xls, `font: "label"`, key `purposeNote`) and the remarks `NO DEROGATORY RECORD ON FILE` (Cambria bold 14 pt). The New Issuance form has no box for the note, so `buildPrintData` prints it for every Barangay Clearance whose purpose does not contain "loan" (assumption, confirm with the barangay). The "c/o" line stays off the overlay.
+- When the certificate is free, `Paid under OFFICIAL RECEIPT No.` prints `FOC` (Barangay Clearance only; the stamp box already did).
 - Resident photo in the designated box on the right (if approved)
 - Bottom fields: valid ID presented, ID number, place of issue, date of issue, official receipt number
 - Do **not** print in the right thumbmark box or the resident signature line

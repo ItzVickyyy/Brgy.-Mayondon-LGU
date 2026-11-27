@@ -19,6 +19,7 @@ export type PrintFieldBox = {
   size?: number // font size in pt, default 11
   page?: number // 0-based page of a multi-page template, default 0
   font?: "value" | "label" | "note" // "label" = Arial Narrow bold; "note" = Arial regular 10 pt (the Addressed-to line); default "value" (Cambria Bold)
+  color?: string // text colour, default black (the loan note of the Clearance is red in the xls)
   prefix?: string // words printed before a non-empty value, for a row the barangay's form leaves unlabelled
 }
 export type PrintMarkBox = {
@@ -111,7 +112,17 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "birthplace", x: 135, y: 371.7, w: 255 },
       { key: "civilStatus", x: 135, y: 387.5 },
       { key: "purpose", x: 135, y: 418.8, w: 255 },
-      { key: "remarks", x: 135, y: 450.5, w: 320 },
+      // Clearance Issuing.xls: the note is Arial Narrow bold 14 pt in red (FF0000), REMARKS Cambria bold 14 pt; both sit on the lines below PURPOSE.
+      {
+        key: "purposeNote",
+        x: 135,
+        y: 433,
+        w: 320,
+        size: 14,
+        font: "label",
+        color: "#ff0000",
+      },
+      { key: "remarks", x: 135, y: 448.5, w: 320, size: 14 },
       // Bottom block: values go right of the colons at x 230.6 (measured on the page image of the barangay form).
       // Width stops at x 393 so the values never run into the stamp box (x 400-580).
       { key: "idType", x: 243, y: 608.9, w: 150, size: 11 },
