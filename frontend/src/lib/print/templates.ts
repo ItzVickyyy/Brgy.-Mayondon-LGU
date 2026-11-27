@@ -128,21 +128,21 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
     documentCode: "FRANCHISE_CLEARANCE",
     paperSize: "short",
     paper,
-    // Row tops measured on the Word template Barangay Franchise Clearance.docx (rendered in LibreOffice, Letter): the value's top equals its label's top. Word may differ by a point or two; calibrate on paper (docs/04 section 7).
+    // Row `y` = label baseline minus 11 pt (a 12 pt Cambria line sits 11 pt below its `y`), so each value shares its label's baseline. Label baselines are measured on the form image public/assets/print-forms/franchise-0.png (Word's own export, 200 dpi); the LibreOffice render of the .docx spaces the rows differently (14.7 pt) and must not be used. Calibrate on paper (docs/04 section 7).
     fields: [
       { ...date(210), size: 12 },
-      { key: "name", x: 207, y: 314.2, w: 330, size: 12 },
-      { key: "address", x: 207, y: 328.9, w: 330, size: 12 },
-      { key: "association", x: 207, y: 343.7, w: 330, size: 12 },
-      { key: "make", x: 207, y: 373.8, size: 12 },
-      { key: "bodyType", x: 207, y: 388.5, size: 12 },
-      { key: "motorNumber", x: 207, y: 403.3, size: 12 },
-      { key: "color", x: 207, y: 418.0, size: 12 },
-      { key: "plateNumber", x: 207, y: 432.8, size: 12 },
-      { key: "idNumber", x: 213, y: 623.6, w: 180, size: 12 }, // colons at x 200.8; width stops before the stamp box (x 400)
-      { key: "idPlace", x: 213, y: 635.9, w: 180, size: 12 },
-      { key: "idDate", x: 213, y: 648.2, w: 180, size: 12 },
-      { key: "orNumber", x: 213, y: 661.5, w: 180, size: 12 },
+      { key: "name", x: 207, y: 332.4, w: 330, size: 12 },
+      { key: "address", x: 207, y: 351.9, w: 330, size: 12 },
+      { key: "association", x: 207, y: 371.3, w: 330, size: 12 },
+      { key: "make", x: 207, y: 406.6, size: 12 },
+      { key: "bodyType", x: 207, y: 426.0, size: 12 },
+      { key: "motorNumber", x: 207, y: 445.5, size: 12 },
+      { key: "color", x: 207, y: 464.9, size: 12 },
+      { key: "plateNumber", x: 207, y: 484.4, size: 12 },
+      { key: "idNumber", x: 213, y: 629.8, w: 180, size: 12 }, // colons at x 201.6; width stops before the stamp box (x 400)
+      { key: "idPlace", x: 213, y: 645.3, w: 180, size: 12 },
+      { key: "idDate", x: 213, y: 661.1, w: 180, size: 12 },
+      { key: "orNumber", x: 213, y: 676.6, w: 180, size: 12 },
     ],
     stamp: { x: 400, y: 628, w: 180, h: 56 },
   },
@@ -156,7 +156,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "name", x: 207, y: 373.8, w: 330 },
       { key: "address", x: 207, y: 392.8, w: 330 },
       { key: "location", x: 207, y: 451.8, w: 330 },
-      { key: "idNumber", x: 213, y: 629, w: 180 }, // colons at x 200.8; width stops before the stamp box (x 400)
+      { key: "idNumber", x: 213, y: 629, w: 180 }, // colons at x 201.6; width stops before the stamp box (x 400)
       { key: "idPlace", x: 213, y: 645, w: 180 },
       { key: "idDate", x: 213, y: 661, w: 180 },
       { key: "orNumber", x: 213, y: 677, w: 180 },
