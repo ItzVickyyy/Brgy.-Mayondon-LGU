@@ -2191,7 +2191,11 @@
         "cancel": "Cancel",
         "saving": "Saving...",
         "saveChanges": "Save changes",
-        "add": "Add Official"
+        "add": "Add Official",
+        "sectionDetails": "Official details",
+        "sectionTerm": "Term of office",
+        "hintElected": "Elected position.",
+        "hintAppointed": "Appointed position."
       },
       "endTerm": {
         "title": "End official term?",

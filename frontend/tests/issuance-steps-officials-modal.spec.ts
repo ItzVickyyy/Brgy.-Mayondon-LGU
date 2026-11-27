@@ -69,7 +69,7 @@ test("an empty New Issuance form shows no checked step except the document type,
   }
 })
 
-test("Add Official shows every position at once and the choice is kept", async ({
+test("Add Official picks the position from a dropdown and the choice is kept", async ({
   page,
 }) => {
   await open(page, "/officials")
@@ -77,25 +77,14 @@ test("Add Official shows every position at once and the choice is kept", async (
     .getByRole("button", { name: /Add Official/ })
     .first()
     .click()
-  const group = page.getByTestId("official-position")
-  await expect(group).toBeVisible()
-  const radios = group.getByRole("radio")
-  await expect(radios).toHaveCount(8)
-  // Every choice sits inside the pop-up (nothing is cut off at its edge).
   const dialog = page.getByRole("dialog")
-  const box = (await dialog.boundingBox())!
-  await dialog.getByRole("radio").last().scrollIntoViewIfNeeded()
-  for (let n = 0; n < 8; n++) {
-    const label = group.locator("label").nth(n)
-    await label.scrollIntoViewIfNeeded()
-    const b = (await label.boundingBox())!
-    expect(b.x).toBeGreaterThanOrEqual(box.x)
-    expect(b.x + b.width).toBeLessThanOrEqual(box.x + box.width + 1)
-  }
-  await expect(radios.first()).toBeChecked()
-  await group.getByText("Barangay Treasurer").click()
-  await expect(
-    group.getByRole("radio", { name: "Barangay Treasurer" }),
-  ).toBeChecked()
-  await expect(radios.first()).not.toBeChecked()
+  const trigger = dialog.getByTestId("official-position")
+  await expect(trigger).toBeVisible()
+  await expect(trigger).toContainText("Punong Barangay")
+  await trigger.click()
+  const options = page.getByRole("option")
+  await expect(options).toHaveCount(8)
+  await options.filter({ hasText: "Barangay Treasurer" }).click()
+  await expect(trigger).toContainText("Barangay Treasurer")
+  await expect(dialog.getByText("Appointed position.")).toBeVisible()
 })

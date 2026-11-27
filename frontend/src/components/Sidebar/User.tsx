@@ -192,6 +192,8 @@ export function User({
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem
+              variant="destructive"
+              data-testid="logout-menu"
               onSelect={() => {
                 handleMenuClick()
                 setLogoutOpen(true)

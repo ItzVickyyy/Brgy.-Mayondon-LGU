@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { createFileRoute } from "@tanstack/react-router"
 import type { TFunction } from "i18next"
 import {
-  Check,
   Eye,
   Pencil,
   Search,
@@ -27,6 +26,7 @@ import {
 } from "@/components/Common/FeedbackState"
 import { formControlClass } from "@/components/Common/formStyles"
 import {
+  ModalSection,
   modalBody,
   modalFooter,
   modalHeader,
@@ -621,7 +621,7 @@ function OfficialsManagement() {
           if (!mutation.isPending) setFormOpen(open)
         }}
       >
-        <DialogContent className={`${modalShell} sm:max-w-2xl`}>
+        <DialogContent className={`${modalShell} sm:max-w-xl`}>
           <DialogHeader className={modalHeader}>
             <DialogTitle className="text-xl">
               {editingOfficial
@@ -632,68 +632,78 @@ function OfficialsManagement() {
               {t("admin.officials.form.description")}
             </DialogDescription>
           </DialogHeader>
-          <div className={`${modalBody} grid gap-4 sm:grid-cols-2`}>
-            <label className="flex flex-col gap-2 text-sm font-medium sm:col-span-2">
-              {t("admin.officials.form.fullName")}
-              <input
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                className={formControlClass}
-                required
-              />
-            </label>
-            {/* All positions are shown at once as choices (a drop-down list was cut off by the pop-up's edge). */}
-            <fieldset className="flex min-w-0 flex-col gap-2 sm:col-span-2">
-              <legend className="mb-2 text-sm font-medium">
-                {t("admin.officials.form.position")}
-              </legend>
-              <div
-                data-testid="official-position"
-                className="grid gap-2 sm:grid-cols-2"
-              >
-                {(positionOptions.includes(position)
-                  ? positionOptions
-                  : [position, ...positionOptions]
-                ).map((item) => (
-                  <label key={item} className="relative block">
-                    <input
-                      type="radio"
-                      name="official-position"
-                      value={item}
-                      checked={position === item}
-                      onChange={() => setPosition(item)}
-                      className="peer sr-only"
-                    />
-                    <span className="flex min-h-11 cursor-pointer items-center justify-between gap-2 rounded-md border bg-background px-3 py-2 text-sm shadow-xs transition-colors hover:bg-muted peer-checked:border-brand peer-checked:bg-brand/10 peer-checked:font-semibold peer-checked:text-brand peer-focus-visible:ring-[3px] peer-focus-visible:ring-ring/50 [&_svg]:invisible peer-checked:[&_svg]:visible">
+          <div className={`${modalBody} flex flex-col gap-6`}>
+            <ModalSection title={t("admin.officials.form.sectionDetails")}>
+              <label className="flex flex-col gap-2 text-sm font-medium">
+                {t("admin.officials.form.fullName")}
+                <input
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  className={formControlClass}
+                  autoComplete="off"
+                  required
+                />
+              </label>
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor="official-position"
+                  className="text-sm font-medium"
+                >
+                  {t("admin.officials.form.position")}
+                </label>
+                {/* The list opens "floating" (placed from the button, not clipped by the pop-up's edge). */}
+                <Select
+                  id="official-position"
+                  data-testid="official-position"
+                  value={position}
+                  onChange={(event) => setPosition(event.target.value)}
+                  className={formControlClass}
+                  searchable={false}
+                  required
+                >
+                  {(positionOptions.includes(position)
+                    ? positionOptions
+                    : [position, ...positionOptions]
+                  ).map((item) => (
+                    <option key={item} value={item}>
                       {item}
-                      <Check className="size-4 shrink-0" aria-hidden="true" />
-                    </span>
-                  </label>
-                ))}
+                    </option>
+                  ))}
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  {isElectedPosition(position)
+                    ? t("admin.officials.form.hintElected")
+                    : t("admin.officials.form.hintAppointed")}
+                </p>
               </div>
-            </fieldset>
-            <label className="flex flex-col gap-2 text-sm font-medium">
-              {t("admin.officials.form.termStart")}
-              <input
-                type="date"
-                value={termStart}
-                onChange={(event) => setTermStart(event.target.value)}
-                className={formControlClass}
-                required
-              />
-            </label>
-            <label className="flex flex-col gap-2 text-sm font-medium">
-              {t("admin.officials.form.termEnd")}
-              <input
-                type="date"
-                value={termEnd}
-                onChange={(event) => setTermEnd(event.target.value)}
-                className={formControlClass}
-                required
-              />
-            </label>
+            </ModalSection>
+            <ModalSection
+              title={t("admin.officials.form.sectionTerm")}
+              className="sm:grid-cols-2"
+            >
+              <label className="flex flex-col gap-2 text-sm font-medium">
+                {t("admin.officials.form.termStart")}
+                <input
+                  type="date"
+                  value={termStart}
+                  onChange={(event) => setTermStart(event.target.value)}
+                  className={formControlClass}
+                  required
+                />
+              </label>
+              <label className="flex flex-col gap-2 text-sm font-medium">
+                {t("admin.officials.form.termEnd")}
+                <input
+                  type="date"
+                  value={termEnd}
+                  onChange={(event) => setTermEnd(event.target.value)}
+                  className={formControlClass}
+                  required
+                />
+              </label>
+            </ModalSection>
             {formOpen ? (
-              <div className="sm:col-span-2 empty:hidden">{dialogError}</div>
+              <div className="empty:hidden">{dialogError}</div>
             ) : null}
           </div>
           <DialogFooter className={modalFooter}>

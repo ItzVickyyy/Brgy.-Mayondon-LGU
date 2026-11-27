@@ -2191,7 +2191,11 @@
         "cancel": "Kanselahin",
         "saving": "Sine-save...",
         "saveChanges": "I-save ang mga pagbabago",
-        "add": "Magdagdag ng Opisyal"
+        "add": "Magdagdag ng Opisyal",
+        "sectionDetails": "Detalye ng opisyal",
+        "sectionTerm": "Termino sa panunungkulan",
+        "hintElected": "Halal na posisyon.",
+        "hintAppointed": "Itinalagang posisyon."
       },
       "endTerm": {
         "title": "Tapusin ang termino ng opisyal?",
