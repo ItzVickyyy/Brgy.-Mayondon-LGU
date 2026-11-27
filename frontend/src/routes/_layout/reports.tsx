@@ -569,6 +569,11 @@ function Reports() {
 
   const th = "px-4 py-3 font-medium sm:px-5"
   const td = "px-4 py-3 sm:px-5"
+  // Long names, e-mails and file names break inside the word, so a report never needs a sideways scroll on a laptop.
+  const wrap = "[overflow-wrap:anywhere]"
+  // Import history has eight columns, so its cells use less side padding.
+  const thTight = "px-3 py-3 font-medium"
+  const tdTight = "px-3 py-3"
   const thead =
     "bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground"
 
@@ -608,7 +613,7 @@ function Reports() {
           <h3 className="mb-3 font-semibold tracking-tight">
             {t("admin.reports.issuances.title", { period: appliedPeriodText })}
           </h3>
-          <table className="w-full min-w-[760px] text-left text-sm">
+          <table className="w-full min-w-[600px] text-left text-sm">
             <thead className={thead}>
               <tr>
                 {(["type", "issued", "voided", "share", "change"] as const).map(
@@ -678,7 +683,7 @@ function Reports() {
           <h3 className="mb-3 font-semibold tracking-tight">
             {t("admin.reports.purpose.title", { period: appliedPeriodText })}
           </h3>
-          <table className="w-full min-w-[560px] text-left text-sm">
+          <table className="w-full min-w-[480px] text-left text-sm">
             <thead className={thead}>
               <tr>
                 {(["purpose", "issued", "share"] as const).map((id) => (
@@ -746,7 +751,7 @@ function Reports() {
               period: appliedPeriodText,
             })}
           </h3>
-          <table className="w-full min-w-[640px] text-left text-sm">
+          <table className="w-full min-w-[560px] text-left text-sm">
             <thead className={thead}>
               <tr>
                 {(["month", "dates", "clients", "documents"] as const).map(
@@ -824,7 +829,7 @@ function Reports() {
           <h3 className="mb-3 font-semibold tracking-tight">
             {t("admin.reports.expiry.title")}
           </h3>
-          <table className="w-full min-w-[800px] text-left text-sm">
+          <table className="w-full min-w-[640px] text-left text-sm">
             <thead className={thead}>
               <tr>
                 {(
@@ -853,11 +858,13 @@ function Reports() {
                     key={row.issuance_id}
                     className="transition-colors hover:bg-muted/30"
                   >
-                    <td className={`${td} font-semibold`}>
+                    <td className={`${td} font-semibold ${wrap}`}>
                       {row.resident_name}
                     </td>
                     <td className={td}>{labelOf(kindKeys, row.kind, t)}</td>
-                    <td className={`${td} font-mono`}>{row.reference_no}</td>
+                    <td className={`${td} font-mono ${wrap}`}>
+                      {row.reference_no}
+                    </td>
                     <td className={td}>
                       <p>{formatReportDate(row.expires_on)}</p>
                       <p className="mt-1 text-xs text-muted-foreground">
@@ -932,7 +939,7 @@ function Reports() {
           <h3 className="mb-3 font-semibold tracking-tight">
             {t("admin.reports.imports.title")}
           </h3>
-          <table className="w-full min-w-[900px] text-left text-sm">
+          <table className="w-full min-w-[600px] text-left text-sm">
             <thead className={thead}>
               <tr>
                 {(
@@ -947,7 +954,7 @@ function Reports() {
                     "failed",
                   ] as const
                 ).map((id) => (
-                  <th key={id} className={th}>
+                  <th key={id} className={thTight}>
                     {t(`admin.reports.imports.columns.${id}`)}
                   </th>
                 ))}
@@ -960,10 +967,14 @@ function Reports() {
                     key={row.id}
                     className="transition-colors hover:bg-muted/30"
                   >
-                    <td className={td}>{formatMoment(row.created_at)}</td>
-                    <td className={td}>{row.file_name}</td>
-                    <td className={td}>{row.created_by_email ?? "—"}</td>
-                    <td className={td}>
+                    <td className={tdTight}>{formatMoment(row.created_at)}</td>
+                    <td className={`${tdTight} max-w-[16rem] ${wrap}`}>
+                      {row.file_name}
+                    </td>
+                    <td className={`${tdTight} max-w-[14rem] ${wrap}`}>
+                      {row.created_by_email ?? "—"}
+                    </td>
+                    <td className={tdTight}>
                       <Badge
                         variant="outline"
                         className={
@@ -977,7 +988,7 @@ function Reports() {
                     </td>
                     {(["created", "updated", "skipped", "failed"] as const).map(
                       (id) => (
-                        <td key={id} className={`${td} tabular-nums`}>
+                        <td key={id} className={`${tdTight} tabular-nums`}>
                           {row.result ? (row.result[id] ?? 0) : "—"}
                         </td>
                       ),
@@ -1010,7 +1021,7 @@ function Reports() {
         <h3 className="mb-3 font-semibold tracking-tight">
           {t("admin.reports.accounts.title", { period: appliedPeriodText })}
         </h3>
-        <table className="w-full min-w-[800px] text-left text-sm">
+        <table className="w-full min-w-[640px] text-left text-sm">
           <thead className={thead}>
             <tr>
               {(["user", "role", "issued", "changed", "last"] as const).map(
@@ -1029,7 +1040,7 @@ function Reports() {
                   key={row.user_id}
                   className="transition-colors hover:bg-muted/30"
                 >
-                  <td className={td}>
+                  <td className={`${td} max-w-[18rem] ${wrap}`}>
                     <p className="font-semibold">
                       {row.full_name || row.email}
                     </p>
