@@ -268,9 +268,11 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     form.setValue("identification", identityDocuments.includes(nextCode)
       ? { idTypeId: nextCode === "BARANGAY_CLEARANCE" ? 0 : 1, idNumber: "", placeOfIssue: "Los Baños, Laguna", dateOfIssue: localIsoDate() }
       : undefined)
-    certifiedByTouched.current = false
+    // Between two stamp documents a value the clerk typed in "Certified by" is carried over; otherwise it restarts from the signed-in user's initials.
+    const carriedCertifiedBy = certifiedByTouched.current && current.payment && stampDocuments.includes(current.documentType as DocumentCode) ? current.payment.certifiedBy ?? "" : null
+    certifiedByTouched.current = carriedCertifiedBy !== null
     form.setValue("payment", stampDocuments.includes(nextCode)
-      ? { officialReceiptNo: "", isFree: false, dateOfPayment: localIsoDate(), certifiedBy: userInitials(signedInUser) }
+      ? { officialReceiptNo: "", isFree: false, dateOfPayment: localIsoDate(), certifiedBy: carriedCertifiedBy ?? userInitials(signedInUser) }
       : identityDocuments.includes(nextCode) ? { officialReceiptNo: "", isFree: false } : undefined)
     const signatoryDefault = documentConfig[nextCode].signatoryDefault
     const signatory = signatoryDefault ? currentOfficials.find((official) => official.status === "Current" && official.position === signatoryDefault) : undefined
@@ -590,7 +592,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
             ? { ...record.payload.details, parts: ["applicant_sheet", "oath", "certification"] }
             : record.payload.details,
       }
-      certifiedByTouched.current = true
+      // A saved value is kept; a draft saved with the box empty gets the initials again.
+      certifiedByTouched.current = Boolean(restored.payment?.certifiedBy?.trim())
       form.reset(restored as never)
       setSelectedResident(resident)
       setAddressParts({ houseNumber: resident.houseNumber ?? "", street: resident.street ?? "", purok: resident.purok ?? 1 })
