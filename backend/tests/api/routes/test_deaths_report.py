@@ -10,6 +10,7 @@ from app.core.config import settings
 from app.core.dates import today_manila
 from tests.api.routes.test_issuances import (  # noqa: F401  (fixtures are reused)
     _resident,
+    _tidy_up,
     street_id,
 )
 
