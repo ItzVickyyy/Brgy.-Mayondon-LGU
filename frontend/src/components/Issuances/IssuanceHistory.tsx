@@ -22,7 +22,11 @@ import {
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import type { IssuanceListItem, IssuancePublic } from "@/client"
+import type {
+  IssuanceListItem,
+  IssuancePublic,
+  issuancesListIssuancesData,
+} from "@/client"
 import { DashboardService, IssuancesService, LookupsService } from "@/client"
 import { ConfirmDialog } from "@/components/Common/ConfirmDialog"
 import { DateRangeField } from "@/components/Common/DateRangeField"
@@ -76,7 +80,7 @@ import { type PrintMode, setPrintMode } from "@/lib/print/printMode"
 import { formatBusinessDate, readApiError } from "@/lib/residents"
 import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
-import { useSort } from "@/lib/useSort"
+import { useServerSort } from "@/lib/useSort"
 import { cn } from "@/lib/utils"
 
 type StatusFilter = "all" | "issued" | "draft" | "voided"
@@ -85,6 +89,11 @@ type PendingAction = {
   item: IssuanceListItem
   action: "void" | "discard" | "correct" | "archive" | "restore"
 }
+
+/** Server sort columns of `GET /issuances/` (316). */
+type IssuanceSortBy = NonNullable<
+  issuancesListIssuancesData["query"]
+>["sort_by"]
 
 const historyColumns = [
   "resident",
@@ -338,6 +347,15 @@ export function IssuanceHistory({
     documentName: string
   } | null>(null)
   const [errorNotice, setErrorNotice] = useState("")
+  // Heading clicks sort the whole history on the server, not one page (316).
+  const sort = useServerSort({
+    resident: "resident",
+    document: "document",
+    purpose: "purpose",
+    dateIssued: "issue_date",
+    validUntil: "expires_on",
+    status: "status",
+  })
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -357,6 +375,7 @@ export function IssuanceHistory({
     view,
     dateFrom,
     dateTo,
+    sort.key,
     pageSize,
   ])
 
@@ -389,6 +408,7 @@ export function IssuanceHistory({
       view,
       dateFrom,
       dateTo,
+      sort.key,
       pageIndex,
       pageSize,
     ],
@@ -402,6 +422,8 @@ export function IssuanceHistory({
             archived: view === "archived" ? "only" : "exclude",
             date_from: dateFrom || undefined,
             date_to: dateTo || undefined,
+            sort_by: sort.by as IssuanceSortBy,
+            sort_dir: sort.by ? sort.dir : undefined,
             skip: pageIndex * pageSize,
             limit: pageSize,
           },
@@ -417,18 +439,6 @@ export function IssuanceHistory({
   const end = Math.min((pageIndex + 1) * pageSize, total)
   // Server pages: a selection lasts only while its rows are on screen.
   const pick = useRowSelection(items, (item) => String(item.id))
-  // Click a heading to sort the rows on this page (292).
-  const sort = useSort(items, {
-    resident: (item) => item.resident_name,
-    document: (item) =>
-      documentNames.get(item.document_type_id) ?? item.document_type_code,
-    purpose: (item) =>
-      (item.purpose_id && purposeNames.get(item.purpose_id)) || null,
-    dateIssued: (item) => (item.status === "draft" ? null : item.issue_date),
-    validUntil: (item) => item.expires_on,
-    status: (item) => statusLabel(item.status, t),
-  })
-
   const overallQuery = useQuery({
     queryKey: ["issuances-summary", "overall"],
     queryFn: async () =>
@@ -800,7 +810,7 @@ export function IssuanceHistory({
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${cardTable.body}`}>
-                  {sort.sorted.map((item) => {
+                  {items.map((item) => {
                     const isDraft = item.status === "draft"
                     const isArchived = Boolean(item.archived_at)
                     const isIssued = item.status === "issued" && !isArchived

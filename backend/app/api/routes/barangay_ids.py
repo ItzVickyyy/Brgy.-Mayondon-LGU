@@ -9,6 +9,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import case
 from sqlalchemy import func as sa_func
 from sqlmodel import col, select
 
@@ -39,6 +40,47 @@ RecordsUser = Annotated[User, Depends(require_permission(Permission.RECORDS_EDIT
 SeriesAdmin = Annotated[User, Depends(require_permission(Permission.ID_OVERRIDE))]
 
 
+# Columns a heading click may sort by (a whitelist: never a free column name).
+IdSort = Literal["resident", "id_number", "card", "issued", "valid_until", "status"]
+
+
+def _sorted_ids(
+    stmt: Any, sort_by: IdSort | None, sort_dir: str, today: Any, soon: Any
+) -> Any:
+    """Order the card list by a heading the person clicked (316).
+
+    Empty values go last either way. Ties, and the default order, are newest
+    issue first, then id, so a page never reshuffles between clicks. Status is
+    computed from ``valid_until`` (expired, expiring soon, valid), the same
+    rule that draws the capsule.
+    """
+    keys: list[Any] = []
+    if sort_by == "resident":
+        keys = [sa_func.lower(Resident.last_name), sa_func.lower(Resident.first_name)]
+    elif sort_by == "id_number":
+        # An empty number (a card issued without one) counts as empty.
+        keys = [sa_func.nullif(IssuanceBarangayId.id_number, "")]
+    elif sort_by == "card":
+        keys = [col(IssuanceBarangayId.transaction_type)]
+    elif sort_by == "issued":
+        keys = [col(Issuance.issue_date)]
+    elif sort_by == "valid_until":
+        keys = [col(IssuanceBarangayId.valid_until)]
+    elif sort_by == "status":
+        keys = [
+            case(
+                (col(IssuanceBarangayId.valid_until) < today, 0),
+                (col(IssuanceBarangayId.valid_until) <= soon, 1),
+                else_=2,
+            )
+        ]
+    ordering = [
+        key.desc().nulls_last() if sort_dir == "desc" else key.asc().nulls_last()
+        for key in keys
+    ]
+    return stmt.order_by(*ordering, col(Issuance.issued_at).desc(), col(Issuance.id))
+
+
 @router.get("/", response_model=BarangayIdsPublic)
 def list_barangay_ids(
     session: SessionDep,
@@ -48,6 +90,11 @@ def list_barangay_ids(
         Query(max_length=100, description="Name words, ID number or reference"),
     ] = None,
     status: Literal["valid", "expiring_soon", "expired", "all"] = "all",
+    sort_by: Annotated[
+        IdSort | None,
+        Query(description="Sort the whole result by this column (default: newest)"),
+    ] = None,
+    sort_dir: Literal["asc", "desc"] = "asc",
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> Any:
@@ -95,11 +142,8 @@ def list_barangay_ids(
             )
         )
     count = session.exec(select(sa_func.count()).select_from(stmt.subquery())).one()
-    rows = session.exec(
-        stmt.order_by(col(Issuance.issued_at).desc(), col(Issuance.id))
-        .offset(skip)
-        .limit(limit)
-    ).all()
+    stmt = _sorted_ids(stmt, sort_by, sort_dir, today, soon)
+    rows = session.exec(stmt.offset(skip).limit(limit)).all()
 
     if not search_words(q) and rows:
         record_read_event(

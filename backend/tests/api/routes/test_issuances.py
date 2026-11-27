@@ -1289,3 +1289,83 @@ def test_sector_in_use_cannot_be_deleted_but_can_be_renamed(
         json={"name": f"ZZ test {random_lower_string()[:8]}"},
     )
     assert r.status_code == 200
+
+
+def test_history_sorts_the_whole_result_not_one_page(
+    client: TestClient,
+    staff_token_headers: Headers,
+    superuser_token_headers: Headers,
+    street_id: int,
+    db: Session,
+) -> None:
+    tag = random_lower_string()[:8]
+    today = today_manila()
+    last = f"Srt{tag}"
+    # Purposes that sort in an order unlike the one the records are made in.
+    purposes = {
+        name: IssuancePurpose(name=f"ZZ test {name}{tag}") for name in ("b", "c")
+    }
+    for purpose in purposes.values():
+        db.add(purpose)
+    db.commit()
+
+    def make(first: str, days_ago: int, purpose: str | None) -> dict:
+        res = _resident(
+            client, staff_token_headers, street_id, first_name=first, last_name=last
+        )
+        extra: dict[str, object] = {
+            "issue_date": (today - timedelta(days=days_ago)).isoformat()
+        }
+        if purpose:
+            extra["purpose_id"] = purposes[purpose].id
+        return _clearance(client, staff_token_headers, res["id"], **extra)
+
+    # Made in this order, so the default (newest first) is C, B, A.
+    alpha = _issue(client, staff_token_headers, make("Alpha", 2, "b")["id"])
+    bravo = make("Bravo", 1, None)  # stays a draft, no purpose
+    charlie = _issue(client, staff_token_headers, make("Charlie", 5, "c")["id"])
+    r = client.post(
+        f"{ISS}/{charlie['id']}/void",
+        headers=superuser_token_headers,
+        json={"reason": "Sort test"},
+    )
+    assert r.status_code == 200, r.text
+
+    def order(**params: object) -> list[str]:
+        r = client.get(
+            f"{ISS}/",
+            headers=staff_token_headers,
+            params={"q": tag, "limit": 10, **params},
+        )
+        assert r.status_code == 200, r.text
+        return [x["id"] for x in r.json()["data"]]
+
+    a, b, c = alpha["id"], bravo["id"], charlie["id"]
+    assert order() == [c, b, a]
+    assert order(sort_by="resident") == [a, b, c]
+    assert order(sort_by="resident", sort_dir="desc") == [c, b, a]
+    # A draft has no date issued, and an empty value goes last either way.
+    assert order(sort_by="issue_date") == [c, a, b]
+    assert order(sort_by="issue_date", sort_dir="desc") == [a, c, b]
+    assert order(sort_by="purpose") == [a, c, b]
+    assert order(sort_by="purpose", sort_dir="desc") == [c, a, b]
+    # Issued, Pending (a draft), Voided.
+    assert order(sort_by="status") == [a, b, c]
+    assert order(sort_by="status", sort_dir="desc") == [c, b, a]
+    # One document type here, so a tie keeps the default order.
+    assert order(sort_by="document") == [c, b, a]
+    assert sorted(order(sort_by="expires_on")) == sorted([a, b, c])
+
+    # Pages follow the whole sorted list, not the page that was fetched.
+    paged = []
+    for skip in range(3):
+        ids = order(sort_by="resident", sort_dir="desc", limit=1, skip=skip)
+        assert len(ids) == 1
+        paged.append(ids[0])
+    assert paged == [c, b, a]
+
+    # Only the listed columns can be sorted.
+    r = client.get(
+        f"{ISS}/", headers=staff_token_headers, params={"sort_by": "reference_no"}
+    )
+    assert r.status_code == 422

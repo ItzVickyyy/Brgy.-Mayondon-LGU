@@ -27,8 +27,8 @@ from datetime import UTC, date, datetime, timedelta
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Response
+from sqlalchemy import case, text
 from sqlalchemy import func as sa_func
-from sqlalchemy import text
 from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, delete, select
 
@@ -572,6 +572,53 @@ def _public(
 # --- Routes -------------------------------------------------------------------
 
 
+# Columns a heading click may sort by (a whitelist: never a free column name).
+IssuanceSort = Literal[
+    "resident", "document", "purpose", "issue_date", "expires_on", "status"
+]
+
+
+def _sorted_issuances(stmt: Any, sort_by: IssuanceSort | None, sort_dir: str) -> Any:
+    """Order the history list by a heading the person clicked (316).
+
+    Empty values go last either way (a draft has no date issued, as the table
+    shows). Ties, and the default order, are newest created first, then id, so
+    a page never reshuffles between clicks. Document sorts by its stored name,
+    Status as Issued, Pending (draft), Voided.
+    """
+    keys: list[Any] = []
+    if sort_by == "resident":
+        keys = [sa_func.lower(Resident.last_name), sa_func.lower(Resident.first_name)]
+    elif sort_by == "document":
+        keys = [sa_func.lower(DocumentType.name)]
+    elif sort_by == "purpose":
+        stmt = stmt.join(
+            IssuancePurpose,
+            col(IssuancePurpose.id) == col(Issuance.purpose_id),
+            isouter=True,
+        )
+        keys = [sa_func.lower(IssuancePurpose.name)]
+    elif sort_by == "issue_date":
+        keys = [
+            case((col(Issuance.status) == "draft", None), else_=Issuance.issue_date)
+        ]
+    elif sort_by == "expires_on":
+        keys = [col(Issuance.expires_on)]
+    elif sort_by == "status":
+        keys = [
+            case(
+                (col(Issuance.status) == "issued", 0),
+                (col(Issuance.status) == "draft", 1),
+                else_=2,
+            )
+        ]
+    ordering = [
+        key.desc().nulls_last() if sort_dir == "desc" else key.asc().nulls_last()
+        for key in keys
+    ]
+    return stmt.order_by(*ordering, col(Issuance.created_at).desc(), col(Issuance.id))
+
+
 @router.get("/", response_model=IssuancesPublic)
 def list_issuances(
     session: SessionDep,
@@ -595,6 +642,11 @@ def list_issuances(
         date | None,
         Query(description="Only issuances dated on or before this day (issue_date)"),
     ] = None,
+    sort_by: Annotated[
+        IssuanceSort | None,
+        Query(description="Sort the whole result by this column (default: newest)"),
+    ] = None,
+    sort_dir: Literal["asc", "desc"] = "asc",
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> Any:
@@ -629,11 +681,8 @@ def list_issuances(
             )
         )
     count = session.exec(select(sa_func.count()).select_from(stmt.subquery())).one()
-    rows = session.exec(
-        stmt.order_by(col(Issuance.created_at).desc(), col(Issuance.id))
-        .offset(skip)
-        .limit(limit)
-    ).all()
+    stmt = _sorted_issuances(stmt, sort_by, sort_dir)
+    rows = session.exec(stmt.offset(skip).limit(limit)).all()
     return IssuancesPublic(
         data=[
             IssuanceListItem.model_validate(

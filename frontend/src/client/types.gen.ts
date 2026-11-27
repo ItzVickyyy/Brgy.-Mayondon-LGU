@@ -5886,6 +5886,16 @@ export type issuancesListIssuancesData = {
          */
         date_to?: string | null;
         /**
+         * Sort By
+         *
+         * Sort the whole result by this column (default: newest)
+         */
+        sort_by?: 'resident' | 'document' | 'purpose' | 'issue_date' | 'expires_on' | 'status' | null;
+        /**
+         * Sort Dir
+         */
+        sort_dir?: 'asc' | 'desc';
+        /**
          * Skip
          */
         skip?: number;
@@ -6227,6 +6237,16 @@ export type barangayIdsListBarangayIdsData = {
          * Status
          */
         status?: 'valid' | 'expiring_soon' | 'expired' | 'all';
+        /**
+         * Sort By
+         *
+         * Sort the whole result by this column (default: newest)
+         */
+        sort_by?: 'resident' | 'id_number' | 'card' | 'issued' | 'valid_until' | 'status' | null;
+        /**
+         * Sort Dir
+         */
+        sort_dir?: 'asc' | 'desc';
         /**
          * Skip
          */

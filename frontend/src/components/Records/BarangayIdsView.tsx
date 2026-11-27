@@ -11,7 +11,10 @@ import {
 } from "lucide-react"
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
-import type { BarangayIdListItem } from "@/client"
+import type {
+  BarangayIdListItem,
+  barangayIdsListBarangayIdsData,
+} from "@/client"
 import { BarangayIdsService } from "@/client"
 import {
   EmptyState,
@@ -38,7 +41,7 @@ import { isSystemAdministrator } from "@/lib/access"
 import { cardTable } from "@/lib/cardTable"
 import { formatBusinessDate } from "@/lib/residents"
 import { useRowSelection } from "@/lib/useRowSelection"
-import { useSort } from "@/lib/useSort"
+import { useServerSort } from "@/lib/useSort"
 import { IdSeriesCard } from "./IdSeriesCard"
 
 type StatusFilter = "all" | BarangayIdListItem["status"]
@@ -56,6 +59,9 @@ type TransactionType = (typeof transactionTypes)[number]
 function isTransactionType(value: string): value is TransactionType {
   return (transactionTypes as readonly string[]).includes(value)
 }
+
+/** Server sort columns of `GET /barangay-ids/` (316). */
+type IdSortBy = NonNullable<barangayIdsListBarangayIdsData["query"]>["sort_by"]
 
 const idColumns = [
   "resident",
@@ -115,6 +121,15 @@ export function BarangayIdsView() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [pageIndex, setPageIndex] = useState(0)
   const [pageSize, setPageSize] = useState(10)
+  // Heading clicks sort the whole list on the server, not one page (316).
+  const sort = useServerSort({
+    resident: "resident",
+    idNumber: "id_number",
+    card: "card",
+    issued: "issued",
+    validUntil: "valid_until",
+    status: "status",
+  })
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -127,13 +142,14 @@ export function BarangayIdsView() {
   // biome-ignore lint/correctness/useExhaustiveDependencies: the filters are the trigger.
   useEffect(() => {
     setPageIndex(0)
-  }, [debouncedSearch, statusFilter])
+  }, [debouncedSearch, statusFilter, sort.key])
 
   const idsQuery = useQuery({
     queryKey: [
       "barangay-ids",
       debouncedSearch,
       statusFilter,
+      sort.key,
       pageIndex,
       pageSize,
     ],
@@ -143,6 +159,8 @@ export function BarangayIdsView() {
           query: {
             q: debouncedSearch || undefined,
             status: statusFilter,
+            sort_by: sort.by as IdSortBy,
+            sort_dir: sort.by ? sort.dir : undefined,
             skip: pageIndex * pageSize,
             limit: pageSize,
           },
@@ -157,16 +175,6 @@ export function BarangayIdsView() {
   const end = Math.min((pageIndex + 1) * pageSize, total)
   // Server pages: a selection lasts only while its rows are on screen.
   const pick = useRowSelection(records, (record) => String(record.issuance_id))
-  // Click a heading to sort the rows on this page (292).
-  const sort = useSort(records, {
-    resident: (record) => record.resident_name,
-    idNumber: (record) => record.id_number,
-    card: (record) => record.transaction_type,
-    issued: (record) => record.issue_date,
-    validUntil: (record) => record.valid_until,
-    status: (record) => record.status,
-  })
-
   const allCount = useIdCount("all")
   const validCount = useIdCount("valid")
   const soonCount = useIdCount("expiring_soon")
@@ -318,7 +326,7 @@ export function BarangayIdsView() {
                   </tr>
                 </thead>
                 <tbody className={`divide-y ${cardTable.body}`}>
-                  {sort.sorted.map((record) => {
+                  {records.map((record) => {
                     const archived = record.resident_status === "archived"
                     const needsRenewal =
                       record.status === "expiring_soon" ||

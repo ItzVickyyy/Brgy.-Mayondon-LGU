@@ -563,3 +563,70 @@ def test_id_list_ignores_other_documents_and_drafts(
     )
     _issue(client, staff_token_headers, r.json()["id"])
     assert _listed(client, staff_token_headers, q=res["last_name"]) == []
+
+
+def test_id_list_sorts_the_whole_result_not_one_page(
+    client: TestClient, staff_token_headers: Headers, street_id: int
+) -> None:
+    tag = random_lower_string()[:8]
+    today = today_manila()
+    last = f"Srt{tag}"
+
+    def card(first: str, number: str, issued_days_ago: int, valid_in_days: int) -> str:
+        res = _id_resident(
+            client, staff_token_headers, street_id, first_name=first, last_name=last
+        )
+        draft = _draft(
+            client,
+            staff_token_headers,
+            res["id"],
+            _card(valid_until=_until(valid_in_days), id_number=f"T{tag}{number}"),
+            issue_date=(today - timedelta(days=issued_days_ago)).isoformat(),
+        )
+        _issue(client, staff_token_headers, draft["id"])
+        return res["id"]
+
+    # Issued in this order, so the default (newest card first) is C, B, A.
+    alpha = card("Alpha", "c", issued_days_ago=30, valid_in_days=300)  # valid
+    bravo = card("Bravo", "a", issued_days_ago=20, valid_in_days=10)  # expiring
+    charlie = card("Charlie", "b", issued_days_ago=400, valid_in_days=-1)  # expired
+
+    def order(**params: object) -> list[str]:
+        rows = _listed(client, staff_token_headers, q=tag, **params)
+        return [r["resident_id"] for r in rows]
+
+    assert order() == [charlie, bravo, alpha]
+    assert order(sort_by="resident") == [alpha, bravo, charlie]
+    assert order(sort_by="resident", sort_dir="desc") == [charlie, bravo, alpha]
+    # ID numbers end in c, a, b.
+    assert order(sort_by="id_number") == [bravo, charlie, alpha]
+    assert order(sort_by="issued") == [charlie, alpha, bravo]
+    assert order(sort_by="issued", sort_dir="desc") == [bravo, alpha, charlie]
+    assert order(sort_by="valid_until") == [charlie, bravo, alpha]
+    assert order(sort_by="valid_until", sort_dir="desc") == [alpha, bravo, charlie]
+    # Expired, expiring soon, valid.
+    assert order(sort_by="status") == [charlie, bravo, alpha]
+    assert order(sort_by="status", sort_dir="desc") == [alpha, bravo, charlie]
+    # Every card here is a new one; a tie keeps the default (newest first).
+    assert order(sort_by="card") == [charlie, bravo, alpha]
+
+    # Pages follow the whole sorted list, not the page that was fetched.
+    paged = []
+    for skip in range(3):
+        rows = _listed(
+            client,
+            staff_token_headers,
+            q=tag,
+            sort_by="valid_until",
+            sort_dir="desc",
+            limit=1,
+            skip=skip,
+        )
+        paged.append(rows[0]["resident_id"])
+    assert paged == [alpha, bravo, charlie]
+
+    # Only the listed columns can be sorted.
+    r = client.get(
+        f"{IDS}/", headers=staff_token_headers, params={"sort_by": "resident_id"}
+    )
+    assert r.status_code == 422
