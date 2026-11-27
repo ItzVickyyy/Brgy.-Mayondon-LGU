@@ -18,7 +18,7 @@ export type PrintFieldBox = {
   align?: "left" | "center"
   size?: number // font size in pt, default 11
   page?: number // 0-based page of a multi-page template, default 0
-  font?: "value" | "label" // "label" = the form's own label font (Arial Narrow); default "value"
+  font?: "value" | "label" | "note" // "label" = Arial Narrow bold; "note" = Arial regular 10 pt (the Addressed-to line); default "value" (Cambria Bold)
   prefix?: string // words printed before a non-empty value, for a row the barangay's form leaves unlabelled
 }
 export type PrintMarkBox = {
@@ -188,7 +188,9 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "purpose", x: 135, y: 479.6, w: 400 },
       {
         key: "addressedTo",
-        prefix: "Addressed to the office of: ",
+        prefix: "Addressed to the office of ",
+        font: "note",
+        size: 10,
         x: 135,
         y: 498,
         w: 400,

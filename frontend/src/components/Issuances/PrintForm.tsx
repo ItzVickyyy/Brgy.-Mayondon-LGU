@@ -313,7 +313,7 @@ function Indigency({ data }: { data: PrintData }) {
       </p>
       <Row label="PURPOSE:" value={v(x, "purpose")} />
       <Row
-        label="Addressed to the office of:"
+        label="Addressed to the office of"
         value={v(x, "addressedTo")}
         style={{ marginTop: 8 }}
       />

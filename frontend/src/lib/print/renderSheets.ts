@@ -140,7 +140,10 @@ export async function renderSheets(data: PrintData): Promise<RenderedDocument> {
     }
     const lineMiddle = (DEFAULT_FONT_PT * LINE_HEIGHT_RATIO) / 2
     for (const item of page?.texts ?? []) {
-      context.font = `bold ${item.size * SCALE}px ${item.font === "label" ? LABEL_FONT : FONT}`
+      context.font =
+        item.font === "note"
+          ? `${item.size * SCALE}px ${STAMP_FONT}`
+          : `bold ${item.size * SCALE}px ${item.font === "label" ? LABEL_FONT : FONT}`
       context.textAlign = item.align === "center" ? "center" : "left"
       context.fillText(item.text, item.x * SCALE, (item.y + lineMiddle) * SCALE)
     }

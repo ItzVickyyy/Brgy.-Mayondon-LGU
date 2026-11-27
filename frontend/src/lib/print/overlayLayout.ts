@@ -22,7 +22,7 @@ export type OverlayText = {
   y: number
   size: number
   align: "left" | "center"
-  font: "value" | "label"
+  font: "value" | "label" | "note"
 }
 export type OverlayStamp = {
   x: number

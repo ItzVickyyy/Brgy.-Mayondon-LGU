@@ -35,7 +35,9 @@ test.describe("print overlay layout", () => {
     )
     expect(filled.texts[0]).toMatchObject({
       key: "addressedTo",
-      text: "Addressed to the office of: CHED",
+      text: "Addressed to the office of CHED",
+      font: "note",
+      size: 10,
     })
     const [empty] = layoutOverlay(
       { templateId: "indigency", values: { addressedTo: "  ", name: "X" } },
