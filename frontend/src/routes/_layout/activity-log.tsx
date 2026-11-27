@@ -29,6 +29,7 @@ import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { activityTitle } from "@/lib/activity"
+import { cardTable } from "@/lib/cardTable"
 import { formatLocaleDate } from "@/lib/locale"
 import { useRowSelection } from "@/lib/useRowSelection"
 import { useServerSort } from "@/lib/useSort"
@@ -475,9 +476,13 @@ function ActivityLog() {
           />
         ) : (
           <>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[900px] text-left text-sm">
-                <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+            <div className={cardTable.box}>
+              <table
+                className={`w-full min-w-[820px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}
+              >
+                <thead
+                  className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
+                >
                   <tr>
                     <th className={selectCol}>
                       <PageCheckbox
@@ -490,7 +495,7 @@ function ActivityLog() {
                       <th
                         key={item}
                         aria-sort={sort.ariaSort(item)}
-                        className={`px-4 py-3 align-middle font-medium sm:px-5 ${item === "outcome" ? "sticky right-0 bg-muted sticky-head-cell" : ""}`}
+                        className={`px-3 py-3 align-middle font-medium @[59rem]/cards:px-4 ${item === "outcome" ? "sticky right-0 bg-muted sticky-head-cell" : ""}`}
                       >
                         <SortLabel
                           sort={sort}
@@ -501,27 +506,32 @@ function ActivityLog() {
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className={`divide-y ${cardTable.body}`}>
                   {items.map((row) => {
                     const known = isOutcome(row.outcome)
                     const lines = detailLines(row.details, row.reason, t)
                     return (
                       <tr
                         key={row.id}
-                        className="transition-colors hover:bg-muted/30"
+                        className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow}`}
                       >
-                        <td className={selectCol}>
+                        <td className={`${selectCol} ${cardTable.select}`}>
                           <RowCheckbox
                             label={activityTitle(row.action, t, row.details)}
                             checked={pickRows.isSelected(String(row.id))}
                             onChange={() => pickRows.toggle(String(row.id))}
                           />
                         </td>
-                        <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                        <td
+                          className={`whitespace-nowrap px-3 py-3 align-middle @[59rem]/cards:px-4 ${cardTable.full} ${cardTable.selectName}`}
+                        >
                           {formatTimestamp(row.occurred_at)}
                         </td>
                         {isAdmin ? (
-                          <td className="px-4 py-3 align-middle font-medium sm:px-5">
+                          <td
+                            data-label={t("activity.columns.user")}
+                            className={`max-w-[12rem] px-3 py-3 align-middle font-medium [overflow-wrap:anywhere] @[59rem]/cards:px-4 ${cardTable.labelled} @max-[59rem]/cards:max-w-none`}
+                          >
                             {row.is_own
                               ? t("activity.youWithName", {
                                   name: row.actor_email ?? t("activity.you"),
@@ -529,12 +539,14 @@ function ActivityLog() {
                               : (row.actor_email ?? "—")}
                           </td>
                         ) : null}
-                        <td className="px-4 py-3 align-middle sm:px-5">
+                        <td
+                          className={`px-3 py-3 align-middle @[59rem]/cards:px-4 ${cardTable.full}`}
+                        >
                           <p className="font-medium">
                             {activityTitle(row.action, t, row.details)}
                           </p>
                           {lines.length ? (
-                            <dl className="mt-1.5 flex max-w-sm flex-col gap-0.5 text-xs">
+                            <dl className="mt-1.5 flex max-w-[16rem] flex-col gap-0.5 text-xs @max-[59rem]/cards:max-w-none">
                               {lines.map((line) => (
                                 <div
                                   key={`${line.label}-${line.value}`}
@@ -551,10 +563,16 @@ function ActivityLog() {
                             </dl>
                           ) : null}
                         </td>
-                        <td className="px-4 py-3 align-middle text-muted-foreground sm:px-5">
+                        <td
+                          data-label={t("activity.columns.module")}
+                          className={`px-3 py-3 align-middle text-muted-foreground @[59rem]/cards:px-4 ${cardTable.labelled}`}
+                        >
                           {moduleLabel(row.module, t)}
                         </td>
-                        <td className="px-4 py-3 align-middle sm:px-5">
+                        <td
+                          data-label={t("activity.columns.record")}
+                          className={`px-3 py-3 align-middle @[59rem]/cards:px-4 ${cardTable.labelled}`}
+                        >
                           {row.record_id ? (
                             <span className="font-mono" title={row.record_id}>
                               {shortId(row.record_id)}
@@ -563,7 +581,10 @@ function ActivityLog() {
                             "—"
                           )}
                         </td>
-                        <td className="sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle sm:px-5 sticky-edge">
+                        <td
+                          data-label={t("activity.columns.outcome")}
+                          className={`sticky right-0 bg-card row-hover-cell px-3 py-3 align-middle @[59rem]/cards:px-4 sticky-edge ${cardTable.labelled} @max-[59rem]/cards:static @max-[59rem]/cards:bg-transparent`}
+                        >
                           <Badge
                             variant="outline"
                             className={

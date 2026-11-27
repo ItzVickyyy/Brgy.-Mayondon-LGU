@@ -177,6 +177,52 @@ const issuances = {
   count: 32,
 }
 
+// Officials and Activity Log (321): the Filipino Officials table was 45 px too wide at
+// 1280 px and the Activity Log 271 to 297 px (a very long e-mail and detail lines).
+const officials = [
+  {
+    id: "44444444-0000-0000-0000-000000000001",
+    full_name: "Hon. Maria Cristina Flores Dela Cruz-Villanueva",
+    position: "Sangguniang Kabataan Chairperson",
+    term_start: "2023-11-01",
+    term_end: "2026-10-30",
+    is_elected: true,
+    is_current: false,
+  },
+  {
+    id: "44444444-0000-0000-0000-000000000002",
+    full_name: "Official Two",
+    position: "Punong Barangay",
+    term_start: "2023-11-01",
+    term_end: null,
+    is_elected: true,
+    is_current: true,
+  },
+]
+const activity = {
+  count: 2,
+  data: [1, 2].map((n) => ({
+    id: n,
+    occurred_at: "2026-11-20T01:38:44.987923Z",
+    actor_user_id: "33333333-0000-0000-0000-000000000001",
+    actor_email:
+      "maria.cristina.dela.cruz.villanueva@barangaymayondon.example.test",
+    is_own: false,
+    action: "issuance.void",
+    module: "issuances",
+    record_type: "issuance",
+    record_id: "ISS-2026-000032-long-reference",
+    outcome: "success",
+    reason:
+      "Replaced by correction ISS-2026-000033. Reason: wrong purpose typed",
+    details: {
+      automatic: true,
+      document_type: "BARANGAY_CLEARANCE",
+      reference_no: "ISS-2026-000032",
+    },
+  })),
+}
+
 const pages = [
   {
     path: "/records",
@@ -192,6 +238,16 @@ const pages = [
     path: "/records?view=barangay-ids",
     name: "Barangay IDs",
     widths: [1280, 1024, 776, 390],
+  },
+  {
+    path: "/officials",
+    name: "Officials",
+    widths: [1280, 1152, 1024, 776, 390],
+  },
+  {
+    path: "/activity-log",
+    name: "Activity Log",
+    widths: [1280, 1152, 1024, 776, 390],
   },
   {
     path: "/records",
@@ -215,6 +271,10 @@ for (const language of ["en", "fil"])
             })
           const url = route.request().url()
           if (url.includes("/users/me")) return json(admin)
+          if (url.includes("/activity/options"))
+            return json({ modules: [], actions: [], outcomes: [], actors: [] })
+          if (url.includes("/activity/")) return json(activity)
+          if (url.includes("/officials/")) return json(officials)
           if (url.includes("/lookups/document-types"))
             return json(documentTypes)
           if (url.includes("/lookups/streets")) return json(streets)

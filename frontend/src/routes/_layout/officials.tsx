@@ -61,6 +61,7 @@ import {
 import { pageTitle } from "@/config/site"
 import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
+import { cardTable } from "@/lib/cardTable"
 import { getLocaleOr } from "@/lib/locale"
 import { notify } from "@/lib/notifications"
 import { readApiError } from "@/lib/residents"
@@ -433,9 +434,13 @@ function OfficialsManagement() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px] text-left text-sm">
-            <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+        <div className={cardTable.box}>
+          <table
+            className={`w-full min-w-[760px] text-left text-sm @max-[59rem]/cards:min-w-0 ${cardTable.table}`}
+          >
+            <thead
+              className={`bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground ${cardTable.head}`}
+            >
               <tr>
                 <th className={selectCol}>
                   <PageCheckbox
@@ -450,8 +455,8 @@ function OfficialsManagement() {
                     aria-sort={sort.ariaSort(id)}
                     className={
                       id === "actions"
-                        ? "sticky right-0 bg-muted sticky-head-cell px-4 py-3 text-center font-medium sm:px-5"
-                        : "px-4 py-3 align-middle font-medium sm:px-5"
+                        ? "sticky right-0 bg-muted sticky-head-cell px-4 py-3 text-center font-medium @[59rem]/cards:px-5"
+                        : "px-4 py-3 align-middle font-medium @[59rem]/cards:px-5"
                     }
                   >
                     <SortLabel
@@ -463,31 +468,42 @@ function OfficialsManagement() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y">
+            <tbody className={`divide-y ${cardTable.body}`}>
               {officialPagination.paginatedItems.map((official) => (
                 <tr
                   key={official.id}
                   {...rowOpen(() => setViewOfficial(official))}
-                  className={`transition-colors hover:bg-muted/30 ${official.status === "Former" ? "opacity-70" : ""}`}
+                  className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow} ${official.status === "Former" ? "opacity-70" : ""}`}
                 >
-                  <td className={selectCol}>
+                  <td className={`${selectCol} ${cardTable.select}`}>
                     <RowCheckbox
                       label={official.name}
                       checked={pickOfficials.isSelected(String(official.id))}
                       onChange={() => pickOfficials.toggle(String(official.id))}
                     />
                   </td>
-                  <td className="px-4 py-3 align-middle sm:px-5">
+                  <td
+                    className={`px-4 py-3 align-middle @[59rem]/cards:px-5 ${cardTable.full} ${cardTable.selectName}`}
+                  >
                     <p className="font-semibold">{official.name}</p>
                   </td>
-                  <td className="px-4 py-3 align-middle sm:px-5">
+                  <td
+                    data-label={t("admin.officials.columns.position")}
+                    className={`px-4 py-3 align-middle @[59rem]/cards:px-5 ${cardTable.labelled}`}
+                  >
                     {official.position}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-3 align-middle sm:px-5">
+                  <td
+                    data-label={t("admin.officials.columns.term")}
+                    className={`min-w-[9rem] px-4 py-3 align-middle @[59rem]/cards:px-5 ${cardTable.labelled}`}
+                  >
                     {formatTermDate(official.termStart, noEndDate)} –{" "}
                     {formatTermDate(official.termEnd, noEndDate)}
                   </td>
-                  <td className="px-4 py-3 align-middle sm:px-5">
+                  <td
+                    data-label={t("admin.officials.columns.status")}
+                    className={`px-4 py-3 align-middle @[59rem]/cards:px-5 ${cardTable.labelled}`}
+                  >
                     <Badge
                       variant="outline"
                       className={statusStyles[official.status]}
@@ -495,8 +511,11 @@ function OfficialsManagement() {
                       {statusLabel(official.status, t)}
                     </Badge>
                   </td>
-                  <td className="sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle sm:px-5 sticky-edge">
+                  <td
+                    className={`sticky right-0 bg-card row-hover-cell px-4 py-3 align-middle @[59rem]/cards:px-5 sticky-edge ${cardTable.actions}`}
+                  >
                     <RowActions
+                      className="@max-[59rem]/cards:flex-wrap @max-[59rem]/cards:justify-start"
                       name={official.name}
                       isAdmin
                       primary={
