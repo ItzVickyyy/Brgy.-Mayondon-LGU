@@ -450,4 +450,32 @@ test.describe("buildPrintData", () => {
     expect(franchise.values.orNumber).toBe("")
     expect(franchise.values.purposeNote ?? "").toBe("")
   })
+
+  test("a free Utility Clearance prints FOC beside the receipt number", () => {
+    const details = {
+      type: "UTILITY_CLEARANCE" as const,
+      location: "Purok 2",
+      services: ["electric" as const],
+      connectionType: "new" as const,
+      classification: "residential" as const,
+    }
+    const free = buildPrintData(
+      make("UTILITY_CLEARANCE", {
+        details,
+        payment: { isFree: true, officialReceiptNo: "" },
+      }),
+      lookups,
+      name,
+    )!
+    expect(free.values.orNumber).toBe("FOC")
+    const paid = buildPrintData(
+      make("UTILITY_CLEARANCE", {
+        details,
+        payment: { isFree: false, officialReceiptNo: "OR-9" },
+      }),
+      lookups,
+      name,
+    )!
+    expect(paid.values.orNumber).toBe("OR-9")
+  })
 })

@@ -160,9 +160,9 @@ export function buildPrintData(
     idDate: payload.identification?.dateOfIssue
       ? formatPaperDate(payload.identification.dateOfIssue)
       : "",
-    // "Paid under OFFICIAL RECEIPT No." of the Barangay Clearance reads FOC when the certificate is free (Clearance Issuing.xls, BRGY CLEARANCE); the other forms leave it blank.
+    // "Paid under OFFICIAL RECEIPT No." of the Barangay Clearance and the Electrical/Water (Utility) Clearance reads FOC when the certificate is free (Clearance Issuing.xls, BRGY CLEARANCE); the other forms leave it blank.
     orNumber: payload.payment?.isFree
-      ? templateId === "clearance"
+      ? templateId === "clearance" || templateId === "utility"
         ? "FOC"
         : ""
       : (payload.payment?.officialReceiptNo ?? ""),
