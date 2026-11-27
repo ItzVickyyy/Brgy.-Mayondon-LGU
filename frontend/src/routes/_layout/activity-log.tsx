@@ -437,6 +437,7 @@ function ActivityLog() {
             </div>
             <SelectionBar
               inline
+              reserveLine
               count={pickRows.count}
               onClear={pickRows.clear}
               csvName="activity-selected.csv"

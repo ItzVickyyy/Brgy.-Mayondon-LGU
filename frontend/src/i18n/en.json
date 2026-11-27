@@ -2964,6 +2964,7 @@
     "selection": {
       "selectRow": "Select {{name}}",
       "selectPage": "Select all rows on this page",
+      "hint": "Tick rows to export or print them.",
       "bar": "Selected rows",
       "count_one": "{{count}} selected",
       "count_other": "{{count}} selected",

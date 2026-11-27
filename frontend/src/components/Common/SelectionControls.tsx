@@ -20,6 +20,12 @@ import {
  */
 export const selectCol = "w-11 py-3 pl-5 pr-0 align-middle"
 
+/**
+ * Both checkboxes are `block` (318): an inline button changes its baseline when
+ * the tick appears, which made short rows (Activity Log) 2 px lower or higher
+ * the moment a row was ticked.
+ */
+
 /** The checkbox in a row (`label` = the row's name, for screen readers). */
 export function RowCheckbox({
   checked,
@@ -37,7 +43,7 @@ export function RowCheckbox({
       checked={checked}
       onCheckedChange={onChange}
       aria-label={t("common.selection.selectRow", { name: label })}
-      className="size-5"
+      className="block size-5"
     />
   )
 }
@@ -59,7 +65,7 @@ export function PageCheckbox({
       checked={all ? true : some ? "indeterminate" : false}
       onCheckedChange={onChange}
       aria-label={t("common.selection.selectPage")}
-      className="size-5"
+      className="block size-5"
     />
   )
 }
@@ -186,6 +192,7 @@ export function SelectionBar({
   csvRows,
   children,
   inline = false,
+  reserveLine = false,
 }: {
   count: number
   onClear: () => void
@@ -200,10 +207,27 @@ export function SelectionBar({
    * below do not move. Nothing is drawn at count 0 either way.
    */
   inline?: boolean
+  /**
+   * `reserveLine` (318): for a filter panel where the tools wrap onto their own
+   * line below 1400 px. The line is kept (with a short hint) while nothing is
+   * ticked, so ticking a row never moves the table. From 1400 px the tools sit
+   * in the filter row and the line is gone.
+   */
+  reserveLine?: boolean
 }) {
   const { t } = useTranslation()
   const [exportOpen, setExportOpen] = useState(false)
-  if (count === 0) return null
+  if (count === 0) {
+    if (!(inline && reserveLine)) return null
+    return (
+      <p
+        data-testid="selection-slot"
+        className="flex min-h-12 items-center px-2 text-sm text-muted-foreground min-[1400px]:hidden"
+      >
+        {t("common.selection.hint")}
+      </p>
+    )
+  }
   return (
     <>
       <SelectionCount count={count} />
@@ -212,7 +236,7 @@ export function SelectionBar({
         aria-label={t("common.selection.bar")}
         className={
           inline
-            ? "selection-bar animate-selection-in flex w-full flex-wrap items-center gap-2 rounded-lg bg-brand/5 px-2 py-0.5 text-sm sm:ml-auto sm:w-auto sm:shrink-0 sm:flex-nowrap sm:gap-1 sm:whitespace-nowrap"
+            ? "selection-bar animate-selection-in flex min-h-12 w-full flex-wrap items-center gap-2 rounded-lg bg-brand/5 px-2 py-0.5 text-sm sm:ml-auto sm:w-auto sm:shrink-0 sm:flex-nowrap sm:gap-1 sm:whitespace-nowrap"
             : "selection-bar flex flex-wrap items-center gap-x-3 gap-y-2 border-b bg-brand/5 px-4 py-2 text-sm sm:px-5"
         }
       >

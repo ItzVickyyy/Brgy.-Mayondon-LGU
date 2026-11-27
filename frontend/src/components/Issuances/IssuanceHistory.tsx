@@ -735,6 +735,7 @@ export function IssuanceHistory({
           </div>
         <SelectionBar
           inline
+          reserveLine
           count={pick.count}
           onClear={pick.clear}
           csvName="issuance-history-selected.csv"
