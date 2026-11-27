@@ -23,7 +23,12 @@ from sqlmodel import Field, SQLModel
 
 from app.core.dates import today_manila
 from app.core.field_crypto import EncryptedBytes
-from app.core.resident_validation import FREE_TEXT_BAD
+from app.core.resident_validation import (
+    FREE_TEXT_BAD,
+    check_birthdate,
+    tidy_name,
+    tidy_text,
+)
 from app.models import get_datetime_utc
 
 SUFFIXES = ("Jr.", "Sr.", "II", "III", "IV", "V")
@@ -326,10 +331,13 @@ class ResidentFields(SQLModel):
 
     @field_validator("birthdate")
     @classmethod
-    def _not_future(cls, value: date | None) -> date | None:
-        if value is not None and value > today_manila():
-            raise ValueError("birthdate cannot be in the future")
-        return value
+    def _birthdate_range(cls, value: date | None) -> date | None:
+        return check_birthdate(value)
+
+    @field_validator("first_name", "middle_name", "last_name")
+    @classmethod
+    def _tidy_name(cls, value: str | None) -> str | None:
+        return tidy_name(value) if isinstance(value, str) else value
 
     @field_validator(
         "middle_name",
@@ -346,7 +354,7 @@ class ResidentFields(SQLModel):
     def _blank_to_none(cls, value: str | None) -> str | None:
         if value is None:
             return None
-        value = value.strip()
+        value = tidy_text(value).strip()
         return value or None
 
     @model_validator(mode="after")
@@ -392,10 +400,27 @@ class ResidentUpdate(SQLModel):
 
     @field_validator("birthdate")
     @classmethod
-    def _not_future(cls, value: date | None) -> date | None:
-        if value is not None and value > today_manila():
-            raise ValueError("birthdate cannot be in the future")
-        return value
+    def _birthdate_range(cls, value: date | None) -> date | None:
+        return check_birthdate(value)
+
+    @field_validator("first_name", "middle_name", "last_name")
+    @classmethod
+    def _tidy_name(cls, value: str | None) -> str | None:
+        return tidy_name(value) if isinstance(value, str) else value
+
+    @field_validator(
+        "birth_place",
+        "occupation",
+        "house_number",
+        "resident_type",
+        "id_number",
+        "emergency_contact_name",
+        "emergency_contact_address",
+        "emergency_contact_phone",
+    )
+    @classmethod
+    def _tidy_text(cls, value: str | None) -> str | None:
+        return tidy_text(value) if isinstance(value, str) else value
 
 
 class ArchiveRequest(SQLModel):

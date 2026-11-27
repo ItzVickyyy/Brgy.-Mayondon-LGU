@@ -95,10 +95,34 @@ export function ruleProps(
   }
 }
 
-/** A Philippine mobile or landline number: 7 to 13 digits once spaces are removed. */
+/**
+ * A Philippine mobile or landline number: 7 to 13 digits once spaces are removed.
+ * A mobile number is held to its real length: one that starts 09 has exactly 11
+ * digits and one that starts 639 (+63 9...) exactly 12. Keep equal to `phone_ok`
+ * in `backend/app/core/resident_validation.py`.
+ */
 export function isValidPhone(value: string): boolean {
   const digits = value.replace(/\D/g, "")
+  if (digits.startsWith("09")) return digits.length === 11
+  if (digits.startsWith("639")) return digits.length === 12
   return digits.length >= 7 && digits.length <= 13
+}
+
+/** A name must start with a letter. Empty is allowed (the caller checks required). */
+export function isValidName(value: string): boolean {
+  const text = value.trim()
+  if (!text) return true
+  return /^\p{L}[\p{L}\p{M}\s.'’,-]*$/u.test(text.normalize("NFC"))
+}
+
+/** A birthdate from 1 January 1900 to `latest` (YYYY-MM-DD). Empty is allowed. */
+export function isValidBirthdate(value: string, latest: string): boolean {
+  if (!value) return true
+  return (
+    /^\d{4}-\d{2}-\d{2}$/.test(value) &&
+    value >= "1900-01-01" &&
+    value <= latest
+  )
 }
 
 /** A four-digit year from 1900 to this year. Empty is allowed (the box is optional). */

@@ -7,6 +7,7 @@ capitals or spaces. Everything here is plain PostgreSQL (``translate``,
 """
 
 import re
+import unicodedata
 from typing import Any
 
 from sqlalchemy import func as sa_func
@@ -31,7 +32,8 @@ def fold(column: Any) -> Any:
 
 def search_words(q: str | None) -> list[str]:
     """Split what was typed into words; commas, dots and semicolons only separate."""
-    return fold_text(re.sub(r"[,.;]", " ", q or "")).split()
+    typed = unicodedata.normalize("NFC", q or "")
+    return fold_text(re.sub(r"[,.;]", " ", typed)).split()
 
 
 def _like_pattern(word: str) -> str:

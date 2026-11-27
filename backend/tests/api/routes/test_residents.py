@@ -877,3 +877,43 @@ def test_sector_summary_counts_active_residents_once(
 
 def test_sector_summary_needs_sign_in(client: TestClient) -> None:
     assert client.get(f"{API}/residents/sector-summary").status_code == 401
+
+
+def test_birthdate_phone_and_name_spelling_rules_on_create_and_edit(
+    client: TestClient, staff_token_headers: Headers
+) -> None:
+    for bad in (
+        {"birthdate": "1899-12-31"},
+        {"emergency_contact_phone": "0917123456"},
+        {"emergency_contact_phone": "+63917123456"},
+    ):
+        r = client.post(
+            f"{API}/residents/", headers=staff_token_headers, json=_payload(**bad)
+        )
+        assert r.status_code == 422, bad
+    made = _create(
+        client,
+        staff_token_headers,
+        first_name="  Nin\u0303o  ",
+        last_name="Dela   Cruz",
+        birth_place="Pen\u0303a",
+        birthdate="1900-01-01",
+        emergency_contact_phone="0917 123 4567",
+    )
+    assert made["first_name"] == "Niño"
+    assert made["last_name"] == "Dela Cruz"
+    assert made["birth_place"] == "Peña"
+    r = client.patch(
+        f"{API}/residents/{made['id']}",
+        headers=staff_token_headers,
+        json={"last_name": "De\u0301la  Rosa", "occupation": "Pen\u0303a"},
+    )
+    assert r.status_code == 200, r.text
+    assert r.json()["last_name"] == "Déla Rosa"
+    assert r.json()["occupation"] == "Peña"
+    r = client.patch(
+        f"{API}/residents/{made['id']}",
+        headers=staff_token_headers,
+        json={"birthdate": "1850-01-01"},
+    )
+    assert r.status_code == 422

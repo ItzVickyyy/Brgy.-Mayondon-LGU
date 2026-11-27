@@ -31,6 +31,8 @@ import {
 } from "@/components/ui/dialog"
 import useAuth from "@/hooks/useAuth"
 import {
+  isValidBirthdate,
+  isValidName,
   isValidPhone,
   isValidPurok,
   isValidYear,
@@ -285,6 +287,10 @@ export function ResidentFormDialog({
     if (
       (form.emergency_contact_phone &&
         !isValidPhone(form.emergency_contact_phone)) ||
+      !isValidName(form.first_name) ||
+      !isValidName(form.middle_name) ||
+      !isValidName(form.last_name) ||
+      !isValidBirthdate(form.birthdate, todayManila()) ||
       !isValidPurok(form.purok) ||
       (!form.resident_since_birth && !isValidYear(form.resident_since_year))
     ) {
@@ -384,8 +390,13 @@ export function ResidentFormDialog({
 
   const firstMissing = !form.first_name.trim()
   const lastMissing = !form.last_name.trim()
-  const showFirstError = submitted && firstMissing
-  const showLastError = submitted && lastMissing
+  const firstBad = !isValidName(form.first_name)
+  const middleBad = !isValidName(form.middle_name)
+  const lastBad = !isValidName(form.last_name)
+  const birthBad = !isValidBirthdate(form.birthdate, todayManila())
+  const showFirstError = submitted && (firstMissing || firstBad)
+  const showLastError = submitted && (lastMissing || lastBad)
+  const showMiddleError = submitted && middleBad
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -466,7 +477,13 @@ export function ResidentFormDialog({
                     }
                   />
                   <FieldError id="resident-form-first-name-error">
-                    {showFirstError ? t("records.form.errors.firstName") : null}
+                    {showFirstError
+                      ? t(
+                          firstMissing
+                            ? "records.form.errors.firstName"
+                            : "records.form.errors.nameStart",
+                        )
+                      : null}
                   </FieldError>
                 </label>
                 <label className={labelClass}>
@@ -475,7 +492,13 @@ export function ResidentFormDialog({
                     value={form.middle_name}
                     {...ruleProps("name", (next) => set("middle_name", next))}
                     className={formControlClass}
+                    aria-invalid={showMiddleError || undefined}
                   />
+                  <FieldError>
+                    {showMiddleError
+                      ? t("records.form.errors.nameStart")
+                      : null}
+                  </FieldError>
                 </label>
                 <label htmlFor="resident-form-last-name" className={labelClass}>
                   <span>
@@ -496,7 +519,13 @@ export function ResidentFormDialog({
                     }
                   />
                   <FieldError id="resident-form-last-name-error">
-                    {showLastError ? t("records.form.errors.lastName") : null}
+                    {showLastError
+                      ? t(
+                          lastMissing
+                            ? "records.form.errors.lastName"
+                            : "records.form.errors.nameStart",
+                        )
+                      : null}
                   </FieldError>
                 </label>
                 <label htmlFor="resident-form-suffix" className={labelClass}>
@@ -519,11 +548,16 @@ export function ResidentFormDialog({
                   {t("records.form.birthdate")}
                   <input
                     type="date"
+                    min="1900-01-01"
                     max={todayManila()}
                     value={form.birthdate}
                     onChange={(event) => set("birthdate", event.target.value)}
+                    aria-invalid={birthBad || undefined}
                     className={formControlClass}
                   />
+                  <FieldError>
+                    {birthBad ? t("records.form.errors.birthdate") : null}
+                  </FieldError>
                 </label>
                 <label className={labelClass}>
                   {t("records.form.birthPlace")}

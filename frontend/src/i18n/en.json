@@ -1071,9 +1071,11 @@
       "errors": {
         "firstName": "Enter the first name.",
         "lastName": "Enter the last name.",
+        "nameStart": "Start the name with a letter.",
+        "birthdate": "Use a date from 1 January 1900 to today.",
         "purok": "Use a number from 1 to 99.",
         "year": "Use a year from 1900 to {{year}}.",
-        "phone": "Use 7 to 13 digits.",
+        "phone": "Use a mobile number like 09171234567 or +639171234567, or a landline number.",
         "checkFields": "Please correct the highlighted boxes before saving."
       }
     },

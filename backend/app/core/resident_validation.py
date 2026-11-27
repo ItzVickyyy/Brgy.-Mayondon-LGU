@@ -8,10 +8,12 @@ record that predates these rules can still be saved without touching the bad val
 import re
 import unicodedata
 from collections.abc import Mapping
+from datetime import date
 from typing import Any
 
 from app.core.dates import today_manila
 
+MIN_BIRTHDATE = date(1900, 1, 1)
 NAME_EXTRA = " .'’,-"
 FREE_TEXT_BAD = re.compile(r"[<>\x00-\x1f\x7f]")
 
@@ -36,11 +38,41 @@ def _is_name(value: str) -> bool:
     )
 
 
+def tidy_name(value: str) -> str:
+    """A name as stored: Unicode NFC (so Ñ is one character, never N plus a tilde)
+    with single spaces, so the same person always matches the same spelling."""
+    return " ".join(unicodedata.normalize("NFC", value).split())
+
+
+def tidy_text(value: str) -> str:
+    """Free text as stored: Unicode NFC, nothing else changed."""
+    return unicodedata.normalize("NFC", value)
+
+
+def check_birthdate(value: date | None) -> date | None:
+    """A birthdate from 1 January 1900 to today (Manila); empty is allowed."""
+    if value is not None and value > today_manila():
+        raise ValueError("birthdate cannot be in the future")
+    if value is not None and value < MIN_BIRTHDATE:
+        raise ValueError("birthdate cannot be before 1900")
+    return value
+
+
 def phone_ok(value: str) -> bool:
-    """Digits, spaces and + - ( ) only, with 7 to 13 digits (as the form's isValidPhone)."""
+    """Digits, spaces and + - ( ) only, with 7 to 13 digits (as the form's isValidPhone).
+
+    A mobile number is checked more strictly: one that starts 09 has exactly 11
+    digits and one that starts 639 (+63 9...) exactly 12, so a missing or extra
+    digit is caught. Anything else is taken as a landline and keeps the 7 to 13 rule.
+    """
     if not re.fullmatch(r"\+?[\d\s\-()]+", value.strip()):
         return False
-    return 7 <= len(re.sub(r"\D", "", value)) <= 13
+    digits = re.sub(r"\D", "", value)
+    if digits.startswith("09"):
+        return len(digits) == 11
+    if digits.startswith("639"):
+        return len(digits) == 12
+    return 7 <= len(digits) <= 13
 
 
 def check_values(

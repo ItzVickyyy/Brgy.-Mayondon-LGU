@@ -1071,9 +1071,11 @@
       "errors": {
         "firstName": "Ilagay ang unang pangalan.",
         "lastName": "Ilagay ang apelyido.",
+        "nameStart": "Magsimula sa titik ang pangalan.",
+        "birthdate": "Gumamit ng petsa mula 1 Enero 1900 hanggang ngayon.",
         "purok": "Gumamit ng bilang mula 1 hanggang 99.",
         "year": "Taon mula 1900 hanggang {{year}}.",
-        "phone": "Gumamit ng 7 hanggang 13 digit.",
+        "phone": "Gumamit ng numero ng cellphone tulad ng 09171234567 o +639171234567, o numero ng landline.",
         "checkFields": "Pakiayusin muna ang mga may markang kahon bago i-save."
       }
     },

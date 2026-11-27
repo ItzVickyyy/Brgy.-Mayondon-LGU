@@ -2,6 +2,8 @@ import { expect, test } from "@playwright/test"
 
 import {
   allowsChar,
+  isValidBirthdate,
+  isValidName,
   isValidPhone,
   isValidPurok,
   isValidYear,
@@ -25,6 +27,29 @@ test.describe("input rules", () => {
     expect(isValidPhone("0917 123 4567")).toBe(true)
     expect(isValidPhone("+63 917 123 4567")).toBe(true)
     expect(isValidPhone("12345")).toBe(false)
+  })
+
+  test("a mobile number must have its real length, a landline keeps 7 to 13", () => {
+    expect(isValidPhone("0917123456")).toBe(false)
+    expect(isValidPhone("091712345678")).toBe(false)
+    expect(isValidPhone("+63917123456")).toBe(false)
+    expect(isValidPhone("+6391712345678")).toBe(false)
+    expect(isValidPhone("+63 917 123 4567")).toBe(true)
+    expect(isValidPhone("(049) 502-2443")).toBe(true)
+    expect(isValidPhone("+63 49 536 0000")).toBe(true)
+  })
+
+  test("a name starts with a letter; a birthdate is from 1900 to today", () => {
+    expect(isValidName("")).toBe(true)
+    expect(isValidName("Niño")).toBe(true)
+    expect(isValidName("Nin\u0303o")).toBe(true)
+    expect(isValidName("De la Cruz-Santos, Jr.")).toBe(true)
+    expect(isValidName("-Juan")).toBe(false)
+    expect(isValidName(".")).toBe(false)
+    expect(isValidBirthdate("", "2026-11-27")).toBe(true)
+    expect(isValidBirthdate("1900-01-01", "2026-11-27")).toBe(true)
+    expect(isValidBirthdate("1899-12-31", "2026-11-27")).toBe(false)
+    expect(isValidBirthdate("2026-11-28", "2026-11-27")).toBe(false)
   })
 
   test("names allow letters and name marks, not digits or symbols", () => {

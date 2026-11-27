@@ -66,6 +66,32 @@ test("N opens Add Resident and the boxes filter what is typed", async ({
   await expect(phone).toHaveValue("0917-123 4567")
   await phone.fill("")
   await phone.pressSequentially("123")
-  await expect(dialog.getByText(/7 to 13 digits/)).toBeVisible()
+  await expect(dialog.getByText(/mobile number like 09171234567/)).toBeVisible()
+  await phone.fill("0917123456")
+  await expect(dialog.getByText(/mobile number like 09171234567/)).toBeVisible()
+  await phone.fill("09171234567")
+  await expect(dialog.getByText(/mobile number like 09171234567/)).toHaveCount(
+    0,
+  )
   await page.screenshot({ path: "test-results/input-validation.png" })
+})
+
+test("a birthdate before 1900 and a name starting with a symbol are refused", async ({
+  page,
+}) => {
+  await page.goto("/records")
+  await page.locator("body").click({ position: { x: 5, y: 5 } })
+  await page.keyboard.press("n")
+  const dialog = page.getByRole("dialog")
+  await expect(dialog).toBeVisible()
+
+  await dialog.getByLabel("Birthdate").first().fill("1850-01-01")
+  await expect(dialog.getByText(/1 January 1900 to today/)).toBeVisible()
+  await dialog.getByLabel("Birthdate").first().fill("1990-05-17")
+  await expect(dialog.getByText(/1 January 1900 to today/)).toHaveCount(0)
+
+  await dialog.locator("#resident-form-first-name").fill("-Juan")
+  await dialog.locator("#resident-form-last-name").fill("Cruz")
+  await dialog.locator('button[type="submit"]').click()
+  await expect(dialog.getByText("Start the name with a letter.")).toBeVisible()
 })
