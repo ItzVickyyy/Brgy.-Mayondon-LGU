@@ -661,7 +661,21 @@ function RecordsManagement() {
         />
       )}
 
-      {view === "barangay-ids" && <BarangayIdsView />}
+      {view === "barangay-ids" && (
+        <BarangayIdsView
+          onViewProfile={async (residentId) => {
+            try {
+              const { data } = await ResidentsService.readResident({
+                path: { resident_id: residentId },
+              })
+              setSelectedResident(data)
+              setProfileTab("Details")
+            } catch (error) {
+              showErrorToast(readApiError(error).message)
+            }
+          }}
+        />
+      )}
 
       {view === "import" && isAdmin && <ImportMasterlistView />}
 

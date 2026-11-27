@@ -4,6 +4,7 @@ import {
   CalendarClock,
   Clock3,
   CreditCard,
+  Eye,
   IdCard,
   RefreshCw,
   Search,
@@ -40,6 +41,7 @@ import useAuth from "@/hooks/useAuth"
 import { isSystemAdministrator } from "@/lib/access"
 import { cardTable } from "@/lib/cardTable"
 import { formatBusinessDate } from "@/lib/residents"
+import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
 import { useServerSort } from "@/lib/useSort"
 import { IdSeriesCard } from "./IdSeriesCard"
@@ -112,7 +114,11 @@ function useIdCount(status: StatusFilter) {
   })
 }
 
-export function BarangayIdsView() {
+export function BarangayIdsView({
+  onViewProfile,
+}: {
+  onViewProfile?: (residentId: string) => void | Promise<void>
+}) {
   const { t } = useTranslation()
   const { user } = useAuth()
   const isAdmin = isSystemAdministrator(user)
@@ -335,6 +341,9 @@ export function BarangayIdsView() {
                     return (
                       <tr
                         key={record.issuance_id}
+                        {...(onViewProfile
+                          ? rowOpen(() => onViewProfile(record.resident_id))
+                          : {})}
                         className={`transition-colors hover:bg-muted/30 ${cardTable.row} ${cardTable.selectRow} ${archived ? "opacity-70" : ""}`}
                       >
                         <td className={`${selectCol} ${cardTable.select}`}>
@@ -440,6 +449,21 @@ export function BarangayIdsView() {
                                     }
                             }
                             items={[
+                              ...(onViewProfile
+                                ? [
+                                    {
+                                      label: t("records.actions.viewProfile"),
+                                      icon: (
+                                        <Eye
+                                          aria-hidden="true"
+                                          className="size-4"
+                                        />
+                                      ),
+                                      onSelect: () =>
+                                        onViewProfile(record.resident_id),
+                                    },
+                                  ]
+                                : []),
                               {
                                 label: t("records.ids.replaceCard"),
                                 icon: (
