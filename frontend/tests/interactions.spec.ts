@@ -50,8 +50,11 @@ test.describe("interaction layer", () => {
     await page.getByRole("button", { name: /add user/i }).click()
     const dialog = page.getByRole("dialog")
     const label = dialog.locator('[data-slot="form-label"]').first()
+    const field = dialog.locator("input").first()
+    // The pop-up may focus its first field by itself: start from a blurred one.
+    await field.blur()
     const before = await label.evaluate((el) => getComputedStyle(el).color)
-    await dialog.locator("input").first().focus()
+    await field.focus()
     await expect
       .poll(() => label.evaluate((el) => getComputedStyle(el).color))
       .not.toBe(before)
