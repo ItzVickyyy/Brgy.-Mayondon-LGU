@@ -1,4 +1,4 @@
-// Ticking a row must not move the table, at any width (318). Below 1400 px the
+// Ticking a row must not move the table, at any width (318, 319). Below 1400 px the
 // selection tools sit on their own line in the filter panel; that line is kept
 // (with a hint) while nothing is ticked. The API is mocked (synthetic data), so
 // this spec needs only the running frontend.
@@ -65,6 +65,20 @@ const activity = {
   count: 3,
 }
 
+const users = {
+  count: 3,
+  data: [1, 2, 3].map((n) => ({
+    id: `22222222-0000-0000-0000-00000000010${n}`,
+    email: `person${n}@example.test`,
+    full_name: `Person ${n}`,
+    is_active: true,
+    is_superuser: false,
+    role: "staff",
+    must_change_password: false,
+    locked_until: null,
+  })),
+}
+
 async function mockApi(page: Page, language: string) {
   await page.route("**/api/v1/**", async (route) => {
     const json = (body: unknown) =>
@@ -74,6 +88,7 @@ async function mockApi(page: Page, language: string) {
       })
     const url = new URL(route.request().url())
     if (url.pathname.endsWith("/users/me")) return json(admin)
+    if (url.pathname.includes("/users/")) return json(users)
     if (url.pathname.endsWith("/activity/options"))
       return json({ modules: [], actions: [], outcomes: [], actors: [] })
     if (url.pathname.endsWith("/activity/")) return json(activity)
@@ -99,6 +114,7 @@ const pageTop = (locator: Locator) =>
 const pages = [
   { name: "Issuance History", path: "/issuances" },
   { name: "Activity Log", path: "/activity-log" },
+  { name: "User Accounts", path: "/admin" },
 ]
 
 for (const { name, path } of pages) {

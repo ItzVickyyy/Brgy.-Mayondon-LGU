@@ -80,6 +80,8 @@ export function DataTable<TData extends RowData>({
     <div className="flex flex-col gap-4">
       {selection ? (
         <SelectionBar
+          inline
+          reserveLine="always"
           count={pick.count}
           onClear={pick.clear}
           csvName={selection.csvName}

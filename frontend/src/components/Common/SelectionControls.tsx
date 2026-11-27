@@ -211,18 +211,20 @@ export function SelectionBar({
    * `reserveLine` (318): for a filter panel where the tools wrap onto their own
    * line below 1400 px. The line is kept (with a short hint) while nothing is
    * ticked, so ticking a row never moves the table. From 1400 px the tools sit
-   * in the filter row and the line is gone.
+   * in the filter row and the line is gone. `"always"` (319) keeps the line at
+   * every width, for a table with no filter row (User Accounts).
    */
-  reserveLine?: boolean
+  reserveLine?: boolean | "always"
 }) {
   const { t } = useTranslation()
   const [exportOpen, setExportOpen] = useState(false)
   if (count === 0) {
     if (!(inline && reserveLine)) return null
+    const narrowOnly = reserveLine !== "always"
     return (
       <p
         data-testid="selection-slot"
-        className="flex min-h-12 items-center px-2 text-sm text-muted-foreground min-[1400px]:hidden"
+        className={`flex min-h-12 items-center px-2 text-sm text-muted-foreground ${narrowOnly ? "min-[1400px]:hidden" : ""}`}
       >
         {t("common.selection.hint")}
       </p>
