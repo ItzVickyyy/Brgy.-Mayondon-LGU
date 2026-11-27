@@ -160,6 +160,10 @@ test("missing resident fields reports only fields required by the selected docum
   expect(getMissingResidentFields(resident, "FRANCHISE_CLEARANCE")).toEqual([
     "address",
   ])
+  // The First-Time Jobseeker packet prints no photo (patch 340), so a missing photo never blocks it.
+  expect(
+    getMissingResidentFields(resident, "FIRST_TIME_JOBSEEKER"),
+  ).not.toContain("photo")
 })
 
 test("First-Time Jobseeker is limited to one issued record per resident", async () => {

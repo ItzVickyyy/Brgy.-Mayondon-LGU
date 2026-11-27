@@ -160,9 +160,11 @@ export function buildPrintData(
     idDate: payload.identification?.dateOfIssue
       ? formatPaperDate(payload.identification.dateOfIssue)
       : "",
-    // "Paid under OFFICIAL RECEIPT No." of the Barangay Clearance and the Electrical/Water (Utility) Clearance reads FOC when the certificate is free (Clearance Issuing.xls, BRGY CLEARANCE); the other forms leave it blank.
+    // "Paid under OFFICIAL RECEIPT No." of the Barangay Clearance, the Franchise Clearance and the Electrical/Water (Utility) Clearance reads FOC when the certificate is free (Clearance Issuing.xls, BRGY CLEARANCE; Franchise added by the owner in patch 340); the other forms leave it blank.
     orNumber: payload.payment?.isFree
-      ? templateId === "clearance" || templateId === "utility"
+      ? templateId === "clearance" ||
+        templateId === "franchise" ||
+        templateId === "utility"
         ? "FOC"
         : ""
       : (payload.payment?.officialReceiptNo ?? ""),
@@ -246,6 +248,15 @@ export function buildPrintData(
     values.educationalAttainment = details.educationalAttainment
     values.course = details.course
     values.jobstart = details.isJobstartBeneficiary ? "yes" : "no"
+    // "Witnessed by:" on the Oath and the Certification: the person who issued the document, in capitals as in the barangay's filled certifications. An older record that kept an official instead of a name uses that official when still current. No designation is printed because an account has no position.
+    const legacyWitness = lookups.officials?.find(
+      (item) => item.id === details.legacyWitnessOfficialId,
+    )
+    values.witnessName = (
+      details.witnessName?.trim() ||
+      legacyWitness?.name ||
+      ""
+    ).toUpperCase()
     wrapLines(resident?.addressLine ?? "", [48, 66, 66], 3).forEach(
       (line, index) => {
         values[`addressLine${index + 1}`] = line

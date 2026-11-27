@@ -322,7 +322,7 @@ test.describe("buildPrintData", () => {
     expect(paid.values.orNumber).toBe("OR-9")
   })
 
-  test("Jobseeker: values for all three sheets, the witness is never printed", () => {
+  test("Jobseeker: values for all three sheets, with the witness name and the Date line", () => {
     const data = buildPrintData(
       make("FIRST_TIME_JOBSEEKER", {
         signatoryOfficialId: "o2",
@@ -348,7 +348,34 @@ test.describe("buildPrintData", () => {
       addressLine1: "12 Rizal Street, Purok 2",
       signatoryName: "HON. ANA REYES", // not doubled
     })
-    expect(JSON.stringify(data.values)).not.toContain("Staff Member")
+    // Decision 118 (patch 340): the witness prints in capitals, with the issue date on the Date line.
+    expect(data.values).toMatchObject({
+      witnessName: "STAFF MEMBER",
+      date: "November 4, 2026",
+    })
+    for (const page of [1, 2])
+      for (const key of ["witnessName", "date"])
+        expect(
+          printTemplates.jobseeker.fields.some(
+            (f) => f.key === key && f.page === page,
+          ),
+        ).toBe(true)
+    // An older record kept an official instead of a name.
+    expect(
+      buildPrintData(
+        make("FIRST_TIME_JOBSEEKER", {
+          details: {
+            type: "FIRST_TIME_JOBSEEKER",
+            educationalAttainment: "x",
+            course: "N/A",
+            isJobstartBeneficiary: false,
+            witnessName: "",
+            legacyWitnessOfficialId: "o1",
+          },
+        }),
+        lookups,
+      )!.values.witnessName,
+    ).toBe("JUAN OFFICIAL")
     expect(
       buildPrintData(
         make("FIRST_TIME_JOBSEEKER", {
@@ -447,7 +474,7 @@ test.describe("buildPrintData", () => {
       lookups,
       name,
     )!
-    expect(franchise.values.orNumber).toBe("")
+    expect(franchise.values.orNumber).toBe("FOC") // patch 340
     expect(franchise.values.purposeNote ?? "").toBe("")
   })
 
@@ -471,6 +498,27 @@ test.describe("buildPrintData", () => {
     const paid = buildPrintData(
       make("UTILITY_CLEARANCE", {
         details,
+        payment: { isFree: false, officialReceiptNo: "OR-9" },
+      }),
+      lookups,
+      name,
+    )!
+    expect(paid.values.orNumber).toBe("OR-9")
+  })
+
+  test("a free Franchise Clearance prints FOC beside the receipt number", () => {
+    const free = buildPrintData(
+      make("FRANCHISE_CLEARANCE", {
+        details: { type: "FRANCHISE_CLEARANCE" },
+        payment: { isFree: true, officialReceiptNo: "" },
+      }),
+      lookups,
+      name,
+    )!
+    expect(free.values.orNumber).toBe("FOC")
+    const paid = buildPrintData(
+      make("FRANCHISE_CLEARANCE", {
+        details: { type: "FRANCHISE_CLEARANCE" },
         payment: { isFree: false, officialReceiptNo: "OR-9" },
       }),
       lookups,

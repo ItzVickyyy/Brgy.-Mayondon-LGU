@@ -264,7 +264,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "date", x: 226, y: 540.9, w: 156, size: 10 },
     ],
   },
-  // First-Time Jobseeker packet on 8.5 x 13 in: page 0 Applicant sheet, page 1 Oath of Undertaking, page 2 Certification. The witness is never printed (decision of patch 133); the signature, photo and thumbmark stay blank.
+  // First-Time Jobseeker packet on 8.5 x 13 in: page 0 Applicant sheet, page 1 Oath of Undertaking, page 2 Certification. The witness name and the Date line print as in the barangay's filled certifications (decision 118, patch 340; it replaces the old rule that the witness is never printed); the signature, photo and thumbmark stay blank. `y` = rule y minus 10.2 pt, as the other values on these sheets; rule positions measured on jobseeker-1.png and jobseeker-2.png.
   jobseeker: {
     id: "jobseeker",
     documentCode: "FIRST_TIME_JOBSEEKER",
@@ -348,6 +348,28 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
         size: 10,
         page: 2,
       },
+      // Oath: the witness name sits on the short rule after "Witnessed by:" (rule y 697.5, x 350-477); the Date follows the pre-printed "Date:" (rule y 763.7, x 105.5-259.6).
+      {
+        key: "witnessName",
+        x: 413,
+        y: 687.3,
+        w: 190,
+        align: "center",
+        size: 10,
+        page: 1,
+      },
+      { key: "date", x: 108, y: 753.5, w: 148, size: 10, page: 1 },
+      // Certification: the witness name sits on the rule under "Witnessed by:" (rule y 679.1, x 291.6-473.4); the Date follows the pre-printed "Date:" (rule y 745.4, x 338.8-493.2).
+      {
+        key: "witnessName",
+        x: 382.5,
+        y: 668.9,
+        w: 182,
+        align: "center",
+        size: 10,
+        page: 2,
+      },
+      { key: "date", x: 342, y: 735.2, w: 148, size: 10, page: 2 },
       {
         key: "signatoryName",
         x: 430,

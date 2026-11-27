@@ -72,7 +72,7 @@ Both modes cover the six types that have a print template. Reprint is no longer 
 - Date at top right, above the pre-printed Date line
 - Name, address, **age calculated from birthdate**, birthdate, birthplace, civil status
 - Purpose, then two lines as in `Clearance Issuing.xls` (sheet BRGY CLEARANCE): `NOT APPLICABLE FOR LOAN PURPOSES` (Arial Narrow bold 14 pt, red `#ff0000` as in the xls, `font: "label"`, key `purposeNote`) and the remarks `NO DEROGATORY RECORD ON FILE` (Cambria bold 14 pt). The New Issuance form has no box for the note, so `buildPrintData` prints it for every Barangay Clearance whose purpose does not contain "loan" (assumption, confirm with the barangay). The "c/o" line stays off the overlay.
-- When the certificate is free, `Paid under OFFICIAL RECEIPT No.` prints `FOC` (Barangay Clearance only; the stamp box already did).
+- When the certificate is free, `Paid under OFFICIAL RECEIPT No.` prints `FOC` (Barangay Clearance, Utility Clearance and, since patch 340, Franchise Clearance; the stamp box already did).
 - Resident photo in the designated box on the right (if approved)
 - Bottom fields: valid ID presented, ID number, place of issue, date of issue, official receipt number
 - Do **not** print in the right thumbmark box or the resident signature line
@@ -114,7 +114,7 @@ Prints since patch 194 as values placed on a blank form image (`residency`, Lett
 The Word file shows wording varies by purpose. Do not hard-code example narratives or incident details. Confirm approved default wording, editable text, purpose options and required issuance metadata. Blotter management stays out of scope unless separately approved **(D-15)**.
 
 ### 4.9 First-Time Jobseekers (provisional)
-Prints since patch 194 as values on three blank sheets (`jobseeker`, `paperSize: "long"`, form images 612 x 936 pt) made from `Barangay-Certification-of-First-Time-Jobseekers-BLANK.docx`. All three sheets always print (stored details do not keep "Parts to print"). The witness is never printed. The blank copies are built by `scripts/make-blank-print-sources.py` and the page images by `scripts/build-print-forms.py`; the Long size is untried on the EPSON L3250.
+Prints since patch 194 as values on three blank sheets (`jobseeker`, `paperSize: "long"`, form images 612 x 936 pt) made from `Barangay-Certification-of-First-Time-Jobseekers-BLANK.docx`. All three sheets always print (stored details do not keep "Parts to print"). The witness name (the person who issued the document, in capitals) and the issue date print on the Oath and the Certification, as in the barangay's filled certifications (decision 118, patch 340); no designation is printed because an account has no position. The packet asks for no photo. The blank copies are built by `scripts/make-blank-print-sources.py` and the page images by `scripts/build-print-forms.py`; the Long size is untried on the EPSON L3250.
 
 The file holds an applicant information sheet, oath of undertaking and barangay certification. Applicant sheet fields: name, birthdate, age, complete address, years/months of residency, sex/gender, civil status, educational attainment, course (if applicable), JobStart beneficiary yes/no. Confirm which parts the system generates, which data comes from the resident record, how residency duration is supplied, and who witnesses the oath. **Do not infer legal eligibility or auto-approve a request** **(D-16)**.
 

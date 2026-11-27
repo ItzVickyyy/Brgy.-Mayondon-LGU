@@ -487,13 +487,8 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
     onePerResident: true,
     signatoryMode: "select",
     signatoryDefault: "Punong Barangay",
-    residentNeeds: [
-      "birthDate",
-      "residentSince",
-      "sex",
-      "civilStatus",
-      "photo",
-    ],
+    // No "photo": the First-Time Jobseeker packet prints no photo (owner, patch 340), so the dialog never asks for one.
+    residentNeeds: ["birthDate", "residentSince", "sex", "civilStatus"],
     fields: [
       {
         name: "educationalAttainment",
