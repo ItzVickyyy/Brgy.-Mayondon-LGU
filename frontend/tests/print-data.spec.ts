@@ -109,7 +109,9 @@ test.describe("buildPrintData", () => {
       lookups,
       name,
     )!
-    expect(data.values.sectorLine).toBe("SECTOR : Senior Citizen / Solo Parent")
+    expect(data.values.sectorLabel).toBe("SECTOR")
+    expect(data.values.sectorColon).toBe(":")
+    expect(data.values.sector).toBe("Senior Citizen / Solo Parent")
     expect(data.values.name).toBe("JUAN S. DELA CRUZ")
     expect(data.values.addressedTo).toBe("PhilHealth")
     expect(data.photoUrl).toBeUndefined()
@@ -152,9 +154,9 @@ test.describe("buildPrintData", () => {
       gaps,
       name,
     )!
-    expect(indigency.values.sectorLine).toBe(
-      "SECTOR : Solo Parent / Senior Citizen",
-    )
+    expect(indigency.values.sectorLabel).toBe("SECTOR")
+    expect(indigency.values.sectorColon).toBe(":")
+    expect(indigency.values.sector).toBe("Solo Parent / Senior Citizen")
     // an id that is no longer in the list prints nothing rather than another item's name
     const missing = buildPrintData(
       make("INDIGENCY", {
@@ -164,8 +166,9 @@ test.describe("buildPrintData", () => {
       gaps,
       name,
     )!
-    expect(missing.values.sectorLine).not.toContain("Solo Parent")
-    expect(missing.values.sectorLine).not.toContain("Senior Citizen")
+    expect(missing.values.sector).toBe("")
+    expect(missing.values.sectorLabel).toBe("")
+    expect(missing.values.sectorColon).toBe("")
   })
 
   test("utility sets marks values and franchise reads the tricycle lookup", () => {

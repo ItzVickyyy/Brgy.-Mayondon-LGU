@@ -14,7 +14,7 @@ import {
   STAMP_PAD,
   STAMP_VALUE_DX,
 } from "./overlayLayout"
-import { STAMP_FONT, VALUE_FONT } from "./overlayStyles"
+import { LABEL_FONT, STAMP_FONT, VALUE_FONT } from "./overlayStyles"
 import { paperDimensions } from "./paperSizes"
 import { printTemplates } from "./templates"
 
@@ -140,7 +140,7 @@ export async function renderSheets(data: PrintData): Promise<RenderedDocument> {
     }
     const lineMiddle = (DEFAULT_FONT_PT * LINE_HEIGHT_RATIO) / 2
     for (const item of page?.texts ?? []) {
-      context.font = `bold ${item.size * SCALE}px ${FONT}`
+      context.font = `bold ${item.size * SCALE}px ${item.font === "label" ? LABEL_FONT : FONT}`
       context.textAlign = item.align === "center" ? "center" : "left"
       context.fillText(item.text, item.x * SCALE, (item.y + lineMiddle) * SCALE)
     }

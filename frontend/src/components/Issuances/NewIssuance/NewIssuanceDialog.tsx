@@ -149,6 +149,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   const { exportIssuance } = useExportIssuance()
   const [autoSave, setAutoSave] = useState<{ state: "idle" | "saving" | "saved" | "error"; at?: Date }>({ state: "idle" })
   const draftIdRef = useRef<string | null>(null)
+  const draftTypeRef = useRef<DocumentCode | null>(null)
   const restoredDraftRef = useRef("")
   const correctionDraftRef = useRef(false)
   const [isCorrection, setIsCorrection] = useState(false)
@@ -507,6 +508,19 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
 
   const draftSignature = JSON.stringify([form.watch(), selectedResident?.id ?? ""])
 
+  /** A draft keeps the document type it was created under, so a draft saved under another type is deleted before saving. */
+  async function dropStaleDraft() {
+    const id = draftIdRef.current
+    if (!id || correctionDraftRef.current || draftTypeRef.current === null) return
+    if (draftTypeRef.current === form.getValues("documentType")) return
+    const removed = await issuanceApi.deleteDraft(id)
+    if (!removed) throw new Error(t("issuances.new.errors.deleteDraft"))
+    draftIdRef.current = null
+    draftTypeRef.current = null
+    lastSavedRef.current = ""
+    onDraftRemoved?.(id)
+  }
+
   /** Saves the draft. Saves are queued, so two saves can never overlap. */
   function persistDraft(auto: boolean) {
     const run = async () => {
@@ -514,11 +528,13 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       const signature = draftSignature
       setAutoSave((previous) => ({ ...previous, state: "saving" }))
       try {
+        await dropStaleDraft()
         const payload = draftPayload(!auto)
         const record = draftIdRef.current
           ? await issuanceApi.updateDraft(draftIdRef.current, payload)
           : await issuanceApi.createIssuance(payload)
         draftIdRef.current = record.id
+        draftTypeRef.current = record.documentType as DocumentCode
         lastSavedRef.current = signature
         onSaved(record, { auto })
         setAutoSave({ state: "saved", at: new Date() })
@@ -586,6 +602,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       setSectorManuallySelected(false)
       setValidUntilEdited(true)
       draftIdRef.current = record.id
+      draftTypeRef.current = record.documentType as DocumentCode
       correctionDraftRef.current = Boolean(record.correctsIssuanceId)
       setIsCorrection(Boolean(record.correctsIssuanceId))
       lastSavedRef.current = ""
@@ -699,6 +716,8 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
         setSaving(false)
         return
       }
+      await saveChain.current
+      await dropStaleDraft()
       const existingDraftId = draftIdRef.current
       const record = existingDraftId
         ? await issuanceApi.issueDraft(existingDraftId, raw, confirmedDuplicate)
@@ -822,6 +841,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
     setChangeResidentOpen(false)
     setQuickAdd(emptyQuickAdd)
     draftIdRef.current = null
+    draftTypeRef.current = null
     restoredDraftRef.current = ""
     correctionDraftRef.current = false
     setIsCorrection(false)

@@ -121,4 +121,23 @@ test.describe("print overlay layout", () => {
     expect(page.stamp).toMatchObject({ x: 400 + 2, y: 612 - 3 })
     expect(page.stamp?.rows.every((row) => row.value === "")).toBe(true)
   })
+
+  test("the Indigency SECTOR line: label and colon in the label font, value in the value font", () => {
+    const [page] = layoutOverlay(
+      { templateId: "indigency", values: { sectorLabel: "SECTOR", sectorColon: ":", sector: "Urban Poor" } },
+      measure,
+    )
+    const by = (key: string) => page.texts.find((t) => t.key === key)
+    expect(by("sectorLabel")).toMatchObject({ x: 51, y: 403.2, font: "label" })
+    expect(by("sectorColon")).toMatchObject({ x: 123.5, y: 403.2, font: "label" })
+    expect(by("sector")).toMatchObject({ x: 135, y: 402, font: "value" })
+  })
+
+  test("an empty sector prints no label or colon", () => {
+    const [page] = layoutOverlay(
+      { templateId: "indigency", values: { name: "JUAN", sectorLabel: "", sectorColon: "", sector: "" } },
+      measure,
+    )
+    expect(page.texts.map((t) => t.key)).toEqual(["name"])
+  })
 })

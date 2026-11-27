@@ -22,6 +22,7 @@ export type OverlayText = {
   y: number
   size: number
   align: "left" | "center"
+  font: "value" | "label"
 }
 export type OverlayStamp = {
   x: number
@@ -90,6 +91,7 @@ export function layoutOverlay(
         x: field.x + offset.x,
         y: field.y + offset.y,
         align: field.align ?? "left",
+        font: field.font ?? "value",
         size: fitFontSize(text, field.w, field.size ?? VALUE_FONT_PT, measure),
       })
     }

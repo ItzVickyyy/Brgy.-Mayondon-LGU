@@ -2,6 +2,8 @@ import { type PaperSize, pageRule, paperDimensions } from "./paperSizes"
 
 /** Typed values use the barangay's own font (Cambria Bold in Clearance Issuing.xls); Caladea is the metric-compatible stand-in where Cambria is not installed. */
 export const VALUE_FONT = "Cambria, Caladea, 'Times New Roman', serif"
+/** Labels printed by the app (the Indigency SECTOR line) use the form's own label font. */
+export const LABEL_FONT = "'Arial Narrow', 'Liberation Sans Narrow', 'Nimbus Sans Narrow', 'Helvetica Neue', Arial, sans-serif"
 /** The stamp box is Arial in the same workbook. */
 export const STAMP_FONT = "Arial, Helvetica, sans-serif"
 

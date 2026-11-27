@@ -11,7 +11,7 @@ import {
   STAMP_PAD,
   STAMP_VALUE_DX,
 } from "@/lib/print/overlayLayout"
-import { overlayCss, STAMP_FONT, VALUE_FONT } from "@/lib/print/overlayStyles"
+import { LABEL_FONT, overlayCss, STAMP_FONT, VALUE_FONT } from "@/lib/print/overlayStyles"
 import { paperDimensions } from "@/lib/print/paperSizes"
 import { printTemplates } from "@/lib/print/templates"
 
@@ -149,6 +149,7 @@ export function PrintOverlay({
                 left: `${item.x}pt`,
                 top: `${item.y}pt`,
                 fontSize: `${item.size}pt`,
+                fontFamily: item.font === "label" ? LABEL_FONT : undefined,
                 lineHeight: `${DEFAULT_FONT_PT * LINE_HEIGHT_RATIO}pt`,
                 transform:
                   item.align === "center" ? "translateX(-50%)" : undefined,

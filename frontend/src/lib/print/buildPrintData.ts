@@ -163,7 +163,8 @@ export function buildPrintData(
     stampDate: slashDate(payload.payment?.dateOfPayment),
     stampBy: payload.payment?.certifiedBy ?? "",
     sector: sectors.join(" / "),
-    sectorLine: sectors.length ? `SECTOR : ${sectors.join(" / ")}` : "",
+    sectorLabel: sectors.length ? "SECTOR" : "",
+    sectorColon: sectors.length ? ":" : "",
   }
 
   if (details.type === "FRANCHISE_CLEARANCE") {

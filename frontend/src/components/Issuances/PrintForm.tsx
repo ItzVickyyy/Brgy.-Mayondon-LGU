@@ -309,7 +309,7 @@ function Indigency({ data }: { data: PrintData }) {
           padding: "0 3pt",
         }}
       >
-        {v(x, "sectorLine")}
+        {v(x, "sectorLabel") ? `${v(x, "sectorLabel")} ${v(x, "sectorColon")} ${v(x, "sector")}` : ""}
       </p>
       <Row label="PURPOSE:" value={v(x, "purpose")} />
       <Row

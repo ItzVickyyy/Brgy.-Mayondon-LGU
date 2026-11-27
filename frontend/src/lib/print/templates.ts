@@ -18,6 +18,7 @@ export type PrintFieldBox = {
   align?: "left" | "center"
   size?: number // font size in pt, default 11
   page?: number // 0-based page of a multi-page template, default 0
+  font?: "value" | "label" // "label" = the form's own label font (Arial Narrow); default "value"
   prefix?: string // words printed before a non-empty value, for a row the barangay's form leaves unlabelled
 }
 export type PrintMarkBox = {
@@ -180,8 +181,10 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "name", x: 135, y: 343.6, w: 400 },
       { key: "address", x: 135, y: 362.6, w: 400 },
       { key: "age", x: 135, y: 382.6 },
-      // "SECTOR :" is NOT pre-printed (docs/04 4.2): the print builder must supply the label in `sectorLine`.
-      { key: "sectorLine", x: 50, y: 402, w: 480 },
+      // "SECTOR :" is NOT pre-printed (docs/04 4.2): the print builder supplies `sectorLabel` and `sectorColon` (label font, 1.2 pt lower than the value) and `sector` (value font).
+      { key: "sectorLabel", x: 51, y: 403.2, font: "label" },
+      { key: "sectorColon", x: 123.5, y: 403.2, font: "label" },
+      { key: "sector", x: 135, y: 402, w: 400 },
       { key: "purpose", x: 135, y: 479.6, w: 400 },
       {
         key: "addressedTo",

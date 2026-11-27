@@ -79,7 +79,7 @@ Both modes cover the six types that have a print template. Reprint is no longer 
 
 ### 4.2 Certificate of Indigency
 - Date, name, address, age, sector (one or two sector names), purpose, and `Addressed to the office of [office]`
-- The **`SECTOR :` label is not pre-printed** and must be included in the typed overlay
+- The **`SECTOR :` label is not pre-printed** and is typed by the overlay as three fields: `sectorLabel` ("SECTOR", x 51) and `sectorColon` (":", x 123.5) in the label font (Arial Narrow Bold 12 pt, 1.2 pt lower than the value) and `sector` (x 135, Cambria Bold 12 pt). With no sector, none of the three prints
 - Punong Barangay signature and everything else stays pre-printed
 
 ### 4.3 Clearance — Electrical and Water Connection
