@@ -15,6 +15,9 @@ Everything the team needs to know about the project lives in this folder, groupe
 | [09-Issuance-Form-Data-Map.md](09-Issuance-Form-Data-Map.md) | Every New Issuance input mapped to a proposed table and column | When the issuance form or schema changes |
 | [10-Decisions-Already-Made.md](10-Decisions-Already-Made.md) | Things the owner already removed, changed or settled, and legacy code to leave alone | **First, before changing anything**; especially for AI assistants |
 | [11-Host-Checks.md](11-Host-Checks.md) | Step-by-step checks and result sheet for the barangay server PC: backup/restore test, scheduled backup, Docker auto-start, second PC, printer, firewall | Installing or re-testing on the real host |
+| [12-Development-Database.md](12-Development-Database.md) | The development database | Setting up or resetting a development database |
+| [13-What-the-Code-Depends-On.md](13-What-the-Code-Depends-On.md) | Rules a code change must respect: security, UI (selection, sorting, card tables, accents, dialogs, inputs), speed, updates, release archive, deployment, issuance and printing | Before changing an area of the code |
+| [14-Assistant-Sandbox-Recipe.md](14-Assistant-Sandbox-Recipe.md) | How an AI assistant sets up a sandbox, runs the checks and builds a patch file | An AI assistant starting a patch session |
 
 **Precedence if documents conflict:** the instructor's *Final Project Guide* → the signed Creative Brief (client scope) → these documents.
 
