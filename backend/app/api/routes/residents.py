@@ -231,6 +231,56 @@ def _set_sectors(
         session.add(ResidentSector(resident_id=resident_id, sector_id=sector_id))
 
 
+ResidentSort = Literal[
+    "name",
+    "address",
+    "birthdate",
+    "sex",
+    "civil_status",
+    "occupation",
+    "archived_at",
+    "archived_by",
+    "archive_reason",
+]
+
+
+def _sorted_residents(stmt: Any, sort_by: ResidentSort | None, sort_dir: str) -> Any:
+    """Order a resident query by a heading the person clicked (315).
+
+    Empty values go last either way. Ties, and the default order, are
+    last name, first name, then id, so a page never reshuffles between clicks.
+    """
+    keys: list[Any] = []
+    if sort_by == "name":
+        keys = [sa_func.lower(Resident.last_name), sa_func.lower(Resident.first_name)]
+    elif sort_by == "address":
+        stmt = stmt.join(
+            Street, col(Resident.street_id) == col(Street.id), isouter=True
+        )
+        keys = [
+            sa_func.lower(Street.name),
+            col(Resident.house_number),
+            col(Resident.purok),
+        ]
+    elif sort_by == "archived_by":
+        stmt = stmt.join(
+            User, col(Resident.archived_by_user_id) == col(User.id), isouter=True
+        )
+        keys = [sa_func.lower(sa_func.coalesce(User.full_name, User.email))]
+    elif sort_by:
+        keys = [col(getattr(Resident, sort_by))]
+    ordering = [
+        key.desc().nulls_last() if sort_dir == "desc" else key.asc().nulls_last()
+        for key in keys
+    ]
+    return stmt.order_by(
+        *ordering,
+        sa_func.lower(Resident.last_name),
+        sa_func.lower(Resident.first_name),
+        col(Resident.id),
+    )
+
+
 @router.get("/", response_model=ResidentsPublic)
 def list_residents(
     session: SessionDep,
@@ -238,6 +288,11 @@ def list_residents(
     q: Annotated[str | None, Query(max_length=100, description="Name search")] = None,
     status: Literal["active", "archived", "all"] = "active",
     sector_id: int | None = None,
+    sort_by: Annotated[
+        ResidentSort | None,
+        Query(description="Sort the whole result by this column (default: by name)"),
+    ] = None,
+    sort_dir: Literal["asc", "desc"] = "asc",
     skip: Annotated[int, Query(ge=0)] = 0,
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> Any:
@@ -272,15 +327,8 @@ def list_residents(
             )
         )
     count = session.exec(select(sa_func.count()).select_from(stmt.subquery())).one()
-    rows = session.exec(
-        stmt.order_by(
-            sa_func.lower(Resident.last_name),
-            sa_func.lower(Resident.first_name),
-            col(Resident.id),
-        )
-        .offset(skip)
-        .limit(limit)
-    ).all()
+    stmt = _sorted_residents(stmt, sort_by, sort_dir)
+    rows: list[Resident] = list(session.exec(stmt.offset(skip).limit(limit)).all())
     ids = [r.id for r in rows]
     sectors = _sector_ids(session, ids)
     photos = _photo_ids(session, ids)

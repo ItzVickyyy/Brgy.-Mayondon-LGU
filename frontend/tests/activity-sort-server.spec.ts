@@ -28,6 +28,9 @@ const row = (n: number, email: string) => ({
   details: null,
 })
 
+// ES2020 has no Array.prototype.at.
+const last = <T>(items: T[]) => items[items.length - 1]
+
 const byDefault = [row(1, "b@example.test"), row(2, "c@example.test")]
 const asServed = [row(3, "z@example.test"), row(4, "a@example.test")]
 
@@ -66,24 +69,24 @@ test("Activity Log sorts on the server, cycling ascending, descending, default",
   await page.goto("/activity-log")
   const emails = page.locator("table tbody tr td:nth-child(3)")
   await expect(emails).toHaveText(["b@example.test", "c@example.test"])
-  expect(queries.at(-1)?.has("sort_by")).toBe(false)
+  expect(last(queries)?.has("sort_by")).toBe(false)
 
   const heading = page.getByTestId("sort-action")
   await heading.click()
   await expect(emails).toHaveText(["z@example.test", "a@example.test"])
-  expect(queries.at(-1)?.get("sort_by")).toBe("action")
-  expect(queries.at(-1)?.get("sort_dir")).toBe("asc")
+  expect(last(queries)?.get("sort_by")).toBe("action")
+  expect(last(queries)?.get("sort_dir")).toBe("asc")
   await expect(heading).toHaveAttribute("data-sort", "asc")
 
   await heading.click()
   await expect(heading).toHaveAttribute("data-sort", "desc")
-  await expect.poll(() => queries.at(-1)?.get("sort_dir")).toBe("desc")
-  expect(queries.at(-1)?.get("sort_by")).toBe("action")
+  await expect.poll(() => last(queries)?.get("sort_dir")).toBe("desc")
+  expect(last(queries)?.get("sort_by")).toBe("action")
 
   await heading.click()
   await expect(heading).toHaveAttribute("data-sort", "none")
   await expect(emails).toHaveText(["b@example.test", "c@example.test"])
-  expect(queries.at(-1)?.has("sort_by")).toBe(false)
+  expect(last(queries)?.has("sort_by")).toBe(false)
 })
 
 test("Each Activity Log heading asks for its own server column", async ({
@@ -103,6 +106,6 @@ test("Each Activity Log heading asks for its own server column", async ({
   }
   for (const [heading, serverColumn] of Object.entries(columns)) {
     await page.getByTestId(`sort-${heading}`).click()
-    await expect.poll(() => queries.at(-1)?.get("sort_by")).toBe(serverColumn)
+    await expect.poll(() => last(queries)?.get("sort_by")).toBe(serverColumn)
   }
 })

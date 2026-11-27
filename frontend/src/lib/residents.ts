@@ -1,8 +1,17 @@
 import { AxiosError } from "axios"
 
-import type { LookupItem, ResidentPublic } from "@/client"
+import type {
+  LookupItem,
+  ResidentPublic,
+  residentsListResidentsData,
+} from "@/client"
 import i18n from "@/i18n"
 import { formatLocaleDate } from "@/lib/locale"
+
+/** Server sort columns of `GET /residents/` (315). */
+export type ResidentSortBy = NonNullable<
+  residentsListResidentsData["query"]
+>["sort_by"]
 
 export const civilStatuses = [
   "Single",

@@ -5,12 +5,12 @@ import { useCallback, useState } from "react"
  * accessor that returns the value to compare. Clicking a heading cycles
  * ascending -> descending -> back to the original order.
  *
- * Server-paged tables (Records, Archived, Barangay IDs, Issuance History)
+ * Server-paged tables still on this hook (Barangay IDs, Issuance History)
  * sort only the rows on the page being shown; tables that hold the whole list
  * (Officials, Backup, User Accounts) sort the full list before it is split
  * into pages. Empty values always go last.
  *
- * The Activity Log uses `useServerSort` instead (314): it only reports which
+ * The Activity Log (314) and Records and Archived (315) use `useServerSort`: it only reports which
  * column and direction were chosen, the endpoint sorts the whole result
  * (`sort_by`, `sort_dir`) and the page shows its rows as they arrive.
  */

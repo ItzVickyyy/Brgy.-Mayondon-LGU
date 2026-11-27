@@ -21,9 +21,10 @@ import { SortLabel } from "@/components/Common/SortLabel"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { cardTable } from "@/lib/cardTable"
 import { formatLocaleDate } from "@/lib/locale"
+import type { ResidentSortBy } from "@/lib/residents"
 import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
-import { useSort } from "@/lib/useSort"
+import { useServerSort } from "@/lib/useSort"
 
 type ArchivedResidentsViewProps = {
   isAdmin: boolean
@@ -42,6 +43,13 @@ export function ArchivedResidentsView({
   const [debouncedSearch, setDebouncedSearch] = useState("")
   const [pageIndex, setPageIndex] = useState(0)
   const [pageSize, setPageSize] = useState(10)
+  // Heading clicks sort the whole list on the server, not one page (315).
+  const sort = useServerSort({
+    resident: "name",
+    archivedOn: "archived_at",
+    archivedBy: "archived_by",
+    reason: "archive_reason",
+  })
 
   useEffect(() => {
     const timer = window.setTimeout(
@@ -51,21 +59,30 @@ export function ArchivedResidentsView({
     return () => window.clearTimeout(timer)
   }, [search])
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: the search is the trigger.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: the search and sort are the trigger.
   useEffect(() => {
     setPageIndex(0)
-  }, [debouncedSearch])
+  }, [debouncedSearch, sort.key])
 
   // The key starts with "residents", so archiving or restoring a resident
   // anywhere on the Records page refreshes this list too.
   const query = useQuery({
-    queryKey: ["residents", "archived", debouncedSearch, pageIndex, pageSize],
+    queryKey: [
+      "residents",
+      "archived",
+      debouncedSearch,
+      sort.key,
+      pageIndex,
+      pageSize,
+    ],
     queryFn: async () =>
       (
         await ResidentsService.listResidents({
           query: {
             q: debouncedSearch || undefined,
             status: "archived",
+            sort_by: sort.by as ResidentSortBy,
+            sort_dir: sort.by ? sort.dir : undefined,
             skip: pageIndex * pageSize,
             limit: pageSize,
           },
@@ -81,14 +98,6 @@ export function ArchivedResidentsView({
 
   // Server pages: a selection lasts only while its rows are on screen.
   const pick = useRowSelection(residents, (resident) => String(resident.id))
-  // Click a heading to sort the rows on this page (292).
-  const sort = useSort(residents, {
-    resident: (resident) => resident.full_name,
-    archivedOn: (resident) => resident.archived_at,
-    archivedBy: (resident) => resident.archived_by_name,
-    reason: (resident) => resident.archive_reason,
-  })
-
   const columns = [
     "resident",
     "archivedOn",
@@ -197,7 +206,7 @@ export function ArchivedResidentsView({
                 </tr>
               </thead>
               <tbody className={`divide-y ${cardTable.body}`}>
-                {sort.sorted.map((resident) => (
+                {residents.map((resident) => (
                   <tr
                     key={resident.id}
                     {...rowOpen(() => onViewProfile(resident))}

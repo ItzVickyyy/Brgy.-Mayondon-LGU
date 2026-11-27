@@ -54,13 +54,14 @@ import { notify } from "@/lib/notifications"
 import { civilStatusLabel, sexLabel } from "@/lib/residentLabels"
 import {
   formatBusinessDate,
+  type ResidentSortBy,
   readApiError,
   residentAddress,
   streetNameMap,
 } from "@/lib/residents"
 import { rowOpen } from "@/lib/rowOpen"
 import { useRowSelection } from "@/lib/useRowSelection"
-import { useSort } from "@/lib/useSort"
+import { useServerSort } from "@/lib/useSort"
 
 export const Route = createFileRoute("/_layout/records")({
   component: RecordsManagement,
@@ -150,10 +151,20 @@ function RecordsManagement() {
     return () => window.clearTimeout(timer)
   }, [search])
 
+  // Heading clicks sort the whole list on the server, not one page (315).
+  const sort = useServerSort({
+    resident: "name",
+    address: "address",
+    birthdate: "birthdate",
+    sex: "sex",
+    civilStatus: "civil_status",
+    occupation: "occupation",
+  })
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: the filters are the trigger.
   useEffect(() => {
     setPageIndex(0)
-  }, [debouncedSearch])
+  }, [debouncedSearch, sort.key])
 
   const streetsQuery = useQuery({
     queryKey: ["lookups", "streets"],
@@ -172,13 +183,15 @@ function RecordsManagement() {
   const streetNames = streetNameMap(streets)
 
   const residentsQuery = useQuery({
-    queryKey: ["residents", debouncedSearch, pageIndex, pageSize],
+    queryKey: ["residents", debouncedSearch, sort.key, pageIndex, pageSize],
     queryFn: async () =>
       (
         await ResidentsService.listResidents({
           query: {
             q: debouncedSearch || undefined,
             status: "active",
+            sort_by: sort.by as ResidentSortBy,
+            sort_dir: sort.by ? sort.dir : undefined,
             skip: pageIndex * pageSize,
             limit: pageSize,
           },
@@ -190,15 +203,6 @@ function RecordsManagement() {
   const total = residentsQuery.data?.count ?? 0
   // Server pages: a selection lasts only while its rows are on screen.
   const pick = useRowSelection(residents, (resident) => String(resident.id))
-  // Click a heading to sort the rows on this page (292).
-  const sort = useSort(residents, {
-    resident: (resident) => resident.full_name,
-    address: (resident) => residentAddress(resident, streetNames),
-    birthdate: (resident) => resident.birthdate,
-    sex: (resident) => resident.sex,
-    civilStatus: (resident) => resident.civil_status,
-    occupation: (resident) => resident.occupation,
-  })
   const pageCount = Math.max(1, Math.ceil(total / pageSize))
   const start = total ? pageIndex * pageSize + 1 : 0
   const end = Math.min((pageIndex + 1) * pageSize, total)
@@ -444,7 +448,7 @@ function RecordsManagement() {
                       </tr>
                     </thead>
                     <tbody className="divide-y @max-[47rem]/records:block">
-                      {sort.sorted.map((resident) => {
+                      {residents.map((resident) => {
                         const address = residentAddress(resident, streetNames)
                         return (
                           <tr

@@ -539,6 +539,98 @@ def test_list_pagination_limits(
     )
 
 
+def test_list_sorts_the_whole_result_not_one_page(
+    client: TestClient,
+    staff_token_headers: Headers,
+    superuser_token_headers: Headers,
+    db: Session,
+) -> None:
+    tag = random_lower_string()[:8]
+    last = f"Srt{tag}"
+    early = Street(name=f"Aaa Road {tag}")
+    late = Street(name=f"Zzz Road {tag}")
+    db.add(early)
+    db.add(late)
+    db.commit()
+    db.refresh(early)
+    db.refresh(late)
+
+    def make(first: str, **extra: object) -> dict:
+        return _create(
+            client, staff_token_headers, first_name=first, last_name=last, **extra
+        )
+
+    alpha = make("Alpha", birthdate="1995-01-01", street_id=late.id)
+    bravo = make(
+        "Bravo", birthdate="1980-01-01", street_id=early.id, occupation="Baker"
+    )
+    charlie = make("Charlie", birthdate="1990-01-01", occupation="Cook")
+
+    def names(**params: object) -> list[str]:
+        r = client.get(
+            f"{API}/residents/",
+            headers=staff_token_headers,
+            params={"q": tag, "limit": 10, **params},
+        )
+        assert r.status_code == 200, r.text
+        return [x["first_name"] for x in r.json()["data"]]
+
+    # Default: by name.
+    assert names() == ["Alpha", "Bravo", "Charlie"]
+    assert names(sort_by="name", sort_dir="desc") == ["Charlie", "Bravo", "Alpha"]
+    assert names(sort_by="birthdate") == ["Bravo", "Charlie", "Alpha"]
+    assert names(sort_by="birthdate", sort_dir="desc") == [
+        "Alpha",
+        "Charlie",
+        "Bravo",
+    ]
+    # Empty values go last in both directions.
+    assert names(sort_by="occupation") == ["Bravo", "Charlie", "Alpha"]
+    assert names(sort_by="occupation", sort_dir="desc") == [
+        "Charlie",
+        "Bravo",
+        "Alpha",
+    ]
+    # Address sorts by street; a resident with no street comes last.
+    assert names(sort_by="address") == ["Bravo", "Alpha", "Charlie"]
+    assert names(sort_by="address", sort_dir="desc") == ["Alpha", "Bravo", "Charlie"]
+    # The sort covers the whole result: page one of three holds the first row.
+    first_page = client.get(
+        f"{API}/residents/",
+        headers=staff_token_headers,
+        params={"q": tag, "sort_by": "birthdate", "limit": 1},
+    ).json()
+    assert first_page["count"] == 3
+    assert [x["id"] for x in first_page["data"]] == [bravo["id"]]
+
+    # Archived list: reason and archiver sort too (the archiver needs a join).
+    for resident, reason in ((bravo, "Moved away"), (charlie, "Deceased")):
+        r = client.post(
+            f"{API}/residents/{resident['id']}/archive",
+            headers=superuser_token_headers,
+            json={"reason": reason},
+        )
+        assert r.status_code == 200, r.text
+    assert names(status="archived", sort_by="archive_reason") == ["Charlie", "Bravo"]
+    assert names(status="archived", sort_by="archived_by", sort_dir="desc") == [
+        "Bravo",
+        "Charlie",
+    ]
+    assert names(status="archived", sort_by="archived_at")
+    assert alpha["id"] not in [
+        x["id"]
+        for x in client.get(
+            f"{API}/residents/",
+            headers=staff_token_headers,
+            params={"q": tag, "status": "archived"},
+        ).json()["data"]
+    ]
+    bad = client.get(
+        f"{API}/residents/", headers=staff_token_headers, params={"sort_by": "ssn"}
+    )
+    assert bad.status_code == 422
+
+
 # --- Archive and restore -----------------------------------------------------
 
 
