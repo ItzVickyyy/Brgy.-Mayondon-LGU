@@ -2,6 +2,7 @@
 // two "from / to" dates are one joined field. The API is mocked (synthetic
 // data), so this spec needs only the running frontend.
 import { expect, type Page, test } from "@playwright/test"
+import { waitUntilSettled } from "./utils/settled"
 
 const admin = {
   id: "22222222-0000-0000-0000-000000000001",
@@ -87,6 +88,8 @@ for (const language of ["en", "fil"]) {
     await expect(range.locator('input[type="date"]')).toHaveCount(2)
 
     await expect(page.getByTestId("selection-bar")).toHaveCount(0)
+    // The page may still be settling after the rows appear (317).
+    await waitUntilSettled(page.locator("table").first())
     const before = await page.locator("table").first().boundingBox()
     await page.getByTestId("row-select").nth(1).click()
     const bar = page.getByTestId("selection-bar")
