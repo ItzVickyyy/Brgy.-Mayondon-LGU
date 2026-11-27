@@ -66,6 +66,8 @@ const detailKeyLabels = {
   archive_reason: "activity.detailKeys.archive_reason",
   verified_on: "activity.detailKeys.verified_on",
   previous_verified_on: "activity.detailKeys.previous_verified_on",
+  evidence: "activity.detailKeys.evidence",
+  date_precision: "activity.detailKeys.date_precision",
   created: "activity.detailKeys.created",
   updated: "activity.detailKeys.updated",
   skipped: "activity.detailKeys.skipped",

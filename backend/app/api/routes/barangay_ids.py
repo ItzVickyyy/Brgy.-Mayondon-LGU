@@ -99,7 +99,7 @@ def list_barangay_ids(
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
 ) -> Any:
     """Latest issued card per resident. A voided card is not listed; the card
-    issued before it, if any, shows instead.
+    issued before it, if any, shows instead. Deceased residents are left out.
 
     Browsing the list without a name or number search is a bulk read of personal
     data and adds a ``barangay_id.list`` audit row (once per 10 minutes).
@@ -123,6 +123,8 @@ def list_barangay_ids(
             IssuanceBarangayId, col(IssuanceBarangayId.issuance_id) == col(Issuance.id)
         )
         .join(Resident, col(Resident.id) == col(Issuance.resident_id))
+        # A deceased resident's card is not in use; it stays in Issuance History.
+        .where(col(Resident.status) != "deceased")
     )
     if status == "expired":
         stmt = stmt.where(col(IssuanceBarangayId.valid_until) < today)

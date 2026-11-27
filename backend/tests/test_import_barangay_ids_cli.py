@@ -358,3 +358,38 @@ def test_missing_columns_and_unknown_user_are_refused(tmp_path: Path) -> None:
         ],
     )
     assert cli.main([path, "--user", "nobody@example.com"]) == 2
+
+
+def test_a_deceased_resident_gets_no_imported_card(
+    db: Session, tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    last, number = _tag(), f"D{_tag()}"
+    person = _resident(db, first_name="Ana", last_name=last, status="deceased")
+    path = _book(
+        tmp_path,
+        [
+            [
+                number,
+                date(2024, 1, 5),
+                date(2025, 1, 5),
+                "new",
+                "Ana",
+                None,
+                last,
+                None,
+                None,
+                None,
+            ]
+        ],
+    )
+    assert _run(path, "--commit") == 0
+    assert "left_out_resident_deceased: 1" in capsys.readouterr().out
+    db.expire_all()
+    db.refresh(person)
+    assert person.id_number is None
+    assert (
+        db.exec(
+            select(IssuanceBarangayId).where(IssuanceBarangayId.id_number == number)
+        ).first()
+        is None
+    )

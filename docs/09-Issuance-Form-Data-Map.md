@@ -53,12 +53,29 @@ These close the gaps found when the database plan was reviewed. They are **desig
 | `id_number` | text, unique where not null (decision 2) |
 | `voter_registration` | text, `CHECK` in (`registered`, `unregistered`), optional. The client's list remark; it is not proof (see `voter_proof_verified_at`) |
 | `emergency_contact_name`, `_address`, `_phone` | text, optional |
-| `status` | text, `CHECK` in (`active`, `archived`), default `active` |
+| `status` | text, `CHECK` in (`active`, `archived`, `deceased`), default `active` (`deceased`: patch 327, see `resident_deaths`) |
 | `archive_reason`, `archived_at`, `archived_by_user_id` | all required when `status = 'archived'` (`CHECK`), otherwise null. Residents are archived, never deleted (D-26) |
 | `created_at`, `updated_at` | timestamptz |
 | `created_by_user_id`, `updated_by_user_id` | FK `user`, `ON DELETE SET NULL` |
 
 No `full_name` column. One backend function builds the display and printed name, so lists and prints always match. Indexes: `(lower(last_name), lower(first_name))`, `birthdate`, and a partial unique index on `id_number`. Duplicates are **warned about, not blocked**: if the same first name, last name and birthdate exist, the API says so (409 `possible_duplicate`, with `resident_ids` and `matches`: id, full name, birthdate, status) and the clerk confirms (namesakes and twins exist). Names are compared by a key (`app/core/duplicates.py`): accents removed, lower case, every character that is not a letter or digit dropped, so `Dela Cruz`, `Delacruz`, `dela-cruz` and `Peña`/`Pena` are the same. A record that holds only a name (no birthdate, as after the Barangay ID history import) is matched on first, middle and last name and suffix, and a new record with no birthdate is matched the same way. Archived residents are included. `POST /residents/` and `PATCH /residents/{id}` (only when a name part or the birthdate really changes) both check, and both take `confirm_duplicate=true`. The check and the insert run under a PostgreSQL advisory lock on the person, so two clerks adding the same person at the same moment get one record and one warning. The issuance screen edits a resident with `confirm_duplicate=true` because it has no place to show the warning; the Records form shows it.
+
+### `resident_deaths` (patch 327; migration `c7f4a1d9e352`)
+
+One row per recorded death. Rows are never edited or deleted: a correction voids the row in force and adds a new one; a mistake is voided and the resident becomes `active` again. The cause of death is not collected (D-49).
+
+| Column | Type / rule |
+|---|---|
+| `id` | UUID PK |
+| `resident_id` | FK `residents`. At most one row per resident with `voided_at` empty (partial unique index) |
+| `date_of_death` | `date`, empty only when the precision is `unknown`. Not in the future, not before 1900 or before the birthdate (compared as far as it is known) |
+| `date_precision` | `day`, `month`, `year` or `unknown`. For `month` and `year` the first day of the period is stored; show only the known part |
+| `evidence` | `reported` (somebody told the barangay) or `verified` (staff saw a death certificate or affidavit) |
+| `source_note` | text, optional, at most 500: who reported it or what was seen |
+| `recorded_at`, `recorded_by_user_id` | when and who (`ON DELETE SET NULL`) |
+| `voided_at`, `voided_by_user_id`, `void_reason` | empty while in force; time and reason together once voided |
+
+`residents.status = 'deceased'` exactly while a row is in force (kept by the API, not by a database constraint). Age at death is computed on read, only from an exact day and a birthdate.
 
 ### `streets`, `resident_sectors`, `resident_photos`
 

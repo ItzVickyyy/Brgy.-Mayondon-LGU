@@ -71,6 +71,9 @@ RECORD_ACTIONS = (
     "resident.update",
     "resident.archive",
     "resident.restore",
+    "resident.death_record",
+    "resident.death_correct",
+    "resident.death_void",
     "resident.photo_set",
     "resident.photo_remove",
 )

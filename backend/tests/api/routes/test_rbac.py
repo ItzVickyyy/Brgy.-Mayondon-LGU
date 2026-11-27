@@ -320,6 +320,7 @@ ADMIN_ONLY = {
     Permission.OFFICIALS_MANAGE,
     Permission.RECORDS_IMPORT,
     Permission.RECORDS_ARCHIVE,
+    Permission.RECORDS_DECEASED,
     Permission.ISSUANCE_VOID,
     Permission.ISSUANCE_ARCHIVE,
     Permission.ID_OVERRIDE,

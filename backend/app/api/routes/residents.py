@@ -2,8 +2,10 @@
 
 Every route needs a permission (``require_permission``): search, view, add, edit
 and photos need RECORDS_EDIT (Staff and System Administrator); archive and
-restore need RECORDS_ARCHIVE (System Administrator only). Every write adds an
-audit row in the same transaction. Audit details hold field names, never values.
+restore need RECORDS_ARCHIVE, and recording, correcting or voiding a death needs
+RECORDS_DECEASED (both System Administrator only). Every write adds an audit row
+in the same transaction. Audit details hold field names and codes, never personal
+values.
 """
 
 import uuid
@@ -11,6 +13,7 @@ from datetime import UTC, date, datetime, timedelta
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import func as sa_func
 from sqlmodel import Session, col, delete, select
 
@@ -27,8 +30,13 @@ from app.models_issuance import ID_EXPIRING_SOON_DAYS, Issuance, IssuanceBaranga
 from app.models_residents import (
     MAX_PHOTO_BYTES,
     ArchiveRequest,
+    DeathCorrectRequest,
+    DeathRecordRequest,
+    DeathVoidRequest,
     Resident,
     ResidentCreate,
+    ResidentDeath,
+    ResidentDeathPublic,
     ResidentPhoto,
     ResidentPublic,
     ResidentSector,
@@ -45,6 +53,8 @@ router = APIRouter(prefix="/residents", tags=["residents"])
 
 EditUser = Annotated[User, Depends(require_permission(Permission.RECORDS_EDIT))]
 ArchiveUser = Annotated[User, Depends(require_permission(Permission.RECORDS_ARCHIVE))]
+
+DeceasedUser = Annotated[User, Depends(require_permission(Permission.RECORDS_DECEASED))]
 
 MODULE = "records"
 
@@ -129,12 +139,52 @@ def _id_status_of(
     return "valid"
 
 
+def _current_deaths(
+    session: Session, resident_ids: list[uuid.UUID]
+) -> dict[uuid.UUID, ResidentDeath]:
+    """The death record in force (not voided) of each deceased resident."""
+    if not resident_ids:
+        return {}
+    rows = session.exec(
+        select(ResidentDeath).where(
+            col(ResidentDeath.resident_id).in_(resident_ids),
+            col(ResidentDeath.voided_at).is_(None),
+        )
+    ).all()
+    return {row.resident_id: row for row in rows}
+
+
+def _death_public(
+    resident: Resident, death: ResidentDeath | None, names: dict[uuid.UUID, str]
+) -> ResidentDeathPublic | None:
+    if death is None:
+        return None
+    age = (
+        age_on(resident.birthdate, death.date_of_death)
+        if death.date_precision == "day"
+        else None
+    )
+    return ResidentDeathPublic.model_validate(
+        {
+            **death.model_dump(),
+            "age_at_death": age,
+            "recorded_by_name": names.get(death.recorded_by_user_id),  # type: ignore[arg-type]
+        }
+    )
+
+
 def _verifier_names(
-    session: Session, residents: list[Resident]
+    session: Session,
+    residents: list[Resident],
+    deaths: dict[uuid.UUID, ResidentDeath],
 ) -> dict[uuid.UUID, str]:
-    """Full name (else e-mail) of the accounts that recorded a voter proof or
-    archived a resident, keyed by user id."""
-    user_ids: set[uuid.UUID] = set()
+    """Full name (else e-mail) of the accounts that recorded a voter proof,
+    archived a resident or recorded a death, keyed by user id."""
+    user_ids: set[uuid.UUID] = {
+        d.recorded_by_user_id
+        for d in deaths.values()
+        if d.recorded_by_user_id is not None
+    }
     for r in residents:
         if r.voter_proof_verified_by_user_id is not None:
             user_ids.add(r.voter_proof_verified_by_user_id)
@@ -153,17 +203,25 @@ def _to_public(
     id_valid_until: date | None,
     verifier_name: str | None = None,
     archiver_name: str | None = None,
+    death: ResidentDeathPublic | None = None,
 ) -> ResidentPublic:
     data = resident.model_dump()
     return ResidentPublic.model_validate(
         {
             **data,
             "full_name": build_full_name(resident),
-            "age": age_on(resident.birthdate),
+            # Someone who has died stops ageing: the age at death, if known.
+            "age": death.age_at_death
+            if resident.status == "deceased" and death
+            else age_on(resident.birthdate),
+            "death": death,
             "sector_ids": sectors,
             "has_photo": has_photo,
-            "id_status": _id_status_of(id_valid_until),
-            "id_valid_until": id_valid_until,
+            # A deceased resident's card no longer counts as valid or expiring.
+            "id_status": "none"
+            if resident.status == "deceased"
+            else _id_status_of(id_valid_until),
+            "id_valid_until": None if resident.status == "deceased" else id_valid_until,
             "id_validity_months": id_validity_months(
                 resident.residency_type, resident.voter_proof_verified_at
             ),
@@ -174,7 +232,8 @@ def _to_public(
 
 
 def _public(session: Session, resident: Resident) -> ResidentPublic:
-    names = _verifier_names(session, [resident])
+    deaths = _current_deaths(session, [resident.id])
+    names = _verifier_names(session, [resident], deaths)
     return _to_public(
         resident,
         _sector_ids(session, [resident.id])[resident.id],
@@ -182,6 +241,7 @@ def _public(session: Session, resident: Resident) -> ResidentPublic:
         _id_valid_untils(session, [resident.id]).get(resident.id),
         names.get(resident.voter_proof_verified_by_user_id),  # type: ignore[arg-type]
         names.get(resident.archived_by_user_id),  # type: ignore[arg-type]
+        _death_public(resident, deaths.get(resident.id), names),
     )
 
 
@@ -190,6 +250,29 @@ def _get_or_404(session: Session, resident_id: uuid.UUID) -> Resident:
     if resident is None:
         raise HTTPException(status_code=404, detail="Resident not found")
     return resident
+
+
+def _locked_or_404(session: Session, resident_id: uuid.UUID) -> Resident:
+    """Lock the resident row, so a change of status cannot slip in between the
+    check and the write."""
+    resident = session.exec(
+        select(Resident).where(Resident.id == resident_id).with_for_update()
+    ).first()
+    if resident is None:
+        raise HTTPException(status_code=404, detail="Resident not found")
+    return resident
+
+
+def _refuse_frozen(resident: Resident) -> None:
+    """Archived and deceased records are read only."""
+    if resident.status == "archived":
+        raise HTTPException(
+            status_code=409, detail="Archived residents cannot be edited; restore first"
+        )
+    if resident.status == "deceased":
+        raise HTTPException(
+            status_code=409, detail="Deceased residents cannot be edited"
+        )
 
 
 def _check_references(
@@ -286,7 +369,7 @@ def list_residents(
     session: SessionDep,
     user: EditUser,
     q: Annotated[str | None, Query(max_length=100, description="Name search")] = None,
-    status: Literal["active", "archived", "all"] = "active",
+    status: Literal["active", "archived", "deceased", "all"] = "active",
     sector_id: int | None = None,
     sort_by: Annotated[
         ResidentSort | None,
@@ -333,7 +416,8 @@ def list_residents(
     sectors = _sector_ids(session, ids)
     photos = _photo_ids(session, ids)
     valid_untils = _id_valid_untils(session, ids)
-    verifiers = _verifier_names(session, list(rows))
+    deaths = _current_deaths(session, ids)
+    verifiers = _verifier_names(session, list(rows), deaths)
     if not search_words(q) and rows:
         record_read_event(
             session,
@@ -352,6 +436,7 @@ def list_residents(
                 valid_untils.get(r.id),
                 verifiers.get(r.voter_proof_verified_by_user_id),  # type: ignore[arg-type]
                 verifiers.get(r.archived_by_user_id),  # type: ignore[arg-type]
+                _death_public(r, deaths.get(r.id), verifiers),
             )
             for r in rows
         ],
@@ -525,11 +610,8 @@ def update_resident(
         bool, Query(description="Set true after the clerk confirms a namesake")
     ] = False,
 ) -> Any:
-    resident = _get_or_404(session, resident_id)
-    if resident.status == "archived":
-        raise HTTPException(
-            status_code=409, detail="Archived residents cannot be edited; restore first"
-        )
+    resident = _locked_or_404(session, resident_id)
+    _refuse_frozen(resident)
     changes = body.model_dump(exclude_unset=True)
     for required in ("first_name", "last_name"):
         if required in changes and changes[required] is None:
@@ -630,16 +712,9 @@ def update_resident(
 
 
 def _proof_resident(session: Session, resident_id: uuid.UUID) -> Resident:
-    """Lock the resident row and refuse archived ones."""
-    resident = session.exec(
-        select(Resident).where(Resident.id == resident_id).with_for_update()
-    ).first()
-    if resident is None:
-        raise HTTPException(status_code=404, detail="Resident not found")
-    if resident.status == "archived":
-        raise HTTPException(
-            status_code=409, detail="Archived residents cannot be edited; restore first"
-        )
+    """Lock the resident row and refuse read-only ones."""
+    resident = _locked_or_404(session, resident_id)
+    _refuse_frozen(resident)
     return resident
 
 
@@ -740,9 +815,13 @@ def clear_voter_proof(
 def archive_resident(
     resident_id: uuid.UUID, body: ArchiveRequest, session: SessionDep, user: ArchiveUser
 ) -> Any:
-    resident = _get_or_404(session, resident_id)
+    resident = _locked_or_404(session, resident_id)
     if resident.status == "archived":
         raise HTTPException(status_code=409, detail="Resident is already archived")
+    if resident.status == "deceased":
+        raise HTTPException(
+            status_code=409, detail="A deceased resident cannot be archived"
+        )
     now = _now()
     resident.status = "archived"
     resident.archive_reason = body.reason
@@ -769,7 +848,7 @@ def archive_resident(
 def restore_resident(
     resident_id: uuid.UUID, session: SessionDep, user: ArchiveUser
 ) -> Any:
-    resident = _get_or_404(session, resident_id)
+    resident = _locked_or_404(session, resident_id)
     if resident.status != "archived":
         raise HTTPException(status_code=409, detail="Resident is not archived")
     resident.status = "active"
@@ -786,6 +865,177 @@ def restore_resident(
         module="records",
         record_type="resident",
         record_id=resident.id,
+    )
+    session.commit()
+    session.refresh(resident)
+    return _public(session, resident)
+
+
+# --- Death records (patch 327) ----------------------------------------------
+
+
+def _refuse_death_before_birth(resident: Resident, body: DeathRecordRequest) -> None:
+    """Compare only as far as the date of death is known."""
+    born, died = resident.birthdate, body.date_of_death
+    if born is None or died is None:
+        return
+    if body.date_precision == "month":
+        born = born.replace(day=1)
+    elif body.date_precision == "year":
+        born = born.replace(month=1, day=1)
+    if died < born:
+        raise HTTPException(
+            status_code=422, detail="The date of death is before the birthdate"
+        )
+
+
+def _deceased_with_record(
+    session: Session, resident_id: uuid.UUID
+) -> tuple[Resident, ResidentDeath]:
+    resident = _locked_or_404(session, resident_id)
+    death = _current_deaths(session, [resident.id]).get(resident.id)
+    if resident.status != "deceased" or death is None:
+        raise HTTPException(
+            status_code=409, detail="Resident is not recorded as deceased"
+        )
+    return resident, death
+
+
+def _new_death(
+    resident: Resident, body: DeathRecordRequest, user: User, now: datetime
+) -> ResidentDeath:
+    return ResidentDeath(
+        resident_id=resident.id,
+        date_of_death=body.date_of_death,
+        date_precision=body.date_precision,
+        evidence=body.evidence,
+        source_note=body.source_note,
+        recorded_at=now,
+        recorded_by_user_id=user.id,
+    )
+
+
+def _void_death_row(
+    death: ResidentDeath, reason: str, user: User, now: datetime
+) -> None:
+    death.voided_at = now
+    death.voided_by_user_id = user.id
+    death.void_reason = reason
+
+
+@router.post("/{resident_id}/deceased", response_model=ResidentPublic)
+def record_death(
+    resident_id: uuid.UUID,
+    body: DeathRecordRequest,
+    session: SessionDep,
+    user: DeceasedUser,
+) -> Any:
+    """Record that an active resident has died. They leave the population counts
+    and expiry lists, cannot be edited or archived, and get no new documents.
+    Documents already issued are not changed."""
+    resident = _locked_or_404(session, resident_id)
+    if resident.status == "deceased":
+        raise HTTPException(
+            status_code=409, detail="Resident is already recorded as deceased"
+        )
+    if resident.status == "archived":
+        raise HTTPException(
+            status_code=409,
+            detail="Restore the archived resident before recording a death",
+        )
+    _refuse_death_before_birth(resident, body)
+    now = _now()
+    resident.status = "deceased"
+    resident.updated_at = now
+    resident.updated_by_user_id = user.id
+    session.add(resident)
+    session.add(_new_death(resident, body, user, now))
+    record_audit_event(
+        session,
+        action="resident.death_record",
+        actor=user,
+        module=MODULE,
+        record_type="resident",
+        record_id=resident.id,
+        details={"evidence": body.evidence, "date_precision": body.date_precision},
+    )
+    session.commit()
+    session.refresh(resident)
+    return _public(session, resident)
+
+
+@router.put("/{resident_id}/deceased", response_model=ResidentPublic)
+def correct_death(
+    resident_id: uuid.UUID,
+    body: DeathCorrectRequest,
+    session: SessionDep,
+    user: DeceasedUser,
+) -> Any:
+    """Replace the death record, for example when the certificate arrives
+    (reported to verified) or a date was wrong. The old row is voided and kept."""
+    resident, old = _deceased_with_record(session, resident_id)
+    _refuse_death_before_birth(resident, body)
+    changed = [
+        field
+        for field in ("date_of_death", "date_precision", "evidence", "source_note")
+        if getattr(old, field) != getattr(body, field)
+    ]
+    if not changed:
+        # Saved with nothing changed: no new row and no Activity Log row.
+        return _public(session, resident)
+    now = _now()
+    _void_death_row(old, body.reason, user, now)
+    session.add(old)
+    # Only one row per resident may be in force: write the voided one first.
+    session.flush()
+    session.add(_new_death(resident, body, user, now))
+    resident.updated_at = now
+    resident.updated_by_user_id = user.id
+    session.add(resident)
+    record_audit_event(
+        session,
+        action="resident.death_correct",
+        actor=user,
+        module=MODULE,
+        record_type="resident",
+        record_id=resident.id,
+        reason=body.reason,
+        details={
+            "fields": sorted(changed),
+            "evidence": body.evidence,
+            "date_precision": body.date_precision,
+        },
+    )
+    session.commit()
+    session.refresh(resident)
+    return _public(session, resident)
+
+
+@router.post("/{resident_id}/deceased/void", response_model=ResidentPublic)
+def void_death(
+    resident_id: uuid.UUID,
+    body: DeathVoidRequest,
+    session: SessionDep,
+    user: DeceasedUser,
+) -> Any:
+    """The death was recorded by mistake (for example a namesake): the resident
+    becomes active again. The voided record is kept."""
+    resident, death = _deceased_with_record(session, resident_id)
+    now = _now()
+    _void_death_row(death, body.reason, user, now)
+    session.add(death)
+    resident.status = "active"
+    resident.updated_at = now
+    resident.updated_by_user_id = user.id
+    session.add(resident)
+    record_audit_event(
+        session,
+        action="resident.death_void",
+        actor=user,
+        module=MODULE,
+        record_type="resident",
+        record_id=resident.id,
+        reason=body.reason,
     )
     session.commit()
     session.refresh(resident)
@@ -818,11 +1068,21 @@ async def put_photo(
     content_type = _detect_photo_type(data)
     if content_type is None:
         raise HTTPException(status_code=415, detail="Photo must be a PNG or WebP image")
-    resident = _get_or_404(session, resident_id)
-    if resident.status == "archived":
-        raise HTTPException(
-            status_code=409, detail="Archived residents cannot be edited"
-        )
+    # The database work may wait for a row lock, so it must not run on the event loop.
+    return await run_in_threadpool(
+        _store_photo, session, user, resident_id, data, content_type
+    )
+
+
+def _store_photo(
+    session: Session,
+    user: User,
+    resident_id: uuid.UUID,
+    data: bytes,
+    content_type: str,
+) -> ResidentPublic:
+    resident = _locked_or_404(session, resident_id)
+    _refuse_frozen(resident)
     now = _now()
     photo = session.get(ResidentPhoto, resident_id)
     if photo is None:
@@ -876,11 +1136,8 @@ def get_photo(resident_id: uuid.UUID, session: SessionDep, _user: EditUser) -> R
 
 @router.delete("/{resident_id}/photo", response_model=ResidentPublic)
 def delete_photo(resident_id: uuid.UUID, session: SessionDep, user: EditUser) -> Any:
-    resident = _get_or_404(session, resident_id)
-    if resident.status == "archived":
-        raise HTTPException(
-            status_code=409, detail="Archived residents cannot be edited"
-        )
+    resident = _locked_or_404(session, resident_id)
+    _refuse_frozen(resident)
     photo = session.get(ResidentPhoto, resident_id)
     if photo is None:
         raise HTTPException(status_code=404, detail="No photo for this resident")

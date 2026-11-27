@@ -160,7 +160,8 @@ def expiring_records(
         select(Issuance, Resident)
         .join(latest, latest.c.id == col(Issuance.id))
         .join(Resident, col(Resident.id) == col(Issuance.resident_id))
-        .where(or_(*conditions))
+        # Nobody renews for a resident who has died.
+        .where(or_(*conditions), col(Resident.status) != "deceased")
         .order_by(col(Issuance.expires_on), col(Issuance.id))
     )
     return stmt, kind_of_type

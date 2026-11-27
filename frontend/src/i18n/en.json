@@ -460,6 +460,8 @@
       "original_status": "previous status",
       "archive_reason": "archive reason",
       "verified_on": "verified on",
+      "evidence": "evidence",
+      "date_precision": "date known to",
       "previous_verified_on": "previously verified on",
       "fields": "fields",
       "field": "field",
@@ -524,6 +526,9 @@
         "photo_set": "Resident photo added",
         "photo_remove": "Resident photo removed",
         "voter_proof_verify": "Voter-registration proof recorded",
+        "death_record": "Death recorded",
+        "death_correct": "Death record corrected",
+        "death_void": "Death record voided",
         "voter_proof_clear": "Voter-registration proof cleared",
         "view": "Resident record viewed",
         "list": "Resident list viewed"

@@ -18,6 +18,7 @@ Rules (decided with the owner's cleaned file in mind, none of them destructive):
     (exact, any case). When nobody matches, a resident with only the name and
     voter status is created (one per person, however many cards they had).
     A name that matches more than one resident is left out and counted.
+  * A row that matches a resident recorded as deceased is left out and counted.
   * A resident who already has an ID number keeps it. A new resident gets the
     number of their latest card.
   * A card whose ID number is already in the history is skipped, so the command
@@ -206,6 +207,10 @@ def run(
                 )
                 created[key] = resident
                 counts["residents_created"] += 1
+        if resident.status == "deceased":
+            # A deceased resident gets no new document and is not edited.
+            counts["left_out_resident_deceased"] += 1
+            continue
         plan.append((card, resident))
         latest_card[id(resident)] = card
         counts["cards"] += 1

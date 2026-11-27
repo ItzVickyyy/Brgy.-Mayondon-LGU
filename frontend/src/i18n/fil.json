@@ -460,6 +460,8 @@
       "original_status": "dating",
       "archive_reason": "dahilan ng pag-archive",
       "verified_on": "napatunayan noong",
+      "evidence": "patunay",
+      "date_precision": "alam ang petsa hanggang",
       "previous_verified_on": "dating napatunayan noong",
       "fields": "mga field",
       "field": "field",
@@ -524,6 +526,9 @@
         "photo_set": "Naidagdag ang larawan ng residente",
         "photo_remove": "Naalis ang larawan ng residente",
         "voter_proof_verify": "Naitala ang patunay ng rehistro bilang botante",
+        "death_record": "Naitala ang pagkamatay",
+        "death_correct": "Itinama ang tala ng pagkamatay",
+        "death_void": "Pinawalang-bisa ang tala ng pagkamatay",
         "voter_proof_clear": "Binura ang patunay ng rehistro bilang botante",
         "view": "Tiningnan ang talaan ng residente",
         "list": "Tiningnan ang listahan ng mga residente"

@@ -177,7 +177,7 @@ class AccountActivityRow(SQLModel):
     role: str
     is_active: bool
     documents_issued: int
-    records_changed: int  # resident create/update/archive/restore/photo audit rows
+    records_changed: int  # resident record, death and photo audit rows
     last_activity: datetime | None  # latest audit row in the period
 
 

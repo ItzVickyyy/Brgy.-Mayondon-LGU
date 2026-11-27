@@ -31,6 +31,7 @@ class Permission(StrEnum):
     OFFICIALS_MANAGE = "officials.manage"
     RECORDS_IMPORT = "records.import"  # import masterlist
     RECORDS_ARCHIVE = "records.archive"
+    RECORDS_DECEASED = "records.deceased"  # record, correct and void a death
     ISSUANCE_VOID = "issuance.void"
     ISSUANCE_ARCHIVE = "issuance.archive"  # hide and restore, never delete
     ID_OVERRIDE = "id.override"  # override ID validity rules

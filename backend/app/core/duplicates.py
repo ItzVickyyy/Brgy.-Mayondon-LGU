@@ -71,7 +71,7 @@ def find_possible_duplicates(
     except_id: Any = None,
     limit: int = 5,
 ) -> list[Resident]:
-    """Residents (active or archived) who may be the same person."""
+    """Residents of any status who may be the same person."""
     first = name_key(first_name)
     last = name_key(last_name)
     if not first or not last:

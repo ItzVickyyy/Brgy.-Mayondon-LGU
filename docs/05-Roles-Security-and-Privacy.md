@@ -31,6 +31,7 @@ The signed brief says **six staff accounts, all with full access**. The prototyp
 | Records Management, Residents: search, view, add, edit | Allowed | Allowed |
 | Records Management, Import Masterlist tab | No (proposed; confirm) | Allowed |
 | Records Management: archive | No | Allowed |
+| Records Management: record, correct and void a death (`records.deceased`, patch 327; proposed, confirm: D-49) | No (can view) | Allowed |
 | Issuance: create, review, print, correct with reason | Allowed | Allowed |
 | Issuance: void/cancel | No | Allowed |
 | Issuance: archive and restore (hide, never delete) | No | Allowed |

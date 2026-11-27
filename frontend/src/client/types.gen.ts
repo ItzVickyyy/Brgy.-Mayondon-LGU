@@ -642,6 +642,67 @@ export type DayCount = {
 };
 
 /**
+ * DeathCorrectRequest
+ */
+export type DeathCorrectRequest = {
+    /**
+     * Date Precision
+     */
+    date_precision?: 'day' | 'month' | 'year' | 'unknown';
+    /**
+     * Date Of Death
+     */
+    date_of_death?: string | null;
+    /**
+     * Evidence
+     */
+    evidence: 'reported' | 'verified';
+    /**
+     * Source Note
+     */
+    source_note?: string | null;
+    /**
+     * Reason
+     */
+    reason: string;
+};
+
+/**
+ * DeathRecordRequest
+ *
+ * ``date_of_death`` is left out only when ``date_precision`` is ``unknown``.
+ * For ``month`` and ``year`` any day inside it may be sent; the first is kept.
+ */
+export type DeathRecordRequest = {
+    /**
+     * Date Precision
+     */
+    date_precision?: 'day' | 'month' | 'year' | 'unknown';
+    /**
+     * Date Of Death
+     */
+    date_of_death?: string | null;
+    /**
+     * Evidence
+     */
+    evidence: 'reported' | 'verified';
+    /**
+     * Source Note
+     */
+    source_note?: string | null;
+};
+
+/**
+ * DeathVoidRequest
+ */
+export type DeathVoidRequest = {
+    /**
+     * Reason
+     */
+    reason: string;
+};
+
+/**
  * DocumentTypeCount
  */
 export type DocumentTypeCount = {
@@ -2478,6 +2539,40 @@ export type ResidentCreate = {
 };
 
 /**
+ * ResidentDeathPublic
+ */
+export type ResidentDeathPublic = {
+    /**
+     * Date Of Death
+     */
+    date_of_death: string | null;
+    /**
+     * Date Precision
+     */
+    date_precision: 'day' | 'month' | 'year' | 'unknown';
+    /**
+     * Evidence
+     */
+    evidence: 'reported' | 'verified';
+    /**
+     * Source Note
+     */
+    source_note: string | null;
+    /**
+     * Age At Death
+     */
+    age_at_death: number | null;
+    /**
+     * Recorded At
+     */
+    recorded_at: string;
+    /**
+     * Recorded By Name
+     */
+    recorded_by_name?: string | null;
+};
+
+/**
  * ResidentPublic
  */
 export type ResidentPublic = {
@@ -2621,6 +2716,7 @@ export type ResidentPublic = {
      * Archived By Name
      */
     archived_by_name?: string | null;
+    death?: ResidentDeathPublic | null;
     /**
      * Created At
      */
@@ -4518,7 +4614,7 @@ export type residentsListResidentsData = {
         /**
          * Status
          */
-        status?: 'active' | 'archived' | 'all';
+        status?: 'active' | 'archived' | 'deceased' | 'all';
         /**
          * Sector Id
          */
@@ -4797,6 +4893,96 @@ export type residentsRestoreResidentResponses = {
 };
 
 export type residentsRestoreResidentResponse = residentsRestoreResidentResponses[keyof residentsRestoreResidentResponses];
+
+export type residentsRecordDeathData = {
+    body: DeathRecordRequest;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}/deceased';
+};
+
+export type residentsRecordDeathErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsRecordDeathError = residentsRecordDeathErrors[keyof residentsRecordDeathErrors];
+
+export type residentsRecordDeathResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentPublic;
+};
+
+export type residentsRecordDeathResponse = residentsRecordDeathResponses[keyof residentsRecordDeathResponses];
+
+export type residentsCorrectDeathData = {
+    body: DeathCorrectRequest;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}/deceased';
+};
+
+export type residentsCorrectDeathErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsCorrectDeathError = residentsCorrectDeathErrors[keyof residentsCorrectDeathErrors];
+
+export type residentsCorrectDeathResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentPublic;
+};
+
+export type residentsCorrectDeathResponse = residentsCorrectDeathResponses[keyof residentsCorrectDeathResponses];
+
+export type residentsVoidDeathData = {
+    body: DeathVoidRequest;
+    path: {
+        /**
+         * Resident Id
+         */
+        resident_id: string;
+    };
+    query?: never;
+    url: '/api/v1/residents/{resident_id}/deceased/void';
+};
+
+export type residentsVoidDeathErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type residentsVoidDeathError = residentsVoidDeathErrors[keyof residentsVoidDeathErrors];
+
+export type residentsVoidDeathResponses = {
+    /**
+     * Successful Response
+     */
+    200: ResidentPublic;
+};
+
+export type residentsVoidDeathResponse = residentsVoidDeathResponses[keyof residentsVoidDeathResponses];
 
 export type residentsDeletePhotoData = {
     body?: never;

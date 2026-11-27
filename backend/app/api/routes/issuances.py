@@ -145,6 +145,10 @@ def _check_issue_date(value: date) -> None:
 
 
 def _require_active(resident: Resident) -> None:
+    if resident.status == "deceased":
+        raise HTTPException(
+            status_code=409, detail="A deceased resident cannot receive documents"
+        )
     if resident.status != "active":
         raise HTTPException(
             status_code=409, detail="An archived resident cannot receive documents"
@@ -1178,7 +1182,14 @@ def issue(
     _require_draft(issuance)
     doc_type = session.get(DocumentType, issuance.document_type_id)
     assert doc_type is not None
-    resident = _resident(session, issuance.resident_id)
+    # Locked and re-read, so a death or archive recorded at the same moment is
+    # either seen here or waits until this document is saved.
+    resident = session.exec(
+        select(Resident)
+        .where(Resident.id == issuance.resident_id)
+        .with_for_update()
+        .execution_options(populate_existing=True)
+    ).one()
     _require_active(resident)
 
     missing = _missing_sections(session, issuance, doc_type.code)
