@@ -2395,7 +2395,8 @@
         "expiry": "Expiring records",
         "imports": "Masterlist import summary",
         "accounts": "Account activity",
-        "utilization": "Utilization report"
+        "utilization": "Utilization report",
+        "deaths": "Deaths"
       },
       "previewArea": {
         "title": "Report preview area",
@@ -2477,6 +2478,40 @@
         "empty": {
           "title": "No utilization data",
           "description": "No documents were issued in this period."
+        }
+      },
+      "deaths": {
+        "title": "Deaths · {{period}}",
+        "columns": {
+          "group": "Breakdown",
+          "detail": "Group",
+          "count": "Deaths"
+        },
+        "sections": {
+          "total": "All deaths",
+          "evidence": "Evidence",
+          "sex": "Sex",
+          "age": "Age at death",
+          "purok": "Purok",
+          "date": "Date of death"
+        },
+        "rows": {
+          "total": "Deaths in this period",
+          "verified": "Verified (document seen)",
+          "reported": "Reported (no document)",
+          "male": "Male",
+          "female": "Female",
+          "notRecorded": "Not recorded",
+          "ageUnknown": "Age not known",
+          "purok": "Purok {{number}}",
+          "purokNotRecorded": "Purok not recorded",
+          "dateUnknown": "No date of death (not counted in any period)",
+          "dateTooGeneral": "Month or year only (may belong to this period, not counted)"
+        },
+        "note": "A death is counted on its date of death. A date known only to the month is counted in the month, quarter and year reports; a date known only to the year, in the year report. Age is shown only when the exact day of death and the birthdate are known. No names are shown.",
+        "empty": {
+          "title": "No deaths in this period",
+          "description": "No death with a date in this period is recorded."
         }
       },
       "accounts": {

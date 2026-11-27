@@ -2395,7 +2395,8 @@
         "expiry": "Mga talaang mag-e-expire",
         "imports": "Buod ng import ng masterlist",
         "accounts": "Aktibidad ng account",
-        "utilization": "Ulat ng paggamit"
+        "utilization": "Ulat ng paggamit",
+        "deaths": "Mga pagpanaw"
       },
       "previewArea": {
         "title": "Lugar ng preview ng ulat",
@@ -2477,6 +2478,40 @@
         "empty": {
           "title": "Walang datos ng paggamit",
           "description": "Walang naisyung dokumento sa panahong ito."
+        }
+      },
+      "deaths": {
+        "title": "Mga pagpanaw · {{period}}",
+        "columns": {
+          "group": "Pagpapangkat",
+          "detail": "Grupo",
+          "count": "Bilang"
+        },
+        "sections": {
+          "total": "Lahat ng pagpanaw",
+          "evidence": "Patunay",
+          "sex": "Kasarian",
+          "age": "Edad sa pagpanaw",
+          "purok": "Purok",
+          "date": "Petsa ng pagpanaw"
+        },
+        "rows": {
+          "total": "Mga pagpanaw sa panahong ito",
+          "verified": "Napatunayan (may dokumentong nakita)",
+          "reported": "Ibinalita (walang dokumento)",
+          "male": "Lalaki",
+          "female": "Babae",
+          "notRecorded": "Hindi naitala",
+          "ageUnknown": "Hindi alam ang edad",
+          "purok": "Purok {{number}}",
+          "purokNotRecorded": "Hindi naitala ang purok",
+          "dateUnknown": "Walang petsa ng pagpanaw (hindi binibilang sa anumang panahon)",
+          "dateTooGeneral": "Buwan o taon lamang ang alam (maaaring kabilang sa panahong ito, hindi binibilang)"
+        },
+        "note": "Binibilang ang pagpanaw ayon sa petsa ng pagpanaw. Ang petsang buwan lamang ang alam ay binibilang sa ulat ng buwan, quarter at taon; ang taon lamang ang alam, sa ulat ng taon. Ipinapakita lamang ang edad kapag alam ang eksaktong araw ng pagpanaw at ang petsa ng kapanganakan. Walang pangalang ipinapakita.",
+        "empty": {
+          "title": "Walang pagpanaw sa panahong ito",
+          "description": "Walang naitalang pagpanaw na may petsa sa panahong ito."
         }
       },
       "accounts": {

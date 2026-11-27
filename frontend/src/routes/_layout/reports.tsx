@@ -12,7 +12,11 @@ import {
 import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 
-import { ImportsService, ReportsService } from "@/client"
+import {
+  type DeathsReportPublic,
+  ImportsService,
+  ReportsService,
+} from "@/client"
 import {
   EmptyState,
   ErrorState,
@@ -66,6 +70,7 @@ type ReportType =
   | "imports"
   | "accounts"
   | "utilization"
+  | "deaths"
 
 type NoticeKey = "notLoaded" | "notRecorded"
 
@@ -188,6 +193,114 @@ function utilizationDates(
   return `${formatReportDate(row.month_start, locale)} – ${formatReportDate(row.month_end, locale)}`
 }
 
+type DeathRow = {
+  key: string
+  section: "total" | "evidence" | "sex" | "age" | "purok" | "date"
+  label: string
+  count: number
+  strong?: boolean
+}
+
+/** The Deaths report as rows (counts only), shared by the table and every saved file. */
+function deathRows(data: DeathsReportPublic, t: TFunction): DeathRow[] {
+  const rows: DeathRow[] = [
+    {
+      key: "total",
+      section: "total",
+      label: t("admin.reports.deaths.rows.total"),
+      count: data.total,
+      strong: true,
+    },
+    {
+      key: "verified",
+      section: "evidence",
+      label: t("admin.reports.deaths.rows.verified"),
+      count: data.verified,
+    },
+    {
+      key: "reported",
+      section: "evidence",
+      label: t("admin.reports.deaths.rows.reported"),
+      count: data.reported,
+    },
+    {
+      key: "male",
+      section: "sex",
+      label: t("admin.reports.deaths.rows.male"),
+      count: data.by_sex.male,
+    },
+    {
+      key: "female",
+      section: "sex",
+      label: t("admin.reports.deaths.rows.female"),
+      count: data.by_sex.female,
+    },
+    {
+      key: "sexNotRecorded",
+      section: "sex",
+      label: t("admin.reports.deaths.rows.notRecorded"),
+      count: data.by_sex.not_recorded,
+    },
+  ]
+  for (const bracket of data.by_age) {
+    rows.push({
+      key: `age-${bracket.bracket}`,
+      section: "age",
+      label:
+        bracket.bracket === "unknown"
+          ? t("admin.reports.deaths.rows.ageUnknown")
+          : bracket.bracket,
+      count: bracket.count,
+    })
+  }
+  for (const purok of data.by_purok) {
+    rows.push({
+      key: `purok-${purok.purok}`,
+      section: "purok",
+      label: t("admin.reports.deaths.rows.purok", { number: purok.purok }),
+      count: purok.count,
+    })
+  }
+  rows.push(
+    {
+      key: "purokNotRecorded",
+      section: "purok",
+      label: t("admin.reports.deaths.rows.purokNotRecorded"),
+      count: data.purok_not_recorded,
+    },
+    {
+      key: "dateUnknown",
+      section: "date",
+      label: t("admin.reports.deaths.rows.dateUnknown"),
+      count: data.date_unknown,
+    },
+    {
+      key: "dateTooGeneral",
+      section: "date",
+      label: t("admin.reports.deaths.rows.dateTooGeneral"),
+      count: data.date_too_general,
+    },
+  )
+  return rows
+}
+
+function deathSection(id: DeathRow["section"], t: TFunction) {
+  switch (id) {
+    case "total":
+      return t("admin.reports.deaths.sections.total")
+    case "evidence":
+      return t("admin.reports.deaths.sections.evidence")
+    case "sex":
+      return t("admin.reports.deaths.sections.sex")
+    case "age":
+      return t("admin.reports.deaths.sections.age")
+    case "purok":
+      return t("admin.reports.deaths.sections.purok")
+    case "date":
+      return t("admin.reports.deaths.sections.date")
+  }
+}
+
 function Reports() {
   const { t } = useTranslation()
   const { user } = useAuth()
@@ -263,6 +376,18 @@ function Reports() {
         })
       ).data,
     enabled: isAdmin && applied?.report === "utilization",
+  })
+
+  // Deaths are counts only: no name and no date of death leaves the server.
+  const deathsQuery = useQuery({
+    queryKey: ["reports-deaths", applied?.period],
+    queryFn: async () =>
+      (
+        await ReportsService.deaths({
+          query: { period: applied?.period },
+        })
+      ).data,
+    enabled: isAdmin && applied?.report === "deaths",
   })
 
   // Import history is a list of the latest imports, so the period does not apply.
@@ -456,6 +581,21 @@ function Reports() {
           utilizationQuery.data.total_clients,
           utilizationQuery.data.total_documents,
         ],
+      ]
+    }
+    if (applied.report === "deaths") {
+      if (!deathsQuery.data) return null
+      return [
+        [
+          tEn("admin.reports.deaths.columns.group"),
+          tEn("admin.reports.deaths.columns.detail"),
+          tEn("admin.reports.deaths.columns.count"),
+        ],
+        ...deathRows(deathsQuery.data, tEn).map((row) => [
+          deathSection(row.section, tEn),
+          row.label,
+          row.count,
+        ]),
       ]
     }
     if (applied.report === "accounts") {
@@ -815,6 +955,64 @@ function Reports() {
             pageSize={utilizationPagination.pageSize}
             onPageSizeChange={utilizationPagination.setPageSize}
           />
+        </div>
+      )
+    }
+
+    if (applied.report === "deaths") {
+      if (deathsQuery.isLoading)
+        return <LoadingState title={t("admin.reports.loading")} />
+      if (deathsQuery.isError || !deathsQuery.data)
+        return loadFailed(() => deathsQuery.refetch())
+      const data = deathsQuery.data
+      const rows = deathRows(data, t)
+      return (
+        <div className="overflow-x-auto">
+          <h3 className="mb-3 font-semibold tracking-tight">
+            {t("admin.reports.deaths.title", { period: appliedPeriodText })}
+          </h3>
+          <table className="w-full text-left text-sm">
+            <thead className={thead}>
+              <tr>
+                {(["group", "detail", "count"] as const).map((id) => (
+                  <th key={id} className={thTight}>
+                    {t(`admin.reports.deaths.columns.${id}`)}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {rows.map((row, index) => (
+                <tr
+                  key={row.key}
+                  className={`transition-colors hover:bg-muted/30 ${row.strong ? "bg-muted/30 font-semibold" : ""}`}
+                >
+                  <td className={`${tdTight} align-top font-medium`}>
+                    {index === 0 || rows[index - 1].section !== row.section
+                      ? deathSection(row.section, t)
+                      : ""}
+                  </td>
+                  <td className={`${tdTight} align-top`}>{row.label}</td>
+                  <td
+                    className={`${tdTight} align-top text-right tabular-nums`}
+                  >
+                    {row.count}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-3 text-xs text-muted-foreground">
+            {t("admin.reports.deaths.note")}
+          </p>
+          {data.total === 0 &&
+          data.date_unknown === 0 &&
+          data.date_too_general === 0 ? (
+            <EmptyState
+              title={t("admin.reports.deaths.empty.title")}
+              description={t("admin.reports.deaths.empty.description")}
+            />
+          ) : null}
         </div>
       )
     }
@@ -1192,6 +1390,9 @@ function Reports() {
                 </option>
                 <option value="utilization">
                   {t("admin.reports.reportTypes.utilization")}
+                </option>
+                <option value="deaths">
+                  {t("admin.reports.reportTypes.deaths")}
                 </option>
               </Select>
             </label>

@@ -45,6 +45,7 @@ REPORT_PATHS = (
     "expiring",
     "account-activity",
     "records-overview",
+    "deaths",
 )
 
 
@@ -779,6 +780,7 @@ def test_no_report_or_dashboard_response_holds_the_health_condition_or_totals_wi
         "issuances-by-type",
         "issuances-by-purpose",
         "records-overview",
+        "deaths",
     ):
         text = client.get(f"{REP}/{path}", headers=superuser_token_headers).text
         assert res["first_name"] not in text and res["last_name"] not in text

@@ -14,7 +14,13 @@ class ReportExportedRequest(SQLModel):
     """What the browser reports just before it saves or prints a report."""
 
     report: Literal[
-        "issuances", "purpose", "expiry", "imports", "accounts", "utilization"
+        "issuances",
+        "purpose",
+        "expiry",
+        "imports",
+        "accounts",
+        "utilization",
+        "deaths",
     ]
     period: Literal[
         "today", "week", "month", "quarter", "3months", "6months", "year", "overall"
@@ -202,8 +208,33 @@ class IdStatusCounts(SQLModel):
 class RecordsOverview(SQLModel):
     residents_active: int
     residents_archived: int
+    residents_deceased: int  # residents with a death record in force
     residents_by_sector: list[SectorCount]  # active residents only
     ids_by_status: IdStatusCounts
+
+
+class SexCounts(SQLModel):
+    male: int
+    female: int
+    not_recorded: int
+
+
+class DeathsReportPublic(SQLModel):
+    """The Deaths report in Management Reports. Counts only: no name, no date of
+    death, no note. ``total`` is the deaths placed in the period (see
+    ``core/death_queries.py`` for how a month- or year-only date is placed);
+    ``verified`` + ``reported`` equals ``total``."""
+
+    period: PeriodInfo
+    total: int
+    verified: int  # a document was seen
+    reported: int  # reported by someone, no document
+    by_sex: SexCounts
+    by_age: list[AgeBracketCount]  # the dashboard's groups, then "unknown"
+    by_purok: list[PurokCount]  # only puroks that have a death, in order
+    purok_not_recorded: int
+    date_unknown: int  # deaths with no date, in no period
+    date_too_general: int  # month or year only, too general for this period
 
 
 class UtilizationMonthRow(SQLModel):

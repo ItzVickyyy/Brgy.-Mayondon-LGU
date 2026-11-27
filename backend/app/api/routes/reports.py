@@ -16,6 +16,7 @@ from sqlmodel import Session, col, select
 from app.api.deps import SessionDep, require_permission
 from app.core.audit import record_audit_event
 from app.core.dates import MANILA_TZ, add_months, today_manila
+from app.core.death_queries import deaths_report
 from app.core.periods import DateRange, Period, resolve_period
 from app.core.permissions import Permission
 from app.core.report_queries import (
@@ -36,6 +37,7 @@ from app.models_issuance import Issuance
 from app.models_reports import (
     AccountActivityPublic,
     AccountActivityRow,
+    DeathsReportPublic,
     ExpiringPublic,
     IdStatusCounts,
     IssuancesByPurposePublic,
@@ -257,6 +259,19 @@ def utilization_report(
     )
 
 
+@router.get("/deaths", response_model=DeathsReportPublic)
+def deaths(
+    session: SessionDep, _user: ReportsUser, period: PeriodQuery = "month"
+) -> Any:
+    """Deaths recorded in the period: counts by evidence, sex, age group and
+    purok. No resident is named and no date is shown. A death is placed by its
+    date of death (day, month or year as far as it is known)."""
+    today = today_manila()
+    return deaths_report(
+        session, period, resolve_period(period, today), period_info(period, today)
+    )
+
+
 @router.get("/expiring", response_model=ExpiringPublic)
 def expiring(
     session: SessionDep,
@@ -349,7 +364,8 @@ def account_activity(
 
 @router.get("/records-overview", response_model=RecordsOverview)
 def records_overview(session: SessionDep, _user: ReportsUser) -> Any:
-    """Residents by status and sector, and Barangay IDs by status."""
+    """Residents by status (active, archived, deceased) and sector, and Barangay IDs
+    by status."""
     today = today_manila()
     status_counts = dict(
         session.exec(
@@ -374,6 +390,7 @@ def records_overview(session: SessionDep, _user: ReportsUser) -> Any:
     return RecordsOverview(
         residents_active=status_counts.get("active", 0),
         residents_archived=status_counts.get("archived", 0),
+        residents_deceased=status_counts.get("deceased", 0),
         residents_by_sector=[
             SectorCount(sector_id=sid or 0, name=name, residents=n)
             for sid, name, n in by_sector

@@ -1,4 +1,4 @@
-// Patch 322: the six Management Reports tables must fit the box without a sideways scroll from 1024 px up
+// Patch 322 (and 329, Deaths): the seven Management Reports tables must fit the box without a sideways scroll from 1024 px up
 // (below that they scroll inside their own box, as before; the same tables are printed, so no cards)
 // (long e-mail, long file name, long names; English and Filipino). Mocked API.
 import { expect, type Page, test } from "@playwright/test"
@@ -77,6 +77,28 @@ const reports: Record<string, unknown> = {
     ],
     total_clients: 1212,
     total_documents: 1515,
+  },
+  "/reports/deaths": {
+    period,
+    total: 1234,
+    verified: 1000,
+    reported: 234,
+    by_sex: { male: 600, female: 600, not_recorded: 34 },
+    by_age: [
+      { bracket: "0-17", count: 12 },
+      { bracket: "18-29", count: 34 },
+      { bracket: "30-49", count: 56 },
+      { bracket: "50-64", count: 78 },
+      { bracket: "65+", count: 900 },
+      { bracket: "unknown", count: 154 },
+    ],
+    by_purok: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((purok) => ({
+      purok,
+      count: 100,
+    })),
+    purok_not_recorded: 34,
+    date_unknown: 12,
+    date_too_general: 34,
   },
   "/reports/expiring": {
     data: [
@@ -181,6 +203,7 @@ const types = [
   "imports",
   "accounts",
   "utilization",
+  "deaths",
 ] as const
 
 for (const language of ["en", "fil"] as const) {

@@ -703,6 +703,51 @@ export type DeathVoidRequest = {
 };
 
 /**
+ * DeathsReportPublic
+ *
+ * The Deaths report in Management Reports. Counts only: no name, no date of
+ * death, no note. ``total`` is the deaths placed in the period (see
+ * ``core/death_queries.py`` for how a month- or year-only date is placed);
+ * ``verified`` + ``reported`` equals ``total``.
+ */
+export type DeathsReportPublic = {
+    period: PeriodInfo;
+    /**
+     * Total
+     */
+    total: number;
+    /**
+     * Verified
+     */
+    verified: number;
+    /**
+     * Reported
+     */
+    reported: number;
+    by_sex: SexCounts;
+    /**
+     * By Age
+     */
+    by_age: Array<AgeBracketCount>;
+    /**
+     * By Purok
+     */
+    by_purok: Array<PurokCount>;
+    /**
+     * Purok Not Recorded
+     */
+    purok_not_recorded: number;
+    /**
+     * Date Unknown
+     */
+    date_unknown: number;
+    /**
+     * Date Too General
+     */
+    date_too_general: number;
+};
+
+/**
  * DocumentTypeCount
  */
 export type DocumentTypeCount = {
@@ -2357,6 +2402,10 @@ export type RecordsOverview = {
      */
     residents_archived: number;
     /**
+     * Residents Deceased
+     */
+    residents_deceased: number;
+    /**
      * Residents By Sector
      */
     residents_by_sector: Array<SectorCount>;
@@ -2414,7 +2463,7 @@ export type ReportExportedRequest = {
     /**
      * Report
      */
-    report: 'issuances' | 'purpose' | 'expiry' | 'imports' | 'accounts' | 'utilization';
+    report: 'issuances' | 'purpose' | 'expiry' | 'imports' | 'accounts' | 'utilization' | 'deaths';
     /**
      * Period
      */
@@ -3043,6 +3092,24 @@ export type SecurityQuestionsStatus = {
      * Updated At
      */
     updated_at?: string | null;
+};
+
+/**
+ * SexCounts
+ */
+export type SexCounts = {
+    /**
+     * Male
+     */
+    male: number;
+    /**
+     * Female
+     */
+    female: number;
+    /**
+     * Not Recorded
+     */
+    not_recorded: number;
 };
 
 /**
@@ -6855,6 +6922,38 @@ export type reportsUtilizationReportResponses = {
 };
 
 export type reportsUtilizationReportResponse = reportsUtilizationReportResponses[keyof reportsUtilizationReportResponses];
+
+export type reportsDeathsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Period
+         *
+         * Reporting period, to date
+         */
+        period?: 'today' | 'week' | 'month' | 'quarter' | '3months' | '6months' | 'year' | 'overall';
+    };
+    url: '/api/v1/reports/deaths';
+};
+
+export type reportsDeathsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HTTPValidationError;
+};
+
+export type reportsDeathsError = reportsDeathsErrors[keyof reportsDeathsErrors];
+
+export type reportsDeathsResponses = {
+    /**
+     * Successful Response
+     */
+    200: DeathsReportPublic;
+};
+
+export type reportsDeathsResponse = reportsDeathsResponses[keyof reportsDeathsResponses];
 
 export type reportsExpiringData = {
     body?: never;

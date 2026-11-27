@@ -7,7 +7,8 @@ never on the real one:
         exec backend python -m app.sample_data_cli --residents 400
 
 What it adds: 8 streets, 10 barangay officials, the requested number of residents
-(default 400; about 6 in 100 archived, about 1 in 4 with a sector) with invented
+(default 400; about 6 in 100 archived, about 1 in 4 with a sector, about 1 in 40
+recorded as deceased) with invented
 names, birthdates and addresses. The lookups (sectors, document types, ID types) and
 the two accounts already come from the migrations and ``initial_data``.
 
@@ -35,7 +36,7 @@ from sqlmodel import Session, col, select
 from app.core.config import settings
 from app.core.db import engine
 from app.models_foundation import Official, Sector, Street
-from app.models_residents import Resident, ResidentSector
+from app.models_residents import Resident, ResidentDeath, ResidentSector
 
 STREETS = [
     "Rizal Street",
@@ -73,6 +74,15 @@ OCCUPATIONS = [
     None,
 ]
 CIVIL = ["Single", "Married", "Widow/Widower", "Legally Separated"]
+# How exactly each sample death date is known, and what backs it, cycled so
+# every case (day, month, year, no date; reported, verified) appears.
+DEATH_PRECISIONS = ["day", "day", "month", "day", "year", "unknown", "day", "month"]
+DEATH_EVIDENCE = ["reported", "verified", "verified", "reported"]
+DEATH_NOTES = [
+    "Reported by a relative (sample data)",
+    "Death certificate seen (sample data)",
+    None,
+]
 OFFICIALS = [
     ("Punong Barangay", True),
     ("Barangay Kagawad", True),
@@ -101,8 +111,46 @@ def _name(rng: random.Random, sex: str) -> tuple[str, str, str]:
     return first, rng.choice(MIDDLE), rng.choice(LAST)
 
 
+def _record_sample_deaths(
+    session: Session, living: list[Resident], today: date, rng: random.Random
+) -> int:
+    """Record about 1 resident in 40 as deceased (at least one), after the loop
+    that makes the residents, so the earlier sample data is not changed."""
+    if not living:
+        return 0
+    chosen = rng.sample(living, min(len(living), max(1, len(living) // 40)))
+    for index, resident in enumerate(chosen):
+        precision = DEATH_PRECISIONS[index % len(DEATH_PRECISIONS)]
+        born = resident.birthdate or today
+        since_birth = max(1, (today - born).days)
+        died = today - timedelta(days=rng.randint(1, min(700, since_birth)))
+        if precision == "month":
+            died = died.replace(day=1)
+        elif precision == "year":
+            died = died.replace(month=1, day=1)
+        resident.status = "deceased"
+        session.add(resident)
+        session.add(
+            ResidentDeath(
+                resident_id=resident.id,
+                date_of_death=None if precision == "unknown" else died,
+                date_precision=precision,
+                evidence=DEATH_EVIDENCE[index % len(DEATH_EVIDENCE)],
+                source_note=DEATH_NOTES[index % len(DEATH_NOTES)],
+            )
+        )
+    session.flush()
+    return len(chosen)
+
+
 def seed(session: Session, residents: int, rng: random.Random) -> dict[str, int]:
-    counts = {"streets": 0, "officials": 0, "residents": 0, "archived": 0}
+    counts = {
+        "streets": 0,
+        "officials": 0,
+        "residents": 0,
+        "archived": 0,
+        "deceased": 0,
+    }
 
     street_ids: list[int] = []
     for name in STREETS:
@@ -134,6 +182,7 @@ def seed(session: Session, residents: int, rng: random.Random) -> dict[str, int]
         i for i in session.exec(select(col(Sector.id))).all() if i is not None
     ]
     today = date.today()
+    living: list[Resident] = []
     for _ in range(residents):
         sex = rng.choice(["Male", "Female"])
         first, middle, last = _name(rng, sex)
@@ -170,12 +219,15 @@ def seed(session: Session, residents: int, rng: random.Random) -> dict[str, int]
         session.flush()
         counts["residents"] += 1
         counts["archived"] += int(archived)
+        if not archived:
+            living.append(resident)
         if sector_ids and rng.random() < 0.25:
             session.add(
                 ResidentSector(
                     resident_id=resident.id, sector_id=rng.choice(sector_ids)
                 )
             )
+    counts["deceased"] = _record_sample_deaths(session, living, today, rng)
     return counts
 
 
