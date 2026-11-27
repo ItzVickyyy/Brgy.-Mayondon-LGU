@@ -661,7 +661,8 @@
       "barangayIds": "Barangay IDs",
       "familySector": "Family & Sector Details",
       "lookupLists": "Lookup Lists",
-      "import": "Import Masterlist"
+      "import": "Import Masterlist",
+      "deceased": "Deceased"
     },
     "dismissMessage": "Dismiss message",
     "dismissError": "Dismiss error",
@@ -730,14 +731,18 @@
     },
     "status": {
       "active": "Active",
-      "archived": "Archived"
+      "archived": "Archived",
+      "deceased": "Deceased"
     },
     "actions": {
       "viewProfile": "View",
       "editDetails": "Edit",
       "newIssuance": "New issuance",
       "archive": "Archive",
-      "restore": "Restore from archive"
+      "restore": "Restore from archive",
+      "recordDeath": "Record death",
+      "correctDeath": "Correct death record",
+      "voidDeath": "Void death record"
     },
     "familySector": {
       "title": "Family, Beneficiary, and Marginalized-Sector Details",
@@ -965,7 +970,13 @@
       "updatedStored": "A resident record was updated.",
       "unchangedStored": "No changes were made to a resident record.",
       "photoFailed": "{{message}}. Photo not saved: {{error}}",
-      "proofFailed": "{{message}}. Proof not saved: {{error}}"
+      "proofFailed": "{{message}}. Proof not saved: {{error}}",
+      "deathRecorded": "Death recorded for {{name}}",
+      "deathCorrected": "Death record of {{name}} corrected",
+      "deathVoided": "Death record of {{name}} voided",
+      "deathRecordedStored": "A death was recorded.",
+      "deathCorrectedStored": "A death record was corrected.",
+      "deathVoidedStored": "A death record was voided."
     },
     "residency": {
       "regular": "Regular resident",
@@ -1044,7 +1055,8 @@
         "saveAnyway": "Save anyway",
         "born": "born {{date}}",
         "noBirthdate": "no birthdate on record",
-        "archived": "archived"
+        "archived": "archived",
+        "deceased": "deceased"
       },
       "cancel": "Cancel",
       "saving": "Saving...",
@@ -1123,7 +1135,8 @@
         "number": "Barangay ID number",
         "none": "None on record",
         "status": "ID status",
-        "note": "ID numbers are set when an ID is issued from Issuance Management."
+        "note": "ID numbers are set when an ID is issued from Issuance Management.",
+        "deceasedNote": "The resident is deceased, so this ID is no longer valid."
       },
       "history": {
         "title": "Issuance history",
@@ -1146,7 +1159,17 @@
           "description": "Documents issued to this resident will appear here."
         }
       },
-      "edit": "Edit details"
+      "edit": "Edit details",
+      "death": {
+        "title": "Death record",
+        "date": "Date of death",
+        "age": "Age at death",
+        "evidence": "Evidence",
+        "source": "Source note",
+        "recorded": "Recorded",
+        "recordedBy": "By {{name}} on {{date}}",
+        "banner": "This resident is recorded as deceased. The record is read only."
+      }
     },
     "ids": {
       "series": {
@@ -1344,6 +1367,73 @@
       "noMatches": "No names match “{{query}}”.",
       "renameItem": "Rename {{name}}",
       "deleteItem": "Delete {{name}}"
+    },
+    "deceased": {
+      "title": "Deceased residents",
+      "description": "Residents recorded as deceased. They are no longer counted as living residents and cannot be issued documents.",
+      "columns": {
+        "dateOfDeath": "Date of death",
+        "ageAtDeath": "Age at death",
+        "evidence": "Evidence",
+        "recordedBy": "Recorded by"
+      },
+      "empty": {
+        "title": "No deceased residents recorded",
+        "description": "A death is recorded by an administrator from a resident's profile or row menu."
+      }
+    },
+    "death": {
+      "recordTitle": "Record a death",
+      "correctTitle": "Correct death record",
+      "recordDescription": "Record that {{name}} has died. The resident stays on record but is no longer counted as living.",
+      "correctDescription": "Correct the death record of {{name}}. The earlier record is kept in the history.",
+      "dateUnknown": "Not known",
+      "unknownHelp": "The date of death is not known. It can be corrected later.",
+      "yearExample": "e.g. 2025",
+      "noteHelp": "Optional. Where the information came from, such as the informant or a certificate number. Do not write the cause of death.",
+      "notePlaceholder": "e.g. Reported by a family member",
+      "reasonPlaceholder": "Why the record is being corrected",
+      "recordConfirm": "Record death",
+      "correctConfirm": "Save correction",
+      "fields": {
+        "precision": "How well is the date known?",
+        "evidence": "Evidence",
+        "note": "Source note",
+        "reason": "Reason for the correction",
+        "date": {
+          "day": "Date of death",
+          "month": "Month of death",
+          "year": "Year of death"
+        }
+      },
+      "precision": {
+        "day": "Exact date",
+        "month": "Month and year only",
+        "year": "Year only",
+        "unknown": "Not known"
+      },
+      "evidence": {
+        "reported": "Reported",
+        "verified": "Verified"
+      },
+      "evidenceHelp": {
+        "reported": "Somebody told the barangay. No certificate or affidavit has been seen.",
+        "verified": "A death certificate or affidavit was seen by staff."
+      },
+      "errors": {
+        "dateRequired": "Enter the date of death.",
+        "dateFormat": "Enter a valid date.",
+        "dateFuture": "The date of death cannot be in the future.",
+        "dateTooOld": "The date of death cannot be before 1900.",
+        "beforeBirth": "The date of death cannot be before the birthdate.",
+        "noteChars": "The note cannot contain line breaks or the characters < and >."
+      }
+    },
+    "deathVoidDialog": {
+      "title": "Void death record?",
+      "description": "Void the death record of {{name}}? Use this only if the death was recorded by mistake. The resident becomes active again and the record stays in the history.",
+      "fallback": "Confirm voiding the death record.",
+      "confirm": "Void death record"
     }
   },
   "issuances": {
@@ -1961,7 +2051,8 @@
           "sector": "Sector",
           "photo": "Photo",
           "emergencyContact": "Emergency contact"
-        }
+        },
+        "deceasedWarning": "This resident is recorded as deceased. Choose someone else."
       },
       "previewRows": {
         "resident": "Resident",

@@ -1,5 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
-import { CreditCard, FileCheck2, Pencil, UserRound, Users } from "lucide-react"
+import {
+  CreditCard,
+  FileCheck2,
+  Flower2,
+  Pencil,
+  Undo2,
+  UserRound,
+  Users,
+} from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -30,7 +38,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
+import { deathDateText } from "@/lib/deaths"
 import { documentTypeLabel } from "@/lib/issuanceLabels"
+import { formatLocaleDate } from "@/lib/locale"
 import {
   civilStatusLabel,
   residentTypeLabel,
@@ -49,6 +59,12 @@ type ResidentProfileDialogProps = {
   documentTypes: LookupItem[]
   /** Shown only for an active resident; opens the edit form. */
   onEdit?: () => void
+  /** Administrators only (patch 328): record a death for an active resident. */
+  onRecordDeath?: () => void
+  /** Administrators only: correct the death record of a deceased resident. */
+  onCorrectDeath?: () => void
+  /** Administrators only: the death was recorded by mistake. */
+  onVoidDeath?: () => void
 }
 
 // statusStyles is keyed by the English status word, not by the shown label.
@@ -97,6 +113,9 @@ export function ResidentProfileDialog({
   sectors,
   documentTypes,
   onEdit,
+  onRecordDeath,
+  onCorrectDeath,
+  onVoidDeath,
 }: ResidentProfileDialogProps) {
   const { t } = useTranslation()
   const [tabEdges, setTabEdges] = useState({ left: false, right: false })
@@ -116,9 +135,11 @@ export function ResidentProfileDialog({
   const recordStatusText = (status: string) =>
     status === "archived"
       ? t("records.status.archived")
-      : status === "active"
-        ? t("records.status.active")
-        : statusLabel(status)
+      : status === "deceased"
+        ? t("records.status.deceased")
+        : status === "active"
+          ? t("records.status.active")
+          : statusLabel(status)
   const historyStatusText = (status: string) =>
     status === "draft" || status === "issued" || status === "voided"
       ? t(`records.profile.history.status.${status}`)
@@ -150,6 +171,8 @@ export function ResidentProfileDialog({
       )
     : []
   const archived = resident?.status === "archived"
+  const deceased = resident?.status === "deceased"
+  const death = deceased ? resident?.death : null
 
   const dash = "—"
   // Only what staff need to read; the name, photo and record status are
@@ -157,13 +180,52 @@ export function ResidentProfileDialog({
   const detailSections: { title: string; rows: [string, string][] }[] =
     resident
       ? [
+          ...(death
+            ? [
+                {
+                  title: t("records.profile.death.title"),
+                  rows: [
+                    [
+                      t("records.profile.death.date"),
+                      deathDateText(death, t),
+                    ],
+                    [
+                      t("records.profile.death.age"),
+                      death.age_at_death !== null
+                        ? t("records.ageYears", { age: death.age_at_death })
+                        : dash,
+                    ],
+                    [
+                      t("records.profile.death.evidence"),
+                      t(`records.death.evidence.${death.evidence}`),
+                    ],
+                    [
+                      t("records.profile.death.source"),
+                      death.source_note || dash,
+                    ],
+                    [
+                      t("records.profile.death.recorded"),
+                      t("records.profile.death.recordedBy", {
+                        name: death.recorded_by_name ?? dash,
+                        date: formatLocaleDate(new Date(death.recorded_at), {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          timeZone: "Asia/Manila",
+                        }),
+                      }),
+                    ],
+                  ] as [string, string][],
+                },
+              ]
+            : []),
           {
             title: t("records.form.sections.personal"),
             rows: [
               [
                 t("records.profile.fields.birthdateAge"),
                 resident.birthdate
-                  ? `${formatBusinessDate(resident.birthdate)}${resident.age !== null ? ` · ${t("records.ageYears", { age: resident.age })}` : ""}`
+                  ? `${formatBusinessDate(resident.birthdate)}${resident.age !== null && !deceased ? ` · ${t("records.ageYears", { age: resident.age })}` : ""}`
                   : dash,
               ],
               [
@@ -369,6 +431,19 @@ export function ResidentProfileDialog({
                   </p>
                 ) : null}
                 <div className="mx-auto w-full max-w-3xl space-y-6">
+                  {deceased ? (
+                    <p
+                      role="status"
+                      data-testid="deceased-banner"
+                      className="flex items-start gap-2 rounded-lg border bg-muted/50 px-3 py-2.5 text-sm"
+                    >
+                      <Flower2
+                        className="mt-0.5 size-4 shrink-0 text-muted-foreground"
+                        aria-hidden="true"
+                      />
+                      <span>{t("records.profile.death.banner")}</span>
+                    </p>
+                  ) : null}
                   {detailSections.map((section) => (
                     <section key={section.title}>
                       <h3 className="border-b pb-1.5 text-xs font-semibold uppercase tracking-wide text-brand">
@@ -447,7 +522,9 @@ export function ResidentProfileDialog({
                     {t(`records.idStatus.${resident.id_status}`)}
                   </Badge>
                   <p className="mt-2 text-xs text-muted-foreground">
-                    {t("records.profile.id.note")}
+                    {deceased
+                      ? t("records.profile.id.deceasedNote")
+                      : t("records.profile.id.note")}
                   </p>
                 </section>
                 <section className="rounded-xl border bg-card p-4 shadow-sm">
@@ -534,18 +611,59 @@ export function ResidentProfileDialog({
             ) : null}
 
             </div>
-            {onEdit && !archived && profileTab === "Details" ? (
-              <div className="flex shrink-0 justify-end border-t bg-muted/30 px-5 py-3 sm:px-6">
-                <Button
-                  type="button"
-                  variant="default"
-                  data-testid="profile-edit"
-                  className="min-h-11 px-6 font-semibold shadow-md"
-                  onClick={onEdit}
-                >
-                  <Pencil aria-hidden="true" />
-                  {t("records.profile.edit")}
-                </Button>
+            {profileTab === "Details" &&
+            ((onEdit && resident.status === "active") ||
+              (onRecordDeath && resident.status === "active") ||
+              (deceased && (onCorrectDeath || onVoidDeath))) ? (
+              <div className="flex shrink-0 flex-wrap justify-end gap-2 border-t bg-muted/30 px-5 py-3 sm:px-6">
+                {deceased && onVoidDeath ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    data-testid="profile-void-death"
+                    className="min-h-11 px-4"
+                    onClick={onVoidDeath}
+                  >
+                    <Undo2 aria-hidden="true" />
+                    {t("records.actions.voidDeath")}
+                  </Button>
+                ) : null}
+                {deceased && onCorrectDeath ? (
+                  <Button
+                    type="button"
+                    variant="default"
+                    data-testid="profile-correct-death"
+                    className="min-h-11 px-6 font-semibold shadow-md"
+                    onClick={onCorrectDeath}
+                  >
+                    <Pencil aria-hidden="true" />
+                    {t("records.actions.correctDeath")}
+                  </Button>
+                ) : null}
+                {resident.status === "active" && onRecordDeath ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    data-testid="profile-record-death"
+                    className="min-h-11 px-4"
+                    onClick={onRecordDeath}
+                  >
+                    <Flower2 aria-hidden="true" />
+                    {t("records.actions.recordDeath")}
+                  </Button>
+                ) : null}
+                {onEdit && resident.status === "active" ? (
+                  <Button
+                    type="button"
+                    variant="default"
+                    data-testid="profile-edit"
+                    className="min-h-11 px-6 font-semibold shadow-md"
+                    onClick={onEdit}
+                  >
+                    <Pencil aria-hidden="true" />
+                    {t("records.profile.edit")}
+                  </Button>
+                ) : null}
               </div>
             ) : null}
           </>

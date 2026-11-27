@@ -57,6 +57,7 @@ const residents = {
       archive_reason: null,
       archived_at: null,
       archived_by_name: null,
+      death: null,
       created_at: "2026-11-20T01:38:19.905795Z",
       updated_at: "2026-11-20T01:38:19.905806Z",
     },
@@ -101,6 +102,43 @@ const residents = {
     },
   ],
   count: 54,
+}
+// Deceased residents (patch 328): the longest evidence label, a long recorder
+// name and a month-only date, so the widest cells are measured.
+const deceasedResidents = {
+  count: 2,
+  data: [
+    {
+      ...residents.data[0],
+      id: "b1d083c5-29b4-402c-bc22-72c418d43c01",
+      status: "deceased",
+      age: null,
+      death: {
+        date_of_death: "2026-03-01",
+        date_precision: "month",
+        evidence: "verified",
+        source_note: "Death certificate seen",
+        age_at_death: 89,
+        recorded_at: "2026-03-20T01:00:00Z",
+        recorded_by_name: "Administrator Maria Cristina Dela Cruz",
+      },
+    },
+    {
+      ...residents.data[1],
+      id: "b1d083c5-29b4-402c-bc22-72c418d43c02",
+      status: "deceased",
+      age: null,
+      death: {
+        date_of_death: null,
+        date_precision: "unknown",
+        evidence: "reported",
+        source_note: null,
+        age_at_death: null,
+        recorded_at: "2026-03-21T01:00:00Z",
+        recorded_by_name: "Test Admin",
+      },
+    },
+  ],
 }
 const barangayIds = {
   count: 3,
@@ -255,6 +293,12 @@ const pages = [
     widths: [1280, 1024, 776, 390],
     tab: /^(Archived|Naka-archive)$/,
   },
+  {
+    path: "/records",
+    name: "Deceased residents",
+    widths: [1280, 1024, 776, 390],
+    tab: /^(Deceased|Pumanaw)$/,
+  },
 ]
 
 for (const language of ["en", "fil"])
@@ -282,6 +326,8 @@ for (const language of ["en", "fil"])
           if (url.includes("/lookups/")) return json([])
           if (url.includes("/dashboard"))
             return json({ total_issued: 2, by_document_type: [] })
+          if (url.includes("/residents/") && url.includes("status=deceased"))
+            return json(deceasedResidents)
           if (url.includes("/residents/") && !url.includes("/residents/stats"))
             return json(residents)
           if (url.includes("/issuances/")) return json(issuances)

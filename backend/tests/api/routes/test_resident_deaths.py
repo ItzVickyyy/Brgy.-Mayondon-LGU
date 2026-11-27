@@ -26,6 +26,7 @@ from tests.api.routes.test_issuances import (  # noqa: F401  (fixtures are reuse
     _tidy_up,
     street_id,
 )
+from tests.utils.utils import random_lower_string
 
 API = settings.API_V1_STR
 ISS = f"{API}/issuances"
@@ -438,3 +439,65 @@ def test_a_new_record_is_warned_about_a_deceased_namesake(
     )
     assert r.status_code == 409
     assert r.json()["detail"]["matches"][0]["status"] == "deceased"
+
+
+def test_the_deceased_list_sorts_by_the_death_record_in_force(
+    client: TestClient, superuser_token_headers: Headers
+) -> None:
+    admin = superuser_token_headers
+    last = f"Dth{random_lower_string()[:8]}"
+
+    def make(first: str, **death: object) -> dict:
+        res = _resident(client, admin, first_name=first, last_name=last)
+        _record(client, admin, res["id"], **death)
+        return res
+
+    make("Cara", date_of_death="2026-01-10", evidence="verified")
+    ana = make("Ana", date_of_death="2026-03-15")
+    make("Bea", date_precision="unknown", date_of_death=None)
+    # Someone who is still alive is not listed, and a corrected record leaves
+    # one row for the resident, not two.
+    _resident(client, admin, first_name="Dan", last_name=last)
+    r = client.put(
+        f"{API}/residents/{ana['id']}/deceased",
+        headers=admin,
+        json=_death(date_of_death="2026-03-14", reason="Date corrected"),
+    )
+    assert r.status_code == 200, r.text
+
+    def names(**params: object) -> list[str]:
+        r = client.get(
+            f"{API}/residents/",
+            headers=admin,
+            params={"status": "deceased", "q": last, **params},
+        )
+        assert r.status_code == 200, r.text
+        assert r.json()["count"] == 3
+        return [row["first_name"] for row in r.json()["data"]]
+
+    # The unknown date is empty, so it comes last either way.
+    assert names(sort_by="death_date") == ["Cara", "Ana", "Bea"]
+    assert names(sort_by="death_date", sort_dir="desc") == ["Ana", "Cara", "Bea"]
+    assert names(sort_by="death_evidence") == ["Ana", "Bea", "Cara"]
+    assert names(sort_by="death_evidence", sort_dir="desc") == ["Cara", "Ana", "Bea"]
+    # One account recorded all three: ties fall back to the name.
+    assert names(sort_by="death_recorded_by") == ["Ana", "Bea", "Cara"]
+    assert names(sort_by="death_recorded_by", sort_dir="desc") == [
+        "Ana",
+        "Bea",
+        "Cara",
+    ]
+    # The sort covers the whole result, not one page.
+    r = client.get(
+        f"{API}/residents/",
+        headers=admin,
+        params={
+            "status": "deceased",
+            "q": last,
+            "sort_by": "death_date",
+            "sort_dir": "desc",
+            "limit": 1,
+            "skip": 1,
+        },
+    )
+    assert [row["first_name"] for row in r.json()["data"]] == ["Cara"]

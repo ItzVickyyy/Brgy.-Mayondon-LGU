@@ -194,7 +194,12 @@ function toResidentRecord(
       resident.voter_registration === "registered"
         ? "Registered"
         : "Unregistered",
-    status: resident.status === "archived" ? "Archived" : "Active",
+    status:
+      resident.status === "archived"
+        ? "Archived"
+        : resident.status === "deceased"
+          ? "Deceased"
+          : "Active",
     archiveReason: resident.archive_reason ?? undefined,
   }
   if (

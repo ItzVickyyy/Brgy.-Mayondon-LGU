@@ -28,7 +28,7 @@ export type ResidentRecord = {
   idNumber: string
   idStatus: "Valid" | "Expiring soon" | "Expired" | "None"
   registration: "Registered" | "Unregistered"
-  status: "Active" | "Archived"
+  status: "Active" | "Archived" | "Deceased"
   archiveReason?: string
 }
 

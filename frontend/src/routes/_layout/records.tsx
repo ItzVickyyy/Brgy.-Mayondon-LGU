@@ -10,6 +10,7 @@ import {
   CreditCard,
   Eye,
   FilePlus2,
+  Flower2,
   Pencil,
   Search,
   UserRound,
@@ -42,7 +43,12 @@ import { StatCard } from "@/components/Common/StatCard"
 import { TablePagination } from "@/components/Common/TablePagination"
 import { ArchivedResidentsView } from "@/components/Records/ArchivedResidentsView"
 import { BarangayIdsView } from "@/components/Records/BarangayIdsView"
+import { DeceasedResidentsView } from "@/components/Records/DeceasedResidentsView"
 import { ImportMasterlistView } from "@/components/Records/ImportMasterlistView"
+import {
+  type DeathDialogMode,
+  RecordDeathDialog,
+} from "@/components/Records/RecordDeathDialog"
 import { ResidentFormDialog } from "@/components/Records/ResidentFormDialog"
 import { ResidentProfileDialog } from "@/components/Records/ResidentProfileDialog"
 import { Button } from "@/components/ui/button"
@@ -79,7 +85,7 @@ export const Route = createFileRoute("/_layout/records")({
   head: () => ({ meta: [{ title: pageTitle("Records Management") }] }),
 })
 
-type View = "residents" | "archived" | "barangay-ids" | "import"
+type View = "residents" | "archived" | "deceased" | "barangay-ids" | "import"
 
 const inputClass = formControlClass
 
@@ -125,6 +131,14 @@ function RecordsManagement() {
     null,
   )
   const [restoreTarget, setRestoreTarget] = useState<ResidentPublic | null>(
+    null,
+  )
+  // Record a death (an active resident) or correct the record in force.
+  const [deathTarget, setDeathTarget] = useState<{
+    resident: ResidentPublic
+    mode: DeathDialogMode
+  } | null>(null)
+  const [voidDeathTarget, setVoidDeathTarget] = useState<ResidentPublic | null>(
     null,
   )
   const { showErrorToast } = useCustomToast()
@@ -279,6 +293,41 @@ function RecordsManagement() {
     },
   })
 
+  // A death changes the resident's status, so the open profile shows the new one.
+  function showSavedResident(saved: ResidentPublic) {
+    setSelectedResident((current) =>
+      current && current.id === saved.id ? saved : current,
+    )
+    refreshResidents()
+  }
+
+  const voidDeathMutation = useMutation({
+    mutationFn: async ({
+      resident,
+      reason,
+    }: {
+      resident: ResidentPublic
+      reason: string
+    }) =>
+      (
+        await ResidentsService.voidDeath({
+          path: { resident_id: resident.id },
+          body: { reason },
+        })
+      ).data,
+    onSuccess: (resident) => {
+      notify({ key: "records.notices.deathVoidedStored" }, "success", {
+        toastText: t("records.notices.deathVoided", {
+          name: resident.full_name,
+        }),
+      })
+      showSavedResident(resident)
+    },
+    onError: (error) => {
+      showErrorToast(readApiError(error).message)
+    },
+  })
+
   function openForm(resident: ResidentPublic | null) {
     setFormResident(resident)
     setFormOpen(true)
@@ -287,6 +336,7 @@ function RecordsManagement() {
   const tabs: { id: View; label: string }[] = [
     { id: "residents", label: t("records.tabs.residents") },
     { id: "archived", label: t("records.tabs.archived") },
+    { id: "deceased", label: t("records.tabs.deceased") },
     { id: "barangay-ids", label: t("records.tabs.barangayIds") },
     ...(isAdmin
       ? [{ id: "import" as const, label: t("records.tabs.import") }]
@@ -592,6 +642,21 @@ function RecordsManagement() {
                                     destructive: true,
                                     onSelect: () => setArchiveTarget(resident),
                                   },
+                                  {
+                                    label: t("records.actions.recordDeath"),
+                                    icon: (
+                                      <Flower2
+                                        aria-hidden="true"
+                                        className="size-4"
+                                      />
+                                    ),
+                                    adminOnly: true,
+                                    onSelect: () =>
+                                      setDeathTarget({
+                                        resident,
+                                        mode: "record",
+                                      }),
+                                  },
                                 ]}
                               />
                             </td>
@@ -661,6 +726,20 @@ function RecordsManagement() {
         />
       )}
 
+      {view === "deceased" && (
+        <DeceasedResidentsView
+          isAdmin={isAdmin}
+          onViewProfile={(resident) => {
+            setSelectedResident(resident)
+            setProfileTab("Details")
+          }}
+          onCorrect={(resident) =>
+            setDeathTarget({ resident, mode: "correct" })
+          }
+          onVoid={setVoidDeathTarget}
+        />
+      )}
+
       {view === "barangay-ids" && (
         <BarangayIdsView
           onViewProfile={async (residentId) => {
@@ -722,6 +801,54 @@ function RecordsManagement() {
           if (!restoreTarget) return
           restoreMutation.mutate(restoreTarget)
           setRestoreTarget(null)
+        }}
+      />
+      <ConfirmDialog
+        open={voidDeathTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setVoidDeathTarget(null)
+        }}
+        title={t("records.deathVoidDialog.title")}
+        description={
+          voidDeathTarget
+            ? t("records.deathVoidDialog.description", {
+                name: voidDeathTarget.full_name,
+              })
+            : t("records.deathVoidDialog.fallback")
+        }
+        confirmLabel={t("records.deathVoidDialog.confirm")}
+        destructive
+        reason="required"
+        onConfirm={(reason) => {
+          if (!voidDeathTarget) return
+          voidDeathMutation.mutate({
+            resident: voidDeathTarget,
+            reason: reason.trim(),
+          })
+          setVoidDeathTarget(null)
+        }}
+      />
+      <RecordDeathDialog
+        resident={deathTarget?.resident ?? null}
+        mode={deathTarget?.mode ?? "record"}
+        onOpenChange={(open) => {
+          if (!open) setDeathTarget(null)
+        }}
+        onSaved={(saved, mode) => {
+          setDeathTarget(null)
+          notify(
+            {
+              key: `records.notices.${mode === "record" ? "deathRecorded" : "deathCorrected"}Stored`,
+            },
+            "success",
+            {
+              toastText: t(
+                `records.notices.${mode === "record" ? "deathRecorded" : "deathCorrected"}`,
+                { name: saved.full_name },
+              ),
+            },
+          )
+          showSavedResident(saved)
         }}
       />
       <ResidentFormDialog
@@ -787,6 +914,32 @@ function RecordsManagement() {
         onEdit={() => {
           if (selectedResident) openForm(selectedResident)
         }}
+        onRecordDeath={
+          isAdmin
+            ? () => {
+                if (selectedResident)
+                  setDeathTarget({ resident: selectedResident, mode: "record" })
+              }
+            : undefined
+        }
+        onCorrectDeath={
+          isAdmin
+            ? () => {
+                if (selectedResident)
+                  setDeathTarget({
+                    resident: selectedResident,
+                    mode: "correct",
+                  })
+              }
+            : undefined
+        }
+        onVoidDeath={
+          isAdmin
+            ? () => {
+                if (selectedResident) setVoidDeathTarget(selectedResident)
+              }
+            : undefined
+        }
       />
     </div>
   )

@@ -52,6 +52,8 @@ export const statusStyles: Record<string, string> = {
   Failed: red,
   Rejected: red,
   Archived: grey,
+  Deceased: grey,
+  Reported: amber,
   None: grey,
   Former: grey,
   Voided: badgeTone.destructive,

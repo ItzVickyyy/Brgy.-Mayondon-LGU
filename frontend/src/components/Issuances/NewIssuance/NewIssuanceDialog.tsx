@@ -284,7 +284,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   }
 
   function selectResident(resident: ResidentRecord, code: DocumentCode = documentType) {
-    if (resident.status === "Archived") return
+    if (resident.status !== "Active") return
     setSelectedResident(resident)
     setEditingResident(false)
     setResidentQuery("")
@@ -334,6 +334,9 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
   // The picture is a separate request. Until it arrives the resident carries a marker so "photo on file" counts.
   const selectedResidentId = selectedResident?.id
   const residentArchived = selectedResident?.status === "Archived"
+  // A deceased resident gets no document either (patch 328; the server says 409).
+  const residentDeceased = selectedResident?.status === "Deceased"
+  const residentBlocked = residentArchived || residentDeceased
   const selectedPhoto = selectedResident?.photoUrl
   useEffect(() => {
     if (!selectedResidentId || selectedPhoto !== PHOTO_ON_FILE) return
@@ -644,7 +647,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
       setFormError(t("issuances.new.errors.selectResidentIssue"))
       return
     }
-    if (!andPrint && selectedResident.status === "Archived") return
+    if (!andPrint && selectedResident.status !== "Active") return
     const projectedResident = { ...selectedResident, ...residentUpdates } as ResidentRecord
     const missingResidentFields = getMissingResidentFields(projectedResident, documentType)
     if (missingResidentFields.length) {
@@ -1235,7 +1238,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
                     <p className="text-base font-semibold">{selectedResident.name}</p>
                     <p className="mt-0.5 text-sm">{getResidentAddress(selectedResident)}</p>
                     <p className="mt-0.5 text-sm text-muted-foreground">{selectedResident.birthdate ? t("issuances.new.resident.yearsOld", { age: calculateAge(selectedResident.birthdate, issueDate) }) : t("issuances.new.resident.birthdateNotRecorded")} · {selectedResident.civilStatus ? civilStatusLabel(selectedResident.civilStatus, t) : t("issuances.new.resident.civilStatusNotRecorded")}</p>
-                    {residentArchived ? <p role="alert" className="mt-1.5 text-sm font-medium text-destructive">{t("issuances.new.resident.archivedWarning")}</p> : null}
+                    {residentBlocked ? <p role="alert" className="mt-1.5 text-sm font-medium text-destructive">{residentDeceased ? t("issuances.new.resident.deceasedWarning") : t("issuances.new.resident.archivedWarning")}</p> : null}
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-wrap gap-2 sm:justify-end"><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => { setQuickAdd({ lastName: selectedResident.lastName, firstName: selectedResident.firstName, middleName: selectedResident.middleName ?? "", suffix: selectedResident.suffix ?? "", birthdate: selectedResident.birthdate ?? "", birthplace: selectedResident.birthplace ?? "", sex: selectedResident.sex ?? "", civilStatus: selectedResident.civilStatus || "Single", houseNumber: selectedResident.houseNumber ?? "", street: selectedResident.street ?? "", purok: selectedResident.purok ?? 1, residentSinceYear: selectedResident.residentSinceBirth ? undefined : selectedResident.residentSince, residentSinceBirth: Boolean(selectedResident.residentSinceBirth), photoUrl: residentUpdates.photoUrl ?? selectedResident.photoUrl ?? "" }); setEditingResident(true); setQuickAttempted(false) }}>{t("issuances.new.resident.editResident")}</Button><Button type="button" variant="outline" size="sm" disabled={saving} onClick={() => setChangeResidentOpen(true)}>{t("issuances.new.resident.chooseSomeoneElse")}</Button></div>
@@ -1338,7 +1341,7 @@ export function NewIssuanceDialog({ open, onOpenChange, initialResidentId, initi
           <div className="grid grid-cols-2 gap-2 sm:flex sm:shrink-0 sm:flex-nowrap sm:justify-end">
             <Button type="button" variant="ghost" className={footerButton} onClick={() => requestClose(false)}>{t("issuances.new.footer.cancel")}</Button>
             <Button type="button" variant="outline" className={footerButton} disabled={saving} onClick={() => void saveDraft()}>{t("issuances.new.footer.saveDraftClose")}</Button>
-            <Button type="submit" className={cn(footerButton, "col-span-2 sm:col-auto")} disabled={saving || Boolean(duplicate) || residentArchived} data-testid="issue-submit">
+            <Button type="submit" className={cn(footerButton, "col-span-2 sm:col-auto")} disabled={saving || Boolean(duplicate) || residentBlocked} data-testid="issue-submit">
               {saving ? <LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> : printable ? <Printer className="size-4" aria-hidden="true" /> : null}
               {saving ? t("issuances.new.footer.savingButton") : printable ? t("issuances.new.footer.issueAndPrint") : t("issuances.new.footer.issue")}
             </Button>

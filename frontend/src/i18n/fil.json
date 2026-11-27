@@ -661,7 +661,8 @@
       "barangayIds": "Mga Barangay ID",
       "familySector": "Detalye ng Pamilya at Sektor",
       "lookupLists": "Mga Listahan",
-      "import": "Mag-import ng Masterlist"
+      "import": "Mag-import ng Masterlist",
+      "deceased": "Pumanaw"
     },
     "dismissMessage": "Isara ang mensahe",
     "dismissError": "Isara ang error",
@@ -730,14 +731,18 @@
     },
     "status": {
       "active": "Aktibo",
-      "archived": "Naka-archive"
+      "archived": "Naka-archive",
+      "deceased": "Pumanaw"
     },
     "actions": {
       "viewProfile": "Tingnan",
       "editDetails": "I-edit",
       "newIssuance": "Bagong pag-isyu",
       "archive": "I-archive",
-      "restore": "Ibalik mula sa archive"
+      "restore": "Ibalik mula sa archive",
+      "recordDeath": "Itala ang pagpanaw",
+      "correctDeath": "Ituwid ang talaan ng pagpanaw",
+      "voidDeath": "Pawalang-bisa ang talaan ng pagpanaw"
     },
     "familySector": {
       "title": "Mga Detalye ng Pamilya, Benepisyaryo, at Marginalized na Sektor",
@@ -965,7 +970,13 @@
       "unchangedStored": "Walang ginawang pagbabago sa isang talaan ng residente.",
       "unchanged": "Walang binago kay {{name}}",
       "photoFailed": "{{message}}. Hindi na-save ang larawan: {{error}}",
-      "proofFailed": "{{message}}. Hindi na-save ang patunay: {{error}}"
+      "proofFailed": "{{message}}. Hindi na-save ang patunay: {{error}}",
+      "deathRecorded": "Naitala ang pagpanaw ni {{name}}",
+      "deathCorrected": "Naituwid ang talaan ng pagpanaw ni {{name}}",
+      "deathVoided": "Pinawalang-bisa ang talaan ng pagpanaw ni {{name}}",
+      "deathRecordedStored": "May naitalang pagpanaw.",
+      "deathCorrectedStored": "May naituwid na talaan ng pagpanaw.",
+      "deathVoidedStored": "May pinawalang-bisang talaan ng pagpanaw."
     },
     "residency": {
       "regular": "Karaniwang residente",
@@ -1044,7 +1055,8 @@
         "saveAnyway": "I-save pa rin",
         "born": "ipinanganak noong {{date}}",
         "noBirthdate": "walang naitalang kapanganakan",
-        "archived": "naka-archive"
+        "archived": "naka-archive",
+        "deceased": "pumanaw na"
       },
       "cancel": "Kanselahin",
       "saving": "Sine-save...",
@@ -1123,7 +1135,8 @@
         "number": "Numero ng Barangay ID",
         "none": "Walang nakatala",
         "status": "Katayuan ng ID",
-        "note": "Itinatakda ang mga numero ng ID kapag may ID na iniisyu mula sa Pamamahala ng Pag-isyu."
+        "note": "Itinatakda ang mga numero ng ID kapag may ID na iniisyu mula sa Pamamahala ng Pag-isyu.",
+        "deceasedNote": "Pumanaw na ang residente, kaya hindi na balido ang ID na ito."
       },
       "history": {
         "title": "Kasaysayan ng pag-isyu",
@@ -1146,7 +1159,17 @@
           "description": "Lalabas dito ang mga dokumentong iniisyu sa residenteng ito."
         }
       },
-      "edit": "I-edit ang mga detalye"
+      "edit": "I-edit ang mga detalye",
+      "death": {
+        "title": "Talaan ng pagpanaw",
+        "date": "Petsa ng pagpanaw",
+        "age": "Edad sa pagpanaw",
+        "evidence": "Patunay",
+        "source": "Tala ng pinagmulan",
+        "recorded": "Naitala",
+        "recordedBy": "Ni {{name}} noong {{date}}",
+        "banner": "Naitalang pumanaw na ang residenteng ito. Pagbasa lamang ang talaan."
+      }
     },
     "ids": {
       "series": {
@@ -1344,6 +1367,73 @@
       "noMatches": "Walang pangalang tumutugma sa “{{query}}”.",
       "renameItem": "Palitan ang pangalan ng {{name}}",
       "deleteItem": "Burahin ang {{name}}"
+    },
+    "deceased": {
+      "title": "Mga residenteng pumanaw",
+      "description": "Mga residenteng naitalang pumanaw na. Hindi na sila binibilang bilang buhay na residente at hindi na sila maaaring bigyan ng dokumento.",
+      "columns": {
+        "dateOfDeath": "Petsa ng pagpanaw",
+        "ageAtDeath": "Edad sa pagpanaw",
+        "evidence": "Patunay",
+        "recordedBy": "Nagtala"
+      },
+      "empty": {
+        "title": "Walang naitalang pumanaw",
+        "description": "Itinatala ng administrator ang pagpanaw mula sa profile o menu ng hanay ng residente."
+      }
+    },
+    "death": {
+      "recordTitle": "Itala ang pagpanaw",
+      "correctTitle": "Ituwid ang talaan ng pagpanaw",
+      "recordDescription": "Itala na pumanaw na si {{name}}. Mananatili ang residente sa talaan ngunit hindi na bibilangin bilang buhay.",
+      "correctDescription": "Ituwid ang talaan ng pagpanaw ni {{name}}. Mananatili sa kasaysayan ang naunang talaan.",
+      "dateUnknown": "Hindi alam",
+      "unknownHelp": "Hindi alam ang petsa ng pagpanaw. Maaari itong ituwid sa susunod.",
+      "yearExample": "hal. 2025",
+      "noteHelp": "Opsyonal. Saan galing ang impormasyon, tulad ng nagbalita o numero ng sertipiko. Huwag isulat ang sanhi ng pagpanaw.",
+      "notePlaceholder": "hal. Ibinalita ng kapamilya",
+      "reasonPlaceholder": "Bakit itinutuwid ang talaan",
+      "recordConfirm": "Itala ang pagpanaw",
+      "correctConfirm": "I-save ang pagtutuwid",
+      "fields": {
+        "precision": "Gaano katiyak ang petsa?",
+        "evidence": "Patunay",
+        "note": "Tala ng pinagmulan",
+        "reason": "Dahilan ng pagtutuwid",
+        "date": {
+          "day": "Petsa ng pagpanaw",
+          "month": "Buwan ng pagpanaw",
+          "year": "Taon ng pagpanaw"
+        }
+      },
+      "precision": {
+        "day": "Eksaktong petsa",
+        "month": "Buwan at taon lamang",
+        "year": "Taon lamang",
+        "unknown": "Hindi alam"
+      },
+      "evidence": {
+        "reported": "Ibinalita",
+        "verified": "Napatunayan"
+      },
+      "evidenceHelp": {
+        "reported": "May nagsabi sa barangay. Wala pang nakitang sertipiko o affidavit.",
+        "verified": "May nakitang sertipiko ng kamatayan o affidavit ang kawani."
+      },
+      "errors": {
+        "dateRequired": "Ilagay ang petsa ng pagpanaw.",
+        "dateFormat": "Maglagay ng wastong petsa.",
+        "dateFuture": "Hindi maaaring nasa hinaharap ang petsa ng pagpanaw.",
+        "dateTooOld": "Hindi maaaring bago mag-1900 ang petsa ng pagpanaw.",
+        "beforeBirth": "Hindi maaaring mas maaga sa petsa ng kapanganakan ang petsa ng pagpanaw.",
+        "noteChars": "Hindi maaaring may line break o ang mga character na < at > ang tala."
+      }
+    },
+    "deathVoidDialog": {
+      "title": "Pawalang-bisa ang talaan ng pagpanaw?",
+      "description": "Pawalang-bisa ang talaan ng pagpanaw ni {{name}}? Gawin lamang ito kung nagkamali ang pagtatala. Magiging aktibo muli ang residente at mananatili ang talaan sa kasaysayan.",
+      "fallback": "Kumpirmahin ang pagpapawalang-bisa ng talaan ng pagpanaw.",
+      "confirm": "Pawalang-bisa ang talaan"
     }
   },
   "issuances": {
@@ -1961,7 +2051,8 @@
           "sector": "Sektor",
           "photo": "Litrato",
           "emergencyContact": "Contact sa oras ng emergency"
-        }
+        },
+        "deceasedWarning": "Naitalang pumanaw na ang residenteng ito. Pumili ng iba."
       },
       "previewRows": {
         "resident": "Residente",

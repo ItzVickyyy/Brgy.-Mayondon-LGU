@@ -1,4 +1,4 @@
-// Records and Archived: a heading click asks the server to sort the whole list
+// Records, Archived and Deceased (328): a heading click asks the server to sort the whole list
 // (315), not just the rows on the page. The API is mocked (synthetic data), so
 // this spec needs only the running frontend. The mock answers a sort with an
 // odd order: the page must show the rows as received.
@@ -16,7 +16,9 @@ const admin = {
 // ES2020 has no Array.prototype.at.
 const last = <T>(items: T[]) => items[items.length - 1]
 
-const resident = (n: number, first: string, status: "active" | "archived") => ({
+type Status = "active" | "archived" | "deceased"
+
+const resident = (n: number, first: string, status: Status) => ({
   first_name: first,
   middle_name: null,
   last_name: "Sorttest",
@@ -52,11 +54,23 @@ const resident = (n: number, first: string, status: "active" | "archived") => ({
   archive_reason: status === "archived" ? "Moved away" : null,
   archived_at: status === "archived" ? "2026-11-20T01:38:19.905795Z" : null,
   archived_by_name: status === "archived" ? "Test Admin" : null,
+  death:
+    status === "deceased"
+      ? {
+          date_of_death: "2026-03-14",
+          date_precision: "day",
+          evidence: "verified",
+          source_note: null,
+          age_at_death: 46,
+          recorded_at: "2026-03-20T01:00:00Z",
+          recorded_by_name: "Test Admin",
+        }
+      : null,
   created_at: "2026-11-20T01:38:19.905795Z",
   updated_at: "2026-11-20T01:38:19.905806Z",
 })
 
-const listFor = (status: "active" | "archived", sorted: boolean) => {
+const listFor = (status: Status, sorted: boolean) => {
   const rows = [resident(1, "Alpha", status), resident(2, "Bravo", status)]
   return sorted ? rows.reverse() : rows
 }
@@ -77,8 +91,9 @@ async function mockApi(page: Page, queries: URLSearchParams[]) {
       return json({ total_issued: 0, by_document_type: [] })
     if (url.pathname.endsWith("/residents/")) {
       queries.push(url.searchParams)
-      const status =
-        url.searchParams.get("status") === "archived" ? "archived" : "active"
+      const asked = url.searchParams.get("status")
+      const status: Status =
+        asked === "archived" || asked === "deceased" ? asked : "active"
       const rows = listFor(status, url.searchParams.has("sort_by"))
       return json({ data: rows, count: rows.length })
     }
@@ -174,5 +189,34 @@ test("Each Archived heading asks for its own server column", async ({
       .poll(() => last(queriesFor(queries, "archived")).get("sort_by"))
       .toBe(serverColumn)
   }
+  await expect(rows.first()).toContainText("Bravo")
+})
+
+test("Each Deceased heading asks for its own server column", async ({
+  page,
+}) => {
+  const queries: URLSearchParams[] = []
+  await page.setViewportSize({ width: 1600, height: 1000 })
+  await mockApi(page, queries)
+  await page.goto("/records")
+  await page.getByRole("tab", { name: "Deceased" }).click()
+  const rows = page.locator("table tbody tr")
+  await expect(rows).toHaveCount(2)
+  await expect(rows.first()).toContainText("Alpha")
+  expect(last(queriesFor(queries, "deceased")).has("sort_by")).toBe(false)
+  const columns = {
+    resident: "name",
+    dateOfDeath: "death_date",
+    evidence: "death_evidence",
+    recordedBy: "death_recorded_by",
+  }
+  for (const [heading, serverColumn] of Object.entries(columns)) {
+    await page.getByTestId(`sort-${heading}`).click()
+    await expect
+      .poll(() => last(queriesFor(queries, "deceased")).get("sort_by"))
+      .toBe(serverColumn)
+  }
+  // Age at death is worked out on read, so it has no sort control.
+  await expect(page.getByTestId("sort-ageAtDeath")).toHaveCount(0)
   await expect(rows.first()).toContainText("Bravo")
 })

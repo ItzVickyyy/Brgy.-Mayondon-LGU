@@ -14,6 +14,7 @@ from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.concurrency import run_in_threadpool
+from sqlalchemy import and_
 from sqlalchemy import func as sa_func
 from sqlmodel import Session, col, delete, select
 
@@ -324,6 +325,9 @@ ResidentSort = Literal[
     "archived_at",
     "archived_by",
     "archive_reason",
+    "death_date",
+    "death_evidence",
+    "death_recorded_by",
 ]
 
 
@@ -350,6 +354,29 @@ def _sorted_residents(stmt: Any, sort_by: ResidentSort | None, sort_dir: str) ->
             User, col(Resident.archived_by_user_id) == col(User.id), isouter=True
         )
         keys = [sa_func.lower(sa_func.coalesce(User.full_name, User.email))]
+    elif sort_by in ("death_date", "death_evidence", "death_recorded_by"):
+        # The death record in force: at most one per resident (partial unique
+        # index), so the join never repeats a resident.
+        stmt = stmt.join(
+            ResidentDeath,
+            and_(
+                col(ResidentDeath.resident_id) == col(Resident.id),
+                col(ResidentDeath.voided_at).is_(None),
+            ),
+            isouter=True,
+        )
+        if sort_by == "death_date":
+            # An unknown date is empty, so it comes last either way.
+            keys = [col(ResidentDeath.date_of_death)]
+        elif sort_by == "death_evidence":
+            keys = [col(ResidentDeath.evidence)]
+        else:
+            stmt = stmt.join(
+                User,
+                col(ResidentDeath.recorded_by_user_id) == col(User.id),
+                isouter=True,
+            )
+            keys = [sa_func.lower(sa_func.coalesce(User.full_name, User.email))]
     elif sort_by:
         keys = [col(getattr(Resident, sort_by))]
     ordering = [

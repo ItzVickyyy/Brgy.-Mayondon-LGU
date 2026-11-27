@@ -4624,7 +4624,7 @@ export type residentsListResidentsData = {
          *
          * Sort the whole result by this column (default: by name)
          */
-        sort_by?: 'name' | 'address' | 'birthdate' | 'sex' | 'civil_status' | 'occupation' | 'archived_at' | 'archived_by' | 'archive_reason' | null;
+        sort_by?: 'name' | 'address' | 'birthdate' | 'sex' | 'civil_status' | 'occupation' | 'archived_at' | 'archived_by' | 'archive_reason' | 'death_date' | 'death_evidence' | 'death_recorded_by' | null;
         /**
          * Sort Dir
          */

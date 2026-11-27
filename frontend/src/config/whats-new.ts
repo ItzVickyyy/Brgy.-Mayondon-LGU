@@ -5,6 +5,13 @@ export type WhatsNewEntry = { title: string; points: string[] }
 
 export const WHATS_NEW: WhatsNewEntry[] = [
   {
+    title: "Deceased residents",
+    points: [
+      "Records Management has a new Deceased tab. An administrator records a death from a resident's profile or row menu, with the date as far as it is known and whether it was reported or verified.",
+      "A deceased resident is no longer counted and cannot be given new documents. A mistake can be corrected or voided by an administrator.",
+    ],
+  },
+  {
     title: "Tables",
     points: [
       "Click a column heading to sort the table; click again to reverse, and a third time to go back.",

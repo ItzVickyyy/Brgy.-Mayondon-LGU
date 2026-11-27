@@ -92,7 +92,7 @@ test("double-clicking a Barangay ID row opens the resident profile", async ({
 }) => {
   await mockApi(page)
   await page.goto("/records")
-  await page.getByRole("tab").nth(2).click()
+  await page.getByRole("tab").nth(3).click()
   const row = page.getByRole("row", { name: /Santos1, Maria1/ })
   await expect(row).toBeVisible()
   await expect(page.getByRole("dialog")).toHaveCount(0)

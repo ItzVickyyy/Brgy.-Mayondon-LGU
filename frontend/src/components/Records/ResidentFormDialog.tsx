@@ -914,7 +914,9 @@ export function ResidentFormDialog({
                           : `, ${t("records.form.duplicate.noBirthdate")}`}
                         {match.status === "archived"
                           ? ` (${t("records.form.duplicate.archived")})`
-                          : ""}
+                          : match.status === "deceased"
+                            ? ` (${t("records.form.duplicate.deceased")})`
+                            : ""}
                       </li>
                     ))}
                   </ul>

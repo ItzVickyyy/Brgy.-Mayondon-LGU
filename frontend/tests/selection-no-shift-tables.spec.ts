@@ -1,4 +1,4 @@
-// Ticking a row must not move the table on Records, Archived, Barangay IDs,
+// Ticking a row must not move the table on Records, Archived, Deceased, Barangay IDs,
 // Officials and Backup History either (320; 318 and 319 did the other three).
 // Measured on `master` before the fix: 4 px at every desktop width and 56 px at
 // 390 px on the first four, 24 to 112 px on Backup. The API is mocked
@@ -40,6 +40,18 @@ const residents = (status: string) => ({
     archive_reason: status === "archived" ? "Moved away" : null,
     archived_at: status === "archived" ? "2026-11-01T01:00:00Z" : null,
     archived_by_name: status === "archived" ? "Test Admin" : null,
+    death:
+      status === "deceased"
+        ? {
+            date_of_death: "2026-03-14",
+            date_precision: "day",
+            evidence: "verified",
+            source_note: null,
+            age_at_death: 35,
+            recorded_at: "2026-03-20T01:00:00Z",
+            recorded_by_name: "Test Admin",
+          }
+        : null,
     created_at: "2026-01-01T00:00:00Z",
     updated_at: "2026-01-01T00:00:00Z",
   })),
@@ -129,7 +141,8 @@ const pageTop = (locator: Locator) =>
 const tables = [
   { name: "Records", path: "/records", tab: 0 },
   { name: "Archived", path: "/records", tab: 1 },
-  { name: "Barangay IDs", path: "/records", tab: 2 },
+  { name: "Deceased", path: "/records", tab: 2 },
+  { name: "Barangay IDs", path: "/records", tab: 3 },
   { name: "Officials", path: "/officials", tab: null },
   { name: "Backup History", path: "/backup-restore", tab: null },
 ]
