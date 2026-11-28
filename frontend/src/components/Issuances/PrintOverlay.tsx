@@ -11,16 +11,16 @@ import {
   STAMP_PAD,
   STAMP_VALUE_DX,
 } from "@/lib/print/overlayLayout"
-import { LABEL_FONT, overlayCss, STAMP_FONT, VALUE_FONT } from "@/lib/print/overlayStyles"
+import { FORM_FONT, LABEL_FONT, overlayCss, STAMP_FONT, VALUE_FONT } from "@/lib/print/overlayStyles"
 import { paperDimensions } from "@/lib/print/paperSizes"
 import { printTemplates } from "@/lib/print/templates"
 
 let canvas: HTMLCanvasElement | undefined
-function measureText(text: string, sizePt: number): number {
+function measureText(text: string, sizePt: number, font?: string): number {
   canvas ??= document.createElement("canvas")
   const ctx = canvas.getContext("2d")
   if (!ctx) return text.length * sizePt * 0.55 // rough fallback
-  ctx.font = `bold ${sizePt}pt ${VALUE_FONT}` // canvas px == CSS px, so convert the result back to pt
+  ctx.font = `bold ${sizePt}pt ${font === "form" ? FORM_FONT : VALUE_FONT}` // canvas px == CSS px, so convert the result back to pt
   return ctx.measureText(text).width * 0.75
 }
 
@@ -149,7 +149,7 @@ export function PrintOverlay({
                 left: `${item.x}pt`,
                 top: `${item.y}pt`,
                 fontSize: `${item.size}pt`,
-                fontFamily: item.font === "label" ? LABEL_FONT : item.font === "note" ? STAMP_FONT : undefined,
+                fontFamily: item.font === "label" ? LABEL_FONT : item.font === "note" ? STAMP_FONT : item.font === "form" ? FORM_FONT : undefined,
                 fontWeight: item.font === "note" ? 400 : undefined,
                 color: item.color,
                 lineHeight: `${DEFAULT_FONT_PT * LINE_HEIGHT_RATIO}pt`,

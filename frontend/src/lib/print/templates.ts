@@ -18,7 +18,7 @@ export type PrintFieldBox = {
   align?: "left" | "center"
   size?: number // font size in pt, default 11
   page?: number // 0-based page of a multi-page template, default 0
-  font?: "value" | "label" | "note" // "label" = Arial Narrow bold; "note" = Arial regular 10 pt (the Addressed-to line); default "value" (Cambria Bold)
+  font?: "value" | "label" | "note" | "form" // "form" = Verdana Bold (the First-Time Jobseeker Word file is all Verdana); "label" = Arial Narrow bold; "note" = Arial regular 10 pt (the Addressed-to line); default "value" (Cambria Bold)
   color?: string // text colour, default black (the loan note of the Clearance is red in the xls)
   prefix?: string // words printed before a non-empty value, for a row the barangay's form leaves unlabelled
 }
@@ -89,6 +89,8 @@ const addressLines = (): PrintFieldBox[] => [
   { key: "addressLine2", x: 74, y: 290.4, w: 358, size: 11 },
   { key: "addressLine3", x: 74, y: 317.6, w: 358, size: 11 },
 ]
+// Verdana Bold has descenders that a value sitting exactly on its rule would run into; every Jobseeker value is lifted this far (pt) off the rule (patch 344).
+const JOBSEEKER_LIFT = 1.5
 const date = (y: number): PrintFieldBox => ({
   key: "date",
   x: 491,
@@ -271,7 +273,8 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
     paperSize: "long",
     paper: longPaper,
     blankStock: true,
-    fields: [
+    // Every Jobseeker value is Verdana Bold, the font of the barangay's Word file (patch 344); Cambria looked small beside the Verdana form text.
+    fields: ([
       { key: "name", x: 118, y: 210.3, w: 326, size: 11 },
       { key: "birthdate", x: 152, y: 237.5, w: 186, size: 11 },
       { key: "ageNumber", x: 395, y: 237.5, w: 78, size: 11 },
@@ -408,7 +411,11 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
         size: 11,
         page: 2,
       },
-    ],
+    ] as PrintFieldBox[]).map((field) => ({
+      ...field,
+      y: Math.round((field.y - JOBSEEKER_LIFT) * 10) / 10,
+      font: "form" as const,
+    })),
     // Centres of the two check boxes on the applicant sheet; an X goes only in the chosen one.
     marks: [
       { key: "jobstart", when: "yes", x: 295.7, y: 558.5 },

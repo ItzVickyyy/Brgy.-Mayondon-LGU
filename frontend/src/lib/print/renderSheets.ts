@@ -14,7 +14,7 @@ import {
   STAMP_PAD,
   STAMP_VALUE_DX,
 } from "./overlayLayout"
-import { LABEL_FONT, STAMP_FONT, VALUE_FONT } from "./overlayStyles"
+import { FORM_FONT, LABEL_FONT, STAMP_FONT, VALUE_FONT } from "./overlayStyles"
 import { paperDimensions } from "./paperSizes"
 import { printTemplates } from "./templates"
 
@@ -62,9 +62,9 @@ export async function renderSheets(data: PrintData): Promise<RenderedDocument> {
   const backgrounds = formBackgrounds[data.templateId] ?? []
   const measureCanvas = document.createElement("canvas")
   const measureContext = measureCanvas.getContext("2d")
-  const measure = (text: string, size: number) => {
+  const measure = (text: string, size: number, font?: string) => {
     if (!measureContext) return text.length * size * 0.55
-    measureContext.font = `bold ${size * SCALE}px ${FONT}`
+    measureContext.font = `bold ${size * SCALE}px ${font === "form" ? FORM_FONT : FONT}`
     return measureContext.measureText(text).width / SCALE
   }
   const laid = layoutOverlay(data, measure)
@@ -143,7 +143,7 @@ export async function renderSheets(data: PrintData): Promise<RenderedDocument> {
       context.font =
         item.font === "note"
           ? `${item.size * SCALE}px ${STAMP_FONT}`
-          : `bold ${item.size * SCALE}px ${item.font === "label" ? LABEL_FONT : FONT}`
+          : `bold ${item.size * SCALE}px ${item.font === "label" ? LABEL_FONT : item.font === "form" ? FORM_FONT : FONT}`
       context.textAlign = item.align === "center" ? "center" : "left"
       context.fillStyle = item.color ?? "#000000"
       context.fillText(item.text, item.x * SCALE, (item.y + lineMiddle) * SCALE)

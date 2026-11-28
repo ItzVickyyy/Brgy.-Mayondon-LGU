@@ -22,7 +22,7 @@ export type OverlayText = {
   y: number
   size: number
   align: "left" | "center"
-  font: "value" | "label" | "note"
+  font: "value" | "label" | "note" | "form"
   color?: string
 }
 export type OverlayStamp = {
@@ -54,11 +54,12 @@ export function fitFontSize(
   text: string,
   maxWidth: number | undefined,
   size: number,
-  measure: (text: string, size: number) => number,
+  measure: (text: string, size: number, font?: string) => number,
   minSize = MIN_FONT_PT,
+  font?: string,
 ): number {
   if (!maxWidth || !text) return size
-  const width = measure(text, size)
+  const width = measure(text, size, font)
   if (width <= maxWidth) return size
   return Math.max(minSize, Math.floor(((size * maxWidth) / width) * 10) / 10)
 }
@@ -66,7 +67,7 @@ export function fitFontSize(
 /** Builds one entry per sheet that has content. Empty values print nothing; marks print only for the matching value. */
 export function layoutOverlay(
   data: PrintData,
-  measure: (text: string, size: number) => number,
+  measure: (text: string, size: number, font?: string) => number,
   offset: Offset = { x: 0, y: 0 },
 ): OverlayPage[] {
   const template = printTemplates[data.templateId]
@@ -94,7 +95,14 @@ export function layoutOverlay(
         align: field.align ?? "left",
         font: field.font ?? "value",
         ...(field.color ? { color: field.color } : {}),
-        size: fitFontSize(text, field.w, field.size ?? VALUE_FONT_PT, measure),
+        size: fitFontSize(
+          text,
+          field.w,
+          field.size ?? VALUE_FONT_PT,
+          measure,
+          MIN_FONT_PT,
+          field.font ?? "value",
+        ),
       })
     }
     const marks: OverlayMark[] = (template.marks ?? [])

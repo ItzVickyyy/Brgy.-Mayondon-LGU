@@ -139,6 +139,24 @@ test.describe("print overlay layout", () => {
     expect(page.stamp?.rows.every((row) => row.value === "")).toBe(true)
   })
 
+  test("every First-Time Jobseeker value is in the form font (Verdana), the others in the value font", () => {
+    const jobseeker = layoutOverlay(
+      {
+        templateId: "jobseeker",
+        values: { name: "A", witnessName: "B", date: "C" },
+      },
+      measure,
+    )
+    const fonts = jobseeker.flatMap((p) => p.texts.map((t) => t.font))
+    expect(fonts.length).toBeGreaterThan(0)
+    expect(new Set(fonts)).toEqual(new Set(["form"]))
+    const residency = layoutOverlay(
+      { templateId: "indigency", values: { name: "X" } },
+      measure,
+    )
+    expect(residency[0].texts[0].font).toBe("value")
+  })
+
   test("the Indigency SECTOR line: label and colon in the label font, value in the value font", () => {
     const [page] = layoutOverlay(
       { templateId: "indigency", values: { sectorLabel: "SECTOR", sectorColon: ":", sector: "Urban Poor" } },

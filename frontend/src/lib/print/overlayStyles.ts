@@ -2,6 +2,8 @@ import { type PaperSize, pageRule, paperDimensions } from "./paperSizes"
 
 /** Typed values use the barangay's own font (Cambria Bold in Clearance Issuing.xls); Caladea is the metric-compatible stand-in where Cambria is not installed. */
 export const VALUE_FONT = "Cambria, Caladea, 'Times New Roman', serif"
+/** The First-Time Jobseeker Word file is Verdana throughout; DejaVu Sans is the closest stand-in where Verdana is not installed. */
+export const FORM_FONT = "Verdana, 'DejaVu Sans', Geneva, sans-serif"
 /** Labels printed by the app (the Indigency SECTOR line) use the form's own label font. */
 export const LABEL_FONT = "'Arial Narrow', 'Liberation Sans Narrow', 'Nimbus Sans Narrow', 'Helvetica Neue', Arial, sans-serif"
 /** The stamp box is Arial in the same workbook. */
