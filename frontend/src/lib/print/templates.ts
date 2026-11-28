@@ -351,12 +351,12 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
         size: 11,
         page: 2,
       },
-      // Oath: the witness name sits on the short rule after "Witnessed by:" (rule y 697.5, x 350-477); the Date follows the pre-printed "Date:" (rule y 763.7, x 105.5-259.6).
+      // Oath: the witness name sits on the rule after "Witnessed by:" (rule y 697.5, x 320.4-528.8, redrawn in patch 345 to be as wide and as centred as the label under it, as in the Word file where name, designation and label share one centre line, x 424.6); the Date follows the pre-printed "Date:" (rule y 763.7, x 105.5-259.6).
       {
         key: "witnessName",
-        x: 413,
+        x: 424.6,
         y: 687.3,
-        w: 190,
+        w: 206,
         align: "center",
         size: 11,
         page: 1,
@@ -364,20 +364,20 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       // Designation of the witness, between the rule and "Barangay Official/Designation/Position" (label y 731.9-742.3).
       {
         key: "witnessDesignation",
-        x: 413,
+        x: 424.6,
         y: 716,
-        w: 190,
+        w: 206,
         align: "center",
         size: 11,
         page: 1,
       },
       { key: "date", x: 108, y: 753.5, w: 148, size: 11, page: 1 },
-      // Certification: the witness name sits on the rule under "Witnessed by:" (rule y 679.1, x 291.6-473.4); the Date follows the pre-printed "Date:" (rule y 759.2, x 338.8-493.2; the label and Date rows were moved down 14 pt in jobseeker-2.png, patch 343, to make room for the designation line as in the barangay's Word file).
+      // Certification: the witness name sits on the rule under "Witnessed by:" (rule y 679.1, x 310.0-518.4, redrawn in patch 345 to centre on the label, x 414.2); the Date follows the pre-printed "Date:" (rule y 759.2, x 338.8-493.2; the label and Date rows were moved down 14 pt in jobseeker-2.png, patch 343, to make room for the designation line as in the barangay's Word file).
       {
         key: "witnessName",
-        x: 382.5,
+        x: 414.2,
         y: 668.9,
-        w: 182,
+        w: 206,
         align: "center",
         size: 11,
         page: 2,
@@ -385,9 +385,9 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       // Designation of the witness, between the rule (y 679.0) and the label, now at y 704.8-715.3.
       {
         key: "witnessDesignation",
-        x: 382.5,
+        x: 414.2,
         y: 690,
-        w: 182,
+        w: 206,
         align: "center",
         size: 11,
         page: 2,
