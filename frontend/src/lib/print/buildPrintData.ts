@@ -270,7 +270,7 @@ export function buildPrintData(
     values.educationalAttainment = details.educationalAttainment
     values.course = details.course
     values.jobstart = details.isJobstartBeneficiary ? "yes" : "no"
-    // "Witnessed by:" on the Oath and the Certification: the person who issued the document, in capitals as in the barangay's filled certifications. An older record that kept an official instead of a name uses that official when still current. No designation is printed because an account has no position.
+    // "Witnessed by:" on the Oath and the Certification: the person who issued the document, in capitals as in the barangay's filled certifications. An older record that kept an official instead of a name uses that official when still current.
     const legacyWitness = lookups.officials?.find(
       (item) => item.id === details.legacyWitnessOfficialId,
     )
@@ -279,13 +279,14 @@ export function buildPrintData(
       legacyWitness?.name ||
       ""
     ).toUpperCase()
-    // "Barangay Official/Designation/Position": accounts have no position, so it is the position of the current official whose name is the witness's (the barangay's clerk and administrative assistant are on the Officials list). No match leaves it blank for handwriting.
+    // "Barangay Official/Designation/Position": what the clerk typed when issuing (patch 346). When nothing was typed (older records), the position of the current official whose name is the witness's; no match leaves it blank for handwriting.
     values.witnessDesignation =
-      legacyWitness && !details.witnessName?.trim()
+      details.witnessDesignation?.trim() ||
+      (legacyWitness && !details.witnessName?.trim()
         ? legacyWitness.position
         : (lookups.officials?.find((item) =>
             isSamePerson(item.name, details.witnessName ?? ""),
-          )?.position ?? "")
+          )?.position ?? ""))
     wrapLines(resident?.addressLine ?? "", [48, 66, 66], 3).forEach(
       (line, index) => {
         values[`addressLine${index + 1}`] = line

@@ -1867,6 +1867,7 @@
         "jobstart": "JobStart beneficiary",
         "partsToPrint": "Parts to print",
         "witness": "Witness",
+        "witnessDesignation": "Witness designation",
         "transaction": "Transaction",
         "barangayIdNumber": "Barangay ID number",
         "validUntil": "Valid until"
@@ -1874,6 +1875,7 @@
       "fieldHelp": {
         "stampBox": "Printed in the stamp box.",
         "witnessIssuer": "The person who issues this document.",
+        "witnessDesignation": "Printed above \"Barangay Official/Designation/Position\", for example Barangay Clerk. Leave it empty to write it by hand.",
         "requestedBy": "Only if someone other than the resident asked for it. Printed after \"Requested by:\".",
         "healthConditionConfidential": "Confidential. Kept in the record but not printed on the certificate.",
         "barangayIdNumber": "Type the number printed on the card. Leave it as shown to keep the resident's current number."

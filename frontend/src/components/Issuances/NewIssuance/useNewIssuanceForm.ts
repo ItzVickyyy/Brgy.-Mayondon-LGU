@@ -46,6 +46,7 @@ export function defaultDetails(code: DocumentCode): DocumentDetails {
         course: "N/A",
         isJobstartBeneficiary: false,
         witnessName: "",
+        witnessDesignation: "",
         parts: ["applicant_sheet", "oath", "certification"],
       }
     case "BARANGAY_ID": {

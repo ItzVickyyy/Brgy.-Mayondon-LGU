@@ -75,6 +75,7 @@ const fieldLabelKeys = {
   "JobStart beneficiary": "issuances.new.fieldLabels.jobstart",
   "Parts to print": "issuances.new.fieldLabels.partsToPrint",
   Witness: "issuances.new.fieldLabels.witness",
+  "Witness designation": "issuances.new.fieldLabels.witnessDesignation",
   Transaction: "issuances.new.fieldLabels.transaction",
   "Barangay ID number": "issuances.new.fieldLabels.barangayIdNumber",
   "Valid until": "issuances.new.fieldLabels.validUntil",
@@ -87,6 +88,8 @@ const fieldHelpKeys = {
   "Printed in the stamp box.": "issuances.new.fieldHelp.stampBox",
   "The person who issues this document.":
     "issuances.new.fieldHelp.witnessIssuer",
+  'Printed above "Barangay Official/Designation/Position", for example Barangay Clerk. Leave it empty to write it by hand.':
+    "issuances.new.fieldHelp.witnessDesignation",
   'Only if someone other than the resident asked for it. Printed after "Requested by:".':
     "issuances.new.fieldHelp.requestedBy",
   "Confidential. Kept in the record but not printed on the certificate.":

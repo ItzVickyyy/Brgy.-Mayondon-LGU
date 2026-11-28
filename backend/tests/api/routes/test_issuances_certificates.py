@@ -533,6 +533,46 @@ def test_jobseeker_witness_is_the_signed_in_users_full_name(
     assert issued["jobseeker"]["witness_official_id"] is None
 
 
+def test_jobseeker_witness_designation_is_typed_trimmed_and_kept(
+    client: TestClient, staff_token_headers: Headers, street_id: int
+) -> None:
+    res = _jobseeker_resident(client, staff_token_headers, street_id)
+    draft = _draft(
+        client,
+        staff_token_headers,
+        "FIRST_TIME_JOBSEEKER",
+        res["id"],
+        jobseeker={
+            "educational_attainment": "College",
+            "witness_designation": "  Barangay Clerk ",
+        },
+    )
+    assert draft["jobseeker"]["witness_designation"] == "Barangay Clerk"
+    issued = _issue(client, staff_token_headers, draft["id"])
+    assert issued["jobseeker"]["witness_designation"] == "Barangay Clerk"
+    # A blank box means no designation; a value over 150 characters is refused.
+    other = _jobseeker_resident(client, staff_token_headers, street_id)
+    blank = _draft(
+        client,
+        staff_token_headers,
+        "FIRST_TIME_JOBSEEKER",
+        other["id"],
+        jobseeker={"educational_attainment": "College", "witness_designation": "   "},
+    )
+    assert blank["jobseeker"]["witness_designation"] is None
+    _draft(
+        client,
+        staff_token_headers,
+        "FIRST_TIME_JOBSEEKER",
+        other["id"],
+        expect=422,
+        jobseeker={
+            "educational_attainment": "College",
+            "witness_designation": "x" * 151,
+        },
+    )
+
+
 def test_jobseeker_witness_is_refreshed_by_whoever_issues_it(
     client: TestClient, staff_token_headers: Headers, street_id: int
 ) -> None:

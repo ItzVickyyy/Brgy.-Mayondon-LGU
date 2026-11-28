@@ -436,6 +436,8 @@ class IssuanceFirstTimeJobseeker(SQLModel, table=True):
     # printed witness never changes when the account is renamed or removed.
     # Older rows keep ``witness_official_id`` and have no name here.
     witness_name: str | None = Field(default=None, max_length=255)
+    # "Barangay Official/Designation/Position" typed by the clerk when issuing (patch 346).
+    witness_designation: str | None = Field(default=None, max_length=150)
 
 
 class IssuanceBarangayId(SQLModel, table=True):
@@ -695,6 +697,12 @@ class JobseekerIn(SQLModel):
     witness_official_id: uuid.UUID | None = None
     # Ignored when sent: the server fills it from the signed-in user.
     witness_name: str | None = Field(default=None, max_length=255)
+    witness_designation: str | None = Field(default=None, max_length=150)
+
+    @field_validator("witness_designation")
+    @classmethod
+    def _blank_to_none(cls, value: str | None) -> str | None:
+        return _clean(value)
 
 
 class BarangayIdIn(SQLModel):
@@ -854,6 +862,7 @@ class JobseekerPublic(SQLModel):
     is_jobstart_beneficiary: bool
     witness_official_id: uuid.UUID | None
     witness_name: str | None
+    witness_designation: str | None = None
 
 
 class BarangayIdPublic(SQLModel):

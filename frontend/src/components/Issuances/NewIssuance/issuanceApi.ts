@@ -563,6 +563,7 @@ async function buildSections(input: IssuanceInput, data: LookupData) {
             ),
             course: text(details.course as string) || "N/A",
             is_jobstart_beneficiary: Boolean(details.isJobstartBeneficiary),
+            witness_designation: orNull(details.witnessDesignation as string),
           }
         : null
       break
@@ -718,6 +719,7 @@ function toMockIssuance(issuance: IssuancePublic): MockIssuance {
         course: jobseeker?.course ?? "",
         isJobstartBeneficiary: jobseeker?.is_jobstart_beneficiary ?? false,
         witnessName: jobseeker?.witness_name ?? "",
+        witnessDesignation: jobseeker?.witness_designation ?? "",
         // Older issuances kept an official instead of a name.
         legacyWitnessOfficialId: jobseeker?.witness_official_id ?? "",
       }

@@ -384,6 +384,26 @@ test.describe("buildPrintData", () => {
       },
     )!
     expect(clerk.values.witnessDesignation).toBe("Barangay Clerk")
+    // Patch 346: what the clerk typed when issuing wins over the Officials list.
+    const typed = buildPrintData(
+      make("FIRST_TIME_JOBSEEKER", {
+        details: {
+          type: "FIRST_TIME_JOBSEEKER",
+          educationalAttainment: "x",
+          course: "N/A",
+          isJobstartBeneficiary: false,
+          witnessName: "Juan Official",
+          witnessDesignation: " Kagawad ",
+        },
+      }),
+      {
+        ...lookups,
+        officials: [
+          { id: "o9", name: "Juan M. Official", position: "Barangay Clerk" },
+        ],
+      },
+    )!
+    expect(typed.values.witnessDesignation).toBe("Kagawad")
     expect(isSamePerson("Mark Dennis A. Concio", "MARK DENNIS CONCIO")).toBe(
       true,
     )

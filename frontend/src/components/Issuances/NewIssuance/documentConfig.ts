@@ -522,6 +522,13 @@ export const documentConfig: Record<DocumentCode, DocumentConfig> = {
         group: "main",
         help: "The person who issues this document.",
       },
+      {
+        name: "witnessDesignation",
+        label: "Witness designation",
+        type: "text",
+        group: "main",
+        help: "Printed above \"Barangay Official/Designation/Position\", for example Barangay Clerk. Leave it empty to write it by hand.",
+      },
     ],
   },
   BARANGAY_ID: {

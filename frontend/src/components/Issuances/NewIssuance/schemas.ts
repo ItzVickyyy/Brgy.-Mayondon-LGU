@@ -73,6 +73,8 @@ const detailsSchemas = {
     isJobstartBeneficiary: z.boolean(),
     // Filled by the server from the signed-in user; kept only for display.
     witnessName: z.string().optional(),
+    // Typed by the clerk when issuing; printed under the witness name.
+    witnessDesignation: z.string().trim().max(150).optional(),
     // Older issuances stored an official instead of a name; shown when no name was saved.
     legacyWitnessOfficialId: z.string().optional(),
     parts: z.array(z.enum(["applicant_sheet", "oath", "certification"])).min(1),

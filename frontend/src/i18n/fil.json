@@ -1867,6 +1867,7 @@
         "jobstart": "Benepisyaryo ng JobStart",
         "partsToPrint": "Mga bahaging ipi-print",
         "witness": "Saksi",
+        "witnessDesignation": "Katungkulan ng saksi",
         "transaction": "Transaksyon",
         "barangayIdNumber": "Numero ng Barangay ID",
         "validUntil": "Balido hanggang"
@@ -1874,6 +1875,7 @@
       "fieldHelp": {
         "stampBox": "Ipi-print sa kahon ng selyo.",
         "witnessIssuer": "Ang taong nag-iisyu ng dokumentong ito.",
+        "witnessDesignation": "Ipi-print sa itaas ng \"Barangay Official/Designation/Position\", halimbawa Barangay Clerk. Iwanang walang laman para isulat sa kamay.",
         "requestedBy": "Kung may ibang humiling maliban sa residente lamang. Ipi-print pagkatapos ng \"Requested by:\".",
         "healthConditionConfidential": "Kumpidensyal. Naka-save sa talaan ngunit hindi ipi-print sa sertipikasyon.",
         "barangayIdNumber": "I-type ang numerong nakaimprenta sa card. Iwanan ito kung ano ang nakikita para manatili ang kasalukuyang numero ng residente."
