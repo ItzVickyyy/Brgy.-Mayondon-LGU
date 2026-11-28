@@ -392,8 +392,9 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
         align: "center",
         size: 11,
         page: 2,
+        font: "formRegular",
       },
-      { key: "date", x: 342, y: 749.2, w: 148, size: 11, page: 2 },
+      { key: "date", x: 342, y: 749.2, w: 148, size: 11, page: 2, font: "formRegular" },
       {
         key: "signatoryName",
         x: 430,
