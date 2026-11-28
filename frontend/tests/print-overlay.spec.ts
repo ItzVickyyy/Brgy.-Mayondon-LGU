@@ -87,6 +87,21 @@ test.describe("print overlay layout", () => {
       w: 82,
       h: 79,
     })
+    // Jobseeker (patch 341): the photo goes on the Applicant sheet only, under the signature.
+    const jobseeker = layoutOverlay(
+      {
+        templateId: "jobseeker",
+        values: { name: "X", witnessName: "Y" },
+        photoUrl: "data:x",
+      },
+      measure,
+    )
+    expect(jobseeker.map((p) => p.photo !== undefined)).toEqual([
+      true,
+      false,
+      false,
+    ])
+    expect(jobseeker[0].photo).toMatchObject({ x: 107.6, y: 692.6 })
     expect(
       layoutOverlay(
         { templateId: "indigency", values: { name: "X" }, photoUrl: "data:x" },

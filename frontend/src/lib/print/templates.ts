@@ -264,7 +264,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "date", x: 226, y: 540.9, w: 156, size: 10 },
     ],
   },
-  // First-Time Jobseeker packet on 8.5 x 13 in: page 0 Applicant sheet, page 1 Oath of Undertaking, page 2 Certification. The witness name and the Date line print as in the barangay's filled certifications (decision 118, patch 340; it replaces the old rule that the witness is never printed); the signature, photo and thumbmark stay blank. `y` = rule y minus 10.2 pt, as the other values on these sheets; rule positions measured on jobseeker-1.png and jobseeker-2.png.
+  // First-Time Jobseeker packet on 8.5 x 13 in: page 0 Applicant sheet, page 1 Oath of Undertaking, page 2 Certification. The witness name and the Date line print as in the barangay's filled certifications (decision 118, patch 340; it replaces the old rule that the witness is never printed); the signature and thumbmark stay blank, and the applicant photo prints under the signature as in the barangay's Word file (patch 341) when the resident has one on file. `y` = rule y minus 10.2 pt, as the other values on these sheets; rule positions measured on jobseeker-1.png and jobseeker-2.png.
   jobseeker: {
     id: "jobseeker",
     documentCode: "FIRST_TIME_JOBSEEKER",
@@ -393,5 +393,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       { key: "jobstart", when: "yes", x: 295.7, y: 558.5 },
       { key: "jobstart", when: "no", x: 403.5, y: 558.5 },
     ],
+    // Applicant photo: in the barangay's Word file it sits under "Signature of Applicant", left-aligned with the text block; x/y/w/h are the picture's visible edges measured on a 200 dpi render of that file (x 107.6-254.5, y 692.6-847.8). The form has no pre-printed box, so the photo is cropped to fill this one.
+    photo: { x: 107.6, y: 692.6, w: 146.9, h: 155.2 },
   },
 }

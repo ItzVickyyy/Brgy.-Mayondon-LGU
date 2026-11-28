@@ -338,6 +338,9 @@ test.describe("buildPrintData", () => {
       { firstName: "Juan", middleName: "Santos", lastName: "Dela Cruz" },
     )!
     expect(data.templateId).toBe("jobseeker")
+    // Patch 341: the resident's photo prints under the signature on the Applicant sheet, as in the barangay's Word file.
+    expect(data.photoUrl).toBe(resident.photoUrl)
+    expect(printTemplates.jobseeker.photo?.page ?? 0).toBe(0)
     expect(data.values).toMatchObject({
       name: "JUAN S. DELA CRUZ",
       ageNumber: "26",
