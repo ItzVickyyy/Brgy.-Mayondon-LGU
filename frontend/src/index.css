@@ -929,6 +929,9 @@ tbody
 [data-sonner-toast].app-toast[data-type="info"] {
   --toast-accent: var(--stat-blue);
 }
+[data-sonner-toast].app-toast {
+  cursor: pointer;
+}
 [data-sonner-toast].app-toast [data-icon] {
   margin: 0;
   color: color-mix(

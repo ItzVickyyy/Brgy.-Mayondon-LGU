@@ -7,11 +7,25 @@ import {
   OctagonXIcon,
   TriangleAlertIcon,
 } from "lucide-react"
+import { useEffect } from "react"
 import { useTheme } from "@/components/theme-provider"
 import { Toaster as Sonner, type ToasterProps } from "sonner"
 
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme } = useTheme()
+
+  // Clicking anywhere on a toast closes it (it has its own X as well). Buttons
+  // and links inside a toast (an action, the X itself) keep their own click.
+  useEffect(() => {
+    const closeOnClick = (event: MouseEvent) => {
+      const target = event.target as Element | null
+      const toastElement = target?.closest("[data-sonner-toast]")
+      if (!toastElement || target?.closest("button, a, [role='button']")) return
+      toastElement.querySelector<HTMLElement>("[data-close-button]")?.click()
+    }
+    document.addEventListener("click", closeOnClick)
+    return () => document.removeEventListener("click", closeOnClick)
+  }, [])
 
   return (
     <Sonner
