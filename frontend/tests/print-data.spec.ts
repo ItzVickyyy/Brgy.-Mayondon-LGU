@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test"
 import type { MockIssuance } from "../src/components/Issuances/NewIssuance/issuanceApi"
 import {
   buildPrintData,
+  isSamePerson,
   ordinal,
   type PrintLookups,
   wrapLines,
@@ -363,6 +364,34 @@ test.describe("buildPrintData", () => {
             (f) => f.key === key && f.page === page,
           ),
         ).toBe(true)
+    // Patch 343: the designation is the position of the current official with the witness's name ("Staff Member" is nobody on the list, so it stays blank).
+    expect(data.values.witnessDesignation).toBe("")
+    const clerk = buildPrintData(
+      make("FIRST_TIME_JOBSEEKER", {
+        details: {
+          type: "FIRST_TIME_JOBSEEKER",
+          educationalAttainment: "x",
+          course: "N/A",
+          isJobstartBeneficiary: false,
+          witnessName: "Juan Official",
+        },
+      }),
+      {
+        ...lookups,
+        officials: [
+          { id: "o9", name: "Juan M. Official", position: "Barangay Clerk" },
+        ],
+      },
+    )!
+    expect(clerk.values.witnessDesignation).toBe("Barangay Clerk")
+    expect(isSamePerson("Mark Dennis A. Concio", "MARK DENNIS CONCIO")).toBe(
+      true,
+    )
+    expect(isSamePerson("Ana Reyes", "Ana Cruz")).toBe(false)
+    expect(isSamePerson("Reyes", "Reyes")).toBe(false)
+    // Every Jobseeker value is 11 pt, as in the Word file.
+    for (const field of printTemplates.jobseeker.fields)
+      expect(field.size).toBe(11)
     // An older record kept an official instead of a name.
     expect(
       buildPrintData(
@@ -379,6 +408,21 @@ test.describe("buildPrintData", () => {
         lookups,
       )!.values.witnessName,
     ).toBe("JUAN OFFICIAL")
+    expect(
+      buildPrintData(
+        make("FIRST_TIME_JOBSEEKER", {
+          details: {
+            type: "FIRST_TIME_JOBSEEKER",
+            educationalAttainment: "x",
+            course: "N/A",
+            isJobstartBeneficiary: false,
+            witnessName: "",
+            legacyWitnessOfficialId: "o1",
+          },
+        }),
+        lookups,
+      )!.values.witnessDesignation,
+    ).toBe("Punong Barangay")
     expect(
       buildPrintData(
         make("FIRST_TIME_JOBSEEKER", {

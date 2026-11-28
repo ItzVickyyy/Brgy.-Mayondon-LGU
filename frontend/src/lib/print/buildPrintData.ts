@@ -47,6 +47,28 @@ export type PrintLookups = {
   } // for FRANCHISE_CLEARANCE (payload only keeps tricycleId)
 }
 
+/** Names are the same person when the first and the last words match, ignoring case, accents, punctuation, "HON.", suffixes and middle initials ("Mark Dennis A. Concio" = "MARK DENNIS CONCIO"). */
+export function isSamePerson(a: string, b: string): boolean {
+  const words = (value: string) =>
+    value
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toUpperCase()
+      .replace(/[^A-Z\s]/g, " ")
+      .split(/\s+/)
+      .filter(
+        (word) =>
+          word.length > 1 && !["HON", "JR", "SR", "II", "III"].includes(word),
+      )
+  const first = words(a)
+  const second = words(b)
+  if (first.length < 2 || second.length < 2) return false
+  return (
+    first[0] === second[0] &&
+    first[first.length - 1] === second[second.length - 1]
+  )
+}
+
 export const templateIdByDocumentCode: Partial<
   Record<DocumentCode, PrintTemplateId>
 > = {
@@ -257,6 +279,13 @@ export function buildPrintData(
       legacyWitness?.name ||
       ""
     ).toUpperCase()
+    // "Barangay Official/Designation/Position": accounts have no position, so it is the position of the current official whose name is the witness's (the barangay's clerk and administrative assistant are on the Officials list). No match leaves it blank for handwriting.
+    values.witnessDesignation =
+      legacyWitness && !details.witnessName?.trim()
+        ? legacyWitness.position
+        : (lookups.officials?.find((item) =>
+            isSamePerson(item.name, details.witnessName ?? ""),
+          )?.position ?? "")
     wrapLines(resident?.addressLine ?? "", [48, 66, 66], 3).forEach(
       (line, index) => {
         values[`addressLine${index + 1}`] = line
