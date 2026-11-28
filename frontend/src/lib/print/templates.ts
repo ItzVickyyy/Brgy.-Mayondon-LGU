@@ -351,7 +351,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
         size: 11,
         page: 2,
       },
-      // Oath: the witness name sits on the rule after "Witnessed by:" (rule y 697.5, x 320.4-528.8, redrawn in patch 345 to be as wide and as centred as the label under it, as in the Word file where name, designation and label share one centre line, x 424.6); the Date follows the pre-printed "Date:" (rule y 763.7, x 105.5-259.6).
+      // Oath (patch 347): the witness name sits on the line after Witnessed by: (centre x 424.6) and the form has no rule there or for the Date, as in the barangay's filled Word file; the Date follows the Certification layout, under Barangay Official/Designation/Position (label top y 733, Date label y 773-781, where a rule would be at y 786.2).
       {
         key: "witnessName",
         x: 424.6,
@@ -371,7 +371,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
         size: 11,
         page: 1,
       },
-      { key: "date", x: 108, y: 753.5, w: 148, size: 11, page: 1 },
+      { key: "date", x: 352, y: 776, w: 148, size: 11, page: 1 },
       // Certification: the witness name sits on the rule under "Witnessed by:" (rule y 679.1, x 310.0-518.4, redrawn in patch 345 to centre on the label, x 414.2); the Date follows the pre-printed "Date:" (rule y 759.2, x 338.8-493.2; the label and Date rows were moved down 14 pt in jobseeker-2.png, patch 343, to make room for the designation line as in the barangay's Word file).
       {
         key: "witnessName",
