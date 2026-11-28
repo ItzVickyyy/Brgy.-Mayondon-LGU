@@ -22,7 +22,7 @@ export type OverlayText = {
   y: number
   size: number
   align: "left" | "center"
-  font: "value" | "label" | "note" | "form"
+  font: "value" | "label" | "note" | "form" | "formRegular"
   color?: string
 }
 export type OverlayStamp = {

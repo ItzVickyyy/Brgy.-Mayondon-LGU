@@ -18,7 +18,7 @@ export type PrintFieldBox = {
   align?: "left" | "center"
   size?: number // font size in pt, default 11
   page?: number // 0-based page of a multi-page template, default 0
-  font?: "value" | "label" | "note" | "form" // "form" = Verdana Bold (the First-Time Jobseeker Word file is all Verdana); "label" = Arial Narrow bold; "note" = Arial regular 10 pt (the Addressed-to line); default "value" (Cambria Bold)
+  font?: "value" | "label" | "note" | "form" | "formRegular" // "formRegular" = Verdana regular, for the Jobseeker Oath witness designation and Date (patch 349); "form" = Verdana Bold (the First-Time Jobseeker Word file is all Verdana); "label" = Arial Narrow bold; "note" = Arial regular 10 pt (the Addressed-to line); default "value" (Cambria Bold)
   color?: string // text colour, default black (the loan note of the Clearance is red in the xls)
   prefix?: string // words printed before a non-empty value, for a row the barangay's form leaves unlabelled
 }
@@ -355,7 +355,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       {
         key: "witnessName",
         x: 424.6,
-        y: 687.3,
+        y: 732,
         w: 206,
         align: "center",
         size: 11,
@@ -365,13 +365,14 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
       {
         key: "witnessDesignation",
         x: 424.6,
-        y: 716,
+        y: 753.5,
         w: 206,
         align: "center",
         size: 11,
         page: 1,
+        font: "formRegular",
       },
-      { key: "date", x: 352, y: 776, w: 148, size: 11, page: 1 },
+      { key: "date", x: 356, y: 799.3, w: 148, size: 11, page: 1, font: "formRegular" },
       // Certification: the witness name sits on the rule under "Witnessed by:" (rule y 679.1, x 310.0-518.4, redrawn in patch 345 to centre on the label, x 414.2); the Date follows the pre-printed "Date:" (rule y 759.2, x 338.8-493.2; the label and Date rows were moved down 14 pt in jobseeker-2.png, patch 343, to make room for the designation line as in the barangay's Word file).
       {
         key: "witnessName",
@@ -414,7 +415,7 @@ export const printTemplates: Record<PrintTemplateId, PrintTemplate> = {
     ] as PrintFieldBox[]).map((field) => ({
       ...field,
       y: Math.round((field.y - JOBSEEKER_LIFT) * 10) / 10,
-      font: "form" as const,
+      font: field.font ?? ("form" as const),
     })),
     // Centres of the two check boxes on the applicant sheet; an X goes only in the chosen one.
     marks: [

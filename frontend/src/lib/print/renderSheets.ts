@@ -64,7 +64,7 @@ export async function renderSheets(data: PrintData): Promise<RenderedDocument> {
   const measureContext = measureCanvas.getContext("2d")
   const measure = (text: string, size: number, font?: string) => {
     if (!measureContext) return text.length * size * 0.55
-    measureContext.font = `bold ${size * SCALE}px ${font === "form" ? FORM_FONT : FONT}`
+    measureContext.font = `${font === "formRegular" ? "" : "bold "}${size * SCALE}px ${font === "form" || font === "formRegular" ? FORM_FONT : FONT}`
     return measureContext.measureText(text).width / SCALE
   }
   const laid = layoutOverlay(data, measure)
@@ -143,6 +143,8 @@ export async function renderSheets(data: PrintData): Promise<RenderedDocument> {
       context.font =
         item.font === "note"
           ? `${item.size * SCALE}px ${STAMP_FONT}`
+          : item.font === "formRegular"
+            ? `${item.size * SCALE}px ${FORM_FONT}`
           : `bold ${item.size * SCALE}px ${item.font === "label" ? LABEL_FONT : item.font === "form" ? FORM_FONT : FONT}`
       context.textAlign = item.align === "center" ? "center" : "left"
       context.fillStyle = item.color ?? "#000000"
